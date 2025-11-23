@@ -1,26 +1,23 @@
 <template>
-  <v-card class="mb-4">
-    <v-card-title class="d-flex align-center">
-      <v-icon left>mdi-account-group</v-icon>
-      <span class="ml-2">{{ t('dashboard.livingDeceasedCard.title') }}</span>
-      <v-spacer></v-spacer>
-      <v-progress-circular v-if="loading" indeterminate size="24" color="primary"></v-progress-circular>
-    </v-card-title>
+  <v-card class="rounded-xl" elevation="2" style="transition: all 0.3s ease-in-out;" hover>
     <v-card-text>
-      <div v-if="loading" class="text-center">{{ t('dashboard.livingDeceasedCard.loading') }}</div>
-      <div v-else-if="livingMembersCount === undefined || deceasedMembersCount === undefined" class="text-center text-medium-emphasis">
+      <div v-if="loading" class="text-center py-2">{{ t('dashboard.livingDeceasedCard.loading') }}</div>
+      <div v-else-if="livingMembersCount === undefined || deceasedMembersCount === undefined" class="text-center text-medium-emphasis py-2">
         {{ t('dashboard.livingDeceasedCard.noData') }}
       </div>
-      <v-row v-else class="text-center">
-        <v-col cols="6">
-          <div class="text-h5 font-weight-bold success--text">{{ livingMembersCount }}</div>
-          <div class="text-subtitle-1 text-medium-emphasis">{{ t('dashboard.livingDeceasedCard.living') }}</div>
-        </v-col>
-        <v-col cols="6">
-          <div class="text-h5 font-weight-bold error--text">{{ deceasedMembersCount }}</div>
-          <div class="text-subtitle-1 text-medium-emphasis">{{ t('dashboard.livingDeceasedCard.deceased') }}</div>
-        </v-col>
-      </v-row>
+      <div v-else class="d-flex justify-space-between align-center py-2">
+        <div>
+          <p class="text-caption">{{ t('dashboard.livingDeceasedCard.living') }}</p>
+          <h4 class="text-h5 font-weight-bold success--text">{{ livingMembersCount }}</h4>
+        </div>
+        <div>
+          <p class="text-caption">{{ t('dashboard.livingDeceasedCard.deceased') }}</p>
+          <h4 class="text-h5 font-weight-bold error--text">{{ deceasedMembersCount }}</h4>
+        </div>
+        <v-avatar color="light-blue-darken-1" rounded="lg" size="42">
+          <v-icon icon="mdi-account-group" color="white"></v-icon>
+        </v-avatar>
+      </div>
     </v-card-text>
   </v-card>
 </template>

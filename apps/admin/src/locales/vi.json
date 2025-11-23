@@ -21,7 +21,7 @@
   "dashboard.averageAgeCard.loading": "Đang tính tuổi trung bình...",
   "dashboard.averageAgeCard.noData": "Không có dữ liệu ngày sinh để tính tuổi trung bình.",
   "dashboard.averageAgeCard.years": "tuổi",
-  "dashboard.livingDeceasedCard.title": "Thành viên Còn sống vs. Đã mất",
+  "dashboard.livingDeceasedCard.title": "Sống/Mất",
   "dashboard.livingDeceasedCard.loading": "Đang tải số lượng thành viên còn sống/đã mất...",
   "dashboard.livingDeceasedCard.noData": "Không có dữ liệu thành viên.",
   "dashboard.livingDeceasedCard.living": "Còn sống",

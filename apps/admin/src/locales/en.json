@@ -21,7 +21,7 @@
   "dashboard.averageAgeCard.loading": "Calculating average age...",
   "dashboard.averageAgeCard.noData": "No birth date data for average age.",
   "dashboard.averageAgeCard.years": "years",
-  "dashboard.livingDeceasedCard.title": "Living vs. Deceased Members",
+  "dashboard.livingDeceasedCard.title": "Living/Deceased Members",
   "dashboard.livingDeceasedCard.loading": "Loading living/deceased members count...",
   "dashboard.livingDeceasedCard.noData": "No member data available.",
   "dashboard.livingDeceasedCard.living": "Living",
