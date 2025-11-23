@@ -54,6 +54,11 @@ public static class DependencyInjection
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
+        // Register n8nSettings
+        services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
+        // Register JwtHelperFactory
+        services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
+
         // Register Background Task Queue
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
         services.AddHostedService<QueuedHostedService>();
