@@ -6,6 +6,8 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
+using System.Net.Http; // Added
+using System.Threading; // Added
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.ExportPdf;
@@ -14,6 +16,7 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
 {
     private readonly Mock<ICurrentUser> _mockCurrentUser;
     private readonly GetFamilyPdfExportQueryHandler _handler;
+    private readonly string _dummyHtmlContent = "<html><body><h1>Test Family Tree</h1></body></html>";
 
     public GetFamilyPdfExportQueryHandlerTests()
     {
@@ -21,8 +24,18 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
         _handler = new GetFamilyPdfExportQueryHandler(
             _context,
             _mockAuthorizationService.Object,
-            _mockCurrentUser.Object
+            _mockCurrentUser.Object,
+            _mockHttpClient.Object // Pass the mocked HttpClient
         );
+
+        // Setup mock for HttpClient PostAsync
+        _mockHttpClient
+            .Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Content = new ByteArrayContent(new byte[] { 1, 2, 3, 4 }) // Dummy PDF bytes
+            });
     }
 
     [Fact]
@@ -60,7 +73,7 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
         _context.Events.Add(event1);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var query = new GetFamilyPdfExportQuery(familyId);
+        var query = new GetFamilyPdfExportQuery(familyId, _dummyHtmlContent); // Pass dummy HTML content
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -80,7 +93,7 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         _mockAuthorizationService.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
 
-        var query = new GetFamilyPdfExportQuery(familyId);
+        var query = new GetFamilyPdfExportQuery(familyId, _dummyHtmlContent); // Pass dummy HTML content
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -105,7 +118,7 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(x => x.CanAccessFamily(familyId)).Returns(false);
 
-        var query = new GetFamilyPdfExportQuery(familyId);
+        var query = new GetFamilyPdfExportQuery(familyId, _dummyHtmlContent); // Pass dummy HTML content
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -150,7 +163,7 @@ public class GetFamilyPdfExportQueryHandlerTests : TestBase
         _context.Events.Add(event1);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var query = new GetFamilyPdfExportQuery(familyId);
+        var query = new GetFamilyPdfExportQuery(familyId, _dummyHtmlContent); // Pass dummy HTML content
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

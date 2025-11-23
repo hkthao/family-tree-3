@@ -16,10 +16,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.Extensions.Localization" />
-    <PackageReference Include="QuestPDF" />
-    <PackageReference Include="SkiaSharp" />
-    <PackageReference Include="Svg.Skia" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
   </ItemGroup>
 
   <ItemGroup>

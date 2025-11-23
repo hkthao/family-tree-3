@@ -3,13 +3,10 @@ import i18n from '@/plugins/i18n';
 import type { Family, FamilyFilter, Result } from '@/types';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
     error: null as string | null,
-    exportingPdf: false, // New state for PDF export loading
-
     list: {
       items: [] as Family[],
       loading: false,
@@ -213,35 +210,6 @@ export const useFamilyStore = defineStore('family', {
         console.error(result.error);
         return [];
       }
-    },
-
-    async exportFamilyPdf(familyId: string) {
-      this.exportingPdf = true;
-      const { showSnackbar } = useGlobalSnackbar(); // Corrected destructuring
-
-      try {
-        const result = await this.services.familyData.exportFamilyPdf(familyId);
-
-        if (result.ok) {
-          const url = window.URL.createObjectURL(new Blob([result.value]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `family_tree_${familyId}.pdf`); // Filename can be improved if returned by API
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-          showSnackbar(i18n.global.t('family.export_pdf_success'), 'success');
-        } else {
-          console.error('Error exporting PDF:', result.error);
-          showSnackbar(i18n.global.t('family.export_pdf_error'), 'error');
-        }
-      } catch (error) {
-        console.error('Unexpected error exporting PDF:', error);
-        showSnackbar(i18n.global.t('family.export_pdf_error'), 'error');
-      } finally {
-        this.exportingPdf = false;
-      }
-    },
+    }
   },
 })

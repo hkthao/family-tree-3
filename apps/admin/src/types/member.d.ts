@@ -50,6 +50,7 @@ export interface Member {
   wifeGender?: string;
 
   order?: number; // New: Order of the member in the family
+  eventMembers?: any[]; // TEMP: Added to resolve TS error for PDF export
 }
 
 export interface MemberFilter {

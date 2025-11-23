@@ -2,6 +2,7 @@ using backend.CompositionRoot;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using backend.Web.Formatters; // Added for custom HTML input formatter
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.
@@ -82,8 +83,12 @@ public class Startup
         services.AddCompositionRootServices(Configuration);
         services.AddWebServices(Configuration);
 
-        services.AddControllers();
+        services.AddControllers(options =>
+        {
+            options.InputFormatters.Insert(0, new HtmlInputFormatter());
+        });
         services.AddLocalization();
+        services.AddHttpClient();
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
             {
@@ -175,4 +180,3 @@ public class Startup
         });
     }
 }
-

@@ -71,4 +71,8 @@ export class ApiFamilyService implements IFamilyService {
       `/family/by-ids?${params.toString()}`,
     );
   }
+
+  async getByIdWithDetails(id: string): Promise<Result<Family, ApiError>> {
+    return this.http.get<Family>(`/family/${id}/details`); // New endpoint for detailed family data
+  }
 }

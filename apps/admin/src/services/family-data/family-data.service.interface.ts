@@ -5,5 +5,5 @@ import type { FamilyExportDto } from '@/types/family'; // Assuming FamilyExportD
 export interface IFamilyDataService {
   exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>>;
   importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>; // Returns new family ID
-  exportFamilyPdf(familyId: string): Promise<Result<Blob, ApiError>>; // New method
+  exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob, ApiError>>; // New method
 }

@@ -5,6 +5,7 @@ using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using System.Net.Http; // Added for HttpClient
 
 namespace backend.Application.UnitTests.Common;
 
@@ -20,6 +21,7 @@ public abstract class TestBase : IDisposable
     protected readonly Mock<IDateTime> _mockDateTime;
     protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
     protected readonly Mock<Microsoft.AspNetCore.Authorization.IAuthorizationService> _mockAspNetCoreAuthorizationService; // Added
+    protected readonly Mock<HttpClient> _mockHttpClient; // Added for HttpClient
     protected readonly IMapper _mapper;
     protected readonly string _databaseName;
 
@@ -39,9 +41,10 @@ public abstract class TestBase : IDisposable
         _context = new ApplicationDbContext(_dbContextOptions);
         _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
-        // Mock IAuthorizationService
+        // Mock IAuthorizationService and HttpClient
         _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockAspNetCoreAuthorizationService = new Mock<Microsoft.AspNetCore.Authorization.IAuthorizationService>(); // Initialized
+        _mockHttpClient = new Mock<HttpClient>(); // Initialized HttpClient
 
         // Cấu hình AutoMapper
         var mapperConfiguration = new MapperConfiguration(cfg =>
@@ -50,9 +53,6 @@ public abstract class TestBase : IDisposable
             // Add other profiles if needed
         });
         _mapper = mapperConfiguration.CreateMapper();
-
-        // Configure QuestPDF license for testing
-        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
     }
 
     /// <summary>

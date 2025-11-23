@@ -1,0 +1,13 @@
+{
+  "name": "puppeteer-service",
+  "version": "1.0.0",
+  "description": "Service to convert HTML to PDF using Puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "puppeteer": "^22.12.0"
+  }
+}
