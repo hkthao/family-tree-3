@@ -2,14 +2,14 @@
   <v-card elevation="2" style="transition: all 0.3s ease-in-out;" hover>
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-family-tree</v-icon>
-      <span class="ml-2">{{ t('dashboard.membersPerGenerationChart.title') }}</span>
+      <span class="ml-2 text-high-emphasis font-weight-bold">{{ t('dashboard.membersPerGenerationChart.title') }}</span>
       <v-spacer></v-spacer>
       <v-progress-circular v-if="loading" indeterminate size="24" color="primary"></v-progress-circular>
     </v-card-title>
     <v-card-text class="fill-height">
       <div class="d-flex flex-column align-center justify-center fill-height">
-        <div v-if="loading">{{ t('dashboard.membersPerGenerationChart.loading') }}</div>
-        <div v-else-if="!chartData.series[0].data.length" class="text-medium-emphasis">
+        <div v-if="loading" class="text-body-2 text-high-emphasis font-weight-bold">{{ t('dashboard.membersPerGenerationChart.loading') }}</div>
+        <div v-else-if="!chartData.series[0].data.length" class="text-caption font-weight-bold">
           {{ t('dashboard.membersPerGenerationChart.noData') }}
         </div>
         <apexchart v-else type="bar" :options="chartOptions" :series="chartData.series"></apexchart>
@@ -23,8 +23,10 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import VueApexCharts from 'vue3-apexcharts';
 import type { ApexOptions } from 'apexcharts';
+import { useTheme } from 'vuetify'; // Import useTheme
 
 const { t } = useI18n();
+const theme = useTheme(); // Initialize useTheme
 
 const props = defineProps<{
   membersPerGeneration: { [key: number]: number } | undefined;
@@ -55,6 +57,8 @@ const chartData = computed(() => {
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'bar',
+    height: '300px',
+    foreColor: theme.global.current.value.colors['on-surface'], // Set chart text color
   },
   plotOptions: {
     bar: {
@@ -74,13 +78,29 @@ const chartOptions = computed<ApexOptions>(() => ({
   xaxis: {
     categories: chartData.value.categories,
     title: {
-      text: t('dashboard.membersPerGenerationChart.generation')
-    }
+      text: t('dashboard.membersPerGenerationChart.generation'),
+      style: {
+        color: theme.global.current.value.colors['on-surface'], // X-axis title color
+      },
+    },
+    labels: {
+      style: {
+        colors: theme.global.current.value.colors['on-surface'], // X-axis labels color
+      },
+    },
   },
   yaxis: {
     title: {
-      text: t('dashboard.membersPerGenerationChart.totalMembers')
-    }
+      text: t('dashboard.membersPerGenerationChart.totalMembers'),
+      style: {
+        color: theme.global.current.value.colors['on-surface'], // Y-axis title color
+      },
+    },
+    labels: {
+      style: {
+        colors: theme.global.current.value.colors['on-surface'], // Y-axis labels color
+      },
+    },
   },
   fill: {
     opacity: 1
@@ -89,10 +109,13 @@ const chartOptions = computed<ApexOptions>(() => ({
     y: {
       formatter: function (val: number) {
         return `${val} ${t('dashboard.membersPerGenerationChart.members')}`
-      }
+      },
+      style: {
+        color: theme.global.current.value.colors['on-surface'], // Tooltip text color
+      },
     }
   },
-  colors: ['#00E396'], // Example color for bars
+  colors: [theme.global.current.value.colors.primary], // Use theme color for bars
 }));
 </script>
 

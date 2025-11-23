@@ -3,9 +3,9 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-center">
         <div>
-          <p class="text-caption">{{ title }}</p>
+          <p class="text-subtitle-1 font-weight-bold text-high-emphasis">{{ title }}</p>
           <h4 class="text-h5 font-weight-bold">{{ value }}</h4>
-          <span :class="change.startsWith('+') ? 'text-success' : 'text-error'" class="text-caption">{{ change }}</span>
+          <span :class="change.startsWith('+') ? 'text-success' : 'text-error'" class="text-subtitle-2">{{ change }}</span>
         </div>
         <v-avatar :color="color" rounded="lg" size="42">
           <v-icon :icon="icon" color="white"></v-icon>
