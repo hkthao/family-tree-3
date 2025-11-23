@@ -5,10 +5,14 @@
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="secondary" @click="aiDrawer = true" data-testid="button-ai-input" v-if="canEditFamily">
+      <v-btn v-if="canManageFamily" color="secondary" :loading="isExporting" @click="exportPdf"
+        data-testid="export-pdf-button">
+        {{ t('family.export_pdf') }}
+      </v-btn>
+      <v-btn color="secondary" @click="aiDrawer = true" data-testid="button-ai-input" v-if="canManageFamily">
         {{ t('common.aiInput') }}
       </v-btn>
-      <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit" v-if="canEditFamily">
+      <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -47,14 +51,20 @@ const props = defineProps<{
 
 const emit = defineEmits(['familyUpdated']);
 
+const isExporting = computed(() => familyStore.exportingPdf); // Bind to store's loading state
+
+const exportPdf = async () => {
+  await familyStore.exportFamilyPdf(props.familyId); // Call the store action
+};
+
+const canManageFamily = computed(() => {
+  return isAdmin.value || isFamilyManager.value;
+});
+
 const family = ref<Family | undefined>(undefined);
 const editableFamily = ref<Family | undefined>(undefined); // Copy of family for editing
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const aiDrawer = ref(false); // Control visibility of the AI input drawer
-
-const canEditFamily = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
-});
 
 const loadFamily = async () => {
   if (props.familyId) {

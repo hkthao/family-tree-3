@@ -1,5 +1,6 @@
-using backend.Application.Families.ExportImport;
+using backend.Application.Families.ExportImport; // Added back for FamilyExportDto and ImportFamilyCommand
 using backend.Application.Families.Queries.ExportImport;
+using backend.Application.Families.Queries.ExportPdf; // Added for PDF export
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -47,5 +48,23 @@ public class FamilyExportImportController : ControllerBase
             return Ok(result.Value);
         }
         return BadRequest(result.Error);
+    }
+
+    [HttpGet("{familyId}/export-pdf")]
+    [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult> ExportFamilyPdf(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetFamilyPdfExportQuery(familyId));
+        if (result.IsSuccess)
+        {
+            return File(result.Value!.Content, "application/pdf", result.Value.FileName); // Changed from Stream to Content
+        }
+        if (result.Error == "Family not found" || result.Error == "No family data to export")
+        {
+            return NotFound(result.Error);
+        }
+        return Forbid();
     }
 }

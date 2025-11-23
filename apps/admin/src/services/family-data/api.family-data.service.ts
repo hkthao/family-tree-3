@@ -15,4 +15,8 @@ export class ApiFamilyDataService implements IFamilyDataService {
     const queryParams = clearExistingData === false ? '?clearExistingData=false' : '';
     return this.api.post<string>(`/family-data/import/${familyId}${queryParams}`, familyData);
   }
+
+  async exportFamilyPdf(familyId: string): Promise<Result<Blob, ApiError>> {
+    return this.api.get<Blob>(`/family-data/${familyId}/export-pdf`, { responseType: 'blob' });
+  }
 }

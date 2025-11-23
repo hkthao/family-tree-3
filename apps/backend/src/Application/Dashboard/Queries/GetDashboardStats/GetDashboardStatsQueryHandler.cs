@@ -3,10 +3,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Dashboard.Specifications;
-using backend.Domain.Entities; // Required for Member and Relationship entities
-using backend.Domain.Enums; // Required for RelationshipType
-using System.Collections.Generic; // Required for Dictionary and List
-using System.Linq; // Required for LINQ extensions
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 

@@ -69,6 +69,7 @@ const canViewFaceDataTab = computed(() => {
 const canManageFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
+
 onMounted(() => {
   const savedTab = localStorage.getItem('familyDetailSelectedTab');
   if (savedTab) {
