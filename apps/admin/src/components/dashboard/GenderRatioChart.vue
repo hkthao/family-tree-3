@@ -1,5 +1,5 @@
 <template>
-  <v-card class="rounded-xl mb-4" elevation="2" style="transition: all 0.3s ease-in-out;" hover>
+  <v-card class="mb-4" elevation="2" style="transition: all 0.3s ease-in-out;" hover>
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-gender-male-female</v-icon>
       <span class="ml-2">{{ t('dashboard.genderRatioChart.title') }}</span>

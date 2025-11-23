@@ -49,17 +49,21 @@
     <!-- New Stats Section -->
     <v-row v-if="stats">
       <v-col cols="12" md="4">
-        <AverageAgeCard
-          :average-age="stats.averageAge"
-          :loading="dashboardStore.loading"
-        />
-      </v-col>
-      <v-col cols="12" md="4">
-        <LivingDeceasedCard
-          :living-members-count="stats.livingMembersCount"
-          :deceased-members-count="stats.deceasedMembersCount"
-          :loading="dashboardStore.loading"
-        />
+        <v-row no-gutters >
+          <v-col cols="12" class="fill-height">
+            <AverageAgeCard
+              :average-age="stats.averageAge"
+              :loading="dashboardStore.loading"
+            />
+          </v-col>
+          <v-col cols="12" class="fill-height mt-4">
+            <LivingDeceasedCard
+              :living-members-count="stats.livingMembersCount"
+              :deceased-members-count="stats.deceasedMembersCount"
+              :loading="dashboardStore.loading"
+            />
+          </v-col>
+        </v-row>
       </v-col>
       <v-col cols="12" md="4">
         <GenderRatioChart
@@ -68,6 +72,7 @@
           :loading="dashboardStore.loading"
         />
       </v-col>
+      <v-col cols="12" md="4"></v-col> <!-- Empty column to maintain md="4" x 3 layout if only 2 components are stacked -->
     </v-row>
   </div>
 </template>

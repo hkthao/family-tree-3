@@ -1,5 +1,5 @@
 <template>
-  <v-card class="rounded-xl" elevation="2" style="transition: all 0.3s ease-in-out;" hover>
+  <v-card elevation="2" class="s-card" hover>
     <v-card-text>
       <div class="d-flex justify-space-between align-center">
         <div>
@@ -24,3 +24,9 @@ defineProps({
   color: String,
 });
 </script>
+
+<style scoped>
+.s-card {
+  height: 105px;
+}
+</style>
