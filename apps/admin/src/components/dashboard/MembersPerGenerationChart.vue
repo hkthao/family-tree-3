@@ -9,7 +9,7 @@
     <v-card-text class="fill-height">
       <div class="d-flex flex-column align-center justify-center fill-height">
         <div v-if="loading" class="text-body-2 text-high-emphasis font-weight-bold">{{ t('dashboard.membersPerGenerationChart.loading') }}</div>
-        <div v-else-if="!chartData.series[0].data.length" class="text-caption font-weight-bold">
+        <div v-else-if="!chartData.series[0].data.length" class="text-body-2 font-weight-bold">
           {{ t('dashboard.membersPerGenerationChart.noData') }}
         </div>
         <apexchart v-else type="bar" :options="chartOptions" :series="chartData.series"></apexchart>

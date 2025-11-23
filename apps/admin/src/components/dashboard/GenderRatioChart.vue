@@ -9,7 +9,7 @@
     <v-card-text class="fill-height pa-3">
       <div class="d-flex flex-column align-center justify-center fill-height">
         <div v-if="loading" class="text-body-2 text-high-emphasis font-weight-bold">{{ t('dashboard.genderRatioChart.loading') }}</div>
-        <div v-else-if="maleRatio === undefined || femaleRatio === undefined || (maleRatio === 0 && femaleRatio === 0)" class="text-caption text-body-2 font-weight-bold">
+        <div v-else-if="maleRatio === undefined || femaleRatio === undefined || (maleRatio === 0 && femaleRatio === 0)" class="text-body-2 font-weight-bold">
           {{ t('dashboard.genderRatioChart.noData') }}
         </div>
         <apexchart v-else type="donut" :options="chartOptions" :series="series"></apexchart>
