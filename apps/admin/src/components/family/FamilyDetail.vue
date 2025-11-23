@@ -9,6 +9,10 @@
         data-testid="export-pdf-button">
         {{ t('family.export_pdf') }}
       </v-btn>
+      <v-btn v-if="canManageFamily && family" color="info" :to="{ name: 'FamilyPdfPreview', params: { familyId: props.familyId } }"
+        target="_blank" data-testid="preview-pdf-button">
+        {{ t('family.preview_pdf') }}
+      </v-btn>
       <v-btn color="secondary" @click="aiDrawer = true" data-testid="button-ai-input" v-if="canManageFamily">
         {{ t('common.aiInput') }}
       </v-btn>

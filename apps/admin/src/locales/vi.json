@@ -675,6 +675,7 @@
   "family.errors.delete": "Không thể xóa gia đình.",
   "family.errors.loadById": "Không thể tải chi tiết gia đình.",
   "family.export_pdf": "Xuất PDF",
+  "family.preview_pdf": "Xem trước PDF",
   "family.export_pdf_success": "Xuất PDF thành công!",
   "family.export_pdf_error": "Lỗi khi xuất PDF.",
   "familyTree.errors.familyIdMissing": "Thiếu ID gia đình trong URL.",
