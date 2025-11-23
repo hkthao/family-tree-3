@@ -46,7 +46,7 @@ public class GetPublicMemberByIdQueryHandler(IApplicationDbContext context, IMap
         var memberDetailDto = await _context.Members
             .AsNoTracking()
             .WithSpecification(spec)
-            .AsSplitQuery() // Add AsSplitQuery here
+            // .AsSplitQuery() // Removed for debugging in-memory database issues
             .ProjectTo<MemberDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 

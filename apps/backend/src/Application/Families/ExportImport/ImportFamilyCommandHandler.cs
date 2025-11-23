@@ -83,7 +83,8 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
                 memberDto.Occupation,
                 memberDto.AvatarUrl,
                 memberDto.Biography,
-                memberDto.Order
+                memberDto.Order,
+                memberDto.IsDeceased
             );
 
             // Generate new GUID for the imported member

@@ -37,6 +37,30 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- New Stats Section -->
+    <v-row v-if="stats">
+      <v-col cols="12" md="4">
+        <AverageAgeCard
+          :average-age="stats.averageAge"
+          :loading="dashboardStore.loading"
+        />
+      </v-col>
+      <v-col cols="12" md="4">
+        <LivingDeceasedCard
+          :living-members-count="stats.livingMembersCount"
+          :deceased-members-count="stats.deceasedMembersCount"
+          :loading="dashboardStore.loading"
+        />
+      </v-col>
+      <v-col cols="12" md="4">
+        <GenderRatioChart
+          :male-ratio="stats.maleRatio"
+          :female-ratio="stats.femaleRatio"
+          :loading="dashboardStore.loading"
+        />
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -44,6 +68,9 @@
 import { useDashboardStore } from '@/stores/dashboard.store';
 import { onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AverageAgeCard from './AverageAgeCard.vue';
+import LivingDeceasedCard from './LivingDeceasedCard.vue';
+import GenderRatioChart from './GenderRatioChart.vue';
 
 const { t } = useI18n();
 

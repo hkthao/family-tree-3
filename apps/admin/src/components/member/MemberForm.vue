@@ -93,6 +93,10 @@
           :disabled="isFormReadOnly" data-testid="member-is-root-checkbox"></v-checkbox>
       </v-col>
       <v-col cols="12">
+        <v-checkbox v-model="formData.isDeceased" :label="t('member.form.isDeceased')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" data-testid="member-is-deceased-checkbox"></v-checkbox>
+      </v-col>
+      <v-col cols="12">
         <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
       </v-col>
@@ -176,6 +180,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       husbandId: props.initialMemberData.husbandId,
       wifeId: props.initialMemberData.wifeId,
       isRoot: props.initialMemberData.isRoot, // Add isRoot here
+      isDeceased: props.initialMemberData.isDeceased, // Add isDeceased here
       phone: props.initialMemberData.phone,
       email: props.initialMemberData.email,
       address: props.initialMemberData.address,
@@ -191,6 +196,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       husbandId: undefined, // Initialize husbandId
       wifeId: undefined, // Initialize wifeId
       isRoot: false, // Initialize isRoot for new members
+      isDeceased: false, // Initialize isDeceased for new members
       order: undefined, // Initialize order for new members
       phone: undefined,
       email: undefined,
@@ -209,6 +215,7 @@ const state = reactive({
   husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
   wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
   isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
+  isDeceased: toRef(formData, 'isDeceased'), // Add isDeceased to state
   order: toRef(formData, 'order'), // Add order to state
   phone: toRef(formData, 'phone'),
   email: toRef(formData, 'email'),

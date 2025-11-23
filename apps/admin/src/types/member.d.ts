@@ -28,6 +28,7 @@ export interface Member {
   familyName?: string; // New
   biography?: string; // New
   isRoot?: boolean;
+  isDeceased?: boolean;
   validationErrors?: string[];
   relationships?: Relationship[]; // New: List of relationships for the member
   fatherId?: string; // New: ID of the father

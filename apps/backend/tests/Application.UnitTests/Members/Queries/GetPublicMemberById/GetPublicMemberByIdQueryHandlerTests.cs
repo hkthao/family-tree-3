@@ -30,10 +30,9 @@ public class GetPublicMemberByIdQueryHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var publicFamily = new Family { Id = familyId, Name = "Public Family", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
+        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = memberId };
+        publicFamily.AddMember(member); // Add member to family
         _context.Families.Add(publicFamily);
-
-        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, null, null) { Id = memberId };
-        _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
         // Mock privacy service to return member as is for this test
@@ -41,6 +40,10 @@ public class GetPublicMemberByIdQueryHandlerTests : TestBase
             .ReturnsAsync((MemberDetailDto m, Guid fId, CancellationToken ct) => m);
 
         var query = new GetPublicMemberByIdQuery(memberId, familyId);
+
+        // Debugging assertion
+        var memberFromContext = await _context.Members.FindAsync(memberId);
+        memberFromContext.Should().NotBeNull("The member should be present in the context.");
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -100,7 +103,7 @@ public class GetPublicMemberByIdQueryHandlerTests : TestBase
         var privateFamily = new Family { Id = familyId, Name = "Private Family", Code = "PRIV1", Visibility = FamilyVisibility.Private.ToString() };
         _context.Families.Add(privateFamily);
 
-        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, null, null) { Id = memberId };
+        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = memberId };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -127,7 +130,7 @@ public class GetPublicMemberByIdQueryHandlerTests : TestBase
         var otherFamily = new Family { Id = otherFamilyId, Name = "Other Family", Code = "OTH1", Visibility = FamilyVisibility.Public.ToString() };
         _context.Families.AddRange(publicFamily, otherFamily);
 
-        var member = new Member("Doe", "John", "M1", otherFamilyId, null, null, null, null, null, null, null, null, null, null, null, null, null) { Id = memberId };
+        var member = new Member("Doe", "John", "M1", otherFamilyId, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = memberId };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -151,7 +154,7 @@ public class GetPublicMemberByIdQueryHandlerTests : TestBase
         var publicFamily = new Family { Id = familyId, Name = "Public Family", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
         _context.Families.Add(publicFamily);
 
-        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, "Some biography", null) { Id = memberId };
+        var member = new Member("Doe", "John", "M1", familyId, null, null, null, null, null, null, null, null, null, null, null, "Some biography", null, false) { Id = memberId };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 

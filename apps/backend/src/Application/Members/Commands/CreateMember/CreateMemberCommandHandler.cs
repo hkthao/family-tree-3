@@ -42,7 +42,8 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Occupation,
             request.AvatarUrl,
             request.Biography,
-            request.Order
+            request.Order,
+            request.IsDeceased
         );
 
         if (request.Id.HasValue)

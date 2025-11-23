@@ -53,7 +53,8 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Occupation,
             request.AvatarUrl,
             request.Biography,
-            request.Order
+            request.Order,
+            request.IsDeceased
         );
 
         // Handle IsRoot property update

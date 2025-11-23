@@ -36,9 +36,9 @@ public class GetFamilyExportQueryHandlerTests : TestBase
         var family = Family.Create("Test Family", "TF1", "Description", "Address", "AvatarUrl", "Private", creatorUserId);
         family.Id = familyId;
 
-        var member1 = new Member("Doe", "John", "JOHNDOE", familyId, "Johnny", "Male", DateTime.Now.AddYears(-30), null, "Place1", null, null, null, null, "Occupation1", "Avatar1", "Bio1", 1);
+        var member1 = new Member("Doe", "John", "JOHNDOE", familyId, "Johnny", "Male", DateTime.Now.AddYears(-30), null, "Place1", null, null, null, null, "Occupation1", "Avatar1", "Bio1", 1, false);
         member1.SetId(Guid.NewGuid());
-        var member2 = new Member("Doe", "Jane", "JANEDOE", familyId, "Janie", "Female", DateTime.Now.AddYears(-28), null, "Place2", null, null, null, null, "Occupation2", "Avatar2", "Bio2", 2);
+        var member2 = new Member("Doe", "Jane", "JANEDOE", familyId, "Janie", "Female", DateTime.Now.AddYears(-28), null, "Place2", null, null, null, null, "Occupation2", "Avatar2", "Bio2", 2, false);
         member2.SetId(Guid.NewGuid());
 
         var relationship = new Relationship(familyId, member1.Id, member2.Id, RelationshipType.Husband, 1);

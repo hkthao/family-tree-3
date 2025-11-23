@@ -18,6 +18,7 @@ public class MemberDto
     public string? Occupation { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; }
+    public bool IsDeceased { get; set; }
     public Guid FamilyId { get; set; }
     public bool IsRoot { get; set; }
 }

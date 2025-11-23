@@ -42,12 +42,52 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
 
         var totalGenerations = await filteredFamiliesQuery.SumAsync(e => e.TotalGenerations, cancellationToken);
 
+        // Get all members within the filtered families for detailed stats calculation
+        var members = await _context.Members
+            .WithSpecification(membersInFamiliesSpec)
+            .ToListAsync(cancellationToken);
+
+        // Calculate Living/Deceased Members
+        var livingMembersCount = members.Count(m => !m.IsDeceased);
+        var deceasedMembersCount = members.Count(m => m.IsDeceased);
+
+        // Calculate Gender Ratio
+        var totalMembersForGender = members.Count(m => !string.IsNullOrEmpty(m.Gender));
+        var maleCount = members.Count(m => m.Gender == backend.Domain.Enums.Gender.Male.ToString());
+        var femaleCount = members.Count(m => m.Gender == backend.Domain.Enums.Gender.Female.ToString());
+        var maleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
+        var femaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
+
+        // Calculate Average Age
+        var membersWithKnownBirthDate = members.Where(m => m.DateOfBirth.HasValue).ToList();
+        double averageAge = 0.0;
+
+        if (membersWithKnownBirthDate.Any())
+        {
+            var totalAge = membersWithKnownBirthDate.Sum(m =>
+            {
+                var yearOfBirth = m.DateOfBirth!.Value.Year;
+                if (m.IsDeceased && m.DateOfDeath.HasValue)
+                {
+                    return m.DateOfDeath.Value.Year - yearOfBirth;
+                }
+                // For living or deceased without DateOfDeath, use current year
+                return DateTime.Now.Year - yearOfBirth;
+            });
+            averageAge = (double)totalAge / membersWithKnownBirthDate.Count;
+        }
+
         var stats = new DashboardStatsDto
         {
             TotalFamilies = totalFamilies,
             TotalMembers = totalMembers,
             TotalRelationships = totalRelationships,
-            TotalGenerations = totalGenerations
+            TotalGenerations = totalGenerations,
+            MaleRatio = maleRatio,
+            FemaleRatio = femaleRatio,
+            LivingMembersCount = livingMembersCount,
+            DeceasedMembersCount = deceasedMembersCount,
+            AverageAge = averageAge
         };
 
         return Result<DashboardStatsDto>.Success(stats);

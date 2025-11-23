@@ -33,7 +33,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
+        var member = new Member("John", "Doe", "JD", familyId, false) { Id = memberId };
         family.AddMember(member);
         _context.Families.Add(family);
         _context.Members.Add(member);
@@ -71,8 +71,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newFatherId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        var initialFather = new Member("Initial", "Father", "IF", familyId) { Id = initialFatherId };
-        var newFather = new Member("New", "Father", "NF", familyId) { Id = newFatherId };
+        var initialFather = new Member("Initial", "Father", "IF", familyId, false) { Id = initialFatherId };
+        var newFather = new Member("New", "Father", "NF", familyId, false) { Id = newFatherId };
 
         family.AddMember(member);
         family.AddMember(initialFather);
@@ -114,8 +114,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newMotherId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        var initialMother = new Member("Initial", "Mother", "IM", familyId) { Id = initialMotherId };
-        var newMother = new Member("New", "Mother", "NM", familyId) { Id = newMotherId };
+        var initialMother = new Member("Initial", "Mother", "IM", familyId, false) { Id = initialMotherId };
+        var newMother = new Member("New", "Mother", "NM", familyId, false) { Id = newMotherId };
 
         family.AddMember(member);
         family.AddMember(initialMother);
@@ -156,10 +156,10 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var initialSpouseId = Guid.NewGuid();
         var newSpouseId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null, null, null, null);
-        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null) { Id = initialSpouseId };
-        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null) { Id = newSpouseId };
+        var member = new Member("John", "Doe", "JD", familyId, false) { Id = memberId };
+        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null, null, null, null, false);
+        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null, false) { Id = initialSpouseId };
+        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null, false) { Id = newSpouseId };
 
         family.AddMember(member);
         family.AddMember(initialSpouse);

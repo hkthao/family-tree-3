@@ -175,8 +175,8 @@ public class DetectFacesTests : TestBase
         var memberId = Guid.NewGuid();
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Doe Family", Code = "DOE" };
-        var member = new Member(memberId, "Doe", "John", "JD1", familyId, family);
-        member.Update("John", "Doe", "JD1", null, null, new DateTime(1990, 1, 1), new DateTime(2050, 1, 1), null, null, null, null, null, null, null, null, null);
+        var member = new Member(memberId, "Doe", "John", "JD1", familyId, family, false);
+        member.Update("John", "Doe", "JD1", null, null, new DateTime(1990, 1, 1), new DateTime(2050, 1, 1), null, null, null, null, null, null, null, null, null, false);
 
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member);

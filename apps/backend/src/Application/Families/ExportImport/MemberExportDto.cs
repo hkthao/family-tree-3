@@ -22,4 +22,5 @@ public class MemberExportDto
     public string? Biography { get; set; }
     public bool IsRoot { get; set; }
     public int? Order { get; set; }
+    public bool IsDeceased { get; set; }
 }
