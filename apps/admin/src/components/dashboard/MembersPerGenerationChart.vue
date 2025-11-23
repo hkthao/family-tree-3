@@ -58,6 +58,7 @@ const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'bar',
     height: '300px',
+    width: '100%', // Ensure chart fills the width of the card
     foreColor: theme.global.current.value.colors['on-surface'], // Set chart text color
   },
   plotOptions: {
@@ -106,13 +107,16 @@ const chartOptions = computed<ApexOptions>(() => ({
     opacity: 1
   },
   tooltip: {
+    theme: theme.global.current.value.dark ? 'dark' : 'light', // Set tooltip theme based on Vuetify theme
     y: {
       formatter: function (val: number) {
         return `${val} ${t('dashboard.membersPerGenerationChart.members')}`
       },
-      style: {
-        color: theme.global.current.value.colors['on-surface'], // Tooltip text color
-      },
+    },
+    style: { // Apply this for overall tooltip text if needed
+      fontSize: '12px',
+      fontFamily: 'inherit',
+      color: theme.global.current.value.colors['on-surface'],
     }
   },
   colors: [theme.global.current.value.colors.primary], // Use theme color for bars
