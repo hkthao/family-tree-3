@@ -582,6 +582,10 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("husband_id");
 
+                    b.Property<bool>("IsDeceased")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deceased");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_deleted");

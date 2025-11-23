@@ -32,6 +32,7 @@ export const useChatStore = defineStore('chat', {
     isLoading: ref(false),
     error: ref<string | null>(null),
     aiAssistantSessionId: ref<string>(uuidv4()), // New: Session ID for AI assistant chat
+    minTypingDelay: ref(500), // Minimum time the typing indicator is shown (in ms)
 
     // State for the chat list (if multiple chats are supported)
     chatList: ref<ChatListItem[]>([]),
@@ -66,12 +67,10 @@ export const useChatStore = defineStore('chat', {
 
     // Action to send a message
     async sendMessage(sessionId: string, messageContent: string, currentUserId: string, i18nTranslator: any) {
-      this.isLoading = true;
       this.error = null;
 
       if (!this.selectedChatId) {
         this.error = i18nTranslator('chat.errors.noChatSelected');
-        this.isLoading = false;
         return;
       }
 
@@ -88,19 +87,19 @@ export const useChatStore = defineStore('chat', {
       const tempMessageId = `temp_${Date.now()}`;
       const tempMessage: ChatMessage = {
         _id: tempMessageId,
-        content: '...',
+        content: '...💬', // Chat bubble emoji for typing indicator
         senderId: 'assistant',
         username: 'AI Assistant',
         timestamp: new Date().toTimeString().substring(0, 5),
         date: new Date().toLocaleDateString(),
       };
       this.addMessage(this.selectedChatId, tempMessage);
-
       try {
         const chatService = this.services.chat as IChatService;
         
         const result = await chatService.sendMessage(sessionId, messageContent);
 
+        // Remove the temporary message (typing indicator)
         const tempMessageIndex = this.messages[this.selectedChatId].findIndex(m => m._id === tempMessageId);
         if (tempMessageIndex !== -1) {
           this.messages[this.selectedChatId].splice(tempMessageIndex, 1);
@@ -124,6 +123,7 @@ export const useChatStore = defineStore('chat', {
         console.error('Error sending message:', err);
         const errorMessage = err.message || 'An unknown error occurred.';
 
+        // If error, replace the typing indicator with an error message
         const tempMessageIndex = this.messages[this.selectedChatId].findIndex(m => m._id === tempMessageId);
         if (tempMessageIndex !== -1) {
           this.messages[this.selectedChatId][tempMessageIndex].content = errorMessage;
@@ -141,6 +141,11 @@ export const useChatStore = defineStore('chat', {
           this.addMessage(this.selectedChatId, errorMsg);
         }
       } finally {
+        // Ensure isLoading is true for at least minTypingDelay
+        await Promise.all([
+          new Promise(resolve => setTimeout(resolve, this.minTypingDelay)),
+          Promise.resolve(), // To ensure Promise.all always has at least two promises
+        ]);
         this.isLoading = false;
       }
     },

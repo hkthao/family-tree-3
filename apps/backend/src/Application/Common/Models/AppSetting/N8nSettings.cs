@@ -23,4 +23,9 @@ public class N8nSettings
     /// Tên của collection được sử dụng trong quá trình embedding.
     /// </summary>
     public string CollectionName { get; set; } = null!;
+
+    /// <summary>
+    /// Chuỗi bí mật được sử dụng để tạo và xác thực JWT cho các webhook n8n.
+    /// </summary>
+    public string JwtSecret { get; set; } = null!;
 }

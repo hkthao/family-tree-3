@@ -1,9 +1,9 @@
 using backend.Infrastructure.Auth;
+using backend.Web.Filters; // Add this using directive for the filter
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using backend.Web.Filters; // Add this using directive for the filter
 
 namespace Microsoft.Extensions.DependencyInjection;
 

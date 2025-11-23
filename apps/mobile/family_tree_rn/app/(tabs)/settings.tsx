@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Alert, ActivityIndicator } from 'react-native';
 import { Text, Button, Switch, Avatar, useTheme, Appbar, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
@@ -6,12 +6,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
 import { useEffect, useState, useMemo } from 'react';
 import { useThemeContext } from '@/context/ThemeContext'; // Import useThemeContext
+import FamilyAvatar from '@/assets/images/familyAvatar.png'; // Import the default avatar image
+import { useUserProfileStore } from '@/stores/useUserProfileStore'; // Import user profile store
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const { logout, user, isLoggedIn } = useAuth(); // Destructure isLoggedIn
+  const { logout, isLoggedIn } = useAuth(); // Destructure isLoggedIn, no longer need `user` directly
   const theme = useTheme();
   const { themePreference, setThemePreference } = useThemeContext(); // Use theme context
+
+  const { userProfile: fetchedUserProfile, loading: loadingProfile, error: errorProfile, fetchUserProfile, clearUserProfile } = useUserProfileStore();
 
   // State for appearance settings
   const [isDarkMode, setIsDarkMode] = useState(themePreference === 'dark'); // Initialize from context
@@ -19,6 +23,14 @@ export default function SettingsScreen() {
   useEffect(() => {
     setIsDarkMode(themePreference === 'dark');
   }, [themePreference]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUserProfile();
+    } else {
+      clearUserProfile();
+    }
+  }, [isLoggedIn, fetchUserProfile, clearUserProfile]);
 
   const handleThemeToggle = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
@@ -101,6 +113,11 @@ export default function SettingsScreen() {
     rightIcon: {
       marginRight: -SPACING_MEDIUM, // Increased negative margin to pull icon further left
     },
+    errorText: {
+      color: theme.colors.error,
+      textAlign: 'center',
+      marginTop: SPACING_MEDIUM,
+    }
   }), [theme]);
 
   return (
@@ -110,32 +127,35 @@ export default function SettingsScreen() {
       </Appbar.Header>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
-          {isLoggedIn ? ( // Only show User Profile section if logged in
+          {loadingProfile ? (
+            <ActivityIndicator animating={true} color={theme.colors.primary} style={{ marginTop: SPACING_MEDIUM }} />
+          ) : errorProfile ? (
+            <Text style={styles.errorText}>{errorProfile}</Text>
+          ) : isLoggedIn && fetchedUserProfile ? (
             <List.Section style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
-                title={user?.fullName || t('settings.profile.guestUser')}
-                description={user?.email || user?.phoneNumber || 'N/A'}
+                title={fetchedUserProfile.name || t('settings.profile.guestUser')}
+                description={fetchedUserProfile.email || fetchedUserProfile.phone || 'N/A'}
                 left={() => (
-                  <Avatar.Image size={48} source={{ uri: user?.avatarUrl || 'https://via.placeholder.com/150' }} />
+                  <Avatar.Image size={48} source={fetchedUserProfile.avatar ? { uri: fetchedUserProfile.avatar } : FamilyAvatar} />
                 )}
                 onPress={handleEditProfile}
               />
             </List.Section>
-          ) : ( // Show login/register option if not logged in
+          ) : (
             <List.Section style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
-                title={t('settings.profile.loginRegister')} // New translation key needed
-                description={t('settings.profile.loginRegisterDescription')} // New translation key needed
+                title={t('settings.profile.loginRegister')}
+                description={t('settings.profile.loginRegisterDescription')}
                 left={() => <List.Icon icon="account-circle-outline" />}
                 onPress={() => router.push('/login')}
               />
             </List.Section>
           )}
 
-
-          {isLoggedIn && ( // Only show Privacy & Security if logged in
+          {/* {isLoggedIn && ( // Only show Privacy & Security if logged in
             <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
@@ -144,15 +164,15 @@ export default function SettingsScreen() {
                 onPress={() => console.log('Download my data')}
               />
               <Divider />
-              <List.Item
+               <List.Item
                 style={styles.listItem}
                 left={() => <List.Icon icon="delete" />}
                 title={t('settings.privacySecurity.deleteAccount')}
                 onPress={handleDeleteAccount}
                 titleStyle={{ color: theme.colors.error }}
-              />
+              /> 
             </List.Section>
-          )}
+          )} */}
 
           {/* 4. Tuỳ chỉnh giao diện (App Appearance) */}
           <List.Section title={t('settings.appAppearance.title')} style={styles.listSection}>
@@ -225,6 +245,11 @@ export default function SettingsScreen() {
           {isLoggedIn && ( // Only show Logout button if logged in
             <Button
               mode="contained"
+              style={
+                {
+                  borderRadius: theme.roundness
+                }
+              }
               onPress={handleLogout}
             >
               {t('settings.logout.button')}

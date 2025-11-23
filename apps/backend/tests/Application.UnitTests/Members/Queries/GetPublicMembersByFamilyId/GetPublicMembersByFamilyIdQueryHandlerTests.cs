@@ -35,8 +35,8 @@ public class GetPublicMembersByFamilyIdQueryHandlerTests : TestBase
         var publicFamily = new Family { Id = familyId, Name = "Public Family", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
         _context.Families.Add(publicFamily);
 
-        var member1 = new Member("Doe", "John", "M1", familyId) { Id = Guid.NewGuid() };
-        var member2 = new Member("Doe", "Jane", "M2", familyId) { Id = Guid.NewGuid() };
+        var member1 = new Member("Doe", "John", "M1", familyId, false) { Id = Guid.NewGuid() };
+        var member2 = new Member("Doe", "Jane", "M2", familyId, false) { Id = Guid.NewGuid() };
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync();
 
@@ -101,7 +101,7 @@ public class GetPublicMembersByFamilyIdQueryHandlerTests : TestBase
         var publicFamily = new Family { Id = familyId, Name = "Public Family", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
         _context.Families.Add(publicFamily);
 
-        var member1 = new Member("Doe", "John", "M1", familyId) { Id = Guid.NewGuid() };
+        var member1 = new Member("Doe", "John", "M1", familyId, false) { Id = Guid.NewGuid() };
         _context.Members.Add(member1);
         await _context.SaveChangesAsync();
 
@@ -140,10 +140,10 @@ public class GetPublicMembersByFamilyIdQueryHandlerTests : TestBase
         _context.Families.Add(publicFamily);
 
         // Use the constructor that allows setting gender
-        var father = new Member("Test", "Father", "F1", familyId, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null) { Id = Guid.NewGuid() };
-        var mother = new Member("Test", "Mother", "M1", familyId, null, Gender.Female.ToString(), null, null, null, null, null, null, null, null, null, null, null) { Id = Guid.NewGuid() };
-        var child = new Member("Test", "Child", "C1", familyId, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null) { Id = Guid.NewGuid() };
-        var spouse = new Member("Test", "Spouse", "S1", familyId, null, Gender.Female.ToString(), null, null, null, null, null, null, null, null, null, null, null) { Id = Guid.NewGuid() };
+        var father = new Member("Test", "Father", "F1", familyId, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var mother = new Member("Test", "Mother", "M1", familyId, null, Gender.Female.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var child = new Member("Test", "Child", "C1", familyId, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var spouse = new Member("Test", "Spouse", "S1", familyId, null, Gender.Female.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
 
         _context.Members.AddRange(father, mother, child, spouse);
 

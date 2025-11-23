@@ -20,6 +20,7 @@ public record MemberInput
     public string? Biography { get; set; }
     public Guid FamilyId { get; set; }
     public bool IsRoot { get; set; }
+    public bool IsDeceased { get; set; }
     public int? Order { get; set; }
     public Guid? FatherId { get; set; }
     public Guid? MotherId { get; set; }

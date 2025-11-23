@@ -4,6 +4,12 @@ import { jwtDecode } from 'jwt-decode';
 import { Platform } from 'react-native';
 import { nanoid } from 'nanoid';
 import * as Crypto from 'expo-crypto'; // Import expo-crypto
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Add AsyncStorage import
+
+// Constants for AsyncStorage keys
+const ACCESS_TOKEN_KEY = 'accessToken';
+const ID_TOKEN_KEY = 'idToken';
+const USER_PROFILE_KEY = 'userProfile';
 
 // Polyfill global.crypto for nanoid
 if (typeof global.crypto === 'undefined' || !global.crypto.getRandomValues) {
@@ -17,8 +23,9 @@ WebBrowser.maybeCompleteAuthSession();
 
 const AUTH0_DOMAIN = process.env.EXPO_PUBLIC_AUTH0_DOMAIN;
 const AUTH0_CLIENT_ID = process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID;
+const AUTH0_AUDIENCE = process.env.EXPO_PUBLIC_AUTH0_AUDIENCE;
 
-interface UserProfile {
+interface IdTokenPayload {
   name: string;
   email: string;
   picture?: string;
@@ -27,7 +34,7 @@ interface UserProfile {
 }
 
 class AuthService {
-  private user: UserProfile | null = null;
+  private user: IdTokenPayload | null = null;
   private accessToken: string | null = null;
   private idToken: string | null = null;
   private nonce: string | null = null; // Store nonce
@@ -36,6 +43,44 @@ class AuthService {
     if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
       console.error('Auth0 environment variables are not set. Check EXPO_PUBLIC_AUTH0_DOMAIN and EXPO_PUBLIC_AUTH0_CLIENT_ID');
     }
+  }
+
+  // Public method to initialize the session
+  public async initSession(): Promise<void> {
+    await this._loadSession();
+  }
+
+  // Persist authentication data to AsyncStorage
+  private async _saveSession() {
+    if (this.accessToken) {
+      await AsyncStorage.setItem(ACCESS_TOKEN_KEY, this.accessToken);
+    }
+    if (this.idToken) {
+      await AsyncStorage.setItem(ID_TOKEN_KEY, this.idToken);
+    }
+    if (this.user) {
+      await AsyncStorage.setItem(USER_PROFILE_KEY, JSON.stringify(this.user));
+    }
+  }
+
+  // Load authentication data from AsyncStorage
+  private async _loadSession() {
+    this.accessToken = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
+    this.idToken = await AsyncStorage.getItem(ID_TOKEN_KEY);
+    const userProfileString = await AsyncStorage.getItem(USER_PROFILE_KEY);
+    if (userProfileString) {
+      this.user = JSON.parse(userProfileString) as IdTokenPayload;
+    }
+  }
+
+  // Clear authentication data from AsyncStorage
+  private async _clearSession() {
+    await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    await AsyncStorage.removeItem(ID_TOKEN_KEY);
+    await AsyncStorage.removeItem(USER_PROFILE_KEY);
+    this.user = null;
+    this.accessToken = null;
+    this.idToken = null;
   }
 
   // Get the redirect URL for the platform
@@ -59,7 +104,7 @@ class AuthService {
 
     const authUrl = `https://${AUTH0_DOMAIN}/authorize?` +
       `scope=openid profile email&` +
-      `audience=https://${AUTH0_DOMAIN}/api/v2/&` +
+      `audience=${AUTH0_AUDIENCE}&` +
       `response_type=token id_token&` +
       `client_id=${AUTH0_CLIENT_ID}&` +
       `redirect_uri=${redirectUri}&` +
@@ -87,7 +132,7 @@ class AuthService {
       this.idToken = parsedUrl.id_token ?? null;
 
       if (this.idToken) {
-        const decodedIdToken = jwtDecode<UserProfile>(this.idToken);
+        const decodedIdToken = jwtDecode<IdTokenPayload>(this.idToken);
 
         // Verify nonce
         if (!decodedIdToken.nonce || decodedIdToken.nonce !== this.nonce) {
@@ -99,6 +144,7 @@ class AuthService {
         this.user = decodedIdToken;
         console.log('Logged in user:', this.user);
         this.nonce = null; // Clear nonce after successful verification
+        await this._saveSession(); // Save session
         return true;
       }
     } else if (result.type === 'cancel') {
@@ -124,18 +170,14 @@ class AuthService {
       `returnTo=${redirectUri}`;
 
     await WebBrowser.openAuthSessionAsync(logoutUrl, redirectUri);
-
-    this.user = null;
-    this.accessToken = null;
-    this.idToken = null;
-    this.nonce = null; // Ensure nonce is cleared on logout
+    await this._clearSession(); // Clear session
   }
 
   public isAuthenticated(): boolean {
     return !!this.user;
   }
 
-  public getUser(): UserProfile | null {
+  public getUser(): IdTokenPayload | null {
     return this.user;
   }
 

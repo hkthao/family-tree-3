@@ -21,6 +21,7 @@ public class Member : BaseAuditableEntity
     public string? Occupation { get; private set; } // New
     public string? AvatarUrl { get; private set; }
     public string? Biography { get; private set; } // New
+    public bool IsDeceased { get; private set; } = false;
     public Guid FamilyId { get; private set; }
     public Family Family { get; private set; } = null!;
     public bool IsRoot { get; private set; } = false;
@@ -56,7 +57,7 @@ public class Member : BaseAuditableEntity
         Id = id;
     }
 
-    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order)
+    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -74,6 +75,7 @@ public class Member : BaseAuditableEntity
         AvatarUrl = avatarUrl;
         Biography = biography;
         Order = order;
+        IsDeceased = isDeceased;
 
         AddDomainEvent(new MemberUpdatedEvent(this));
     }
@@ -120,15 +122,16 @@ public class Member : BaseAuditableEntity
 
     public Member() { }
 
-    public Member(string lastName, string firstName, string code, Guid familyId)
+    public Member(string lastName, string firstName, string code, Guid familyId, bool isDeceased = false)
     {
         LastName = lastName;
         FirstName = firstName;
         Code = code;
         FamilyId = familyId;
+        IsDeceased = isDeceased;
     }
 
-    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order)
+    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
         : this(lastName, firstName, code, familyId)
     {
         Nickname = nickname;
@@ -144,10 +147,11 @@ public class Member : BaseAuditableEntity
         AvatarUrl = avatarUrl;
         Biography = biography;
         Order = order;
+        IsDeceased = isDeceased;
     }
 
-    public Member(Guid id, string lastName, string firstName, string code, Guid familyId, Family family)
-        : this(lastName, firstName, code, familyId)
+    public Member(Guid id, string lastName, string firstName, string code, Guid familyId, Family family, bool isDeceased = false)
+        : this(lastName, firstName, code, familyId, isDeceased)
     {
         Id = id;
         Family = family;

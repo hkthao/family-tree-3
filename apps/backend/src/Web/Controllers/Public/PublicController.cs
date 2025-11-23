@@ -8,6 +8,8 @@ using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
 using backend.Application.Families.Queries.GetPublicFamilyById;
 using backend.Application.Families.Queries.SearchPublicFamilies;
+using backend.Application.FamilyDicts; // Thêm dòng này từ PublicFamilyDictsController
+using backend.Application.FamilyDicts.Queries.Public; // Thêm dòng này từ PublicFamilyDictsController
 using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetPublicMemberById;
@@ -15,10 +17,8 @@ using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.Members.Queries.SearchPublicMembers; // Add this using directive
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
-using Microsoft.AspNetCore.Mvc;
 using backend.Web.Filters; // Thêm dòng này
-using backend.Application.FamilyDicts; // Thêm dòng này từ PublicFamilyDictsController
-using backend.Application.FamilyDicts.Queries.Public; // Thêm dòng này từ PublicFamilyDictsController
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 

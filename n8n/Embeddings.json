@@ -1,5 +1,5 @@
 {
-  "name": "Family Embeddings",
+  "name": "Embeddings",
   "nodes": [
     {
       "parameters": {
@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -3920,
-        -368
+        -944,
+        288
       ],
-      "id": "112e13cb-0f55-4681-a64c-e83224d23fbf",
+      "id": "a3d00cfd-5a0b-4bac-b041-156a0d807858",
       "name": "Webhook",
       "webhookId": "80039437-9508-48fb-a9d5-c467ad9b3f5a"
     },
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        -2688,
-        -368
+        288,
+        288
       ],
-      "id": "9d713a6f-e600-420d-92ac-f1024bb186cf",
+      "id": "9cb79456-eaa3-482c-b1a6-682db0f92096",
       "name": "Respond to Webhook"
     },
     {
@@ -40,14 +40,14 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -3040,
-        448
+        -128,
+        1104
       ],
-      "id": "3438fca4-64a1-4367-9d64-ceb7f0766a0f",
+      "id": "14c49560-7949-41ba-bb64-6d62599efbbf",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
-          "id": "RbWthTT5dEupCdko",
+          "id": "PwMTW5bCXHwatA4D",
           "name": "OpenAi account"
         }
       }
@@ -66,14 +66,14 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
       "typeVersion": 1.3,
       "position": [
-        -3040,
-        224
+        -64,
+        880
       ],
-      "id": "a269b86c-bd3c-496b-98eb-955c78006a20",
+      "id": "7e5e1fe2-ec0f-49f0-8fe9-7619e7dc143d",
       "name": "Qdrant Vector Store",
       "credentials": {
         "qdrantApi": {
-          "id": "Ja4ITvGx3OlRcTSx",
+          "id": "FSMoT31iuIQkXZSN",
           "name": "QdrantApi account"
         }
       }
@@ -85,8 +85,7 @@
         "collectionName": {
           "__rl": true,
           "value": "family_store",
-          "mode": "list",
-          "cachedResultName": "family_store"
+          "mode": "name"
         },
         "points": "=",
         "filter": "= {\n\"must\": [\n      {\n        \"key\": \"metadata.id\",\n        \"match\": { \"value\": \"{{ $json.id }}\" }\n      }\n    ]\n } ",
@@ -95,14 +94,14 @@
       "type": "n8n-nodes-qdrant.qdrant",
       "typeVersion": 1,
       "position": [
-        -2976,
-        -80
+        0,
+        576
       ],
-      "id": "2718dee4-eaad-44f4-aa00-866a4b700911",
+      "id": "890491be-8b2d-484f-a447-a2a67a6d5a38",
       "name": "Delete Points",
       "credentials": {
         "qdrantRestApi": {
-          "id": "Yjp0G8xIM6MJh5el",
+          "id": "smpg1YhBd7BnLQqH",
           "name": "Qdrant account"
         }
       }
@@ -114,10 +113,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -3264,
-        80
+        -288,
+        736
       ],
-      "id": "4ccb2521-899b-4568-b347-86773a85402f",
+      "id": "468f966c-c821-4e55-bb2e-cf1591ce3c80",
       "name": "Map Payload"
     },
     {
@@ -146,10 +145,10 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        -2912,
-        448
+        80,
+        1104
       ],
-      "id": "0a97f8dd-7603-4f42-9052-21e4d92e754f",
+      "id": "62aa4030-da72-4712-a99c-0f6129a7e9f9",
       "name": "Default Data Loader"
     },
     {
@@ -261,10 +260,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        -3696,
-        -400
+        -720,
+        256
       ],
-      "id": "711fab58-c0b9-46e0-b5f4-8944037b1f0d",
+      "id": "375f085c-b71f-4bec-976c-ba4b1936dfd3",
       "name": "Switch"
     },
     {
@@ -273,9 +272,8 @@
         "operation": "queryPoints",
         "collectionName": {
           "__rl": true,
-          "value": "family-face-embeddings",
-          "mode": "list",
-          "cachedResultName": "family-face-embeddings"
+          "value": "={{ $json.body.collectionName }}",
+          "mode": "name"
         },
         "query": "=[{{ $json.body.entityData.embedding }}]",
         "scoreThreshold": 0.8,
@@ -285,14 +283,14 @@
       "type": "n8n-nodes-qdrant.qdrant",
       "typeVersion": 1,
       "position": [
-        -2976,
-        -464
+        0,
+        192
       ],
-      "id": "2f204531-80e0-4b8c-98ce-7ac19eeb3622",
+      "id": "206f9d52-e889-4b4c-b59e-6c75abb156ce",
       "name": "Search Faces",
       "credentials": {
         "qdrantRestApi": {
-          "id": "Yjp0G8xIM6MJh5el",
+          "id": "smpg1YhBd7BnLQqH",
           "name": "Qdrant account"
         }
       }
@@ -303,9 +301,8 @@
         "operation": "upsertPoints",
         "collectionName": {
           "__rl": true,
-          "value": "family-face-embeddings",
-          "mode": "list",
-          "cachedResultName": "family-face-embeddings"
+          "value": "={{ $json.body.collectionName }}",
+          "mode": "name"
         },
         "points": "=[\n    {\n        \"id\": \"{{ $json.body.entityId }}\",\n        \"payload\": {\n            \"memberId\": \"{{ $json.body.entityData.memberId }}\",\n            \"actionType\": \"{{ $json.body.actionType }}\",\n            \"entityType\": \"{{ $json.body.entityType }}\",\n            \"description\": \"{{ $json.body.description }}\"\n        },\n        \"vector\": [{{ $json.body.entityData.embedding }}]\n    }\n]\n ",
         "requestOptions": {}
@@ -313,14 +310,14 @@
       "type": "n8n-nodes-qdrant.qdrant",
       "typeVersion": 1,
       "position": [
-        -2976,
-        -656
+        0,
+        0
       ],
-      "id": "dc843d47-e3db-4ec7-af8a-5835179feae7",
+      "id": "022791eb-9a6b-459f-9a7c-77b817553e94",
       "name": "Upsert Faces",
       "credentials": {
         "qdrantRestApi": {
-          "id": "Yjp0G8xIM6MJh5el",
+          "id": "smpg1YhBd7BnLQqH",
           "name": "Qdrant account"
         }
       }
@@ -331,8 +328,8 @@
         "operation": "deletePoints",
         "collectionName": {
           "__rl": true,
-          "mode": "list",
-          "value": "family-face-embeddings"
+          "value": "={{ $json.body.collectionName }}",
+          "mode": "name"
         },
         "points": "{}",
         "filter": "= {\n\"must\": [\n      {\n        \"key\": \"payload.memberId\",\n        \"match\": { \"value\": \"{{ $('Webhook').item.json.body.entityData.memberId }}\" }\n      }\n    ]\n }  ",
@@ -341,14 +338,14 @@
       "type": "n8n-nodes-qdrant.qdrant",
       "typeVersion": 1,
       "position": [
-        -2976,
-        -272
+        0,
+        384
       ],
-      "id": "f750d14b-7008-4eb0-a62c-248f4c7b56bd",
+      "id": "a3e0e881-010d-4578-aea6-957de4189f71",
       "name": "Delete Faces",
       "credentials": {
         "qdrantRestApi": {
-          "id": "Yjp0G8xIM6MJh5el",
+          "id": "smpg1YhBd7BnLQqH",
           "name": "Qdrant account"
         }
       }
@@ -359,9 +356,8 @@
         "operation": "createPayloadIndex",
         "collectionName": {
           "__rl": true,
-          "value": "family-face-embeddings",
-          "mode": "list",
-          "cachedResultName": "family-face-embeddings"
+          "value": "={{ $json.body.collectionName }}",
+          "mode": "name"
         },
         "fieldName": "payload.memberId",
         "fieldSchema": "\"keyword\"",
@@ -370,15 +366,15 @@
       "type": "n8n-nodes-qdrant.qdrant",
       "typeVersion": 1,
       "position": [
-        -3280,
-        -288
+        -304,
+        368
       ],
-      "id": "b9187db1-a05a-4972-8a19-3b2109f60279",
+      "id": "1e0f0519-8034-4655-9135-f09daee9e149",
       "name": "Create Payload Index",
       "alwaysOutputData": false,
       "credentials": {
         "qdrantRestApi": {
-          "id": "Yjp0G8xIM6MJh5el",
+          "id": "smpg1YhBd7BnLQqH",
           "name": "Qdrant account"
         }
       }
@@ -443,11 +439,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Delete Points": {
-      "main": [
-        []
       ]
     },
     "Map Payload": {
@@ -558,11 +549,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "94fafe02-1540-40e9-8c75-65d4beedf4e7",
+  "versionId": "86a3ce15-b37a-44fc-815d-59a6b9fa0750",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "aef829d0d59991f04437d80873cfa10d735e2854c9b4476df1579624e98e2a9e"
+    "instanceId": "5c839bad11aad70c163702399b0bcb78b661c9970a1e4316b14e6da296a68b9a"
   },
-  "id": "a8afOjtPdqX4SiDa",
+  "id": "UaaKI1jHcNwwpGT4",
   "tags": []
 }

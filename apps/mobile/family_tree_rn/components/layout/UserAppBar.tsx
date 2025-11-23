@@ -1,15 +1,18 @@
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { Avatar, Appbar, useTheme } from 'react-native-paper'; // Remove Menu, IconButton, Add useTheme
+import { Avatar, Appbar, useTheme } from 'react-native-paper';
+import FamilyAvatar from '../../assets/images/familyAvatar.png'; // Import the default avatar image
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useFonts } from 'expo-font';
 import { useAuth } from '@/hooks/useAuth'; // Import the real useAuth hook
+import { useUserProfileStore } from '../../stores/useUserProfileStore'; // Import user profile store
 
 export default function UserAppBar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { isLoggedIn, user } = useAuth(); // Use the real useAuth hook
+  const { isLoggedIn } = useAuth(); // Use the real useAuth hook
+  const { userProfile } = useUserProfileStore();
   const theme = useTheme();
 
   const [fontsLoaded] = useFonts({
@@ -52,7 +55,7 @@ export default function UserAppBar() {
       <Appbar.Header style={styles.appBarHeader}>
         {isLoggedIn ? ( // Conditionally render avatar and bell if logged in
           <Appbar.Action // Avatar on the left
-            icon={user?.avatarUrl ? () => <Avatar.Image size={32} source={{ uri: user.avatarUrl }} /> : "account"}
+            icon={userProfile?.avatar ? () => <Avatar.Image size={32} source={{ uri: userProfile.avatar }} /> : () => <Avatar.Image size={32} source={FamilyAvatar} />}
             onPress={handleAvatarPress} // Handle press on avatar
             size={32}
             color={theme.colors.primary}

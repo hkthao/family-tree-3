@@ -39,6 +39,12 @@ export interface DashboardStats {
   totalMembers: number;
   totalRelationships: number;
   totalGenerations?: number;
+  maleRatio?: number;
+  femaleRatio?: number;
+  livingMembersCount?: number;
+  deceasedMembersCount?: number;
+  averageAge?: number;
+  membersPerGeneration?: { [key: number]: number };
 }
 
 export interface RecentActivityItem {

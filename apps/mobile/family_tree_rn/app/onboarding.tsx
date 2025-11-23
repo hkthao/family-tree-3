@@ -75,7 +75,7 @@ export default function OnboardingScreen() {
   const skipOnboarding = async () => {
 
     await AsyncStorage.setItem('hasOnboarded', 'true');
-    router.push('/feature-under-development');
+    router.push('/');
   };
 
   const styles = StyleSheet.create({
