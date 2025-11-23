@@ -44,6 +44,7 @@ export interface DashboardStats {
   livingMembersCount?: number;
   deceasedMembersCount?: number;
   averageAge?: number;
+  membersPerGeneration?: { [key: number]: number };
 }
 
 export interface RecentActivityItem {

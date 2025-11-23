@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace backend.Application.Dashboard.Queries;
 
 public class DashboardStatsDto
@@ -11,4 +13,5 @@ public class DashboardStatsDto
     public int LivingMembersCount { get; set; }
     public int DeceasedMembersCount { get; set; }
     public double AverageAge { get; set; }
+    public Dictionary<int, int> MembersPerGeneration { get; set; } = new();
 }
