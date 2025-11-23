@@ -74,6 +74,15 @@
       </v-col>
       <v-col cols="12" md="4"></v-col> <!-- Empty column to maintain md="4" x 3 layout if only 2 components are stacked -->
     </v-row>
+
+    <v-row v-if="stats">
+      <v-col cols="12">
+        <MembersPerGenerationChart
+          :members-per-generation="stats.membersPerGeneration"
+          :loading="dashboardStore.loading"
+        />
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -84,6 +93,7 @@ import { useI18n } from 'vue-i18n';
 import AverageAgeCard from './AverageAgeCard.vue';
 import LivingDeceasedCard from './LivingDeceasedCard.vue';
 import GenderRatioChart from './GenderRatioChart.vue';
+import MembersPerGenerationChart from './MembersPerGenerationChart.vue';
 
 const { t } = useI18n();
 
