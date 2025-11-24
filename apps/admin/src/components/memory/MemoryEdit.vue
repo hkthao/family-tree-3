@@ -94,6 +94,7 @@ const saveMemory = async () => {
   if (result.isSuccess) {
     emit('saved', props.memoryId);
   } else {
+    // Error is handled by the store, no specific action needed here
   }
   savingMemory.value = false;
 };

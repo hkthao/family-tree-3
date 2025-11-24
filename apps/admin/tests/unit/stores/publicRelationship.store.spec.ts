@@ -5,7 +5,6 @@ import type { Relationship } from '@/types';
 import { ok, err, RelationshipType } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IPublicRelationshipService
 const mockGetPublicRelationshipsByFamilyId = vi.fn();

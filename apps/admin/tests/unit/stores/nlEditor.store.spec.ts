@@ -5,7 +5,6 @@ import type { Member } from '@/types';
 import { ok, err, Gender } from '@/types';
 import type { ApiError, Paginated } from '@/types';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IMemberService
 const mockMemberLoadItems = vi.fn();
