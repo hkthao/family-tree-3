@@ -9,33 +9,33 @@
     </MemberList>
 
     <!-- Edit Member Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" :title="t('member.form.editTitle')" icon="mdi-pencil" @close="handleMemberClosed">
+    <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
       <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId as string" @close="handleMemberClosed"
         @saved="handleMemberSaved" />
     </BaseCrudDrawer>
 
     <!-- Add Member Drawer -->
-    <BaseCrudDrawer v-model="addDrawer" :title="t('member.form.addTitle')" icon="mdi-plus" @close="handleMemberClosed">
+    <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
       <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId"
         @close="handleMemberClosed" @saved="handleMemberSaved" />
     </BaseCrudDrawer>
 
     <!-- Detail Member Drawer -->
-    <BaseCrudDrawer v-model="detailDrawer" :title="t('member.detail.title')" icon="mdi-information-outline" @close="handleDetailClosed">
-      <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId as string"
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
+      <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId"
         @close="handleDetailClosed" @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
     </BaseCrudDrawer>
 
     <!-- Biography Drawer -->
-    <v-navigation-drawer v-model="biographyDrawer" location="right" temporary width="650">
+    <BaseCrudDrawer v-model="biographyDrawer" @close="handleBiographyClosed">
       <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
         @close="handleBiographyClosed" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
 
     <!-- AI Create Member Drawer -->
-    <v-navigation-drawer v-model="aiCreateDrawer" location="right" temporary width="650">
+    <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
       <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId || ''" @close="aiCreateDrawer = false" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
   </div>
 </template>
 

@@ -97,7 +97,7 @@ const handleClose = () => {
 
 const handleEdit = () => {
   if (member.value) {
-    emit('edit-member', member.value);
+    emit('edit-member', member.value.id);
   }
 };
 
