@@ -472,6 +472,7 @@
   "event.search.name": "Event Name",
   "event.search.type": "Event Type",
   "event.search.family": "Family",
+  "event.search.member": "Member",
   "event.search.startDate": "Start Date",
   "event.search.endDate": "End Date",
   "event.search.location": "Location",

@@ -542,6 +542,7 @@
   "event.search.searchQueryPlaceholder": "Tìm kiếm theo tên hoặc mô tả sự kiện...",
   "event.search.type": "Loại Sự kiện",
   "event.search.family": "Gia đình/Dòng họ",
+  "event.search.member": "Thành viên",
   "event.search.startDate": "Ngày bắt đầu",
   "event.search.endDate": "Ngày kết thúc",
   "event.search.apply": "Áp dụng Bộ lọc",
