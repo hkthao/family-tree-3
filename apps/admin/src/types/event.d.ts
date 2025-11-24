@@ -29,7 +29,7 @@ export interface EventFilter {
   startDate?: Date | null;
   endDate?: Date | null;
   location?: string;
-  relatedMemberId?: string;
-  sortBy?: string; 
-  sortOrder?: 'asc' | 'desc'; 
+  relatedMemberId?: string | null; // Allow null
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
