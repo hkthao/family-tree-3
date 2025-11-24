@@ -60,22 +60,13 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const fetchEventsData = async () => {
-  eventStore.list.filters = {
-    ...currentFilters.value,
-    searchQuery: currentFilters.value.searchQuery || '',
-  };
-  await eventStore._loadItems(); // Call _loadItems directly
-};
 
 const handleFilterUpdate = (filters: Omit<EventFilter, 'searchQuery'>) => {
   currentFilters.value = { ...currentFilters.value, ...filters };
-  fetchEventsData();
 };
 
 const handleSearchUpdate = (searchQuery: string) => {
   currentFilters.value.searchQuery = searchQuery;
-  fetchEventsData();
 };
 
 const handleListOptionsUpdate = (options: {
@@ -84,7 +75,6 @@ const handleListOptionsUpdate = (options: {
   sortBy: { key: string; order: string }[];
 }) => {
   eventStore.setListOptions(options); // Use the new setListOptions action
-  fetchEventsData(); // Fetch data after options are updated
 };
 
 const confirmDelete = async (event: Event) => {
@@ -103,7 +93,6 @@ const confirmDelete = async (event: Event) => {
         t('event.messages.deleteSuccess'),
         'success',
       );
-      await fetchEventsData(); // Reload events after deletion
     } catch (error) {
       showSnackbar(
         t('event.messages.deleteError'),
@@ -115,10 +104,8 @@ const confirmDelete = async (event: Event) => {
 
 const handleEventSaved = () => {
   closeAllDrawers(); // Close whichever drawer was open
-  fetchEventsData(); // Reload list after save
 };
 
 onMounted(() => {
-  fetchEventsData(); // Initial load when component is mounted
 });
 </script>

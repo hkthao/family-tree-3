@@ -9,6 +9,7 @@
         @close="closeForm"
         data-testid="event-form"
         :family-id="props.familyId"
+        :allow-family-edit="true"
       />
     </v-card-text>
     <v-card-actions>

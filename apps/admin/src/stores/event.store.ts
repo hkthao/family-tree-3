@@ -90,11 +90,8 @@ export const useEventStore = defineStore('event', {
           familyId: item.familyId,
           relatedMembers: item.relatedMembers,
         }));
-
-        // Assuming a bulk add method exists in the service
         const result = await this.services.event.addItems(createCommands);
         if (result.ok) {
-          // this.eventCache.clear(); // Invalidate cache on add
           await this._loadItems();
           return result; // Return the result from the service
         } else {
@@ -116,7 +113,6 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
-        // this.eventCache.clear(); // Invalidate cache on update
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.update');
@@ -131,7 +127,6 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
-        // this.eventCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.delete');
@@ -142,24 +137,11 @@ export const useEventStore = defineStore('event', {
     },
 
     setPage(page: number) {
-      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
-        this.list.currentPage = page;
-        // _loadItems() will be called by setListOptions
-      }
+      this.list.currentPage = page
     },
 
-    setItemsPerPage(count: number) {
-      if (count > 0 && this.list.itemsPerPage !== count) {
-        this.list.itemsPerPage = count;
-        this.list.currentPage = 1; // Reset to first page when items per page changes
-        // _loadItems() will be called by setListOptions
-      }
-    },
-
-    setSortBy(sortBy: { key: string; order: string }[]) {
-      this.list.sortBy = sortBy;
-      this.list.currentPage = 1; // Reset to first page on sort change
-      // _loadItems() will be called by setListOptions
+    setItemsPerPage(itemsPerPage: number) {
+      this.list.itemsPerPage = itemsPerPage
     },
 
     setListOptions(options: {
@@ -167,10 +149,26 @@ export const useEventStore = defineStore('event', {
       itemsPerPage: number;
       sortBy: { key: string; order: string }[];
     }) {
-      this.setPage(options.page); // Update page
-      this.setItemsPerPage(options.itemsPerPage); // Update items per page
-      this.setSortBy(options.sortBy); // Update sort by
-      this._loadItems(); // Load items with new options
+      // Cập nhật trang hiện tại nếu nó thay đổi
+      if (this.list.currentPage !== options.page) {
+        this.list.currentPage = options.page;
+      }
+
+      // Cập nhật số lượng mục trên mỗi trang nếu nó thay đổi
+      if (this.list.itemsPerPage !== options.itemsPerPage) {
+        this.list.itemsPerPage = options.itemsPerPage;
+      }
+
+      // Cập nhật sắp xếp nếu nó thay đổi
+      // So sánh mảng sortBy để tránh cập nhật không cần thiết
+      const currentSortBy = JSON.stringify(this.list.sortBy);
+      const newSortBy = JSON.stringify(options.sortBy);
+      if (currentSortBy !== newSortBy) {
+        this.list.sortBy = options.sortBy;
+      }
+
+      // Sau khi tất cả các tùy chọn đã được cập nhật, gọi _loadItems một lần duy nhất
+      this._loadItems();
     },
 
     setCurrentItem(item: Event) {
@@ -180,7 +178,6 @@ export const useEventStore = defineStore('event', {
     async getById(id: string): Promise<Event | undefined> {
       this.detail.loading = true;
       this.error = null;
-
       const result = await this.services.event.getById(id);
       this.detail.loading = false;
       if (result.ok) {

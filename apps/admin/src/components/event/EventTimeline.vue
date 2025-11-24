@@ -86,9 +86,6 @@ const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const totalEvents = ref(0);
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being viewed
 const detailDrawer = ref(false); // Control visibility of the detail drawer
-
-
-
 const paginatedEvents = computed(() => eventStore.list.items);
 
 const paginationLength = computed(() => {

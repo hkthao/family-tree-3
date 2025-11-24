@@ -4,7 +4,7 @@
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
           @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
-          :read-only="props.readOnly" :multiple="false" :disabled="true" data-testid="event-family-autocomplete" />
+          :read-only="props.readOnly" :multiple="false" :disabled="props.readOnly || !props.allowFamilyEdit" data-testid="event-family-autocomplete" />
       </v-col>
     </v-row>
 
@@ -82,11 +82,14 @@ import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
-const props = defineProps<{
+interface EventFormProps {
   readOnly?: boolean;
   initialEventData?: Event;
   familyId?: string; // New prop
-}>();
+  allowFamilyEdit?: boolean; // New prop
+}
+
+const props = defineProps<EventFormProps>();
 
 const { t } = useI18n();
 
@@ -109,7 +112,7 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
 const state = reactive({
   name: toRef(formData, 'name'),
   type: toRef(formData, 'type'),
-  familyId: toRef(formData, 'familyId'),
+  familyId: toRef(formData, 'familyId'), // Added familyId to state
   startDate: toRef(formData, 'startDate'),
   endDate: toRef(formData, 'endDate'),
   relatedMembers: toRef(formData, 'relatedMembers'),

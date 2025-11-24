@@ -119,24 +119,6 @@ export const useFamilyDictStore = defineStore('familyDict', {
       return result;
     },
 
-    async setPage(page: number) {
-      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
-        this.list.currentPage = page;
-      }
-    },
-
-    async setItemsPerPage(count: number) {
-      if (count > 0 && this.list.itemsPerPage !== count) {
-        this.list.itemsPerPage = count;
-        this.list.currentPage = 1;
-      }
-    },
-
-    setSortBy(sortBy: { key: string; order: string }[]) {
-      this.list.sortBy = Array.isArray(sortBy) ? sortBy : [];
-      this.list.currentPage = 1;
-    },
-
     setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
       if (this.list.currentPage !== options.page) {
         this.list.currentPage = options.page;
