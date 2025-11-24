@@ -81,6 +81,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Memory.
+    /// </summary>
+    public DbSet<Memory> Memories => Set<Memory>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể PhotoAnalysisResult.
+    /// </summary>
+    public DbSet<PhotoAnalysisResult> PhotoAnalysisResults => Set<PhotoAnalysisResult>();
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();

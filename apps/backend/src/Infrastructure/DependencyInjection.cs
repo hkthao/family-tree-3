@@ -54,6 +54,9 @@ public static class DependencyInjection
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
+        // Register N8nSettings
+        services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
+
         // Register n8nSettings
         services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
         // Register JwtHelperFactory
@@ -71,6 +74,14 @@ public static class DependencyInjection
 
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
+
+        // Register Photo Analysis Service and configure its HttpClient
+        services.AddScoped<IPhotoAnalysisService, PhotoAnalysisService>();
+        services.AddHttpClient<IPhotoAnalysisService, PhotoAnalysisService>(); // For HttpClient injection
+
+        // Register Story Generation Service and configure its HttpClient
+        services.AddScoped<IStoryGenerationService, StoryGenerationService>();
+        services.AddHttpClient<IStoryGenerationService, StoryGenerationService>(); // For HttpClient injection
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
