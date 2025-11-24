@@ -44,12 +44,12 @@ export const useEventCalendarStore = defineStore('eventCalendar', {
 
       // Always fetch all events for the current month in calendar view
       const page = 1;
-      const itemsPerPage = -1; // -1 typically means fetch all
+      const itemsPerPage = 100; // Default to 100 instead of fetching all
 
       const result = await this.services.event.loadItems(
         filters,
         page,
-        itemsPerPage,
+        itemsPerPage, // This is where 100 is used
       );
 
       if (result.ok) {
