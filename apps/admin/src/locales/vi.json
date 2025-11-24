@@ -1060,6 +1060,10 @@
   "aiMemorialStudio.selection.description": "Chọn một gia đình và một thành viên để truy cập AI Memorial Studio.",
   "aiMemorialStudio.selection.selectFamily": "Chọn Gia đình",
   "aiMemorialStudio.selection.actions": "Hành động",
+  "aiMemorialStudio.selection.select": "Chọn",
+  "aiMemorialStudio.selection.storyMemory": "Ký ức Câu chuyện",
+  "aiMemorialStudio.selection.photoRevival": "Phục hồi Ảnh",
+  "aiMemorialStudio.selection.voiceRevival": "Phục hồi Giọng nói",
   "aiMemorialStudio.selection.selectMember": "Chọn Thành viên",
   "aiMemorialStudio.selection.noFamilySelected": "Chưa chọn gia đình nào.",
 

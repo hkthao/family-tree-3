@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router'; // For navigation
 interface LoadMembersOptions {
   page: number;
   itemsPerPage: number;
-  sortBy?: string | null;
+  sortBy?: { key: string; order: string }[]; // Updated to match v-data-table-server output
 }
 
 export const useAIMemorialStudioStore = defineStore('aiMemorialStudio', {
@@ -41,20 +41,26 @@ export const useAIMemorialStudioStore = defineStore('aiMemorialStudio', {
       }
 
       this.loadingMembers = true;
-      // Access memberService via this.services as per convention
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const result = await this.services.member.searchMembers({
-        familyId: this.selectedFamilyId,
-        searchQuery: this.searchMember,
-        page: options.page,
-        itemsPerPage: options.itemsPerPage,
-        sortBy: options.sortBy,
-      });
 
-      if (result.isSuccess) {
-        this.members = result.value?.items || [];
-        this.totalMembers = result.value?.totalCount || 0;
+      // Extract sort parameters
+      const sortBy = options.sortBy && options.sortBy.length > 0 ? options.sortBy[0].key : undefined;
+      const sortOrder = options.sortBy && options.sortBy.length > 0 ? (options.sortBy[0].order as 'asc' | 'desc') : undefined;
+
+
+      const result = await this.services.member.loadItems(
+        {
+          familyId: this.selectedFamilyId,
+          searchQuery: this.searchMember,
+          sortBy: sortBy,
+          sortOrder: sortOrder,
+        },
+        options.page,
+        options.itemsPerPage,
+      );
+
+      if (result.ok) {
+        this.members = result.value.items || [];
+        this.totalMembers = result.value.totalItems || 0;
       } else {
         this.members = [];
         this.totalMembers = 0;
@@ -72,11 +78,11 @@ export const useAIMemorialStudioStore = defineStore('aiMemorialStudio', {
         this.totalMembers = 0;
       }
     },
-    async selectMember(member: Member) {
+    async selectMember(member: Member, aiMemorialStudioType: 'story' | 'photo' | 'voice') {
       this.selectingMember = member.id;
       const router = useRouter(); // Access router inside action
-      // Navigate to the member's memories studio
-      await router.push({ name: 'MemberMemories', params: { memberId: member.id } });
+      // Navigate to the member's memories studio with the specified type
+      await router.push({ name: 'MemberMemories', params: { memberId: member.id, aiMemorialStudioType } });
       this.selectingMember = null;
     },
     // You might want to add an initialization action if necessary

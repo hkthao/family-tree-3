@@ -41,9 +41,24 @@
                 {{ item.birthDeathYears }}
               </template>
               <template v-slot:item.actions="{ item }">
-                <v-btn color="primary" @click="selectMember(item)" :loading="selectingMember === item.id">
-                  {{ t('aiMemorialStudio.selection.selectMember') }}
-                </v-btn>
+                <v-menu>
+                  <template v-slot:activator="{ props: menuProps }">
+                    <v-btn color="primary" v-bind="menuProps" :loading="selectingMember === item.id">
+                      {{ t('aiMemorialStudio.selection.select') }}
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="selectMember(item, 'story')">
+                      <v-list-item-title>{{ t('aiMemorialStudio.selection.storyMemory') }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="selectMember(item, 'photo')">
+                      <v-list-item-title>{{ t('aiMemorialStudio.selection.photoRevival') }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="selectMember(item, 'voice')">
+                      <v-list-item-title>{{ t('aiMemorialStudio.selection.voiceRevival') }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </template>
               <template v-slot:no-data>
                 <v-alert type="info">{{ t('member.list.noMembers') }}</v-alert>
