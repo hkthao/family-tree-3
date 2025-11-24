@@ -1,76 +1,83 @@
 import { defineStore } from 'pinia';
+import i18n from '@/plugins/i18n';
 import type { Event, EventFilter } from '@/types';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useI18n } from 'vue-i18n';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination'; // Import DEFAULT_ITEMS_PER_PAGE
+
+interface EventTimelineState {
+  error: string | null;
+  list: {
+    items: Event[];
+    loading: boolean;
+    filters: EventFilter;
+    totalItems: number;
+    currentPage: number;
+    itemsPerPage: number;
+    totalPages: number;
+    sortBy: { key: string; order: string }[];
+  };
+}
 
 export const useEventTimelineStore = defineStore('eventTimeline', {
-  state: () => ({
-    events: [] as Event[],
-    totalEvents: 0,
-    currentPage: 1,
-    itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
-    loading: false,
-    error: null as string | null,
-    filter: {} as EventFilter,
+  state: (): EventTimelineState => ({
+    error: null,
+    list: {
+      items: [],
+      loading: false,
+      filters: {} as EventFilter,
+      totalItems: 0,
+      currentPage: 1,
+      itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Use DEFAULT_ITEMS_PER_PAGE
+      totalPages: 1,
+      sortBy: [],
+    },
   }),
-  getters: {
-    paginatedEvents: (state) => state.events,
-    paginationLength: (state) => {
-      if (typeof state.totalEvents !== 'number' || typeof state.itemsPerPage !== 'number' || state.itemsPerPage <= 0) {
-        return 1;
-      }
-      return Math.max(1, Math.ceil(state.totalEvents / state.itemsPerPage));
-    },
-  },
   actions: {
-    async loadEvents(familyId?: string, memberId?: string) {
-      this.loading = true;
+    async _loadItems() {
+      this.list.loading = true;
       this.error = null;
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
+      // const eventService = useEventService(); // Remove this line
 
-      try {
-        const currentFilter: EventFilter = {};
+      const result = await this.services.event.loadItems( // Use this.services.event
+        this.list.filters,
+        this.list.currentPage,
+        this.list.itemsPerPage,
+        this.list.sortBy,
+      );
 
-        if (memberId) {
-          currentFilter.relatedMemberId = memberId;
-        } else if (familyId) {
-          currentFilter.familyId = familyId;
-        } else {
-          this.events = [];
-          this.totalEvents = 0;
-          this.loading = false;
-          return;
-        }
-
-        const result = await this.services.event.loadItems(currentFilter, this.currentPage, this.itemsPerPage);
-
-        if (result.ok) {
-          this.events = result.value.items;
-          this.totalEvents = result.value.totalItems;
-        } else {
-          this.error = result.error?.message || t('event.timeline.errors.load');
-          showSnackbar(this.error || t('common.error'));
-          this.events = [];
-          this.totalEvents = 0;
-        }
-      } catch (err: any) {
-        this.error = err.message || t('event.timeline.errors.load');
-        showSnackbar(this.error || t('common.error'));
-        this.events = [];
-        this.totalEvents = 0;
-      } finally {
-        this.loading = false;
+      if (result.ok) {
+        this.list.items = result.value.items;
+        this.list.totalItems = result.value.totalItems;
+        this.list.totalPages = result.value.totalPages;
+      } else {
+        this.error = i18n.global.t('event.errors.load');
+        console.error(result.error);
       }
+      this.list.loading = false;
     },
 
-    setPage(page: number) {
-      this.currentPage = page;
+    setListOptions(options: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: { key: string; order: string }[];
+    }) {
+      if (this.list.currentPage !== options.page) {
+        this.list.currentPage = options.page;
+      }
+      if (this.list.itemsPerPage !== options.itemsPerPage) {
+        this.list.itemsPerPage = options.itemsPerPage;
+      }
+      const currentSortBy = JSON.stringify(this.list.sortBy);
+      const newSortBy = JSON.stringify(options.sortBy);
+      if (currentSortBy !== newSortBy) {
+        this.list.sortBy = options.sortBy;
+      }
+      this._loadItems();
     },
 
-    setItemsPerPage(perPage: number) {
-      this.itemsPerPage = perPage;
+    setFilters(filters: EventFilter) {
+      this.list.filters = { ...this.list.filters, ...filters };
+      this.list.currentPage = 1; // Reset to first page when filters change
+      this._loadItems();
     },
   },
 });

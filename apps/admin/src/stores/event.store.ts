@@ -36,7 +36,6 @@ export const useEventStore = defineStore('event', {
       loading: false,
     },
 
-    // eventCache: new IdCache<Event>(), // Remove eventCache from state
   }),
   getters: {},
   actions: {
