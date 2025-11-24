@@ -934,6 +934,9 @@
   "memory.list.header.actions": "Hành động",
   "memory.list.noMemoriesFound": "Không tìm thấy ký ức nào cho thành viên này.",
 
+  "memory.list.action.create": "Tạo Ký ức",
+  "memory.errors.selectMemberToAdd": "Vui lòng chọn một thành viên để thêm ký ức.",
+
   "memory.create.title": "Tạo Ký ức Mới",
   "memory.create.step1.title": "Chọn ảnh",
   "memory.create.step1.choosePhoto": "Chọn ảnh (Tùy chọn)",

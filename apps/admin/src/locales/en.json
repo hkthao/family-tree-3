@@ -922,6 +922,9 @@
   "memory.list.header.actions": "Actions",
   "memory.list.noMemoriesFound": "No memories found for this member.",
 
+  "memory.list.action.create": "Create Memory",
+  "memory.errors.selectMemberToAdd": "Please select a member to add a memory.",
+
   "memory.create.title": "Create New Memory",
   "memory.create.step1.title": "Choose Photo",
   "memory.create.step1.choosePhoto": "Choose a Photo (Optional)",
