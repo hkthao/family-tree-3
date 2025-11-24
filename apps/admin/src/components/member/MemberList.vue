@@ -261,14 +261,14 @@ const loadMembers = (options: {
 };
 
 const viewMember = (member: Member) => {
-  emit('view', member);
+  emit('view', member.id);
 };
 
 const editMember = (member: Member) => {
-  emit('edit', member);
+  emit('edit', member.id);
 };
 
 const confirmDelete = (member: Member) => {
-  emit('delete', member);
+  emit('delete', member.id);
 };
 </script>

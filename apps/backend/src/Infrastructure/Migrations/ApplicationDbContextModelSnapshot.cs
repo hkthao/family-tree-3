@@ -674,6 +674,76 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("members");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.PdfTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CssContent")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("css_content");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<string>("HtmlContent")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("html_content");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Placeholders")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)")
+                        .HasColumnName("placeholders");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pdf_templates");
+
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_pdf_templates_family_id");
+
+                    b.ToTable("pdf_templates");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.PrivacyConfiguration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1165,6 +1235,18 @@ namespace backend.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_members_families_family_id");
+
+                    b.Navigation("Family");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.PdfTemplate", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pdf_templates_families_family_id");
 
                     b.Navigation("Family");
                 });

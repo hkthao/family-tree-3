@@ -132,24 +132,6 @@ export const useMemberStore = defineStore('member', {
       return result;
     },
 
-    async setPage(page: number) {
-      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
-        this.list.currentPage = page;
-      }
-    },
-
-    async setItemsPerPage(count: number) {
-      if (count > 0 && this.list.itemsPerPage !== count) {
-        this.list.itemsPerPage = count;
-        this.list.currentPage = 1; // Reset to first page when items per page changes
-      }
-    },
-
-    setSortBy(sortBy: { key: string; order: string }[]) {
-      this.list.sortBy = sortBy;
-      this.list.currentPage = 1; // Reset to first page on sort change
-    },
-
     setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
       // Cập nhật trang hiện tại nếu nó thay đổi
       if (this.list.currentPage !== options.page) {

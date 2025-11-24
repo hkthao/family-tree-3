@@ -9,6 +9,7 @@
         @close="closeForm"
         data-testid="event-form"
         :family-id="props.familyId"
+        :allow-family-edit="true"
       />
     </v-card-text>
     <v-card-actions>
@@ -51,7 +52,7 @@ const handleAddEvent = async () => {
     await eventStore.addItem(eventData as Omit<Event, 'id'>);
     if (!eventStore.error) {
       showSnackbar(t('event.messages.addSuccess'), 'success');
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
     }

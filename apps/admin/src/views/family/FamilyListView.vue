@@ -1,11 +1,11 @@
 <template>
   <div data-testid="family-list-view">
     <FamilySearch id="tour-step-1" @update:filters="handleFilterUpdate" />
-    <FamilyList id="tour-step-2" :items="list.items" :total-items="familyStore.list.totalItems" :loading="familyStore.list.loading"
-      :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
+    <FamilyList id="tour-step-2" :items="list.items" :total-items="familyStore.list.totalItems"
+      :loading="familyStore.list.loading" :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
-      @update:search="handleSearchUpdate" @view="navigateToViewFamily"
-      @delete="confirmDelete" @create="navigateToAddFamily" />
+      @update:search="handleSearchUpdate" @view="navigateToFamilyDetail" @delete="confirmDelete"
+      @create="openAddDrawer" />
   </div>
 </template>
 
@@ -13,32 +13,40 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilySearch, FamilyList } from '@/components/family';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
 import { useFamilyTour } from '@/composables';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import { useRouter } from 'vue-router';
 
-const { t } = useI18n();
 const router = useRouter();
-
+const { t } = useI18n();
 const familyStore = useFamilyStore();
 const { list } = storeToRefs(familyStore);
 const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
 useFamilyTour();
 
 const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
+const {
+  openAddDrawer,
+} = useCrudDrawer<string>();
 
 const handleFilterUpdate = async (filters: FamilyFilter) => {
   currentFilters.value = filters;
   familyStore.list.filter = currentFilters.value;
   await familyStore._loadItems()
 };
+
+const navigateToFamilyDetail = (item: Family) => {
+  router.push({ name: 'FamilyDetail', params: { id: item.id } });
+}
 
 const handleSearchUpdate = async (search: string) => {
   currentFilters.value.searchQuery = search;
@@ -52,14 +60,6 @@ const handleListOptionsUpdate = (options: {
   sortBy: { key: string; order: string }[];
 }) => {
   familyStore.setListOptions(options);
-};
-
-const navigateToAddFamily = () => {
-  router.push('/family/add');
-};
-
-const navigateToViewFamily = (family: Family) => {
-  router.push(`/family/detail/${family.id}`);
 };
 
 const confirmDelete = async (family: Family) => {
@@ -86,4 +86,7 @@ const confirmDelete = async (family: Family) => {
     }
   }
 };
+
+
+
 </script>

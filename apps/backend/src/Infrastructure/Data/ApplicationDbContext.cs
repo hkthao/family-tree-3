@@ -80,6 +80,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
+    /// </summary>
+    public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
+
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{

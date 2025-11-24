@@ -8,6 +8,7 @@ export interface IEventService extends ICrudService<Event> {
     filters: EventFilter,
     page?: number,
     itemsPerPage?: number,
+    sortBy?: { key: string; order: string }[],
   ): Promise<Result<Paginated<Event>, ApiError>>;
   getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>>;
   addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>>;

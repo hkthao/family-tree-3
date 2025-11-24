@@ -4,39 +4,38 @@
 
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView()"
+      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
       @ai-biography="navigateToAIBiography" @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
     </MemberList>
 
     <!-- Edit Member Drawer -->
-
-    <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-      <MemberEditView v-if="selectedMemberId && editDrawer" :member-id="selectedMemberId" @close="handleMemberClosed"
-        @saved="handleMemberSaved" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
+      <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId as string"
+        @close="handleMemberClosed" @saved="handleMemberSaved" />
+    </BaseCrudDrawer>
 
     <!-- Add Member Drawer -->
-    <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
+    <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
       <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId"
         @close="handleMemberClosed" @saved="handleMemberSaved" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
 
     <!-- Detail Member Drawer -->
-    <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
-      <MemberDetailView v-if="selectedMemberId && detailDrawer" :member-id="selectedMemberId"
-        @close="handleDetailClosed" @edit-member="navigateToEditMember" @generate-biography="handleGenerateBiography" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
+      <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId" @close="handleDetailClosed"
+        @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
+    </BaseCrudDrawer>
 
     <!-- Biography Drawer -->
-    <v-navigation-drawer v-model="biographyDrawer" location="right" temporary width="650">
+    <BaseCrudDrawer v-model="biographyDrawer" @close="handleBiographyClosed">
       <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
         @close="handleBiographyClosed" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
 
     <!-- AI Create Member Drawer -->
-    <v-navigation-drawer v-model="aiCreateDrawer" location="right" temporary width="650">
+    <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
       <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId || ''" @close="aiCreateDrawer = false" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -53,7 +52,9 @@ import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
 interface MemberListViewProps {
   familyId?: string;
@@ -67,33 +68,25 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 const { list } = storeToRefs(memberStore);
 const searchQuery = ref('');
-const editDrawer = ref(false);
-const addDrawer = ref(false);
-const selectedMemberId = ref<string | null>(null);
-const detailDrawer = ref(false);
+
+// Use the new composable
+const {
+  addDrawer,
+  editDrawer,
+  detailDrawer,
+  selectedItemId,
+  openAddDrawer,
+  openEditDrawer,
+  openDetailDrawer,
+  closeAllDrawers,
+} = useCrudDrawer<string>(); // Specify the type for selectedItemId
+
 const biographyDrawer = ref(false);
 const biographyMemberId = ref<string | null>(null);
-const initialMemberData = ref<Member | null>(null);
 const aiCreateDrawer = ref(false);
 
 const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
-
-const navigateToDetailView = (member: Member) => {
-  selectedMemberId.value = member.id;
-  detailDrawer.value = true;
-};
-
-const navigateToCreateView = (initialData: Member | null = null) => {
-  initialMemberData.value = initialData;
-  addDrawer.value = true;
-};
-
-const navigateToEditMember = (member: Member) => {
-  selectedMemberId.value = member.id;
-  detailDrawer.value = false;
-  editDrawer.value = true;
-};
+const { showSnackbar } = useGlobalSnackbar();
 
 const navigateToAIBiography = (member: Member) => {
   handleGenerateBiography(member);
@@ -155,28 +148,21 @@ const handleDeleteConfirm = async (member: Member) => {
 };
 
 const handleMemberSaved = () => {
-  editDrawer.value = false;
-  addDrawer.value = false;
-  selectedMemberId.value = null;
-  initialMemberData.value = null;
+  closeAllDrawers(); // Close whichever drawer was open
   memberStore._loadItems();
 };
 
 const handleMemberClosed = () => {
-  editDrawer.value = false;
-  addDrawer.value = false;
-  selectedMemberId.value = null;
-  initialMemberData.value = null;
+  closeAllDrawers(); // Close whichever drawer was open
 };
 
 const handleDetailClosed = () => {
-  detailDrawer.value = false;
-  selectedMemberId.value = null;
+  closeAllDrawers(); // Close the detail drawer
 };
 
 const handleGenerateBiography = (member: Member) => {
   biographyMemberId.value = member.id;
-  detailDrawer.value = false;
+  closeAllDrawers(); // Close detail drawer
   biographyDrawer.value = true;
 };
 

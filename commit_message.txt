@@ -1,0 +1,11 @@
+fix(EventListView): Ensure advanced search filters are applied and loaded
+
+Corrects the advanced search functionality in `EventListView.vue` by directly
+updating `eventStore.list.filters` and triggering a data reload (`eventStore._loadItems()`)
+when filters or search query change. This resolves the issue where `currentFilters`
+and `eventStore.list.filters` were not synchronizing correctly.
+
+Key changes:
+- In `handleFilterUpdate`, directly updates `list.value.filters` and calls `eventStore._loadItems()`.
+- In `handleSearchUpdate`, directly updates `list.value.filters.searchQuery` and calls `eventStore._loadItems()`.
+- The local `currentFilters` ref in `EventListView.vue` is effectively bypassed, with direct interaction with the store's filters.

@@ -48,7 +48,7 @@
     <!-- Event Name column -->
     <template #item.name="{ item }">
       <a
-        @click="$emit('view', item)"
+        @click="$emit('view', item.id)"
         class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
         data-testid="event-name-link"
       >
@@ -82,14 +82,14 @@
     <template #item.actions="{ item }">
       <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item)" data-testid="edit-event-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)" data-testid="edit-event-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-event-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)" data-testid="delete-event-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -205,16 +205,16 @@ const headers = computed<DataTableHeader[]>(() => [
 const loadEvents = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: string | string[] | null;
+  sortBy: { key: string; order: string }[];
 }) => {
   emit('update:options', options);
 };
 
-const editEvent = (event: Event) => {
-  emit('edit', event);
+const editEvent = (eventId: string) => {
+  emit('edit', eventId);
 };
 
-const confirmDelete = (event: Event) => {
-  emit('delete', event);
+const confirmDelete = (eventId: string) => {
+  emit('delete', eventId);
 };
 </script>

@@ -6,6 +6,7 @@ using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.ExportImport; // New using statement
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
 using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
@@ -79,5 +80,15 @@ public class MappingProfile : Profile
         CreateMap<Relationship, RelationshipExportDto>();
         CreateMap<Event, EventExportDto>()
             .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
+
+        // FamilyDetails DTOs
+        CreateMap<Member, MemberDetailsDto>()
+            .ForMember(d => d.DateOfBirth, opt => opt.MapFrom(s => s.DateOfBirth.HasValue ? s.DateOfBirth.Value.ToShortDateString() : (string?)null))
+            .ForMember(d => d.EventMembersCount, opt => opt.MapFrom(s => s.EventMembers != null ? s.EventMembers.Count : 0));
+        CreateMap<Family, FamilyDetailsDto>()
+            .ForMember(d => d.Members, opt => opt.MapFrom(s => s.Members != null ? s.Members.Select(m => m).ToList() : new List<Member>()));
+
+        // PdfTemplate DTO
+        CreateMap<PdfTemplate, PdfTemplateDto>();
     }
 }

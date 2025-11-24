@@ -40,6 +40,13 @@ const menu: MenuSection[] = [
         exact: true,
       },
       {
+        titleKey: 'event.list.title', // New: Title for Event List
+        icon: 'mdi-calendar-month-outline', // New: Icon for Event List
+        to: '/event', // New: Route for Event List
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], // New: Roles for Event List
+        exact: true,
+      },
+      {
         titleKey: 'search.face',
         icon: 'mdi-magnify-expand',
         to: '/face/search',

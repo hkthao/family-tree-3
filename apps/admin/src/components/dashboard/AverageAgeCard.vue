@@ -14,7 +14,7 @@ import StatisticCard from './StatisticCard.vue';
 
 const { t } = useI18n();
 
-const props = defineProps<{
+const { averageAge, loading } = defineProps<{
   averageAge: number | undefined;
   loading: boolean;
 }>();

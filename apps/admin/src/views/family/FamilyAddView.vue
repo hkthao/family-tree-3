@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router'; // Removed as no longer used for navigation
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
@@ -35,9 +35,11 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);
 
 const { t } = useI18n();
-const router = useRouter();
+// const router = useRouter(); // Removed
 const familyStore = useFamilyStore();
 const { showSnackbar } = useGlobalSnackbar();
+
+const emit = defineEmits(['close', 'saved']); // Add emit
 
 const handleAddItem = async () => {
   if (!familyFormRef.value) return;
@@ -51,7 +53,7 @@ const handleAddItem = async () => {
           t('family.management.messages.addSuccess'),
           'success',
         );
-        closeForm();
+        emit('saved'); // Emit saved event instead of closing directly
       } else {
         showSnackbar(
           familyStore.error || t('family.management.messages.saveError'),
@@ -66,6 +68,6 @@ const handleAddItem = async () => {
     }};
 
 const closeForm = () => {
-  router.push('/family');
+  emit('close'); // Emit close event
 };
 </script>

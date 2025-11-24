@@ -47,6 +47,7 @@ const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'donut',
     height: 250,
+    width: '100%', // Ensure chart fills the width of the card
   },
   labels: [t('member.gender.male'), t('member.gender.female')],
   colors: [theme.global.current.value.colors.primary, theme.global.current.value.colors.error], // Use theme colors

@@ -2,7 +2,7 @@
   <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
     <AvatarInput v-if="!props.readOnly" v-model="formData.avatarUrl" :size="96" />
     <div v-else class="d-flex justify-center mb-4">
-      <AvatarDisplay :src="formData.avatarUrl" :size="96" />
+      <AvatarDisplay :src="displayAvatarSrc" :size="96" />
     </div>
 
     <v-row>
@@ -50,6 +50,7 @@ import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useVuelidate } from '@vuelidate/core';
 import { useFamilyRules } from '@/validations/family.validation';
+import familyDefaultAvatar from '@/assets/images/family_avatar.png'; // Corrected path and name
 
 const props = defineProps<{
   initialFamilyData?: Family;
@@ -70,6 +71,10 @@ const formData = reactive<Family | Omit<Family, 'id'>>(
     familyUsers: [],
   },
 );
+
+const displayAvatarSrc = computed(() => {
+  return formData.avatarUrl || familyDefaultAvatar;
+});
 
 watch(
   () => props.initialFamilyData,

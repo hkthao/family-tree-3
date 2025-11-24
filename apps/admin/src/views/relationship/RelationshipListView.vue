@@ -6,35 +6,76 @@
       :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate"
       @update:search="handleSearchUpdate"
-      @view="navigateToDetailView"
-      @edit="navigateToEditRelationship"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
       @delete="confirmDelete"
-      @create="navigateToAddRelationship"
+      @create="openAddDrawer"
       @view-member="navigateToMemberDetailView"
     />
+
+    <!-- Add Relationship Drawer -->
+    <BaseCrudDrawer v-model="addDrawer" :title="t('relationship.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
+      <RelationshipAddView v-if="addDrawer" @close="closeAddDrawer" @saved="handleRelationshipSaved" />
+    </BaseCrudDrawer>
+
+    <!-- Edit Relationship Drawer -->
+    <BaseCrudDrawer v-model="editDrawer" :title="t('relationship.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
+      <RelationshipEditView v-if="selectedItemId && editDrawer" :relationship-id="selectedItemId as string" @close="closeEditDrawer"
+        @saved="handleRelationshipSaved" />
+    </BaseCrudDrawer>
+
+    <!-- Detail Relationship Drawer -->
+    <BaseCrudDrawer v-model="detailDrawer" :title="t('relationship.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
+      <RelationshipDetailView v-if="selectedItemId && detailDrawer" :relationship-id="selectedItemId as string" @close="closeDetailDrawer"
+        @edit="openEditDrawer" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router'; // Removed as no longer used for navigation directly
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipSearch, RelationshipList } from '@/components/relationship';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { RelationshipFilter, Relationship } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import RelationshipAddView from '@/views/relationship/RelationshipAddView.vue'; // New import
+import RelationshipEditView from '@/views/relationship/RelationshipEditView.vue'; // New import
+import RelationshipDetailView from '@/views/relationship/RelationshipDetailView.vue'; // New import
 
 const { t } = useI18n();
-const router = useRouter();
+
+// const router = useRouter(); // Removed
+
+const emit = defineEmits(['view-member']); // Add emit
+
+
 
 const relationshipStore = useRelationshipStore();
 const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
 
 const currentFilters = ref<RelationshipFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
+const {
+  addDrawer,
+  editDrawer,
+  detailDrawer,
+  selectedItemId,
+  openAddDrawer,
+  openEditDrawer,
+  openDetailDrawer,
+  closeAddDrawer,
+  closeEditDrawer,
+  closeDetailDrawer,
+  closeAllDrawers,
+} = useCrudDrawer<string>();
 
 const loadRelationships = async () => {
   relationshipStore.list.filters = {
@@ -45,21 +86,8 @@ const loadRelationships = async () => {
   await relationshipStore._loadItems();
 };
 
-const navigateToDetailView = (relationship: Relationship) => {
-  // Assuming a detail view for relationship exists, similar to member
-  router.push(`/relationship/detail/${relationship.id}`);
-};
-
-const navigateToAddRelationship = () => {
-  router.push('/relationship/add');
-};
-
-const navigateToEditRelationship = (relationship: Relationship) => {
-  router.push(`/relationship/edit/${relationship.id}`);
-};
-
 const navigateToMemberDetailView = (memberId: string) => {
-  router.push(`/member/detail/${memberId}`);
+  emit('view-member', memberId);
 };
 
 const handleFilterUpdate = (filters: RelationshipFilter) => {
@@ -110,6 +138,11 @@ const confirmDelete = async (relationship: Relationship) => {
       );
     }
   }
+};
+
+const handleRelationshipSaved = () => {
+  closeAllDrawers(); // Close whichever drawer was open
+  loadRelationships(); // Reload list after save
 };
 
 onMounted(() => {

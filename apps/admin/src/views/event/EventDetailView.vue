@@ -23,21 +23,15 @@ import { useEventStore } from '@/stores/event.store';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
 
-
 interface EventDetailViewProps {
   eventId: string;
 }
 
 const props = defineProps<EventDetailViewProps>();
 const emit = defineEmits(['close', 'edit']);
-
 const { t } = useI18n();
 const eventStore = useEventStore();
-
-
 const event = ref<Event | undefined>(undefined);
-
-
 
 const loadEvent = async () => {
   if (props.eventId) {
@@ -53,8 +47,6 @@ const loadEvent = async () => {
 const closeView = () => {
   emit('close');
 };
-
-
 
 onMounted(() => {
   loadEvent();

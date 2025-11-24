@@ -7,7 +7,6 @@ import type { ApiError } from '@/plugins/axios';
 export const useFamilyStore = defineStore('family', {
   state: () => ({
     error: null as string | null,
-
     list: {
       items: [] as Family[],
       loading: false,
@@ -124,27 +123,6 @@ export const useFamilyStore = defineStore('family', {
       return result;
     },
 
-    async setPage(page: number) {
-      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
-        this.list.currentPage = page;
-        // this._loadItems(); // Sẽ được gọi bởi setListOptions
-      }
-    },
-
-    async setItemsPerPage(count: number) {
-      if (count > 0 && this.list.itemsPerPage !== count) {
-        this.list.itemsPerPage = count;
-        // this.list.currentPage = 1; // Sẽ được xử lý bởi setListOptions nếu cần
-        // this._loadItems(); // Sẽ được gọi bởi setListOptions
-      }
-    },
-
-    setSortBy(sortBy: { key: string; order: string }[]) {
-      this.list.sortBy = sortBy;
-      // this.list.currentPage = 1; // Sẽ được xử lý bởi setListOptions nếu cần
-      // this._loadItems(); // Sẽ được gọi bởi setListOptions
-    },
-
     setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
       // Cập nhật trang hiện tại nếu nó thay đổi
       if (this.list.currentPage !== options.page) {
@@ -175,14 +153,6 @@ export const useFamilyStore = defineStore('family', {
     async getById(id: string): Promise<Family | undefined> {
       this.detail.loading = true;
       this.error = null;
-
-      // const cachedFamily = this.familyCache.get(id);
-      // if (cachedFamily) {
-      //   this.detail.loading = false;
-      //   this.detail.item = cachedFamily;
-      //   return cachedFamily;
-      // }
-
       const result = await this.services.family.getById(id);
       this.detail.loading = false;
       if (result.ok) {
@@ -211,6 +181,6 @@ export const useFamilyStore = defineStore('family', {
         console.error(result.error);
         return [];
       }
-    },
+    }
   },
 })

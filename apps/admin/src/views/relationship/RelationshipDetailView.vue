@@ -36,14 +36,16 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
 
+const props = defineProps<{
+  relationshipId: string;
+}>();
+const emit = defineEmits(['close', 'edit']);
+
 const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
 const relationshipStore = useRelationshipStore();
 
 const relationship = ref<Relationship | null>(null);
@@ -52,20 +54,19 @@ const selectedTab = ref('general');
 
 const loadRelationship = async () => {
   loading.value = true;
-  const relationshipId = route.params.id as string;
-  if (relationshipId) {
-    await relationshipStore.getById(relationshipId);
+  if (props.relationshipId) {
+    await relationshipStore.getById(props.relationshipId);
     relationship.value = relationshipStore.detail.item;
   }
   loading.value = false;
 };
 
 const navigateToEditRelationship = (id: string) => {
-  router.push(`/relationship/edit/${id}`);
+  emit('edit', { id: id }); // Emit an edit event
 };
 
 const closeView = () => {
-  router.push('/relationship');
+  emit('close'); // Emit close event
 };
 
 onMounted(() => {
@@ -73,7 +74,7 @@ onMounted(() => {
 });
 
 watch(
-  () => route.params.id,
+  () => props.relationshipId,
   (newId) => {
     if (newId) {
       loadRelationship();
