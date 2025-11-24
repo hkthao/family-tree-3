@@ -12,14 +12,16 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 *   Trực quan hóa Cây Gia Phả (biểu đồ tương tác).
 *   Tìm kiếm & Lọc thành viên.
 *   Hỗ trợ đa ngôn ngữ (tiếng Việt, tiếng Anh).
-*   Các tính năng nâng cao như xuất/nhập GEDCOM, báo cáo thống kê, quản lý tài khoản và phân quyền, tích hợp AI (gợi ý tiểu sử, nhận diện khuôn mặt), cộng tác thời gian thực, thông báo sự kiện, v.v.
+*   Các tính năng nâng cao như xuất/nhập GEDCOM, báo cáo thống kê, quản lý tài khoản và phân quyền, tích hợp AI (gợi ý tiểu sử, nhận diện khuôn mặt, xử lý ngôn ngữ tự nhiên), cộng tác thời gian thực, thông báo sự kiện, v.v.
 
 ## 2. Công nghệ sử dụng (Tech Stack)
 
 *   **Backend:** ASP.NET 8, Clean Architecture, JWT Authentication, MySQL (qua Entity Framework Core).
-*   **Frontend (Admin):** Vue.js 3, Vuetify 3, Pinia, Vue Router, Vite.
+*   **Frontend (Admin):** Vue.js 3, TypeScript, Vuetify 3, Pinia, Vue Router, Vite, Axios (custom `apiClient`), Vuelidate, Vue I18n.
 *   **Triển khai:** Docker, Nginx.
 *   **CI/CD:** GitHub Actions.
+*   **Trực quan hóa:** D3.js, ApexCharts, Family-chart (f3).
+*   **Xử lý văn bản rich-text:** Tiptap.
 
 ## 3. Bắt đầu nhanh (Getting Started)
 
@@ -28,6 +30,7 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 *   Docker & Docker Compose (để chạy ứng dụng).
 *   .NET 8 SDK (chỉ cần cho phát triển backend).
 *   Node.js 20+ (chỉ cần cho phát triển frontend).
+*   Java 17+ (chỉ cần cho phát triển mobile).
 
 ### Cài đặt và Chạy
 
@@ -49,6 +52,12 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 4.  **Truy cập ứng dụng:**
     *   **Admin Frontend:** [http://localhost:8081](http://localhost:8081)
     *   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+5.  **Chạy ứng dụng di động (Tùy chọn):**
+    ```bash
+    cd apps/mobile/family_tree_rn
+    npm install
+    npm run android # hoặc npm run ios
+    ```
 
 ## 4. Cấu trúc Dự án
 
@@ -57,10 +66,12 @@ Dự án được tổ chức theo cấu trúc monorepo, bao gồm các thư m�
 *   `apps/`: Chứa các ứng dụng chính có thể chạy độc lập.
     *   `apps/backend/`: Mã nguồn ASP.NET Core API, tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
     *   `apps/admin/`: Mã nguồn ứng dụng Vue.js frontend cho giao diện quản trị.
+    *   `apps/mobile/`: Ứng dụng di động (ví dụ: React Native).
 *   `services/`: Chứa các dịch vụ phụ trợ.
     *   `services/face-service/`: Dịch vụ xử lý khuôn mặt bằng Python.
-*   `packages/`: Chứa các gói mã nguồn được chia sẻ giữa các ứng dụng.
-    *   `packages/shared-types/`: Định nghĩa các kiểu dữ liệu (TypeScript types/interfaces/DTOs) được chia sẻ giữa backend và các frontend.
+    *   `services/puppeteer-service/`: Dịch vụ chuyển đổi HTML/CSS sang PDF bằng Node.js và Puppeteer.
+*   `packages/`: (Tùy chọn) Chứa các gói mã nguồn được chia sẻ giữa các ứng dụng.
+    *   `packages/shared-types/`: (Tùy chọn) Định nghĩa các kiểu dữ liệu (TypeScript types/interfaces/DTOs) được chia sẻ giữa backend và các frontend.
     *   `packages/ui-components/`: (Tùy chọn) Nơi chứa các thành phần UI dùng chung cho các ứng dụng frontend.
 *   `infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.*), Nginx và seed data.
 *   `docs/`: Chứa toàn bộ tài liệu dự án, được phân loại thành các thư mục con:
@@ -86,7 +97,7 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 ## 6. Hướng dẫn Phát triển
 
 *   **Code Style & Linting:** Sử dụng `dotnet format` cho `apps/backend`, `eslint` cho `apps/admin`.
-*   **Testing:** Chạy unit tests và kiểm tra code coverage cho cả backend và frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
+*   **Testing:** Chạy unit tests (Vitest) và kiểm tra code coverage cho cả backend và frontend. Chạy end-to-end tests (Playwright) cho frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
 *   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code. Chi tiết tại [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md).
 *   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
