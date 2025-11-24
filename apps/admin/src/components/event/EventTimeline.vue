@@ -122,7 +122,7 @@ const loadEvents = async () => {
     filters.familyId = props.familyId;
   }
 
-  eventStore.list.filter = { ...eventStore.list.filter, ...filters }; // Directly update filter
+  eventStore.list.filters = { ...eventStore.list.filters, ...filters }; // Directly update filters
   eventStore.setPage(page.value);
   eventStore.setItemsPerPage(itemsPerPage.value);
   await eventStore._loadItems(); // Call _loadItems directly

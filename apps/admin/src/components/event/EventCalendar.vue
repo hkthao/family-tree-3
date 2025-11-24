@@ -150,7 +150,7 @@ const loadEvents = async () => {
   } else if (props.familyId) {
     filters.familyId = props.familyId;
   }
-  eventStore.list.filter = filters;
+  eventStore.list.filters = filters;
   await eventStore._loadItems();
 };
 

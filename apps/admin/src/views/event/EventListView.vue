@@ -2,8 +2,8 @@
   <EventSearch @update:filters="handleFilterUpdate" />
   <EventList :events="list.items" :total-events="list.totalItems" :loading="list.loading"
     :search="currentFilters.searchQuery || ''" @update:options="handleListOptionsUpdate"
-    @update:search="handleSearchUpdate" @view="(event: Event) => openDetailDrawer(event.id)"
-    @edit="(event: Event) => openEditDrawer(event.id)" @delete="confirmDelete" @create="openAddDrawer" />
+    @update:search="handleSearchUpdate" @view="openDetailDrawer"
+    @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer" />
 
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
@@ -43,19 +43,14 @@ const { t } = useI18n();
 const eventStore = useEventStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-
 const { list } = storeToRefs(eventStore);
-
 const currentFilters = ref<EventFilter>({});
-// const currentPage = ref(1); // Removed
-// const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Removed
 
 const {
   addDrawer,
   editDrawer,
   detailDrawer,
   selectedItemId,
-  // initialData, // No longer needed for EventEditView
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,

@@ -74,7 +74,7 @@ onMounted(() => {
 });
 
 watch(
-  () => route.params.id,
+  () => props.relationshipId,
   (newId) => {
     if (newId) {
       loadRelationship();
