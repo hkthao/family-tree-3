@@ -5,22 +5,22 @@
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="secondary" @click="aiDrawer = true" data-testid="button-ai-input" v-if="canManageFamily">
+      <v-btn color="secondary" @click="openAiDrawer()" data-testid="button-ai-input" v-if="canManageFamily">
         {{ t('common.aiInput') }}
       </v-btn>
-      <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit" v-if="canManageFamily">
+      <v-btn color="primary" @click="openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
-    <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-      <FamilyEditView v-if="editableFamily && editDrawer" :initial-family="editableFamily" @close="editDrawer = false"
+    <BaseCrudDrawer v-model="editDrawer" :title="t('family.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
+      <FamilyEditView v-if="family && editDrawer" :initial-family="family" @close="closeEditDrawer"
         @saved="handleFamilySaved" />
-    </v-navigation-drawer>
+    </BaseCrudDrawer>
 
-    <v-navigation-drawer v-model="aiDrawer" location="right" temporary width="650">
-      <NLEditorView v-if="aiDrawer" :family-id="props.familyId" @close="aiDrawer = false" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="aiDrawer" :title="t('aiInput.title')" icon="mdi-robot-happy-outline" @close="closeAiDrawer">
+      <NLEditorView v-if="aiDrawer" :family-id="props.familyId" @close="closeAiDrawer" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -34,6 +34,8 @@ import FamilyEditView from '@/views/family/FamilyEditView.vue';
 import NLEditorView from '@/views/natural-language/NLEditorView.vue';
 import type { Family } from '@/types';
 import { useAuth } from '@/composables/useAuth';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
 const { t } = useI18n();
 const router = useRouter();
@@ -45,16 +47,32 @@ const props = defineProps<{
   readOnly: boolean;
 }>();
 
-const emit = defineEmits(['familyUpdated']);
+const emit = defineEmits(['familyUpdated', 'edit-family']); // Add emit for edit-family
 
 const canManageFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
 
 const family = ref<Family | undefined>(undefined);
-const editableFamily = ref<Family | undefined>(undefined); // Copy of family for editing
-const editDrawer = ref(false); // Control visibility of the edit drawer
-const aiDrawer = ref(false); // Control visibility of the AI input drawer
+
+const {
+  editDrawer,
+  addDrawer: aiDrawer, // Rename addDrawer to aiDrawer for clarity in this context
+  openEditDrawer: openEditDrawerComposable,
+  openAddDrawer: openAiDrawerComposable, // Rename openAddDrawer to openAiDrawer
+  closeEditDrawer,
+  closeAddDrawer: closeAiDrawer, // Rename closeAddDrawer to closeAiDrawer
+} = useCrudDrawer<string>();
+
+const openEditDrawer = () => {
+  if (family.value) {
+    openEditDrawerComposable(family.value.id, family.value);
+  }
+};
+
+const openAiDrawer = () => {
+  openAiDrawerComposable();
+};
 
 const loadFamily = async () => {
   if (props.familyId) {
@@ -68,7 +86,7 @@ const loadFamily = async () => {
 };
 
 const handleFamilySaved = async () => {
-  editDrawer.value = false;
+  closeEditDrawer(); // Close the edit drawer
   await loadFamily(); // Reload family data after saving
   emit('familyUpdated'); // Notify parent that family data has been updated
 };
@@ -79,12 +97,6 @@ const closeView = () => {
 
 onMounted(() => {
   loadFamily();
-});
-
-watch(editDrawer, (newVal) => {
-  if (newVal && family.value) {
-    editableFamily.value = JSON.parse(JSON.stringify(family.value));
-  }
 });
 
 watch(

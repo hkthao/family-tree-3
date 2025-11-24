@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
@@ -38,7 +38,8 @@ interface FamilyFormExposed {
 }
 
 interface FamilyEditViewProps {
-  initialFamily: Family;
+  initialFamily?: Family; // Make optional for better flexibility
+  initialFamilyId?: string; // New prop to fetch family if not provided
 }
 
 const props = defineProps<FamilyEditViewProps>();
@@ -49,6 +50,44 @@ const familyFormRef = ref<FamilyFormExposed | null>(null);
 const { t } = useI18n();
 const familyStore = useFamilyStore();
 const { showSnackbar } = useGlobalSnackbar();
+
+const family = ref<Family | undefined>(undefined); // Internal ref for family data
+
+// Fetch family if initialFamilyId is provided or if initialFamily is not
+const loadFamily = async (id: string) => {
+  await familyStore.getById(id);
+  if (!familyStore.error) {
+    family.value = familyStore.detail.item as Family;
+  } else {
+    family.value = undefined; // Clear family on error
+  }
+};
+
+onMounted(() => {
+  if (props.initialFamily) {
+    family.value = props.initialFamily;
+  } else if (props.initialFamilyId) {
+    loadFamily(props.initialFamilyId);
+  }
+});
+
+watch(
+  () => props.initialFamilyId,
+  (newId) => {
+    if (newId) {
+      loadFamily(newId);
+    }
+  },
+);
+
+watch(
+  () => props.initialFamily,
+  (newFamily) => {
+    if (newFamily) {
+      family.value = newFamily;
+    }
+  },
+);
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;

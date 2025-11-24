@@ -33,12 +33,10 @@
     </template>
   </v-calendar>
 
-  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="canEditEvent">
-    <EventEditView v-if="editableEvent && editDrawer" :initial-event="editableEvent" @close="handleEventClosed"
-      @saved="handleEventSaved" />
-  </v-navigation-drawer>
-
-  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="canAddEvent">
+          <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="canEditEvent">
+            <EventEditView v-if="selectedEventId && editDrawer" :event-id="selectedEventId" @close="handleEventClosed"
+              @saved="handleEventSaved" />
+          </v-navigation-drawer>  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="canAddEvent">
     <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
   </v-navigation-drawer>
 
@@ -87,7 +85,7 @@ const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
-const editableEvent = ref<Event | undefined>(undefined); // Copy of event for editing
+// const editableEvent = ref<Event | undefined>(undefined); // No longer needed
 
 const calendarRef = ref<{
   title: string;
@@ -181,7 +179,6 @@ const getEventColor: CalendarEventColorFunction = (event: {
 const showEventDetails = (eventSlotScope: Event) => {
   selectedEventId.value = eventSlotScope.id;
   if (canEditEvent.value) {
-    editableEvent.value = JSON.parse(JSON.stringify(eventSlotScope)); // Deep copy the event object
     editDrawer.value = true;
   } else {
     detailDrawer.value = true;
@@ -191,14 +188,12 @@ const showEventDetails = (eventSlotScope: Event) => {
 const handleEventSaved = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
-  editableEvent.value = undefined;
   loadEvents(); // Reload events after saving
 };
 
 const handleEventClosed = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
-  editableEvent.value = undefined;
 };
 
 const handleAddSaved = () => {
@@ -218,7 +213,6 @@ const handleDetailClosed = () => {
 const handleDetailEdit = (event: Event) => {
   detailDrawer.value = false;
   selectedEventId.value = event.id;
-  editableEvent.value = JSON.parse(JSON.stringify(event));
   editDrawer.value = true;
 };
 

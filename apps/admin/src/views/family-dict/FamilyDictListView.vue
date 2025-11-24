@@ -4,26 +4,26 @@
 
     <FamilyDictList :items="familyDictStore.list.items" :total-items="familyDictStore.list.totalItems"
       :loading="list.loading" :search="searchQuery" @update:search="handleSearchUpdate"
-      @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditFamilyDict"
-      @delete="confirmDelete" @create="navigateToCreateView()" @import="openImportDialog" :read-only="props.readOnly">
+      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer"
+      @delete="confirmDelete" @create="openAddDrawer" @import="openImportDialog" :read-only="props.readOnly">
     </FamilyDictList>
 
     <!-- Edit FamilyDict Drawer -->
-    <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-      <FamilyDictEditView v-if="selectedFamilyDictId && editDrawer" :family-dict-id="selectedFamilyDictId"
-        @close="handleFamilyDictClosed" @saved="handleFamilyDictSaved" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="editDrawer" :title="t('familyDict.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
+      <FamilyDictEditView v-if="selectedItemId && editDrawer" :family-dict-id="selectedItemId as string"
+        @close="closeEditDrawer" @saved="handleFamilyDictSaved" />
+    </BaseCrudDrawer>
 
     <!-- Add FamilyDict Drawer -->
-    <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
-      <FamilyDictAddView v-if="addDrawer" @close="handleFamilyDictClosed" @saved="handleFamilyDictSaved" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="addDrawer" :title="t('familyDict.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
+      <FamilyDictAddView v-if="addDrawer" @close="closeAddDrawer" @saved="handleFamilyDictSaved" />
+    </BaseCrudDrawer>
 
     <!-- Detail FamilyDict Drawer -->
-    <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
-      <FamilyDictDetailView v-if="selectedFamilyDictId && detailDrawer" :family-dict-id="selectedFamilyDictId"
-        @close="handleDetailClosed" @edit-family-dict="navigateToEditFamilyDict" />
-    </v-navigation-drawer>
+    <BaseCrudDrawer v-model="detailDrawer" :title="t('familyDict.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
+      <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId as string"
+        @close="closeDetailDrawer" @edit-family-dict="openEditDrawer" />
+    </BaseCrudDrawer>
 
     <!-- Import FamilyDict Dialog -->
     <FamilyDictImportDialog :show="importDialog" @update:show="importDialog = $event"
@@ -43,7 +43,9 @@ import type { FamilyDictFilter, FamilyDict } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
 interface FamilyDictListViewProps {
   readOnly?: boolean;
@@ -56,33 +58,24 @@ const { t } = useI18n();
 const familyDictStore = useFamilyDictStore();
 const { list } = storeToRefs(familyDictStore);
 const searchQuery = ref('');
-const editDrawer = ref(false);
-const addDrawer = ref(false);
-const selectedFamilyDictId = ref<string | null>(null);
-const detailDrawer = ref(false);
 const importDialog = ref(false); // State for import dialog
 
+const {
+  addDrawer,
+  editDrawer,
+  detailDrawer,
+  selectedItemId,
+  openAddDrawer,
+  openEditDrawer,
+  openDetailDrawer,
+  closeAddDrawer,
+  closeEditDrawer,
+  closeDetailDrawer,
+  closeAllDrawers,
+} = useCrudDrawer<string>();
+
 const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
-
-const navigateToDetailView = (familyDict: FamilyDict) => {
-  selectedFamilyDictId.value = familyDict.id;
-  detailDrawer.value = true;
-};
-
-const navigateToCreateView = () => {
-  addDrawer.value = true;
-};
-
-const openImportDialog = () => {
-  importDialog.value = true;
-};
-
-const navigateToEditFamilyDict = (familyDict: FamilyDict) => {
-  selectedFamilyDictId.value = familyDict.id;
-  detailDrawer.value = false;
-  editDrawer.value = true;
-};
+const { showSnackbar } = useGlobalSnackbar();
 
 const handleFilterUpdate = async (filters: FamilyDictFilter) => {
   familyDictStore.list.filters = { ...filters, searchQuery: searchQuery.value };
@@ -101,6 +94,10 @@ const handleListOptionsUpdate = (options: {
   sortBy: { key: string; order: string }[];
 }) => {
   familyDictStore.setListOptions(options);
+};
+
+const openImportDialog = () => {
+  importDialog.value = true;
 };
 
 const confirmDelete = async (familyDict: FamilyDict) => {
@@ -136,21 +133,8 @@ const handleDeleteConfirm = async (familyDict: FamilyDict) => {
 };
 
 const handleFamilyDictSaved = () => {
-  editDrawer.value = false;
-  addDrawer.value = false;
-  selectedFamilyDictId.value = null;
-  familyDictStore._loadItems();
-};
-
-const handleFamilyDictClosed = () => {
-  editDrawer.value = false;
-  addDrawer.value = false;
-  selectedFamilyDictId.value = null;
-};
-
-const handleDetailClosed = () => {
-  detailDrawer.value = false;
-  selectedFamilyDictId.value = null;
+  closeAllDrawers(); // Close whichever drawer was open
+  familyDictStore._loadItems(); // Reload list after save
 };
 
 onMounted(() => {

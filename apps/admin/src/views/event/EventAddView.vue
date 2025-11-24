@@ -51,7 +51,7 @@ const handleAddEvent = async () => {
     await eventStore.addItem(eventData as Omit<Event, 'id'>);
     if (!eventStore.error) {
       showSnackbar(t('event.messages.addSuccess'), 'success');
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
     }

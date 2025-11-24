@@ -13,6 +13,7 @@ import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
 import { donateRoutes } from './features/donate.routes';
+import { eventRoutes } from './features/event.routes'; // New: Import eventRoutes
 
 // Import all pages from the views index
 import {
@@ -46,6 +47,7 @@ const router = createRouter({
         ...faceRoutes,
         ...settingRoutes,
         ...donateRoutes,
+        ...eventRoutes, // New: Include eventRoutes
         {
           path: 'nl-editor',
           name: 'NLEditor',

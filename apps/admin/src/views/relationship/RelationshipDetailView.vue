@@ -36,14 +36,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router'; // Remove useRouter
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
 
+const props = defineProps<{
+  relationshipId: string;
+}>();
+const emit = defineEmits(['close', 'edit']);
+
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const relationshipStore = useRelationshipStore();
 
 const relationship = ref<Relationship | null>(null);
@@ -61,11 +65,11 @@ const loadRelationship = async () => {
 };
 
 const navigateToEditRelationship = (id: string) => {
-  router.push(`/relationship/edit/${id}`);
+  emit('edit', { id: id }); // Emit an edit event
 };
 
 const closeView = () => {
-  router.push('/relationship');
+  emit('close'); // Emit close event
 };
 
 onMounted(() => {
