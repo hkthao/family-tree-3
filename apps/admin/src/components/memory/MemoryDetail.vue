@@ -112,9 +112,9 @@ const deleteConfirmDialog = ref(false);
 
   const loadMemory = async (id: string) => {
   loading.value = true;
-  const result = await memoryStore.getById(id);
-  if (result.isSuccess) {
-    memory.value = result.value;
+  const memoryData = await memoryStore.getById(id); // Returns MemoryDto | undefined
+  if (memoryData) {
+    memory.value = memoryData;
   } else {
     memory.value = null;
   }
@@ -141,8 +141,8 @@ const confirmDeleteMemory = () => {
 
 const deleteMemory = async () => {
   if (memory.value) {
-    const result = await memoryStore.delete(memory.value.id);
-    if (result.isSuccess) {
+    const result = await memoryStore.deleteItem(memory.value.id);
+    if (result.ok) {
       // snackbarStore.showSnackbar(t('memory.delete.success'), 'success'); // Removed
       emit('deleted');
       emit('close'); // Close detail view after deletion

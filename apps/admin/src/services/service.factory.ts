@@ -38,6 +38,8 @@ import type { IPrivacyConfigurationService } from './privacy-configuration/priva
 import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; // Add familyDict service interface
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service'; // Add familyDict service implementation
+import type { IMemoryService } from './memory/memory.service.interface'; // New
+import { ApiMemoryService } from './memory/api.memory.service'; // New
 
 
 export type ServiceMode = 'real' | 'test';
@@ -63,6 +65,7 @@ export interface AppServices {
   familyData: IFamilyDataService;
   privacyConfiguration: IPrivacyConfigurationService;
   familyDict: IFamilyDictService; // Add familyDict service
+  memory: IMemoryService; // New
 }
 
 import apiClient from '@/plugins/axios';
@@ -150,5 +153,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyDictService(apiClient)
         : testServices?.familyDict || new ApiFamilyDictService(apiClient),
+    memory: // New
+      mode === 'real'
+        ? new ApiMemoryService(apiClient)
+        : testServices?.memory || new ApiMemoryService(apiClient),
   };
 }

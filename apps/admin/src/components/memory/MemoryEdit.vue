@@ -62,9 +62,9 @@ const savingMemory = ref(false);
 
   const loadMemory = async (id: string) => {
   loading.value = true;
-  const result = await memoryStore.getById(id);
-  if (result.isSuccess) {
-    editableMemory.value = { ...result.value }; 
+  const memoryData = await memoryStore.getById(id);
+  if (memoryData) {
+    editableMemory.value = { ...memoryData }; 
   } else {
     editableMemory.value = null;
   }
@@ -90,8 +90,8 @@ const saveMemory = async () => {
     keywords: editableMemory.value.keywords,
   };
 
-  const result = await memoryStore.update(updatePayload);
-  if (result.isSuccess) {
+  const result = await memoryStore.updateItem(updatePayload);
+  if (result.ok) {
     emit('saved', props.memoryId);
   } else {
     // Error is handled by the store, no specific action needed here

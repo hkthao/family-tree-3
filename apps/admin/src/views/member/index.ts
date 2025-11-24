@@ -1,1 +1,0 @@
-export { default as MemberMemoriesView } from './MemberMemories.vue';

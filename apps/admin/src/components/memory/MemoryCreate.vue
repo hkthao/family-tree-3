@@ -241,7 +241,7 @@ const analyzePhoto = async () => {
   formData.append('memberId', props.memberId);
 
   const result = await memoryStore.analyzePhoto(formData);
-  if (result.isSuccess) {
+  if (result.ok) {
     photoAnalysisResult.value = result.value;
     photoAnalysisId.value = result.value?.id || null; // Fix: Handle potential undefined/null id
     currentStep.value = 2; // Move to Photo Analysis step
@@ -303,7 +303,7 @@ const generateStory = async () => {
   };
 
   const result = await memoryStore.generateStory(requestPayload);
-  if (result.isSuccess) {
+  if (result.ok) {
     generatedStory.value = result.value;
     if (!memoryTitle.value) memoryTitle.value = generatedStory.value.title;
     if (generatedStory.value.tags && generatedStory.value.tags.length > 0) {
@@ -334,9 +334,9 @@ const saveMemory = async () => {
     keywords: generatedStory.value.keywords || [],
   };
 
-  const result = await memoryStore.create(createPayload);
-  if (result.isSuccess) {
-    savedMemoryId.value = result.value || null; // Fix: Handle potential undefined/null value
+  const result = await memoryStore.addItem(createPayload);
+  if (result.ok) {
+    savedMemoryId.value = result.value.id || null; // Access id from result.value
     // snackbarStore.showSnackbar(t('memory.create.step5.saveSuccess'), 'success'); // Removed
     emit('saved', savedMemoryId.value);
     currentStep.value = 5; // Move to Review & Save

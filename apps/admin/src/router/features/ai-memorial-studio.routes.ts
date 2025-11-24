@@ -1,17 +1,20 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { AIMemorialStudioSelectionView, AIMemorialStudioMemberView, MemoryDetailPage, MemoryEditPage } from '@/views/ai-memorial-studio';
+import MemoryListView from '@/views/ai-memorial-studio/MemoryListView.vue';
+import AIMemorialStudioMemberView from '@/views/ai-memorial-studio/AIMemorialStudioMemberView.vue';
+import MemoryDetailPage from '@/views/ai-memorial-studio/MemoryDetailPage.vue';
+import MemoryEditPage from '@/views/ai-memorial-studio/MemoryEditPage.vue';
 
 export const aiMemorialStudioRoutes: RouteRecordRaw[] = [
   {
     path: '/ai-memorial-studio',
-    redirect: '/ai-memorial-studio/selection', // Explicit redirect to selection view
-    meta: { breadcrumb: 'aiMemorialStudio.selection.title' },
+    redirect: '/ai-memorial-studio/list', // Redirect to the memory list
+    meta: { breadcrumb: 'memory.list.title' },
   },
   {
-    path: '/ai-memorial-studio/selection',
-    name: 'AIMemorialStudioSelection',
-    component: AIMemorialStudioSelectionView,
-    meta: { breadcrumb: 'aiMemorialStudio.selection.title' },
+    path: '/ai-memorial-studio/list',
+    name: 'MemoryList',
+    component: MemoryListView,
+    meta: { breadcrumb: 'memory.list.title' },
   },
   {
     path: '/ai-memorial-studio/:memberId/:aiMemorialStudioType?',
@@ -19,21 +22,5 @@ export const aiMemorialStudioRoutes: RouteRecordRaw[] = [
     component: AIMemorialStudioMemberView,
     props: true,
     meta: { breadcrumb: 'memory.studio.title' },
-    children: [
-      {
-        path: 'memories/:memoryId',
-        name: 'MemoryDetail',
-        component: MemoryDetailPage,
-        props: true,
-        meta: { breadcrumb: 'memory.detail.titleDefault' },
-      },
-      {
-        path: 'memories/:memoryId/edit',
-        name: 'MemoryEdit',
-        component: MemoryEditPage,
-        props: true,
-        meta: { breadcrumb: 'memory.edit.title' },
-      },
-    ],
   },
 ];

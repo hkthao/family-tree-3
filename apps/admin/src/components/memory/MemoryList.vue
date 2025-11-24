@@ -109,24 +109,24 @@ const headers = ref([
   { title: t('memory.list.header.actions'), key: 'actions', sortable: false },
 ]);
 
-interface LoadMemoriesOptions {
+
+
+  const loadMemories = async (options: {
   page: number;
   itemsPerPage: number;
-  sortBy?: string | null;
-}
-
-  const loadMemories = async (options: LoadMemoriesOptions) => {
+  sortBy: { key: string; order: string }[];
+}) => {
   loading.value = true;
-  const result = await memoryStore.getByMemberId(props.memberId, {
-    page: options.page,
-    limit: options.itemsPerPage,
-    search: search.value,
-    sortBy: options.sortBy ?? undefined, 
-  });
-  if (result.isSuccess) {
-    memories.value = result.value?.items || [];
-    totalMemories.value = result.value?.totalCount || 0;
-  }
+  memoryStore.list.filters.memberId = props.memberId;
+  memoryStore.list.filters.searchQuery = search.value;
+  memoryStore.list.currentPage = options.page;
+  memoryStore.list.itemsPerPage = options.itemsPerPage;
+  memoryStore.list.sortBy = options.sortBy;
+
+  await memoryStore._loadItems();
+  
+  memories.value = memoryStore.list.items;
+  totalMemories.value = memoryStore.list.totalItems;
   loading.value = false;
 };
 const viewMemory = (item: MemoryDto) => {
@@ -158,9 +158,9 @@ const closeEditMemory = () => {
 
 const deleteMemory = async () => {
   if (selectedMemoryId.value) {
-    const result = await memoryStore.delete(selectedMemoryId.value);
-    if (result.isSuccess) {
-      loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: null }); // Reload list
+    const result = await memoryStore.deleteItem(selectedMemoryId.value);
+    if (result.ok) {
+      loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload list
       selectedMemoryId.value = null;
       selectedMemory.value = null;
     }
@@ -174,17 +174,17 @@ const cancelDelete = () => {
 
 const handleMemorySaved = () => {
   editMemoryDrawer.value = false;
-  loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: null }); // Reload list
+  loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload list
 };
 
 onMounted(() => {
-  loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: null });
+  loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
 });
 
 watch(
   () => props.memberId,
   () => {
-    loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: null });
+    loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
   }
 );
 </script>

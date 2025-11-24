@@ -18,7 +18,7 @@
 
         <v-window v-model="activeTab">
           <v-window-item value="story">
-            <MemoryDetailPage v-if="memberId" :member-id="memberId" />
+            <MemoryListView v-if="memberId" :member-id="memberId" />
             <v-alert v-else type="error">{{ t('common.errors.memberIdRequired') }}</v-alert>
           </v-window-item>
           <v-window-item value="photo">
@@ -53,7 +53,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store'; // To fetch member details
 import type { Member } from '@/types';
-import MemoryDetailPage from './MemoryDetailPage.vue';
+import MemoryListView from './MemoryListView.vue';
 
 const route = useRoute();
 const { t } = useI18n();
