@@ -1,7 +1,6 @@
 <template>
   <v-navigation-drawer v-model="internalModelValue" location="right" temporary :width="width" :scrim="scrim">
-    <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small" class="mx-2 mt-2" absolute top
-      right></v-btn>
+    <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small" class="mx-2 mt-2 btn-close"></v-btn>
     <slot></slot>
   </v-navigation-drawer>
 </template>
@@ -42,5 +41,7 @@ const closeDrawer = () => {
 </script>
 
 <style scoped>
-/* Add any specific styles for the drawer here */
+.btn-close{
+  position: absolute;
+}
 </style>

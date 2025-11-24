@@ -399,6 +399,7 @@
   "member.form.wife": "Wife",
   "member.form.isRoot": "Is Root Member",
   "member.form.isDeceased": "Is Deceased",
+  "member.form.member": "Member",
   "member.form.order": "Order",
   "member.form.spouse": "Spouse",
   "member.form.parents": "Parents (Optional)",
@@ -479,6 +480,8 @@
   "timeline.form.addTitle": "Add Timeline Event",
   "timeline.addEvent": "Add New Event",
   "common.close": "Close",
+  "common.next": "Next",
+  "common.back": "Back",
   "common.subtitle": "Description",
   "common.today": "Today",
   "common.search": "Search",
@@ -955,6 +958,11 @@
   "memory.create.step5.saveFailed": "Failed to save memory.",
   "memory.create.step5.viewMemory": "View Memory Details",
 
+  "memory.create.step1.title": "Photo Upload",
+  "memory.create.step2.title": "General Information",
+  "memory.create.step3.title": "Review & Save",
+  "memory.create.action.analyze": "Analyze Photo",
+
   "memory.photoAnalysis.title": "Photo Analysis",
   "memory.photoAnalysis.summary": "Summary",
   "memory.photoAnalysis.scene": "Scene",
@@ -990,6 +998,10 @@
   "memory.edit.loading": "Loading memory for editing...",
   "memory.edit.notFound": "Memory not found for editing.",
   "memory.edit.saveSuccess": "Memory updated successfully!",
+  "memory.edit.saveFailed": "Failed to update memory.",
+
+  "memory.validation.maxPhotos": "You can upload a maximum of {max} photos.",
+  "memory.validation.maxPhotoSize": "Each photo must be less than {max}MB.",
 
   "memory.delete.confirmTitle": "Confirm Delete Memory",
   "memory.delete.confirmMessage": "Are you sure you want to delete the memory '{title}'?",

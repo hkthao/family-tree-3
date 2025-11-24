@@ -359,6 +359,7 @@
   "common.loading": "Đang tải...",
   "common.saveSuccess": "Lưu thành công!",
   "common.saveError": "Lưu thất bại!",
+  "common.info": "Thông tin",
   "common.aiInput": "Nhập liệu AI",
   "common.refresh": "Làm mới",
   "topbar.search": "Tìm kiếm...",
@@ -454,6 +455,7 @@
   "member.form.wife": "Vợ",
   "member.form.isRoot": "Là thành viên gốc",
   "member.form.isDeceased": "Đã qua đời",
+  "member.form.member": "Thành viên",
   "member.form.order": "Thứ tự",
   "member.form.spouse": "Vợ/Chồng",
   "member.form.parents": "Cha mẹ",
@@ -562,6 +564,8 @@
   "timeline.form.addTitle": "Thêm Sự kiện Dòng Thời Gian",
   "timeline.addEvent": "Thêm Sự kiện Mới",
   "common.close": "Đóng",
+  "common.next": "Tiếp theo",
+  "common.back": "Quay lại",
   "common.subtitle": "Mô tả",
   "common.today": "Hôm nay",
   "event.calendar.viewMode": "Chế độ xem",
@@ -967,6 +971,11 @@
   "memory.create.step5.saveFailed": "Lưu ký ức thất bại.",
   "memory.create.step5.viewMemory": "Xem chi tiết ký ức",
 
+  "memory.create.step1.title": "Tải ảnh lên",
+  "memory.create.step2.title": "Thông tin chung",
+  "memory.create.step3.title": "Xem lại & Lưu",
+  "memory.create.action.analyze": "Phân tích ảnh",
+
   "memory.photoAnalysis.title": "Phân tích ảnh",
   "memory.photoAnalysis.summary": "Tóm tắt",
   "memory.photoAnalysis.scene": "Bối cảnh",
@@ -1002,6 +1011,10 @@
   "memory.edit.loading": "Đang tải ký ức để chỉnh sửa...",
   "memory.edit.notFound": "Không tìm thấy ký ức để chỉnh sửa.",
   "memory.edit.saveSuccess": "Cập nhật ký ức thành công!",
+  "memory.edit.saveFailed": "Cập nhật ký ức thất bại.",
+
+  "memory.validation.maxPhotos": "Bạn chỉ có thể tải lên tối đa {max} ảnh.",
+  "memory.validation.maxPhotoSize": "Mỗi ảnh phải nhỏ hơn {max}MB.",
 
   "memory.delete.confirmTitle": "Xác nhận xóa ký ức",
   "memory.delete.confirmMessage": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",

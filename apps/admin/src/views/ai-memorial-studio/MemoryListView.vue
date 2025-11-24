@@ -117,11 +117,7 @@ const { showSnackbar } = useGlobalSnackbar();
 
 // New: Wrapper for openAddDrawer to check for memberId
 const openAddDrawer = () => {
-  if (props.memberId) {
-    _openAddDrawer();
-  } else {
-    showSnackbar(t('memory.errors.selectMemberToAdd'), 'warning'); // Display a warning
-  }
+  _openAddDrawer();
 };
 
 const handleListOptionsUpdate = (options: {
@@ -129,9 +125,7 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  if (props.memberId) { // Only update options and load if memberId is present
-    memoryStore.setListOptions(options);
-  }
+  memoryStore.setListOptions(options);
 };
 
 const handleCrudDrawerClosed = () => {
@@ -140,9 +134,7 @@ const handleCrudDrawerClosed = () => {
 
 const handleCrudDrawerSaved = () => {
   closeAllDrawers();
-  if (props.memberId) { // Only reload if memberId is present
-    memoryStore._loadItems();
-  }
+  memoryStore._loadItems();
 };
 
 const confirmDelete = async (memory: MemoryDto) => {
@@ -168,9 +160,7 @@ const handleDeleteConfirm = async (memory: MemoryDto) => {
       showSnackbar(t('memory.delete.success'), 'success');
     }
   }
-  if (props.memberId) { // Only reload if memberId is present
-    memoryStore._loadItems();
-  }
+  memoryStore._loadItems();
 };
 
 const formatDate = (dateString: string) => {
@@ -179,10 +169,8 @@ const formatDate = (dateString: string) => {
 
 // Watch for changes in searchQuery to update filters and reload items
 watch(searchQuery, (newSearchQuery) => {
-  if (props.memberId) {
     memoryStore.setFilters({ searchQuery: newSearchQuery, memberId: props.memberId });
     memoryStore._loadItems();
-  }
 });
 
 // Watch for changes in memberId prop to update filters and reload items

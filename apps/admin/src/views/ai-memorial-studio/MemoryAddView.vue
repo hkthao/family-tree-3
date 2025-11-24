@@ -1,82 +1,38 @@
 <template>
-  <v-form ref="form" @submit.prevent="handleSubmit">
-    <v-card-title>
-      <span class="text-h6">{{ t('memory.create.title') }}</span>
-    </v-card-title>
-    <v-card-text>
-      <v-container>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="editedMemory.title"
-              :label="t('memory.storyEditor.title')"
-              :rules="[(v: string) => !!v || t('common.validations.required')]"
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12">
-            <v-textarea
-              v-model="editedMemory.story"
-              :label="t('memory.storyEditor.storyContent')"
-              :rules="[(v: string) => !!v || t('common.validations.required')]"
-              required
-            ></v-textarea>
-          </v-col>
-          <v-col cols="12">
-            <v-text-field
-              v-model="editedMemory.photoUrl"
-              :label="t('memory.create.step1.choosePhoto')"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12">
-            <v-combobox
-              v-model="editedMemory.tags"
-              :label="t('memory.storyEditor.tags')"
-              chips
-              multiple
-              clearable
-            ></v-combobox>
-          </v-col>
-          <v-col cols="12">
-            <v-combobox
-              v-model="editedMemory.keywords"
-              :label="t('memory.storyEditor.keywords')"
-              chips
-              multiple
-              clearable
-            ></v-combobox>
-          </v-col>
-          <v-col cols="12">
-            <MemberAutocomplete
-              v-model="editedMemory.memberId"
-              :label="t('member.form.member')"
-              :rules="[(v: string) => !!v || t('common.validations.required')]"
-              :read-only="!!props.memberId"
-              required
-            ></MemberAutocomplete>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue-darken-1" variant="text" @click="handleClose">
-        {{ t('common.cancel') }}
-      </v-btn>
-      <v-btn color="blue-darken-1" variant="text" type="submit" :loading="memoryStore.add.loading">
-        {{ t('common.save') }}
-      </v-btn>
-    </v-card-actions>
-  </v-form>
+  <v-card-title class="text-center">
+    <span class="text-h6">{{ t('memory.create.title') }}</span>
+  </v-card-title>
+  <MemoryForm
+    ref="memoryFormRef"
+    v-model="editedMemory"
+    :member-id="memberId"
+    @update:selectedFiles="handleSelectedFilesUpdate"
+    :readonly="false"
+  />
+  <v-card-actions>
+    <v-spacer></v-spacer>
+    <v-btn color="blue-darken-1" variant="text" @click="handleClose">
+      {{ t('common.cancel') }}
+    </v-btn>
+    <v-btn v-if="memoryFormRef?.activeStep > 1 && !isSaving" color="blue-darken-1" variant="text" @click="memoryFormRef?.prevStep()">
+      {{ t('common.back') }}
+    </v-btn>
+    <v-btn v-if="memoryFormRef?.activeStep < 3" color="blue-darken-1" variant="text" @click="memoryFormRef?.nextStep()" :loading="isSaving">
+      {{ t('common.next') }}
+    </v-btn>
+    <v-btn v-else color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
+      {{ t('common.save') }}
+    </v-btn>
+  </v-card-actions>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue'; // Added 'computed'
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { CreateMemoryDto } from '@/types/memory';
-import { MemberAutocomplete } from '@/components/common';
+import MemoryForm from '@/components/memory/MemoryForm.vue';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -88,20 +44,55 @@ const { t } = useI18n();
 const memoryStore = useMemoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
-const form = ref<HTMLFormElement | null>(null);
+const memoryFormRef = ref<InstanceType<typeof MemoryForm> | null>(null);
+const selectedFiles = ref<File[]>([]);
+const isSaving = ref(false); // To manage loading state for buttons
 
 const editedMemory = ref<CreateMemoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
   story: '',
   photoAnalysisId: undefined,
-  photoUrl: undefined,
+  photoUrl: undefined, // This will temporarily hold a file name if files are selected
   tags: [],
   keywords: [],
 });
 
-const handleSubmit = async () => {
-  if (form.value && (await form.value.validate()).valid) {
+// Watch for changes in memberId prop to update editedMemory
+watch(() => props.memberId, (newMemberId) => {
+  if (newMemberId) {
+    editedMemory.value.memberId = newMemberId;
+  }
+}, { immediate: true });
+
+const handleSelectedFilesUpdate = (files: File[]) => {
+  selectedFiles.value = files;
+};
+
+const handleSave = async () => {
+  if (!memoryFormRef.value) return;
+
+  isSaving.value = true;
+  try {
+    // Validate the current step (Step 3 has no form, so validation is conceptual)
+    // We need to ensure all previous steps are valid before final save
+    const step1Valid = await memoryFormRef.value.validateStep(1);
+    const step2Valid = await memoryFormRef.value.validateStep(2);
+
+    if (!step1Valid || !step2Valid) { // Ensure all relevant steps are valid
+        isSaving.value = false;
+        return;
+    }
+
+    // Placeholder for file upload logic
+    if (selectedFiles.value.length > 0) {
+      console.log('Files to upload:', selectedFiles.value);
+      // In a real application, you would upload files to a server here.
+      // For now, we'll just assign the name of the first selected file as photoUrl
+      editedMemory.value.photoUrl = selectedFiles.value[0]?.name || undefined;
+      showSnackbar(t('common.info'), 'info', `${selectedFiles.value.length} files selected. Upload logic to be implemented.`);
+    }
+
     const result = await memoryStore.addItem(editedMemory.value);
     if (result.ok) {
       showSnackbar(t('memory.create.step5.saveSuccess'), 'success');
@@ -109,6 +100,11 @@ const handleSubmit = async () => {
     } else {
       showSnackbar(t('memory.create.step5.saveFailed'), 'error');
     }
+  } catch (error) {
+    console.error('Error saving memory:', error);
+    showSnackbar(t('common.error'), 'error', (error as Error).message);
+  } finally {
+    isSaving.value = false;
   }
 };
 
