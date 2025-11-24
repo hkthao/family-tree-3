@@ -1,49 +1,50 @@
 <template>
   <div>
-  <v-toolbar>
-    <v-btn variant="text" @click="setToday">{{ t('common.today') }}</v-btn>
-    <v-btn variant="text" size="small" icon @click="prev">
-      <v-icon>mdi-chevron-left</v-icon>
-    </v-btn>
-    <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
-    <v-btn variant="text" size="small" icon @click="next">
-      <v-icon>mdi-chevron-right</v-icon>
-    </v-btn>
-    <v-spacer></v-spacer>
-    <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
-      :label="t('event.calendar.viewMode')" hide-details :readonly="props.readOnly"></v-select>
-    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
-      <v-tooltip :text="t('event.list.action.create')">
-        <template v-slot:activator="{ props }">
-          <v-icon v-bind="props">mdi-plus</v-icon>
-        </template>
-      </v-tooltip>
-    </v-btn>
-  </v-toolbar>
-  <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
-    :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
-    :weekdays="weekdays">
-    <template #event="{ event }">
-      <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
-        {{ event.title }}
-      </div>
-      <div class="v-event-description">
-        {{ event.eventObject.description }}
-      </div>
-    </template>
-  </v-calendar>
+    <v-toolbar>
+      <v-btn variant="text" @click="setToday">{{ t('common.today') }}</v-btn>
+      <v-btn variant="text" size="small" icon @click="prev">
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
+      <v-btn variant="text" size="small" icon @click="next">
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
+        :label="t('event.calendar.viewMode')" hide-details :readonly="props.readOnly"></v-select>
+      <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
+        <v-tooltip :text="t('event.list.action.create')">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props">mdi-plus</v-icon>
+          </template>
+        </v-tooltip>
+      </v-btn>
+    </v-toolbar>
+    <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
+      :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
+      :weekdays="weekdays">
+      <template #event="{ event }">
+        <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
+          {{ event.title }}
+        </div>
+        <div class="v-event-description">
+          {{ event.eventObject.description }}
+        </div>
+      </template>
+    </v-calendar>
 
-          <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="canEditEvent">
-            <EventEditView v-if="selectedEventId && editDrawer" :event-id="selectedEventId" @close="handleEventClosed"
-              @saved="handleEventSaved" />
-          </v-navigation-drawer>  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="canAddEvent">
-    <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
-  </v-navigation-drawer>
+    <BaseCrudDrawer v-model="editDrawer" v-if="canEditEvent" @close="handleEventClosed">
+      <EventEditView v-if="selectedEventId && editDrawer" :event-id="selectedEventId" @close="handleEventClosed"
+        @saved="handleEventSaved" />
+    </BaseCrudDrawer>
+    <BaseCrudDrawer v-model="addDrawer" v-if="canAddEvent" @close="handleAddClosed">
+      <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
+    </BaseCrudDrawer>
 
-  <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
-    <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed"
-      @edit="handleDetailEdit" />
-  </v-navigation-drawer>
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
+      <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed"
+        @edit="handleDetailEdit" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -51,7 +52,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
-import { useEventStore } from '@/stores/event.store'; // Import event store
+import { useEventCalendarStore } from '@/stores/eventCalendar.store'; // Import new calendar store
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
@@ -67,7 +68,7 @@ const props = defineProps<{
 }>();
 
 const { t, locale } = useI18n();
-const eventStore = useEventStore(); // Initialize event store
+const eventCalendarStore = useEventCalendarStore(); // Use new calendar store
 const { isAdmin, isFamilyManager } = useAuth();
 
 const canAddEvent = computed(() => {
@@ -85,7 +86,6 @@ const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
-// const editableEvent = ref<Event | undefined>(undefined); // No longer needed
 
 const calendarRef = ref<{
   title: string;
@@ -134,29 +134,10 @@ const setToday = () => {
   }
 };
 
-const loadEvents = async () => {
-  if (!props.familyId && !props.memberId) {
-    eventStore.list.items = [];
-    eventStore.list.totalItems = 0;
-    return;
-  }
-
-  eventStore.setPage(1); // Always fetch all for calendar view
-  eventStore.setItemsPerPage(-1); // Fetch all for calendar view
-
-  const filters: any = {};
-  if (props.memberId) {
-    filters.relatedMemberId = props.memberId;
-  } else if (props.familyId) {
-    filters.familyId = props.familyId;
-  }
-  eventStore.list.filters = filters;
-  await eventStore._loadItems();
-};
-
+// Data loading is now handled by the store
 const formattedEvents = computed(() => {
-  const events = eventStore.list.items
-    .filter((event) => event.startDate) // Only include events with a valid startDate
+  const events = eventCalendarStore.list.items
+    .filter((event) => event.startDate)
     .map((event) => ({
       title: event.name,
       start: new Date(event.startDate as Date),
@@ -165,7 +146,7 @@ const formattedEvents = computed(() => {
         : new Date(event.startDate as Date),
       color: event.color || 'primary',
       timed: true,
-      eventObject: event, // Store the original event object
+      eventObject: event,
     }));
   return events;
 });
@@ -188,7 +169,7 @@ const showEventDetails = (eventSlotScope: Event) => {
 const handleEventSaved = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
-  loadEvents(); // Reload events after saving
+  eventCalendarStore.setCurrentMonth(selectedDate.value); // Reload events after saving
 };
 
 const handleEventClosed = () => {
@@ -198,7 +179,7 @@ const handleEventClosed = () => {
 
 const handleAddSaved = () => {
   addDrawer.value = false;
-  loadEvents(); // Reload events after adding
+  eventCalendarStore.setCurrentMonth(selectedDate.value); // Reload events after adding
 };
 
 const handleAddClosed = () => {
@@ -216,15 +197,26 @@ const handleDetailEdit = (event: Event) => {
   editDrawer.value = true;
 };
 
+// Watch for changes in props.familyId and props.memberId
 watch(
   [() => props.familyId, () => props.memberId],
-  () => {
-    loadEvents();
+  ([newFamilyId, newMemberId]) => {
+    eventCalendarStore.setFilters({ familyId: newFamilyId, relatedMemberId: newMemberId });
   },
   { immediate: true },
 );
 
+// Watch for changes in selectedDate to reload events for the new month
+watch(
+  selectedDate,
+  (newDate) => {
+    eventCalendarStore.setCurrentMonth(newDate);
+  },
+  { immediate: true },
+);
+
+// No longer needed here as watch on selectedDate handles it
 onMounted(() => {
-  loadEvents();
+  // eventCalendarStore.setCurrentMonth(selectedDate.value);
 });
 </script>
