@@ -52,9 +52,9 @@
     class="mt-4"
   ></v-pagination>
 
-  <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
+  <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
     <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed" />
-  </v-navigation-drawer>
+  </BaseCrudDrawer>
 </template>
 
 <script setup lang="ts">
