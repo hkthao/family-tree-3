@@ -54,14 +54,14 @@ describe('publicRelationship.store', () => {
       id: 'rel-1',
       sourceMemberId: 'member-1',
       targetMemberId: 'member-2',
-      type: RelationshipType.ParentChild,
+      type: RelationshipType.Child, // Fixed: Used a valid RelationshipType
       familyId: 'family-1',
     },
     {
       id: 'rel-2',
       sourceMemberId: 'member-3',
       targetMemberId: 'member-4',
-      type: RelationshipType.Marriage,
+      type: RelationshipType.Husband, // Fixed: Used a valid RelationshipType
       familyId: 'family-1',
     },
   ];

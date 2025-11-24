@@ -1,7 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { usePublicFamilyStore } from '@/stores/publicFamily.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Family } from '@/types';
+import { type Family, FamilyVisibility } from '@/types'; // Changed from import type to import
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
@@ -55,7 +55,7 @@ describe('publicFamily.store', () => {
     description: 'A public family for testing',
     address: 'Public Address',
     avatarUrl: 'public-avatar.jpg',
-    visibility: 1, // Assuming 1 means public
+    visibility: FamilyVisibility.Public, // Fixed
     familyUsers: [],
   };
 

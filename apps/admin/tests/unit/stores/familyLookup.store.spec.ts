@@ -1,7 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Family } from '@/types';
+import { type Family, FamilyVisibility } from '@/types'; // Changed from import type to import
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
@@ -60,7 +60,7 @@ describe('familyLookup.store', () => {
     description: 'Desc One',
     address: 'Address One',
     avatarUrl: 'url-1',
-    visibility: 0,
+    visibility: FamilyVisibility.Private, // Fixed
     familyUsers: [],
   };
 
@@ -70,7 +70,7 @@ describe('familyLookup.store', () => {
     description: 'Desc Two',
     address: 'Address Two',
     avatarUrl: 'url-2',
-    visibility: 0,
+    visibility: FamilyVisibility.Private, // Fixed
     familyUsers: [],
   };
 

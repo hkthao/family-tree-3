@@ -9,6 +9,10 @@ interface EventCalendarState {
     items: Event[];
     loading: boolean;
     filters: EventFilter;
+    totalItems: number; // Added to interface
+    currentPage: number; // Added to interface
+    totalPages: number; // Added to interface
+    sortBy: any[]; // Added to interface (can be more specific if sort options are known)
     currentMonthStartDate: Date | null;
     currentMonthEndDate: Date | null;
   };
