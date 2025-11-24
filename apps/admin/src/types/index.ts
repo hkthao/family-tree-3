@@ -14,3 +14,4 @@ export * from './auth.d';
 export * from './user.d';
 export * from './chat.d';
 export * from './api-error.d';
+export * from './memory.d'; // Added new memory types

@@ -23,7 +23,8 @@ import {
   DashboardView,
   NotFoundView,
   NLEditorView,
-  FaqPage, // Import FaqPage
+  FaqPage,
+  MemberMemoriesView, // Import MemberMemoriesView
 } from '@/views';
 
 const router = createRouter({
@@ -42,6 +43,12 @@ const router = createRouter({
           meta: { breadcrumb: 'dashboard.title' },
         },
         ...memberRoutes,
+        {
+          path: 'members/:memberId/memories',
+          name: 'MemberMemories',
+          component: MemberMemoriesView,
+          meta: { breadcrumb: 'memory.studio.title' },
+        },
         ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,
