@@ -1056,6 +1056,13 @@
   "menu.utilitiesAndAI": "Tiện ích & AI",
   "menu.aiMemorialStudio": "Phòng Ký Ức",
 
+  "aiMemorialStudio.selection.title": "Chọn Thành viên AI Memorial Studio",
+  "aiMemorialStudio.selection.description": "Chọn một gia đình và một thành viên để truy cập AI Memorial Studio.",
+  "aiMemorialStudio.selection.selectFamily": "Chọn Gia đình",
+  "aiMemorialStudio.selection.actions": "Hành động",
+  "aiMemorialStudio.selection.selectMember": "Chọn Thành viên",
+  "aiMemorialStudio.selection.noFamilySelected": "Chưa chọn gia đình nào.",
+
   "tour": {
     "familyList": {
       "search": {
