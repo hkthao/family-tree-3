@@ -691,7 +691,6 @@
   "member.errors.loadById": "Không thể tải thành viên.",
   "member.errors.loadByFamilyId": "Không thể tải danh sách thành viên theo gia đình.",
   "menu.profileAndContent": "Hồ sơ & Nội dung",
-  "menu.utilitiesAndAI": "Tiện ích & AI",
   "menu.cultureAndTraditions": "Văn hóa & Truyền thống",
   "menu.dashboards": "Tổng quan",
   "menu.family": "Gia phả",
@@ -1055,9 +1054,7 @@
   "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm",
 
   "menu.utilitiesAndAI": "Tiện ích & AI",
-  "aiMemorialStudio.storyMemory": "Ký ức Câu chuyện",
-  "aiMemorialStudio.photoRevival": "Phục dựng Ảnh",
-  "aiMemorialStudio.voiceRevival": "Phục dựng Giọng nói",
+  "menu.aiMemorialStudio": "Phòng Ký Ức",
 
   "tour": {
     "familyList": {

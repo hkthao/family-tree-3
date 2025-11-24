@@ -1,0 +1,1 @@
+export { default as AIMemorialStudioSelectionView } from './AIMemorialStudioSelectionView.vue';

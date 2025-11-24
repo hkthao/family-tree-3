@@ -20,6 +20,7 @@ import { nlEditorRoutes } from './features/nl-editor.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
+import { aiMemorialStudioRoutes } from './features/ai-memorial-studio.routes'; // New
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,7 @@ const router = createRouter({
         ...dashboardRoutes, // Replaced
         ...memberRoutes,
         ...memoryRoutes, // Replaced
+        ...aiMemorialStudioRoutes, // New
         ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,
