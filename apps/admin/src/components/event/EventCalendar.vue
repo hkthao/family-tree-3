@@ -5,7 +5,12 @@
       <v-btn variant="text" size="small" icon @click="prev">
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
+      <v-menu v-model="isDatePickerOpen" :close-on-content-click="false">
+        <template v-slot:activator="{ props }">
+          <v-toolbar-title v-bind="props" class="text-center cursor-pointer">{{ calendarTitle }}</v-toolbar-title>
+        </template>
+        <v-date-picker v-model="selectedDate" @update:model-value="isDatePickerOpen = false"></v-date-picker>
+      </v-menu>
       <v-btn variant="text" size="small" icon @click="next">
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
@@ -86,6 +91,7 @@ const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
+const isDatePickerOpen = ref(false); // Controls the visibility of the date picker
 
 const calendarRef = ref<{
   title: string;
