@@ -114,7 +114,7 @@ const handlePageChange = (newPage: number) => {
 watch(
   [() => props.familyId, () => props.memberId],
   ([newFamilyId, newMemberId]) => {
-    eventTimelineStore.setFilters({ familyId: newFamilyId, relatedMemberId: newMemberId });
+    eventTimelineStore.setFilters({ familyId: newFamilyId, memberId: newMemberId });
   },
   { immediate: true },
 );

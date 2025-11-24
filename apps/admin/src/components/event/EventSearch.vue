@@ -53,7 +53,7 @@
             </v-col>
             <v-col cols="12" md="4">
               <MemberAutocomplete
-                v-model="filters.relatedMemberId"
+                v-model="filters.memberId"
                 :label="t('event.search.member')"
                 clearable
                 :multiple="false"
@@ -91,7 +91,7 @@ const expanded = ref(false); // Default to collapsed
 const filters = ref<Omit<EventFilter, 'searchQuery'>>({
   type: undefined,
   familyId: null, // familyId should be string or null, not undefined
-  relatedMemberId: null, // Change to relatedMemberId
+  memberId: null, // Change to memberId
   startDate: undefined,
   endDate: undefined,
 });
@@ -121,7 +121,7 @@ const resetFilters = () => {
   filters.value = {
     type: undefined,
     familyId: null, // familyId should be string or null, not undefined
-    relatedMemberId: null, // Change to relatedMemberId
+    memberId: null, // Change to memberId
     startDate: undefined,
     endDate: undefined,
   };

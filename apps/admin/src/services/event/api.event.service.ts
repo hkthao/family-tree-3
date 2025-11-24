@@ -50,6 +50,7 @@ export class ApiEventService implements IEventService {
         if (filters.endDate)
           params.append('endDate', filters.endDate.toISOString());
         if (filters.location) params.append('location', filters.location);
+        if (filters.memberId) params.append('memberId', filters.memberId);
     
         params.append('page', page.toString());
         params.append('itemsPerPage', itemsPerPage.toString());

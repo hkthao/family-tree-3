@@ -208,7 +208,7 @@ const handleDetailEdit = (event: Event) => {
 watch(
   [() => props.familyId, () => props.memberId],
   ([newFamilyId, newMemberId]) => {
-    eventCalendarStore.setFilters({ familyId: newFamilyId, relatedMemberId: newMemberId });
+    eventCalendarStore.setFilters({ familyId: newFamilyId, memberId: newMemberId });
   },
   { immediate: true },
 );
