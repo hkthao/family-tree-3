@@ -13,7 +13,7 @@
 
   <!-- Edit Event Drawer -->
   <BaseCrudDrawer v-model="editDrawer" :title="t('event.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-    <EventEditView v-if="selectedItemId && editDrawer" :event-id="selectedItemId as string" :initial-event="initialData"
+    <EventEditView v-if="selectedItemId && editDrawer" :event-id="selectedItemId as string"
       @close="closeEditDrawer" @saved="handleEventSaved" />
   </BaseCrudDrawer>
 
@@ -58,7 +58,7 @@ const {
   editDrawer,
   detailDrawer,
   selectedItemId,
-  initialData, // Expose initialData
+  // initialData, // No longer needed for EventEditView
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
