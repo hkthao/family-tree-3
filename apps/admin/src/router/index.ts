@@ -64,13 +64,6 @@ const router = createRouter({
           component: SupportLegalPage,
           meta: { breadcrumb: 'menu.supportAndLegal' },
         },
-        {
-          path: 'family/:familyId/pdf-preview', // New route for PDF preview
-          name: 'FamilyPdfPreview',
-          component: () => import('@/views/pdf/PdfPreviewView.vue'),
-          meta: { requiresAuth: true, breadcrumb: 'family.pdf_preview' },
-          props: true, // Pass familyId as a prop
-        },
       ],
     },
     {
