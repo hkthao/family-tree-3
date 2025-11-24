@@ -21,6 +21,10 @@ export const useEventCalendarStore = defineStore('eventCalendar', {
       items: [],
       loading: false,
       filters: {} as EventFilter,
+      totalItems: 0, // Added
+      currentPage: 1, // Added
+      totalPages: 1, // Added
+      sortBy: [], // Added
       currentMonthStartDate: null,
       currentMonthEndDate: null,
     },
