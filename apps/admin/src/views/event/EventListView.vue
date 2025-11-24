@@ -62,11 +62,13 @@ const {
 
 
 const handleFilterUpdate = (filters: Omit<EventFilter, 'searchQuery'>) => {
-  currentFilters.value = { ...currentFilters.value, ...filters };
+  list.value.filters = { ...currentFilters.value, ...filters };
+  eventStore._loadItems()
 };
 
 const handleSearchUpdate = (searchQuery: string) => {
-  currentFilters.value.searchQuery = searchQuery;
+  list.value.filters.searchQuery = searchQuery;
+  eventStore._loadItems()
 };
 
 const handleListOptionsUpdate = (options: {
