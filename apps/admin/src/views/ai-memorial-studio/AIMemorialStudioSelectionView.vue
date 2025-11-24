@@ -30,7 +30,7 @@
           </v-card-title>
           <v-card-text>
             <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="members"
-              :items-length="totalMembers" :loading="loadingMembers" @update:options="loadMembers" class="elevation-0">
+              :items-length="totalMembers" :loading="loadingMembers" @update:options="({ page, itemsPerPage, sortBy }) => loadMembers({ page, itemsPerPage, sortBy })" class="elevation-0">
               <template v-slot:item.avatarUrl="{ item }">
                 <AvatarDisplay :src="item.avatarUrl" :gender="item.gender" :size="36" />
               </template>
@@ -62,95 +62,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useMemberStore } from '@/stores/member.store';
+import { storeToRefs } from 'pinia';
 import { FamilyAutocomplete } from '@/components/common';
 import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
-import type { MemberListDto } from '@/types'; // MemberListDto from '@/types'
+import { useAIMemorialStudioStore } from '@/stores/aiMemorialStudio.store';
 
 const { t } = useI18n();
-const router = useRouter();
-const memberStore = useMemberStore();
+const aiMemorialStudioStore = useAIMemorialStudioStore();
 
-const selectedFamilyId = ref<string | null>(null);
-const searchMember = ref('');
-const members = ref<MemberListDto[]>([]);
-const totalMembers = ref(0);
-const loadingMembers = ref(false);
-const itemsPerPage = ref(10);
-const selectingMember = ref<string | null>(null); // To track which member is being selected
+// Map state and getters from the store
+const {
+  selectedFamilyId,
+  searchMember,
+  members,
+  totalMembers,
+  loadingMembers,
+  itemsPerPage,
+  selectingMember,
+  headers,
+} = storeToRefs(aiMemorialStudioStore);
 
-const headers = ref([
-  { title: t('member.list.headers.avatar'), key: 'avatarUrl', sortable: false },
-  { title: t('member.list.headers.fullName'), key: 'fullName' },
-  { title: t('member.list.headers.gender'), key: 'gender' },
-  { title: t('member.list.headers.birthDeathYears'), key: 'birthDeathYears' },
-  { title: t('aiMemorialStudio.selection.actions'), key: 'actions', sortable: false },
-]);
+// Map actions from the store
+const {
+  loadMembers,
+  handleFamilySelection,
+  selectMember,
+} = aiMemorialStudioStore;
 
-interface LoadMembersOptions {
-  page: number;
-  itemsPerPage: number;
-  sortBy?: string | null;
-}
-
-const loadMembers = async (options: LoadMembersOptions) => {
-  if (!selectedFamilyId.value) {
-    members.value = [];
-    totalMembers.value = 0;
-    return;
-  }
-
-  loadingMembers.value = true;
-  const result = await memberStore.searchMembers({
-    familyId: selectedFamilyId.value,
-    searchQuery: searchMember.value,
-    page: options.page,
-    itemsPerPage: options.itemsPerPage,
-    sortBy: options.sortBy,
-  });
-
-  if (result.isSuccess) {
-    members.value = result.value?.items || [];
-    totalMembers.value = result.value?.totalCount || 0;
-  } else {
-    members.value = [];
-    totalMembers.value = 0;
-  }
-  loadingMembers.value = false;
-};
-
-const handleFamilySelection = (familyId: string | null) => {
-  selectedFamilyId.value = familyId;
-  if (familyId) {
-    loadMembers({ page: 1, itemsPerPage: itemsPerPage.value });
-  } else {
-    members.value = [];
-    totalMembers.value = 0;
-  }
-};
-
-const selectMember = async (member: MemberListDto) => {
-  selectingMember.value = member.id;
-  // Navigate to the member's memories studio
-  await router.push({ name: 'MemberMemories', params: { memberId: member.id } });
-  selectingMember.value = null;
-};
-
-onMounted(() => {
-  // If a family ID is already selected (e.g., from query params or previous state)
-  // this would be a good place to load members initially.
-  // For now, it will load when selectedFamilyId changes.
-});
-
+// Watch for changes in searchMember and selectedFamilyId
 watch(searchMember, () => {
   loadMembers({ page: 1, itemsPerPage: itemsPerPage.value });
 });
 
 watch(selectedFamilyId, () => {
   loadMembers({ page: 1, itemsPerPage: itemsPerPage.value });
+});
+
+onMounted(() => {
+  aiMemorialStudioStore.init(); // Initialize the store
 });
 </script>
 
