@@ -2,8 +2,8 @@
   <EventSearch @update:filters="handleFilterUpdate" />
   <EventList :events="list.items" :total-events="list.totalItems" :loading="list.loading"
     :search="currentFilters.searchQuery || ''" @update:options="handleListOptionsUpdate"
-    @update:search="handleSearchUpdate" @view="openDetailDrawer"
-    @edit="(event: Event) => openEditDrawer(event.id, event)" @delete="confirmDelete" @create="openAddDrawer" />
+    @update:search="handleSearchUpdate" @view="(event: Event) => openDetailDrawer(event.id)"
+    @edit="(event: Event) => openEditDrawer(event.id)" @delete="confirmDelete" @create="openAddDrawer" />
 
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" :title="t('event.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
