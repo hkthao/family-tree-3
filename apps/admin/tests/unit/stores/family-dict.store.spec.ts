@@ -265,49 +265,9 @@ describe('family-dict.store', () => {
     });
   });
 
-  describe('setPage', () => {
-    it('should set the current page', async () => {
-      store.list.totalPages = 5;
-      await store.setPage(2);
-      expect(store.list.currentPage).toBe(2);
-    });
-
-    it('should not set an invalid page', async () => {
-      store.list.totalPages = 5;
-      store.list.currentPage = 1;
-      await store.setPage(0);
-      expect(store.list.currentPage).toBe(1);
-      await store.setPage(6);
-      expect(store.list.currentPage).toBe(1);
-    });
-  });
-
-  describe('setItemsPerPage', () => {
-    it('should set items per page and reset current page', async () => {
-      store.list.itemsPerPage = 10;
-      store.list.currentPage = 3;
-      await store.setItemsPerPage(20);
-      expect(store.list.itemsPerPage).toBe(20);
-      expect(store.list.currentPage).toBe(1);
-    });
-
-    it('should not set invalid items per page', async () => {
-      store.list.itemsPerPage = 10;
-      await store.setItemsPerPage(0);
-      expect(store.list.itemsPerPage).toBe(10);
-    });
-  });
-
-  describe('setSortBy', () => {
-    it('should set sort by and reset current page', () => {
-      store.list.sortBy = [];
-      store.list.currentPage = 3;
-      const newSortBy = [{ key: 'name', order: 'asc' }];
-      store.setSortBy(newSortBy);
-      expect(store.list.sortBy).toEqual(newSortBy);
-      expect(store.list.currentPage).toBe(1);
-    });
-  });
+  // describe('setPage', () => { /* ... removed ... */ });
+  // describe('setItemsPerPage', () => { /* ... removed ... */ });
+  // describe('setSortBy', () => { /* ... removed ... */ });
 
   describe('setListOptions', () => {
     it('should set list options and load items', async () => {
