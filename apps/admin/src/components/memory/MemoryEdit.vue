@@ -46,7 +46,6 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
-// import { useSnackbarStore } from '@/stores/snackbar.store'; // Removed
 import StoryEditor from './StoryEditor.vue';
 
 interface Props {
@@ -57,8 +56,6 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const memoryStore = useMemoryStore();
-// const snackbarStore = useSnackbarStore(); // Removed
-
 const editableMemory = ref<any | null>(null);
 const loading = ref(false);
 const savingMemory = ref(false);
@@ -67,16 +64,15 @@ const savingMemory = ref(false);
   loading.value = true;
   const result = await memoryStore.getById(id);
   if (result.isSuccess) {
-    editableMemory.value = { ...result.value }; // Create a copy for editing
+    editableMemory.value = { ...result.value }; 
   } else {
-    // snackbarStore.showSnackbar('Error loading memory for editing: ' + result.error, 'error'); // Removed
     editableMemory.value = null;
   }
   loading.value = false;
 };
 
 const onUpdateEditableMemory = (draft: any) => {
-  editableMemory.value = { ...draft }; // Update local state when StoryEditor emits changes
+  editableMemory.value = { ...draft };
 };
 
 const saveMemory = async () => {
@@ -87,7 +83,7 @@ const saveMemory = async () => {
     id: props.memoryId,
     memberId: editableMemory.value.memberId,
     title: editableMemory.value.title,
-    story: editableMemory.value.draftStory || editableMemory.value.story, // Use draftStory from editor, fallback to story
+    story: editableMemory.value.draftStory || editableMemory.value.story,
     photoAnalysisId: editableMemory.value.photoAnalysisId,
     photoUrl: editableMemory.value.photoUrl,
     tags: editableMemory.value.tags,
@@ -96,10 +92,8 @@ const saveMemory = async () => {
 
   const result = await memoryStore.update(updatePayload);
   if (result.isSuccess) {
-    // snackbarStore.showSnackbar(t('memory.edit.saveSuccess'), 'success'); // Removed
     emit('saved', props.memoryId);
   } else {
-    // snackbarStore.showSnackbar('Error saving memory: ' + result.error, 'error'); // Removed
   }
   savingMemory.value = false;
 };

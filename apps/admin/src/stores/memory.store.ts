@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import apiClient from '@/plugins/axios';
-import type { ApiError } from '@/types'; // Import ApiError
 import type {
   PhotoAnalysisResultDto,
   GenerateStoryRequestDto, GenerateStoryResponseDto,
@@ -36,10 +35,10 @@ export const useMemoryStore = defineStore('memory', {
           },
         });
         if (result.ok) { // Changed to result.ok
-            return { isSuccess: true, value: result.value! };
+          return { isSuccess: true, value: result.value! };
         } else {
-            this.error = result.error?.message || 'Unknown error during photo analysis'; // Access result.error
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error during photo analysis'; // Access result.error
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) { // Catch unexpected errors outside of ApiError
         this.error = err.message || 'An unexpected error occurred';
@@ -55,10 +54,10 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await apiClient.post<GenerateStoryResponseDto>('/memories/generate', payload);
         if (result.ok) { // Changed from isSuccess to ok
-            return { isSuccess: true, value: result.value! };
+          return { isSuccess: true, value: result.value! };
         } else {
-            this.error = result.error?.message || 'Unknown error during story generation';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error during story generation';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';
@@ -74,10 +73,10 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await apiClient.post<string>('/memories', payload); // Returns Guid as string
         if (result.ok) {
-            return { isSuccess: true, value: result.value! };
+          return { isSuccess: true, value: result.value! };
         } else {
-            this.error = result.error?.message || 'Unknown error during memory creation';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error during memory creation';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';
@@ -93,10 +92,10 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await apiClient.put(`/memories/${payload.id}`, payload);
         if (result.ok) {
-            return { isSuccess: true };
+          return { isSuccess: true };
         } else {
-            this.error = result.error?.message || 'Unknown error during memory update';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error during memory update';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';
@@ -112,10 +111,10 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await apiClient.delete(`/memories/${memoryId}`);
         if (result.ok) {
-            return { isSuccess: true };
+          return { isSuccess: true };
         } else {
-            this.error = result.error?.message || 'Unknown error during memory deletion';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error during memory deletion';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';
@@ -131,11 +130,11 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await apiClient.get<MemoryDto>(`/memories/detail/${memoryId}`);
         if (result.ok) {
-            this.memoryDetail = result.value;
-            return { isSuccess: true, value: result.value! };
+          this.memoryDetail = result.value;
+          return { isSuccess: true, value: result.value! };
         } else {
-            this.error = result.error?.message || 'Unknown error fetching memory details';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error fetching memory details';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';
@@ -157,16 +156,16 @@ export const useMemoryStore = defineStore('memory', {
 
         const result = await apiClient.get<{ items: MemoryDto[]; totalCount: number; page: number; pageSize: number }>(`/memories/member/${memberId}?${queryParams.toString()}`);
         if (result.ok) {
-            this.memories = {
-                items: result.value?.items || [],
-                totalCount: result.value?.totalCount || 0,
-                page: result.value?.page || 1,
-                pageSize: result.value?.pageSize || 10,
-            };
-            return { isSuccess: true, value: this.memories };
+          this.memories = {
+            items: result.value?.items || [],
+            totalCount: result.value?.totalCount || 0,
+            page: result.value?.page || 1,
+            pageSize: result.value?.pageSize || 10,
+          };
+          return { isSuccess: true, value: this.memories };
         } else {
-            this.error = result.error?.message || 'Unknown error fetching memories by member ID';
-            return { isSuccess: false, error: this.error };
+          this.error = result.error?.message || 'Unknown error fetching memories by member ID';
+          return { isSuccess: false, error: this.error };
         }
       } catch (err: any) {
         this.error = err.message || 'An unexpected error occurred';

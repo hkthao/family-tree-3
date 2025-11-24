@@ -90,20 +90,17 @@ interface Props {
 const props = defineProps<Props>();
 
 const { t } = useI18n();
-// const router = useRouter(); // Removed unused import
 const memoryStore = useMemoryStore();
-
 const search = ref('');
-const memories = ref<MemoryDto[]>([]); // Typed as MemoryDto[]
+const memories = ref<MemoryDto[]>([]); 
 const totalMemories = ref(0);
 const loading = ref(false);
 const itemsPerPage = ref(10);
-
 const detailMemoryDrawer = ref(false);
 const editMemoryDrawer = ref(false);
 const deleteConfirmDialog = ref(false);
 const selectedMemoryId = ref<string | null>(null);
-const selectedMemory = ref<MemoryDto | null>(null); // To store full memory object for confirmation message
+const selectedMemory = ref<MemoryDto | null>(null); 
 
 const headers = ref([
   { title: t('memory.list.header.title'), key: 'title' },
@@ -124,7 +121,7 @@ interface LoadMemoriesOptions {
     page: options.page,
     limit: options.itemsPerPage,
     search: search.value,
-    sortBy: options.sortBy ?? undefined, // Fix: Convert null to undefined
+    sortBy: options.sortBy ?? undefined, 
   });
   if (result.isSuccess) {
     memories.value = result.value?.items || [];

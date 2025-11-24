@@ -91,12 +91,11 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
-// import { useSnackbarStore } from '@/stores/snackbar.store'; // Removed
 import { formatDateTime } from '@/utils/formatters';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 import PhotoAnalyzerPreview from './PhotoAnalyzerPreview.vue';
-import MemoryEdit from './MemoryEdit.vue'; // Will create this component
+import MemoryEdit from './MemoryEdit.vue'; 
 
 interface Props {
   memoryId: string;
@@ -106,8 +105,6 @@ const emit = defineEmits(['close', 'deleted', 'updated']);
 
 const { t } = useI18n();
 const memoryStore = useMemoryStore();
-// const snackbarStore = useSnackbarStore(); // Removed
-
 const memory = ref<any | null>(null);
 const loading = ref(false);
 const editMemoryDrawer = ref(false);
@@ -119,7 +116,6 @@ const deleteConfirmDialog = ref(false);
   if (result.isSuccess) {
     memory.value = result.value;
   } else {
-    // snackbarStore.showSnackbar('Error loading memory: ' + result.error, 'error'); // Removed
     memory.value = null;
   }
   loading.value = false;

@@ -182,9 +182,8 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
-// import { useSnackbarStore } from '@/stores/snackbar.store'; // Removed
-import PhotoAnalyzerPreview from './PhotoAnalyzerPreview.vue'; // Will create this component
-import StoryEditor from './StoryEditor.vue'; // Will create this component
+import PhotoAnalyzerPreview from './PhotoAnalyzerPreview.vue'; 
+import StoryEditor from './StoryEditor.vue'; 
 import router from '@/router';
 
 interface Props {
@@ -195,8 +194,6 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const memoryStore = useMemoryStore();
-// const snackbarStore = useSnackbarStore(); // Removed
-
 const currentStep = ref(1);
 
 // Step 1: Choose Photo
