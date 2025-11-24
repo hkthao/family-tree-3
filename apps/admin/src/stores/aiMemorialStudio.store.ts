@@ -82,7 +82,7 @@ export const useAIMemorialStudioStore = defineStore('aiMemorialStudio', {
       this.selectingMember = member.id;
       const router = useRouter(); // Access router inside action
       // Navigate to the member's memories studio with the specified type
-      await router.push({ name: 'MemberMemories', params: { memberId: member.id, aiMemorialStudioType } });
+      await router.push({ name: 'AIMemorialStudioMemberView', params: { memberId: member.id, aiMemorialStudioType } });
       this.selectingMember = null;
     },
     // You might want to add an initialization action if necessary

@@ -15,7 +15,7 @@ import { settingRoutes } from './features/setting.routes';
 import { donateRoutes } from './features/donate.routes';
 import { eventRoutes } from './features/event.routes';
 import { dashboardRoutes } from './features/dashboard.routes'; // New
-import { memoryRoutes } from './features/memory.routes'; // New
+
 import { nlEditorRoutes } from './features/nl-editor.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
@@ -33,7 +33,7 @@ const router = createRouter({
       children: [
         ...dashboardRoutes, // Replaced
         ...memberRoutes,
-        ...memoryRoutes, // Replaced
+
         ...aiMemorialStudioRoutes, // New
         ...familyDictRoutes,
         ...familyRoutes,

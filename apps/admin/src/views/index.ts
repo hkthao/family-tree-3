@@ -33,8 +33,7 @@ export { default as MemberDetailView } from './member/MemberDetailView.vue';
 export { default as MemberEditView } from './member/MemberEditView.vue';
 export { default as MemberListView } from './member/MemberListView.vue';
 export { MemberMemoriesView } from './member'; // Added MemberMemoriesView re-export
-export { MemoryDetailPage, MemoryEditPage } from './memory'; // New: Export MemoryDetail and MemoryEdit Pages
-export { AIMemorialStudioSelectionView } from './ai-memorial-studio'; // New: Export AI Memorial Studio Selection View
+export { AIMemorialStudioSelectionView, AIMemorialStudioMemberView, MemoryDetailPage, MemoryEditPage } from './ai-memorial-studio'; // New: Export AI Memorial Studio related Views
 
 // Export pages from misc
 export { default as NotFoundView } from './misc/NotFoundView.vue';
