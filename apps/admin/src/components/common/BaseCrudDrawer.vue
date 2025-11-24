@@ -1,13 +1,7 @@
 <template>
   <v-navigation-drawer v-model="internalModelValue" location="right" temporary :width="width" :scrim="scrim">
     <v-card class="d-flex flex-column h-full" :elevation="0">
-      <v-card-title class="d-flex align-center">
-        <v-icon v-if="icon" :icon="icon" class="mr-2"></v-icon>
-        <span class="text-h6">{{ title }}</span>
-        <v-spacer></v-spacer>
-        <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small"></v-btn>
-      </v-card-title>
-      <v-divider></v-divider>
+      <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small" class="mx-2 mt-2" absolute top right></v-btn>
       <v-card-text class="flex-grow-1 overflow-y-auto">
         <slot></slot>
       </v-card-text>
@@ -20,8 +14,6 @@ import { ref, watch } from 'vue';
 
 interface BaseCrudDrawerProps {
   modelValue: boolean;
-  title: string;
-  icon?: string;
   width?: string | number;
   scrim?: boolean;
 }
