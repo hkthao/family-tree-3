@@ -2,24 +2,21 @@
   <v-container fluid>
 
 
-    <v-row class="mt-4">
-      <v-col cols="12" md="6">
-        <FamilyAutocomplete
-          v-model="selectedFamilyId"
-          :label="t('aiMemorialStudio.selection.selectFamily')"
-          clearable
-          @update:modelValue="handleFamilySelection"
-          :key="'ai-memorial-studio-family-autocomplete'"
-        />
-      </v-col>
-    </v-row>
-
     <v-row v-if="selectedFamilyId">
       <v-col cols="12">
         <v-card flat>
-          <v-card-title class="d-flex align-center">
+          <v-card-title class="d-flex flex-wrap align-center">
             <span class="text-h6">{{ t('member.list.title') }}</span>
             <v-spacer></v-spacer>
+            <FamilyAutocomplete
+              v-model="selectedFamilyId"
+              :label="t('aiMemorialStudio.selection.selectFamily')"
+              clearable
+              @update:modelValue="handleFamilySelection"
+              :key="'ai-memorial-studio-family-autocomplete'"
+              class="flex-grow-1 mr-2"
+              style="max-width: 300px;"
+            />
             <v-text-field v-model="searchMember" append-inner-icon="mdi-magnify" :label="t('common.search')" single-line
               hide-details density="compact" class="flex-grow-0" style="max-width: 200px;"></v-text-field>
           </v-card-title>
@@ -38,8 +35,8 @@
               <template v-slot:item.actions="{ item }">
                 <v-menu>
                   <template v-slot:activator="{ props: menuProps }">
-                    <v-btn color="primary" v-bind="menuProps" :loading="selectingMember === item.id">
-                      {{ t('aiMemorialStudio.selection.select') }}
+                    <v-btn icon variant="text" v-bind="menuProps" size="small" :loading="selectingMember === item.id">
+                      <v-icon>mdi-dots-vertical</v-icon>
                     </v-btn>
                   </template>
                   <v-list>
