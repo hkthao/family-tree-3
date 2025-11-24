@@ -66,6 +66,7 @@ import ChipLookup from '@/components/common/ChipLookup.vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import EventDetailView from '@/views/event/EventDetailView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
 import type { Event } from '@/types';
 
 const props = defineProps<{
