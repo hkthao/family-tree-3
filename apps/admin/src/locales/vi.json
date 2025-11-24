@@ -1053,6 +1053,12 @@
   "naturalLanguage.recommendations.missingGender": "Thiếu giới tính",
   "naturalLanguage.recommendations.missingDate": "Thiếu ngày sự kiện",
   "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm",
+
+  "menu.utilitiesAndAI": "Tiện ích & AI",
+  "aiMemorialStudio.storyMemory": "Ký ức Câu chuyện",
+  "aiMemorialStudio.photoRevival": "Phục dựng Ảnh",
+  "aiMemorialStudio.voiceRevival": "Phục dựng Giọng nói",
+
   "tour": {
     "familyList": {
       "search": {

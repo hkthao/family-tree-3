@@ -55,6 +55,29 @@ const menu: MenuSection[] = [
     ],
   },
   {
+    titleKey: 'menu.utilitiesAndAI', // New section for AI Memorial Studio
+    items: [
+      {
+        titleKey: 'aiMemorialStudio.storyMemory',
+        icon: 'mdi-book-open-outline',
+        to: '/ai-memorial-studio/story', // Placeholder route
+        roles: ['Admin', 'FamilyManager', 'Editor'],
+      },
+      {
+        titleKey: 'aiMemorialStudio.photoRevival',
+        icon: 'mdi-image-filter-vintage',
+        to: '/ai-memorial-studio/photo', // Placeholder route
+        roles: ['Admin', 'FamilyManager', 'Editor'],
+      },
+      {
+        titleKey: 'aiMemorialStudio.voiceRevival',
+        icon: 'mdi-account-voice',
+        to: '/ai-memorial-studio/voice', // Placeholder route
+        roles: ['Admin', 'FamilyManager', 'Editor'],
+      },
+    ],
+  },
+  {
     titleKey: 'menu.dictionary',
     items: [
       {

@@ -1,0 +1,8 @@
+fix(frontend): Finalize Memory UI & store fixes, add i18n entries
+
+This commit includes the remaining frontend fixes and additions for the Story Memory feature:
+
+- **Localization:** Added Vietnamese (vi) localization entries for the Memory feature.
+- **Store Refactoring:** Updated `memory.store.ts` to properly handle `Result` type from `apiClient` and removed snackbar calls from store actions, as per user feedback.
+- **Component Fixes:** Addressed type-related issues in `MemoryCreate.vue`, `MemoryDetail.vue`, `MemoryEdit.vue`, and `MemoryList.vue` including correct typing for props, state variables, and function parameters.
+- **Removed temporary `commit_message.txt`**.
