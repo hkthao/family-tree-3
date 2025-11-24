@@ -36,7 +36,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router'; // Remove useRouter
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
@@ -47,7 +46,6 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'edit']);
 
 const { t } = useI18n();
-const route = useRoute();
 const relationshipStore = useRelationshipStore();
 
 const relationship = ref<Relationship | null>(null);
@@ -56,9 +54,8 @@ const selectedTab = ref('general');
 
 const loadRelationship = async () => {
   loading.value = true;
-  const relationshipId = route.params.id as string;
-  if (relationshipId) {
-    await relationshipStore.getById(relationshipId);
+  if (props.relationshipId) {
+    await relationshipStore.getById(props.relationshipId);
     relationship.value = relationshipStore.detail.item;
   }
   loading.value = false;
