@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { MemberMemoriesView } from '@/views';
+import { MemberMemoriesView, MemoryDetailPage, MemoryEditPage } from '@/views'; // Import new views
 
 export const memoryRoutes: RouteRecordRaw[] = [
   {
@@ -7,5 +7,17 @@ export const memoryRoutes: RouteRecordRaw[] = [
     name: 'MemberMemories',
     component: MemberMemoriesView,
     meta: { breadcrumb: 'memory.studio.title' },
+  },
+  {
+    path: 'memories/:memoryId',
+    name: 'MemoryDetail',
+    component: MemoryDetailPage,
+    meta: { breadcrumb: 'memory.detail.titleDefault' },
+  },
+  {
+    path: 'memories/:memoryId/edit',
+    name: 'MemoryEdit',
+    component: MemoryEditPage,
+    meta: { breadcrumb: 'memory.edit.title' },
   },
 ];
