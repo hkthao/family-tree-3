@@ -1,36 +1,33 @@
 <template>
   <v-container fluid>
-
-
-    <v-row v-if="selectedFamilyId">
+    <v-row>
       <v-col cols="12">
         <v-card flat>
           <v-card-title class="d-flex flex-wrap align-center">
             <span class="text-h6">{{ t('member.list.title') }}</span>
             <v-spacer></v-spacer>
-            <FamilyAutocomplete
-              v-model="selectedFamilyId"
-              :label="t('aiMemorialStudio.selection.selectFamily')"
-              clearable
-              @update:modelValue="handleFamilySelection"
-              :key="'ai-memorial-studio-family-autocomplete'"
-              class="flex-grow-1 mr-2"
-              style="max-width: 300px;"
-            />
+            <FamilyAutocomplete v-model="selectedFamilyId" :label="t('aiMemorialStudio.selection.selectFamily')"
+              clearable @update:modelValue="handleFamilySelection" :key="'ai-memorial-studio-family-autocomplete'"
+              class="flex-grow-1 mr-2" style="max-width: 300px;" />
             <v-text-field v-model="searchMember" append-inner-icon="mdi-magnify" :label="t('common.search')" single-line
-              hide-details density="compact" class="flex-grow-0" style="max-width: 200px;"></v-text-field>
+              hide-details></v-text-field>
           </v-card-title>
-          <v-card-text>
-            <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="members"
-              :items-length="totalMembers" :loading="loadingMembers" @update:options="({ page, itemsPerPage, sortBy }) => loadMembers({ page, itemsPerPage, sortBy })" class="elevation-0">
+          <v-card-text v-if="selectedFamilyId">
+            <v-data-table-server  v-model:items-per-page="itemsPerPage" :headers="headers"
+              :items="members" :items-length="totalMembers" :loading="loadingMembers"
+              @update:options="({ page, itemsPerPage, sortBy }) => loadMembers({ page, itemsPerPage, sortBy })"
+              class="elevation-0">
               <template v-slot:item.avatarUrl="{ item }">
-                <AvatarDisplay :src="item.avatarUrl" :gender="item.gender" :size="36" />
+                <MemberAvatarDisplay :member="item" />
               </template>
               <template v-slot:item.fullName="{ item }">
                 {{ item.fullName }}
               </template>
               <template v-slot:item.birthDeathYears="{ item }">
                 {{ item.birthDeathYears }}
+              </template>
+              <template v-slot:item.gender="{ item }">
+                <MemberGenderChip :gender="item.gender" />
               </template>
               <template v-slot:item.actions="{ item }">
                 <v-menu>
@@ -60,7 +57,7 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row v-else>
+    <v-row v-if="!selectedFamilyId">
       <v-col cols="12">
         <v-alert type="info">{{ t('aiMemorialStudio.selection.noFamilySelected') }}</v-alert>
       </v-col>
@@ -73,7 +70,7 @@ import { watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { FamilyAutocomplete } from '@/components/common';
-import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+import { MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; // Added MemberAvatarDisplay and MemberGenderChip
 import { useAIMemorialStudioStore } from '@/stores/aiMemorialStudio.store';
 
 const { t } = useI18n();

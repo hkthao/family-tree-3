@@ -27,11 +27,7 @@
     </template>
     <!-- Avatar column -->
     <template #item.avatarUrl="{ item }">
-      <div class="d-flex justify-center">
-        <v-avatar size="36" class="my-2">
-          <v-img :src="getMemberAvatar(item)" :alt="item.fullName || ''" />
-        </v-avatar>
-      </div>
+      <MemberAvatarDisplay :member="item" />
     </template>
 
     <!-- Full Name column -->
@@ -73,9 +69,7 @@
 
     <!-- Gender column -->
     <template #item.gender="{ item }">
-      <v-chip label size="small" class="text-capitalize">
-        {{ getGenderTitle(item.gender) }}
-      </v-chip>
+      <MemberGenderChip :gender="item.gender" />
     </template>
 
     <!-- Actions column -->
@@ -116,28 +110,12 @@ import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { ChipLookup } from '@/components/common';
-import { MemberName } from '@/components/member';
-import { getGenderTitle } from '@/constants/genders';
+import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; // Added MemberAvatarDisplay and MemberGenderChip
 import { useAuth } from '@/composables/useAuth';
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const familyLookupStore = useFamilyLookupStore();
 const { isAdmin, isFamilyManager } = useAuth();
-
-const getMemberAvatar = (member: Member) => {
-  if (member.avatarUrl) {
-    return member.avatarUrl;
-  }
-  if (member.gender === 'Male') {
-    return maleAvatar;
-  }
-  if (member.gender === 'Female') {
-    return femaleAvatar;
-  }
-  return maleAvatar; // Fallback for 'Other' or undefined gender
-};
 
 const props = defineProps<{
   items: Member[];
