@@ -6,20 +6,19 @@
     @edit="(event: Event) => openEditDrawer(event.id)" @delete="confirmDelete" @create="openAddDrawer" />
 
   <!-- Add Event Drawer -->
-  <BaseCrudDrawer v-model="addDrawer" :title="t('event.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
+  <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
     <EventAddView v-if="addDrawer" :family-id="currentFilters.familyId || undefined" @close="closeAddDrawer"
       @saved="handleEventSaved" />
   </BaseCrudDrawer>
 
   <!-- Edit Event Drawer -->
-  <BaseCrudDrawer v-model="editDrawer" :title="t('event.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
+  <BaseCrudDrawer v-model="editDrawer" @close="closeEditDrawer">
     <EventEditView v-if="selectedItemId && editDrawer" :event-id="selectedItemId" @close="closeEditDrawer"
       @saved="handleEventSaved" />
   </BaseCrudDrawer>
 
   <!-- Detail Event Drawer -->
-  <BaseCrudDrawer v-model="detailDrawer" :title="t('event.detail.title')" icon="mdi-information-outline"
-    @close="closeDetailDrawer">
+  <BaseCrudDrawer v-model="detailDrawer" @close="closeDetailDrawer">
     <EventDetailView v-if="selectedItemId && detailDrawer" :event-id="selectedItemId" @close="closeDetailDrawer"
       @edit="openEditDrawer" />
   </BaseCrudDrawer>
@@ -32,7 +31,6 @@ import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/event';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
@@ -49,9 +47,8 @@ const { showSnackbar } = useGlobalSnackbar();
 const { list } = storeToRefs(eventStore);
 
 const currentFilters = ref<EventFilter>({});
-const currentPage = ref(1);
-
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+// const currentPage = ref(1); // Removed
+// const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Removed
 
 const {
   addDrawer,
@@ -68,28 +65,22 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const loadEvents = async (
-  page: number = currentPage.value,
-  itemsPerPageCount: number = itemsPerPage.value,
-) => {
-  eventStore.list.filter = {
+const fetchEventsData = async () => {
+  eventStore.list.filters = {
     ...currentFilters.value,
     searchQuery: currentFilters.value.searchQuery || '',
   };
-  eventStore.setPage(page);
-  eventStore.setItemsPerPage(itemsPerPageCount);
-
   await eventStore._loadItems(); // Call _loadItems directly
 };
 
 const handleFilterUpdate = (filters: Omit<EventFilter, 'searchQuery'>) => {
   currentFilters.value = { ...currentFilters.value, ...filters };
-  loadEvents();
+  fetchEventsData();
 };
 
 const handleSearchUpdate = (searchQuery: string) => {
   currentFilters.value.searchQuery = searchQuery;
-  loadEvents();
+  fetchEventsData();
 };
 
 const handleListOptionsUpdate = (options: {
@@ -97,14 +88,8 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  eventStore.setPage(options.page);
-  eventStore.setItemsPerPage(options.itemsPerPage);
-  // Handle sorting
-  if (options.sortBy && options.sortBy.length > 0) {
-    eventStore.setSortBy(options.sortBy);
-  } else {
-    eventStore.setSortBy([]); // Clear sort if no sortBy is provided
-  }
+  eventStore.setListOptions(options); // Use the new setListOptions action
+  fetchEventsData(); // Fetch data after options are updated
 };
 
 const confirmDelete = async (event: Event) => {
@@ -123,7 +108,7 @@ const confirmDelete = async (event: Event) => {
         t('event.messages.deleteSuccess'),
         'success',
       );
-      await loadEvents(); // Reload events after deletion
+      await fetchEventsData(); // Reload events after deletion
     } catch (error) {
       showSnackbar(
         t('event.messages.deleteError'),
@@ -135,10 +120,10 @@ const confirmDelete = async (event: Event) => {
 
 const handleEventSaved = () => {
   closeAllDrawers(); // Close whichever drawer was open
-  loadEvents(); // Reload list after save
+  fetchEventsData(); // Reload list after save
 };
 
 onMounted(() => {
-  loadEvents();
+  fetchEventsData(); // Initial load when component is mounted
 });
 </script>

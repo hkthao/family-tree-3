@@ -1,9 +1,7 @@
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { EventFilter, Event, Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { defineStore } from 'pinia';
-import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
 export const useEventStore = defineStore('event', {
   state: () => ({
@@ -12,11 +10,12 @@ export const useEventStore = defineStore('event', {
     list: {
       items: [] as Event[],
       loading: false,
-      filter: {} as EventFilter,
+      filters: {} as EventFilter, // Renamed filter to filters
       totalItems: 0,
       currentPage: 1,
       itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
       totalPages: 1,
+      sortBy: [] as { key: string; order: string }[], // Added sortBy
     },
 
     detail: {
@@ -36,7 +35,7 @@ export const useEventStore = defineStore('event', {
       loading: false,
     },
 
-    eventCache: new IdCache<Event>(), // Add eventCache to state
+    // eventCache: new IdCache<Event>(), // Remove eventCache from state
   }),
   getters: {},
   actions: {
@@ -44,15 +43,16 @@ export const useEventStore = defineStore('event', {
       this.list.loading = true;
       this.error = null;
       const result = await this.services.event.loadItems(
-        this.list.filter,
+        this.list.filters, // Use filters
         this.list.currentPage,
         this.list.itemsPerPage,
+        this.list.sortBy, // Pass sortBy
       );
       if (result.ok) {
         this.list.items = result.value.items;
         this.list.totalItems = result.value.totalItems;
         this.list.totalPages = result.value.totalPages;
-        this.eventCache.setMany(result.value.items); // Cache fetched items
+        // this.eventCache.setMany(result.value.items); // Remove Cache fetched items
       } else {
         this.error = i18n.global.t('event.errors.load');
         console.error(result.error);
@@ -65,7 +65,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.add(newItem);
       if (result.ok) {
-        this.eventCache.clear(); // Invalidate cache on add
+        // this.eventCache.clear(); // Invalidate cache on add
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.add');
@@ -93,7 +93,7 @@ export const useEventStore = defineStore('event', {
         // Assuming a bulk add method exists in the service
         const result = await this.services.event.addItems(createCommands);
         if (result.ok) {
-          this.eventCache.clear(); // Invalidate cache on add
+          // this.eventCache.clear(); // Invalidate cache on add
           await this._loadItems();
           return result; // Return the result from the service
         } else {
@@ -110,18 +110,19 @@ export const useEventStore = defineStore('event', {
       }
     },
 
-    async updateItem(updatedItem: Event): Promise<void> {
+    async updateItem(updatedItem: Event): Promise<Result<Event, ApiError>> {
       this.update.loading = true;
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
-        this.eventCache.clear(); // Invalidate cache on update
+        // this.eventCache.clear(); // Invalidate cache on update
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.update');
         console.error(result.error);
       }
       this.update.loading = false;
+      return result;
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
@@ -129,7 +130,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
-        this.eventCache.clear(); // Invalidate cache on delete
+        // this.eventCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.delete');
@@ -139,28 +140,36 @@ export const useEventStore = defineStore('event', {
       return result;
     },
 
-    async setPage(page: number) {
+    setPage(page: number) {
       if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
         this.list.currentPage = page;
-        this._loadItems();
+        // _loadItems() will be called by setListOptions
       }
     },
 
-    async setItemsPerPage(count: number) {
+    setItemsPerPage(count: number) {
       if (count > 0 && this.list.itemsPerPage !== count) {
         this.list.itemsPerPage = count;
         this.list.currentPage = 1; // Reset to first page when items per page changes
-        this._loadItems();
+        // _loadItems() will be called by setListOptions
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
-      // Assuming EventFilter has sortBy and sortOrder properties
-      this.list.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
-      this.list.filter.sortOrder =
-        sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
+      this.list.sortBy = sortBy;
       this.list.currentPage = 1; // Reset to first page on sort change
-      this._loadItems();
+      // _loadItems() will be called by setListOptions
+    },
+
+    setListOptions(options: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: { key: string; order: string }[];
+    }) {
+      this.setPage(options.page); // Update page
+      this.setItemsPerPage(options.itemsPerPage); // Update items per page
+      this.setSortBy(options.sortBy); // Update sort by
+      this._loadItems(); // Load items with new options
     },
 
     setCurrentItem(item: Event) {
@@ -171,19 +180,11 @@ export const useEventStore = defineStore('event', {
       this.detail.loading = true;
       this.error = null;
 
-      const cachedEvent = this.eventCache.get(id);
-      if (cachedEvent) {
-        this.detail.loading = false;
-        this.detail.item = cachedEvent;
-        return cachedEvent;
-      }
-
       const result = await this.services.event.getById(id);
       this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
           this.detail.item = result.value;
-          this.eventCache.set(result.value); // Cache the fetched event
           return result.value;
         }
       } else {
@@ -197,9 +198,7 @@ export const useEventStore = defineStore('event', {
       this.list.loading = true;
       this.error = null;
 
-      const result = await this.eventCache.getMany(ids, (missingIds) =>
-        this.services.event.getByIds(missingIds),
-      );
+      const result = await this.services.event.getByIds(ids);
 
       this.list.loading = false;
       if (result.ok) {
