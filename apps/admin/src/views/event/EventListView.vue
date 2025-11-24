@@ -13,15 +13,15 @@
 
   <!-- Edit Event Drawer -->
   <BaseCrudDrawer v-model="editDrawer" :title="t('event.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-    <EventEditView v-if="selectedItemId && editDrawer" :event-id="selectedItemId"
-      @close="closeEditDrawer" @saved="handleEventSaved" />
+    <EventEditView v-if="selectedItemId && editDrawer" :event-id="selectedItemId" @close="closeEditDrawer"
+      @saved="handleEventSaved" />
   </BaseCrudDrawer>
 
   <!-- Detail Event Drawer -->
   <BaseCrudDrawer v-model="detailDrawer" :title="t('event.detail.title')" icon="mdi-information-outline"
     @close="closeDetailDrawer">
-    <EventDetailView v-if="selectedItemId && detailDrawer" :event-id="selectedItemId"
-      @close="closeDetailDrawer" @edit="openEditDrawer" />
+    <EventDetailView v-if="selectedItemId && detailDrawer" :event-id="selectedItemId" @close="closeDetailDrawer"
+      @edit="openEditDrawer" />
   </BaseCrudDrawer>
 </template>
 

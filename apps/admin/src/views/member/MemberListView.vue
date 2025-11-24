@@ -10,8 +10,8 @@
 
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
-      <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId as string" @close="handleMemberClosed"
-        @saved="handleMemberSaved" />
+      <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId as string"
+        @close="handleMemberClosed" @saved="handleMemberSaved" />
     </BaseCrudDrawer>
 
     <!-- Add Member Drawer -->
@@ -22,8 +22,8 @@
 
     <!-- Detail Member Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId"
-        @close="handleDetailClosed" @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
+      <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId" @close="handleDetailClosed"
+        @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
     </BaseCrudDrawer>
 
     <!-- Biography Drawer -->
