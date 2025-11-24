@@ -60,18 +60,24 @@ export const useEventTimelineStore = defineStore('eventTimeline', {
       itemsPerPage: number;
       sortBy: { key: string; order: string }[];
     }) {
+      let changed = false;
       if (this.list.currentPage !== options.page) {
         this.list.currentPage = options.page;
+        changed = true;
       }
       if (this.list.itemsPerPage !== options.itemsPerPage) {
         this.list.itemsPerPage = options.itemsPerPage;
+        changed = true;
       }
       const currentSortBy = JSON.stringify(this.list.sortBy);
       const newSortBy = JSON.stringify(options.sortBy);
       if (currentSortBy !== newSortBy) {
         this.list.sortBy = options.sortBy;
+        changed = true;
       }
-      this._loadItems();
+      if (changed) {
+        this._loadItems();
+      }
     },
 
     setFilters(filters: EventFilter) {

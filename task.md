@@ -1,117 +1,282 @@
-# BẢN THIẾT KẾ MẪU: GIA PHẢ "CỘI NGUỒN VĨNH CỬU"
+Dưới đây là **ĐẶC TẢ CHI TIẾT – FULL SPEC** dành cho tính năng **AI Memorial Studio**, thiết kế theo chuẩn product spec
 
-## I. Phong cách Chủ đạo & Hệ thống Thị giác (Visual System)
+# 🕊️ **AI MEMORIAL STUDIO – FULL PRODUCT SPEC**
 
-Chủ đề thiết kế là sự giao thoa giữa **"Hoài cổ trang trọng"** (để thể hiện sự tôn kính) và **"Mạch lạc hiện đại"** (để dễ đọc và dễ truyền tải cho thế hệ trẻ).
-
-### 1. Bảng màu (Color Palette)
-Không dùng màu đen tuyền (Pure Black #000000) vì tạo cảm giác gay gắt trên nền giấy cũ.
-
-* **Màu nền chủ đạo (Background):** Màu kem giấy bồi (Off-white / Aged Cream).
-    * *Mã màu gợi ý:* `#F8F5E6` hoặc dùng một lớp texture giấy nhẹ (paper texture overlay) với độ mờ 10-20%.
-* **Màu chữ chính (Body Text):** Nâu đen đậm (Dark Sepia) hoặc Xám than (Charcoal).
-    * *Mã màu gợi ý:* `#3E3B36` hoặc `#4A4238`.
-* **Màu nhấn (Accent Color) - Dùng cho tiêu đề lớn, đường viền:**
-    * *Option 1 (Sang trọng):* Vàng đồng cổ (Muted Gold / Antique Brass). *Mã màu:* `#B39B5E`.
-    * *Option 2 (Truyền thống):* Đỏ trầm (Deep Burgundy). *Mã màu:* `#800020` (Dùng tiết chế).
-
-### 2. Typography (Phông chữ)
-Sử dụng cặp font tương phản để tạo nhịp điệu.
-
-* **Font Tiêu đề (Headings - H1, H2, H3):** Sử dụng font có chân (Serif) mang nét cổ điển, vững chãi.
-    * *Gợi ý:* `Playfair Display`, `Noto Serif VN`, hoặc `Merriweather`.
-* **Font Nội dung (Body Text):** Sử dụng font không chân (Sans-serif) sạch sẽ, dễ đọc ở kích thước nhỏ.
-    * *Gợi ý:* `Open Sans`, `Roboto`, hoặc `Montserrat` (trọng lượng Light hoặc Regular).
-
-### 3. Họa tiết & Yếu tố Đồ họa (Graphic Elements)
-* **Đường viền (Borders):** Sử dụng các đường viền mảnh đôi (double thin lines) hoặc họa tiết góc lấy cảm hứng từ hoa văn kỷ hà, vân mây hoặc rễ cây cách điệu.
-* **Dải phân cách (Dividers):** Dùng các đoạn thẳng ngắn kết thúc bằng hình thoi nhỏ hoặc chấm tròn để ngắt các đoạn nội dung.
+### *“Phòng ghi nhớ & phục dựng ký ức tổ tiên bằng AI”*
 
 ---
 
-## II. Chi tiết Bố cục Từng trang (Page Layouts)
+# 1️⃣ MỤC TIÊU TÍNH NĂNG (PRODUCT GOALS)
 
-### 1. TRANG BÌA (The Cover)
-*Mục tiêu: Gây ấn tượng mạnh, tạo cảm giác một cuốn sách cổ quý giá.*
+1. Giúp người dùng **tái tạo – lưu giữ – truyền lại ký ức gia đình** qua 3 loại dữ liệu:
+   * **Story (text)**
+   * **Photo (image)**
+   * **Voice (audio)**
+2. Cung cấp một trải nghiệm **nhân văn – cảm xúc – không creepy**.
+3. Tạo ra **dữ liệu di sản số (digital legacy)** gắn trực tiếp với từng thành viên trong gia phả.
+4. Có thể xuất bản:
 
-* **Nền bìa:** Sử dụng texture nền màu nâu đậm hơn các trang ruột, giả lập bìa da hoặc bìa giấy dó dày.
-* **Bố cục:** Căn giữa toàn bộ (Center align).
-* **Thành phần:**
-    1.  **Trên cùng (Header nhỏ):** Dòng chữ "KỶ YẾU DÒNG TỘC" hoặc "GIA PHẢ" (Font Serif, màu vàng đồng, size nhỏ, in hoa).
-    2.  **Tiêu đề chính (Lớn nhất):** TÊN DÒNG HỌ (Ví dụ: **NGUYỄN TỘC THẾ GIA**). (Font Serif cực lớn, in đậm, màu vàng đồng hoặc đỏ trầm).
-    3.  **Điểm nhấn trung tâm:** Một khung hình tròn hoặc bầu dục lớn, viền trang trí cầu kỳ.
-        * *Nội dung bên trong:* Đặt Ảnh thờ Tổ tiên (nếu có) hoặc Huy hiệu dòng họ, hoặc một chữ Hán Nôm đại diện (ví dụ chữ "Phúc" hoặc chữ họ).
-    4.  **Phụ đề:** "Cội nguồn & Di sản" (Font Serif in nghiêng nhẹ).
-    5.  **Chân trang:** Năm biên soạn (Ví dụ: "Phụng lập năm Giáp Thìn - 2024").
+   * PDF
+   * Photo album
+   * Audio memories
+   * Video slideshow (ở giai đoạn sau)
 
-### 2. TRANG LỜI TỰA / GIỚI THIỆU
-*Mục tiêu: Trang đệm trang trọng để bắt đầu câu chuyện.*
+---
 
-* **Bố cục:** Một cột văn bản căn giữa, lề rộng.
-* **Thành phần:**
-    * Một họa tiết trang trí nhỏ ở đầu trang.
-    * Tiêu đề: "Lời Nói Đầu" hoặc một câu đối tâm đắc của dòng họ.
-    * Nội dung: Đoạn văn ngắn giới thiệu mục đích cuốn sách. Sử dụng font chữ hơi lớn hơn font nội dung bình thường một chút.
-    * Kết thúc bằng tên người/ban biên soạn.
+# 2️⃣ KIẾN TRÚC MODULE
 
-### 3. ẢNH TỔ TIÊN (Ancestor Gallery)
-*Mục tiêu: Trưng bày ảnh cũ một cách đồng bộ và tôn kính.*
+```
+AI Memorial Studio
+ ├── Story Memory (NLP)
+ ├── Photo Revival (Image Restoration)
+ └── Voice Revival (Audio Reconstruction)
+```
 
-* **Tiêu đề trang:** "Di Ảnh Tiền Nhân" hoặc "Gương Mặt Gia Đình".
-* **Bố cục (Grid):** Lưới ảnh 2x3 (2 cột, 3 hàng) hoặc 3x3 tùy số lượng ảnh trên một trang A4.
-* **Thiết kế Module Ảnh:**
-    * **Khung:** Mỗi bức ảnh được đặt trong một khung viền đôi màu sepia. Có thể áp dụng hiệu ứng đổ bóng nhẹ (soft shadow) để tạo cảm giác ảnh nổi lên khỏi trang giấy.
-    * **Xử lý ảnh tự động:** Hệ thống nên tự động chuyển ảnh sang tone màu Sepia nhẹ để đồng bộ hóa các bức ảnh màu và đen trắng khác nhau.
-    * **Chú thích (Caption):** Đặt ngay dưới khung ảnh.
-        * Dòng 1: **Họ và Tên** (In đậm).
-        * Dòng 2: (Năm sinh - Năm mất) + Vai vế (Ví dụ: (1920 - 1995) - Đời thứ 3).
+## 🔧 Công nghệ chính:
 
-### 4. CÂY GIA PHẢ (Family Tree)
-*Mục tiêu: Thể hiện cấu trúc huyết thống rõ ràng. Đây là phần khó nhất về kỹ thuật.*
+* **Story** → LLM (OpenAI/Gemini)
+* **Photo** → Image Restoration pipeline (GFPGAN + Colorization + Upscale)
+* **Voice** → Voice Cloning (Edge-TTS, OpenVoice, XTTS, hoặc ElevenLabs API)
 
-* **Tiêu đề trang:** "Thế Thứ Đồ" hoặc "Cây Phả Hệ Dòng Họ...".
-* **Bố cục:** Ưu tiên bố cục từ trên xuống dưới (Top-down hierarchy). Tổ tiên cao nhất ở trên cùng.
-* **Thiết kế Node (Thẻ tên):**
-    * Hình dạng: Hình chữ nhật bo tròn góc hoặc hình bầu dục.
-    * Màu nền Node: Phân biệt giới tính bằng màu nền pastel rất nhạt (Ví dụ: Xanh rêu nhạt cho Nam, Hồng đất nhạt cho Nữ).
-    * Nội dung Node: Tên (In đậm) + Năm sinh/mất (nhỏ hơn bên dưới).
-* **Đường nối (Connectors):**
-    * Không dùng đường thẳng cứng nhắc. Sử dụng các đường cong nhẹ, màu nâu, mô phỏng cành cây vươn ra. Đường nét liền cho quan hệ huyết thống, nét đứt cho quan hệ hôn nhân (vợ/chồng).
-* **Phân chia thế hệ:** Sử dụng các dải màu nền ngang rất mờ hoặc đường kẻ đứt đoạn mỏng để đánh dấu rõ các tầng: "Đời thứ 1", "Đời thứ 2"... ở lề trái.
+---
 
-### 5. DÒNG THỜI GIAN (Timeline)
-*Mục tiêu: Kể lại lịch sử theo trình tự thời gian.*
+# 3️⃣ FLOW NGƯỜI DÙNG (USER FLOW)
 
-* **Tiêu đề trang:** "Hành Trình Lịch Sử" hoặc "Những Dấu Mốc Quan Trọng".
-* **Bố cục:** Trục dọc trung tâm (Central Vertical Axis).
-* **Thiết kế:**
-    * **Trục chính:** Một đường kẻ màu nâu đậm chạy từ trên xuống dưới giữa trang.
-    * **Điểm mốc (Markers):** Các hình tròn nhỏ màu vàng đồng nằm trên trục chính ghi nhận năm tháng.
-    * **Sự kiện:** Các sự kiện nằm so le hai bên trục (Trái - Phải - Trái - Phải).
-    * **Module sự kiện:**
-        1.  **Năm:** Số năm to, rõ ràng, font Serif (Ví dụ: **1945**).
-        2.  **Icon:** Một biểu tượng nhỏ bên cạnh năm (Ví dụ: Ngôi nhà = Xây nhà thờ tổ; Chiếc nhẫn = Đám cưới quan trọng; Quyển sách = Có người đỗ đạt).
-        3.  **Tiêu đề sự kiện:** Ngắn gọn (In đậm).
-        4.  **Mô tả:** Đoạn văn nhỏ bên dưới.
+## 3.1 Chọn thành viên gia đình
 
-### 6. CÂU CHUYỆN & TIỂU SỬ (Stories)
-*Mục tiêu: Phần "văn học" nhất của cuốn sách, cần dễ đọc và có cảm xúc.*
+User vào hồ sơ > bấm **“AI Memorial Studio”**
+→ Chọn 1 trong 3 tool: Story / Photo / Voice.
 
-* **Tiêu đề trang:** Tên nhân vật chính của câu chuyện (Ví dụ: "Cụ Tổ Khảo: Nguyễn Văn A").
-* **Bố cục:** Bố cục sách truyền thống (Single column book layout).
-* **Thiết kế:**
-    * **Drop Cap:** Chữ cái đầu tiên của đoạn văn đầu tiên được phóng to, sử dụng font Serif trang trí, màu nhấn (Vàng đồng/Đỏ).
-    * **Hình ảnh minh họa:** Ảnh được chèn vào giữa văn bản, căn trái hoặc phải, cho chữ bao quanh (Text wrap) để tạo sự mềm mại. Kèm chú thích ảnh nhỏ bên dưới.
-    * **Trích dẫn nổi bật (Blockquote):** Những câu nói hay hoặc sự kiện đắt giá được tách ra thành một khối riêng, căn giữa, font in nghiêng, có dấu ngoặc kép lớn trang trí ở đầu và cuối.
+---
 
-### 7. BẢN ĐỒ DÒNG HỌ (Family Map)
-*Mục tiêu: Trực quan hóa sự di cư và phân bố.*
+# 4️⃣ MODULE 1 – STORY MEMORY (AI LIFE STORY BUILDER)
 
-* **Tiêu đề trang:** "Dấu Chân Dòng Họ" hoặc "Bản Đồ Phân Bố".
-* **Nền:** Sử dụng một lớp nền bản đồ phong cách cổ (Vintage map style) với tone màu sepia, các đường bờ biển hoặc địa giới hành chính được vẽ theo lối cũ.
-* **Các yếu tố trên bản đồ:**
-    * **Điểm mốc (Pins/Markers):**
-        * *Quê gốc/Nhà thờ tổ:* Dùng icon đặc biệt (ví dụ: hình ngôi đình) màu đỏ nổi bật.
-        * *Nơi sinh sống hiện tại:* Dùng icon ghim tròn màu vàng đồng nhỏ hơn.
-    * **Đường di cư (Migration Routes):** Sử dụng các đường mũi tên nét đứt, uốn cong mềm mại để chỉ hướng di chuyển từ quê gốc đến các vùng đất mới.
-    * **Chú giải (Legend):** Một bảng nhỏ ở góc bản đồ giải thích ý nghĩa các icon và đường kẻ.
+## 🎯 Mục đích
+
+Biến:
+
+* ghi chú
+* ảnh
+* sự kiện
+* ký ức rời rạc
+
+→ thành **một câu chuyện hoàn chỉnh**, có giọng văn tự nhiên.
+
+---
+
+## 📌 FLOW
+
+1. Upload dữ liệu:
+
+   * Ảnh
+   * Sự kiện (năm sinh, nơi sinh, nghề nghiệp,…)
+   * Các đoạn text hoặc voice mô tả ký ức
+2. User chọn style:
+
+   * Giọng kể người lớn tuổi
+   * Giọng hiện đại
+   * Giọng dân dã
+   * Giọng nghiêm trang / sử thi
+3. AI gợi ý câu hỏi:
+
+   * “Bạn có thể mô tả thêm về tính cách của ông không?”
+   * “Gia đình nhớ nhất điều gì về bà?”
+4. User trả lời → AI refine story
+5. Output:
+
+   * Story dạng chương
+   * Timeline tóm tắt
+
+---
+
+## 📌 JSON Structure (Lưu DB)
+
+```json
+{
+  "memberId": "guild",
+  "storyId": "guild",
+  "title": "Cuộc đời ông Nguyễn Văn A",
+  "storyContent": "string-long",
+  "timeline": [
+    { "year": 1952, "event": "Sinh tại Bình Định" },
+    { "year": 1970, "event": "Đi quân sự" }
+  ],
+  "createdAt": "2025-11-24T07:00:00Z",
+  "style": "traditional"
+}
+```
+
+---
+
+# 5️⃣ MODULE 2 – PHOTO REVIVAL (IMAGE RESTORATION & COLORIZATION)
+
+## 🎯 Mục đích
+
+* Phục chế ảnh cũ, mờ, rách.
+* Tô màu.
+* Nâng độ phân giải.
+* Giữ lại nét mặt nguyên bản, không deepfake.
+
+---
+
+## 📌 FLOW
+
+1. Upload ảnh (JPG/PNG/HEIC)
+2. AI tự phân tích:
+
+   * mức độ hư hại
+   * khuôn mặt
+   * background
+3. 3 chế độ phục chế:
+
+   * **Basic Restore:** làm nét + xóa noise
+   * **Colorize:** tô màu tự nhiên
+   * **Revive Max:** full pipeline (GFPGAN + ESRGAN + Colorization)
+4. Hiển thị Before/After slider
+5. Người dùng chọn mức độ:
+
+   * 25% / 50% / 75% / 100%
+6. Lưu output vào profile thành viên
+
+---
+
+## 📌 JSON Structure
+
+```json
+{
+  "photoId": "string",
+  "memberId": "string",
+  "originalUrl": "string",
+  "restoredUrl": "string",
+  "mode": "revive-max",
+  "intensity": 80,
+  "createdAt": "2025-11-24T07:00:00Z"
+}
+```
+
+---
+
+# 6️⃣ MODULE 3 – VOICE REVIVAL (VOICE RESTORATION & MEMORY PLAYBACK)
+
+## 🎯 Mục đích
+
+* Phục hồi giọng nói từ file cũ.
+* Tạo “Voice Memory” (voice sample).
+* Cho phép nghe lại hoặc nói chuyện hạn chế.
+
+---
+
+## 📌 2 CHẾ ĐỘ CHÍNH
+
+### **Chế độ 1: Voice Memory Playback (an toàn – nhân văn)**
+
+* AI làm sạch audio cũ (noise reduction).
+* Chuẩn hoá giọng.
+* Chỉ phát lại các câu đã có trong dữ liệu gốc.
+
+### **Chế độ 2: AI Limited Conversation**
+
+* Tạo voice clone từ sample (nếu gia đình đồng ý).
+* Người dùng có thể hỏi:
+
+  * “Ông thích món gì?”
+  * “Hồi nhỏ ông làm gì?”
+* AI trả lời dựa trên:
+
+  * dữ liệu trong profile
+  * story memory
+  * ghi âm/thư cũ
+    **Không được tạo dự đoán về tương lai → tránh spooky.**
+
+---
+
+## 📌 FLOW
+
+1. Upload file audio (mp3/wav/m4a).
+2. AI phân tích:
+
+   * chất lượng
+   * noise
+   * xác suất clone được hay không
+3. User chọn:
+
+   * Chỉ phục chế (không clone)
+   * Tạo Voice Memory (clone)
+4. AI xử lý
+5. Output:
+
+   * Audio file
+   * Hoặc WebRTC chat với giọng người thân
+
+---
+
+## 📌 JSON Structure
+
+```json
+{
+  "voiceId": "string",
+  "memberId": "string",
+  "mode": "memory-playback",
+  "originalUrl": "string",
+  "cleanUrl": "string",
+  "cloneModelUrl": "string",
+  "createdAt": "2025-11-24T07:00:00Z"
+}
+```
+
+---
+
+# 7️⃣ TRANG UI CHÍNH – AI MEMORIAL STUDIO
+
+### Header:
+
+* Avatar thành viên
+* Tên
+* Năm sinh – năm mất
+
+### 3 Button lớn:
+
+1. **Story Memory**
+2. **Photo Revival**
+3. **Voice Revival**
+
+### Mỗi module hiển thị:
+
+* List các sản phẩm đã tạo
+* Nút “Tạo mới”
+* Modal preview
+
+---
+
+# 8️⃣ GÓC NHẠY CẢM – CẦN LƯU Ý (ETHICS)
+
+### ✔ Thông báo khi dùng Voice Cloning
+
+> “Đây là giọng mô phỏng dựa trên dữ liệu gia đình cung cấp.
+> Chúng tôi không tạo nội dung mà người thân chưa từng nói nếu không có ngữ cảnh phù hợp.”
+
+### ✔ Không trả lời tương lai
+
+> “Tôi không thể nói về những điều mà ông/bà chưa từng chia sẻ.”
+
+### ✔ Lưu metadata để kiểm soát
+
+* Ai upload
+* Khi nào
+* Giọng gốc dài bao nhiêu
+
+---
+
+# 9️⃣ API BACKEND (ASP.NET CORE)
+
+## POST /api/memorial/story
+
+## POST /api/memorial/photo
+
+## POST /api/memorial/voice
+
+## GET /api/memorial/{memberId}
+
+## DELETE /api/memorial/{id}
+
+---
