@@ -1008,6 +1008,8 @@
   "memory.delete.error": "Error deleting memory.",
   "memory.validation.photoProcessingNotDone": "Photo is being processed or not uploaded.",
   "memory.validation.noMainCharacterSelected": "Please select a main character for this memory.",
+  "memory.validation.noPhotoUploaded": "Please upload a photo for this memory.",
+  "memory.validation.noFacesDetectedInPhoto": "No faces were detected in the uploaded photo. Please upload a photo with at least one face.",
   "memory.style.nostalgic": "Nostalgic",
   "memory.style.warm": "Warm",
   "memory.style.formal": "Formal",

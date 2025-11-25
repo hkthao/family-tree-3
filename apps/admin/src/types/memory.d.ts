@@ -11,6 +11,7 @@ export interface MemoryDto {
   story?: string; // New field for AI-generated story
   photoAnalysisId?: string | null;
   photoUrl?: string | null;
+  photo?: string; // New field for temporary photo data (e.g., base64 string)
   tags?: string[];
   keywords?: string[];
   eventSuggestion?: string;

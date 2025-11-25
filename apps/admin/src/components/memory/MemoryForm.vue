@@ -81,21 +81,32 @@ watch(() => props.memberId, (newMemberId) => {
 
 const validateStep = async (step: number) => {
   if (step === 1) {
-    // Step 1 doesn't have explicit form validation, but check if photo processing is done
-    const isValid = step1Ref.value?.isValid;
+    const hasPhoto = internalMemory.value.photo !== null && internalMemory.value.photo !== undefined && internalMemory.value.photo !== '';
+    const hasDetectedFaces = internalMemory.value.faces && internalMemory.value.faces.length > 0;
+    const isValid = step1Ref.value?.isValid; // This seems to check if photo processing is finished
     const isMainCharacterSelected = step1Ref.value?.selectedMainCharacterFaceId !== null && step1Ref.value?.selectedMainCharacterFaceId !== undefined;
-    const hasDetectedFaces = step1Ref.value?.memoryFaceStore?.detectedFaces ? step1Ref.value.memoryFaceStore.detectedFaces.length > 0 : false;
+
+    if (!hasPhoto) {
+      showSnackbar(t('memory.validation.noPhotoUploaded'), 'warning');
+      return false;
+    }
+
+    if (!hasDetectedFaces) {
+      showSnackbar(t('memory.validation.noFacesDetectedInPhoto'), 'warning');
+      return false;
+    }
 
     if (!isValid) {
-      showSnackbar(t('memory.validation.photoProcessingNotDone'), 'warning'); // Need to add this translation
+      showSnackbar(t('memory.validation.photoProcessingNotDone'), 'warning');
       return false;
     }
-    if (!isMainCharacterSelected && hasDetectedFaces) {
-      showSnackbar(t('memory.validation.noMainCharacterSelected'), 'warning'); // Need to add this translation
+    // This check is only relevant if there ARE detected faces
+    if (!isMainCharacterSelected && hasDetectedFaces) { // Re-added hasDetectedFaces check for clarity
+      showSnackbar(t('memory.validation.noMainCharacterSelected'), 'warning');
       return false;
     }
 
-    return isValid && (isMainCharacterSelected || !hasDetectedFaces);
+    return hasPhoto && hasDetectedFaces && isValid && (isMainCharacterSelected || !hasDetectedFaces);
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
   }

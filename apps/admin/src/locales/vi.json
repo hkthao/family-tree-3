@@ -1048,6 +1048,8 @@
   "memory.delete.error": "Lỗi khi xóa ký ức.",
   "memory.validation.photoProcessingNotDone": "Ảnh đang được xử lý hoặc chưa tải lên.",
   "memory.validation.noMainCharacterSelected": "Vui lòng chọn nhân vật chính cho ký ức này.",
+  "memory.validation.noPhotoUploaded": "Vui lòng tải ảnh lên cho ký ức này.",
+  "memory.validation.noFacesDetectedInPhoto": "Không tìm thấy khuôn mặt nào trong ảnh đã tải lên. Vui lòng tải ảnh có ít nhất một khuôn mặt.",
 
   "memory.style.nostalgic": "Hoài niệm",
   "memory.style.warm": "Ấm áp",

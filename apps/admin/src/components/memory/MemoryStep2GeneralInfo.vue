@@ -12,7 +12,7 @@
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="(face, index) in internalMemory.faces" :key="face.id" cols="6">
             <v-card>
-              <v-img class="rounded-sm mt-4" :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
+              <v-img class="rounded-sm my-4" :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
               <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">
               </MemberAutocomplete>
               <v-text-field class="mt-2" v-model="face.relationPrompt"
