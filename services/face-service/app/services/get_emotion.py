@@ -28,9 +28,10 @@ def get_emotion(cropped_face_base64: str) -> tuple[str, float]:
         # Decode base64 to image
         img_bytes = base64.b64decode(cropped_face_base64)
         image = Image.open(io.BytesIO(img_bytes)).convert('L')  # Convert to grayscale
-        image = image.resize((48, 48))
+        image = image.resize((64, 64))
         image = img_to_array(image)
         image = np.expand_dims(image, axis=0)
+        image = np.expand_dims(image, axis=-1) # Add channel dimension
         image /= 255.0
 
         # Predict emotion
