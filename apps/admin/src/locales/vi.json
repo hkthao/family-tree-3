@@ -1042,6 +1042,8 @@
   "memory.delete.confirmMessage": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",
   "memory.delete.success": "Xóa ký ức thành công!",
   "memory.delete.error": "Lỗi khi xóa ký ức.",
+  "memory.validation.photoProcessingNotDone": "Ảnh đang được xử lý hoặc chưa tải lên.",
+  "memory.validation.noMainCharacterSelected": "Vui lòng chọn nhân vật chính cho ký ức này.",
 
   "memory.style.nostalgic": "Hoài niệm",
   "memory.style.warm": "Ấm áp",

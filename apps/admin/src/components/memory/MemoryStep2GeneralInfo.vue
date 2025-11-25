@@ -2,7 +2,7 @@
   <v-form ref="formStep2">
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete v-model="internalMemory.memberId" :label="t('member.form.member')"
+        <MemberAutocomplete class="mt-2" v-model="internalMemory.memberId" :label="t('member.form.member')"
           :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
           :readonly="readonly || !!memberId" required></MemberAutocomplete>
       </v-col>
@@ -28,8 +28,8 @@
           :readonly="readonly"></v-combobox>
       </v-col>
       <v-col cols="12">
-        <v-combobox v-model="internalMemory.keywords" :label="t('memory.storyEditor.keywords')" chips multiple
-          clearable :readonly="readonly"></v-combobox>
+        <v-combobox v-model="internalMemory.keywords" :label="t('memory.storyEditor.keywords')" chips multiple clearable
+          :readonly="readonly"></v-combobox>
       </v-col>
     </v-row>
   </v-form>

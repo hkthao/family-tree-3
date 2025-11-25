@@ -2,7 +2,7 @@
   <v-stepper v-model="activeStep" :alt-labels="true" :hide-actions="true" flat>
     <v-stepper-header class="stepper-header">
       <!-- Step 1: Photo Upload -->
-      <v-stepper-item  :value="1" :title="t('memory.create.step1.title')" :complete="activeStep > 1"></v-stepper-item>
+      <v-stepper-item :value="1" :title="t('memory.create.step1.title')" :complete="activeStep > 1"></v-stepper-item>
       <v-divider></v-divider>
       <!-- Step 2: General Information -->
       <v-stepper-item :value="2" :title="t('memory.create.step2.title')" :complete="activeStep > 2"></v-stepper-item>
@@ -14,7 +14,7 @@
     <v-stepper-window>
       <!-- Step 1 Content: Photo Upload -->
       <v-stepper-window-item :value="1">
-        <MemoryStep1PhotoUpload ref="step1Ref" v-model="internalMemory" :readonly="readonly" />
+          <MemoryStep1PhotoUpload ref="step1Ref" v-model="internalMemory" :readonly="readonly" />
       </v-stepper-window-item>
 
       <!-- Step 2 Content: General Information -->
@@ -37,6 +37,7 @@ import type { MemoryDto } from '@/types/memory';
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
 import MemoryStep2GeneralInfo from './MemoryStep2GeneralInfo.vue';
 import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -47,6 +48,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 
 const { t } = useI18n();
+const { showSnackbar } = useGlobalSnackbar(); // Initialize useGlobalSnackbar
 const activeStep = ref(1);
 
 const step1Ref = ref<InstanceType<typeof MemoryStep1PhotoUpload> | null>(null);
@@ -80,7 +82,20 @@ watch(() => props.memberId, (newMemberId) => {
 const validateStep = async (step: number) => {
   if (step === 1) {
     // Step 1 doesn't have explicit form validation, but check if photo processing is done
-    return step1Ref.value?.isValid; // Assuming isValid is exposed by MemoryStep1PhotoUpload
+    const isValid = step1Ref.value?.isValid;
+    const isMainCharacterSelected = step1Ref.value?.selectedMainCharacterFaceId !== null && step1Ref.value?.selectedMainCharacterFaceId !== undefined;
+    const hasDetectedFaces = step1Ref.value?.memoryFaceStore?.detectedFaces ? step1Ref.value.memoryFaceStore.detectedFaces.length > 0 : false;
+
+    if (!isValid) {
+      showSnackbar(t('memory.validation.photoProcessingNotDone'), 'warning'); // Need to add this translation
+      return false;
+    }
+    if (!isMainCharacterSelected && hasDetectedFaces) {
+      showSnackbar(t('memory.validation.noMainCharacterSelected'), 'warning'); // Need to add this translation
+      return false;
+    }
+
+    return isValid && (isMainCharacterSelected || !hasDetectedFaces);
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
   }
@@ -112,6 +127,7 @@ defineExpose({
   activeStep,
   nextStep,
   prevStep,
+  step1Ref, // Expose step1Ref for direct access to its properties
 });
 </script>
 
