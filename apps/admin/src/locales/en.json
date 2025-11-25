@@ -755,6 +755,9 @@
   "face.title": "Face",
   "face.sidebar.title": "Face Recognition",
   "face.sidebar.unlabeled": "Unlabeled",
+  "face.sidebar.summaryDetectedFaces": "Detected {count} faces.",
+  "face.sidebar.instructionClickToLabel": "Click on a face to label or change label.",
+  "face.sidebar.instructionNoUnlabeled": "All faces have been labeled.",
   "face.errors.unexpectedError": "An unexpected error occurred.",
   "userSettings.title": "User Settings",
   "userSettings.tab.profile": "Profile",
@@ -957,10 +960,6 @@
   "memory.create.step5.saveSuccess": "Memory saved successfully!",
   "memory.create.step5.saveFailed": "Failed to save memory.",
   "memory.create.step5.viewMemory": "View Memory Details",
-
-  "memory.create.step1.title": "Photo Upload",
-  "memory.create.step2.title": "General Information",
-  "memory.create.step3.title": "Review & Save",
   "memory.create.action.analyze": "Analyze Photo",
 
   "memory.photoAnalysis.title": "Photo Analysis",

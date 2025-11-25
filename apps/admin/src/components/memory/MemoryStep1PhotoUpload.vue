@@ -11,14 +11,32 @@
     <v-row>
       <v-col cols="12">
         <div v-if="memoryFaceStore.uploadedImage && memoryFaceStore.detectedFaces.length > 0">
-          <FaceBoundingBoxViewer :image-src="memoryFaceStore.uploadedImage" :faces="memoryFaceStore.detectedFaces" selectable
-            @face-selected="openSelectMemberDialog" />
+          <FaceBoundingBoxViewer :image-src="memoryFaceStore.uploadedImage" :faces="memoryFaceStore.detectedFaces"
+            selectable @face-selected="openSelectMemberDialog" />
           <FaceDetectionSidebar :faces="memoryFaceStore.detectedFaces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
+
+          <!-- Main Character Selection -->
+          <v-card flat>
+            <v-card-title>{{ t('memory.create.selectMainCharacter') }}</v-card-title>
+            <v-card-text>
+              <v-chip-group v-model="selectedMainCharacterFaceId" mandatory column>
+                <v-chip v-for="face in memoryFaceStore.detectedFaces" :key="face.id" :value="face.id"
+                  variant="outlined" color="primary" filter>
+                  <v-avatar left>
+                    <v-img :src="getFaceThumbnailSrc(face)" alt="Face"></v-img>
+                  </v-avatar>
+                  <span class="ml-2">{{ face.memberName || t('common.unknown') }}</span>
+                  <v-chip v-if="face.emotion" size="x-small" class="ml-2">{{ face.emotion }}</v-chip>
+                </v-chip>
+              </v-chip-group>
+            </v-card-text>
+          </v-card>
         </div>
         <v-alert v-else-if="!memoryFaceStore.loading && !memoryFaceStore.uploadedImage" type="info">{{
           t('face.recognition.uploadPrompt') }}</v-alert>
-        <v-alert v-else-if="!memoryFaceStore.loading && memoryFaceStore.uploadedImage && memoryFaceStore.detectedFaces.length === 0"
+        <v-alert
+          v-else-if="!memoryFaceStore.loading && memoryFaceStore.uploadedImage && memoryFaceStore.detectedFaces.length === 0"
           type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
       </v-col>
     </v-row>
@@ -33,13 +51,13 @@ import { useI18n } from 'vue-i18n';
 import { useMemoryFaceStore } from '@/stores/memoryFaceStore';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { MemoryDto } from '@/types/memory';
-import type { DetectedFace, Member } from '@/types'; // Import Member type
+import type { DetectedFace, Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 const props = defineProps<{
   modelValue: MemoryDto;
   readonly?: boolean;
-  familyId?: string; // Add familyId prop
+  familyId?: string;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
@@ -48,8 +66,9 @@ const { t } = useI18n();
 const memoryFaceStore = useMemoryFaceStore();
 const { showSnackbar } = useGlobalSnackbar();
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
-const showSelectMemberDialog = ref(false); // Add for dialog visibility
-const faceToLabel = ref<DetectedFace | null>(null); // Add for face labeling
+const showSelectMemberDialog = ref(false);
+const faceToLabel = ref<DetectedFace | null>(null);
+const selectedMainCharacterFaceId = ref<string | null>(null); // New ref for main character selection
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
@@ -62,6 +81,20 @@ watch(() => memoryFaceStore.error, (newError) => {
   }
 });
 
+// Watch for changes in selectedMainCharacterFaceId to update internalMemory.memberId
+watch(selectedMainCharacterFaceId, (newId) => {
+  if (newId) {
+    const selectedFace = memoryFaceStore.detectedFaces.find(face => face.id === newId);
+    if (selectedFace && selectedFace.memberId) {
+      internalMemory.value.memberId = selectedFace.memberId;
+    } else {
+      internalMemory.value.memberId = null; // Clear if no memberId on selected face
+    }
+  } else {
+    internalMemory.value.memberId = null; // Clear if nothing selected
+  }
+});
+
 const handleFileUpload = async (file: File | File[] | null) => {
   if (props.readonly) return;
 
@@ -71,8 +104,14 @@ const handleFileUpload = async (file: File | File[] | null) => {
       internalMemory.value.photoAnalysisId = 'generated_id';
       internalMemory.value.faces = memoryFaceStore.detectedFaces;
       internalMemory.value.photoUrl = memoryFaceStore.uploadedImage;
+      // Automatically select the first face as main character if any faces are detected
+      if (memoryFaceStore.detectedFaces.length > 0) {
+        selectedMainCharacterFaceId.value = memoryFaceStore.detectedFaces[0].id;
+      }
     } else if (!memoryFaceStore.loading && memoryFaceStore.uploadedImage && memoryFaceStore.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+      internalMemory.value.faces = []; // Clear faces if none detected
+      selectedMainCharacterFaceId.value = null;
     }
   } else if (Array.isArray(file) && file.length > 0) {
     await memoryFaceStore.detectFaces(file[0]);
@@ -80,8 +119,13 @@ const handleFileUpload = async (file: File | File[] | null) => {
       internalMemory.value.photoAnalysisId = 'generated_id';
       internalMemory.value.faces = memoryFaceStore.detectedFaces;
       internalMemory.value.photoUrl = memoryFaceStore.uploadedImage;
+      if (memoryFaceStore.detectedFaces.length > 0) {
+        selectedMainCharacterFaceId.value = memoryFaceStore.detectedFaces[0].id;
+      }
     } else if (!memoryFaceStore.loading && memoryFaceStore.uploadedImage && memoryFaceStore.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+      internalMemory.value.faces = []; // Clear faces if none detected
+      selectedMainCharacterFaceId.value = null;
     }
   }
   else {
@@ -89,11 +133,12 @@ const handleFileUpload = async (file: File | File[] | null) => {
     internalMemory.value.photoAnalysisId = undefined;
     internalMemory.value.faces = [];
     internalMemory.value.photoUrl = undefined;
+    selectedMainCharacterFaceId.value = null;
   }
 };
 
 const openSelectMemberDialog = (faceId: string) => {
-  memoryFaceStore.selectFace(faceId); // Select face in store
+  memoryFaceStore.selectFace(faceId);
   const face = memoryFaceStore.currentSelectedFace;
   if (face) {
     faceToLabel.value = face;
@@ -105,15 +150,57 @@ const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) =>
   memoryFaceStore.labelFace(faceId, memberDetails.id, memberDetails);
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
+  // If the labeled face is currently selected as main character, update internalMemory.memberId
+  if (selectedMainCharacterFaceId.value === faceId) {
+    internalMemory.value.memberId = memberDetails.id;
+  }
 };
 
 const handleRemoveFace = (faceId: string) => {
   memoryFaceStore.removeFace(faceId);
+  // If the removed face was the main character, clear selection
+  if (selectedMainCharacterFaceId.value === faceId) {
+    selectedMainCharacterFaceId.value = null;
+  }
+};
+
+const canSaveLabels = computed(() => {
+  return memoryFaceStore.detectedFaces.some(
+    (face) =>
+      face.memberId &&
+      (face.originalMemberId === null ||
+        face.originalMemberId === undefined ||
+        face.memberId !== face.originalMemberId),
+  );
+});
+
+const saveLabels = async () => {
+  const result = await memoryFaceStore.saveFaceLabels();
+  if (result.ok) {
+    showSnackbar(t('face.recognition.saveSuccess'), 'success');
+    // Don't reset state fully here, as the user might want to proceed with memory creation
+    // Reset only if necessary, or let parent component handle full reset after memory is saved
+    // memoryFaceStore.resetState();
+    // if (faceUploadInputRef.value) {
+    //   faceUploadInputRef.value.reset();
+    // }
+  }
+};
+
+const getFaceThumbnailSrc = (face: DetectedFace) => {
+  if (face.thumbnail) {
+    return `data:image/jpeg;base64,${face.thumbnail}`;
+  }
+  return '';
 };
 
 defineExpose({
   isValid: computed(() => !memoryFaceStore.loading),
   memoryFaceStore,
   faceUploadInputRef,
+  selectedMainCharacterFaceId, // Expose for potential validation in parent
 });
 </script>
+
+<style scoped>
+</style>

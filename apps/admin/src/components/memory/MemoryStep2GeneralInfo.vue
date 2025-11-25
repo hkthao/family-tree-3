@@ -45,7 +45,7 @@ import type { MemoryDto } from '@/types/memory';
 const props = defineProps<{
   modelValue: MemoryDto;
   readonly?: boolean;
-  memberId?: string;
+  memberId?: string | null;
 }>();
 
 const emit = defineEmits(['update:modelValue']);

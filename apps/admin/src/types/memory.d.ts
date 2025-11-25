@@ -42,7 +42,7 @@ export interface GenerateStoryResponseDto {
 // DTO cho Memory đầy đủ (khi hiển thị chi tiết hoặc trong danh sách)
 export interface MemoryDto {
   id?: string; // Made optional to support new creation
-  memberId: string;
+  memberId: string | null;
   title: string;
   rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
   story?: string; // New field for AI-generated story

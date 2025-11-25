@@ -1,46 +1,66 @@
 <template>
-  <v-list>
-    <v-list-item v-for="face in faces" :key="face.id" :class="{
-      'face-item--recognized': face.status === 'recognized',
-      'face-item--unrecognized': face.status === 'unrecognized',
-      'face-item--newly-labeled': face.status === 'newly-labeled',
-      'face-item--selected': face.id === selectedFaceId,
-    }" @click="$emit('face-selected', face.id)">
-      <template v-slot:prepend>
-        <v-avatar size="40" rounded="sm">
-          <v-img :src="getFaceThumbnailSrc(face)" alt="Face"></v-img>
-        </v-avatar>
+  <div>
+    <v-alert
+      v-if="faces.length > 0"
+      density="compact"
+      type="info"
+      variant="tonal"
+      class="my-2"
+    >
+      {{ t('face.sidebar.summaryDetectedFaces', { count: faces.length }) }}
+      <template v-if="unlabeledFacesCount > 0">
+        <br />
+        {{ t('face.sidebar.instructionClickToLabel') }}
       </template>
-      <v-list-item-title>
-        <span v-if="face.memberId">{{ face.memberName }}</span>
-        <span v-else>{{ t('face.sidebar.unlabeled') }}</span>
-      </v-list-item-title>
-      <v-list-item-subtitle v-if="face.memberId">
-        <div class="text-caption text-medium-emphasis">{{ face.familyName }}</div>
-        <div class="text-caption text-medium-emphasis">
-          <span v-if="face.birthYear">{{ face.birthYear }}</span>
-          <span v-if="face.birthYear && face.deathYear"> - </span>
-          <span v-if="face.deathYear">{{ face.deathYear }}</span>
-        </div>
-      </v-list-item-subtitle>
-      <template v-slot:append>
-        <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
-        <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
-        <v-icon v-else-if="face.status === 'newly-labeled'" color="info">mdi-tag</v-icon>
-        <v-btn v-if="!readOnly" icon="mdi-close-circle" variant="text" size="small"
-          @click.stop="removeFace(face.id)"></v-btn>
+      <template v-else>
+        <br />
+        {{ t('face.sidebar.instructionNoUnlabeled') }}
       </template>
-    </v-list-item>
-    <v-list-item v-if="faces.length === 0">
-      <v-list-item-title>{{ t('face.sidebar.noFaces') }}</v-list-item-title>
-    </v-list-item>
-  </v-list>
+    </v-alert>
+
+    <v-list>
+      <v-list-item v-for="face in faces" :key="face.id" :class="{
+        'face-item--recognized': face.status === 'recognized',
+        'face-item--unrecognized': face.status === 'unrecognized',
+        'face-item--newly-labeled': face.status === 'newly-labeled',
+        'face-item--selected': face.id === selectedFaceId,
+      }" @click="$emit('face-selected', face.id)">
+        <template v-slot:prepend>
+          <v-avatar size="40" rounded="sm">
+            <v-img :src="getFaceThumbnailSrc(face)" alt="Face"></v-img>
+          </v-avatar>
+        </template>
+        <v-list-item-title>
+          <span v-if="face.memberId">{{ face.memberName }}</span>
+          <span v-else>{{ t('face.sidebar.unlabeled') }}</span>
+        </v-list-item-title>
+        <v-list-item-subtitle v-if="face.memberId">
+          <div class="text-caption text-medium-emphasis">{{ face.familyName }}</div>
+          <div class="text-caption text-medium-emphasis">
+            <span v-if="face.birthYear">{{ face.birthYear }}</span>
+            <span v-if="face.birthYear && face.deathYear"> - </span>
+            <span v-if="face.deathYear">{{ face.deathYear }}</span>
+          </div>
+        </v-list-item-subtitle>
+        <template v-slot:append>
+          <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
+          <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
+          <v-icon v-else-if="face.status === 'newly-labeled'" color="info">mdi-tag</v-icon>
+          <v-btn v-if="!readOnly" icon="mdi-close-circle" variant="text" size="small"
+            @click.stop="removeFace(face.id)"></v-btn>
+        </template>
+      </v-list-item>
+      <v-list-item v-if="faces.length === 0">
+        <v-list-item-title>{{ t('face.sidebar.noFaces') }}</v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
-import { type PropType } from 'vue';
+import { type PropType, computed } from 'vue';
 
 const { t } = useI18n();
 
@@ -63,6 +83,7 @@ const getFaceThumbnailSrc = (face: DetectedFace) => {
   return '';
 };
 
+const unlabeledFacesCount = computed(() => faces.filter(face => !face.memberId).length);
 
 </script>
 

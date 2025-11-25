@@ -41,7 +41,7 @@ import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';
 const props = defineProps<{
   modelValue: MemoryDto;
   readonly?: boolean;
-  memberId?: string; // Prop to potentially pre-fill memberId
+  memberId?: string | null; // Prop to potentially pre-fill memberId
 }>();
 
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
