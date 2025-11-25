@@ -31,7 +31,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { CreateMemoryDto } from '@/types/memory';
+import type { MemoryDto } from '@/types/memory';
 import MemoryForm from '@/components/memory/MemoryForm.vue';
 
 const props = defineProps<{
@@ -48,7 +48,7 @@ const memoryFormRef = ref<InstanceType<typeof MemoryForm> | null>(null);
 const selectedFiles = ref<File[]>([]);
 const isSaving = ref(false); // To manage loading state for buttons
 
-const editedMemory = ref<CreateMemoryDto>({
+const editedMemory = ref<MemoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
   story: '',
@@ -61,6 +61,8 @@ const editedMemory = ref<CreateMemoryDto>({
   emotionContextTags: [],
   customEmotionContext: undefined,
   faces: [],
+  id: undefined, // MemoryDto specific
+  createdAt: undefined, // MemoryDto specific
 });
 
 // Computed property for safe access to activeStep

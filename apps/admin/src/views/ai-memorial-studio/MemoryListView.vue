@@ -21,7 +21,7 @@
       </template>
 
       <template v-slot:item.title="{ item }">
-        <a @click="openDetailDrawer(item.id)"
+        <a @click="openDetailDrawer(item.id!)"
           class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
           {{ item.title }}
         </a>
@@ -33,7 +33,7 @@
         <v-chip v-for="tag in item.tags" :key="tag" size="small" class="mr-1 my-1">{{ tag }}</v-chip>
       </template>
       <template v-slot:item.createdAt="{ item }">
-        {{ formatDate(item.createdAt) }}
+        {{ formatDate(item.createdAt!) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-menu>
@@ -43,7 +43,7 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item @click="openEditDrawer(item.id)">
+            <v-list-item @click="openEditDrawer(item.id!)">
               <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
             </v-list-item>
             <v-list-item @click="confirmDelete(item)">
@@ -153,7 +153,7 @@ const confirmDelete = async (memory: MemoryDto) => {
 
 const handleDeleteConfirm = async (memory: MemoryDto) => {
   if (memory) {
-    await memoryStore.deleteItem(memory.id);
+    await memoryStore.deleteItem(memory.id!); // Use non-null assertion as memory.id is expected for existing memory
     if (memoryStore.error) {
       showSnackbar(t('memory.delete.error', { error: memoryStore.error }), 'error');
     } else {

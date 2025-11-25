@@ -35,7 +35,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { MemoryDto, UpdateMemoryDto } from '@/types/memory';
+import type { MemoryDto } from '@/types/memory'; // Removed UpdateMemoryDto
 import MemoryForm from '@/components/memory/MemoryForm.vue';
 
 const props = defineProps<{
@@ -49,7 +49,7 @@ const memoryStore = useMemoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
 const memoryFormRef = ref<InstanceType<typeof MemoryForm> | null>(null);
-const editedMemory = ref<UpdateMemoryDto | null>(null);
+const editedMemory = ref<MemoryDto | null>(null); // Changed to MemoryDto
 const selectedFiles = ref<File[]>([]);
 const isSaving = ref(false); // To manage loading state for buttons
 
@@ -62,21 +62,7 @@ const memoryFormValidAndLoaded = computed(() => memoryFormRef.value !== null);
 const fetchMemory = async (id: string) => {
   const memory = await memoryStore.getById(id);
   if (memory) {
-    editedMemory.value = {
-      id: memory.id,
-      memberId: memory.memberId,
-      title: memory.title,
-      story: memory.story,
-      photoAnalysisId: memory.photoAnalysisId,
-      photoUrl: memory.photoUrl,
-      tags: memory.tags,
-      keywords: memory.keywords,
-      eventSuggestion: memory.eventSuggestion,
-      customEventDescription: memory.customEventDescription,
-      emotionContextTags: memory.emotionContextTags,
-      customEmotionContext: memory.customEmotionContext,
-      faces: memory.faces,
-    };
+    editedMemory.value = memory; // Direct assignment, as editedMemory is now MemoryDto
   } else {
     showSnackbar(t('memory.edit.notFound'), 'error');
     emit('close');

@@ -99,7 +99,7 @@ const itemsPerPage = ref(10);
 const detailMemoryDrawer = ref(false);
 const editMemoryDrawer = ref(false);
 const deleteConfirmDialog = ref(false);
-const selectedMemoryId = ref<string | null>(null);
+const selectedMemoryId = ref<string | undefined>(undefined);
 const selectedMemory = ref<MemoryDto | null>(null); 
 
 const headers = ref([
@@ -147,12 +147,12 @@ const confirmDeleteMemory = (item: MemoryDto) => {
 
 const closeDetailMemory = () => {
   detailMemoryDrawer.value = false;
-  selectedMemoryId.value = null;
+  selectedMemoryId.value = undefined;
 };
 
 const closeEditMemory = () => {
   editMemoryDrawer.value = false;
-  selectedMemoryId.value = null;
+  selectedMemoryId.value = undefined;
 };
 
 
@@ -161,14 +161,14 @@ const deleteMemory = async () => {
     const result = await memoryStore.deleteItem(selectedMemoryId.value);
     if (result.ok) {
       loadMemories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload list
-      selectedMemoryId.value = null;
+      selectedMemoryId.value = undefined;
       selectedMemory.value = null;
     }
   }
 };
 
 const cancelDelete = () => {
-  selectedMemoryId.value = null;
+  selectedMemoryId.value = undefined;
   selectedMemory.value = null;
 };
 

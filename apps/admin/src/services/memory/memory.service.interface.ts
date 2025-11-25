@@ -1,4 +1,4 @@
-import type { MemoryDto, CreateMemoryDto, UpdateMemoryDto } from '@/types/memory.d';
+import type { MemoryDto } from '@/types/memory.d';
 import type { ApiError } from '@/plugins/axios';
 import type { Result, Paginated } from '@/types';
 import type { ICrudService } from '../common/crud.service.interface';
@@ -14,8 +14,8 @@ export interface MemoryFilter {
 
 export interface IMemoryService extends ICrudService<MemoryDto> {
   // Overriding add/update to use specific DTOs
-  add(newItem: CreateMemoryDto): Promise<Result<MemoryDto, ApiError>>;
-  update(updatedItem: UpdateMemoryDto): Promise<Result<MemoryDto, ApiError>>;
+  add(newItem: MemoryDto): Promise<Result<MemoryDto, ApiError>>; // Changed from CreateMemoryDto
+  update(updatedItem: MemoryDto): Promise<Result<MemoryDto, ApiError>>; // Changed from UpdateMemoryDto
 
   // Overriding fetch (or defining a specific loadItems for lists)
   loadItems(

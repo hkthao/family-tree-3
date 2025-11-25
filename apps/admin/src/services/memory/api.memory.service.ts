@@ -1,4 +1,4 @@
-import type { MemoryDto, CreateMemoryDto, UpdateMemoryDto } from '@/types/memory.d';
+import type { MemoryDto } from '@/types/memory.d';
 import type { IMemoryService, MemoryFilter } from './memory.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import { ok, type Result, type Paginated } from '@/types'; // Import 'ok' from '@/types'
@@ -42,7 +42,7 @@ export class ApiMemoryService implements IMemoryService {
     return ok(fetchedMemories);
   }
 
-  async add(newItem: CreateMemoryDto): Promise<Result<MemoryDto, ApiError>> {
+  async add(newItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from CreateMemoryDto
     // Backend CreateMemoryCommand expects CreateMemoryCommand (which maps from CreateMemoryDto)
     const result = await this.http.post<string>(this.baseRoute, newItem); // Backend returns Guid
     if (result.ok) {
@@ -58,11 +58,11 @@ export class ApiMemoryService implements IMemoryService {
     return { ok: false, error: { name: result.error?.name || 'UnknownError', message: result.error?.message || 'Failed to add memory.' } };
   }
 
-  async update(updatedItem: UpdateMemoryDto): Promise<Result<MemoryDto, ApiError>> {
+  async update(updatedItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from UpdateMemoryDto
     const result = await this.http.put<void>(`${this.baseRoute}/${updatedItem.id}`, updatedItem);
     if (result.ok) {
         // After successful update, fetch the updated memory
-        const updatedMemory = await this.getById(updatedItem.id);
+        const updatedMemory = await this.getById(updatedItem.id!);
         if (updatedMemory.ok && updatedMemory.value) {
             return ok(updatedMemory.value);
         }

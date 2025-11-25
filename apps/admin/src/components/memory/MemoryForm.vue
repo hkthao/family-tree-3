@@ -38,62 +38,8 @@
                 :readonly="readonly || !!memberId" required></MemberAutocomplete>
             </v-col>
 
-            <v-col cols="12" class="mt-4">
-              <h4 class="mb-2">{{ t('memory.create.aiEventSuggestion.title') }}</h4>
-              <v-chip-group v-model="internalMemory.eventSuggestion" selected-class="text-primary" mandatory>
-                <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter>
-                  {{ event }}
-                </v-chip>
-                <v-chip value="unsure" filter>
-                  {{ t('memory.create.aiEventSuggestion.unsure') }}
-                </v-chip>
-              </v-chip-group>
-              <v-text-field v-if="internalMemory.eventSuggestion === 'unsure'"
-                v-model="internalMemory.customEventDescription"
-                :label="t('memory.create.aiEventSuggestion.customDescription')" clearable
-                :readonly="readonly"></v-text-field>
-            </v-col>
-
-            <v-col cols="12" class="mt-4">
-              <h4 class="mb-2">{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
-              <v-row v-if="detectedFaces.length > 0">
-                <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="12" sm="6" md="4" lg="3">
-                  <v-card class="pa-2">
-                    <v-img :src="face.photoUrl" height="100px" contain class="mb-2"></v-img>
-                    <MemberAutocomplete
-                      v-model="face.memberId"
-                      :label="t('member.form.member')"
-                      :readonly="readonly"
-                      variant="outlined"
-                      density="compact"
-                    ></MemberAutocomplete>
-                    <v-text-field
-                      v-model="face.relationPrompt"
-                      :label="t('memory.create.aiCharacterSuggestion.relationPrompt')"
-                      :readonly="readonly"
-                      density="compact"
-                      class="mt-2"
-                    ></v-text-field>
-                  </v-card>
-                </v-col>
-              </v-row>
-              <p v-else class="text-body-2 text-grey">{{ t('memory.create.aiCharacterSuggestion.noFacesDetected') }}</p>
-            </v-col>
-
-            <v-col cols="12" class="mt-4">
-              <h4 class="mb-2">{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
-              <v-chip-group v-model="internalMemory.emotionContextTags" multiple filter selected-class="text-primary">
-                <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag">
-                  {{ tag }}
-                </v-chip>
-              </v-chip-group>
-              <v-text-field
-                v-model="internalMemory.customEmotionContext"
-                :label="t('memory.create.aiEmotionContextSuggestion.customInput')"
-                clearable
-                :readonly="readonly"
-                class="mt-2"
-              ></v-text-field>
+            <v-col cols="12">
+              <AiSuggestionsForm v-model="internalMemory" :readonly="readonly" />
             </v-col>
 
             <v-col cols="12">
@@ -158,10 +104,12 @@
 
             <!-- AI Emotion & Context Suggestions Review -->
             <p v-if="internalMemory.emotionContextTags && internalMemory.emotionContextTags.length > 0">
-              <strong>{{ t('memory.create.aiEmotionContextSuggestion.title') }}:</strong> {{ internalMemory.emotionContextTags.join(', ') }}
+              <strong>{{ t('memory.create.aiEmotionContextSuggestion.title') }}:</strong> {{
+                internalMemory.emotionContextTags.join(', ') }}
             </p>
             <p v-if="internalMemory.customEmotionContext">
-              <strong>{{ t('memory.create.aiEmotionContextSuggestion.customInput') }}:</strong> {{ internalMemory.customEmotionContext }}
+              <strong>{{ t('memory.create.aiEmotionContextSuggestion.customInput') }}:</strong> {{
+                internalMemory.customEmotionContext }}
             </p>
 
           </v-col>
@@ -185,11 +133,12 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
-import type { CreateMemoryDto, MemoryDto } from '@/types/memory';
+import type { MemoryDto } from '@/types/memory';
 import { VFileUpload } from 'vuetify/labs/VFileUpload'
+import AiSuggestionsForm from './AiSuggestionsForm.vue';
 
 const props = defineProps<{
-  modelValue: CreateMemoryDto | MemoryDto;
+  modelValue: MemoryDto;
   readonly?: boolean;
   memberId?: string; // Prop to potentially pre-fill memberId
 }>();
@@ -199,13 +148,11 @@ const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']
 const { t } = useI18n();
 const formStep1 = ref<HTMLFormElement | null>(null); // Now for Photo Upload
 const formStep2 = ref<HTMLFormElement | null>(null); // Now for General Info
-
 const activeStep = ref(1);
-
 const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 2; // 2 MB
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
+const selectedFiles = ref<File[]>([]);
 const photoRules = [
   (files: File[]) => {
     if (!files || files.length === 0) return true;
@@ -221,93 +168,21 @@ const photoRules = [
   },
 ];
 
-const selectedFiles = ref<File[]>([]);
-
 // Use a computed property for internal model to handle v-model
-const internalMemory = computed<CreateMemoryDto | MemoryDto>({
+const internalMemory = computed<MemoryDto>({
   get: () => {
     const model = props.modelValue;
-    // We need to ensure that the returned object conforms to either CreateMemoryDto or MemoryDto
-    // by providing default values for optional properties and ensuring all required properties are there.
-    // The explicit casting helps TypeScript understand the shape of the returned object.
     return {
-      ...(model as any), // Use 'as any' temporarily for spreading to avoid initial type conflicts
-      eventSuggestion: model.eventSuggestion ?? null,
-      customEventDescription: model.customEventDescription ?? null,
+      ...model,
+      eventSuggestion: model.eventSuggestion ?? undefined, // Changed null to undefined
+      customEventDescription: model.customEventDescription ?? undefined, // Changed null to undefined
       emotionContextTags: model.emotionContextTags ?? [],
-      customEmotionContext: model.customEmotionContext ?? null,
+      customEmotionContext: model.customEmotionContext ?? undefined, // Changed null to undefined
       faces: model.faces ?? [],
-    } as CreateMemoryDto | MemoryDto; // Explicitly cast the final object to the expected type
+    } as MemoryDto; // Explicitly cast the final object to the expected type
   },
-  set: (value: CreateMemoryDto | MemoryDto) => emit('update:modelValue', value),
+  set: (value: MemoryDto) => emit('update:modelValue', value),
 });
-
-// If memberId prop is provided and internalMemory.memberId is empty, pre-fill it
-watch(() => props.memberId, (newMemberId) => {
-  if (newMemberId && !internalMemory.value.memberId) {
-    internalMemory.value.memberId = newMemberId;
-  }
-}, { immediate: true });
-
-// Emit selectedFiles changes to parent
-watch(selectedFiles, (newFiles) => {
-  emit('update:selectedFiles', newFiles);
-});
-
-// AI Event Suggestions
-const aiEventSuggestions = ref([
-  t('memory.create.aiEventSuggestion.suggestion1'),
-  t('memory.create.aiEventSuggestion.suggestion2'),
-  t('memory.create.aiEventSuggestion.suggestion3'),
-  t('memory.create.aiEventSuggestion.suggestion4'),
-]);
-
-interface DetectedFace {
-  id: string;
-  photoUrl: string; // Base64 or object URL of the cropped face
-  memberId: string | null; // User's selected member ID
-  relationPrompt: string; // User input for "who is this?" or "relation?"
-}
-
-const detectedFaces = ref<DetectedFace[]>([]);
-
-// Watch internalMemory.faces to populate detectedFaces (e.g., when editing an existing memory)
-watch(() => internalMemory.value.faces, (newFaces) => {
-  if (newFaces) {
-    // Deep copy to prevent direct mutation of internalMemory.faces
-    // and to include photoUrl which is not stored in MemoryFaceDto
-    detectedFaces.value = newFaces.map(faceDto => ({
-      id: faceDto.faceId || '', // Assuming faceId exists or generate a temp one
-      photoUrl: '', // Placeholder. In a real app, this would be fetched or extracted from original image.
-      memberId: faceDto.memberId,
-      relationPrompt: faceDto.relationPrompt || '',
-    }));
-  } else {
-    detectedFaces.value = [];
-  }
-}, { immediate: true, deep: true });
-
-// Watch detectedFaces to update internalMemory.faces when changes occur in UI
-watch(detectedFaces, (newDetectedFaces) => {
-  // Map back to MemoryFaceDto format for internalMemory
-  internalMemory.value.faces = newDetectedFaces.map(face => ({
-    faceId: face.id,
-    memberId: face.memberId,
-    relationPrompt: face.relationPrompt,
-  }));
-}, { deep: true });
-
-// AI Emotion & Context Suggestions
-const aiEmotionContextSuggestions = ref([
-  t('memory.create.aiEmotionContextSuggestion.suggestion1'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion2'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion3'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion4'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion5'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion6'),
-]);
-
-
 
 // If memberId prop is provided and internalMemory.memberId is empty, pre-fill it
 watch(() => props.memberId, (newMemberId) => {

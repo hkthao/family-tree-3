@@ -39,42 +39,9 @@ export interface GenerateStoryResponseDto {
   timeline?: TimelineEntryDto[]; // Dòng thời gian gợi ý
 }
 
-// DTO cho việc tạo Memory
-export interface CreateMemoryDto {
-  memberId: string;
-  title: string;
-  story: string;
-  photoAnalysisId?: string | null;
-  photoUrl?: string | null;
-  tags?: string[];
-  keywords?: string[];
-  eventSuggestion?: string; // Thêm trường này
-  customEventDescription?: string; // Thêm trường này
-  emotionContextTags?: string[]; // Thêm trường này
-  customEmotionContext?: string; // Thêm trường này
-  faces?: MemoryFaceDto[]; // Thêm trường này
-}
-
-// DTO cho việc cập nhật Memory
-export interface UpdateMemoryDto {
-  id: string;
-  memberId: string; // MemberId không đổi, nhưng cần để truyền qua API
-  title: string;
-  story: string;
-  photoAnalysisId?: string | null;
-  photoUrl?: string | null;
-  tags?: string[];
-  keywords?: string[];
-  eventSuggestion?: string; // Thêm trường này
-  customEventDescription?: string; // Thêm trường này
-  emotionContextTags?: string[]; // Thêm trường này
-  customEmotionContext?: string; // Thêm trường này
-  faces?: MemoryFaceDto[]; // Thêm trường này
-}
-
 // DTO cho Memory đầy đủ (khi hiển thị chi tiết hoặc trong danh sách)
 export interface MemoryDto {
-  id: string;
+  id?: string; // Made optional to support new creation
   memberId: string;
   title: string;
   story: string;
@@ -82,12 +49,12 @@ export interface MemoryDto {
   photoUrl?: string | null;
   tags?: string[];
   keywords?: string[];
-  eventSuggestion?: string; // Thêm trường này
-  customEventDescription?: string; // Thêm trường này
-  emotionContextTags?: string[]; // Thêm trường này
-  customEmotionContext?: string; // Thêm trường này
-  faces?: MemoryFaceDto[]; // Thêm trường này
-  createdAt: string;
+  eventSuggestion?: string;
+  customEventDescription?: string;
+  emotionContextTags?: string[];
+  customEmotionContext?: string;
+  faces?: MemoryFaceDto[];
+  createdAt?: string; // Made optional to support new creation
   photoAnalysisResult?: PhotoAnalysisResultDto | null;
   // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị
 }

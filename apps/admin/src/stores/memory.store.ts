@@ -1,7 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { Result, Paginated } from '@/types';
-import type { MemoryDto, CreateMemoryDto, UpdateMemoryDto } from '@/types/memory';
+import type { MemoryDto } from '@/types/memory';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { MemoryFilter } from '@/services/memory/memory.service.interface';
@@ -120,7 +120,7 @@ export const useMemoryStore = defineStore('memory', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: CreateMemoryDto): Promise<Result<MemoryDto, ApiError>> {
+    async addItem(newItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from CreateMemoryDto
       this.add.loading = true;
       this.error = null;
       const result = await this.services.memory.add(newItem);
@@ -134,7 +134,7 @@ export const useMemoryStore = defineStore('memory', {
       return result;
     },
 
-    async updateItem(updatedItem: UpdateMemoryDto): Promise<Result<MemoryDto, ApiError>> {
+    async updateItem(updatedItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from UpdateMemoryDto
       this.update.loading = true;
       this.error = null;
       const result = await this.services.memory.update(updatedItem);
