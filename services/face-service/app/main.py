@@ -1,14 +1,21 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query
-from typing import List, Optional
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form # Added Form
+from fastapi.responses import JSONResponse, Response # Added Response
+from typing import List, Optional, Tuple # Added Tuple
 import uuid
 import base64
 import io
+import json # Added
 from PIL import Image
 import numpy as np
+import cv2 # Added
 
-from app.services.face_detector import DlibFaceDetector  # Changed
+from pydantic import BaseModel # Added for DTOs
+
+from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
-from app.models.face_detection import FaceDetectionResult, BoundingBox
+# Import the newly copied files
+from .crop_face import crop_and_resize_face, encode_image_to_base64
+from .get_emotion import get_emotion
 
 import logging
 
@@ -21,18 +28,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Models for face detection results (redefined here from app.models.face_detection)
+class BoundingBox(BaseModel):
+    x: int
+    y: int
+    width: int
+    height: int
+
+class FaceDetectionResult(BaseModel):
+    id: str
+    bounding_box: BoundingBox
+    confidence: float
+    thumbnail: Optional[str] = None
+    embedding: Optional[List[float]] = None
+
+# New DTOs for image-processing integration
+class FaceLocation(BaseModel):
+    top: int
+    right: int
+    bottom: int
+    left: int
+
+class CropAndAnalyzeFaceResponse(BaseModel):
+    cropped_face_base64: str
+    emotion: str
+    confidence: float
+    member_id: Optional[str] = None
+
 
 app = FastAPI(
-    title="FaceDetectionService",
+    title="ImageFaceEmotionService", # Changed title
     description=(
-        "A FastAPI service for face detection using Dlib."
-    ),  # Changed
+        "A FastAPI service for face detection, embedding, cropping, and emotion analysis." # Changed description
+    ),
     version="1.0.0",
 )
 
 # Initialize the face detector and embedding service
-face_detector = DlibFaceDetector()  # Changed
-face_embedding_service = FaceEmbeddingService()  # Changed
+face_detector = DlibFaceDetector()
+face_embedding_service = FaceEmbeddingService()
 
 
 @app.post("/detect", response_model=List[FaceDetectionResult])
@@ -120,6 +154,52 @@ async def detect_faces(
             status_code=500,
             detail=f"Face detection failed: {e}"
         )
+
+@app.post("/crop-and-analyze-face/", response_model=CropAndAnalyzeFaceResponse)
+async def crop_and_analyze_face_endpoint(
+    file: UploadFile = File(...),
+    face_location_json: str = Form(..., description="JSON string of face location (top, right, bottom, left)"),
+    member_id: Optional[str] = Form(None, description="Optional member ID to associate with the face")
+):
+    """
+    Crops a specific face from an uploaded image based on the provided location,
+    resizes it to 512x512, and performs preliminary emotion analysis.
+    Returns the base64 encoded cropped face and detected emotion.
+    """
+    logger.info(f"Received request to crop and analyze face for file: {file.filename}")
+    try:
+        image_bytes = await file.read()
+        face_location_data = json.loads(face_location_json)
+        
+        # Convert dict to FaceLocation Pydantic model
+        face_location = FaceLocation(**face_location_data)
+
+        # Crop and resize the face
+        # Note: crop_and_resize_face expects a tuple (top, right, bottom, left)
+        # So convert from Pydantic model to tuple
+        cropped_face_base64 = crop_and_resize_face(
+            image_bytes, 
+            (face_location.top, face_location.right, face_location.bottom, face_location.left), 
+            target_size=512
+        )
+        if not cropped_face_base64:
+            raise HTTPException(status_code=400, detail="Failed to crop and resize face.")
+
+        # Perform preliminary emotion analysis
+        predicted_emotion, confidence = get_emotion(cropped_face_base64)
+
+        return CropAndAnalyzeFaceResponse(
+            cropped_face_base64=cropped_face_base64,
+            emotion=predicted_emotion,
+            confidence=confidence,
+            member_id=member_id,
+        )
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON format for face_location: {face_location_json}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Invalid JSON format for face_location.")
+    except Exception as e:
+        logger.error(f"Error processing face: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error processing face: {e}")
 
 if __name__ == "__main__":
     import uvicorn

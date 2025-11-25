@@ -54,20 +54,7 @@ services:
     volumes:
       - ../infra/app/models:/face-service/app/models/dlib_models
 
-  image-processing-service:
-    build:
-      context: ../services/image-processing-service
-      dockerfile: Dockerfile
-    container_name: family-tree-image-processing-service
-    ports:
-      - "8001:8000" # Map host port 8001 to container port 8000 (FastAPI default)
-    env_file:
-      - ./.env.dev # Assuming it might need environment variables
-    environment:
-      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
-    mem_limit: 4g # Increase memory limit as it involves image processing
-    depends_on:
-      - backend # Assuming it might depend on backend for some reason, or just good practice
+
 
 
   puppeteer-service:
