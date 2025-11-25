@@ -32,11 +32,9 @@ public class MemoriesController : ControllerBase
     /// Analyzes a photo using AI to extract context.
     /// </summary>
     [HttpPost("analyze-photo")]
-    [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(PhotoAnalysisResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status413PayloadTooLarge)]
-    public async Task<ActionResult<PhotoAnalysisResultDto>> AnalyzePhoto([FromForm] AnalyzePhotoCommand command, CancellationToken cancellationToken)
+    public async Task<ActionResult<PhotoAnalysisResultDto>> AnalyzePhoto([FromBody] AnalyzePhotoCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
         if (result.IsSuccess)
