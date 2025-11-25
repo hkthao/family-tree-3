@@ -98,44 +98,48 @@ watch(selectedMainCharacterFaceId, (newId) => {
 const handleFileUpload = async (file: File | File[] | null) => {
   if (props.readonly) return;
 
-  if (file instanceof File) {
-    await memoryStore.detectFaces(file);
-    if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-      internalMemory.value.photoAnalysisId = 'generated_id';
-      internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
-      internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
-      // Automatically select the first face as main character if any faces are detected
-      if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-        selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
-      }
-    } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
-      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-      internalMemory.value.faces = []; // Clear faces if none detected
-      selectedMainCharacterFaceId.value = null;
-    }
-  } else if (Array.isArray(file) && file.length > 0) {
-    await memoryStore.detectFaces(file[0]);
-    if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-      internalMemory.value.photoAnalysisId = 'generated_id';
-      internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
-      internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
-      if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-        selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
-      }
-    } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
-      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-      internalMemory.value.faces = []; // Clear faces if none detected
-      selectedMainCharacterFaceId.value = null;
-    }
-  }
-  else {
-    memoryStore.resetFaceRecognitionState();
-    internalMemory.value.photoAnalysisId = undefined;
-    internalMemory.value.faces = [];
-    internalMemory.value.photoUrl = undefined;
-    selectedMainCharacterFaceId.value = null;
-  }
-};
+        if (file instanceof File) {
+          await memoryStore.detectFaces(file);
+          if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+            internalMemory.value.photoAnalysisId = 'generated_id';
+            internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
+            internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
+            internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
+            // Automatically select the first face as main character if any faces are detected
+            if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+              selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+            }
+          } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
+            showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+            internalMemory.value.faces = []; // Clear faces if none detected
+            selectedMainCharacterFaceId.value = null;
+            internalMemory.value.photo = undefined; // Clear photo if no faces detected
+          }
+        } else if (Array.isArray(file) && file.length > 0) {
+          await memoryStore.detectFaces(file[0]);
+          if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+            internalMemory.value.photoAnalysisId = 'generated_id';
+            internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
+            internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
+            internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
+            if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+              selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+            }
+          } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
+            showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+            internalMemory.value.faces = []; // Clear faces if none detected
+            selectedMainCharacterFaceId.value = null;
+            internalMemory.value.photo = undefined; // Clear photo if no faces detected
+          }
+        }
+        else {
+          memoryStore.resetFaceRecognitionState();
+          internalMemory.value.photoAnalysisId = undefined;
+          internalMemory.value.faces = [];
+          internalMemory.value.photoUrl = undefined;
+          internalMemory.value.photo = undefined; // Clear the 'photo' property
+          selectedMainCharacterFaceId.value = null;
+        }};
 
 const openSelectMemberDialog = (faceId: string) => {
   memoryStore.selectFace(faceId);
