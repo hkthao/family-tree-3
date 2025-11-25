@@ -29,7 +29,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the new python files along with the app directory
 COPY app ./app
-COPY app/crop_face.py app/
-COPY app/get_emotion.py app/
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
