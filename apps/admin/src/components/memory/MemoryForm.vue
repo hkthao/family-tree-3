@@ -18,14 +18,22 @@
     <v-stepper-window>
       <!-- Step 1 Content: Photo Upload -->
       <v-stepper-window-item :value="1">
-        <v-form ref="formStep1">
+        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
+        <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
+        <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
           <v-row>
-            <v-col cols="12">
-              <VFileUpload v-model="selectedFiles" :label="t('memory.create.step1.choosePhoto')" :readonly="readonly"
-                accept="image/*" show-size multiple max-files="5" :rules="readonly ? [] : photoRules" />
+            <v-col cols="12" md="8">
+              <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" />
+            </v-col>
+            <v-col cols="12" md="4">
+              <FaceDetectionSidebar :faces="faceStore.detectedFaces" />
             </v-col>
           </v-row>
-        </v-form>
+        </div>
+        <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+          t('face.recognition.uploadPrompt') }}</v-alert>
+        <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+          type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
       </v-stepper-window-item>
 
       <!-- Step 2 Content: General Information -->
@@ -117,15 +125,10 @@
             </p>
 
           </v-col>
-          <v-col cols="12" v-if="selectedFiles.length > 0">
+          <v-col cols="12" v-if="faceStore.uploadedImage">
             <h4>{{ t('memory.create.step1.title') }}</h4> <!-- Photo Upload Title for review -->
-            <p>{{ t('memory.create.step2.analysisResult') }}:</p>
-            <!-- Placeholder for displaying analysis results -->
-            <div v-for="(file, index) in selectedFiles" :key="index">
-              <img :src="fileToBase64(file)" height="100" class="ma-2" />
-              <span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
-            </div>
-            <p v-if="!props.readonly">{{ t('memory.create.step2.noAnalysisYet') }}</p>
+            <img :src="faceStore.uploadedImage" height="100" class="ma-2" />
+            <p v-if="!props.readonly">{{ t('memory.create.step2.analysisResult') }}</p>
           </v-col>
         </v-row>
       </v-stepper-window-item>
@@ -140,6 +143,10 @@ import { MemberAutocomplete } from '@/components/common';
 import type { MemoryDto } from '@/types/memory';
 import { VFileUpload } from 'vuetify/labs/VFileUpload'
 import AiSuggestionsForm from './AiSuggestionsForm.vue';
+import { useFaceStore } from '@/stores/face.store'; // Import useFaceStore
+import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face'; // Import face components
+import type { DetectedFace } from '@/types'; // Import DetectedFace type
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -150,6 +157,8 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 
 const { t } = useI18n();
+const faceStore = useFaceStore(); // Khởi tạo faceStore
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 const formStep1 = ref<HTMLFormElement | null>(null); // Now for Photo Upload
 const formStep2 = ref<HTMLFormElement | null>(null); // Now for General Info
 const activeStep = ref(1);
@@ -157,6 +166,8 @@ const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 2; // 2 MB
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const selectedFiles = ref<File[]>([]);
+const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null); // Ref for FaceUploadInput
+
 const photoRules = [
   (files: File[]) => {
     if (!files || files.length === 0) return true;
@@ -202,6 +213,12 @@ watch(selectedFiles, (newFiles) => {
   emit('update:selectedFiles', newFiles);
 });
 
+watch(() => faceStore.error, (newError) => {
+  if (newError) {
+    showSnackbar(newError, 'error');
+  }
+});
+
 const validateStep = async (step: number) => {
   if (step === 1) { // Now validates Photo Upload
     return formStep1.value ? (await formStep1.value.validate()).valid : false;
@@ -211,8 +228,35 @@ const validateStep = async (step: number) => {
   return true; // Step 3 is review, no direct validation form
 };
 
+const handleFileUpload = async (file: File | File[] | null) => {
+  if (file instanceof File) {
+    await faceStore.detectFaces(file);
+    if (faceStore.detectedFaces.length > 0) {
+      internalMemory.value.photoAnalysisId = 'generated_id'; // Placeholder for analysis ID
+      internalMemory.value.faces = faceStore.detectedFaces;
+      internalMemory.value.photoUrl = faceStore.uploadedImage;
+    } else if (!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0) {
+      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+    }
+  } else if (Array.isArray(file) && file.length > 0) {
+    await faceStore.detectFaces(file[0]);
+    if (faceStore.detectedFaces.length > 0) {
+      internalMemory.value.photoAnalysisId = 'generated_id'; // Placeholder for analysis ID
+      internalMemory.value.faces = faceStore.detectedFaces;
+      internalMemory.value.photoUrl = faceStore.uploadedImage;
+    } else if (!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0) {
+      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+    }
+  } else {
+    faceStore.resetState();
+    internalMemory.value.photoAnalysisId = undefined;
+    internalMemory.value.faces = [];
+    internalMemory.value.photoUrl = undefined;
+  }
+};
+
 const nextStep = async () => {
-  if (props.readonly) { // For readonly mode, just advance step
+  if (props.readonly) {
     activeStep.value++;
     return;
   }
@@ -220,12 +264,17 @@ const nextStep = async () => {
   const isValid = await validateStep(currentStep);
 
   if (isValid) {
-    if (currentStep === 1) { // If currently on photo upload step
-      if (selectedFiles.value.length > 0) {
-        analyzePhotos(); // Analyze photos if selected
+    if (currentStep === 1) {
+      if (faceStore.uploadedImage && faceStore.detectedFaces.length > 0) {
+        activeStep.value = 2;
+      } else if (faceStore.uploadedImage && faceStore.detectedFaces.length === 0) {
+        // If an image was uploaded but no faces detected, still allow to proceed to step 2
+        activeStep.value = 2;
+      } else {
+        // No image uploaded, directly go to step 2
+        activeStep.value = 2;
       }
-      activeStep.value = 2;
-    } else if (currentStep === 2) { // If currently on general info step
+    } else if (currentStep === 2) {
       activeStep.value = 3;
     }
   }
@@ -238,17 +287,11 @@ const prevStep = () => {
 };
 
 const analyzePhotos = () => {
-  // Placeholder for photo analysis logic
-  console.log('Analyzing photos:', selectedFiles.value);
-  // In a real application, this would trigger an AI analysis service
-  // and update internalMemory with analysis results (e.g., photoAnalysisId)
-  // For now, it just logs.
-  alert('Photo analysis triggered! (Check console for files)');
+  // This function is now deprecated. Logic moved to handleFileUpload and useFaceStore.
 };
 
 const fileToBase64 = (file: File): string => {
   if (!file) return '';
-  // This is a synchronous placeholder. In a real app, use FileReader for async conversion.
   return URL.createObjectURL(file);
 };
 
