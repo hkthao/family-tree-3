@@ -141,18 +141,18 @@
           <v-stepper-window-item :value="4">
             <v-card class="mb-5" flat>
               <v-card-title>{{ t('memory.create.step4.reviewEdit') }}</v-card-title>
-              <v-card-text v-if="generatedStory">
-                <StoryEditor :draft="generatedStory" @update:draft="onUpdateGeneratedStory" />
+              <v-card-text v-if="story">
+                <StoryEditor :draft="story" @update:draft="onUpdateGeneratedStory" />
               </v-card-text>
               <v-card-text v-else>
                 <v-alert type="info">{{ t('memory.create.step4.noStoryGenerated') }}</v-alert>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="saveMemory" :disabled="!generatedStory || savingMemory" :loading="savingMemory">
+                <v-btn color="primary" @click="saveMemory" :disabled="!story || savingMemory" :loading="savingMemory">
                   {{ t('memory.create.step5.save') }}
                 </v-btn>
-                <v-btn color="secondary" @click="exportPdf" :disabled="!generatedStory">{{ t('memory.create.step5.exportPdf') }}</v-btn>
+                <v-btn color="secondary" @click="exportPdf" :disabled="!story">{{ t('memory.create.step5.exportPdf') }}</v-btn>
               </v-card-actions>
             </v-card>
           </v-stepper-window-item>
@@ -215,7 +215,7 @@ const memoryTags = ref<string[]>([]);
 const generatingStory = ref(false);
 
 // Step 4: Story Editor
-const generatedStory = ref<any | null>(null);
+const story = ref<any | null>(null);
 const savingMemory = ref(false);
 
 // Step 5: Review & Save
@@ -304,10 +304,10 @@ const generateStory = async () => {
 
   const result = await memoryStore.generateStory(requestPayload);
   if (result.ok) {
-    generatedStory.value = result.value;
-    if (!memoryTitle.value) memoryTitle.value = generatedStory.value.title;
-    if (generatedStory.value.tags && generatedStory.value.tags.length > 0) {
-        memoryTags.value = [...new Set([...memoryTags.value, ...generatedStory.value.tags])];
+    story.value = result.value;
+    if (!memoryTitle.value) memoryTitle.value = story.value.title;
+    if (story.value.tags && story.value.tags.length > 0) {
+        memoryTags.value = [...new Set([...memoryTags.value, ...story.value.tags])];
     }
     currentStep.value = 4; // Move to Story Editor
   } else {
@@ -317,21 +317,21 @@ const generateStory = async () => {
 };
 
 const onUpdateGeneratedStory = (draft: any) => {
-  generatedStory.value = draft; // Update local state when StoryEditor emits changes
+  story.value = draft; // Update local state when StoryEditor emits changes
 };
 
 const saveMemory = async () => {
-  if (!generatedStory.value) return;
+  if (!story.value) return;
 
   savingMemory.value = true;
   const createPayload = {
     memberId: props.memberId,
-    title: memoryTitle.value || generatedStory.value.title,
-    story: generatedStory.value.draftStory,
+    title: memoryTitle.value || story.value.title,
+    story: story.value.draftStory,
     photoAnalysisId: photoAnalysisId.value,
     photoUrl: photoPreviewUrl.value, // Save the original photo URL (or restored if we integrate photo revival)
     tags: memoryTags.value,
-    keywords: generatedStory.value.keywords || [],
+    keywords: story.value.keywords || [],
   };
 
   const result = await memoryStore.addItem(createPayload);

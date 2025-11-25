@@ -48,9 +48,12 @@
                 required></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-textarea v-model="internalMemory.story" :label="t('memory.create.step3.placeholder')"
-                :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
-                required></v-textarea>
+              <v-textarea v-model="internalMemory.rawInput" :label="t('memory.create.rawInputPlaceholder')"
+                :readonly="readonly"></v-textarea>
+            </v-col>
+            <v-col cols="12" v-if="internalMemory.story">
+              <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')"
+                readonly></v-textarea>
             </v-col>
             <v-col cols="12">
               <v-combobox v-model="internalMemory.tags" :label="t('memory.storyEditor.tags')" chips multiple clearable
@@ -71,7 +74,8 @@
             <h4>{{ t('memory.create.step2.title') }}</h4> <!-- General Info Title for review -->
             <p><strong>{{ t('member.form.member') }}:</strong> {{ internalMemory.memberId }}</p>
             <p><strong>{{ t('memory.storyEditor.title') }}:</strong> {{ internalMemory.title }}</p>
-            <p><strong>{{ t('memory.create.step3.placeholder') }}:</strong> {{ internalMemory.story }}</p>
+            <p v-if="internalMemory.rawInput"><strong>{{ t('memory.create.rawInputPlaceholder') }}:</strong> {{ internalMemory.rawInput }}</p>
+            <p v-if="internalMemory.story"><strong>{{ t('memory.storyEditor.storyContent') }}:</strong> {{ internalMemory.story }}</p>
             <p v-if="internalMemory.tags && internalMemory.tags.length > 0">
               <strong>{{ t('memory.storyEditor.tags') }}:</strong> {{ internalMemory.tags.join(', ') }}
             </p>
@@ -174,6 +178,8 @@ const internalMemory = computed<MemoryDto>({
     const model = props.modelValue;
     return {
       ...model,
+      rawInput: model.rawInput ?? undefined, // Use rawInput instead of story
+      story: model.story ?? undefined, // Add story
       eventSuggestion: model.eventSuggestion ?? undefined, // Changed null to undefined
       customEventDescription: model.customEventDescription ?? undefined, // Changed null to undefined
       emotionContextTags: model.emotionContextTags ?? [],

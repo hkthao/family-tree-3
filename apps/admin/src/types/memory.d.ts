@@ -44,7 +44,8 @@ export interface MemoryDto {
   id?: string; // Made optional to support new creation
   memberId: string;
   title: string;
-  story: string;
+  rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
+  story?: string; // New field for AI-generated story
   photoAnalysisId?: string | null;
   photoUrl?: string | null;
   tags?: string[];

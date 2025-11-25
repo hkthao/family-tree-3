@@ -1,8 +1,8 @@
 <template>
   <v-row>
-    <v-col cols="12" class="mt-4">
-      <h4 class="mb-2">{{ t('memory.create.aiEventSuggestion.title') }}</h4>
-      <v-chip-group v-model="localSuggestions.eventSuggestion" color="primary" mandatory>
+    <v-col cols="12">
+      <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
+      <v-chip-group v-model="localSuggestions.eventSuggestion" color="primary" mandatory column>
         <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter variant="tonal">
           {{ event }}
         </v-chip>
@@ -15,32 +15,32 @@
         :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
     </v-col>
 
-    <v-col cols="12" class="mt-4">
-      <h4 class="mb-2">{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
+    <v-col cols="12">
+      <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
       <v-row v-if="detectedFaces.length > 0">
-        <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="12" sm="6" md="4" lg="3">
-          <v-card class="pa-2">
-            <v-img :src="face.photoUrl" height="100px" contain class="mb-2"></v-img>
+        <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="12">
+          <v-card >
+            <v-img :src="face.photoUrl" height="100px" contain></v-img>
             <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :readonly="readonly"
-              variant="outlined" density="compact"></MemberAutocomplete>
+              variant="outlined"></MemberAutocomplete>
             <v-text-field v-model="face.relationPrompt" :label="t('memory.create.aiCharacterSuggestion.relationPrompt')"
-              :readonly="readonly" density="compact" class="mt-2"></v-text-field>
+              :readonly="readonly"></v-text-field>
           </v-card>
         </v-col>
       </v-row>
       <p v-else class="text-body-2 text-grey">{{ t('memory.create.aiCharacterSuggestion.noFacesDetected') }}</p>
     </v-col>
 
-    <v-col cols="12" class="mt-4">
-      <h4 class="mb-2">{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
-      <v-chip-group v-model="localSuggestions.emotionContextTags" multiple filter color="primary">
+    <v-col cols="12">
+      <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
+      <v-chip-group v-model="localSuggestions.emotionContextTags" multiple filter color="primary" column>
         <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag" filter variant="tonal">
           {{ tag }}
         </v-chip>
       </v-chip-group>
       <v-text-field v-model="localSuggestions.customEmotionContext"
-        :label="t('memory.create.aiEmotionContextSuggestion.customInput')" clearable :readonly="readonly"
-        class="mt-2"></v-text-field>
+        :label="t('memory.create.aiEmotionContextSuggestion.customInput')" clearable
+        :readonly="readonly"></v-text-field>
     </v-col>
   </v-row>
 </template>
@@ -49,10 +49,10 @@
 import { ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
-import type { MemoryDto } from '@/types/memory'; // Removed CreateMemoryDto
+import type { MemoryDto } from '@/types/memory';
 
 const props = defineProps<{
-  modelValue: MemoryDto; // Changed to MemoryDto
+  modelValue: MemoryDto;
   readonly?: boolean;
 }>();
 
@@ -60,14 +60,12 @@ const emit = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
 
-const localSuggestions = ref<MemoryDto>({ // Changed to MemoryDto
-  // No need for memberId, title, story defaults here, as they are required and
-  // should always come from props.modelValue or be initialized in parent
-  // id, createdAt will be undefined for new memory
+const localSuggestions = ref<MemoryDto>({
   id: undefined,
-  memberId: '', // Still provide default for non-optional fields just in case
+  memberId: '',
   title: '',
-  story: '',
+  rawInput: undefined, // Changed from story to rawInput and made optional
+  story: undefined, // Added new field
   eventSuggestion: undefined,
   customEventDescription: undefined,
   emotionContextTags: [],
@@ -86,7 +84,8 @@ watch(() => props.modelValue, (newVal) => {
   localSuggestions.value.id = newVal.id;
   localSuggestions.value.memberId = newVal.memberId;
   localSuggestions.value.title = newVal.title;
-  localSuggestions.value.story = newVal.story;
+  localSuggestions.value.rawInput = newVal.rawInput; // Use rawInput
+  localSuggestions.value.story = newVal.story; // Add story
   localSuggestions.value.photoAnalysisId = newVal.photoAnalysisId;
   localSuggestions.value.photoUrl = newVal.photoUrl;
   localSuggestions.value.tags = newVal.tags ?? [];
@@ -100,13 +99,12 @@ watch(() => props.modelValue, (newVal) => {
   localSuggestions.value.photoAnalysisResult = newVal.photoAnalysisResult;
 
   nextTick(() => {
-    updatingFromProp.value = false; // Reset flag after Vue's update cycle
+    updatingFromProp.value = false;
   });
 }, { immediate: true, deep: true });
 
-// Watch localSuggestions to emit update:modelValue when it changes
 watch(localSuggestions, (newVal) => {
-  if (!updatingFromProp.value) { // Only emit if change didn't originate from prop
+  if (!updatingFromProp.value) {
     emit('update:modelValue', newVal);
   }
 }, { deep: true });
@@ -133,7 +131,7 @@ watch(() => localSuggestions.value.faces, (newFaces) => {
   if (newFaces) {
     detectedFaces.value = newFaces.map(faceDto => ({
       id: faceDto.faceId || '',
-      photoUrl: '', // Placeholder. In a real app, this would be fetched or extracted from original image.
+      photoUrl: '',
       memberId: faceDto.memberId,
       relationPrompt: faceDto.relationPrompt || '',
     }));

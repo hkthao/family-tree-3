@@ -51,7 +51,8 @@ const isSaving = ref(false); // To manage loading state for buttons
 const editedMemory = ref<MemoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
-  story: '',
+  rawInput: undefined, // Changed from story to rawInput and made optional
+  story: undefined, // Added new field
   photoAnalysisId: undefined,
   photoUrl: undefined, // This will temporarily hold a file name if files are selected
   tags: [],
