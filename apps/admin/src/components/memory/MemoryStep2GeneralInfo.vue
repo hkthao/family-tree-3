@@ -2,12 +2,6 @@
   <v-form ref="formStep2">
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete class="mt-2" v-model="internalMemory.memberId" :label="t('member.form.member')"
-          :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
-          :readonly="readonly || !!memberId" required></MemberAutocomplete>
-      </v-col>
-
-      <v-col cols="12">
         <AiSuggestionsForm v-model="internalMemory" :readonly="readonly" />
       </v-col>
 

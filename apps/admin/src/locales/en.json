@@ -1012,7 +1012,7 @@
   "memory.style.warm": "Warm",
   "memory.style.formal": "Formal",
   "memory.style.folk": "Folk",
-
+  "memory.create.aiEventSuggestion.title": "Can you tell us what this event could be ?",
   "tour": {
     "familyList": {
       "search": {

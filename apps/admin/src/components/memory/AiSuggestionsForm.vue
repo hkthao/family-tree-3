@@ -6,19 +6,17 @@
         <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="6">
           <v-card>
             <v-img class="rounded-sm my-4" :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
-            <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true"
-              ></MemberAutocomplete>
-            <v-text-field
-            class="mt-2"
-            v-model="face.relationPrompt" :label="t('memory.create.aiCharacterSuggestion.relationPrompt')"
-              :readonly="readonly"></v-text-field>
+            <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">
+            </MemberAutocomplete>
+            <v-text-field class="mt-2" v-model="face.relationPrompt"
+              :label="t('memory.create.aiCharacterSuggestion.relationPrompt')" :readonly="readonly"></v-text-field>
           </v-card>
         </v-col>
       </v-row>
       <p v-else class="text-body-2 text-grey">{{ t('memory.create.aiCharacterSuggestion.noFacesDetected') }}</p>
     </v-col>
 
-     <v-col cols="12">
+    <v-col cols="12">
       <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
       <v-chip-group v-model="localSuggestions.eventSuggestion" color="primary" mandatory column>
         <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter variant="tonal">
@@ -28,21 +26,15 @@
           {{ t('memory.create.aiEventSuggestion.unsure') }}
         </v-chip>
       </v-chip-group>
-      <v-text-field v-if="localSuggestions.eventSuggestion === 'unsure'"
+      <v-text-field class="mt-2" v-if="localSuggestions.eventSuggestion === 'unsure'"
         v-model="localSuggestions.customEventDescription"
         :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
-    </v-col>
-
-    <v-col cols="12">
       <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
       <v-chip-group v-model="localSuggestions.emotionContextTags" multiple filter color="primary" column>
         <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag" filter variant="tonal">
           {{ tag }}
         </v-chip>
       </v-chip-group>
-      <v-text-field v-model="localSuggestions.customEmotionContext"
-        :label="t('memory.create.aiEmotionContextSuggestion.customInput')" clearable
-        :readonly="readonly"></v-text-field>
     </v-col>
   </v-row>
 </template>
@@ -76,7 +68,6 @@ const localSuggestions = ref<MemoryDto>({
   eventSuggestion: undefined,
   customEventDescription: undefined,
   emotionContextTags: [],
-  customEmotionContext: undefined,
   faces: [], // Initialized as empty array of MemoryFaceDto
   createdAt: undefined,
 });
@@ -100,7 +91,6 @@ watch(() => props.modelValue, (newVal) => {
   localSuggestions.value.eventSuggestion = newVal.eventSuggestion ?? undefined;
   localSuggestions.value.customEventDescription = newVal.customEventDescription ?? undefined;
   localSuggestions.value.emotionContextTags = newVal.emotionContextTags ?? [];
-  localSuggestions.value.customEmotionContext = newVal.customEmotionContext ?? undefined;
   localSuggestions.value.faces = newVal.faces ?? []; // MemoryDto.faces is now DetectedFace[]
   localSuggestions.value.createdAt = newVal.createdAt;
   localSuggestions.value.photoAnalysisResult = newVal.photoAnalysisResult;
@@ -158,9 +148,3 @@ const getFaceThumbnailSrc = (face: DetectedFace) => { // Use DetectedFace type h
   return '';
 };
 </script>
-
-<style scoped>
-.member-thumbnail{
-
-}
-</style>

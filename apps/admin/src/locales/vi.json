@@ -976,7 +976,7 @@
   "memory.create.step2.title": "Thông tin chung",
   "memory.create.step3.title": "Xem lại & Lưu",
   "memory.create.action.analyze": "Phân tích ảnh",
-  "memory.create.aiEventSuggestion.title": "Gợi ý đây có thể là sự kiện gì?",
+  "memory.create.aiEventSuggestion.title": "Bạn có thể cho biết đây là sự kiện gì không ?",
   "memory.create.aiEventSuggestion.suggestion1": "Sinh nhật",
   "memory.create.aiEventSuggestion.suggestion2": "Đám cưới",
   "memory.create.aiEventSuggestion.suggestion3": "Kỷ niệm",
