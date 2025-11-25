@@ -2,7 +2,7 @@ import base64
 import binascii # Import binascii for specific error handling
 import cv2
 import numpy as np
-import random
+from deepface import DeepFace
 
 # In a real scenario, you'd load a pre-trained model here
 # For example:
@@ -32,15 +32,22 @@ def get_emotion(face_image_base64: str):
             # If image loading fails, it's an invalid input for emotion detection
             raise ValueError("Could not load face image from base64 string.")
 
-        # For demonstration, return a random emotion
-        emotions = ["happy", "sad", "neutral", "angry", "surprise", "fear", "disgust"]
-        predicted_emotion = random.choice(emotions)
-        confidence = round(random.uniform(0.5, 0.99), 2) # Random confidence
+        # Convert face_image (OpenCV format) to RGB as DeepFace expects
+        rgb_face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
 
-        # In a real scenario:
-        # result = DeepFace.analyze(face_image, actions=['emotion'], enforce_detection=False)
-        # predicted_emotion = result[0]['dominant_emotion']
-        # confidence = result[0]['emotion'][predicted_emotion] # Or other confidence metric
+        # Perform emotion analysis using DeepFace
+        # enforce_detection=False is used because we are already passing a cropped face
+        result = DeepFace.analyze(rgb_face_image, actions=['emotion'], enforce_detection=False)
+        
+        if result and len(result) > 0:
+            dominant_emotion = result[0]['dominant_emotion']
+            # DeepFace returns a dictionary of emotions with their scores
+            # We can use the score of the dominant emotion as confidence
+            confidence = float(result[0]['emotion'][dominant_emotion] / 100.0) # Convert to a 0-1 range and ensure it's a native float
+            predicted_emotion = dominant_emotion
+        else:
+            predicted_emotion = "unknown"
+            confidence = 0.0
 
         return predicted_emotion, confidence
     except Exception as e:
