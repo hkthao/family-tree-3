@@ -19,8 +19,8 @@
       <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
       <v-row v-if="detectedFaces.length > 0">
         <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="12">
-          <v-card >
-            <v-img :src="face.photoUrl" height="100px" contain></v-img>
+          <v-card>
+            <v-img :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
             <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :readonly="readonly"
               variant="outlined"></MemberAutocomplete>
             <v-text-field v-model="face.relationPrompt" :label="t('memory.create.aiCharacterSuggestion.relationPrompt')"
@@ -49,7 +49,8 @@
 import { ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
-import type { MemoryDto } from '@/types/memory';
+import type { MemoryDto, MemoryFaceDto } from '@/types/memory'; // Import MemoryFaceDto
+import type { DetectedFace } from '@/types'; // Import DetectedFace (for getFaceThumbnailSrc)
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -62,15 +63,19 @@ const { t } = useI18n();
 
 const localSuggestions = ref<MemoryDto>({
   id: undefined,
-  memberId: '',
+  memberId: null, // Initialized as null now
   title: '',
-  rawInput: undefined, // Changed from story to rawInput and made optional
-  story: undefined, // Added new field
+  rawInput: undefined,
+  story: undefined,
+  photoAnalysisId: undefined,
+  photoUrl: undefined,
+  tags: [],
+  keywords: [],
   eventSuggestion: undefined,
   customEventDescription: undefined,
   emotionContextTags: [],
   customEmotionContext: undefined,
-  faces: [],
+  faces: [], // Initialized as empty array of MemoryFaceDto
   createdAt: undefined,
 });
 
@@ -84,8 +89,8 @@ watch(() => props.modelValue, (newVal) => {
   localSuggestions.value.id = newVal.id;
   localSuggestions.value.memberId = newVal.memberId;
   localSuggestions.value.title = newVal.title;
-  localSuggestions.value.rawInput = newVal.rawInput; // Use rawInput
-  localSuggestions.value.story = newVal.story; // Add story
+  localSuggestions.value.rawInput = newVal.rawInput;
+  localSuggestions.value.story = newVal.story;
   localSuggestions.value.photoAnalysisId = newVal.photoAnalysisId;
   localSuggestions.value.photoUrl = newVal.photoUrl;
   localSuggestions.value.tags = newVal.tags ?? [];
@@ -94,7 +99,7 @@ watch(() => props.modelValue, (newVal) => {
   localSuggestions.value.customEventDescription = newVal.customEventDescription ?? undefined;
   localSuggestions.value.emotionContextTags = newVal.emotionContextTags ?? [];
   localSuggestions.value.customEmotionContext = newVal.customEmotionContext ?? undefined;
-  localSuggestions.value.faces = newVal.faces ?? [];
+  localSuggestions.value.faces = newVal.faces ?? []; // MemoryDto.faces is now DetectedFace[]
   localSuggestions.value.createdAt = newVal.createdAt;
   localSuggestions.value.photoAnalysisResult = newVal.photoAnalysisResult;
 
@@ -117,24 +122,12 @@ const aiEventSuggestions = ref([
   t('memory.create.aiEventSuggestion.suggestion4'),
 ]);
 
-interface DetectedFace {
-  id: string;
-  photoUrl: string; // Base64 or object URL of the cropped face
-  memberId: string | null; // User's selected member ID
-  relationPrompt: string; // User input for "who is this?" or "relation?"
-}
-
-const detectedFaces = ref<DetectedFace[]>([]);
+const detectedFaces = ref<MemoryFaceDto[]>([]); // Use MemoryFaceDto from '@/types/memory'
 
 // Watch localSuggestions.faces to populate detectedFaces (e.g., when editing an existing memory)
 watch(() => localSuggestions.value.faces, (newFaces) => {
   if (newFaces) {
-    detectedFaces.value = newFaces.map(faceDto => ({
-      id: faceDto.faceId || '',
-      photoUrl: '',
-      memberId: faceDto.memberId,
-      relationPrompt: faceDto.relationPrompt || '',
-    }));
+    detectedFaces.value = newFaces; // Direct assignment since MemoryDto.faces is now DetectedFace[]
   } else {
     detectedFaces.value = [];
   }
@@ -142,11 +135,7 @@ watch(() => localSuggestions.value.faces, (newFaces) => {
 
 // Watch detectedFaces to update localSuggestions.faces when changes occur in UI
 watch(detectedFaces, (newDetectedFaces) => {
-  localSuggestions.value.faces = newDetectedFaces.map(face => ({
-    faceId: face.id,
-    memberId: face.memberId,
-    relationPrompt: face.relationPrompt,
-  }));
+  localSuggestions.value.faces = newDetectedFaces; // Direct assignment
 }, { deep: true });
 
 
@@ -160,4 +149,10 @@ const aiEmotionContextSuggestions = ref([
   t('memory.create.aiEmotionContextSuggestion.suggestion6'),
 ]);
 
+const getFaceThumbnailSrc = (face: DetectedFace) => { // Use DetectedFace type here
+  if (face.thumbnail) {
+    return `data:image/jpeg;base64,${face.thumbnail}`;
+  }
+  return '';
+};
 </script>
