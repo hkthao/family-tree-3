@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 
 # Load the emotion detection model
-emotion_model_path = 'app/models/emotion_model.hdf5'  # Update this path to your model
+emotion_model_path = '../models/emotion_model.hdf5'  # Update this path to your model
 emotion_classifier = load_model(emotion_model_path, compile=False)
 emotion_classifier.make_predict_function()
 emotion_labels = [
