@@ -961,10 +961,6 @@
   "memory.create.step5.saveFailed": "Failed to save memory.",
   "memory.create.step5.viewMemory": "View Memory Details",
   "memory.create.selectMainCharacter": "You want to create a memory about whom",
-  "memory.create.perspective.title": "Story Perspective",
-  "memory.create.perspective.firstPerson": "From creator's perspective (first person)",
-  "memory.create.perspective.neutralPersonal": "Neutral yet personal",
-  "memory.create.perspective.fullyNeutral": "Fully neutral",
 
   "memory.photoAnalysis.title": "Photo Analysis",
   "memory.photoAnalysis.summary": "Summary",

@@ -988,6 +988,10 @@
   "memory.create.aiCharacterSuggestion.relationPrompt": "Đây là ai? / Quan hệ với bạn?",
   "memory.create.aiCharacterSuggestion.noFacesDetected": "Không tìm thấy khuôn mặt nào trong ảnh. Vui lòng tải ảnh có người.",
   "memory.create.selectMainCharacter": "Bạn muốn tạo ký ức về ai",
+  "memory.create.perspective.title": "Góc nhìn bài viết",
+  "memory.create.perspective.firstPerson": "Từ góc nhìn của người tạo (ngôi thứ nhất)",
+  "memory.create.perspective.neutralPersonal": "Trung lập nhưng mang cảm xúc cá nhân",
+  "memory.create.perspective.fullyNeutral": "Trung lập hoàn toàn",
 
   "memory.create.aiEmotionContextSuggestion.title": "Cảm nhận được cảm xúc và bối cảnh gì?",
   "memory.create.aiEmotionContextSuggestion.suggestion1": "Nụ cười hạnh phúc 😊",
