@@ -55,11 +55,11 @@ public static class DependencyInjection
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
         // Register N8nSettings
-        services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
-
-        // Register n8nSettings
-        services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
-        // Register JwtHelperFactory
+                services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
+                // Register ImageProcessingServiceSettings
+                services.Configure<ImageProcessingServiceSettings>(configuration.GetSection(ImageProcessingServiceSettings.SectionName));
+        
+                // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
 
         // Register Background Task Queue
