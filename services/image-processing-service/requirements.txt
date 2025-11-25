@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart
+opencv-python-headless # For image processing, easier to install than dlib
+Pillow # For basic image manipulation
+scikit-image # For image resizing and other utilities
+
+# For Face Detection (face_recognition depends on dlib)
+# dlib # Known to be hard to install, will try to use face_recognition's capabilities directly if possible
+face_recognition
+# deepface # Uncomment and install if you want to use DeepFace for emotion detection
+
+pytest
+httpx
