@@ -1,6 +1,6 @@
 <template>
   <v-stepper v-model="activeStep" :alt-labels="!readonly" :hide-actions="true" flat>
-    <v-stepper-header>
+    <v-stepper-header class="stepper-header">
       <!-- Step 1: Photo Upload -->
       <v-stepper-item :value="1" :title="t('memory.create.step1.title')" :complete="activeStep > 1"></v-stepper-item>
 
@@ -21,16 +21,8 @@
         <v-form ref="formStep1">
           <v-row>
             <v-col cols="12">
-              <VFileUpload
-                  v-model="selectedFiles"
-                  :label="t('memory.create.step1.choosePhoto')"
-                  :readonly="readonly"
-                  accept="image/*"
-                  show-size
-                  multiple
-                  max-files="5"
-                  :rules="readonly ? [] : photoRules"
-              />
+              <VFileUpload v-model="selectedFiles" :label="t('memory.create.step1.choosePhoto')" :readonly="readonly"
+                accept="image/*" show-size multiple max-files="5" :rules="readonly ? [] : photoRules" />
             </v-col>
           </v-row>
         </v-form>
@@ -42,27 +34,85 @@
           <v-row>
             <v-col cols="12">
               <MemberAutocomplete v-model="internalMemory.memberId" :label="t('member.form.member')"
-                  :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
-                  :readonly="readonly || !!memberId" required></MemberAutocomplete>
+                :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
+                :readonly="readonly || !!memberId" required></MemberAutocomplete>
+            </v-col>
+
+            <v-col cols="12" class="mt-4">
+              <h4 class="mb-2">{{ t('memory.create.aiEventSuggestion.title') }}</h4>
+              <v-chip-group v-model="internalMemory.eventSuggestion" selected-class="text-primary" mandatory>
+                <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter>
+                  {{ event }}
+                </v-chip>
+                <v-chip value="unsure" filter>
+                  {{ t('memory.create.aiEventSuggestion.unsure') }}
+                </v-chip>
+              </v-chip-group>
+              <v-text-field v-if="internalMemory.eventSuggestion === 'unsure'"
+                v-model="internalMemory.customEventDescription"
+                :label="t('memory.create.aiEventSuggestion.customDescription')" clearable
+                :readonly="readonly"></v-text-field>
+            </v-col>
+
+            <v-col cols="12" class="mt-4">
+              <h4 class="mb-2">{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
+              <v-row v-if="detectedFaces.length > 0">
+                <v-col v-for="(face, index) in detectedFaces" :key="face.id" cols="12" sm="6" md="4" lg="3">
+                  <v-card class="pa-2">
+                    <v-img :src="face.photoUrl" height="100px" contain class="mb-2"></v-img>
+                    <MemberAutocomplete
+                      v-model="face.memberId"
+                      :label="t('member.form.member')"
+                      :readonly="readonly"
+                      variant="outlined"
+                      density="compact"
+                    ></MemberAutocomplete>
+                    <v-text-field
+                      v-model="face.relationPrompt"
+                      :label="t('memory.create.aiCharacterSuggestion.relationPrompt')"
+                      :readonly="readonly"
+                      density="compact"
+                      class="mt-2"
+                    ></v-text-field>
+                  </v-card>
+                </v-col>
+              </v-row>
+              <p v-else class="text-body-2 text-grey">{{ t('memory.create.aiCharacterSuggestion.noFacesDetected') }}</p>
+            </v-col>
+
+            <v-col cols="12" class="mt-4">
+              <h4 class="mb-2">{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
+              <v-chip-group v-model="internalMemory.emotionContextTags" multiple filter selected-class="text-primary">
+                <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag">
+                  {{ tag }}
+                </v-chip>
+              </v-chip-group>
+              <v-text-field
+                v-model="internalMemory.customEmotionContext"
+                :label="t('memory.create.aiEmotionContextSuggestion.customInput')"
+                clearable
+                :readonly="readonly"
+                class="mt-2"
+              ></v-text-field>
             </v-col>
 
             <v-col cols="12">
               <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')"
-                  :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
-                  required></v-text-field>
+                :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
+                required></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-textarea v-model="internalMemory.story" :label="t('memory.create.step3.placeholder')"
-                  :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
-                  required></v-textarea>
+                :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
+                required></v-textarea>
             </v-col>
             <v-col cols="12">
               <v-combobox v-model="internalMemory.tags" :label="t('memory.storyEditor.tags')" chips multiple clearable
-                  :readonly="readonly"></v-combobox>
+                :readonly="readonly"></v-combobox>
             </v-col>
             <v-col cols="12">
               <v-combobox v-model="internalMemory.keywords" :label="t('memory.storyEditor.keywords')" chips multiple
-                  clearable :readonly="readonly"></v-combobox>
+                clearable :readonly="readonly"></v-combobox>
             </v-col>
           </v-row>
         </v-form>
@@ -70,30 +120,62 @@
 
       <!-- Step 3 Content: Review & Save -->
       <v-stepper-window-item :value="3">
-          <v-row>
-            <v-col cols="12">
-              <h4>{{ t('memory.create.step2.title') }}</h4> <!-- Photo Upload Title for review -->
-              <p><strong>{{ t('member.form.member') }}:</strong> {{ internalMemory.memberId }}</p>
-              <p><strong>{{ t('memory.storyEditor.title') }}:</strong> {{ internalMemory.title }}</p>
-              <p><strong>{{ t('memory.create.step3.placeholder') }}:</strong> {{ internalMemory.story }}</p>
-              <p v-if="internalMemory.tags && internalMemory.tags.length > 0">
-                <strong>{{ t('memory.storyEditor.tags') }}:</strong> {{ internalMemory.tags.join(', ') }}
-              </p>
-              <p v-if="internalMemory.keywords && internalMemory.keywords.length > 0">
-                <strong>{{ t('memory.storyEditor.keywords') }}:</strong> {{ internalMemory.keywords.join(', ') }}
-              </p>
-            </v-col>
-            <v-col cols="12" v-if="selectedFiles.length > 0">
-              <h4>{{ t('memory.create.step1.title') }}</h4> <!-- General Info Title for review -->
-              <p>{{ t('memory.create.step2.analysisResult') }}:</p>
-              <!-- Placeholder for displaying analysis results -->
-              <div v-for="(file, index) in selectedFiles" :key="index">
-                <img :src="fileToBase64(file)" height="100" class="ma-2" />
-                <span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
-              </div>
-              <p v-if="!props.readonly">{{ t('memory.create.step2.noAnalysisYet') }}</p>
-            </v-col>
-          </v-row>
+        <v-row>
+          <v-col cols="12">
+            <h4>{{ t('memory.create.step2.title') }}</h4> <!-- General Info Title for review -->
+            <p><strong>{{ t('member.form.member') }}:</strong> {{ internalMemory.memberId }}</p>
+            <p><strong>{{ t('memory.storyEditor.title') }}:</strong> {{ internalMemory.title }}</p>
+            <p><strong>{{ t('memory.create.step3.placeholder') }}:</strong> {{ internalMemory.story }}</p>
+            <p v-if="internalMemory.tags && internalMemory.tags.length > 0">
+              <strong>{{ t('memory.storyEditor.tags') }}:</strong> {{ internalMemory.tags.join(', ') }}
+            </p>
+            <p v-if="internalMemory.keywords && internalMemory.keywords.length > 0">
+              <strong>{{ t('memory.storyEditor.keywords') }}:</strong> {{ internalMemory.keywords.join(', ') }}
+            </p>
+
+            <!-- AI Event Suggestion Review -->
+            <p v-if="internalMemory.eventSuggestion">
+              <strong>{{ t('memory.create.aiEventSuggestion.title') }}:</strong> {{ internalMemory.eventSuggestion }}
+              <span v-if="internalMemory.customEventDescription && internalMemory.eventSuggestion === 'unsure'">
+                ({{ internalMemory.customEventDescription }})
+              </span>
+            </p>
+
+            <!-- AI Character Suggestions Review -->
+            <p v-if="internalMemory.faces && internalMemory.faces.length > 0">
+              <strong>{{ t('memory.create.aiCharacterSuggestion.title') }}:</strong>
+              <v-list density="compact">
+                <v-list-item v-for="(face, index) in internalMemory.faces" :key="index">
+                  <v-list-item-title>
+                    {{ t('member.form.member') }}: {{ face.memberId || t('common.unknown') }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle v-if="face.relationPrompt">
+                    {{ t('memory.create.aiCharacterSuggestion.relationPrompt') }}: {{ face.relationPrompt }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </p>
+
+            <!-- AI Emotion & Context Suggestions Review -->
+            <p v-if="internalMemory.emotionContextTags && internalMemory.emotionContextTags.length > 0">
+              <strong>{{ t('memory.create.aiEmotionContextSuggestion.title') }}:</strong> {{ internalMemory.emotionContextTags.join(', ') }}
+            </p>
+            <p v-if="internalMemory.customEmotionContext">
+              <strong>{{ t('memory.create.aiEmotionContextSuggestion.customInput') }}:</strong> {{ internalMemory.customEmotionContext }}
+            </p>
+
+          </v-col>
+          <v-col cols="12" v-if="selectedFiles.length > 0">
+            <h4>{{ t('memory.create.step1.title') }}</h4> <!-- Photo Upload Title for review -->
+            <p>{{ t('memory.create.step2.analysisResult') }}:</p>
+            <!-- Placeholder for displaying analysis results -->
+            <div v-for="(file, index) in selectedFiles" :key="index">
+              <img :src="fileToBase64(file)" height="100" class="ma-2" />
+              <span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span>
+            </div>
+            <p v-if="!props.readonly">{{ t('memory.create.step2.noAnalysisYet') }}</p>
+          </v-col>
+        </v-row>
       </v-stepper-window-item>
     </v-stepper-window>
   </v-stepper>
@@ -124,8 +206,6 @@ const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 2; // 2 MB
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-const selectedFiles = ref<File[]>([]);
-
 const photoRules = [
   (files: File[]) => {
     if (!files || files.length === 0) return true;
@@ -141,11 +221,93 @@ const photoRules = [
   },
 ];
 
+const selectedFiles = ref<File[]>([]);
+
 // Use a computed property for internal model to handle v-model
 const internalMemory = computed<CreateMemoryDto | MemoryDto>({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+  get: () => {
+    const model = props.modelValue;
+    // We need to ensure that the returned object conforms to either CreateMemoryDto or MemoryDto
+    // by providing default values for optional properties and ensuring all required properties are there.
+    // The explicit casting helps TypeScript understand the shape of the returned object.
+    return {
+      ...(model as any), // Use 'as any' temporarily for spreading to avoid initial type conflicts
+      eventSuggestion: model.eventSuggestion ?? null,
+      customEventDescription: model.customEventDescription ?? null,
+      emotionContextTags: model.emotionContextTags ?? [],
+      customEmotionContext: model.customEmotionContext ?? null,
+      faces: model.faces ?? [],
+    } as CreateMemoryDto | MemoryDto; // Explicitly cast the final object to the expected type
+  },
+  set: (value: CreateMemoryDto | MemoryDto) => emit('update:modelValue', value),
 });
+
+// If memberId prop is provided and internalMemory.memberId is empty, pre-fill it
+watch(() => props.memberId, (newMemberId) => {
+  if (newMemberId && !internalMemory.value.memberId) {
+    internalMemory.value.memberId = newMemberId;
+  }
+}, { immediate: true });
+
+// Emit selectedFiles changes to parent
+watch(selectedFiles, (newFiles) => {
+  emit('update:selectedFiles', newFiles);
+});
+
+// AI Event Suggestions
+const aiEventSuggestions = ref([
+  t('memory.create.aiEventSuggestion.suggestion1'),
+  t('memory.create.aiEventSuggestion.suggestion2'),
+  t('memory.create.aiEventSuggestion.suggestion3'),
+  t('memory.create.aiEventSuggestion.suggestion4'),
+]);
+
+interface DetectedFace {
+  id: string;
+  photoUrl: string; // Base64 or object URL of the cropped face
+  memberId: string | null; // User's selected member ID
+  relationPrompt: string; // User input for "who is this?" or "relation?"
+}
+
+const detectedFaces = ref<DetectedFace[]>([]);
+
+// Watch internalMemory.faces to populate detectedFaces (e.g., when editing an existing memory)
+watch(() => internalMemory.value.faces, (newFaces) => {
+  if (newFaces) {
+    // Deep copy to prevent direct mutation of internalMemory.faces
+    // and to include photoUrl which is not stored in MemoryFaceDto
+    detectedFaces.value = newFaces.map(faceDto => ({
+      id: faceDto.faceId || '', // Assuming faceId exists or generate a temp one
+      photoUrl: '', // Placeholder. In a real app, this would be fetched or extracted from original image.
+      memberId: faceDto.memberId,
+      relationPrompt: faceDto.relationPrompt || '',
+    }));
+  } else {
+    detectedFaces.value = [];
+  }
+}, { immediate: true, deep: true });
+
+// Watch detectedFaces to update internalMemory.faces when changes occur in UI
+watch(detectedFaces, (newDetectedFaces) => {
+  // Map back to MemoryFaceDto format for internalMemory
+  internalMemory.value.faces = newDetectedFaces.map(face => ({
+    faceId: face.id,
+    memberId: face.memberId,
+    relationPrompt: face.relationPrompt,
+  }));
+}, { deep: true });
+
+// AI Emotion & Context Suggestions
+const aiEmotionContextSuggestions = ref([
+  t('memory.create.aiEmotionContextSuggestion.suggestion1'),
+  t('memory.create.aiEmotionContextSuggestion.suggestion2'),
+  t('memory.create.aiEmotionContextSuggestion.suggestion3'),
+  t('memory.create.aiEmotionContextSuggestion.suggestion4'),
+  t('memory.create.aiEmotionContextSuggestion.suggestion5'),
+  t('memory.create.aiEmotionContextSuggestion.suggestion6'),
+]);
+
+
 
 // If memberId prop is provided and internalMemory.memberId is empty, pre-fill it
 watch(() => props.memberId, (newMemberId) => {
@@ -178,12 +340,12 @@ const nextStep = async () => {
 
   if (isValid) {
     if (currentStep === 1) { // If currently on photo upload step
-        if (selectedFiles.value.length > 0) {
-            analyzePhotos(); // Analyze photos if selected
-        }
-        activeStep.value = 2;
+      if (selectedFiles.value.length > 0) {
+        analyzePhotos(); // Analyze photos if selected
+      }
+      activeStep.value = 2;
     } else if (currentStep === 2) { // If currently on general info step
-        activeStep.value = 3;
+      activeStep.value = 3;
     }
   }
 };
@@ -218,3 +380,9 @@ defineExpose({
   prevStep,
 });
 </script>
+
+<style scoped>
+.stepper-header {
+  box-shadow: none;
+}
+</style>

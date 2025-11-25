@@ -48,6 +48,11 @@ export interface CreateMemoryDto {
   photoUrl?: string | null;
   tags?: string[];
   keywords?: string[];
+  eventSuggestion?: string; // Thêm trường này
+  customEventDescription?: string; // Thêm trường này
+  emotionContextTags?: string[]; // Thêm trường này
+  customEmotionContext?: string; // Thêm trường này
+  faces?: MemoryFaceDto[]; // Thêm trường này
 }
 
 // DTO cho việc cập nhật Memory
@@ -60,6 +65,11 @@ export interface UpdateMemoryDto {
   photoUrl?: string | null;
   tags?: string[];
   keywords?: string[];
+  eventSuggestion?: string; // Thêm trường này
+  customEventDescription?: string; // Thêm trường này
+  emotionContextTags?: string[]; // Thêm trường này
+  customEmotionContext?: string; // Thêm trường này
+  faces?: MemoryFaceDto[]; // Thêm trường này
 }
 
 // DTO cho Memory đầy đủ (khi hiển thị chi tiết hoặc trong danh sách)
@@ -72,7 +82,20 @@ export interface MemoryDto {
   photoUrl?: string | null;
   tags?: string[];
   keywords?: string[];
+  eventSuggestion?: string; // Thêm trường này
+  customEventDescription?: string; // Thêm trường này
+  emotionContextTags?: string[]; // Thêm trường này
+  customEmotionContext?: string; // Thêm trường này
+  faces?: MemoryFaceDto[]; // Thêm trường này
   createdAt: string;
   photoAnalysisResult?: PhotoAnalysisResultDto | null;
   // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị
+}
+
+// DTO for identified faces in a memory
+export interface MemoryFaceDto {
+  faceId?: string; // ID của khuôn mặt được phát hiện (ví dụ: từ phân tích ảnh)
+  memberId: string | null; // ID của thành viên được liên kết với khuôn mặt này
+  relationPrompt?: string; // Mô tả của người dùng cho "đây là ai?" hoặc "quan hệ?"
+  // Bạn có thể bao gồm URL hoặc ID của khuôn mặt đã cắt nếu cần cho việc hiển thị sau này
 }

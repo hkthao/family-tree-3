@@ -18,10 +18,10 @@
     <v-btn color="blue-darken-1" variant="text" @click="handleClose">
       {{ t('common.cancel') }}
     </v-btn>
-    <v-btn v-if="memoryFormRef?.activeStep > 1 && !isSaving" color="blue-darken-1" variant="text" @click="memoryFormRef?.prevStep()">
+    <v-btn v-if="memoryFormValidAndLoaded && currentStep > 1 && !isSaving" color="blue-darken-1" variant="text" @click="memoryFormRef?.prevStep()">
       {{ t('common.back') }}
     </v-btn>
-    <v-btn v-if="memoryFormRef?.activeStep < 3" color="blue-darken-1" variant="text" @click="memoryFormRef?.nextStep()" :loading="isSaving">
+    <v-btn v-if="memoryFormValidAndLoaded && currentStep < 3" color="blue-darken-1" variant="text" @click="memoryFormRef?.nextStep()" :loading="isSaving">
       {{ t('common.next') }}
     </v-btn>
     <v-btn v-else color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'; // Added computed
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
@@ -53,6 +53,11 @@ const editedMemory = ref<UpdateMemoryDto | null>(null);
 const selectedFiles = ref<File[]>([]);
 const isSaving = ref(false); // To manage loading state for buttons
 
+// Computed property for safe access to activeStep
+const currentStep = computed(() => memoryFormRef.value?.activeStep ?? 1);
+
+// Computed property to check if memoryFormRef is loaded and valid
+const memoryFormValidAndLoaded = computed(() => memoryFormRef.value !== null);
 
 const fetchMemory = async (id: string) => {
   const memory = await memoryStore.getById(id);
@@ -66,6 +71,11 @@ const fetchMemory = async (id: string) => {
       photoUrl: memory.photoUrl,
       tags: memory.tags,
       keywords: memory.keywords,
+      eventSuggestion: memory.eventSuggestion,
+      customEventDescription: memory.customEventDescription,
+      emotionContextTags: memory.emotionContextTags,
+      customEmotionContext: memory.customEmotionContext,
+      faces: memory.faces,
     };
   } else {
     showSnackbar(t('memory.edit.notFound'), 'error');
@@ -100,6 +110,7 @@ const handleSave = async () => {
 
     if (!step1Valid || !step2Valid) {
         isSaving.value = false;
+        showSnackbar(t('common.validations.required'), 'error'); // Generic validation error message
         return;
     }
 
@@ -109,7 +120,8 @@ const handleSave = async () => {
       // In a real application, you would upload files to a server here.
       // For now, we'll just assign the name of the first selected file as photoUrl
       editedMemory.value.photoUrl = selectedFiles.value[0]?.name || undefined;
-      showSnackbar(t('common.info'), 'info', `${selectedFiles.value.length} files selected for upload. Upload logic to be implemented.`);
+      // Corrected showSnackbar call: message as first arg, color as second
+      showSnackbar(`${selectedFiles.value.length} files selected for upload. Upload logic to be implemented.`, 'info');
     }
 
     const result = await memoryStore.updateItem(editedMemory.value);
@@ -121,7 +133,8 @@ const handleSave = async () => {
     }
   } catch (error) {
     console.error('Error saving memory:', error);
-    showSnackbar(t('common.error'), 'error', (error as Error).message);
+    // Corrected showSnackbar call: message as first arg, color as second
+    showSnackbar((error as Error).message, 'error');
   } finally {
     isSaving.value = false;
   }
