@@ -1,20 +1,26 @@
 <template>
-  <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" :readonly="readonly" />
-  <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
-  <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
+  <div>
     <v-row>
-      <v-col cols="12" md="8">
-        <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" />
+      <v-col v-if="faceStore.loading" cols="12">
+        <v-progress-linear v-if="faceStore.loading" indeterminate color="primary"></v-progress-linear>
       </v-col>
-      <v-col cols="12" md="4">
-        <FaceDetectionSidebar :faces="faceStore.detectedFaces" />
+      <v-col cols="12">
+        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" :readonly="readonly" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0">
+          <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" />
+          <FaceDetectionSidebar :faces="faceStore.detectedFaces" />
+        </div>
+        <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info">{{
+          t('face.recognition.uploadPrompt') }}</v-alert>
+        <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+          type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
       </v-col>
     </v-row>
   </div>
-  <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
-    t('face.recognition.uploadPrompt') }}</v-alert>
-  <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
-    type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
 </template>
 
 <script setup lang="ts">
