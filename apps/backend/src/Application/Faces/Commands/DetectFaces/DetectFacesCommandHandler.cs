@@ -50,7 +50,9 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     FamilyId = null,
                     FamilyName = null,
                     BirthYear = null,
-                    DeathYear = null
+                    DeathYear = null,
+                    Emotion = faceResult.Emotion,
+                    EmotionConfidence = faceResult.EmotionConfidence
                 };
 
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())

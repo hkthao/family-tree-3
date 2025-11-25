@@ -15,4 +15,6 @@ public class DetectedFaceDto
     public int? BirthYear { get; set; }
     public int? DeathYear { get; set; }
     public List<double>? Embedding { get; set; }
+    public string? Emotion { get; set; }
+    public float? EmotionConfidence { get; set; }
 }

@@ -9,4 +9,6 @@ public class FaceDetectionResultDto
     public float Confidence { get; set; }
     public string? Thumbnail { get; set; } // Base64 encoded image
     public double[]? Embedding { get; set; }
+    public string? Emotion { get; set; }
+    public float? EmotionConfidence { get; set; }
 }
