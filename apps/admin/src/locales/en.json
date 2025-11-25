@@ -960,7 +960,11 @@
   "memory.create.step5.saveSuccess": "Memory saved successfully!",
   "memory.create.step5.saveFailed": "Failed to save memory.",
   "memory.create.step5.viewMemory": "View Memory Details",
-  "memory.create.action.analyze": "Analyze Photo",
+  "memory.create.selectMainCharacter": "You want to create a memory about whom",
+  "memory.create.perspective.title": "Story Perspective",
+  "memory.create.perspective.firstPerson": "From creator's perspective (first person)",
+  "memory.create.perspective.neutralPersonal": "Neutral yet personal",
+  "memory.create.perspective.fullyNeutral": "Fully neutral",
 
   "memory.photoAnalysis.title": "Photo Analysis",
   "memory.photoAnalysis.summary": "Summary",
@@ -1012,7 +1016,7 @@
   "memory.style.warm": "Warm",
   "memory.style.formal": "Formal",
   "memory.style.folk": "Folk",
-  "memory.create.aiEventSuggestion.title": "Can you tell us what this event could be ?",
+  "memory.create.aiEventSuggestion.title": "Can you tell us what this event could be?",
   "tour": {
     "familyList": {
       "search": {

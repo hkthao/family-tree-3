@@ -18,6 +18,7 @@ export interface MemoryDto {
   emotionContextTags?: string[];
   customEmotionContext?: string;
   faces?: MemoryFaceDto[]; // Changed back to MemoryFaceDto[]
+  perspective?: string; // New field for story perspective
   createdAt?: string; // Made optional to support new creation
   photoAnalysisResult?: PhotoAnalysisResultDto | null;
   // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị

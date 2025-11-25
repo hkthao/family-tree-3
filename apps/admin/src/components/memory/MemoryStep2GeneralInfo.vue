@@ -53,6 +53,20 @@
         <v-textarea v-model="internalMemory.rawInput" :label="t('memory.create.rawInputPlaceholder')"
           :readonly="readonly"></v-textarea>
       </v-col>
+      <v-col cols="12">
+        <h4>{{ t('memory.create.perspective.title') }}</h4>
+        <v-chip-group v-model="internalMemory.perspective" color="primary" mandatory column>
+          <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[0].text }}
+          </v-chip>
+          <v-chip :value="aiPerspectiveSuggestions[1].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[1].text }}
+          </v-chip>
+          <v-chip :value="aiPerspectiveSuggestions[2].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[2].text }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
       <v-col cols="12" v-if="internalMemory.story">
         <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" readonly></v-textarea>
       </v-col>
@@ -64,8 +78,8 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
-import type { MemoryDto, MemoryFaceDto } from '@/types/memory'; // Import MemoryFaceDto
-import type { DetectedFace } from '@/types'; // Import DetectedFace
+import type { MemoryDto } from '@/types/memory';
+import type { DetectedFace } from '@/types';
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -90,6 +104,7 @@ const internalMemory = computed<MemoryDto>({
       emotionContextTags: model.emotionContextTags ?? [],
       customEmotionContext: model.customEmotionContext ?? undefined,
       faces: model.faces ?? [],
+      perspective: model.perspective ?? undefined, // Initialize perspective
     } as MemoryDto;
   },
   set: (value: MemoryDto) => emit('update:modelValue', value),
@@ -117,6 +132,13 @@ const aiEmotionContextSuggestions = ref([
   t('memory.create.aiEmotionContextSuggestion.suggestion4'),
   t('memory.create.aiEmotionContextSuggestion.suggestion5'),
   t('memory.create.aiEmotionContextSuggestion.suggestion6'),
+]);
+
+// AI Perspective Suggestions
+const aiPerspectiveSuggestions = ref([
+  { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
+  { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
+  { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
 
 const getFaceThumbnailSrc = (face: DetectedFace) => {
