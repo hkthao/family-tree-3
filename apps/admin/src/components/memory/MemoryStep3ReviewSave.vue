@@ -47,9 +47,9 @@
       </p>
 
     </v-col>
-    <v-col cols="12" v-if="memoryFaceStore.uploadedImage">
+    <v-col cols="12" v-if="memoryStore.faceRecognition.uploadedImage">
       <h4>{{ t('memory.create.step1.title') }}</h4> <!-- Photo Upload Title for review -->
-      <img :src="memoryFaceStore.uploadedImage" height="100" class="ma-2" />
+      <img :src="memoryStore.faceRecognition.uploadedImage" height="100" class="ma-2" />
       <p v-if="!props.readonly">{{ t('memory.create.step2.analysisResult') }}</p>
     </v-col>
   </v-row>
@@ -59,7 +59,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
-import { useMemoryFaceStore } from '@/stores/memoryFaceStore'; // Use the new store
+import { useMemoryStore } from '@/stores/memory.store'; // Use the main memory store
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -67,7 +67,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const memoryFaceStore = useMemoryFaceStore();
+const memoryStore = useMemoryStore(); // Initialize the main memory store
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,

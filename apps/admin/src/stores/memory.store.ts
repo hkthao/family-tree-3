@@ -1,10 +1,20 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { Result, Paginated } from '@/types';
+import type { DetectedFace, SearchResult, Member, Result, Paginated } from '@/types'; // Added DetectedFace, SearchResult, Member
 import type { MemoryDto } from '@/types/memory';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { MemoryFilter } from '@/services/memory/memory.service.interface';
+
+interface MemoryFaceState {
+  uploadedImage: string | null; // Base64 or URL of the uploaded image
+  uploadedImageId: string | null; // ID of the uploaded image from the backend
+  detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
+  selectedFaceId: string | undefined; // ID of the currently selected face for labeling
+  faceSearchResults: SearchResult[]; // Results from face search
+  loading: boolean;
+  error: string | null;
+}
 
 export const useMemoryStore = defineStore('memory', {
   state: () => ({
@@ -46,10 +56,21 @@ export const useMemoryStore = defineStore('memory', {
     _delete: {
       loading: false,
     },
+
+    // Face Recognition State for memory creation
+    faceRecognition: {
+      uploadedImage: null,
+      uploadedImageId: null,
+      detectedFaces: [],
+      selectedFaceId: undefined,
+      faceSearchResults: [],
+      loading: false,
+      error: null,
+    } as MemoryFaceState,
   }),
 
   getters: {
-    headers: () => {
+    headers: (state) => {
       const t = i18n.global.t;
       return [
         {
@@ -80,6 +101,13 @@ export const useMemoryStore = defineStore('memory', {
         },
       ];
     },
+    // Getters for Face Recognition
+    currentSelectedFace: (state) =>
+      state.faceRecognition.detectedFaces.find((face) => face.id === state.faceRecognition.selectedFaceId),
+    unlabeledFaces: (state) =>
+      state.faceRecognition.detectedFaces.filter((face) => !face.memberId),
+    labeledFaces: (state) =>
+      state.faceRecognition.detectedFaces.filter((face) => face.memberId),
   },
 
   actions: {
@@ -215,6 +243,154 @@ export const useMemoryStore = defineStore('memory', {
       const result = await this.services.memory.generateStory(command);
       this.list.loading = false;
       return result;
+    },
+
+    // Actions for Face Recognition
+    async detectFaces(imageFile: File): Promise<Result<void, ApiError>> {
+      this.faceRecognition.loading = true;
+      this.faceRecognition.error = null;
+      try {
+        const result = await this.services.face.detect(imageFile);
+        if (result.ok) {
+          this.faceRecognition.uploadedImage = URL.createObjectURL(imageFile);
+          this.faceRecognition.uploadedImageId = result.value.imageId;
+          this.faceRecognition.detectedFaces = result.value.detectedFaces.map((face) => ({
+            id: face.id,
+            boundingBox: face.boundingBox,
+            thumbnail: face.thumbnail,
+            memberId: face.memberId,
+            originalMemberId: face.memberId,
+            memberName: face.memberName,
+            familyId: face.familyId,
+            familyName: face.familyName,
+            birthYear: face.birthYear,
+            deathYear: face.deathYear,
+            embedding: face.embedding,
+            emotion: face.emotion,
+            emotionConfidence: face.emotionConfidence,
+            status: face.memberId ? 'original-recognized' : 'unrecognized',
+          }));
+          return { ok: true, value: undefined };
+        } else {
+          this.faceRecognition.error =
+            result.error?.message ||
+            i18n.global.t('face.errors.detectionFailed');
+          return { ok: false, error: result.error };
+        }
+      } catch (err: any) {
+        this.faceRecognition.error =
+          err.message || i18n.global.t('face.errors.unexpectedError');
+        return { ok: false, error: { message: this.faceRecognition.error } as ApiError };
+      } finally {
+        this.faceRecognition.loading = false;
+      }
+    },
+
+    selectFace(faceId: string | undefined): void {
+      this.faceRecognition.selectedFaceId = faceId;
+    },
+
+    async labelFace(
+      faceId: string,
+      memberId: string,
+      memberDetails: Member,
+    ): Promise<void> {
+      const faceIndex = this.faceRecognition.detectedFaces.findIndex((f) => f.id === faceId);
+      if (faceIndex !== -1) {
+        this.faceRecognition.detectedFaces[faceIndex].memberId = memberId;
+        this.faceRecognition.detectedFaces[faceIndex].status = 'labeled';
+        if (memberDetails) {
+          this.faceRecognition.detectedFaces[faceIndex].memberName = memberDetails.fullName;
+          this.faceRecognition.detectedFaces[faceIndex].familyId = memberDetails.familyId;
+          this.faceRecognition.detectedFaces[faceIndex].familyName = memberDetails.familyName;
+          this.faceRecognition.detectedFaces[faceIndex].birthYear = memberDetails.dateOfBirth
+            ? new Date(memberDetails.dateOfBirth).getFullYear()
+            : undefined;
+          this.faceRecognition.detectedFaces[faceIndex].deathYear = memberDetails.dateOfDeath
+            ? new Date(memberDetails.dateOfDeath).getFullYear()
+            : undefined;
+        }
+      }
+    },
+
+    removeFace(faceId: string): void {
+      this.faceRecognition.detectedFaces = this.faceRecognition.detectedFaces.filter(
+        (face) => face.id !== faceId,
+      );
+    },
+
+    async saveFaceLabels(): Promise<Result<void, ApiError>> {
+      this.faceRecognition.loading = true;
+      this.faceRecognition.error = null;
+      try {
+        const facesToSave = this.faceRecognition.detectedFaces.filter(
+          (face) =>
+            face.memberId &&
+            (face.originalMemberId === null ||
+              face.originalMemberId === undefined ||
+              face.memberId !== face.originalMemberId),
+        );
+
+        if (facesToSave.length === 0) {
+          this.faceRecognition.loading = false;
+          return { ok: true, value: undefined };
+        }
+
+        const faceLabels = facesToSave.map((face) => ({
+          id: face.id,
+          boundingBox: face.boundingBox,
+          thumbnail: face.thumbnail,
+          memberId: face.memberId,
+          memberName: face.memberName,
+          familyId: face.familyId,
+          familyName: face.familyName,
+          birthYear: face.birthYear,
+          deathYear: face.deathYear,
+          embedding: face.embedding,
+          emotion: face.emotion,
+          emotionConfidence: face.emotionConfidence,
+          status: face.status,
+        }));
+
+        const imageId = this.faceRecognition.uploadedImageId;
+
+        if (!imageId) {
+          const errorMessage = 'Image ID is missing. Cannot save face labels.';
+          this.faceRecognition.error = errorMessage;
+          return { ok: false, error: { message: errorMessage } as ApiError };
+        }
+
+        const result = await this.services.face.saveLabels(faceLabels, imageId);
+
+        if (result.ok) {
+          facesToSave.forEach((face) => {
+            face.originalMemberId = face.memberId;
+            face.status = 'original-recognized';
+          });
+          return { ok: true, value: undefined };
+        } else {
+          this.faceRecognition.error =
+            result.error?.message ||
+            i18n.global.t('face.errors.saveMappingFailed');
+          return { ok: false, error: result.error };
+        }
+      } catch (err: any) {
+        this.faceRecognition.error =
+          err.message || i18n.global.t('face.errors.unexpectedError');
+        return { ok: false, error: { message: this.faceRecognition.error } as ApiError };
+      } finally {
+        this.faceRecognition.loading = false;
+      }
+    },
+
+    resetFaceRecognitionState(): void {
+      this.faceRecognition.uploadedImage = null;
+      this.faceRecognition.uploadedImageId = null;
+      this.faceRecognition.detectedFaces = [];
+      this.faceRecognition.selectedFaceId = undefined;
+      this.faceRecognition.faceSearchResults = [];
+      this.faceRecognition.loading = false;
+      this.faceRecognition.error = null;
     },
   },
 });
