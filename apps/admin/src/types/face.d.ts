@@ -22,6 +22,8 @@ interface DetectedFace {
   birthYear?: number; // For display
   deathYear?: number; // For display
   embedding: number[] | null; // Embedding vector for the face
+  emotion?: string;
+  emotionConfidence?: number;
   status: FaceStatus; // For UI styling: 'recognized', 'unrecognized', 'newly-labeled', 'original-recognized'
 }
 
