@@ -25,7 +25,7 @@
 
       <v-col cols="12">
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
-        <v-chip-group v-model="internalMemory.eventSuggestion" color="primary" mandatory column>
+        <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter variant="tonal">
             {{ event }}
           </v-chip>
@@ -37,25 +37,21 @@
           v-model="internalMemory.customEventDescription"
           :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
         <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
-        <v-chip-group v-model="internalMemory.emotionContextTags" multiple filter color="primary" column>
+        <v-chip-group :model-value="internalMemory.emotionContextTags" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, emotionContextTags: newValue })" multiple filter color="primary" column :disabled="readonly">
           <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag" filter variant="tonal">
             {{ tag }}
           </v-chip>
         </v-chip-group>
       </v-col>
 
-      <v-col cols="12">
-        <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')"
-          :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]" :readonly="readonly"
-          required></v-text-field>
-      </v-col>
+
       <v-col cols="12">
         <v-textarea v-model="internalMemory.rawInput" :label="t('memory.create.rawInputPlaceholder')"
           :readonly="readonly"></v-textarea>
       </v-col>
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.title') }}</h4>
-        <v-chip-group v-model="internalMemory.perspective" color="primary" mandatory column>
+        <v-chip-group :model-value="internalMemory.perspective" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, perspective: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
           </v-chip>
@@ -99,12 +95,12 @@ const internalMemory = computed<MemoryDto>({
       ...model,
       rawInput: model.rawInput ?? undefined,
       story: model.story ?? undefined,
-      eventSuggestion: model.eventSuggestion ?? undefined,
+      eventSuggestion: model.eventSuggestion ?? aiEventSuggestions.value[0],
       customEventDescription: model.customEventDescription ?? undefined,
       emotionContextTags: model.emotionContextTags ?? [],
       customEmotionContext: model.customEmotionContext ?? undefined,
       faces: model.faces ?? [],
-      perspective: model.perspective ?? undefined, // Initialize perspective
+      perspective: model.perspective ?? aiPerspectiveSuggestions.value[0].value,
     } as MemoryDto;
   },
   set: (value: MemoryDto) => emit('update:modelValue', value),
