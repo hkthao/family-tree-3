@@ -23,14 +23,6 @@
       <v-col cols="12" v-if="internalMemory.story">
         <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" readonly></v-textarea>
       </v-col>
-      <v-col cols="12">
-        <v-combobox v-model="internalMemory.tags" :label="t('memory.storyEditor.tags')" chips multiple clearable
-          :readonly="readonly"></v-combobox>
-      </v-col>
-      <v-col cols="12">
-        <v-combobox v-model="internalMemory.keywords" :label="t('memory.storyEditor.keywords')" chips multiple clearable
-          :readonly="readonly"></v-combobox>
-      </v-col>
     </v-row>
   </v-form>
 </template>
