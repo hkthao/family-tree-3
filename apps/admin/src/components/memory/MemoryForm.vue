@@ -1,16 +1,12 @@
 <template>
-  <v-stepper v-model="activeStep" :alt-labels="!readonly" :hide-actions="true" flat>
+  <v-stepper v-model="activeStep" :alt-labels="true" :hide-actions="true" flat>
     <v-stepper-header class="stepper-header">
       <!-- Step 1: Photo Upload -->
-      <v-stepper-item :value="1" :title="t('memory.create.step1.title')" :complete="activeStep > 1"></v-stepper-item>
-
+      <v-stepper-item  :value="1" :title="t('memory.create.step1.title')" :complete="activeStep > 1"></v-stepper-item>
       <v-divider></v-divider>
-
       <!-- Step 2: General Information -->
       <v-stepper-item :value="2" :title="t('memory.create.step2.title')" :complete="activeStep > 2"></v-stepper-item>
-
       <v-divider></v-divider>
-
       <!-- Step 3: Review & Save -->
       <v-stepper-item :value="3" :title="t('memory.create.step3.title')" :complete="activeStep > 3"></v-stepper-item>
     </v-stepper-header>
