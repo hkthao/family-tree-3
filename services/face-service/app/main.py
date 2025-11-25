@@ -15,7 +15,7 @@ from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
 
 
-from .get_emotion import get_emotion
+from app.services.get_emotion import get_emotion
 import logging
 
 # Configure logging
