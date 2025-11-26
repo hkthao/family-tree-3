@@ -35,6 +35,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory'; // Only MemoryDto needed
 import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // Only AiPhotoAnalysisInputDto needed
+import type { MemoryFaceState } from '@/stores/memory.store'; // NEW IMPORT
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
 import MemoryStep2GeneralInfo from './MemoryStep2GeneralInfo.vue';
 import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';
@@ -113,81 +114,83 @@ const validateStep = async (step: number) => {
   return true; // Step 3 is review, no direct validation form
 };
 
+// Helper function to build AiPhotoAnalysisInputDto
+const buildAiPhotoAnalysisInput = (
+  memory: MemoryDto,
+  faceRecognitionState: MemoryFaceState // Pass the entire faceRecognition state
+): AiPhotoAnalysisInputDto => {
+  const aiInput: AiPhotoAnalysisInputDto = {
+    imageUrl: faceRecognitionState.resizedImageUrl || memory.photoUrl, // Use resized URL if available
+    imageBase64: faceRecognitionState.resizedImageUrl ? undefined : memory.photo, // Use base64 only if no resized URL
+    imageSize: memory.imageSize || '512x512',
+    exif: memory.exifData,
+    targetFaceId: memory.targetFaceId,
+    targetFaceCropUrl: null, // Placeholder for now, can be generated later if needed
+
+    faces: memory.faces!.map(face => ({
+      faceId: face.id,
+      bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
+      emotionLocal: {
+        dominant: face.emotion || '',
+        confidence: face.emotionConfidence || 0,
+      },
+      quality: face.quality || 'unknown',
+    })),
+    memberInfo: undefined,
+    otherFacesSummary: [],
+  };
+
+  const targetMemberFace = memory.faces!.find(
+    (face) => face.id === aiInput.targetFaceId
+  );
+
+  if (targetMemberFace && targetMemberFace.memberId) {
+    aiInput.memberInfo = {
+      id: targetMemberFace.memberId,
+      name: targetMemberFace.memberName,
+      age: targetMemberFace.birthYear ? (new Date().getFullYear() - targetMemberFace.birthYear) : undefined,
+    };
+  }
+
+  aiInput.otherFacesSummary = memory.faces!
+    .filter(face => face.id !== aiInput.targetFaceId)
+    .map(face => ({
+      emotionLocal: face.emotion || '',
+    }));
+
+  return aiInput;
+};
+
 const nextStep = async () => {
   if (props.readonly) {
     activeStep.value++;
     return;
   }
+
   const currentStep = activeStep.value;
   const isValid = await validateStep(currentStep);
 
-  if (isValid) {
-    if (currentStep === 1) {
-      activeStep.value++;
-      // Construct AiPhotoAnalysisInputDto
-      const aiInput: AiPhotoAnalysisInputDto = {
-        imageUrl: internalMemory.value.photoUrl,
-        imageBase64: internalMemory.value.photo, // This is the base64 string
-        imageSize: internalMemory.value.imageSize || '512x512', // Use stored size or default
-        exif: internalMemory.value.exifData,
-        targetFaceId: internalMemory.value.targetFaceId, // Already added to MemoryDto
-        targetFaceCropUrl: null, // Placeholder for now, can be generated later if needed
+  if (!isValid) {
+    return; // Do not proceed if current step is not valid
+  }
 
-        faces: internalMemory.value.faces!.map(face => ({ // Added non-null assertion
-          faceId: face.id,
-          bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
-          emotionLocal: {
-            dominant: face.emotion || '',
-            confidence: face.emotionConfidence || 0,
-          },
-          quality: face.quality || 'unknown',
-        })),
-        
-        memberInfo: undefined, // Default
-        otherFacesSummary: [], // Default
-      };
+  if (currentStep === 1) {
+    const aiInput = buildAiPhotoAnalysisInput(internalMemory.value, memoryStore.faceRecognition);
+    const aiResult = await memoryStore.services.ai.analyzePhoto({ Input: aiInput });
 
-      // Find the selected main character face from detected faces
-      const targetMemberFace = internalMemory.value.faces!.find( // Added non-null assertion
-        (face) => face.id === aiInput.targetFaceId
-      );
-
-      if (targetMemberFace && targetMemberFace.memberId) {
-        // Populate with available info. Gender is not directly in DetectedFace/MemoryFaceDto.
-        // It should be fetched or added to DetectedFace type if possible.
-        aiInput.memberInfo = {
-          id: targetMemberFace.memberId,
-          name: targetMemberFace.memberName,
-          age: targetMemberFace.birthYear ? (new Date().getFullYear() - targetMemberFace.birthYear) : undefined,
-          // gender: targetMemberFace.gender, // Gender is not directly available here
-        };
-      }
-
-      // Construct otherFacesSummary
-      aiInput.otherFacesSummary = internalMemory.value.faces! // Added non-null assertion
-        .filter(face => face.id !== aiInput.targetFaceId)
-        .map(face => ({
-          emotionLocal: face.emotion || '',
-        }));
-      
-      // Call AI analysis action
-      // memoryStore.aiAnalysis.loading is automatically managed by the action
-      const aiResult = await memoryStore.services.ai.analyzePhoto({ Input: aiInput }); // WRAP aiInput IN { Input: ... }
-      
-      if (aiResult.ok) {
-        internalMemory.value.photoAnalysisResult = aiResult.value;
-        activeStep.value++; // Proceed to next step only on success
-      } else {
-        showSnackbar(
-          aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
-          'error'
-        );
-        // Do not proceed to next step
-      }
+    if (aiResult.ok) {
+      internalMemory.value.photoAnalysisResult = aiResult.value;
+      activeStep.value++; // Proceed to next step only on success
     } else {
-      // For other steps, just advance
-      activeStep.value++;
+      showSnackbar(
+        aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
+        'error'
+      );
+      // Do not proceed to next step
     }
+  } else {
+    // For other steps, just advance
+    activeStep.value++;
   }
 };
 

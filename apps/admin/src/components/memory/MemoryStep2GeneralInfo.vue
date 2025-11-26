@@ -75,7 +75,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
 import type { MemoryDto } from '@/types/memory';
-import type { DetectedFace } from '@/types';
+// import type { DetectedFace } from '@/types'; // Removed unused import
 
 const props = defineProps<{
   modelValue: MemoryDto;

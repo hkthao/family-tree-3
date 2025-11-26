@@ -69,6 +69,7 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null); // Renamed ref
+const resizeImageForAnalysis = ref(true); // NEW: Option to resize image for analysis
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
@@ -134,7 +135,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
   }
 
   if (uploadedFile) {
-    await memoryStore.detectFaces(uploadedFile);
+    await memoryStore.detectFaces(uploadedFile, true);
 
     // Set image size
     try {

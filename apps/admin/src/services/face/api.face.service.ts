@@ -6,14 +6,18 @@ import { type IFaceService } from './face.service.interface';
 export class ApiFaceService implements IFaceService {
   constructor(private http: ApiClientMethods) {}
 
-  async detect(imageFile: File): Promise<Result<{ imageId: string; detectedFaces: DetectedFace[] }, ApiError>> {
+  async detect(
+    imageFile: File,
+    resizeImageForAnalysis: boolean,
+  ): Promise<Result<{ imageId: string; resizedImageUrl?: string | null; detectedFaces: DetectedFace[] }, ApiError>> {
     const formData = new FormData();
     formData.append('file', imageFile);
     formData.append('fileName', imageFile.name); // Keep fileName
-    // formData.append('cloud', 'imgbb'); // Removed cloud
-    // formData.append('folder', 'family-tree-face-detection'); // Removed folder
 
-    return this.http.post<{ imageId: string; detectedFaces: DetectedFace[] }>(`/face/detect`, formData, {
+    // Append resizeImageForAnalysis as a query parameter
+    const url = `/face/detect?resizeImageForAnalysis=${resizeImageForAnalysis}`;
+
+    return this.http.post<{ imageId: string; resizedImageUrl?: string | null; detectedFaces: DetectedFace[] }>(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

@@ -46,7 +46,7 @@ const handleFileUpload = async (file: File | null) => {
     faceStore.resetState();
     return;
   }
-  await faceStore.detectFaces(file);
+  await faceStore.detectFaces(file, false);
 };
 
 </script>

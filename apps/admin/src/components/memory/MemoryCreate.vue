@@ -267,7 +267,7 @@ const analyzePhoto = async () => {
   
   try {
     // 1. Perform client-side face detection
-    await memoryStore.detectFaces(photoFile.value);
+    await memoryStore.detectFaces(photoFile.value, true);
 
     // 2. Extract image size
     let imageSize: string | undefined;

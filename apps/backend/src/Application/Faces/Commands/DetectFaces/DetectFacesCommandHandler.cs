@@ -27,6 +27,9 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             // 1. Upload original image to n8n webhook to get a public URL
             string? originalImageUrl = null;
+            byte[]? imageBytesToAnalyze = request.ImageBytes;
+            string? resizedImageUrl = null;
+
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
                 var imageUploadDto = new ImageUploadWebhookDto
@@ -53,10 +56,52 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     _logger.LogError("Failed to upload original image to n8n: {Error}", n8nImageUploadResult.Error);
                     return Result<FaceDetectionResponseDto>.Failure(n8nImageUploadResult.Error ?? ErrorMessages.FileUploadFailed, ErrorSources.ExternalServiceError);
                 }
+
+                // If resizing is requested, resize the image and upload it
+                if (request.ResizeImageForAnalysis)
+                {
+                    try
+                    {
+                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); // Resize to 512px width, auto height
+                        var resizedFileName = $"resized_{effectiveFileName}";
+
+                        var resizedImageUploadDto = new ImageUploadWebhookDto
+                        {
+                            ImageData = resizedImageBytes,
+                            FileName = resizedFileName,
+                            Cloud = request.Cloud,
+                            Folder = request.Folder
+                        };
+
+                        var n8nResizedImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(resizedImageUploadDto, cancellationToken);
+
+                        if (n8nResizedImageUploadResult.IsSuccess && n8nResizedImageUploadResult.Value != null)
+                        {
+                            resizedImageUrl = n8nResizedImageUploadResult.Value.Url;
+                            if (string.IsNullOrEmpty(resizedImageUrl))
+                            {
+                                _logger.LogWarning("n8n image upload returned success but no URL for resized image.");
+                            }
+                            else
+                            {
+                                imageBytesToAnalyze = resizedImageBytes; // Use resized image for detection
+                            }
+                        }
+                        else if (!n8nResizedImageUploadResult.IsSuccess)
+                        {
+                            _logger.LogError("Failed to upload resized image to n8n: {Error}", n8nResizedImageUploadResult.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to resize or upload image for analysis.");
+                        // Continue with original image if resizing fails, but log the error.
+                    }
+                }
             }
 
 
-            var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
+            var detectedFacesResult = await _faceApiService.DetectFacesAsync(imageBytesToAnalyze!, request.ContentType, request.ReturnCrop);
 
             // Generate a unique ImageId for this detection session
             var imageId = Guid.NewGuid();
@@ -191,6 +236,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             {
                 ImageId = imageId,
                 OriginalImageUrl = originalImageUrl, // Populate the OriginalImageUrl
+                ResizedImageUrl = resizedImageUrl, // Populate the ResizedImageUrl
                 DetectedFaces = detectedFaceDtos
             });
         }

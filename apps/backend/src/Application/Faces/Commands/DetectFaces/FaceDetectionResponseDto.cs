@@ -6,5 +6,6 @@ public class FaceDetectionResponseDto
 {
     public Guid ImageId { get; set; }
     public string? OriginalImageUrl { get; set; } // NEW PROPERTY
+    public string? ResizedImageUrl { get; set; } // NEW PROPERTY
     public List<DetectedFaceDto> DetectedFaces { get; set; } = [];
 }

@@ -45,10 +45,6 @@ class FaceDetectionResult(BaseModel):
 
 # New DTOs for image-processing integration
 
-
-
-
-
 app = FastAPI(
     title="ImageFaceEmotionService", # Changed title
     description=(
@@ -159,7 +155,52 @@ async def detect_faces(
         )
 
 
+@app.post("/resize")
+async def resize_image(
+    file: UploadFile = File(...),
+    width: int = Query(..., description="Desired width for the resized image"),
+    height: Optional[int] = Query(None, description="Desired height for the resized image (optional, aspect ratio will be maintained if not provided)"),
+):
+    logger.info("Received request to resize image. Filename: %s, Target Width: %s, Target Height: %s", file.filename, width, height)
 
+    if not file.content_type.startswith("image/"):
+        logger.warning(f"Invalid file type received for resize: {file.content_type}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only images are allowed."
+        )
+
+    try:
+        image_data = await file.read()
+        image = Image.open(io.BytesIO(image_data))
+
+        original_width, original_height = image.size
+
+        if height is None:
+            # Maintain aspect ratio
+            aspect_ratio = original_height / original_width
+            new_height = int(width * aspect_ratio)
+            size = (width, new_height)
+            logger.info(f"Resizing image to {size[0]}x{size[1]} (maintaining aspect ratio).")
+            image.thumbnail(size, Image.LANCZOS) # Use thumbnail to maintain aspect ratio and not upscale
+        else:
+            size = (width, height)
+            logger.info(f"Resizing image to exact dimensions {size[0]}x{size[1]}.")
+            image = image.resize(size, Image.LANCZOS) # Use resize for exact dimensions
+
+        buffered = io.BytesIO()
+        image.save(buffered, format=image.format if image.format else "PNG") # Preserve original format if possible
+        buffered.seek(0)
+
+        logger.info(f"Successfully resized image to {image.size[0]}x{image.size[1]}.")
+        return Response(content=buffered.getvalue(), media_type=file.content_type)
+
+    except Exception as e:
+        logger.error(f"Image resize failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Image resize failed: {e}"
+        )
 
 
 if __name__ == "__main__":

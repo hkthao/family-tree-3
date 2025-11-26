@@ -7,9 +7,10 @@ import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { MemoryFilter } from '@/services/memory/memory.service.interface';
 
-interface MemoryFaceState {
+export interface MemoryFaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
   uploadedImageId: string | null; // ID of the uploaded image from the backend
+  resizedImageUrl: string | null; // NEW: URL of the resized image for analysis
   detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
   selectedFaceId: string | undefined; // ID of the currently selected face for labeling
   faceSearchResults: SearchResult[]; // Results from face search
@@ -67,6 +68,7 @@ export const useMemoryStore = defineStore('memory', {
       faceSearchResults: [],
       loading: false,
       error: null,
+      resizedImageUrl: null
     } as MemoryFaceState,
 
     // AI Analysis State for photo analysis
@@ -265,11 +267,11 @@ export const useMemoryStore = defineStore('memory', {
     },
 
     // Actions for Face Recognition
-    async detectFaces(imageFile: File): Promise<Result<void, ApiError>> {
+    async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.faceRecognition.loading = true;
       this.faceRecognition.error = null;
       try {
-        const result = await this.services.face.detect(imageFile);
+        const result = await this.services.face.detect(imageFile, resizeImageForAnalysis);
         if (result.ok) {
           this.faceRecognition.uploadedImage = URL.createObjectURL(imageFile);
           this.faceRecognition.uploadedImageId = result.value.imageId;
@@ -289,6 +291,8 @@ export const useMemoryStore = defineStore('memory', {
             emotionConfidence: face.emotionConfidence,
             status: face.memberId ? 'original-recognized' : 'unrecognized',
           }));
+          // Store the resized image URL if available
+          this.faceRecognition.resizedImageUrl = result.value.resizedImageUrl ?? null;
           return { ok: true, value: undefined };
         } else {
           this.faceRecognition.error =

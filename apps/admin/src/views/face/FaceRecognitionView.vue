@@ -59,10 +59,10 @@ watch(() => faceStore.error, (newError) => {
 
 const handleFileUpload = async (file: File | File[] | null) => {
   if (file instanceof File) {
-    await faceStore.detectFaces(file);
+    await faceStore.detectFaces(file, false);
   } else if (Array.isArray(file) && file.length > 0) {
     // Handle multiple files if needed, but for now, we expect a single file
-    await faceStore.detectFaces(file[0]);
+    await faceStore.detectFaces(file[0], false);
   } else {
     // Clear detected faces if no file or null is uploaded
     faceStore.resetState();

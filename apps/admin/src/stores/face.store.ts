@@ -6,6 +6,7 @@ import type { ApiError } from '@/plugins/axios';
 interface FaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
   uploadedImageId: string | null; // ID of the uploaded image from the backend
+  resizedImageUrl: string | null; // NEW: URL of the resized image for analysis
   detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
   selectedFaceId: string | undefined; // ID of the currently selected face for labeling
   faceSearchResults: SearchResult[]; // Results from face search
@@ -22,6 +23,7 @@ export const useFaceStore = defineStore('face', {
     faceSearchResults: [],
     loading: false,
     error: null,
+    resizedImageUrl: null
   }),
 
   getters: {
@@ -36,14 +38,15 @@ export const useFaceStore = defineStore('face', {
 
   actions: {
     // Action to handle image upload and face detection
-    async detectFaces(imageFile: File): Promise<Result<void, ApiError>> {
+    async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.face.detect(imageFile);
+        const result = await this.services.face.detect(imageFile, resizeImageForAnalysis);
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
           this.uploadedImageId = result.value.imageId; // Assign the imageId
+          this.resizedImageUrl = result.value.resizedImageUrl ?? null; // Store resized image URL
           this.detectedFaces = result.value.detectedFaces.map((face) => ({
             id: face.id,
             boundingBox: face.boundingBox,
@@ -56,6 +59,8 @@ export const useFaceStore = defineStore('face', {
             birthYear: face.birthYear,
             deathYear: face.deathYear,
             embedding: face.embedding, // Include embedding
+            emotion: face.emotion,
+            emotionConfidence: face.emotionConfidence,
             status: face.memberId ? 'original-recognized' : 'unrecognized', // Set initial status
           }));
           return { ok: true, value: undefined };
