@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using backend.Application.Memories.DTOs; // NEW IMPORT
+using backend.Application.AI.DTOs; // UPDATED USING
 using System.Net.Http.Headers; // For MediaTypeHeaderValue
 
 namespace backend.Infrastructure.Services;

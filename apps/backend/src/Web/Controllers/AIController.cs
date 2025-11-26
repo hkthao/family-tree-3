@@ -1,7 +1,7 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
-using backend.Application.Memories.Commands.AnalyzePhoto; // NEW IMPORT
-using backend.Application.Memories.DTOs; // NEW IMPORT
+using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
+using backend.Application.AI.DTOs; // UPDATED IMPORT
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

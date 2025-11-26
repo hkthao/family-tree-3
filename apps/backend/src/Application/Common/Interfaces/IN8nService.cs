@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Memories.DTOs; // NEW USING
+using backend.Application.AI.DTOs; // UPDATED USING
 
 namespace backend.Application.Common.Interfaces;
 

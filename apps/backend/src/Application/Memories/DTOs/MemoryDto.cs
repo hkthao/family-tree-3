@@ -1,3 +1,5 @@
+using backend.Application.AI.DTOs; // NEW USING
+
 namespace backend.Application.Memories.DTOs;
 
 public class MemoryDto

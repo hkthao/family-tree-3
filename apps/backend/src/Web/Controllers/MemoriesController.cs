@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Memories.Commands.AnalyzePhoto; // Import AnalyzePhotoCommand
+// using backend.Application.Memories.Commands.AnalyzePhoto; // REMOVED
 using backend.Application.Memories.Commands.CreateMemory; // Import CreateMemoryCommand
 using backend.Application.Memories.Commands.DeleteMemory; // Import DeleteMemoryCommand
 using backend.Application.Memories.Commands.GenerateStory; // Import GenerateStoryCommand
@@ -26,22 +26,6 @@ public class MemoriesController : ControllerBase
     public MemoriesController(IMediator mediator)
     {
         _mediator = mediator; // Initialized IMediator
-    }
-
-    /// <summary>
-    /// Analyzes a photo using AI to extract context.
-    /// </summary>
-    [HttpPost("analyze-photo")]
-    [ProducesResponseType(typeof(PhotoAnalysisResultDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PhotoAnalysisResultDto>> AnalyzePhoto([FromBody] AnalyzePhotoCommand command, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error); // Errors from validator or service
     }
 
     /// <summary>

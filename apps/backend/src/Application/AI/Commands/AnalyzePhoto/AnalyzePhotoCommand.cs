@@ -1,7 +1,7 @@
 using backend.Application.Common.Models;
-using backend.Application.Memories.DTOs;
+using backend.Application.AI.DTOs;
 
-namespace backend.Application.Memories.Commands.AnalyzePhoto;
+namespace backend.Application.AI.Commands.AnalyzePhoto;
 
 public record AnalyzePhotoCommand : IRequest<Result<PhotoAnalysisResultDto>>
 {

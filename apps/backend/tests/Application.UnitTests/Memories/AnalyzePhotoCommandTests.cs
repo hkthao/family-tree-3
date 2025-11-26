@@ -5,8 +5,8 @@ using System.Threading; // Added for CancellationToken
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Memories.Commands.AnalyzePhoto;
-using backend.Application.Memories.DTOs;
+using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED USING
+using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.UnitTests.Common; // Added for TestBase
 using backend.Domain.Entities;
 using backend.Infrastructure.Data; // For ApplicationDbContext

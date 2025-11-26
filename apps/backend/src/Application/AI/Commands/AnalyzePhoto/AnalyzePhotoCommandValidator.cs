@@ -1,7 +1,8 @@
 using System.Linq; // For .Any()
 using FluentValidation;
+using backend.Application.AI.DTOs; // NEW USING
 
-namespace backend.Application.Memories.Commands.AnalyzePhoto;
+namespace backend.Application.AI.Commands.AnalyzePhoto;
 
 public class AnalyzePhotoCommandValidator : AbstractValidator<AnalyzePhotoCommand>
 {

@@ -5,12 +5,12 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting; // Added for N8nSettings
-using backend.Application.Memories.DTOs;
+using backend.Application.AI.DTOs;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options; // Added for IOptions
 
-namespace backend.Application.Memories.Commands.AnalyzePhoto;
+namespace backend.Application.AI.Commands.AnalyzePhoto;
 
 public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, Result<PhotoAnalysisResultDto>>
 {

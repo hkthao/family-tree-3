@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using backend.Domain.Enums;
 
-namespace backend.Application.Memories.DTOs;
+namespace backend.Application.AI.DTOs;
 
 public class AiPhotoAnalysisInputDto
 {
