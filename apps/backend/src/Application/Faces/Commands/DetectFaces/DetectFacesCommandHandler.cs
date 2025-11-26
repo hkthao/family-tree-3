@@ -22,6 +22,11 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
     {
         try
         {
+            // Ensure fileName is valid for the webhook
+            string effectiveFileName = string.IsNullOrWhiteSpace(request.FileName)
+                ? $"uploaded_image_{Guid.NewGuid()}{Path.GetExtension(request.ContentType)}"
+                : request.FileName;
+
             // 1. Upload original image to n8n webhook to get a public URL
             string? originalImageUrl = null;
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
@@ -29,7 +34,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 var imageUploadDto = new ImageUploadWebhookDto
                 {
                     ImageData = request.ImageBytes,
-                    FileName = request.FileName,
+                    FileName = effectiveFileName, // Use effectiveFileName
                     Cloud = request.Cloud,
                     Folder = request.Folder
                 };
