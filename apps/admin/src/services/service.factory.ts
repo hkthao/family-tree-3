@@ -18,8 +18,8 @@ import type { ICurrentUserActivityService } from './user-activity/user-activity.
 import { ApICurrentUserActivityService } from './user-activity/api.user-activity.service';
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
-import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface';
-import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service';
+// import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface'; // REMOVED IMPORT
+// import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service'; // REMOVED IMPORT
 import type { ICurrentUserPreferenceService } from './user-preference/user-preference.service.interface';
 import { ApICurrentUserPreferenceService } from './user-preference/api.user-preference.service';
 import type { IFileUploadService } from './file-upload/file-upload.service.interface';
@@ -53,11 +53,11 @@ export interface AppServices {
   publicMember: IPublicMemberService; // New service
   event: IEventService;
   relationship: IRelationshipService;
-  publicRelationship: IPublicRelationshipService; // New service
+  publicRelationship: IPublicRelationshipService; // CORRECTED TYPE
   userProfile: ICurrentUserProfileService;
   userActivity: ICurrentUserActivityService;
   dashboard: IDashboardService;
-  aiBiography: IAIBiographyService;
+  // aiBiography: IAIBiographyService; // REMOVED SERVICE
   userPreference: ICurrentUserPreferenceService;
   fileUpload: IFileUploadService;
   chat: IChatService;
@@ -116,10 +116,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiDashboardService(apiClient)
         : testServices?.dashboard || new ApiDashboardService(apiClient),
-    aiBiography:
-      mode === 'real'
-        ? new ApiAIBiographyService(apiClient)
-        : testServices?.aiBiography || new ApiAIBiographyService(apiClient),
+    // aiBiography: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApiAIBiographyService(apiClient)
+    //     : testServices?.aiBiography || new ApiAIBiographyService(apiClient),
     userPreference:
       mode === 'real'
         ? new ApICurrentUserPreferenceService(apiClient)
@@ -166,4 +166,5 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : testServices?.ai || new ApiAiService(apiClient),
   };
 }
+
 
