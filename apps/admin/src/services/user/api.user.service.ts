@@ -1,5 +1,5 @@
 import type { IUserService } from './user.service.interface';
-import type { UserProfile, Result, Paginated, User } from '@/types';
+import type { UserProfile, Result, Paginated, User, RecentActivity, TargetType, UserPreference } from '@/types'; // NEW IMPORTS
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 export class ApiUserService implements IUserService {
@@ -27,5 +27,37 @@ export class ApiUserService implements IUserService {
     return this.http.get<User>(
       `/user/${id}`,
     );
+  }
+
+  async getRecentActivities( // NEW METHOD
+    page: number,
+    itemsPerPage?: number,
+    targetType?: TargetType,
+    targetId?: string,
+    groupId?: string,
+  ): Promise<Result<Paginated<RecentActivity>, ApiError>> {
+    const params = new URLSearchParams();
+    if (page) params.append('page', page.toString())
+    if (itemsPerPage) params.append('itemsPerPage', itemsPerPage.toString());
+    if (targetType !== undefined) params.append('targetType', targetType.toString());
+    if (targetId) params.append('targetId', targetId);
+    if (groupId) params.append('groupId', groupId);
+    return this.http.get<Paginated<RecentActivity>>(`/activity/recent?${params.toString()}`);
+  }
+
+  async getUserPreferences(): Promise<Result<UserPreference, ApiError>> { // NEW METHOD
+    return this.http.get<UserPreference>(`/user-preference`);
+  }
+
+  async saveUserPreferences(preferences: UserPreference): Promise<Result<void, ApiError>> { // NEW METHOD
+    return this.http.put<void>(`/user-preference`, preferences);
+  }
+
+  public async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>> { // NEW METHOD
+    return this.http.put<UserProfile>(`/user-profile/${profile.id}`, profile);
+  }
+
+  public async getCurrentUserProfile(): Promise<Result<UserProfile, ApiError>> { // NEW METHOD
+    return this.http.get<UserProfile>(`/user-profile/me`);
   }
 }

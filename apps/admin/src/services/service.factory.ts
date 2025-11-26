@@ -10,18 +10,18 @@ import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
-import type { IPublicRelationshipService } from './relationship/public.service.interface';
-import { PublicApiRelationshipService } from './relationship/publicApi.relationship.service';
-import type { ICurrentUserProfileService } from './user-profile/user-profile.service.interface';
-import { UserProfileApiService } from './user-profile/api.user-profile.service';
-import type { ICurrentUserActivityService } from './user-activity/user-activity.service.interface';
-import { ApICurrentUserActivityService } from './user-activity/api.user-activity.service';
+import type { IPublicRelationshipService } from './relationship/public.service.interface'; // New
+import { PublicApiRelationshipService } from './relationship/publicApi.relationship.service'; // New
+// import type { ICurrentUserProfileService } from './user-profile/user-profile.service.interface'; // REMOVED IMPORT
+// import { UserProfileApiService } from './user-profile/api.user-profile.service'; // REMOVED IMPORT
+// import type { ICurrentUserActivityService } from './user-activity/user-activity.service.interface'; // REMOVED IMPORT
+// import { ApICurrentUserActivityService } from './user-activity/api.user-activity.service'; // REMOVED IMPORT
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
 // import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface'; // REMOVED IMPORT
 // import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service'; // REMOVED IMPORT
-import type { ICurrentUserPreferenceService } from './user-preference/user-preference.service.interface';
-import { ApICurrentUserPreferenceService } from './user-preference/api.user-preference.service';
+// import type { ICurrentUserPreferenceService } from './user-preference/user-preference.service.interface'; // REMOVED IMPORT
+// import { ApICurrentUserPreferenceService } from './user-preference/api.user-preference.service'; // REMOVED IMPORT
 import type { IFileUploadService } from './file-upload/file-upload.service.interface';
 import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
@@ -52,11 +52,11 @@ export interface AppServices {
   event: IEventService;
   relationship: IRelationshipService;
   publicRelationship: IPublicRelationshipService; // CORRECTED TYPE
-  userProfile: ICurrentUserProfileService;
-  userActivity: ICurrentUserActivityService;
+  // userProfile: ICurrentUserProfileService; // REMOVED SERVICE
+  // userActivity: ICurrentUserActivityService; // REMOVED SERVICE
   dashboard: IDashboardService;
   // aiBiography: IAIBiographyService; // REMOVED SERVICE
-  userPreference: ICurrentUserPreferenceService;
+  // userPreference: ICurrentUserPreferenceService; // REMOVED SERVICE
   fileUpload: IFileUploadService;
   chat: IChatService;
   face: IFaceService;
@@ -102,14 +102,14 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new PublicApiRelationshipService(apiClient)
         : testServices?.publicRelationship || new PublicApiRelationshipService(apiClient),
-    userProfile:
-      mode === 'real'
-        ? new UserProfileApiService(apiClient)
-        : testServices?.userProfile || new UserProfileApiService(apiClient),
-    userActivity:
-      mode === 'real'
-        ? new ApICurrentUserActivityService(apiClient)
-        : testServices?.userActivity || new ApICurrentUserActivityService(apiClient),
+    // userProfile: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new UserProfileApiService(apiClient)
+    //     : testServices?.userProfile || new UserProfileApiService(apiClient),
+    // userActivity: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApICurrentUserActivityService(apiClient)
+    //     : testServices?.userActivity || new ApICurrentUserActivityService(apiClient),
     dashboard:
       mode === 'real'
         ? new ApiDashboardService(apiClient)
@@ -118,10 +118,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
     //   mode === 'real'
     //     ? new ApiAIBiographyService(apiClient)
     //     : testServices?.aiBiography || new ApiAIBiographyService(apiClient),
-    userPreference:
-      mode === 'real'
-        ? new ApICurrentUserPreferenceService(apiClient)
-        : testServices?.userPreference || new ApICurrentUserPreferenceService(apiClient),
+    // userPreference: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApICurrentUserPreferenceService(apiClient)
+    //     : testServices?.userPreference || new ApICurrentUserPreferenceService(apiClient),
     fileUpload:
       mode === 'real'
         ? new FileUploadApiService(apiClient)
