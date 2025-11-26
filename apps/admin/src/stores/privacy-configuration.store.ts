@@ -20,7 +20,7 @@ export const usePrivacyConfigurationStore = defineStore('privacyConfiguration', 
     async fetchPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.privacyConfiguration.get(familyId);
+      const result = await this.services.family.getPrivacyConfiguration(familyId); // Use services.family
       if (result.ok) {
         this.privacyConfig = result.value;
       } else {
@@ -34,7 +34,7 @@ export const usePrivacyConfigurationStore = defineStore('privacyConfiguration', 
     async updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.privacyConfiguration.update(familyId, publicMemberProperties);
+      const result = await this.services.family.updatePrivacyConfiguration(familyId, publicMemberProperties); // Use services.family
       if (result.ok) {
         // Optionally refetch or update state directly
         if (this.privacyConfig && this.privacyConfig.familyId === familyId) {

@@ -7,6 +7,7 @@ import {
   type Paginated,
 } from '@/types';
 import type { FamilyExportDto } from '@/types/family'; // NEW IMPORT
+import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store'; // NEW IMPORT
 
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
@@ -88,5 +89,19 @@ export class ApiFamilyService implements IFamilyService {
 
   async exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob, ApiError>> { // NEW METHOD
     return this.http.post<Blob>(`/family-data/${familyId}/export-pdf`, htmlContent, { headers: { 'Content-Type': 'text/html' }, responseType: 'blob' });
+  }
+
+  async getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>> { // NEW METHOD
+    const result = await this.http.get<PrivacyConfiguration>(`/PrivacyConfiguration/${familyId}`);
+    if (result.ok) {
+      // Ensure publicMemberProperties is always an array
+      result.value.publicMemberProperties = result.value.publicMemberProperties || [];
+    }
+    return result;
+  }
+
+  async updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>> { // NEW METHOD
+    const payload = { familyId, publicMemberProperties };
+    return this.http.put<void>(`/PrivacyConfiguration/${familyId}`, payload);
   }
 }

@@ -32,8 +32,8 @@ import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
 // import type { IFamilyDataService } from './family-data/family-data.service.interface'; // REMOVED IMPORT
 // import { ApiFamilyDataService } from './family-data/api.family-data.service'; // REMOVED IMPORT
-import type { IPrivacyConfigurationService } from './privacy-configuration/privacy-configuration.service.interface';
-import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service';
+// import type { IPrivacyConfigurationService } from './privacy-configuration/privacy-configuration.service.interface'; // REMOVED IMPORT
+// import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service'; // REMOVED IMPORT
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; // Add familyDict service interface
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service'; // Add familyDict service implementation
 import type { IMemoryService } from './memory/memory.service.interface'; // New
@@ -63,7 +63,7 @@ export interface AppServices {
   user: IUserService;
   // naturalLanguage: INaturalLanguageService; // REMOVED SERVICE
   // familyData: IFamilyDataService; // REMOVED SERVICE
-  privacyConfiguration: IPrivacyConfigurationService;
+  // privacyConfiguration: IPrivacyConfigurationService; // REMOVED SERVICE
   familyDict: IFamilyDictService; // Add familyDict service
   memory: IMemoryService; // New
   ai: IAiService; // NEW SERVICE
@@ -146,10 +146,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
     //   mode === 'real'
     //     ? new ApiFamilyDataService(apiClient)
     //     : testServices?.familyData || new ApiFamilyDataService(apiClient),
-    privacyConfiguration:
-      mode === 'real'
-        ? new ApiPrivacyConfigurationService(apiClient)
-        : testServices?.privacyConfiguration || new ApiPrivacyConfigurationService(apiClient),
+    // privacyConfiguration: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApiPrivacyConfigurationService(apiClient)
+    //     : testServices?.privacyConfiguration || new ApiPrivacyConfigurationService(apiClient),
     familyDict: // Add familyDict service
       mode === 'real'
         ? new ApiFamilyDictService(apiClient)
