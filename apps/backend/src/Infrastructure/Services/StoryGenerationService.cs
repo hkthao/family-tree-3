@@ -1,9 +1,9 @@
+using System.Net.Http.Json; // For ReadFromJsonAsync
+using System.Text.Json; // Added for JsonException
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Memories.DTOs;
 using Microsoft.Extensions.Configuration; // Assuming Configuration is used for N8n settings
-using System.Net.Http.Json; // For ReadFromJsonAsync
-using System.Text.Json; // Added for JsonException
 
 namespace backend.Infrastructure.Services;
 

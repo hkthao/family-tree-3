@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using System.Text.Json.Serialization;
+using backend.Domain.Enums;
 
 namespace backend.Application.Memories.DTOs;
 

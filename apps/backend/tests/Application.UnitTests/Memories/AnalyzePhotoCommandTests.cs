@@ -1,27 +1,27 @@
+using System.Collections.Generic; // Added for List
+using System.Net;
+using System.Text.Json;
+using System.Threading; // Added for CancellationToken
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Memories.Commands.AnalyzePhoto;
 using backend.Application.Memories.DTOs;
+using backend.Application.UnitTests.Common; // Added for TestBase
 using backend.Domain.Entities;
+using backend.Infrastructure.Data; // For ApplicationDbContext
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
-using System.Net;
-using System.Text.Json;
 using Xunit;
-using backend.Application.UnitTests.Common; // Added for TestBase
-using backend.Infrastructure.Data; // For ApplicationDbContext
-using System.Threading; // Added for CancellationToken
-using System.Collections.Generic; // Added for List
 
 namespace backend.Application.UnitTests.Memories.Commands;
 
 public class AnalyzePhotoCommandTests : TestBase
 {
     private readonly Mock<IOptions<N8nSettings>> _n8nSettingsMock;
-    
+
     public AnalyzePhotoCommandTests() : base()
     {
         _n8nSettingsMock = new Mock<IOptions<N8nSettings>>();
@@ -202,7 +202,7 @@ public class AnalyzePhotoCommandTests : TestBase
             },
             TargetFaceId = "f1"
         };
-        
+
         httpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -238,7 +238,7 @@ public class AnalyzePhotoCommandTests : TestBase
             },
             TargetFaceId = "f1"
         };
-        
+
         httpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",

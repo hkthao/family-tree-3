@@ -56,7 +56,7 @@ public static class DependencyInjection
 
         // Register N8nSettings
         services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
-        
+
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
 
@@ -72,7 +72,7 @@ public static class DependencyInjection
 
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
-        
+
         // Register Story Generation Service and configure its HttpClient
         services.AddScoped<IStoryGenerationService, StoryGenerationService>();
         services.AddHttpClient<IStoryGenerationService, StoryGenerationService>(); // For HttpClient injection

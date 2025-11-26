@@ -1,7 +1,7 @@
+using System;
 using backend.Application.Common.Models;
 using backend.Application.PdfTemplates.Dtos;
 using MediatR;
-using System;
 
 namespace backend.Application.PdfTemplates.Commands.CreatePdfTemplate;
 

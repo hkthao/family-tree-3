@@ -1,13 +1,13 @@
+using Ardalis.Specification.EntityFrameworkCore;
+using AutoMapper; // Added
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using MediatR;
-using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Families.Specifications;
-using AutoMapper; // Added
 using backend.Application.Families; // Added for FamilyDetailsDto
+using backend.Application.Families.Specifications;
+using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.GetFamilyDetails;
 

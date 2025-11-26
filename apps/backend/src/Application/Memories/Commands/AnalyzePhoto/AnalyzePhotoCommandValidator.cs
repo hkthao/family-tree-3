@@ -1,5 +1,5 @@
-using FluentValidation;
 using System.Linq; // For .Any()
+using FluentValidation;
 
 namespace backend.Application.Memories.Commands.AnalyzePhoto;
 
@@ -42,7 +42,7 @@ public class AiDetectedFaceDtoValidator : AbstractValidator<DTOs.AiDetectedFaceD
         RuleFor(x => x.Bbox)
             .NotNull().WithMessage("Bounding box is required.")
             .Must(bbox => bbox != null && bbox.Count == 4).WithMessage("Bounding box must contain 4 integer values (x, y, w, h).");
-        
+
         RuleFor(x => x.EmotionLocal)
             .NotNull().WithMessage("Emotion data is required.");
 

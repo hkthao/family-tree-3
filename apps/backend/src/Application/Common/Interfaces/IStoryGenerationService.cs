@@ -1,5 +1,5 @@
-using backend.Application.Memories.DTOs;
 using backend.Application.Common.Models;
+using backend.Application.Memories.DTOs;
 
 namespace backend.Application.Common.Interfaces;
 

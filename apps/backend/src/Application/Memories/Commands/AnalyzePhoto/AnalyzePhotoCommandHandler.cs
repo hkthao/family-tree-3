@@ -1,14 +1,14 @@
+using System.Net.Http.Headers; // For MediaTypeHeaderValue
+using System.Net.Http.Json; // Added for ReadFromJsonAsync
+using System.Text.Json; // Added for JsonDocument
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting; // Added for N8nSettings
 using backend.Application.Memories.DTOs;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json; // Added for JsonDocument
-using System.Net.Http.Json; // Added for ReadFromJsonAsync
 using Microsoft.Extensions.Options; // Added for IOptions
-using backend.Application.Common.Models.AppSetting; // Added for N8nSettings
-using System.Net.Http.Headers; // For MediaTypeHeaderValue
 
 namespace backend.Application.Memories.Commands.AnalyzePhoto;
 
@@ -50,7 +50,7 @@ public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, R
                 return Result<PhotoAnalysisResultDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
         }
-        
+
         // 3. Call n8n WebHook for advanced analysis and suggestions
         var n8nPhotoAnalysisWebhook = _n8nSettings.PhotoAnalysisWebhook;
         if (string.IsNullOrEmpty(n8nPhotoAnalysisWebhook))
@@ -67,7 +67,7 @@ public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, R
         {
             // Ensure content type is application/json
             var jsonContent = JsonContent.Create(n8nRequestPayload, options: new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-            
+
             n8nHttpResponse = await _httpClient.PostAsync(n8nPhotoAnalysisWebhook, jsonContent, cancellationToken);
             n8nHttpResponse.EnsureSuccessStatusCode();
         }
@@ -84,7 +84,7 @@ public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, R
         catch (JsonException)
         {
             return Result<PhotoAnalysisResultDto>.Failure("Phân tích ảnh từ n8n trả về phản hồi không hợp lệ.", ErrorSources.ExternalServiceError);
-        }        
+        }
 
         if (photoAnalysisResult == null)
         {

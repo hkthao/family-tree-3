@@ -1,5 +1,5 @@
-using backend.Domain.Common;
 using System;
+using backend.Domain.Common;
 
 namespace backend.Domain.Entities;
 

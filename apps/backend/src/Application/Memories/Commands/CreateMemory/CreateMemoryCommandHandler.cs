@@ -29,7 +29,7 @@ public class CreateMemoryCommandHandler : IRequestHandler<CreateMemoryCommand, R
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
-        
+
         // Find the member to ensure it exists and belongs to the family
         var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
         if (member == null)

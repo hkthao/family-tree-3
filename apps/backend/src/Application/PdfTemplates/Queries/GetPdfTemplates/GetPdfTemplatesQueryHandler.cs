@@ -1,14 +1,14 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.PdfTemplates.Dtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace backend.Application.PdfTemplates.Queries.GetPdfTemplates;
 
