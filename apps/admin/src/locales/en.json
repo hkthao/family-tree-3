@@ -960,7 +960,7 @@
   "memory.create.step5.saveSuccess": "Memory saved successfully!",
   "memory.create.step5.saveFailed": "Failed to save memory.",
   "memory.create.step5.viewMemory": "View Memory Details",
-  "memory.create.selectMainCharacter": "You want to create a memory about whom",
+  "memory.create.selectTargetMember": "You want to create a memory about whom",
 
   "memory.photoAnalysis.title": "Photo Analysis",
   "memory.photoAnalysis.summary": "Summary",
@@ -1007,7 +1007,7 @@
   "memory.delete.success": "Memory deleted successfully!",
   "memory.delete.error": "Error deleting memory.",
   "memory.validation.photoProcessingNotDone": "Photo is being processed or not uploaded.",
-  "memory.validation.noMainCharacterSelected": "Please select a main character for this memory.",
+  "memory.validation.noTargetMemberSelected": "Please select a main character for this memory.",
   "memory.validation.noPhotoUploaded": "Please upload a photo for this memory.",
   "memory.validation.noFacesDetectedInPhoto": "No faces were detected in the uploaded photo. Please upload a photo with at least one face.",
   "memory.style.nostalgic": "Nostalgic",

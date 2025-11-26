@@ -97,8 +97,8 @@ const validateStep = async (step: number) => {
     const hasPhoto = internalMemory.value.photo !== null && internalMemory.value.photo !== undefined && internalMemory.value.photo !== '';
     const hasDetectedFaces = internalMemory.value.faces && internalMemory.value.faces.length > 0;
     const isValid = step1Ref.value?.isValid; // This seems to check if photo processing is finished
-    // Ensure selectedMainCharacterFaceId is correctly mapped from exposed property
-    const isMainCharacterSelected = step1Ref.value?.selectedMainCharacterFaceId !== null && step1Ref.value?.selectedMainCharacterFaceId !== undefined;
+    // Ensure selectedTargetMemberFaceId is correctly mapped from exposed property
+    const isTargetMemberSelected = step1Ref.value?.selectedTargetMemberFaceId !== null && step1Ref.value?.selectedTargetMemberFaceId !== undefined;
 
     if (!hasPhoto) {
       showSnackbar(t('memory.validation.noPhotoUploaded'), 'warning');
@@ -115,12 +115,12 @@ const validateStep = async (step: number) => {
       return false;
     }
     // This check is only relevant if there ARE detected faces
-    if (!isMainCharacterSelected && hasDetectedFaces) { // Re-added hasDetectedFaces check for clarity
-      showSnackbar(t('memory.validation.noMainCharacterSelected'), 'warning');
+    if (!isTargetMemberSelected && hasDetectedFaces) { // Re-added hasDetectedFaces check for clarity
+      showSnackbar(t('memory.validation.noTargetMemberSelected'), 'warning');
       return false;
     }
 
-    return hasPhoto && hasDetectedFaces && isValid && (isMainCharacterSelected || !hasDetectedFaces);
+    return hasPhoto && hasDetectedFaces && isValid && (isTargetMemberSelected || !hasDetectedFaces);
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
   }
@@ -161,18 +161,18 @@ const nextStep = async () => {
       };
 
       // Find the selected main character face from detected faces
-      const mainCharacterFace = internalMemory.value.faces!.find( // Added non-null assertion
+      const targetMemberFace = internalMemory.value.faces!.find( // Added non-null assertion
         (face) => face.id === aiInput.targetFaceId
       );
 
-      if (mainCharacterFace && mainCharacterFace.memberId) {
+      if (targetMemberFace && targetMemberFace.memberId) {
         // Populate with available info. Gender is not directly in DetectedFace/MemoryFaceDto.
         // It should be fetched or added to DetectedFace type if possible.
         aiInput.memberInfo = {
-          id: mainCharacterFace.memberId,
-          name: mainCharacterFace.memberName,
-          age: mainCharacterFace.birthYear ? (new Date().getFullYear() - mainCharacterFace.birthYear) : undefined,
-          // gender: mainCharacterFace.gender, // Gender is not directly available here
+          id: targetMemberFace.memberId,
+          name: targetMemberFace.memberName,
+          age: targetMemberFace.birthYear ? (new Date().getFullYear() - targetMemberFace.birthYear) : undefined,
+          // gender: targetMemberFace.gender, // Gender is not directly available here
         };
       }
 

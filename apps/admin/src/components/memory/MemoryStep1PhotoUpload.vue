@@ -16,11 +16,11 @@
           <FaceDetectionSidebar :faces="memoryStore.faceRecognition.detectedFaces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
 
-          <!-- Main Character Selection -->
+          <!-- Target Member Selection -->
           <v-card flat>
-            <v-card-title>{{ t('memory.create.selectMainCharacter') }}</v-card-title>
+            <v-card-title>{{ t('memory.create.selectTargetMember') }}</v-card-title>
             <v-card-text>
-              <v-chip-group v-model="selectedMainCharacterFaceId" mandatory column>
+              <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
                 <v-chip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id" :value="face.id"
                   variant="outlined" color="primary" filter>
                   <v-avatar left>
@@ -68,7 +68,7 @@ const { showSnackbar } = useGlobalSnackbar();
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
-const selectedMainCharacterFaceId = ref<string | null>(null); // New ref for main character selection
+const selectedTargetMemberFaceId = ref<string | null>(null); // Renamed ref
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
@@ -81,8 +81,8 @@ watch(() => memoryStore.faceRecognition.error, (newError) => {
   }
 });
 
-// Watch for changes in selectedMainCharacterFaceId to update internalMemory.memberId and targetFaceId
-watch(selectedMainCharacterFaceId, (newId) => {
+// Watch for changes in selectedTargetMemberFaceId to update internalMemory.memberId and targetFaceId
+watch(selectedTargetMemberFaceId, (newId) => { // Updated ref name
   internalMemory.value.targetFaceId = newId ?? undefined; // Set targetFaceId, convert null to undefined
   if (newId) {
     const selectedFace = memoryStore.faceRecognition.detectedFaces.find(face => face.id === newId);
@@ -160,12 +160,12 @@ const handleFileUpload = async (file: File | File[] | null) => {
       internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
       // Automatically select the first face as main character if any faces are detected
       if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-        selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+        selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id; // Updated ref name
       }
     } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
       internalMemory.value.faces = []; // Clear faces if none detected
-      selectedMainCharacterFaceId.value = null;
+      selectedTargetMemberFaceId.value = null; // Updated ref name
       internalMemory.value.photo = undefined; // Clear photo if no faces detected
       internalMemory.value.imageSize = undefined;
       internalMemory.value.exifData = undefined;
@@ -176,7 +176,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
     internalMemory.value.faces = [];
     internalMemory.value.photoUrl = undefined;
     internalMemory.value.photo = undefined; // Clear the 'photo' property
-    selectedMainCharacterFaceId.value = null;
+    selectedTargetMemberFaceId.value = null; // Updated ref name
     internalMemory.value.imageSize = undefined;
     internalMemory.value.exifData = undefined;
   }
@@ -196,7 +196,7 @@ const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) =>
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
   // If the labeled face is currently selected as main character, update internalMemory.memberId
-  if (selectedMainCharacterFaceId.value === faceId) {
+  if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
     internalMemory.value.memberId = memberDetails.id;
   }
 };
@@ -204,8 +204,8 @@ const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) =>
 const handleRemoveFace = (faceId: string) => {
   memoryStore.removeFace(faceId);
   // If the removed face was the main character, clear selection
-  if (selectedMainCharacterFaceId.value === faceId) {
-    selectedMainCharacterFaceId.value = null;
+  if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
+    selectedTargetMemberFaceId.value = null;
   }
 };
 
@@ -237,7 +237,7 @@ defineExpose({
   isValid: computed(() => !memoryStore.faceRecognition.loading),
   memoryFaceStore: memoryStore.faceRecognition, // Expose memoryStore.faceRecognition instead of memoryFaceStore
   faceUploadInputRef,
-  selectedMainCharacterFaceId, // Expose for potential validation in parent
+  selectedTargetMemberFaceId, // Updated exposed ref name
 });
 </script>
 
