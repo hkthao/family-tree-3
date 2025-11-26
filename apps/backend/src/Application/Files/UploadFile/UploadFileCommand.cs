@@ -26,6 +26,7 @@ public record UploadFileCommand : IRequest<Result<string>>
     /// The folder in the cloud storage to upload to (e.g., "family-tree-memories").
     /// </summary>
     public string Folder { get; init; } = "family-tree-memories"; // Default folder
+    public string ContentType { get; init; } = string.Empty;
 
     /// <summary>
     /// Optional: The type of the entity that this file is associated with (e.g., "Member", "Family").

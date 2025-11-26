@@ -47,6 +47,7 @@ public class UploadController(IMediator mediator) : ControllerBase
         {
             ImageData = imageData,
             FileName = file.FileName,
+            ContentType = file.ContentType,
             Cloud = cloud ?? "imgbb", // Use query param or default
             Folder = folder ?? "family-tree-memories" // Use query param or default
         };

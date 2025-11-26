@@ -41,9 +41,9 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
                 var n8nImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
 
-                if (n8nImageUploadResult.IsSuccess && n8nImageUploadResult.Value != null && n8nImageUploadResult.Value.Any())
+                if (n8nImageUploadResult.IsSuccess && n8nImageUploadResult.Value != null)
                 {
-                    originalImageUrl = n8nImageUploadResult.Value.FirstOrDefault()?.Url;
+                    originalImageUrl = n8nImageUploadResult.Value.Url;
                     if (string.IsNullOrEmpty(originalImageUrl))
                     {
                         _logger.LogWarning("n8n image upload returned success but no URL for original image.");
@@ -77,6 +77,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     {
                         var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
                         var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
+
                         var thumbnailUploadDto = new ImageUploadWebhookDto
                         {
                             ImageData = thumbnailBytes,
@@ -86,9 +87,9 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         };
 
                         var n8nThumbnailUploadResult = await _n8nService.CallImageUploadWebhookAsync(thumbnailUploadDto, cancellationToken);
-                        if (n8nThumbnailUploadResult.IsSuccess && n8nThumbnailUploadResult.Value != null && n8nThumbnailUploadResult.Value.Any())
+                        if (n8nThumbnailUploadResult.IsSuccess && n8nThumbnailUploadResult.Value != null)
                         {
-                            thumbnailUrl = n8nThumbnailUploadResult.Value.FirstOrDefault()?.Url;
+                            thumbnailUrl = n8nThumbnailUploadResult.Value?.Url;
                             if (string.IsNullOrEmpty(thumbnailUrl))
                             {
                                 _logger.LogWarning("n8n image upload returned success but no URL for face thumbnail {FaceId}.", faceResult.Id);
@@ -104,7 +105,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         _logger.LogError(ex, "Failed to convert or upload base64 thumbnail for face {FaceId}.", faceResult.Id);
                     }
                 }
-
 
                 var detectedFaceDto = new DetectedFaceDto
                 {

@@ -30,6 +30,6 @@ public interface IN8nService
     /// </summary>
     /// <param name="dto">Đối tượng chứa dữ liệu ảnh và các tham số tải lên.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Kết quả chứa danh sách phản hồi tải ảnh lên.</returns>
-    Task<Result<List<ImageUploadResponseDto>>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken);
+    /// <returns>Kết quả chứa phản hồi tải ảnh lên.</returns>
+    Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken);
 }

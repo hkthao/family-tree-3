@@ -5,7 +5,6 @@ using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -14,26 +13,13 @@ namespace backend.Application.UnitTests.Files.UploadFile;
 public class UploadFileCommandHandlerTests : TestBase
 {
     private readonly Mock<IN8nService> _n8nServiceMock; // Changed from IFileStorage
-    private readonly Mock<IDateTime> _dateTimeMock;
-    private readonly IConfiguration _configuration;
     private readonly UploadFileCommandHandler _handler;
 
     public UploadFileCommandHandlerTests()
     {
         _n8nServiceMock = new Mock<IN8nService>(); // Changed from IFileStorageMock
-        _dateTimeMock = new Mock<IDateTime>();
-
-        var inMemorySettings = new Dictionary<string, string?> {};
-
-        _configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
-            .Build();
-
         _handler = new UploadFileCommandHandler(
-            _n8nServiceMock.Object, // Changed from _fileStorageMock.Object
-            _configuration,
-            _context,
-            _dateTimeMock.Object);
+            _n8nServiceMock.Object);
     }
 
     private UploadFileCommand CreateValidCommand(byte[] imageData)
@@ -53,12 +39,12 @@ public class UploadFileCommandHandlerTests : TestBase
         // Arrange
         var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
         var imageUrl = "http://uploaded.image.url/test.jpg";
-        var n8nResponse = new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = imageUrl } };
+        var n8nResponse = new ImageUploadResponseDto { Url = imageUrl };
 
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -88,7 +74,7 @@ public class UploadFileCommandHandlerTests : TestBase
         var errorMessage = "N8n upload failed.";
         var errorSource = ErrorSources.ExternalServiceError;
 
-        var failureResult = Result<List<ImageUploadResponseDto>>.Failure(errorMessage, errorSource); // Create result explicitly
+        var failureResult = Result<ImageUploadResponseDto>.Failure(errorMessage, errorSource); // Create result explicitly
 
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),
@@ -110,12 +96,12 @@ public class UploadFileCommandHandlerTests : TestBase
     {
         // Arrange
         var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var n8nResponse = new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = "" } }; // Empty URL
+        var n8nResponse = new ImageUploadResponseDto { Url = "" }; // Empty URL
 
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -132,12 +118,12 @@ public class UploadFileCommandHandlerTests : TestBase
     {
         // Arrange
         var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var n8nResponse = new List<ImageUploadResponseDto>(); // Empty list
+        var n8nResponse = new ImageUploadResponseDto(); // Empty list
 
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -159,7 +145,7 @@ public class UploadFileCommandHandlerTests : TestBase
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = string.Empty, DisplayUrl = string.Empty, Width = 0, Height = 0, Size = 0, Id = string.Empty, Name = string.Empty, Filename = string.Empty, Extension = string.Empty } })); // Simulate empty URL
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = string.Empty, DisplayUrl = string.Empty, Width = 0, Height = 0, Size = 0, Id = string.Empty, Name = string.Empty, Filename = string.Empty, Extension = string.Empty })); // Simulate empty URL
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

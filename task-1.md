@@ -1,176 +1,51 @@
-BƯỚC 2 – INPUT CHUẨN (FINAL SPEC)
-
-Dữ liệu đầu vào cho bước phân tích bối cảnh & cảm xúc từ AI
-
-Bạn đã có:
-
-Ảnh
-
-Danh sách bounding box
-
-Emotion local detect
-
-→ Nhưng để AI hoạt động chính xác, cần đủ 7 nhóm thông tin sau.
-
-🎯 1. Ảnh gốc (full image)
-
-Dạng: URL hoặc base64
-
-Resize xuống max 512px để AI phân tích tốt hơn & giảm token.
-
-image_url / image_base64
-image_size: "512x512"
-
-🎯 2. Danh sách khuôn mặt đã detect
-
-Chỉ cần:
-
-face_id (unique)
-
-bbox (x, y, w, h)
-
-emotion_local (dominant + confidence)
-
-quality (blur score optional)
-
-Ví dụ:
-
-faces: [
-  {
-    "face_id": "f1",
-    "bbox": [100, 200, 160, 160],
-    "emotion_local": { "dominant": "happy", "confidence": 0.82 },
-    "quality": "good"
-  }
-]
-
-🎯 3. Ai là người được chọn (target face)
-
-Step 2 cần biết bạn muốn phân tích cảm xúc & ngữ cảnh cho ai.
-
-target_face_id: "f1"
-
-
-Nếu không chỉ rõ → AI sẽ đoán sai cảm xúc và sai ngữ cảnh cá nhân.
-
-🎯 4. Thông tin Member (nếu đã match)
-
-Không bắt buộc.
-Nhưng nếu Step 1 có match thì nên đưa vào (để AI mô tả đúng phong cách):
-
-name (optional)
-
-age (nếu biết)
-
-gender (nếu có)
-
-relationship (cha/mẹ/ông/bà…)
-
-member_info: {
-  "id": "m123",
-  "name": "Huỳnh Văn A",
-  "gender": "male",
-  "age": 42
-}
-
-🎯 5. Ảnh crop của target face
-
-AI cần nhìn rõ khuôn mặt người được phân tích.
-
-→ Crop từ bbox
-→ Resize 128–256px
-
-target_face_crop_url: "..."
-
-🎯 6. Danh sách các khuôn mặt khác (context people)
-
-Không cần nhiều, chỉ cần để AI hiểu bối cảnh:
-
-other_faces_summary: [
-   { "emotion_local": "neutral" },
-   { "emotion_local": "happy" }
-]
-
-
-Không cần bbox, không cần crop vì AI đã xem full-image.
-
-🎯 7. EXIF (nếu có) – KHÔNG BẮT BUỘC
-
-Nếu ảnh chụp thật sẽ rất hữu ích:
-
-datetime
-
-gps
-
-camera info
-
-Ví dụ:
-
-exif: {
-  "datetime": "2012-05-22 17:30",
-  "gps": null
-}
-
-
-Nếu không có cũng OK.
-
-🧱 TỔNG HỢP – FULL INPUT CHUẨN CHO STEP 2
-
-Bạn chỉ cần đưa đúng format này vào AI:
 
 {
-  "image_url": "...",
-  "faces": [
-    {
-      "face_id": "f1",
-      "bbox": [100, 200, 160, 160],
-      "emotion_local": { "dominant": "happy", "confidence": 0.82 },
-      "quality": "good"
-    },
-    {
-      "face_id": "f2",
-      "bbox": [240, 210, 140, 140],
-      "emotion_local": { "dominant": "neutral", "confidence": 0.63 },
-      "quality": "medium"
-    }
-  ],
-  "target_face_id": "f1",
-  
-  "target_face_crop_url": "...",
-  
-  "member_info": {
-    "id": "m123",
-    "name": "Huỳnh Văn A",
-    "gender": "male",
-    "age": 42
-  },
-
-  "other_faces_summary": [
-    { "emotion_local": "neutral" },
-    { "emotion_local": "happy" }
-  ],
-
-  "exif": {
-    "datetime": "2012-05-22 17:30",
-    "gps": null
-  }
+"headers": 
+{
+"host": 
+"n8n.srv1128614.hstgr.cloud",
+"user-agent": 
+"PostmanRuntime/7.49.1",
+"content-length": 
+"110680",
+"accept": 
+"*/*",
+"accept-encoding": 
+"gzip, deflate, br",
+"authorization": 
+"Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImVlOUx4b24yV0xaMUNvN2g3aFMyTCJ9.eyJodHRwczovL2ZhbWlseXRyZWUuY29tL3JvbGVzIjpbIkFkbWluIl0sImh0dHBzOi8vZmFtaWx5dHJlZS5jb20vZW1haWwiOiJ0aGFvLmhrOTBAZ21haWwuY29tIiwiaHR0cHM6Ly9mYW1pbHl0cmVlLmNvbS9uYW1lIjoidGhhby5oazkwQGdtYWlsLmNvbSIsImlzcyI6Imh0dHBzOi8vZGV2LWc3NnRxMDBnaWN3ZHprM3oudXMuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDY4ZTM4YTVhOTY5MTA3ZWJhYTkxMjU3NyIsImF1ZCI6WyJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJodHRwczovL2Rldi1nNzZ0cTAwZ2ljd2R6azN6LnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3NjM3ODM2NDIsImV4cCI6MTc2Mzg3MDA0Miwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsImF6cCI6InY0alNlNVFSNFVqNmRkb0JCTUhOdGFETkh3djhVelFOIn0.BRapv545A3Kxk73-Ui4XMKjcYjUA61E9eUYGMbbIff7-J3TQ_XfvuaBPWJqkutDvAOOuOYNGCeg0EiT6v7JotEo_irz-1AbReYFerURZba4D-VzSnEXqCmdaxZm0ysffHhpZ2-2JTF93pIeCW_8_0IRuKEoYhPAetOQ9mdfVKw2sL_eUyDMh023h24MkTGQfAWUHimbsisnk0z9s9mVy9R9y5PTYOsRQQsLtLhKmbT0Uh4UpX8J0D30hojc2KctQkdp2POTH69Paj8nlUoFEIrSstei9ah3EL3SQelWXAYFpYssshATBhTZNHpsPyZwpQrZoBC9DP_MuuDcIWhN-rw",
+"content-type": 
+"multipart/form-data; boundary=--------------------------719131315342491515858643",
+"postman-token": 
+"06ba6b38-92a4-4f41-9fe4-86088e4c0cf5",
+"x-forwarded-for": 
+"172.18.0.1",
+"x-forwarded-host": 
+"n8n.srv1128614.hstgr.cloud",
+"x-forwarded-port": 
+"443",
+"x-forwarded-proto": 
+"https",
+"x-forwarded-server": 
+"fbda558c2e9f",
+"x-real-ip": 
+"172.18.0.1"
+},
+"params": 
+{
+},
+"query": 
+{
+},
+"body": 
+{
+"cloud": 
+"imgbb",
+"folder": 
+"test"
+},
+"webhookUrl": 
+"https://n8n.srv1128614.hstgr.cloud/webhook-test/image-upload",
+"executionMode": 
+"test"
 }
-
-📌 Vậy là đủ chưa?
-
-Đủ 100%.
-Chỉ cần 7 nhóm dữ liệu ở trên → AI phân tích 100% đầy đủ:
-
-Bối cảnh sự kiện
-
-Không gian
-
-Ánh sáng
-
-Diễn tả khuôn mặt người target
-
-Cảm xúc target (fusion local + AI)
-
-Mối quan hệ người trong ảnh
-
-Cues để viết story

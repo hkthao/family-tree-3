@@ -210,12 +210,12 @@ public class N8nService : IN8nService
     }
 
     /// <inheritdoc />
-    public async Task<Result<List<ImageUploadResponseDto>>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken)
+    public async Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_n8nSettings.ImageUploadWebhookUrl) || _n8nSettings.ImageUploadWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
             _logger.LogWarning("n8n image upload webhook URL is not configured.");
-            return Result<List<ImageUploadResponseDto>>.Failure("n8n image upload integration is not configured.", "Configuration");
+            return Result<ImageUploadResponseDto>.Failure("n8n image upload integration is not configured.", "Configuration");
         }
 
         var httpClient = _httpClientFactory.CreateClient();
@@ -234,27 +234,25 @@ public class N8nService : IN8nService
             _logger.LogWarning("N8nSettings.JwtSecret is not configured. Skipping JWT token generation for image upload webhook.");
         }
 
+        // Add image file
         using var content = new MultipartFormDataContent();
 
-        // Add image file
-        var fileContent = new ByteArrayContent(dto.ImageData);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg"); // Assuming JPEG, adjust as needed
-        content.Add(fileContent, "data", dto.FileName!); // Added null-forgiving operator
+        var stream = new MemoryStream(dto.ImageData);
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Add(fileContent, "data", dto.FileName!);
 
-        // Add other form fields
-        content.Add(new StringContent(dto.Cloud), "cloud");
-        content.Add(new StringContent(dto.Folder), "folder");
-
+        var url = $"{_n8nSettings.ImageUploadWebhookUrl}?cloud=${dto.Cloud}&folder=${dto.Folder}";
         try
         {
-            _logger.LogInformation("Calling n8n image upload webhook at {Url}", _n8nSettings.ImageUploadWebhookUrl);
-            var response = await httpClient.PostAsync(_n8nSettings.ImageUploadWebhookUrl, content, cancellationToken);
+            _logger.LogInformation("Calling n8n image upload webhook at {Url}", url);
+            var response = await httpClient.PostAsync(url, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 _logger.LogError("Failed to call n8n image upload webhook. Status: {StatusCode}, Response: {ErrorContent}", response.StatusCode, errorContent);
-                return Result<List<ImageUploadResponseDto>>.Failure($"Failed to upload image via n8n webhook. Status: {response.StatusCode}", "ExternalService");
+                return Result<ImageUploadResponseDto>.Failure($"Failed to upload image via n8n webhook. Status: {response.StatusCode}", "ExternalService");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -263,7 +261,7 @@ public class N8nService : IN8nService
             if (string.IsNullOrWhiteSpace(responseContent))
             {
                 _logger.LogWarning("Received empty response content from n8n image upload webhook.");
-                return Result<List<ImageUploadResponseDto>>.Failure("Invalid response format from n8n: Received empty response.", "ExternalService");
+                return Result<ImageUploadResponseDto>.Failure("Invalid response format from n8n: Received empty response.", "ExternalService");
             }
 
             var options = new JsonSerializerOptions
@@ -271,29 +269,29 @@ public class N8nService : IN8nService
                 PropertyNameCaseInsensitive = true,
             };
 
-            List<ImageUploadResponseDto>? uploadResponse = null;
+            ImageUploadResponseDto? uploadResponse = null;
             try
             {
-                uploadResponse = JsonSerializer.Deserialize<List<ImageUploadResponseDto>>(responseContent, options);
+                uploadResponse = JsonSerializer.Deserialize<ImageUploadResponseDto>(responseContent, options);
             }
             catch (JsonException ex)
             {
                 _logger.LogError(ex, "Failed to deserialize n8n image upload webhook response. Raw response: {RawResponse}", responseContent);
-                return Result<List<ImageUploadResponseDto>>.Failure($"Invalid response format from n8n: Failed to deserialize image upload response. Raw response: {responseContent}", "ExternalService");
+                return Result<ImageUploadResponseDto>.Failure($"Invalid response format from n8n: Failed to deserialize image upload response. Raw response: {responseContent}", "ExternalService");
             }
 
-            if (uploadResponse == null || !uploadResponse.Any())
+            if (uploadResponse == null)
             {
                 _logger.LogWarning("Received empty or invalid image upload response from n8n.");
-                return Result<List<ImageUploadResponseDto>>.Failure("Invalid response format from n8n: Empty or invalid image upload response.", "ExternalService");
+                return Result<ImageUploadResponseDto>.Failure("Invalid response format from n8n: Empty or invalid image upload response.", "ExternalService");
             }
 
-            return Result<List<ImageUploadResponseDto>>.Success(uploadResponse);
+            return Result<ImageUploadResponseDto>.Success(uploadResponse);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception occurred while calling the n8n image upload webhook.");
-            return Result<List<ImageUploadResponseDto>>.Failure($"An error occurred: {ex.Message}", "Exception");
+            return Result<ImageUploadResponseDto>.Failure($"An error occurred: {ex.Message}", "Exception");
         }
     }
 }

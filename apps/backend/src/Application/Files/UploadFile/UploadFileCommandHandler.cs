@@ -1,26 +1,14 @@
-using System.Text.RegularExpressions;
 using backend.Application.AI.DTOs; // NEW USING FOR IMAGELOADWEBHOOKDTO
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
-using Microsoft.Extensions.Configuration;
-
 namespace backend.Application.Files.UploadFile;
 
 public class UploadFileCommandHandler(
-    IN8nService n8nService, // INJECT NEW SERVICE
-    IConfiguration configuration,
-    IApplicationDbContext context,
-    IDateTime dateTime
+    IN8nService n8nService
 ) : IRequestHandler<UploadFileCommand, Result<string>>
 {
     private readonly IN8nService _n8nService = n8nService; // ADD NEW SERVICE FIELD
-    private readonly IConfiguration _configuration = configuration;
-    private readonly IApplicationDbContext _context = context;
-    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
@@ -43,8 +31,7 @@ public class UploadFileCommandHandler(
             return Result<string>.Failure(n8nUploadResult.Error ?? ErrorMessages.FileUploadFailed, n8nUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
         }
 
-        var uploadedImageResponse = n8nUploadResult.Value!.FirstOrDefault(); // Added null-forgiving operator
-        var uploadedImageUrl = uploadedImageResponse?.Url;
+        var uploadedImageUrl = n8nUploadResult.Value?.Url;
 
         if (string.IsNullOrEmpty(uploadedImageUrl))
         {
