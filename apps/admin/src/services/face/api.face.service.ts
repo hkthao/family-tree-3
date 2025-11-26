@@ -9,6 +9,9 @@ export class ApiFaceService implements IFaceService {
   async detect(imageFile: File): Promise<Result<{ imageId: string; detectedFaces: DetectedFace[] }, ApiError>> {
     const formData = new FormData();
     formData.append('file', imageFile);
+    formData.append('fileName', imageFile.name); // Keep fileName
+    // formData.append('cloud', 'imgbb'); // Removed cloud
+    // formData.append('folder', 'family-tree-face-detection'); // Removed folder
 
     return this.http.post<{ imageId: string; detectedFaces: DetectedFace[] }>(`/face/detect`, formData, {
       headers: {
