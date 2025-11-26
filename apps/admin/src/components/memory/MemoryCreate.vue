@@ -314,7 +314,7 @@ const analyzePhoto = async () => {
     };
 
     // 5. Call AI analysis action
-    const result = await memoryStore.services.ai.analyzePhoto(aiInput);
+    const result = await memoryStore.services.ai.analyzePhoto({ Input: aiInput }); // WRAP aiInput IN { Input: ... }
     
     if (result.ok) {
       photoAnalysisResult.value = result.value;

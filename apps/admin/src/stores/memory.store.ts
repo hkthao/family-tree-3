@@ -237,11 +237,11 @@ export const useMemoryStore = defineStore('memory', {
       this.list.filters = { ...this.list.filters, ...filters };
     },
 
-    async analyzePhoto(input: AiPhotoAnalysisInputDto): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // MODIFIED
+    async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // MODIFIED
       this.aiAnalysis.loading = true;
       this.aiAnalysis.error = null;
       try {
-        const result = await this.services.ai.analyzePhoto(input); // Use new ai service
+        const result = await this.services.ai.analyzePhoto(command); // Use new ai service
         if (result.ok) {
           this.aiAnalysis.result = result.value;
         } else {

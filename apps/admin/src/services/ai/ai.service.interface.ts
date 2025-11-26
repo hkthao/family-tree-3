@@ -7,7 +7,7 @@ import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/natural-language.d'; // NEW IMPORT
 
 export interface IAiService {
-  analyzePhoto(input: AiPhotoAnalysisInputDto): Promise<Result<PhotoAnalysisResultDto, ApiError>>;
+  analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>>; // UPDATED
   generateBiography(
     memberId: string,
     style: BiographyStyle,

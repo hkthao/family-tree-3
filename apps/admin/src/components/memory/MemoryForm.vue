@@ -177,7 +177,7 @@ const nextStep = async () => {
       
       // Call AI analysis action
       // memoryStore.aiAnalysis.loading is automatically managed by the action
-      const aiResult = await memoryStore.services.ai.analyzePhoto(aiInput); // CORRECTED SERVICE ACCESS
+      const aiResult = await memoryStore.services.ai.analyzePhoto({ Input: aiInput }); // WRAP aiInput IN { Input: ... }
       
       if (aiResult.ok) {
         internalMemory.value.photoAnalysisResult = aiResult.value;

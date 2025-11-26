@@ -14,8 +14,8 @@ const NATURAL_LANGUAGE_URL = '/natural-language'; // Corrected Base URL for natu
 export class ApiAiService implements IAiService {
   constructor(private apiClient: ApiClientMethods) {}
 
-  async analyzePhoto(input: AiPhotoAnalysisInputDto): Promise<Result<PhotoAnalysisResultDto, ApiError>> {
-    return this.apiClient.post<PhotoAnalysisResultDto>(`${AI_BASE_URL}/analyze-photo`, input); // CORRECTED URL
+  async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // UPDATED
+    return this.apiClient.post<PhotoAnalysisResultDto>(`${AI_BASE_URL}/analyze-photo`, command); // UPDATED
   }
 
   async generateBiography(
