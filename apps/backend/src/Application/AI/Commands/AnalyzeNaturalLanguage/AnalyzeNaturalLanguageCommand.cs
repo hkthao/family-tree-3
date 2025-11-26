@@ -1,5 +1,5 @@
-using backend.Application.Common.Models;
 using backend.Application.AI.Models; // UPDATED USING
+using backend.Application.Common.Models;
 
 namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;
 

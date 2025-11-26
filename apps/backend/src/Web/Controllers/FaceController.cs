@@ -42,7 +42,7 @@ public class FaceController(IMediator mediator) : ControllerBase
             ImageBytes = imageBytes,
             ContentType = file.ContentType,
             ReturnCrop = returnCrop,
-            ResizeImageForAnalysis =resizeImageForAnalysis
+            ResizeImageForAnalysis = resizeImageForAnalysis
         };
 
         var result = await _mediator.Send(command);

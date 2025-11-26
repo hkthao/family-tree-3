@@ -1,8 +1,8 @@
 using System.Text.Json;
+using backend.Application.AI.Models; // UPDATED USING
 using backend.Application.AI.Prompts;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.AI.Models; // UPDATED USING
 using backend.Domain.Enums; // Add using directive
 
 namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;

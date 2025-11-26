@@ -14,6 +14,8 @@ public class PhotoAnalysisResult : BaseAuditableEntity, IAggregateRoot
     public string Emotion { get; set; } = string.Empty;
     public JsonDocument? Faces { get; set; } // array of face objects
     public JsonDocument? Objects { get; set; }
+    public JsonDocument? Persons { get; set; } // NEW
+    public JsonDocument? Suggestions { get; set; } // NEW
     public string YearEstimate { get; set; } = string.Empty;
     // CreatedAt is inherited from BaseAuditableEntity
 

@@ -1,29 +1,35 @@
+using System.Text.Json;
+using backend.Application.AI.DTOs;
+using backend.Application.AI.Prompts;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Memories.DTOs;
+using backend.Application.Memories.DTOs; // PhotoAnalysisResultDto, GenerateStoryResponseDto
+using backend.Domain.Entities; // Family, Member
+using Microsoft.EntityFrameworkCore; // ToListAsync
 
 namespace backend.Application.Memories.Commands.GenerateStory;
 
 public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand, Result<GenerateStoryResponseDto>>
 {
-    private readonly IStoryGenerationService _storyGenerationService;
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IMapper _mapper;
+    private readonly IN8nService _n8nService; // NEW
 
-    public GenerateStoryCommandHandler(IStoryGenerationService storyGenerationService, IApplicationDbContext context, IAuthorizationService authorizationService, IMapper mapper)
+    public GenerateStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService)
     {
-        _storyGenerationService = storyGenerationService;
         _context = context;
         _authorizationService = authorizationService;
-        _mapper = mapper;
+        _n8nService = n8nService;
     }
 
     public async Task<Result<GenerateStoryResponseDto>> Handle(GenerateStoryCommand request, CancellationToken cancellationToken)
     {
         // Find the member to ensure it exists and belongs to the family
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        var member = await _context.Members
+            .Include(m => m.Family)
+            .FirstOrDefaultAsync(m => m.Id == request.MemberId, cancellationToken);
+
         if (member == null)
         {
             return Result<GenerateStoryResponseDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId} not found."), ErrorSources.NotFound);
@@ -35,34 +41,41 @@ public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand,
             return Result<GenerateStoryResponseDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // Check if PhotoAnalysisId is provided and exists
-        if (request.PhotoAnalysisId.HasValue)
+        // Build the user message for the AI Agent
+        var sessionId = Guid.NewGuid().ToString(); // Generate a new session ID for this generation
+        var userMessage = PromptBuilder.BuildStoryGenerationPrompt(request, member, member.Family, request.PhotoAnalysisResult);
+
+        // Call n8n Chat Webhook for story generation
+        var n8nChatResult = await _n8nService.CallChatWebhookAsync(sessionId, userMessage, cancellationToken);
+
+        if (!n8nChatResult.IsSuccess)
         {
-            var photoAnalysis = await _context.PhotoAnalysisResults.FindAsync(new object[] { request.PhotoAnalysisId.Value }, cancellationToken);
-            if (photoAnalysis == null)
+            return Result<GenerateStoryResponseDto>.Failure(n8nChatResult.Error ?? "Lỗi khi gọi webhook n8n để tạo câu chuyện.", ErrorSources.ExternalServiceError);
+        }
+
+        GenerateStoryResponseDto? storyResponseDto;
+        try
+        {
+            if (string.IsNullOrEmpty(n8nChatResult.Value))
             {
-                return Result<GenerateStoryResponseDto>.Failure(string.Format(ErrorMessages.NotFound, $"PhotoAnalysisResult with ID {request.PhotoAnalysisId} not found."), ErrorSources.NotFound);
+                return Result<GenerateStoryResponseDto>.Failure("Tạo câu chuyện từ n8n trả về phản hồi rỗng.", ErrorSources.ExternalServiceError);
             }
-            // Add check that PhotoAnalysisResult belongs to the same family/member if needed
-        }
-
-        var serviceResult = await _storyGenerationService.GenerateStoryAsync(
-            new GenerateStoryRequestDto
+            var options = new JsonSerializerOptions
             {
-                MemberId = request.MemberId,
-                PhotoAnalysisId = request.PhotoAnalysisId,
-                RawText = request.RawText,
-                Style = request.Style,
-                MaxWords = request.MaxWords,
-            },
-            cancellationToken
-        );
-
-        if (serviceResult.IsSuccess)
+                PropertyNameCaseInsensitive = true
+            };
+            storyResponseDto = System.Text.Json.JsonSerializer.Deserialize<GenerateStoryResponseDto>(n8nChatResult.Value, options);
+        }
+        catch (JsonException ex)
         {
-            return Result<GenerateStoryResponseDto>.Success(serviceResult.Value!);
+            return Result<GenerateStoryResponseDto>.Failure($"Tạo câu chuyện từ n8n trả về phản hồi không hợp lệ: {ex.Message}", ErrorSources.ExternalServiceError);
         }
 
-        return Result<GenerateStoryResponseDto>.Failure(serviceResult.Error!);
+        if (storyResponseDto == null)
+        {
+            return Result<GenerateStoryResponseDto>.Failure("Tạo câu chuyện từ n8n trả về phản hồi rỗng hoặc không hợp lệ.");
+        }
+
+        return Result<GenerateStoryResponseDto>.Success(storyResponseDto);
     }
 }

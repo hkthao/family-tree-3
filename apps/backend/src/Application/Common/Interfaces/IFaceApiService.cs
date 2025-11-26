@@ -15,7 +15,7 @@ public interface IFaceApiService
     /// <param name="returnCrop">Cho biết có trả về ảnh cắt của khuôn mặt hay không.</param>
     /// <returns>Danh sách các đối tượng FaceDetectionResultDto chứa thông tin về các khuôn mặt được phát hiện.</returns>
     Task<List<FaceDetectionResultDto>> DetectFacesAsync(byte[] imageBytes, string contentType, bool returnCrop);
-    
+
     /// <summary>
     /// Thay đổi kích thước hình ảnh.
     /// </summary>

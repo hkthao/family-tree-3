@@ -1,10 +1,9 @@
 using System.Text;
 using System.Text.Json; // NEW
-using System.Text.Json.Serialization; // NEW
 using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
-using backend.Application.AI.Models; // NEW USING
 using backend.Application.AI.DTOs; // NEW USING for AiPhotoAnalysisInputDto
+using backend.Application.AI.Models; // NEW USING
 using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
@@ -129,11 +128,74 @@ public static class PromptBuilder
             WriteIndented = false // Keep JSON concise
         };
         var jsonInput = System.Text.Json.JsonSerializer.Serialize(input, options);
-        
+
         var promptBuilder = new StringBuilder();
         promptBuilder.AppendLine("Hãy phân tích bức ảnh dựa trên dữ liệu JSON sau:");
         promptBuilder.AppendLine(jsonInput);
         promptBuilder.AppendLine("Trả về kết quả phân tích theo đúng định dạng JSON đã được hướng dẫn trong system prompt.");
+        return promptBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Xây dựng prompt cho AI Agent để tạo câu chuyện về một thành viên gia đình.
+    /// </summary>
+    /// <param name="request">Lệnh tạo câu chuyện chứa thông tin yêu cầu.</param>
+    /// <param name="member">Thông tin chi tiết về thành viên.</param>
+    /// <param name="family">Thông tin chi tiết về gia đình.</param>
+    /// <param name="photoAnalysisResult">Kết quả phân tích ảnh liên quan (nếu có).</param>
+    /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
+    public static string BuildStoryGenerationPrompt(
+        backend.Application.Memories.Commands.GenerateStory.GenerateStoryCommand request,
+        Member member,
+        Family? family,
+        PhotoAnalysisResultDto? photoAnalysisResult)
+    {
+        var promptBuilder = new StringBuilder();
+        promptBuilder.AppendLine($"Tạo một câu chuyện về thành viên gia đình sau với phong cách: {request.Style}");
+        promptBuilder.AppendLine($"Độ dài câu chuyện khoảng {request.MaxWords} từ.");
+        promptBuilder.AppendLine("Ngôn ngữ đầu ra: Tiếng Việt.");
+        promptBuilder.AppendLine("\nThông tin thành viên:");
+        promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
+        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToShortDateString() ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToShortDateString() ?? "N/A"}");
+        promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Nghề nghiệp: {member.Occupation ?? "Không rõ"}");
+
+        if (family != null)
+        {
+            promptBuilder.AppendLine($"- Gia đình: {family.Name}");
+        }
+
+        if (!string.IsNullOrEmpty(member.HusbandFullName))
+        {
+            promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
+        }
+        if (!string.IsNullOrEmpty(member.WifeFullName))
+        {
+            promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
+        }
+
+        if (!string.IsNullOrEmpty(request.RawText))
+        {
+            promptBuilder.AppendLine("\nThông tin bổ sung từ người dùng:");
+            promptBuilder.AppendLine(request.RawText);
+        }
+
+        if (photoAnalysisResult != null)
+        {
+            promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            };
+            promptBuilder.AppendLine(System.Text.Json.JsonSerializer.Serialize(photoAnalysisResult, options));
+        }
+
+        // Add instructions from the system prompt
+        promptBuilder.AppendLine("\nTuân thủ các quy tắc đã được đặt ra trong system prompt để tạo ra câu chuyện.");
+
         return promptBuilder.ToString();
     }
 }

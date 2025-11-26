@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions; // NEW USING FOR REGEX
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGEUPLOADWEBHOOKDTO
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using Microsoft.Extensions.Logging;
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGEUPLOADWEBHOOKDTO
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 

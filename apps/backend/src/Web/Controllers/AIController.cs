@@ -1,7 +1,7 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
-using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
 using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
+using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
 using backend.Application.AI.DTOs; // UPDATED IMPORT
 using backend.Application.AI.Models; // NEW IMPORT
 using Microsoft.AspNetCore.Authorization;
