@@ -30,8 +30,8 @@ import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
-import type { INaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service interface
-import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service implementation
+// import type { INaturalLanguageService } from './natural-language/api.natural-language.service'; // REMOVED IMPORT
+// import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // REMOVED IMPORT
 import type { IFamilyDataService } from './family-data/family-data.service.interface';
 import { ApiFamilyDataService } from './family-data/api.family-data.service';
 import type { IPrivacyConfigurationService } from './privacy-configuration/privacy-configuration.service.interface';
@@ -63,7 +63,7 @@ export interface AppServices {
   chat: IChatService;
   face: IFaceService;
   user: IUserService;
-  naturalLanguage: INaturalLanguageService; // Add new service to interface
+  // naturalLanguage: INaturalLanguageService; // REMOVED SERVICE
   familyData: IFamilyDataService;
   privacyConfiguration: IPrivacyConfigurationService;
   familyDict: IFamilyDictService; // Add familyDict service
@@ -140,10 +140,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiUserService(apiClient)
         : testServices?.user || new ApiUserService(apiClient),
-    naturalLanguage: // Register new service
-      mode === 'real'
-        ? new ApiNaturalLanguageService(apiClient)
-        : testServices?.naturalLanguage || new ApiNaturalLanguageService(apiClient),
+    // naturalLanguage: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApiNaturalLanguageService(apiClient)
+    //     : testServices?.naturalLanguage || new ApiNaturalLanguageService(apiClient),
     familyData:
       mode === 'real'
         ? new ApiFamilyDataService(apiClient)
@@ -166,5 +166,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : testServices?.ai || new ApiAiService(apiClient),
   };
 }
+
 
 

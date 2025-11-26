@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/natural-language.d'; // Update import
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types'; // Update type import to global
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
@@ -29,7 +29,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
       const sessionId = uuidv4(); // Generate sessionId here
 
-      const result = await this.services.naturalLanguage.analyzeContent(this.input, sessionId); // Use new service
+      const result = await this.services.ai.analyzeContent(this.input, sessionId); // Use services.ai
 
       if (result.ok) {
         this.parsedData = result.value; // Directly assign the object
