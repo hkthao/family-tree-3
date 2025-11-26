@@ -100,8 +100,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 }
             }
 
-
-            var detectedFacesResult = await _faceApiService.DetectFacesAsync(imageBytesToAnalyze!, request.ContentType, request.ReturnCrop);
+            var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
 
             // Generate a unique ImageId for this detection session
             var imageId = Guid.NewGuid();

@@ -1,7 +1,10 @@
 using System.Text;
+using System.Text.Json; // NEW
+using System.Text.Json.Serialization; // NEW
 using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
 using backend.Application.AI.Models; // NEW USING
+using backend.Application.AI.DTOs; // NEW USING for AiPhotoAnalysisInputDto
 using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
@@ -110,6 +113,27 @@ public static class PromptBuilder
             promptBuilder.AppendLine("Do not use any existing biography from the database. Generate a new one based on the details and user prompt.");
         }
 
+        return promptBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Xây dựng prompt cho AI Agent để phân tích ảnh dựa trên dữ liệu AiPhotoAnalysisInputDto.
+    /// </summary>
+    /// <param name="input">Đối tượng AiPhotoAnalysisInputDto chứa dữ liệu ảnh và các thông tin liên quan.</param>
+    /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
+    public static string BuildPhotoAnalysisPrompt(AiPhotoAnalysisInputDto input)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, // Ensure camelCase for JSON keys
+            WriteIndented = false // Keep JSON concise
+        };
+        var jsonInput = System.Text.Json.JsonSerializer.Serialize(input, options);
+        
+        var promptBuilder = new StringBuilder();
+        promptBuilder.AppendLine("Hãy phân tích bức ảnh dựa trên dữ liệu JSON sau:");
+        promptBuilder.AppendLine(jsonInput);
+        promptBuilder.AppendLine("Trả về kết quả phân tích theo đúng định dạng JSON đã được hướng dẫn trong system prompt.");
         return promptBuilder.ToString();
     }
 }

@@ -69,7 +69,6 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null); // Renamed ref
-const resizeImageForAnalysis = ref(true); // NEW: Option to resize image for analysis
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,

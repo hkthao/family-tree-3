@@ -2,7 +2,9 @@
   <v-form ref="formStep2">
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete class="mt-2" v-model="internalMemory.memberId" :label="t('member.form.member')"
+        <MemberAutocomplete 
+        :disabled="true"
+        class="mt-2" v-model="internalMemory.memberId" :label="t('member.form.member')"
           :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
           :readonly="readonly || !!memberId" required></MemberAutocomplete>
       </v-col>
@@ -71,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
 import type { MemoryDto } from '@/types/memory';
@@ -95,7 +97,7 @@ const internalMemory = computed<MemoryDto>({
       ...model,
       rawInput: model.rawInput ?? undefined,
       story: model.story ?? undefined,
-      eventSuggestion: model.eventSuggestion ?? aiEventSuggestions.value[0],
+      eventSuggestion: model.eventSuggestion ?? undefined, // No longer reference aiEventSuggestions directly
       customEventDescription: model.customEventDescription ?? undefined,
       emotionContextTags: model.emotionContextTags ?? [],
       customEmotionContext: model.customEmotionContext ?? undefined,
@@ -112,25 +114,29 @@ watch(() => props.memberId, (newMemberId) => {
   }
 }, { immediate: true });
 
-// AI Event Suggestions
-const aiEventSuggestions = ref([
-  t('memory.create.aiEventSuggestion.suggestion1'),
-  t('memory.create.aiEventSuggestion.suggestion2'),
-  t('memory.create.aiEventSuggestion.suggestion3'),
-  t('memory.create.aiEventSuggestion.suggestion4'),
-]);
+// AI Event Suggestions (now derived from photoAnalysisResult or fallback)
+const aiEventSuggestions: ComputedRef<string[]> = computed(() => { // Explicitly typed
+  return internalMemory.value.photoAnalysisResult?.suggestions?.event || [
+    t('memory.create.aiEventSuggestion.suggestion1'),
+    t('memory.create.aiEventSuggestion.suggestion2'),
+    t('memory.create.aiEventSuggestion.suggestion3'),
+    t('memory.create.aiEventSuggestion.suggestion4'),
+  ];
+});
 
-// AI Emotion & Context Suggestions
-const aiEmotionContextSuggestions = ref([
-  t('memory.create.aiEmotionContextSuggestion.suggestion1'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion2'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion3'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion4'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion5'),
-  t('memory.create.aiEmotionContextSuggestion.suggestion6'),
-]);
+// AI Emotion & Context Suggestions (now derived from photoAnalysisResult or fallback)
+const aiEmotionContextSuggestions: ComputedRef<string[]> = computed(() => { // Explicitly typed
+  return internalMemory.value.photoAnalysisResult?.suggestions?.emotion || [
+    t('memory.create.aiEmotionContextSuggestion.suggestion1'),
+    t('memory.create.aiEmotionContextSuggestion.suggestion2'),
+    t('memory.create.aiEmotionContextSuggestion.suggestion3'),
+    t('memory.create.aiEmotionContextSuggestion.suggestion4'),
+    t('memory.create.aiEmotionContextSuggestion.suggestion5'),
+    t('memory.create.aiEmotionContextSuggestion.suggestion6'),
+  ];
+});
 
-// AI Perspective Suggestions
+// AI Perspective Suggestions (remains fixed as no AI suggestions for this)
 const aiPerspectiveSuggestions = ref([
   { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },

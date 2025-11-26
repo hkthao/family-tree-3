@@ -120,7 +120,7 @@ const buildAiPhotoAnalysisInput = (
     imageSize: memory.imageSize || '512x512',
     exif: memory.exifData,
     targetFaceId: memory.targetFaceId,
-    targetFaceCropUrl: null, // Placeholder for now, can be generated later if needed
+    targetFaceCropUrl: undefined, // Initialize as undefined
 
     faces: memory.faces!.map(face => ({
       faceId: face.id,
@@ -139,12 +139,19 @@ const buildAiPhotoAnalysisInput = (
     (face) => face.id === aiInput.targetFaceId
   );
 
-  if (targetMemberFace && targetMemberFace.memberId) {
-    aiInput.memberInfo = {
-      id: targetMemberFace.memberId,
-      name: targetMemberFace.memberName,
-      age: targetMemberFace.birthYear ? (new Date().getFullYear() - targetMemberFace.birthYear) : undefined,
-    };
+  if (targetMemberFace) {
+    aiInput.targetFaceCropUrl = targetMemberFace.thumbnail; // Assign the thumbnail URL if target face exists
+
+    if (targetMemberFace.memberId) {
+              aiInput.memberInfo = {
+                id: targetMemberFace.memberId,
+                name: targetMemberFace.memberName,
+                age: targetMemberFace.birthYear
+                  ? (targetMemberFace.deathYear
+                      ? targetMemberFace.deathYear - targetMemberFace.birthYear
+                      : new Date().getFullYear() - targetMemberFace.birthYear)
+                  : undefined,
+              };    }
   }
 
   aiInput.otherFacesSummary = memory.faces!

@@ -1,29 +1,24 @@
 using System.Net.Http.Json; // Added for ReadFromJsonAsync
 using System.Text.Json; // Added for JsonDocument
 using backend.Application.AI.DTOs;
+using backend.Application.AI.Prompts; // NEW
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting; // Added for N8nSettings
-using Microsoft.Extensions.Options; // Added for IOptions
 
 namespace backend.Application.AI.Commands.AnalyzePhoto;
 
 public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, Result<PhotoAnalysisResultDto>>
 {
-    private readonly IMapper _mapper;
     private readonly IApplicationDbContext _context; // To check if memberId exists
     private readonly IAuthorizationService _authorizationService;
-    private readonly HttpClient _httpClient; // Keep HttpClient for n8n webhook
-    private readonly N8nSettings _n8nSettings; // Replaced IConfiguration with N8nSettings
+    private readonly IN8nService _n8nService; // Use IN8nService
 
-    public AnalyzePhotoCommandHandler(IMapper mapper, IApplicationDbContext context, IAuthorizationService authorizationService, HttpClient httpClient, IOptions<N8nSettings> n8nSettings)
+    public AnalyzePhotoCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService)
     {
-        _mapper = mapper;
         _context = context;
         _authorizationService = authorizationService;
-        _httpClient = httpClient;
-        _n8nSettings = n8nSettings.Value; // Assign the value
+        _n8nService = n8nService;
     }
 
     public async Task<Result<PhotoAnalysisResultDto>> Handle(AnalyzePhotoCommand request, CancellationToken cancellationToken)
@@ -48,44 +43,40 @@ public class AnalyzePhotoCommandHandler : IRequestHandler<AnalyzePhotoCommand, R
             }
         }
 
-        // 3. Call n8n WebHook for advanced analysis and suggestions
-        var n8nPhotoAnalysisWebhook = _n8nSettings.PhotoAnalysisWebhook;
-        if (string.IsNullOrEmpty(n8nPhotoAnalysisWebhook))
-        {
-            return Result<PhotoAnalysisResultDto>.Failure("N8n configuration for photo analysis is missing.");
-        }
+        // Use PromptBuilder to create message for AI and call CallChatWebhookAsync
+        var sessionId = Guid.NewGuid().ToString(); // Generate a new session ID for this analysis
+        var userMessage = PromptBuilder.BuildPhotoAnalysisPrompt(request.Input);
 
-        // Use the AiPhotoAnalysisInputDto directly as payload for n8n webhook
-        // n8n will handle the image processing and AI analysis
-        var n8nRequestPayload = request.Input;
+        var n8nChatResult = await _n8nService.CallChatWebhookAsync(sessionId, userMessage, cancellationToken);
 
-        HttpResponseMessage n8nHttpResponse;
-        try
+        if (!n8nChatResult.IsSuccess)
         {
-            // Ensure content type is application/json
-            var jsonContent = JsonContent.Create(n8nRequestPayload, options: new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
-            n8nHttpResponse = await _httpClient.PostAsync(n8nPhotoAnalysisWebhook, jsonContent, cancellationToken);
-            n8nHttpResponse.EnsureSuccessStatusCode();
-        }
-        catch (HttpRequestException ex)
-        {
-            return Result<PhotoAnalysisResultDto>.Failure($"Lỗi khi gọi webhook n8n để phân tích ảnh: {ex.Message}", ErrorSources.ExternalServiceError);
+            return Result<PhotoAnalysisResultDto>.Failure(n8nChatResult.Error ?? "Lỗi khi gọi webhook n8n để phân tích ảnh.", ErrorSources.ExternalServiceError);
         }
 
         PhotoAnalysisResultDto? photoAnalysisResult;
         try
         {
-            photoAnalysisResult = await n8nHttpResponse.Content.ReadFromJsonAsync<PhotoAnalysisResultDto>(cancellationToken);
+            if (string.IsNullOrEmpty(n8nChatResult.Value))
+            {
+                return Result<PhotoAnalysisResultDto>.Failure("Phân tích ảnh từ n8n trả về phản hồi rỗng.", ErrorSources.ExternalServiceError);
+            }
+            // Ensure camelCase JSON from AI is deserialized correctly to PascalCase C# properties
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            // The result.Value is expected to be a JSON string from the AI
+            photoAnalysisResult = System.Text.Json.JsonSerializer.Deserialize<PhotoAnalysisResultDto>(n8nChatResult.Value, options);
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
-            return Result<PhotoAnalysisResultDto>.Failure("Phân tích ảnh từ n8n trả về phản hồi không hợp lệ.", ErrorSources.ExternalServiceError);
+            return Result<PhotoAnalysisResultDto>.Failure($"Phân tích ảnh từ n8n trả về phản hồi không hợp lệ: {ex.Message}", ErrorSources.ExternalServiceError);
         }
 
         if (photoAnalysisResult == null)
         {
-            return Result<PhotoAnalysisResultDto>.Failure("Phân tích ảnh từ n8n trả về phản hồi rỗng.");
+            return Result<PhotoAnalysisResultDto>.Failure("Phân tích ảnh từ n8n trả về phản hồi rỗng hoặc không hợp lệ.");
         }
 
         // Add CreatedAt to the result if it's not already set by n8n

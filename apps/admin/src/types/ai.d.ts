@@ -51,7 +51,14 @@ export interface PhotoAnalysisResultDto {
   yearEstimate?: string;
   objects?: string[];
   persons?: PhotoAnalysisPersonDto[];
+  suggestions?: PhotoAnalysisSuggestionsDto; // NEW PROPERTY
   createdAt: string; // Changed to string as it will be Date on BE but handled as string in TS
+}
+
+export interface PhotoAnalysisSuggestionsDto {
+  scene: string[];
+  event: string[];
+  emotion: string[];
 }
 
 export interface PhotoAnalysisPersonDto {

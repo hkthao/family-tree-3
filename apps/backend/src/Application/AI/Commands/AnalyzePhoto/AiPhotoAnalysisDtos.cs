@@ -60,7 +60,15 @@ public class PhotoAnalysisResultDto
     public string? YearEstimate { get; set; }
     public List<string>? Objects { get; set; }
     public List<PhotoAnalysisPersonDto>? Persons { get; set; }
+    public PhotoAnalysisSuggestionsDto? Suggestions { get; set; } // NEW
     public DateTime CreatedAt { get; set; }
+}
+
+public class PhotoAnalysisSuggestionsDto
+{
+    public List<string> Scene { get; set; } = new List<string>();
+    public List<string> Event { get; set; } = new List<string>();
+    public List<string> Emotion { get; set; } = new List<string>();
 }
 
 public class PhotoAnalysisPersonDto

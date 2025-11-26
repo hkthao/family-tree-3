@@ -3,6 +3,8 @@ using System.Text.Json;
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED USING
 using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces; // NEW
+using backend.Application.Common.Models; // NEW
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.UnitTests.Common; // Added for TestBase
 using backend.Domain.Entities;
@@ -16,23 +18,21 @@ namespace backend.Application.UnitTests.Memories.Commands;
 
 public class AnalyzePhotoCommandTests : TestBase
 {
-    private readonly Mock<IOptions<N8nSettings>> _n8nSettingsMock;
+    private readonly Mock<IN8nService> _n8nServiceMock; // NEW
+    private readonly Mock<IOptions<N8nSettings>> _n8nSettingsMock; // Keep for now, might be removed later
 
     public AnalyzePhotoCommandTests() : base()
     {
+        _n8nServiceMock = new Mock<IN8nService>(); // NEW
         _n8nSettingsMock = new Mock<IOptions<N8nSettings>>();
     }
 
-    private AnalyzePhotoCommandHandler CreateHandler(HttpClient httpClient, N8nSettings n8nSettings)
+    private AnalyzePhotoCommandHandler CreateHandler() // Simplified parameters
     {
-        _n8nSettingsMock.Setup(x => x.Value).Returns(n8nSettings);
-
         return new AnalyzePhotoCommandHandler(
-            _mapper,
             _context,
             _mockAuthorizationService.Object,
-            httpClient,
-            _n8nSettingsMock.Object
+            _n8nServiceMock.Object // Use IN8nService mock
         );
     }
 
@@ -41,9 +41,7 @@ public class AnalyzePhotoCommandTests : TestBase
     {
         // Arrange
         var memberId = Guid.NewGuid();
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "/webhook-test/photo-analysis" });
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         var command = new AnalyzePhotoCommand { Input = new AiPhotoAnalysisInputDto { MemberInfo = new AiMemberInfoDto { Id = memberId.ToString() } } };
 
@@ -69,9 +67,7 @@ public class AnalyzePhotoCommandTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "/webhook-test/photo-analysis" });
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         _mockAuthorizationService.Setup(a => a.CanAccessFamily(familyId)).Returns(false);
 
@@ -111,9 +107,7 @@ public class AnalyzePhotoCommandTests : TestBase
             MemberInfo = new AiMemberInfoDto { Id = memberId.ToString(), Name = "Test Member" }
         };
 
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "/webhook-test/photo-analysis" });
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         _mockAuthorizationService.Setup(a => a.CanAccessFamily(familyId)).Returns(true);
 
@@ -129,17 +123,13 @@ public class AnalyzePhotoCommandTests : TestBase
             CreatedAt = DateTime.UtcNow
         };
 
-        httpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri != null && req.RequestUri.ToString().Contains("/webhook-test/photo-analysis")),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonSerializer.Serialize(photoAnalysisResultDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
-            });
+        // Setup n8nServiceMock to return successful JSON string
+        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
+            It.IsAny<string>(), // sessionId
+            It.IsAny<string>(), // message
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(Result<string>.Success(JsonSerializer.Serialize(photoAnalysisResultDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })));
+
 
         var command = new AnalyzePhotoCommand { Input = aiInput };
 
@@ -158,9 +148,7 @@ public class AnalyzePhotoCommandTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenN8nConfigMissing()
     {
         // Arrange
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "" }); // Missing webhook config
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         var aiInput = new AiPhotoAnalysisInputDto
         {
@@ -172,6 +160,13 @@ public class AnalyzePhotoCommandTests : TestBase
             TargetFaceId = "f1"
         };
         var command = new AnalyzePhotoCommand { Input = aiInput };
+
+        // Setup n8nServiceMock to return failure for the chat webhook call
+        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
+            It.IsAny<string>(), // sessionId
+            It.IsAny<string>(), // message
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(Result<string>.Failure("N8n configuration for photo analysis is missing.")); // Simulate config missing
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -185,9 +180,7 @@ public class AnalyzePhotoCommandTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenN8nWebhookFails()
     {
         // Arrange
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "/webhook-test/photo-analysis" });
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         var aiInput = new AiPhotoAnalysisInputDto
         {
@@ -199,13 +192,13 @@ public class AnalyzePhotoCommandTests : TestBase
             TargetFaceId = "f1"
         };
 
-        httpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri != null && req.RequestUri.ToString().Contains("/webhook-test/photo-analysis")),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.InternalServerError }); // Simulate failure
+        // Setup n8nServiceMock to simulate webhook failure
+        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
+            It.IsAny<string>(), // sessionId
+            It.IsAny<string>(), // message
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(Result<string>.Failure("N8n service returned internal server error.", ErrorSources.ExternalServiceError)); // Simulate failure
+
 
         var command = new AnalyzePhotoCommand { Input = aiInput };
 
@@ -214,16 +207,14 @@ public class AnalyzePhotoCommandTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Internal Server Error");
+        result.Error.Should().Contain("N8n service returned internal server error."); // Updated expected error message
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenN8nWebhookReturnsEmptyResponse()
     {
         // Arrange
-        var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        var httpClient = new HttpClient(httpMessageHandlerMock.Object) { BaseAddress = new Uri("http://localhost") };
-        var handler = CreateHandler(httpClient, new N8nSettings { BaseUrl = "http://localhost:5678", PhotoAnalysisWebhook = "/webhook-test/photo-analysis" });
+        var handler = CreateHandler(); // Use simplified CreateHandler
 
         var aiInput = new AiPhotoAnalysisInputDto
         {
@@ -235,17 +226,13 @@ public class AnalyzePhotoCommandTests : TestBase
             TargetFaceId = "f1"
         };
 
-        httpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri != null && req.RequestUri.ToString().Contains("/webhook-test/photo-analysis")),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("") // Empty response
-            });
+        // Setup n8nServiceMock to simulate an empty response
+        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
+            It.IsAny<string>(), // sessionId
+            It.IsAny<string>(), // message
+            It.IsAny<CancellationToken>()
+        )).ReturnsAsync(Result<string>.Success("")); // Empty response
+
 
         var command = new AnalyzePhotoCommand { Input = aiInput };
 
@@ -254,6 +241,6 @@ public class AnalyzePhotoCommandTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Phân tích ảnh từ n8n trả về phản hồi không hợp lệ.");
+        result.Error.Should().Contain("Phân tích ảnh từ n8n trả về phản hồi rỗng.");
     }
 }
