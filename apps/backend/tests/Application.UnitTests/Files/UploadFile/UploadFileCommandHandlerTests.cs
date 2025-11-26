@@ -4,25 +4,28 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Moq;
+using System.Net;
+using System.Text.Json;
+using System.Threading;
 using Xunit;
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGE UPLOAD DTOs
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 
 public class UploadFileCommandHandlerTests : TestBase
 {
-    private readonly Mock<IFileStorage> _fileStorageMock;
+    private readonly Mock<IN8nService> _n8nServiceMock; // Changed from IFileStorage
     private readonly Mock<IDateTime> _dateTimeMock;
     private readonly IConfiguration _configuration;
     private readonly UploadFileCommandHandler _handler;
 
     public UploadFileCommandHandlerTests()
     {
-        _fileStorageMock = new Mock<IFileStorage>();
+        _n8nServiceMock = new Mock<IN8nService>(); // Changed from IFileStorageMock
         _dateTimeMock = new Mock<IDateTime>();
 
         var inMemorySettings = new Dictionary<string, string?> {
@@ -35,251 +38,145 @@ public class UploadFileCommandHandlerTests : TestBase
             .Build();
 
         _handler = new UploadFileCommandHandler(
-            _fileStorageMock.Object,
+            _n8nServiceMock.Object, // Changed from _fileStorageMock.Object
             _configuration,
             _context,
             _dateTimeMock.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFileIsEmpty()
+    private UploadFileCommand CreateValidCommand(byte[] imageData)
     {
-        // Arrange
-        var command = new UploadFileCommand
+        return new UploadFileCommand
         {
-            FileStream = new MemoryStream(),
-            FileName = "test.txt",
-            ContentType = "text/plain",
-            Length = 0
+            ImageData = imageData ?? new byte[] { 1, 2, 3 },
+            FileName = "test.jpg",
+            Cloud = "imgbb",
+            Folder = "test-folder"
         };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ErrorMessages.FileEmpty);
-        result.ErrorSource.Should().Be(ErrorSources.Validation);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFileSizeExceedsLimit()
+    public async Task Handle_ShouldReturnSuccess_WhenN8nUploadIsSuccessful()
     {
         // Arrange
-        var command = new UploadFileCommand
-        {
-            FileStream = new MemoryStream(new byte[5 * 1024 * 1024 + 1]), // 5MB + 1 byte
-            FileName = "large.jpg",
-            ContentType = "image/jpeg",
-            Length = 5 * 1024 * 1024 + 1
-        };
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
+        var imageUrl = "http://uploaded.image.url/test.jpg";
+        var n8nResponse = new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = imageUrl } };
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(string.Format(ErrorMessages.FileSizeExceedsLimit, 5));
-        result.ErrorSource.Should().Be(ErrorSources.Validation);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFileTypeIsInvalid()
-    {
-        // Arrange
-        var command = new UploadFileCommand
-        {
-            FileStream = new MemoryStream(new byte[10]),
-            FileName = "document.exe",
-            ContentType = "application/octet-stream",
-            Length = 10
-        };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ErrorMessages.InvalidFileType);
-        result.ErrorSource.Should().Be(ErrorSources.Validation);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldUploadFileAndSaveMetadata_WhenValidCommand()
-    {
-        // Arrange
-        var fileContent = new byte[] { 0x01, 0x02, 0x03 };
-        var fileStream = new MemoryStream(fileContent);
-        var fileName = "valid.png";
-        var contentType = "image/png";
-        var fileUrl = "http://example.com/uploaded/unique_valid.png";
-        var now = DateTime.UtcNow;
-
-        var command = new UploadFileCommand
-        {
-            FileStream = fileStream,
-            FileName = fileName,
-            ContentType = contentType,
-            Length = fileContent.Length
-        };
-
-        _fileStorageMock.Setup(x => x.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success(fileUrl));
-        _dateTimeMock.Setup(x => x.Now).Returns(now);
+        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(fileUrl);
+        result.Value.Should().Be(imageUrl);
+        _n8nServiceMock.Verify(x => x.CallImageUploadWebhookAsync(
+            It.Is<ImageUploadWebhookDto>(dto =>
+                dto.ImageData == command.ImageData &&
+                dto.FileName == command.FileName &&
+                dto.Cloud == command.Cloud &&
+                dto.Folder == command.Folder
+            ),
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
 
-        _fileStorageMock.Verify(x => x.UploadFileAsync(It.IsAny<Stream>(), It.Is<string>(s => s.Contains("valid_") && s.EndsWith(".png")), contentType, CancellationToken.None), Times.Once);
-
-        _context.FileMetadata.Should().ContainSingle(fm =>
-            fm.FileName.Contains("valid_") &&
-            fm.Url == fileUrl &&
-            fm.ContentType == contentType &&
-            fm.FileSize == fileContent.Length &&
-            fm.StorageProvider == StorageProvider.Local &&
-            fm.Created == now &&
-            fm.LastModified == now);
+        // Verify that FileMetadata is NOT saved
+        _context.FileMetadata.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFileStorageUploadFails()
+    public async Task Handle_ShouldReturnFailure_WhenN8nUploadFails()
     {
         // Arrange
-        var fileContent = new byte[] { 0x01, 0x02, 0x03 };
-        var fileStream = new MemoryStream(fileContent);
-        var fileName = "valid.png";
-        var contentType = "image/png";
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
+        var errorMessage = "N8n upload failed.";
+        var errorSource = ErrorSources.ExternalServiceError;
 
-        var command = new UploadFileCommand
-        {
-            FileStream = fileStream,
-            FileName = fileName,
-            ContentType = contentType,
-            Length = fileContent.Length
-        };
+        var failureResult = Result<List<ImageUploadResponseDto>>.Failure(errorMessage, errorSource); // Create result explicitly
 
-        _fileStorageMock.Setup(x => x.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Failure("Upload failed", ErrorSources.FileStorage));
+        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failureResult!); // Add null-forgiving operator to the returned result
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("Upload failed");
-        result.ErrorSource.Should().Be(ErrorSources.FileStorage);
-        _context.FileMetadata.Should().BeEmpty(); // No metadata should be saved
+        result.Error.Should().Contain(errorMessage);
+        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
+        _context.FileMetadata.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFileStorageReturnsNullUrl()
+    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsEmptyUrl()
     {
         // Arrange
-        var fileContent = new byte[] { 0x01, 0x02, 0x03 };
-        var fileStream = new MemoryStream(fileContent);
-        var fileName = "valid.png";
-        var contentType = "image/png";
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
+        var n8nResponse = new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = "" } }; // Empty URL
 
-        var command = new UploadFileCommand
-        {
-            FileStream = fileStream,
-            FileName = fileName,
-            ContentType = contentType,
-            Length = fileContent.Length
-        };
-
-        _fileStorageMock.Setup(x => x.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success(null!)); // Simulate null URL
+        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ErrorMessages.FileUploadNullUrl);
-        result.ErrorSource.Should().Be(ErrorSources.FileStorage);
-        _context.FileMetadata.Should().BeEmpty(); // No metadata should be saved
+        result.Error.Should().Contain(ErrorMessages.FileUploadNullUrl);
+        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
+        _context.FileMetadata.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task Handle_ShouldAddFileUsage_WhenEntityTypeAndIdAreProvided()
+    public async Task Handle_ShouldReturnFailure_WhenN8nResponseIsEmptyList()
     {
         // Arrange
-        var fileContent = new byte[] { 0x01, 0x02, 0x03 };
-        var fileStream = new MemoryStream(fileContent);
-        var fileName = "valid.png";
-        var contentType = "image/png";
-        var fileUrl = "http://example.com/uploaded/unique_valid.png";
-        var entityType = "Family";
-        var entityId = Guid.NewGuid();
-        var now = DateTime.UtcNow;
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
+        var n8nResponse = new List<ImageUploadResponseDto>(); // Empty list
 
-        var command = new UploadFileCommand
-        {
-            FileStream = fileStream,
-            FileName = fileName,
-            ContentType = contentType,
-            Length = fileContent.Length,
-            EntityType = entityType,
-            EntityId = entityId
-        };
-
-        _fileStorageMock.Setup(x => x.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success(fileUrl));
-        _dateTimeMock.Setup(x => x.Now).Returns(now);
+        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(n8nResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        _context.FileMetadata.Should().ContainSingle();
-        var fileMetadata = _context.FileMetadata.First();
-        fileMetadata.FileUsages.Should().ContainSingle(fu =>
-            fu.EntityType == entityType &&
-            fu.EntityId == entityId &&
-            fu.FileMetadataId == fileMetadata.Id);
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain(ErrorMessages.FileUploadNullUrl);
+        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
+        _context.FileMetadata.Should().BeEmpty();
     }
 
-    [Theory]
-    [InlineData("malicious/../../path/file.jpg", "file.jpg")]
-    [InlineData("file with spaces.png", "filewithspaces.png")]
-    [InlineData("file_with-dashes.pdf", "file_with-dashes.pdf")]
-    [InlineData("file!@#$%^&*().docx", "file.docx")]
-    public async Task Handle_ShouldSanitizeFileName(string inputFileName, string expectedSanitizedPart)
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsNullResponse()
     {
         // Arrange
-        var fileContent = new byte[] { 0x01, 0x02, 0x03 };
-        var fileStream = new MemoryStream(fileContent);
-        var contentType = "image/jpeg";
-        var fileUrl = "http://example.com/uploaded/unique_file.jpg";
-
-        var command = new UploadFileCommand
-        {
-            FileStream = fileStream,
-            FileName = inputFileName,
-            ContentType = contentType,
-            Length = fileContent.Length
-        };
-
-        _fileStorageMock.Setup(x => x.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success(fileUrl));
-        _dateTimeMock.Setup(x => x.Now).Returns(DateTime.UtcNow);
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
+        
+        // Simulate n8n returning a list where the first item has an empty URL
+        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<ImageUploadResponseDto>>.Success(new List<ImageUploadResponseDto> { new ImageUploadResponseDto { Url = string.Empty, DisplayUrl = string.Empty, Width = 0, Height = 0, Size = 0, Id = string.Empty, Name = string.Empty, Filename = string.Empty, Extension = string.Empty } })); // Simulate empty URL
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
+
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        _fileStorageMock.Verify(x => x.UploadFileAsync(
-            It.IsAny<Stream>(),
-            It.Is<string>(s => s.Contains(Path.GetFileNameWithoutExtension(expectedSanitizedPart)) && s.EndsWith(Path.GetExtension(expectedSanitizedPart))),
-            contentType,
-            CancellationToken.None), Times.Once);
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain(ErrorMessages.FileUploadNullUrl);
+        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
+        _context.FileMetadata.Should().BeEmpty();
     }
 }

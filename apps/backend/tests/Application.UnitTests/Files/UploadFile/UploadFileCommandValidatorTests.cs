@@ -14,118 +14,118 @@ public class UploadFileCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenFileStreamIsNull()
+    public void ShouldHaveError_WhenImageDataIsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi FileStream là null.
-        var command = new UploadFileCommand { FileStream = null!, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi ImageData là null.
+        var command = new UploadFileCommand { ImageData = null!, FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.FileStream)
-              .WithErrorMessage("FileStream cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.ImageData)
+              .WithErrorMessage("Image data cannot be null.");
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenFileStreamIsValid()
+    public void ShouldHaveError_WhenImageDataIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi FileStream hợp lệ.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi ImageData là mảng rỗng.
+        var command = new UploadFileCommand { ImageData = Array.Empty<byte>(), FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.FileStream);
+        result.ShouldHaveValidationErrorFor(x => x.ImageData)
+              .WithErrorMessage("Image data cannot be empty.");
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenImageDataIsValid()
+    {
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi ImageData hợp lệ.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.ImageData);
     }
 
     [Fact]
     public void ShouldHaveError_WhenFileNameIsNull()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi FileName là null.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = null!, ContentType = "text/plain", Length = 10 };
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = null!, Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.FileName)
-              .WithErrorMessage("FileName cannot be null.");
+              .WithErrorMessage("File name cannot be null.");
     }
 
     [Fact]
     public void ShouldHaveError_WhenFileNameIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi FileName là chuỗi rỗng.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = string.Empty, ContentType = "text/plain", Length = 10 };
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = string.Empty, Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.FileName)
-              .WithErrorMessage("FileName cannot be empty.");
+              .WithErrorMessage("File name cannot be empty.");
     }
 
     [Fact]
     public void ShouldNotHaveError_WhenFileNameIsValid()
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi FileName hợp lệ.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveValidationErrorFor(x => x.FileName);
     }
 
     [Fact]
-    public void ShouldHaveError_WhenContentTypeIsNull()
+    public void ShouldHaveError_WhenCloudIsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi ContentType là null.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = null!, Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Cloud là null.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = null!, Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.ContentType)
-              .WithErrorMessage("ContentType cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.Cloud)
+              .WithErrorMessage("Cloud service name cannot be null.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenContentTypeIsEmpty()
+    public void ShouldHaveError_WhenCloudIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi ContentType là chuỗi rỗng.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = string.Empty, Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Cloud là chuỗi rỗng.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = string.Empty, Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.ContentType)
-              .WithErrorMessage("ContentType cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Cloud)
+              .WithErrorMessage("Cloud service name cannot be empty.");
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenContentTypeIsValid()
+    public void ShouldNotHaveError_WhenCloudIsValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi ContentType hợp lệ.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Cloud hợp lệ.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.ContentType);
+        result.ShouldNotHaveValidationErrorFor(x => x.Cloud);
     }
 
     [Fact]
-    public void ShouldHaveError_WhenLengthIsZero()
+    public void ShouldHaveError_WhenFolderIsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Length là 0.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 0 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Folder là null.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = null! };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Length)
-              .WithErrorMessage("File length must be greater than 0.");
+        result.ShouldHaveValidationErrorFor(x => x.Folder)
+              .WithErrorMessage("Folder name cannot be null.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenLengthIsNegative()
+    public void ShouldHaveError_WhenFolderIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Length là số âm.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = -1 };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Folder là chuỗi rỗng.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = string.Empty };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Length)
-              .WithErrorMessage("File length must be greater than 0.");
+        result.ShouldHaveValidationErrorFor(x => x.Folder)
+              .WithErrorMessage("Folder name cannot be empty.");
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenLengthIsValid()
+    public void ShouldNotHaveError_WhenFolderIsValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Length hợp lệ.
-        using var stream = new MemoryStream();
-        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Folder hợp lệ.
+        var command = new UploadFileCommand { ImageData = new byte[] { 1, 2, 3 }, FileName = "test.jpg", Cloud = "imgbb", Folder = "test" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Length);
+        result.ShouldNotHaveValidationErrorFor(x => x.Folder);
     }
 }

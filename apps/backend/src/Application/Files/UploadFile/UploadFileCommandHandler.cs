@@ -6,87 +6,56 @@ using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Configuration;
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGELOADWEBHOOKDTO
 
 namespace backend.Application.Files.UploadFile;
 
-public class UploadFileCommandHandler(IFileStorage fileStorage, IConfiguration configuration, IApplicationDbContext context, IDateTime dateTime) : IRequestHandler<UploadFileCommand, Result<string>>
+public class UploadFileCommandHandler(
+    IN8nService n8nService, // INJECT NEW SERVICE
+    IConfiguration configuration,
+    IApplicationDbContext context,
+    IDateTime dateTime
+) : IRequestHandler<UploadFileCommand, Result<string>>
 {
-    private readonly IFileStorage _fileStorage = fileStorage;
+    private readonly IN8nService _n8nService = n8nService; // ADD NEW SERVICE FIELD
     private readonly IConfiguration _configuration = configuration;
     private readonly IApplicationDbContext _context = context;
     private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
-        // 1. Validate file size
-        var maxFileSizeInBytes = storageSettings.MaxFileSizeMB * 1024 * 1024;
-        if (request.Length == 0)
+        // For image uploads, we use the n8n webhook directly.
+        // File type and size validations are now handled by n8n webhook or client-side.
+
+        // 1. Construct ImageUploadWebhookDto
+        var imageUploadDto = new ImageUploadWebhookDto
         {
-            return Result<string>.Failure(ErrorMessages.FileEmpty, ErrorSources.Validation);
-        }
-        if (request.Length > maxFileSizeInBytes)
+            ImageData = request.ImageData,
+            FileName = request.FileName,
+            Cloud = request.Cloud,
+            Folder = request.Folder
+        };
+
+        // 2. Call n8n Image Upload Webhook
+        var n8nUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
+        if (!n8nUploadResult.IsSuccess)
         {
-            return Result<string>.Failure(string.Format(ErrorMessages.FileSizeExceedsLimit, storageSettings.MaxFileSizeMB), ErrorSources.Validation);
+            return Result<string>.Failure(n8nUploadResult.Error ?? ErrorMessages.FileUploadFailed, n8nUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
         }
 
-        // 2. Validate file type
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf", ".docx" };
-        var fileExtension = Path.GetExtension(request.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(fileExtension))
+        var uploadedImageResponse = n8nUploadResult.Value!.FirstOrDefault(); // Added null-forgiving operator
+        var uploadedImageUrl = uploadedImageResponse?.Url;
+
+        if (string.IsNullOrEmpty(uploadedImageUrl))
         {
-            return Result<string>.Failure(ErrorMessages.InvalidFileType, ErrorSources.Validation);
+            return Result<string>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
         }
 
-        // 3. Sanitize file name to prevent path traversal
-        var sanitizedFileName = SanitizeFileName(request.FileName);
-        // Add a unique identifier to prevent overwriting
-        var uniqueFileName = $"{Path.GetFileNameWithoutExtension(sanitizedFileName)}_{Guid.NewGuid()}{fileExtension}";
-
-        // 4. Upload file
-        await using (request.FileStream)
-        {
-            var uploadResult = await _fileStorage.UploadFileAsync(request.FileStream, uniqueFileName, request.ContentType, cancellationToken);
-            if (!uploadResult.IsSuccess)
-            {
-                return Result<string>.Failure(uploadResult.Error ?? ErrorMessages.FileUploadFailed, uploadResult.ErrorSource ?? ErrorSources.FileStorage);
-            }
-            if (uploadResult.Value == null)
-            {
-                return Result<string>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileStorage);
-            }
-
-            // 5. Save file metadata to DB
-            var fileMetadata = new FileMetadata
-            {
-                FileName = uniqueFileName,
-                Url = uploadResult.Value,
-                StorageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true),
-                ContentType = request.ContentType,
-                FileSize = request.Length,
-                Created = _dateTime.Now,
-                LastModified = _dateTime.Now
-            };
-
-            _context.FileMetadata.Add(fileMetadata);
-
-            if (request.EntityType != null && request.EntityId != null)
-            {
-                fileMetadata.AddFileUsage(request.EntityType, request.EntityId.Value);
-            }
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return Result<string>.Success(uploadResult.Value);
-        }
+        // 3. (Optional) Save metadata to DB if needed, but not using FileMetadata table anymore for external uploads.
+        // For now, just return the URL, assuming it will be stored as PhotoUrl in Memory entity later.
+        
+        return Result<string>.Success(uploadedImageUrl);
     }
 
-    private string SanitizeFileName(string fileName)
-    {
-        // Remove any path traversal attempts (e.g., ../)
-        fileName = Path.GetFileName(fileName);
-        // Remove invalid characters for file names
-        fileName = Regex.Replace(fileName, "[^a-zA-Z0-9_.-]", "");
-        return fileName;
-    }
+    // Removed the SanitizeFileName method as it's no longer used.
 }

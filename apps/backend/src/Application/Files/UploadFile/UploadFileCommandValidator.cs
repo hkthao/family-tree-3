@@ -4,18 +4,20 @@ public class UploadFileCommandValidator : AbstractValidator<UploadFileCommand>
 {
     public UploadFileCommandValidator()
     {
-        RuleFor(v => v.FileStream)
-            .NotNull().WithMessage("FileStream cannot be null.");
+        RuleFor(v => v.ImageData)
+            .NotNull().WithMessage("Image data cannot be null.")
+            .Must(data => data != null && data.Length > 0).WithMessage("Image data cannot be empty.");
 
         RuleFor(v => v.FileName)
-            .NotNull().WithMessage("FileName cannot be null.")
-            .NotEmpty().WithMessage("FileName cannot be empty.");
+            .NotNull().WithMessage("File name cannot be null.")
+            .NotEmpty().WithMessage("File name cannot be empty.");
 
-        RuleFor(v => v.ContentType)
-            .NotNull().WithMessage("ContentType cannot be null.")
-            .NotEmpty().WithMessage("ContentType cannot be empty.");
-
-        RuleFor(v => v.Length)
-            .GreaterThan(0).WithMessage("File length must be greater than 0.");
+        RuleFor(v => v.Cloud)
+            .NotNull().WithMessage("Cloud service name cannot be null.")
+            .NotEmpty().WithMessage("Cloud service name cannot be empty.");
+            
+        RuleFor(v => v.Folder)
+            .NotNull().WithMessage("Folder name cannot be null.")
+            .NotEmpty().WithMessage("Folder name cannot be empty.");
     }
 }
