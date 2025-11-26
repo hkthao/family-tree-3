@@ -185,6 +185,18 @@ import { useMemoryStore } from '@/stores/memory.store';
 import PhotoAnalyzerPreview from './PhotoAnalyzerPreview.vue'; 
 import StoryEditor from './StoryEditor.vue'; 
 import router from '@/router';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // NEW IMPORT
+import type { ExifDataDto } from '@/types/memory'; // NEW IMPORT
+import type {
+  AiPhotoAnalysisInputDto,
+  AiDetectedFaceDto,
+  AiEmotionLocalDto,
+  AiMemberInfoDto,
+  AiOtherFaceSummaryDto,
+  PhotoAnalysisResultDto,
+  AiExifInfoDto
+} from '@/types/ai'; // NEW IMPORT
+
 
 interface Props {
   memberId: string;
@@ -194,6 +206,7 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const memoryStore = useMemoryStore();
+const { showSnackbar } = useGlobalSnackbar(); // Initialize snackbar
 const currentStep = ref(1);
 
 // Step 1: Choose Photo
@@ -202,8 +215,8 @@ const photoPreviewUrl = ref<string | null>(null);
 const analyzingPhoto = ref(false);
 
 // Step 2: Photo Analysis
-const photoAnalysisResult = ref<any | null>(null);
-const photoAnalysisId = ref<string | null>(null);
+const photoAnalysisResult = ref<PhotoAnalysisResultDto | null>(null); // Use PhotoAnalysisResultDto
+const photoAnalysisId = ref<string | null>(null); // Will store createdAt from analysis result
 
 // Step 3: Raw Text Input
 const rawText = ref('');
@@ -232,23 +245,95 @@ const onFileChange = (event: Event) => {
   }
 };
 
+// Helper function to load image and get dimensions
+const loadImage = (file: File): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+// Function to simulate EXIF extraction (placeholder)
+const extractExifData = async (file: File): Promise<ExifDataDto | undefined> => {
+  console.log('Attempting to extract EXIF from file:', file.name);
+  return {
+    datetime: new Date().toISOString(),
+    gps: '50.123, 10.456',
+    cameraInfo: 'DummyCameraModel',
+  };
+};
+
 const analyzePhoto = async () => {
   if (!photoFile.value) return;
 
   analyzingPhoto.value = true;
-  const formData = new FormData();
-  formData.append('file', photoFile.value);
-  formData.append('memberId', props.memberId);
+  
+  try {
+    // 1. Perform client-side face detection
+    await memoryStore.detectFaces(photoFile.value);
 
-  const result = await memoryStore.analyzePhoto(formData);
-  if (result.ok) {
-    photoAnalysisResult.value = result.value;
-    photoAnalysisId.value = result.value?.id || null; // Fix: Handle potential undefined/null id
-    currentStep.value = 2; // Move to Photo Analysis step
-  } else {
-    // snackbarStore.showSnackbar('Error analyzing photo: ' + result.error, 'error'); // Removed
+    // 2. Extract image size
+    let imageSize: string | undefined;
+    try {
+      const img = await loadImage(photoFile.value);
+      imageSize = `${img.width}x${img.height}`;
+    } catch (e) {
+      console.error('Failed to load image for dimensions:', e);
+    }
+
+    // 3. Extract EXIF data
+    let exifData: ExifDataDto | undefined;
+    try {
+      exifData = await extractExifData(photoFile.value);
+    } catch (e) {
+      console.error('Failed to extract EXIF data:', e);
+    }
+
+    // 4. Construct AiPhotoAnalysisInputDto
+    const detectedFaces = memoryStore.faceRecognition.detectedFaces;
+    const aiInput: AiPhotoAnalysisInputDto = {
+      imageBase64: memoryStore.faceRecognition.uploadedImage || undefined,
+      imageSize: imageSize,
+      exif: exifData,
+      // Default to first detected face as target if available, otherwise null
+      targetFaceId: detectedFaces.length > 0 ? detectedFaces[0].id : undefined,
+      targetFaceCropUrl: null, // Placeholder
+
+      faces: detectedFaces.map(face => ({
+        faceId: face.id,
+        bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
+        emotionLocal: {
+          dominant: face.emotion || '',
+          confidence: face.emotionConfidence || 0,
+        },
+        quality: face.quality || 'unknown',
+      })),
+      memberInfo: undefined, // Requires more complex lookup
+      otherFacesSummary: detectedFaces
+        .filter(face => face.id !== (detectedFaces.length > 0 ? detectedFaces[0].id : undefined))
+        .map(face => ({
+          emotionLocal: face.emotion || '',
+        })),
+    };
+
+    // 5. Call AI analysis action
+    const result = await memoryStore.services.ai.analyzePhoto(aiInput);
+    
+    if (result.ok) {
+      photoAnalysisResult.value = result.value;
+      photoAnalysisId.value = result.value?.createdAt || null; // Use createdAt as ID
+      currentStep.value = 2; // Move to Photo Analysis step
+    } else {
+      showSnackbar(result.error?.message || t('memory.errors.aiAnalysisFailed'), 'error');
+    }
+  } catch (error: any) {
+    console.error('Error during photo analysis setup:', error);
+    showSnackbar(error.message || t('memory.errors.unexpectedError'), 'error');
+  } finally {
+    analyzingPhoto.value = false;
   }
-  analyzingPhoto.value = false;
 };
 
 const skipPhotoAnalysis = () => {
@@ -282,7 +367,7 @@ const usePhotoContext = () => {
 const editPhotoContext = () => {
   // Allow user to edit the photoAnalysisResult before proceeding
   // For now, this just means they can go back and re-analyze or skip.
-  // snackbarStore.showSnackbar('Editing photo context is not yet implemented. Please adjust raw text manually.', 'info'); // Removed
+  showSnackbar(t('memory.create.editContextNotImplemented'), 'info'); // Use snackbar for info
   currentStep.value = 3;
 };
 
@@ -311,7 +396,7 @@ const generateStory = async () => {
     }
     currentStep.value = 4; // Move to Story Editor
   } else {
-    // snackbarStore.showSnackbar('Error generating story: ' + result.error, 'error'); // Removed
+    showSnackbar(result.error?.message || t('memory.errors.storyGenerationFailed'), 'error'); // Use snackbar
   }
   generatingStory.value = false;
 };
@@ -337,18 +422,18 @@ const saveMemory = async () => {
   const result = await memoryStore.addItem(createPayload);
   if (result.ok) {
     savedMemoryId.value = result.value.id || null; // Access id from result.value
-    // snackbarStore.showSnackbar(t('memory.create.step5.saveSuccess'), 'success'); // Removed
+    showSnackbar(t('memory.create.step5.saveSuccess'), 'success'); // Use snackbar
     emit('saved', savedMemoryId.value);
     currentStep.value = 5; // Move to Review & Save
   }
   else {
-    // snackbarStore.showSnackbar('Error saving memory: ' + result.error, 'error'); // Removed
+    showSnackbar(result.error?.message || t('memory.errors.memorySaveFailed'), 'error'); // Use snackbar
   }
   savingMemory.value = false;
 };
 
 const exportPdf = () => {
-  // snackbarStore.showSnackbar('Export to PDF is not yet implemented.', 'info'); // Removed
+  showSnackbar(t('memory.create.exportPdfNotImplemented'), 'info'); // Use snackbar
 };
 
 const viewSavedMemory = () => {

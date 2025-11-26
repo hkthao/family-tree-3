@@ -50,7 +50,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store'; // Use the main memory store
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { MemoryDto } from '@/types/memory';
+import type { MemoryDto, ExifDataDto } from '@/types/memory'; // Added ExifDataDto
 import type { DetectedFace, Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
@@ -81,8 +81,9 @@ watch(() => memoryStore.faceRecognition.error, (newError) => {
   }
 });
 
-// Watch for changes in selectedMainCharacterFaceId to update internalMemory.memberId
+// Watch for changes in selectedMainCharacterFaceId to update internalMemory.memberId and targetFaceId
 watch(selectedMainCharacterFaceId, (newId) => {
+  internalMemory.value.targetFaceId = newId ?? undefined; // Set targetFaceId, convert null to undefined
   if (newId) {
     const selectedFace = memoryStore.faceRecognition.detectedFaces.find(face => face.id === newId);
     if (selectedFace && selectedFace.memberId) {
@@ -95,51 +96,91 @@ watch(selectedMainCharacterFaceId, (newId) => {
   }
 });
 
+// Helper function to load image and get dimensions
+const loadImage = (file: File): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+// Function to simulate EXIF extraction (placeholder)
+const extractExifData = async (file: File): Promise<ExifDataDto | undefined> => {
+  // In a real application, you would use a library like 'piexifjs' or similar
+  // to parse the EXIF data from the image file.
+  // For this task, we'll return some dummy data or undefined.
+  console.log('Attempting to extract EXIF from file:', file.name);
+  // Example dummy data
+  return {
+    datetime: new Date().toISOString(),
+    gps: '50.123, 10.456', // Example coordinates
+    cameraInfo: 'DummyCameraModel',
+  };
+  // If no EXIF data is found or library is not available:
+  // return undefined;
+};
+
 const handleFileUpload = async (file: File | File[] | null) => {
   if (props.readonly) return;
 
-        if (file instanceof File) {
-          await memoryStore.detectFaces(file);
-          if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-            internalMemory.value.photoAnalysisId = 'generated_id';
-            internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
-            internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
-            internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
-            // Automatically select the first face as main character if any faces are detected
-            if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-              selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
-            }
-          } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
-            showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-            internalMemory.value.faces = []; // Clear faces if none detected
-            selectedMainCharacterFaceId.value = null;
-            internalMemory.value.photo = undefined; // Clear photo if no faces detected
-          }
-        } else if (Array.isArray(file) && file.length > 0) {
-          await memoryStore.detectFaces(file[0]);
-          if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-            internalMemory.value.photoAnalysisId = 'generated_id';
-            internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
-            internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
-            internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
-            if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-              selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
-            }
-          } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
-            showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-            internalMemory.value.faces = []; // Clear faces if none detected
-            selectedMainCharacterFaceId.value = null;
-            internalMemory.value.photo = undefined; // Clear photo if no faces detected
-          }
-        }
-        else {
-          memoryStore.resetFaceRecognitionState();
-          internalMemory.value.photoAnalysisId = undefined;
-          internalMemory.value.faces = [];
-          internalMemory.value.photoUrl = undefined;
-          internalMemory.value.photo = undefined; // Clear the 'photo' property
-          selectedMainCharacterFaceId.value = null;
-        }};
+  let uploadedFile: File | null = null;
+
+  if (file instanceof File) {
+    uploadedFile = file;
+  } else if (Array.isArray(file) && file.length > 0) {
+    uploadedFile = file[0];
+  }
+
+  if (uploadedFile) {
+    await memoryStore.detectFaces(uploadedFile);
+
+    // Set image size
+    try {
+      const img = await loadImage(uploadedFile);
+      internalMemory.value.imageSize = `${img.width}x${img.height}`;
+    } catch (e) {
+      console.error('Failed to load image for dimensions:', e);
+      internalMemory.value.imageSize = undefined; // Clear or set default
+    }
+
+    // Extract EXIF data
+    try {
+      internalMemory.value.exifData = await extractExifData(uploadedFile);
+    } catch (e) {
+      console.error('Failed to extract EXIF data:', e);
+      internalMemory.value.exifData = undefined;
+    }
+
+    if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+      internalMemory.value.photoAnalysisId = 'generated_id';
+      internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
+      internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
+      internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
+      // Automatically select the first face as main character if any faces are detected
+      if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+        selectedMainCharacterFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+      }
+    } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
+      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+      internalMemory.value.faces = []; // Clear faces if none detected
+      selectedMainCharacterFaceId.value = null;
+      internalMemory.value.photo = undefined; // Clear photo if no faces detected
+      internalMemory.value.imageSize = undefined;
+      internalMemory.value.exifData = undefined;
+    }
+  } else {
+    memoryStore.resetFaceRecognitionState();
+    internalMemory.value.photoAnalysisId = undefined;
+    internalMemory.value.faces = [];
+    internalMemory.value.photoUrl = undefined;
+    internalMemory.value.photo = undefined; // Clear the 'photo' property
+    selectedMainCharacterFaceId.value = null;
+    internalMemory.value.imageSize = undefined;
+    internalMemory.value.exifData = undefined;
+  }
+};
 
 const openSelectMemberDialog = (faceId: string) => {
   memoryStore.selectFace(faceId);

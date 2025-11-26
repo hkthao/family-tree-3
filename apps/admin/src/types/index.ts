@@ -15,3 +15,4 @@ export * from './user.d';
 export * from './chat.d';
 export * from './api-error.d';
 export * from './memory.d'; // Added new memory types
+export * from './biography.d'; // NEW EXPORT

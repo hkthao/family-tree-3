@@ -27,7 +27,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (result.ok) {
           this.currentMember = result.value!;
           if (this.currentMember.biography) {
-            this.biographyResult = { content: this.currentMember.biography };
+            this.biographyResult = { biography: this.currentMember.biography };
           }
         } else {
           this.error =
@@ -62,7 +62,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         );
 
         if (result.ok) {
-          this.biographyResult = { content: result.value };
+          this.biographyResult = { biography: result.value };
         } else {
           this.error =
             result.error?.message ||

@@ -33,11 +33,21 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryDto } from '@/types/memory';
+import type { MemoryDto, MemoryFaceDto, ExifDataDto } from '@/types/memory'; // Added MemoryFaceDto, ExifDataDto
+import type { Member } from '@/types'; // Added Member
+import type {
+  AiPhotoAnalysisInputDto,
+  AiDetectedFaceDto,
+  AiEmotionLocalDto,
+  AiMemberInfoDto,
+  AiOtherFaceSummaryDto,
+  PhotoAnalysisResultDto
+} from '@/types/ai'; // NEW IMPORT
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
 import MemoryStep2GeneralInfo from './MemoryStep2GeneralInfo.vue';
 import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useMemoryStore } from '@/stores/memory.store'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -48,7 +58,8 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar(); // Initialize useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
+const memoryStore = useMemoryStore(); // Initialize memory store
 const activeStep = ref(1);
 
 const step1Ref = ref<InstanceType<typeof MemoryStep1PhotoUpload> | null>(null);
@@ -67,6 +78,8 @@ const internalMemory = computed<MemoryDto>({
       emotionContextTags: model.emotionContextTags ?? [],
       customEmotionContext: model.customEmotionContext ?? undefined,
       faces: model.faces ?? [],
+      // Ensure photoAnalysisResult is initialized
+      photoAnalysisResult: model.photoAnalysisResult ?? null,
     } as MemoryDto;
   },
   set: (value: MemoryDto) => emit('update:modelValue', value),
@@ -84,6 +97,7 @@ const validateStep = async (step: number) => {
     const hasPhoto = internalMemory.value.photo !== null && internalMemory.value.photo !== undefined && internalMemory.value.photo !== '';
     const hasDetectedFaces = internalMemory.value.faces && internalMemory.value.faces.length > 0;
     const isValid = step1Ref.value?.isValid; // This seems to check if photo processing is finished
+    // Ensure selectedMainCharacterFaceId is correctly mapped from exposed property
     const isMainCharacterSelected = step1Ref.value?.selectedMainCharacterFaceId !== null && step1Ref.value?.selectedMainCharacterFaceId !== undefined;
 
     if (!hasPhoto) {
@@ -122,7 +136,71 @@ const nextStep = async () => {
   const isValid = await validateStep(currentStep);
 
   if (isValid) {
-    activeStep.value++;
+    if (currentStep === 1) {
+      // Construct AiPhotoAnalysisInputDto
+      const aiInput: AiPhotoAnalysisInputDto = {
+        imageUrl: internalMemory.value.photoUrl,
+        imageBase64: internalMemory.value.photo, // This is the base64 string
+        imageSize: internalMemory.value.imageSize || '512x512', // Use stored size or default
+        exif: internalMemory.value.exifData,
+        targetFaceId: internalMemory.value.targetFaceId, // Already added to MemoryDto
+        targetFaceCropUrl: null, // Placeholder for now, can be generated later if needed
+
+        faces: internalMemory.value.faces!.map(face => ({ // Added non-null assertion
+          faceId: face.id,
+          bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
+          emotionLocal: {
+            dominant: face.emotion || '',
+            confidence: face.emotionConfidence || 0,
+          },
+          quality: face.quality || 'unknown',
+        })),
+        
+        memberInfo: undefined, // Default
+        otherFacesSummary: [], // Default
+      };
+
+      // Find the selected main character face from detected faces
+      const mainCharacterFace = internalMemory.value.faces!.find( // Added non-null assertion
+        (face) => face.id === aiInput.targetFaceId
+      );
+
+      if (mainCharacterFace && mainCharacterFace.memberId) {
+        // Populate with available info. Gender is not directly in DetectedFace/MemoryFaceDto.
+        // It should be fetched or added to DetectedFace type if possible.
+        aiInput.memberInfo = {
+          id: mainCharacterFace.memberId,
+          name: mainCharacterFace.memberName,
+          age: mainCharacterFace.birthYear ? (new Date().getFullYear() - mainCharacterFace.birthYear) : undefined,
+          // gender: mainCharacterFace.gender, // Gender is not directly available here
+        };
+      }
+
+      // Construct otherFacesSummary
+      aiInput.otherFacesSummary = internalMemory.value.faces! // Added non-null assertion
+        .filter(face => face.id !== aiInput.targetFaceId)
+        .map(face => ({
+          emotionLocal: face.emotion || '',
+        }));
+      
+      // Call AI analysis action
+      // memoryStore.aiAnalysis.loading is automatically managed by the action
+      const aiResult = await memoryStore.services.ai.analyzePhoto(aiInput); // CORRECTED SERVICE ACCESS
+      
+      if (aiResult.ok) {
+        internalMemory.value.photoAnalysisResult = aiResult.value;
+        activeStep.value++; // Proceed to next step only on success
+      } else {
+        showSnackbar(
+          aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
+          'error'
+        );
+        // Do not proceed to next step
+      }
+    } else {
+      // For other steps, just advance
+      activeStep.value++;
+    }
   }
 };
 

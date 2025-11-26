@@ -24,6 +24,7 @@ interface DetectedFace {
   embedding: number[] | null; // Embedding vector for the face
   emotion?: string;
   emotionConfidence?: number;
+  quality?: string; // New field for face quality (e.g., "good", "medium", "poor")
   status: FaceStatus; // For UI styling: 'recognized', 'unrecognized', 'newly-labeled', 'original-recognized'
 }
 

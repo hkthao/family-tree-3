@@ -40,6 +40,8 @@ import type { IFamilyDictService } from './family-dict/family-dict.service.inter
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service'; // Add familyDict service implementation
 import type { IMemoryService } from './memory/memory.service.interface'; // New
 import { ApiMemoryService } from './memory/api.memory.service'; // New
+import type { IAiService } from './ai/ai.service.interface'; // NEW IMPORT
+import { ApiAiService } from './ai/api.ai.service'; // NEW IMPORT
 
 
 export type ServiceMode = 'real' | 'test';
@@ -66,6 +68,7 @@ export interface AppServices {
   privacyConfiguration: IPrivacyConfigurationService;
   familyDict: IFamilyDictService; // Add familyDict service
   memory: IMemoryService; // New
+  ai: IAiService; // NEW SERVICE
 }
 
 import apiClient from '@/plugins/axios';
@@ -157,5 +160,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiMemoryService(apiClient)
         : testServices?.memory || new ApiMemoryService(apiClient),
+    ai: // NEW SERVICE
+      mode === 'real'
+        ? new ApiAiService(apiClient)
+        : testServices?.ai || new ApiAiService(apiClient),
   };
 }
+

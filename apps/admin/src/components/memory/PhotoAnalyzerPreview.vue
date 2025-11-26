@@ -59,7 +59,7 @@
               <v-list-item-subtitle>
                 <v-chip-group>
                   <v-chip v-for="(person, index) in analysisResult.persons" :key="index" color="primary">
-                    {{ person.name || t('memory.photoAnalysis.unknownPerson') }} ({{ (person.confidence * 100).toFixed(0) }}%)
+                    {{ person.name || t('memory.photoAnalysis.unknownPerson') }} ({{ ((person.confidence ?? 0) * 100).toFixed(0) }}%)
                   </v-chip>
                 </v-chip-group>
               </v-list-item-subtitle>
@@ -82,20 +82,10 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import type { PhotoAnalysisResultDto, PhotoAnalysisPersonDto } from '@/types/ai'; // Import PhotoAnalysisResultDto and PhotoAnalysisPersonDto
 
 interface Props {
-  analysisResult: {
-    summary: string;
-    scene: string;
-    event: string;
-    emotion: string;
-    yearEstimate: string;
-    objects: string[];
-    persons: Array<{
-      name?: string;
-      confidence: number;
-    }>;
-  } | null;
+  analysisResult: PhotoAnalysisResultDto | null;
 }
 
 const props = defineProps<Props>();

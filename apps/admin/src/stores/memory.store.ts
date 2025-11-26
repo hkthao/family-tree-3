@@ -2,6 +2,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { DetectedFace, SearchResult, Member, Result, Paginated } from '@/types'; // Added DetectedFace, SearchResult, Member
 import type { MemoryDto } from '@/types/memory';
+import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { MemoryFilter } from '@/services/memory/memory.service.interface';
@@ -67,6 +68,13 @@ export const useMemoryStore = defineStore('memory', {
       loading: false,
       error: null,
     } as MemoryFaceState,
+
+    // AI Analysis State for photo analysis
+    aiAnalysis: { // NEW STATE
+      loading: false,
+      error: null as string | null,
+      result: null as PhotoAnalysisResultDto | null,
+    },
   }),
 
   getters: {
@@ -229,12 +237,23 @@ export const useMemoryStore = defineStore('memory', {
       this.list.filters = { ...this.list.filters, ...filters };
     },
 
-    async analyzePhoto(command: FormData): Promise<Result<any, ApiError>> {
-      this.list.loading = true; // Use list loading for now
-      this.error = null;
-      const result = await this.services.memory.analyzePhoto(command);
-      this.list.loading = false;
-      return result;
+    async analyzePhoto(input: AiPhotoAnalysisInputDto): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // MODIFIED
+      this.aiAnalysis.loading = true;
+      this.aiAnalysis.error = null;
+      try {
+        const result = await this.services.ai.analyzePhoto(input); // Use new ai service
+        if (result.ok) {
+          this.aiAnalysis.result = result.value;
+        } else {
+          this.aiAnalysis.error = result.error?.message || i18n.global.t('memory.errors.aiAnalysisFailed');
+        }
+        return result;
+      } catch (error: any) {
+        this.aiAnalysis.error = error.message || i18n.global.t('memory.errors.unexpectedError');
+        return { ok: false, error: { message: this.aiAnalysis.error } as ApiError };
+      } finally {
+        this.aiAnalysis.loading = false;
+      }
     },
 
     async generateStory(command: any): Promise<Result<any, ApiError>> {

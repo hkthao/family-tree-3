@@ -69,4 +69,5 @@ public class PhotoAnalysisPersonDto
     public string? MemberId { get; set; }
     public string? Name { get; set; }
     public string? Emotion { get; set; }
+    public double? Confidence { get; set; } // NEW PROPERTY
 }

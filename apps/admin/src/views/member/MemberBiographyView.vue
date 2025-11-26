@@ -144,7 +144,7 @@ watch(
   () => aiBiographyStore.biographyResult,
   (newResult) => {
     if (newResult) {
-      biographyContent.value = newResult.content;
+      biographyContent.value = newResult.biography || ''; // Use biography property
     }
   },
 );

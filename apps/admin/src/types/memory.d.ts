@@ -1,4 +1,5 @@
 import type { DetectedFace } from '@/types/face'; // Import DetectedFace
+import type { PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
 
 // ... (other interfaces)
 
@@ -12,6 +13,9 @@ export interface MemoryDto {
   photoAnalysisId?: string | null;
   photoUrl?: string | null;
   photo?: string | null; // New field for temporary photo data (e.g., base64 string)
+  targetFaceId?: string; // New field for the ID of the main character face
+  imageSize?: string; // New field for image size, e.g., "512x512"
+  exifData?: ExifDataDto; // New field for EXIF metadata
   tags?: string[];
   keywords?: string[];
   eventSuggestion?: string;
@@ -23,6 +27,13 @@ export interface MemoryDto {
   createdAt?: string; // Made optional to support new creation
   photoAnalysisResult?: PhotoAnalysisResultDto | null;
   // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị
+}
+
+// DTO for EXIF metadata
+export interface ExifDataDto {
+  datetime?: string;
+  gps?: string; // Or a more structured GPS object if needed
+  cameraInfo?: string;
 }
 
 // DTO for identified faces in a memory
