@@ -71,6 +71,6 @@ const memoryStore = useMemoryStore(); // Initialize the main memory store
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
-  set: (value: MemoryDto) => { /* No-op for review step */ },
+  set: (_value: MemoryDto) => { /* No-op for review step */ },
 });
 </script>

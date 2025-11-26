@@ -33,16 +33,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryDto, MemoryFaceDto, ExifDataDto } from '@/types/memory'; // Added MemoryFaceDto, ExifDataDto
-import type { Member } from '@/types'; // Added Member
-import type {
-  AiPhotoAnalysisInputDto,
-  AiDetectedFaceDto,
-  AiEmotionLocalDto,
-  AiMemberInfoDto,
-  AiOtherFaceSummaryDto,
-  PhotoAnalysisResultDto
-} from '@/types/ai'; // NEW IMPORT
+import type { MemoryDto } from '@/types/memory'; // Only MemoryDto needed
+import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // Only AiPhotoAnalysisInputDto needed
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
 import MemoryStep2GeneralInfo from './MemoryStep2GeneralInfo.vue';
 import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';

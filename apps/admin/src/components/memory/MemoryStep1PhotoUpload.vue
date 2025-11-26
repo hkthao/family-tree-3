@@ -209,22 +209,6 @@ const handleRemoveFace = (faceId: string) => {
   }
 };
 
-const canSaveLabels = computed(() => {
-  return memoryStore.faceRecognition.detectedFaces.some(
-    (face) =>
-      face.memberId &&
-      (face.originalMemberId === null ||
-        face.originalMemberId === undefined ||
-        face.memberId !== face.originalMemberId),
-  );
-});
-
-const saveLabels = async () => {
-  const result = await memoryStore.saveFaceLabels();
-  if (result.ok) {
-    showSnackbar(t('face.recognition.saveSuccess'), 'success');
-  }
-};
 
 const getFaceThumbnailSrc = (face: DetectedFace) => {
   if (face.thumbnail) {

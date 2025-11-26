@@ -10,7 +10,7 @@
       <v-col cols="12">
         <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
-          <v-col v-for="(face, index) in internalMemory.faces" :key="face.id" cols="6">
+          <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
             <v-card>
               <v-img class="rounded-sm my-4" :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
               <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">

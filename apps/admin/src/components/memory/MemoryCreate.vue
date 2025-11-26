@@ -189,13 +189,8 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // NEW IMPO
 import type { ExifDataDto } from '@/types/memory'; // NEW IMPORT
 import type {
   AiPhotoAnalysisInputDto,
-  AiDetectedFaceDto,
-  AiEmotionLocalDto,
-  AiMemberInfoDto,
-  AiOtherFaceSummaryDto,
-  PhotoAnalysisResultDto,
-  AiExifInfoDto
-} from '@/types/ai'; // NEW IMPORT
+  PhotoAnalysisResultDto, // Keep PhotoAnalysisResultDto
+} from '@/types/ai'; // Only import necessary AI DTOs
 
 
 interface Props {
@@ -297,7 +292,7 @@ const analyzePhoto = async () => {
       imageBase64: memoryStore.faceRecognition.uploadedImage || undefined,
       imageSize: imageSize,
       exif: exifData,
-      // Default to first detected face as target if available, otherwise null
+      // Default to first detected face as target if available, otherwise undefined
       targetFaceId: detectedFaces.length > 0 ? detectedFaces[0].id : undefined,
       targetFaceCropUrl: null, // Placeholder
 

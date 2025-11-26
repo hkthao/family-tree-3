@@ -1,8 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router';
 import MemoryListView from '@/views/ai-memorial-studio/MemoryListView.vue';
 import AIMemorialStudioMemberView from '@/views/ai-memorial-studio/AIMemorialStudioMemberView.vue';
-import MemoryDetailPage from '@/views/ai-memorial-studio/MemoryDetailPage.vue';
-import MemoryEditPage from '@/views/ai-memorial-studio/MemoryEditPage.vue';
+// import MemoryDetailPage from '@/views/ai-memorial-studio/MemoryDetailPage.vue'; // REMOVED
+// import MemoryEditPage from '@/views/ai-memorial-studio/MemoryEditPage.vue'; // REMOVED
 
 export const aiMemorialStudioRoutes: RouteRecordRaw[] = [
   {

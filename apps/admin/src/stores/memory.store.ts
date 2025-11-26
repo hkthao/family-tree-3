@@ -1,6 +1,6 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { DetectedFace, SearchResult, Member, Result, Paginated } from '@/types'; // Added DetectedFace, SearchResult, Member
+import type { DetectedFace, SearchResult, Member, Result } from '@/types'; // Removed Paginated
 import type { MemoryDto } from '@/types/memory';
 import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
@@ -78,7 +78,7 @@ export const useMemoryStore = defineStore('memory', {
   }),
 
   getters: {
-    headers: (state) => {
+    headers: (_state) => { // Renamed state to _state
       const t = i18n.global.t;
       return [
         {

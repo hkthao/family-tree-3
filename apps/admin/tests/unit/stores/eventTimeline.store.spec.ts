@@ -5,7 +5,7 @@ import type { Event, EventFilter } from '@/types';
 import { ok, err, EventType } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
+// import i18n from '@/plugins/i18n'; // REMOVED
 
 // Mock the IEventService
 const mockLoadItems = vi.fn();

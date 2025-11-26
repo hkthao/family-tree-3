@@ -7,9 +7,9 @@ import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/natural-language.d'; // NEW IMPORT
 
-const API_BASE_URL = '/api/memories'; // Base URL for memory-related endpoints (non-AI)
-const AI_BASE_URL = '/api/ai'; // Base URL for AI-related endpoints
-const NATURAL_LANGUAGE_URL = '/natural-language'; // Base URL for natural language analysis
+// const API_BASE_URL = '/api/memories'; // Base URL for memory-related endpoints (non-AI) - REMOVED
+const AI_BASE_URL = '/ai'; // Corrected Base URL for AI-related endpoints (without /api)
+const NATURAL_LANGUAGE_URL = '/natural-language'; // Corrected Base URL for natural language analysis (without /api)
 
 export class ApiAiService implements IAiService {
   constructor(private apiClient: ApiClientMethods) {}

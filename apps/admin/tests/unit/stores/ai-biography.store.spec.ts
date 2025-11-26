@@ -75,7 +75,7 @@ describe('ai-biography.store', () => {
   };
 
   const mockBiographyResult: BiographyResultDto = {
-    content: 'Generated biography content',
+    biography: 'Generated biography content', // Use 'biography' instead of 'content'
   };
 
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('ai-biography.store', () => {
     // Set default mock resolved values
     mockGetById.mockResolvedValue(ok(mockMember));
     mockUpdateMemberBiography.mockResolvedValue(ok(undefined));
-    mockGenerateBiography.mockResolvedValue(ok(mockBiographyResult.content));
+    mockGenerateBiography.mockResolvedValue(ok(mockBiographyResult)); // Return the full DTO
   });
 
   it('should have correct initial state', () => {
@@ -117,7 +117,8 @@ describe('ai-biography.store', () => {
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.currentMember).toEqual(mockMember);
-      expect(store.biographyResult).toEqual({ content: mockMember.biography });
+      // Ensure the biographyResult is also updated correctly
+      expect(store.biographyResult?.biography).toEqual(mockMember.biography);
       expect(mockGetById).toHaveBeenCalledTimes(1);
       expect(mockGetById).toHaveBeenCalledWith(mockMember.id);
     });

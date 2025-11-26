@@ -5,7 +5,7 @@ import type { Member } from '@/types';
 import { ok, err, Gender } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
+// import i18n from '@/plugins/i18n'; // REMOVED
 
 // Mock the IMemberService
 const mockGetByIds = vi.fn();

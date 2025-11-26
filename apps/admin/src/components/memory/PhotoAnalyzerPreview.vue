@@ -82,13 +82,13 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { PhotoAnalysisResultDto, PhotoAnalysisPersonDto } from '@/types/ai'; // Import PhotoAnalysisResultDto and PhotoAnalysisPersonDto
+import type { PhotoAnalysisResultDto } from '@/types/ai'; // Only PhotoAnalysisResultDto needed
 
 interface Props {
   analysisResult: PhotoAnalysisResultDto | null;
 }
 
-const props = defineProps<Props>();
+const { analysisResult } = defineProps<Props>(); // Destructure props
 const emit = defineEmits(['useContext', 'editContext', 'skip']);
 const { t } = useI18n();
 </script>
