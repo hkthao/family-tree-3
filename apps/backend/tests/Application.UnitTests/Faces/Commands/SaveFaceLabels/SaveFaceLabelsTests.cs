@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands.SaveFaceLabels;

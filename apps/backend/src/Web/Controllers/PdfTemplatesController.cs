@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using backend.Application.Common.Models;
 using backend.Application.PdfTemplates.Commands.CreatePdfTemplate;
 using backend.Application.PdfTemplates.Commands.DeletePdfTemplate;
 using backend.Application.PdfTemplates.Commands.UpdatePdfTemplate;
 using backend.Application.PdfTemplates.Dtos;
 using backend.Application.PdfTemplates.Queries.GetPdfTemplate;
 using backend.Application.PdfTemplates.Queries.GetPdfTemplates;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

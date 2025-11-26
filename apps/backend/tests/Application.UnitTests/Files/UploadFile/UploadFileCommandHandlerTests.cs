@@ -1,16 +1,11 @@
-using System.Net;
-using System.Text.Json;
-using System.Threading;
 using backend.Application.AI.DTOs; // NEW USING FOR IMAGE UPLOAD DTOs
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
 using Moq;
 using Xunit;
 
@@ -28,10 +23,7 @@ public class UploadFileCommandHandlerTests : TestBase
         _n8nServiceMock = new Mock<IN8nService>(); // Changed from IFileStorageMock
         _dateTimeMock = new Mock<IDateTime>();
 
-        var inMemorySettings = new Dictionary<string, string?> {
-            {$"{nameof(StorageSettings)}:MaxFileSizeMB", "5"},
-            {$"{nameof(StorageSettings)}:Provider", "Local"}
-        };
+        var inMemorySettings = new Dictionary<string, string?> {};
 
         _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(inMemorySettings)

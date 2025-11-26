@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Families.Queries.GetPublicFamilyById;
 using backend.Application.UnitTests.Common;

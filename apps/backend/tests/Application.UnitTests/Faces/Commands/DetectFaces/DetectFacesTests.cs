@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this line
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Common;
-using backend.Application.Faces.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;

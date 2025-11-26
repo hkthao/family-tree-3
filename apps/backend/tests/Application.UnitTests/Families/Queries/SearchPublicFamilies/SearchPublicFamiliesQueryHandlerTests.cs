@@ -1,5 +1,3 @@
-using AutoMapper;
-using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

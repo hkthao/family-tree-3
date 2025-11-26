@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using backend.Application.Faces.Queries;
 using FluentValidation.TestHelper;

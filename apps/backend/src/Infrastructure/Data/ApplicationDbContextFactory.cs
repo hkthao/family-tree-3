@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.Data.Interceptors;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;

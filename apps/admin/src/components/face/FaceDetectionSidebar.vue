@@ -78,7 +78,7 @@ const removeFace = (faceId: string) => {
 
 const getFaceThumbnailSrc = (face: DetectedFace) => {
   if (face.thumbnail) {
-    return `data:image/jpeg;base64,${face.thumbnail}`;
+    return face.thumbnail;
   }
   return '';
 };

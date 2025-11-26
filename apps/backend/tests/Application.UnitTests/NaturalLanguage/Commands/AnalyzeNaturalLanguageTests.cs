@@ -1,20 +1,12 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.AI.Prompts;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.Queries; // For MemberDto
 using backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 using backend.Application.NaturalLanguage.Models;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

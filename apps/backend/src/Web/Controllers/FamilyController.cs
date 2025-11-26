@@ -9,7 +9,6 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetFamilyDetails; // Added for new endpoint
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields; // Add this using directive
-using backend.Domain.Entities; // Added for Family entity
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

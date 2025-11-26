@@ -4,7 +4,6 @@ using backend.Application.Families.EventHandlers;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;

@@ -1,10 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Domain.Enums;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
-using backend.Infrastructure.Files;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -88,36 +86,9 @@ public static class DependencyInjection
 
         services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
 
-
-
-        // Register AI Content Generator
-
-        // Register Embedding Settings and Providers
-
-
         // Register Configuration Provider
         services.AddMemoryCache();
 
-
-        // Register File Storage
-        services.AddTransient<LocalFileStorage>();
-        services.AddTransient<S3FileStorage>();
-        services.AddTransient<CloudinaryFileStorage>();
-
-        // Register IFileStorage based on configuration
-        services.AddScoped<IFileStorage>(sp =>
-        {
-            var storageSettings = configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
-            var storageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true);
-
-            return storageProvider switch
-            {
-                StorageProvider.Local => sp.GetRequiredService<LocalFileStorage>(),
-                StorageProvider.Cloudinary => sp.GetRequiredService<CloudinaryFileStorage>(),
-                StorageProvider.S3 => sp.GetRequiredService<S3FileStorage>(),
-                _ => throw new InvalidOperationException($"No file storage provider configured for: {storageProvider}")
-            };
-        });
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         // Register n8n Service

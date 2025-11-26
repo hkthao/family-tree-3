@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands; // Added this using directive
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Common;

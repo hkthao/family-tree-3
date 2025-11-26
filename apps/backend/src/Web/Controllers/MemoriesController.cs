@@ -1,4 +1,3 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 // using backend.Application.Memories.Commands.AnalyzePhoto; // REMOVED
 using backend.Application.Memories.Commands.CreateMemory; // Import CreateMemoryCommand
@@ -8,7 +7,6 @@ using backend.Application.Memories.Commands.UpdateMemory; // Import UpdateMemory
 using backend.Application.Memories.DTOs;
 using backend.Application.Memories.Queries.GetMemoriesByMemberId; // Import GetMemoriesByMemberIdQuery
 using backend.Application.Memories.Queries.GetMemoryDetail; // Import GetMemoryDetailQuery
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

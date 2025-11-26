@@ -6,9 +6,7 @@ using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AI;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Memories.DTOs; // NEW IMPORT
 using backend.Infrastructure.Auth;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

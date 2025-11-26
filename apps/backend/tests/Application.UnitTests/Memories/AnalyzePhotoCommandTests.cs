@@ -1,15 +1,11 @@
-using System.Collections.Generic; // Added for List
 using System.Net;
 using System.Text.Json;
-using System.Threading; // Added for CancellationToken
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED USING
 using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.Common.Constants;
-using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.UnitTests.Common; // Added for TestBase
 using backend.Domain.Entities;
-using backend.Infrastructure.Data; // For ApplicationDbContext
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
