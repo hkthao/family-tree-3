@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGELOADWEBHOOKDTO
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -6,7 +7,6 @@ using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Configuration;
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGELOADWEBHOOKDTO
 
 namespace backend.Application.Files.UploadFile;
 
@@ -53,7 +53,7 @@ public class UploadFileCommandHandler(
 
         // 3. (Optional) Save metadata to DB if needed, but not using FileMetadata table anymore for external uploads.
         // For now, just return the URL, assuming it will be stored as PhotoUrl in Memory entity later.
-        
+
         return Result<string>.Success(uploadedImageUrl);
     }
 

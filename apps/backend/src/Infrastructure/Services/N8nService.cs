@@ -1,16 +1,16 @@
+using System.Net.Http.Headers; // For MediaTypeHeaderValue
 using System.Text; // NEW USING
 using System.Text.Json; // NEW USING
+using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AI;
 using backend.Application.Common.Models.AppSetting;
+using backend.Application.Memories.DTOs; // NEW IMPORT
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using backend.Application.Memories.DTOs; // NEW IMPORT
-using backend.Application.AI.DTOs; // UPDATED USING
-using System.Net.Http.Headers; // For MediaTypeHeaderValue
 
 namespace backend.Infrastructure.Services;
 
@@ -237,7 +237,7 @@ public class N8nService : IN8nService
         }
 
         using var content = new MultipartFormDataContent();
-        
+
         // Add image file
         var fileContent = new ByteArrayContent(dto.ImageData);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg"); // Assuming JPEG, adjust as needed
@@ -272,7 +272,7 @@ public class N8nService : IN8nService
             {
                 PropertyNameCaseInsensitive = true,
             };
-            
+
             List<ImageUploadResponseDto>? uploadResponse = null;
             try
             {

@@ -1,3 +1,7 @@
+using System.Net;
+using System.Text.Json;
+using System.Threading;
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGE UPLOAD DTOs
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -8,11 +12,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Moq;
-using System.Net;
-using System.Text.Json;
-using System.Threading;
 using Xunit;
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGE UPLOAD DTOs
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 
@@ -162,7 +162,7 @@ public class UploadFileCommandHandlerTests : TestBase
     {
         // Arrange
         var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        
+
         // Simulate n8n returning a list where the first item has an empty URL
         _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
             It.IsAny<ImageUploadWebhookDto>(),

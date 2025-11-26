@@ -1,8 +1,8 @@
 using AutoMapper;
+using backend.Application.AI.DTOs; // NEW USING
 using backend.Application.Memories.Commands.CreateMemory;
 using backend.Application.Memories.Commands.UpdateMemory;
 using backend.Application.Memories.DTOs;
-using backend.Application.AI.DTOs; // NEW USING
 using backend.Domain.Entities;
 
 namespace backend.Application.Memories;
