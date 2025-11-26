@@ -18,8 +18,7 @@ public class UploadFileCommandHandlerTests : TestBase
     public UploadFileCommandHandlerTests()
     {
         _n8nServiceMock = new Mock<IN8nService>(); // Changed from IFileStorageMock
-        _handler = new UploadFileCommandHandler(
-            _n8nServiceMock.Object);
+        _handler = new UploadFileCommandHandler(_n8nServiceMock.Object);
     }
 
     private UploadFileCommand CreateValidCommand(byte[] imageData)

@@ -1,16 +1,16 @@
 using System.Text.Json;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
-using backend.Application.NaturalLanguage.Models;
+using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // UPDATED USING
+using backend.Application.AI.Models; // UPDATED USING
+using backend.Application.Common.Exceptions; // ADDED
+using backend.Application.Common.Interfaces; // ADDED
+using backend.Application.Common.Models; // ADDED
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace backend.Application.UnitTests.NaturalLanguage.Commands;
+namespace backend.Application.UnitTests.AI.Commands;
 
 public class AnalyzeNaturalLanguageTests : TestBase
 {

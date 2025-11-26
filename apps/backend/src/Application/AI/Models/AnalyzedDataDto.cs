@@ -1,4 +1,4 @@
-namespace backend.Application.NaturalLanguage.Models;
+namespace backend.Application.AI.Models;
 
 /// <summary>
 /// Đại diện cho dữ liệu đã được AI phân tích từ văn bản ngôn ngữ tự nhiên.

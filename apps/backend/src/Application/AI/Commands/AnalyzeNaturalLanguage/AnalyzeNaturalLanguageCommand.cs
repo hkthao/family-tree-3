@@ -1,7 +1,7 @@
 using backend.Application.Common.Models;
-using backend.Application.NaturalLanguage.Models; // Add using directive
+using backend.Application.AI.Models; // UPDATED USING
 
-namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
+namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;
 
 /// <summary>
 /// Lệnh để phân tích văn bản ngôn ngữ tự nhiên và tạo prompt cho AI Agent.

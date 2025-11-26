@@ -1,6 +1,7 @@
 using backend.Domain.Enums; // Add this using directive
+using backend.Application.AI.Models; // NEW USING
 
-namespace backend.Application.NaturalLanguage.Models;
+namespace backend.Application.AI.Models;
 
 /// <summary>
 /// Đại diện cho dữ liệu đã được phân tích và chuyển đổi sang định dạng cuối cùng với Guid IDs.

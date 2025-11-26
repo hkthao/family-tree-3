@@ -1,8 +1,10 @@
+using backend.Application.AI.DTOs; // ADDED
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this line
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Common;
+using backend.Application.Memories.DTOs; // ADDED
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
@@ -23,14 +25,20 @@ public class DetectFacesTests : TestBase
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
-
         _mockN8nService = new Mock<IN8nService>();
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
+
+        // Default setup for CallImageUploadWebhookAsync to prevent early failures
+        _mockN8nService.Setup(s => s.CallImageUploadWebhookAsync(
+            It.IsAny<ImageUploadWebhookDto>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ImageUploadWebhookDto dto, CancellationToken token) =>
+                Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = $"http://mock.image.url/{dto.FileName}" }));
+
         _handler = new DetectFacesCommandHandler(
             _mockFaceApiService.Object,
             _context,
-
-            _mockLogger.Object, // Passed ListLogger directly
+            _mockLogger.Object,
             _mockN8nService.Object);
     }
 
@@ -47,7 +55,7 @@ public class DetectFacesTests : TestBase
                 Id = "face1",
                 BoundingBox = new BoundingBoxDto { X = 1, Y = 2, Width = 3, Height = 4 },
                 Confidence = 0.9f,
-                Thumbnail = "base64thumb",
+                Thumbnail = "AQID", // A valid base64 string for 1, 2, 3 bytes
                 Embedding = new double[] { 0.1, 0.2 }
             }
         };
@@ -68,7 +76,7 @@ public class DetectFacesTests : TestBase
         var detectedFace = result.Value.DetectedFaces.First();
         detectedFace.BoundingBox.X.Should().Be(1);
         detectedFace.Confidence.Should().Be(0.9f);
-        detectedFace.Thumbnail.Should().Be("base64thumb");
+        detectedFace.Thumbnail.Should().Be("http://mock.image.url/face1_thumbnail.jpeg");
         detectedFace.Embedding.Should().NotBeNull().And.HaveCount(2);
         detectedFace.MemberId.Should().BeNull();
     }

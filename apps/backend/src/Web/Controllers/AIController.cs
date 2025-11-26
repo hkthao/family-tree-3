@@ -1,7 +1,9 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
+using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
 using backend.Application.AI.DTOs; // UPDATED IMPORT
+using backend.Application.AI.Models; // NEW IMPORT
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,6 +55,18 @@ public class AIController : ControllerBase
     /// <returns>Kết quả phân tích ảnh.</returns>
     [HttpPost("analyze-photo")]
     public async Task<ActionResult<PhotoAnalysisResultDto>> AnalyzePhoto([FromBody] AnalyzePhotoCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Phân tích văn bản ngôn ngữ tự nhiên bằng AI để trích xuất thông tin về thành viên, sự kiện, mối quan hệ.
+    /// </summary>
+    /// <param name="command">Lệnh chứa văn bản cần phân tích và ID phiên làm việc.</param>
+    /// <returns>Kết quả phân tích văn bản.</returns>
+    [HttpPost("analyze-natural-language")]
+    public async Task<ActionResult<AnalyzedResultDto>> AnalyzeNaturalLanguage([FromBody] AnalyzeNaturalLanguageCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result);

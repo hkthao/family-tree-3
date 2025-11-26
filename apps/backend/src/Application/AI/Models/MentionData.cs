@@ -1,4 +1,4 @@
-namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
+namespace backend.Application.AI.Models;
 
 /// <summary>
 /// Đại diện cho dữ liệu của một mention đã được trích xuất.

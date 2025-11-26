@@ -1,6 +1,6 @@
-using backend.Application.NaturalLanguage.Models;
+using backend.Application.AI.Models;
 
-namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
+namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;
 
 public class AnalyzedDataDtoValidator : AbstractValidator<AnalyzedDataDto>
 {

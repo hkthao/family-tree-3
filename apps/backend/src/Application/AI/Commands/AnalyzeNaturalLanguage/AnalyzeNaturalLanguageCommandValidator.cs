@@ -1,4 +1,4 @@
-namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
+namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;
 
 /// <summary>
 /// Validator cho AnalyzeNaturalLanguageCommand.
