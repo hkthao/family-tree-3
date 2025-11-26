@@ -64,15 +64,10 @@ const internalMemory = computed<MemoryDto>({
     const model = props.modelValue;
     return {
       ...model,
-      rawInput: model.rawInput ?? undefined,
-      story: model.story ?? undefined,
-      eventSuggestion: model.eventSuggestion ?? undefined,
-      customEventDescription: model.customEventDescription ?? undefined,
-      emotionContextTags: model.emotionContextTags ?? [],
-      customEmotionContext: model.customEmotionContext ?? undefined,
+      // Ensure faces is an array to prevent .map() errors if it's null/undefined
       faces: model.faces ?? [],
-      // Ensure photoAnalysisResult is initialized
-      photoAnalysisResult: model.photoAnalysisResult ?? null,
+      emotionContextTags: model.emotionContextTags ?? [],
+      // photoAnalysisResult can be null, so no need to default to a specific value other than null
     } as MemoryDto;
   },
   set: (value: MemoryDto) => emit('update:modelValue', value),
@@ -87,31 +82,31 @@ watch(() => props.memberId, (newMemberId) => {
 
 const validateStep = async (step: number) => {
   if (step === 1) {
-    const hasDetectedFaces = internalMemory.value.faces && internalMemory.value.faces.length > 0;
-    const isValid = step1Ref.value?.isValid; // This seems to check if photo processing is finished
-    // Ensure selectedTargetMemberFaceId is correctly mapped from exposed property
-    const isTargetMemberSelected = step1Ref.value?.selectedTargetMemberFaceId !== null && step1Ref.value?.selectedTargetMemberFaceId !== undefined;
+    const hasDetectedFaces = (internalMemory.value.faces?.length ?? 0) > 0;
+    const isPhotoProcessingValid = step1Ref.value?.isValid ?? false;
+    const selectedTargetMemberFaceId = step1Ref.value?.selectedTargetMemberFaceId;
+    const isTargetFaceSelected = selectedTargetMemberFaceId !== null && selectedTargetMemberFaceId !== undefined;
 
     if (!hasDetectedFaces) {
       showSnackbar(t('memory.validation.noFacesDetectedInPhoto'), 'warning');
       return false;
     }
 
-    if (!isValid) {
+    if (!isPhotoProcessingValid) {
       showSnackbar(t('memory.validation.photoProcessingNotDone'), 'warning');
       return false;
     }
-    // This check is only relevant if there ARE detected faces
-    if (!isTargetMemberSelected && hasDetectedFaces) { // Re-added hasDetectedFaces check for clarity
+
+    if (hasDetectedFaces && !isTargetFaceSelected) {
       showSnackbar(t('memory.validation.noTargetMemberSelected'), 'warning');
       return false;
     }
 
-    return hasDetectedFaces && isValid && (isTargetMemberSelected || !hasDetectedFaces);
+    return true; // All checks passed for step 1
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
   }
-  return true; // Step 3 is review, no direct validation form
+  return true; // Step 3 (review) always valid for direct progression
 };
 
 // Helper function to build AiPhotoAnalysisInputDto
