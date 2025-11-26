@@ -12,7 +12,7 @@
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
             <v-card>
-              <v-img class="rounded-sm my-4" :src="getFaceThumbnailSrc(face)" height="100px" contain></v-img>
+              <v-img class="rounded-sm my-4" :src="face.thumbnail" height="100px" contain></v-img>
               <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">
               </MemberAutocomplete>
               <v-text-field class="mt-2" v-model="face.relationPrompt"
@@ -136,13 +136,6 @@ const aiPerspectiveSuggestions = ref([
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
-
-const getFaceThumbnailSrc = (face: DetectedFace) => {
-  if (face.thumbnail) {
-    return `data:image/jpeg;base64,${face.thumbnail}`;
-  }
-  return '';
-};
 
 const validate = async () => {
   return formStep2.value ? (await formStep2.value.validate()).valid : false;

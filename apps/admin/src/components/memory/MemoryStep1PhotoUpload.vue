@@ -24,7 +24,7 @@
                 <v-chip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id" :value="face.id"
                   variant="outlined" color="primary" filter>
                   <v-avatar left>
-                    <v-img :src="getFaceThumbnailSrc(face)" alt="Face"></v-img>
+                    <v-img :src="face.thumbnail" alt="Face"></v-img>
                   </v-avatar>
                   <span class="ml-2">{{ face.memberName || t('common.unknown') }}</span>
                   <v-chip v-if="face.emotion" size="x-small" class="ml-2">{{ face.emotion }}</v-chip>
@@ -207,14 +207,6 @@ const handleRemoveFace = (faceId: string) => {
   if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
     selectedTargetMemberFaceId.value = null;
   }
-};
-
-
-const getFaceThumbnailSrc = (face: DetectedFace) => {
-  if (face.thumbnail) {
-    return `data:image/jpeg;base64,${face.thumbnail}`;
-  }
-  return '';
 };
 
 defineExpose({

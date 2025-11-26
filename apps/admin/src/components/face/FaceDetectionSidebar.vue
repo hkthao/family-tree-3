@@ -27,7 +27,7 @@
       }" @click="$emit('face-selected', face.id)">
         <template v-slot:prepend>
           <v-avatar size="40" rounded="sm">
-            <v-img :src="getFaceThumbnailSrc(face)" alt="Face"></v-img>
+            <v-img :src="face.thumbnail" alt="Face"></v-img>
           </v-avatar>
         </template>
         <v-list-item-title>
@@ -74,13 +74,6 @@ const emit = defineEmits(['face-selected', 'remove-face']);
 
 const removeFace = (faceId: string) => {
   emit('remove-face', faceId);
-};
-
-const getFaceThumbnailSrc = (face: DetectedFace) => {
-  if (face.thumbnail) {
-    return face.thumbnail;
-  }
-  return '';
 };
 
 const unlabeledFacesCount = computed(() => faces.filter(face => !face.memberId).length);

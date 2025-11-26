@@ -86,16 +86,10 @@ watch(() => props.memberId, (newMemberId) => {
 
 const validateStep = async (step: number) => {
   if (step === 1) {
-    const hasPhoto = internalMemory.value.photo !== null && internalMemory.value.photo !== undefined && internalMemory.value.photo !== '';
     const hasDetectedFaces = internalMemory.value.faces && internalMemory.value.faces.length > 0;
     const isValid = step1Ref.value?.isValid; // This seems to check if photo processing is finished
     // Ensure selectedTargetMemberFaceId is correctly mapped from exposed property
     const isTargetMemberSelected = step1Ref.value?.selectedTargetMemberFaceId !== null && step1Ref.value?.selectedTargetMemberFaceId !== undefined;
-
-    if (!hasPhoto) {
-      showSnackbar(t('memory.validation.noPhotoUploaded'), 'warning');
-      return false;
-    }
 
     if (!hasDetectedFaces) {
       showSnackbar(t('memory.validation.noFacesDetectedInPhoto'), 'warning');
@@ -112,7 +106,7 @@ const validateStep = async (step: number) => {
       return false;
     }
 
-    return hasPhoto && hasDetectedFaces && isValid && (isTargetMemberSelected || !hasDetectedFaces);
+    return hasDetectedFaces && isValid && (isTargetMemberSelected || !hasDetectedFaces);
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
   }
@@ -129,6 +123,7 @@ const nextStep = async () => {
 
   if (isValid) {
     if (currentStep === 1) {
+      activeStep.value++;
       // Construct AiPhotoAnalysisInputDto
       const aiInput: AiPhotoAnalysisInputDto = {
         imageUrl: internalMemory.value.photoUrl,
