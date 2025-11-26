@@ -1,9 +1,0 @@
-import type { Result } from '@/types/result';
-import type { ApiError } from '@/types/api-error';
-import type { FamilyExportDto } from '@/types/family'; // Assuming FamilyExportDto is defined here
-
-export interface IFamilyDataService {
-  exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>>;
-  importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>; // Returns new family ID
-  exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob, ApiError>>; // New method
-}

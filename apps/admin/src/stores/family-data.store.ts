@@ -11,13 +11,12 @@ export const useFamilyDataStore = defineStore('familyData', {
   actions: {
     async exportFamilyData(familyId: string) {
       this.exporting = true;
-      this.error = null;
-      try {
-        const result = await this.services.familyData.exportFamilyData(familyId);
-
-        if (result.ok) {
-          const familyExportDto: FamilyExportDto = result.value;
-          const filename = `family_data_${familyExportDto.name.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+              this.error = null;
+              try {
+                const result = await this.services.family.exportFamilyData(familyId); // Use services.family
+      
+                if (result.ok) {
+                  const familyExportDto: FamilyExportDto = result.value;          const filename = `family_data_${familyExportDto.name.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
           const jsonStr = JSON.stringify(familyExportDto, null, 2);
           const blob = new Blob([jsonStr], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -45,7 +44,7 @@ export const useFamilyDataStore = defineStore('familyData', {
       this.importing = true;
       this.error = null;
       try {
-        const result = await this.services.familyData.importFamilyData(familyId, familyData, clearExistingData);
+        const result = await this.services.family.importFamilyData(familyId, familyData, clearExistingData); // Use services.family
 
         if (result.ok) {
           return result.value; // Return new family ID

@@ -30,10 +30,8 @@ import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
-// import type { INaturalLanguageService } from './natural-language/api.natural-language.service'; // REMOVED IMPORT
-// import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // REMOVED IMPORT
-import type { IFamilyDataService } from './family-data/family-data.service.interface';
-import { ApiFamilyDataService } from './family-data/api.family-data.service';
+// import type { IFamilyDataService } from './family-data/family-data.service.interface'; // REMOVED IMPORT
+// import { ApiFamilyDataService } from './family-data/api.family-data.service'; // REMOVED IMPORT
 import type { IPrivacyConfigurationService } from './privacy-configuration/privacy-configuration.service.interface';
 import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; // Add familyDict service interface
@@ -64,7 +62,7 @@ export interface AppServices {
   face: IFaceService;
   user: IUserService;
   // naturalLanguage: INaturalLanguageService; // REMOVED SERVICE
-  familyData: IFamilyDataService;
+  // familyData: IFamilyDataService; // REMOVED SERVICE
   privacyConfiguration: IPrivacyConfigurationService;
   familyDict: IFamilyDictService; // Add familyDict service
   memory: IMemoryService; // New
@@ -144,10 +142,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
     //   mode === 'real'
     //     ? new ApiNaturalLanguageService(apiClient)
     //     : testServices?.naturalLanguage || new ApiNaturalLanguageService(apiClient),
-    familyData:
-      mode === 'real'
-        ? new ApiFamilyDataService(apiClient)
-        : testServices?.familyData || new ApiFamilyDataService(apiClient),
+    // familyData: // REMOVED SERVICE INSTANTIATION
+    //   mode === 'real'
+    //     ? new ApiFamilyDataService(apiClient)
+    //     : testServices?.familyData || new ApiFamilyDataService(apiClient),
     privacyConfiguration:
       mode === 'real'
         ? new ApiPrivacyConfigurationService(apiClient)
@@ -166,6 +164,8 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : testServices?.ai || new ApiAiService(apiClient),
   };
 }
+
+
 
 
 

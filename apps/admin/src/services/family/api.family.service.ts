@@ -6,6 +6,7 @@ import {
   type FamilyFilter,
   type Paginated,
 } from '@/types';
+import type { FamilyExportDto } from '@/types/family'; // NEW IMPORT
 
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
@@ -74,5 +75,18 @@ export class ApiFamilyService implements IFamilyService {
 
   async getByIdWithDetails(id: string): Promise<Result<Family, ApiError>> {
     return this.http.get<Family>(`/family/${id}/details`); // New endpoint for detailed family data
+  }
+
+  async exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>> { // NEW METHOD
+    return this.http.get<FamilyExportDto>(`/family-data/${familyId}/export`);
+  }
+
+  async importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>> { // NEW METHOD
+    const queryParams = clearExistingData === false ? '?clearExistingData=false' : '';
+    return this.http.post<string>(`/family-data/import/${familyId}${queryParams}`, familyData);
+  }
+
+  async exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob, ApiError>> { // NEW METHOD
+    return this.http.post<Blob>(`/family-data/${familyId}/export-pdf`, htmlContent, { headers: { 'Content-Type': 'text/html' }, responseType: 'blob' });
   }
 }
