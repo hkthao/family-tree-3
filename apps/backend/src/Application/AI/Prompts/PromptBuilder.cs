@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
-using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // UPDATED USING
 using backend.Application.AI.Models; // NEW USING
 using backend.Domain.Entities; // Add using directive for Member and Family
 

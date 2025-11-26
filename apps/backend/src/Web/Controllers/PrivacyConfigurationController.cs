@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.PrivacyConfigurations.Commands;
+using backend.Application.Families.PrivacyConfigurations.Commands;
 using backend.Application.PrivacyConfigurations.Queries;
 using Microsoft.AspNetCore.Mvc;
 

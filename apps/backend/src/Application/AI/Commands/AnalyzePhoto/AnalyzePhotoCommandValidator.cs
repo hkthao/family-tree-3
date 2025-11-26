@@ -1,7 +1,3 @@
-using System.Linq; // For .Any()
-using backend.Application.AI.DTOs; // NEW USING
-using FluentValidation;
-
 namespace backend.Application.AI.Commands.AnalyzePhoto;
 
 public class AnalyzePhotoCommandValidator : AbstractValidator<AnalyzePhotoCommand>

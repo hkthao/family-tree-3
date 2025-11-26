@@ -6,8 +6,6 @@ using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using Microsoft.Extensions.Logging;
 using backend.Application.AI.DTOs; // NEW USING FOR IMAGEUPLOADWEBHOOKDTO
-using backend.Application.Memories.DTOs; // For ImageUploadResponseDto
-using System.Linq; // For FirstOrDefault
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 

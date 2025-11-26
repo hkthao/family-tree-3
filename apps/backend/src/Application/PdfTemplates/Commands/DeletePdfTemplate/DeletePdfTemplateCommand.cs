@@ -1,6 +1,4 @@
-using System;
 using backend.Application.Common.Models;
-using MediatR;
 
 namespace backend.Application.PdfTemplates.Commands.DeletePdfTemplate;
 
