@@ -1,9 +1,13 @@
+using System.Text.RegularExpressions; // NEW USING FOR REGEX
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using Microsoft.Extensions.Logging;
+using backend.Application.AI.DTOs; // NEW USING FOR IMAGEUPLOADWEBHOOKDTO
+using backend.Application.Memories.DTOs; // For ImageUploadResponseDto
+using System.Linq; // For FirstOrDefault
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
@@ -18,13 +22,41 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
     {
         try
         {
-            var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes, request.ContentType, request.ReturnCrop); // Changed
+            // 1. Upload original image to n8n webhook to get a public URL
+            string? originalImageUrl = null;
+            if (request.ImageBytes != null && request.ImageBytes.Length > 0)
+            {
+                var imageUploadDto = new ImageUploadWebhookDto
+                {
+                    ImageData = request.ImageBytes,
+                    FileName = request.FileName,
+                    Cloud = request.Cloud,
+                    Folder = request.Folder
+                };
+
+                var n8nImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
+
+                if (n8nImageUploadResult.IsSuccess && n8nImageUploadResult.Value != null && n8nImageUploadResult.Value.Any())
+                {
+                    originalImageUrl = n8nImageUploadResult.Value.FirstOrDefault()?.Url;
+                    if (string.IsNullOrEmpty(originalImageUrl))
+                    {
+                        _logger.LogWarning("n8n image upload returned success but no URL for original image.");
+                        return Result<FaceDetectionResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
+                    }
+                }
+                else if (!n8nImageUploadResult.IsSuccess)
+                {
+                    _logger.LogError("Failed to upload original image to n8n: {Error}", n8nImageUploadResult.Error);
+                    return Result<FaceDetectionResponseDto>.Failure(n8nImageUploadResult.Error ?? ErrorMessages.FileUploadFailed, ErrorSources.ExternalServiceError);
+                }
+            }
+
+
+            var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
 
             // Generate a unique ImageId for this detection session
             var imageId = Guid.NewGuid();
-
-            // Store the original image or a reference to it if needed for later processing
-            // For now, we'll just return the detected faces with the generated ImageId
 
             var detectedFaceDtos = new List<DetectedFaceDto>();
             var memberIdsToFetch = new HashSet<Guid>();
@@ -32,6 +64,43 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             foreach (var faceResult in detectedFacesResult)
             {
+                // Upload face thumbnail to n8n to get a public URL
+                string? thumbnailUrl = null;
+                if (!string.IsNullOrEmpty(faceResult.Thumbnail))
+                {
+                    try
+                    {
+                        var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
+                        var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
+                        var thumbnailUploadDto = new ImageUploadWebhookDto
+                        {
+                            ImageData = thumbnailBytes,
+                            FileName = thumbnailFileName,
+                            Cloud = request.Cloud,
+                            Folder = request.Folder
+                        };
+
+                        var n8nThumbnailUploadResult = await _n8nService.CallImageUploadWebhookAsync(thumbnailUploadDto, cancellationToken);
+                        if (n8nThumbnailUploadResult.IsSuccess && n8nThumbnailUploadResult.Value != null && n8nThumbnailUploadResult.Value.Any())
+                        {
+                            thumbnailUrl = n8nThumbnailUploadResult.Value.FirstOrDefault()?.Url;
+                            if (string.IsNullOrEmpty(thumbnailUrl))
+                            {
+                                _logger.LogWarning("n8n image upload returned success but no URL for face thumbnail {FaceId}.", faceResult.Id);
+                            }
+                        }
+                        else if (!n8nThumbnailUploadResult.IsSuccess)
+                        {
+                            _logger.LogError("Failed to upload face thumbnail {FaceId} to n8n: {Error}", faceResult.Id, n8nThumbnailUploadResult.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to convert or upload base64 thumbnail for face {FaceId}.", faceResult.Id);
+                    }
+                }
+
+
                 var detectedFaceDto = new DetectedFaceDto
                 {
                     Id = Guid.NewGuid().ToString(), // Generate a unique ID for each detected face
@@ -43,7 +112,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         Height = faceResult.BoundingBox.Height
                     },
                     Confidence = faceResult.Confidence,
-                    Thumbnail = faceResult.Thumbnail,
+                    Thumbnail = thumbnailUrl, // Use the public URL
                     Embedding = faceResult.Embedding?.ToList(),
                     MemberId = null,
                     MemberName = null,
@@ -118,6 +187,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             return Result<FaceDetectionResponseDto>.Success(new FaceDetectionResponseDto
             {
                 ImageId = imageId,
+                OriginalImageUrl = originalImageUrl, // Populate the OriginalImageUrl
                 DetectedFaces = detectedFaceDtos
             });
         }
@@ -126,5 +196,16 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             _logger.LogError(ex, "An unexpected error occurred during face detection.");
             return Result<FaceDetectionResponseDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
+    }
+
+    private byte[] ConvertBase64ToBytes(string base64String)
+    {
+        // Remove "data:image/jpeg;base64," or "data:image/png;base64," prefix if present
+        var base64Data = Regex.Match(base64String, @"data:image/(?<type>.+?);base64,(?<data>.+)").Groups["data"].Value;
+        if (string.IsNullOrEmpty(base64Data))
+        {
+            base64Data = base64String; // Fallback if no prefix or not an image data URI
+        }
+        return Convert.FromBase64String(base64Data);
     }
 }
