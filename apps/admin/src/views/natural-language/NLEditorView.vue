@@ -13,7 +13,7 @@ import { onMounted } from 'vue';
 import ParsedDataList from '@/components/natural-language-input/ParsedDataList.vue';
 import NLEditorInput from '@/components/natural-language-input/NLEditorInput.vue';
 import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store';
-import type { MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/natural-language.d'; // Add RelationshipDataDto
+import type { MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/ai/analyzed-data'; // Add RelationshipDataDto
 import i18n from '@/plugins/i18n';
 
 const props = defineProps<{

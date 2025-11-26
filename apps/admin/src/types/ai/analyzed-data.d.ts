@@ -1,5 +1,5 @@
-import type { EventType } from './event';
-import type { RelationshipType } from './relationship';
+import type { EventType } from '../event'; // Adjusted import path
+import type { RelationshipType } from '../relationship'; // Adjusted import path
 
 export interface AnalyzedDataDto {
   members: MemberDataDto[];

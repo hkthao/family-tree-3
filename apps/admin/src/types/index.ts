@@ -16,4 +16,5 @@ export * from './chat.d';
 export * from './api-error.d';
 export * from './memory.d'; // Added new memory types
 export * from './biography.d'; // NEW EXPORT
-export * from './natural-language.d'; // NEW EXPORT
+export * from './ai/analyzed-data.d'; // NEW EXPORT
+export type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from './ai/analyzed-data';
