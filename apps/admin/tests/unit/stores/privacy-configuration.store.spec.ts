@@ -12,15 +12,10 @@ const mockUpdatePrivacyConfiguration = vi.fn();
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    privacyConfiguration: {
-      get: mockGetPrivacyConfiguration,
-      update: mockUpdatePrivacyConfiguration,
+    family: {
+      getPrivacyConfiguration: mockGetPrivacyConfiguration,
+      updatePrivacyConfiguration: mockUpdatePrivacyConfiguration,
     },
-    // Add other services as empty objects
-    ai: {}, auth: {}, chat: {}, event: {}, face: {}, family: {},
-    member: {}, naturalLanguageInput: {}, notification: {}, relationship: {},
-    systemConfig: {}, userActivity: {}, userPreference: {}, userProfile: {},
-    userSettings: {}, familyDict: {}, familyData: {}, familyLookup: {}, eventCalendar: {}, eventTimeline: {}, memberLookup: {}, nlEditor: {},
   })),
 }));
 

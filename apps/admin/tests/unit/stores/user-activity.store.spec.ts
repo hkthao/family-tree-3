@@ -13,26 +13,9 @@ const mockGetRecentActivities = vi.fn();
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    userActivity: {
+    user: {
       getRecentActivities: mockGetRecentActivities,
     },
-    // Add other services as empty objects if they are not directly used by userActivity.store
-    ai: {},
-    auth: {},
-    chat: {},
-    dashboard: {},
-    event: {},
-    face: {},
-    family: {},
-    fileUpload: {},
-    member: {},
-    naturalLanguageInput: {},
-    notification: {},
-    relationship: {},
-    systemConfig: {},
-    userPreference: {},
-    userProfile: {},
-    userSettings: {},
   })),
 }));
 

@@ -20,27 +20,9 @@ vi.mock('@/services/service.factory', () => ({
       getById: mockGetById,
       updateMemberBiography: mockUpdateMemberBiography,
     },
-    aiBiography: {
-      generateBiography: mockGenerateBiography,
-    },
-    // Add other services as empty objects if they are not directly used by ai-biography.store
-    ai: {},
-    auth: {},
-    chat: {},
-    dashboard: {},
-    event: {},
-    face: {},
-    faceMember: {},
-    family: {},
-    fileUpload: {},
-    naturalLanguageInput: {},
-    notification: {},
-    relationship: {},
-    systemConfig: {},
-    userActivity: {},
-    userPreference: {},
-    userProfile: {},
-    userSettings: {},
+        ai: {
+          generateBiography: mockGenerateBiography,
+        },
   })),
 }));
 

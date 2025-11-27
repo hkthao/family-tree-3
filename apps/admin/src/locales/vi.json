@@ -995,6 +995,7 @@
 
   "memory.create.aiEmotionContextSuggestion.title": "Cảm nhận được cảm xúc và bối cảnh gì?",
 
+  "memory.create.storyStyle": "Phong cách câu chuyện",
   "memory.create.storyStyle.question": "Bạn muốn câu chuyện được viết theo phong cách nào?",
   "memory.create.aiEmotionContextSuggestion.suggestion1": "Nụ cười hạnh phúc 😊",
   "memory.create.aiEmotionContextSuggestion.suggestion2": "Không khí gia đình ấm cúng",

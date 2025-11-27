@@ -13,27 +13,10 @@ const mockUpdateUserProfile = vi.fn();
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    userProfile: {
+    user: {
       getCurrentUserProfile: mockGetCurrentUserProfile,
       updateUserProfile: mockUpdateUserProfile,
     },
-    // Add other services as empty objects if they are not directly used by user-profile.store
-    ai: {},
-    auth: {},
-    chat: {},
-    dashboard: {},
-    event: {},
-    face: {},
-    family: {},
-    fileUpload: {},
-    member: {},
-    naturalLanguageInput: {},
-    notification: {},
-    relationship: {},
-    systemConfig: {},
-    userActivity: {},
-    userPreference: {},
-    userSettings: {},
   })),
 }));
 

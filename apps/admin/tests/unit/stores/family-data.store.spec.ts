@@ -14,15 +14,15 @@ const mockImportFamilyData = vi.fn();
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    familyData: {
+    family: {
       exportFamilyData: mockExportFamilyData,
       importFamilyData: mockImportFamilyData,
     },
     // Add other services as empty objects
-    ai: {}, auth: {}, chat: {}, event: {}, face: {}, family: {},
+    ai: {}, auth: {}, chat: {}, event: {}, face: {},
     member: {}, naturalLanguageInput: {}, notification: {}, relationship: {},
     systemConfig: {}, userActivity: {}, userPreference: {}, userProfile: {},
-    userSettings: {}, familyDict: {},
+    userSettings: {}, familyDict: {}, fileUpload: {},
   })),
 }));
 
@@ -30,7 +30,11 @@ vi.mock('@/services/service.factory', () => ({
 vi.mock('@/plugins/i18n', () => ({
   default: {
     global: {
-      t: vi.fn((key) => key),
+      t: vi.fn((key) => {
+        if (key === 'family.errors.export') return 'Failed to export family data.';
+        if (key === 'family.errors.import') return 'Failed to import family data.';
+        return key;
+      }),
     },
   },
 }));
@@ -67,14 +71,7 @@ describe('family-data.store', () => {
     }
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(vi.fn());
 
-    // Mock i18n
-    vi.mock('@/plugins/i18n', () => ({
-      default: {
-        global: {
-          t: vi.fn((key) => key), // Mock the translation function to return the key itself
-        },
-      },
-    }));
+
   });
 
   const mockFamilyExportDto: FamilyExportDto = {

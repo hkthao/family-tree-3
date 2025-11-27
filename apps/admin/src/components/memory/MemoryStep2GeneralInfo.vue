@@ -1,14 +1,15 @@
 <template>
   <v-form ref="formStep2">
     <v-row>
-      <v-col cols="12">
-        <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
-          <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
+          <v-col v-for="face in internalMemory.faces" :key="face.id" cols="12" sm="6">
             <v-card variant="tonal" class="pa-2 position-relative">
               <v-btn icon="mdi-close-circle" variant="text" class="remove-face-button"
                 @click="handleRemoveFace(face.id)" :disabled="readonly"></v-btn>
-              <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px" contain></v-img>
+              <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px"
+                contain></v-img>
               <MemberAutocomplete :model-value="face.memberId"
                 @update:model-value="(newValue) => handleMemberIdUpdate(face.id, newValue)"
                 :label="t('member.form.member')">
@@ -21,70 +22,51 @@
         <p v-else class="text-body-2 text-grey">{{ t('memory.create.aiCharacterSuggestion.noFacesDetected') }}</p>
       </v-col>
 
-      <v-col cols="12">
+      <!-- Photo Analysis Results & AI Suggestion Disclaimer - NOT in expansion panel -->
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.photoAnalysisResult.title') }}</h4>
         <v-alert type="info" variant="tonal" class="mb-4" icon="mdi-robot-outline">
           {{ t('memory.create.aiSuggestionDisclaimer') }}
           <template v-slot:append>
             <v-btn v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0" color="primary"
-              prepend-icon="mdi-lightbulb-on-outline" variant="text" @click="triggerAiAnalysis" :loading="isAnalyzingAi"
-              :disabled="isAnalyzingAi">
+              prepend-icon="mdi-lightbulb-on-outline" variant="text" @click="triggerAiAnalysis"
+              :loading="isAnalyzingAi" :disabled="isAnalyzingAi">
               {{ t('memory.create.analyzePhotoWithAi') }}
             </v-btn>
           </template>
         </v-alert>
 
-        <!-- New: Photo Analysis Results Display -->
         <div v-if="internalMemory.photoAnalysisResult">
-          <h4>{{ t('memory.create.photoAnalysisResult.title') }}</h4>
-          <v-chip-group column>
-            <v-chip v-if="internalMemory.photoAnalysisResult.summary" class="mb-1">
+          <div>
+            <p v-if="internalMemory.photoAnalysisResult.summary" class="mb-1">
               {{ t('memory.create.photoAnalysisResult.summary') }}: {{ internalMemory.photoAnalysisResult.summary }}
-            </v-chip>
-            <v-chip v-if="internalMemory.photoAnalysisResult.scene" class="mb-1">
+            </p>
+            <p v-if="internalMemory.photoAnalysisResult.scene" class="mb-1">
               {{ t('memory.create.photoAnalysisResult.scene') }}: {{ internalMemory.photoAnalysisResult.scene }}
-            </v-chip>
-            <v-chip v-if="internalMemory.photoAnalysisResult.event" class="mb-1">
-              {{ t('memory.create.photoAnalysisResult.eventAnalysis') }}: {{ internalMemory.photoAnalysisResult.event }}
-            </v-chip>
-            <v-chip v-if="internalMemory.photoAnalysisResult.emotion" class="mb-1">
+            </p>
+            <p v-if="internalMemory.photoAnalysisResult.event" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.eventAnalysis') }}: {{
+                internalMemory.photoAnalysisResult.event }}
+            </p>
+            <p v-if="internalMemory.photoAnalysisResult.emotion" class="mb-1">
               {{ t('memory.create.photoAnalysisResult.emotionAnalysis') }}: {{
                 internalMemory.photoAnalysisResult.emotion }}
-            </v-chip>
-            <v-chip v-if="internalMemory.photoAnalysisResult.yearEstimate" class="mb-1">
+            </p>
+            <p v-if="internalMemory.photoAnalysisResult.yearEstimate" class="mb-1">
               {{ t('memory.create.photoAnalysisResult.yearEstimate') }}: {{
                 internalMemory.photoAnalysisResult.yearEstimate }}
-            </v-chip>
-
-            <!-- AI Suggestions -->
-            <div
-              v-if="internalMemory.photoAnalysisResult.suggestions?.scene && internalMemory.photoAnalysisResult.suggestions.scene.length > 0">
-              <v-chip class="mb-1">
-                {{ t('memory.create.photoAnalysisResult.sceneSuggestions') }}: {{
-                  internalMemory.photoAnalysisResult.suggestions.scene.join(', ') }}
-              </v-chip>
-            </div>
-            <div
-              v-if="internalMemory.photoAnalysisResult.suggestions?.event && internalMemory.photoAnalysisResult.suggestions.event.length > 0">
-              <v-chip class="mb-1">
-                {{ t('memory.create.photoAnalysisResult.eventSuggestions') }}: {{
-                  internalMemory.photoAnalysisResult.suggestions.event.join(', ') }}
-              </v-chip>
-            </div>
-            <div
-              v-if="internalMemory.photoAnalysisResult.suggestions?.emotion && internalMemory.photoAnalysisResult.suggestions.emotion.length > 0">
-              <v-chip class="mb-1">
-                {{ t('memory.create.photoAnalysisResult.emotionSuggestions') }}: {{
-                  internalMemory.photoAnalysisResult.suggestions.emotion.join(', ') }}
-              </v-chip>
-            </div>
-          </v-chip-group>
+            </p>
+          </div>
         </div>
         <p v-else-if="!internalMemory.photoAnalysisResult && (internalMemory.photoUrl || memoryStore.faceRecognition.uploadedImage)"
           class="text-body-2 text-grey mb-4">
           {{ t('memory.create.photoAnalysisResult.noResult') }}
         </p>
+      </v-col>
 
-        <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
+      <!-- AI Event Suggestion - NOT in expansion panel -->
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.aiEventSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.eventSuggestion"
           @update:model-value="(newValue) => updateMemory({ eventSuggestion: newValue })" color="primary" mandatory
           column :disabled="readonly">
@@ -100,8 +82,13 @@
         <v-text-field class="my-2" v-if="internalMemory.eventSuggestion === 'unsure'"
           :model-value="internalMemory.customEventDescription"
           @update:model-value="(newValue) => updateMemory({ customEventDescription: newValue })"
-          :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
-        <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
+          :label="t('memory.create.aiEventSuggestion.customDescription')" clearable
+          :readonly="readonly"></v-text-field>
+      </v-col>
+
+      <!-- AI Emotion Context Suggestion - NOT in expansion panel -->
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.emotionContextTags"
           @update:model-value="(newValue) => updateMemory({ emotionContextTags: newValue })" multiple filter
           color="primary" column :disabled="readonly">
@@ -113,20 +100,22 @@
         </v-chip-group>
       </v-col>
 
-      <v-col cols="12">
-        <v-textarea :model-value="internalMemory.rawInput" :rows="2"
+      <!-- Raw Input & Story Style - NOT in expansion panel -->
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.rawInputPlaceholder') }}</h4>
+        <v-textarea class="mt-3" :model-value="internalMemory.rawInput" :rows="2"
           @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
           :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
         <StoryStyleInput :model-value="internalMemory.storyStyle"
           @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" :readonly="readonly" />
       </v-col>
-      <!-- END NEW -->
 
-      <v-col cols="12">
-        <h4>{{ t('memory.create.perspective.question') }}</h4>
+      <!-- Perspective - NOT in expansion panel -->
+      <v-col cols="12" class="mb-4">
+        <h4 class="text-h6">{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective"
-          @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column
-          :disabled="readonly">
+          @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory
+          column :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
           </v-chip>
@@ -138,7 +127,6 @@
           </v-chip>
         </v-chip-group>
       </v-col>
-
     </v-row>
   </v-form>
 </template>

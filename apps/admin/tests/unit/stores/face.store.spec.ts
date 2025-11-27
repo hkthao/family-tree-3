@@ -10,6 +10,7 @@ import { createServices } from '@/services/service.factory';
 const mockDetect = vi.fn();
 const mockSaveLabels = vi.fn();
 const mockSearch = vi.fn();
+const mockDeleteFacesByMemberId = vi.fn(); // Add this mock function
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
@@ -18,6 +19,7 @@ vi.mock('@/services/service.factory', () => ({
       detect: mockDetect,
       saveLabels: mockSaveLabels,
       search: mockSearch,
+      deleteFacesByMemberId: mockDeleteFacesByMemberId, // Add this to the mock
     },
     // Add other services as empty objects if they are not directly used by face.store
     ai: {},
@@ -106,10 +108,11 @@ describe('face.store', () => {
     // Reset mocks before each test
     (store.services.face.detect as any).mockReset();
     (store.services.face.saveLabels as any).mockReset();
-
+    mockDeleteFacesByMemberId.mockReset(); // NEW
     // Set default mock resolved values on the injected service mocks
     (store.services.face.detect as any).mockResolvedValue(ok(mockFaceDetectionResult));
     (store.services.face.saveLabels as any).mockResolvedValue(ok(undefined));
+    mockDeleteFacesByMemberId.mockResolvedValue(ok(undefined)); // NEW
   });
 
   it('should have correct initial state', () => {
@@ -125,7 +128,7 @@ describe('face.store', () => {
   describe('detectFaces', () => {
     it('should detect faces successfully', async () => {
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
@@ -137,7 +140,7 @@ describe('face.store', () => {
       expect(store.detectedFaces[0].originalMemberId).toBeNull(); // New assertion
       expect(store.detectedFaces[0].status).toBe('unrecognized'); // New assertion
       expect(mockDetect).toHaveBeenCalledTimes(1);
-      expect(mockDetect).toHaveBeenCalledWith(file);
+      expect(mockDetect).toHaveBeenCalledWith(file, false);
     });
 
     it('should handle detect faces failure', async () => {
@@ -145,7 +148,7 @@ describe('face.store', () => {
       mockDetect.mockResolvedValue(err({ message: errorMessage } as ApiError));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
 
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
@@ -160,7 +163,7 @@ describe('face.store', () => {
       mockDetect.mockRejectedValue(new Error(errorMessage));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
 
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
