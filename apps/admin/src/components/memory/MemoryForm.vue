@@ -19,7 +19,13 @@
 
       <!-- Step 2 Content: General Information -->
       <v-stepper-window-item :value="2">
-        <MemoryStep2GeneralInfo ref="step2Ref" v-model="internalMemory" :readonly="readonly" :member-id="memberId" />
+        <MemoryStep2GeneralInfo
+          ref="step2Ref"
+          v-model="internalMemory"
+          :readonly="readonly"
+          :member-id="memberId"
+          @aiAnalysisCompleted="activeStep++"
+        />
       </v-stepper-window-item>
 
       <!-- Step 3 Content: Review & Save -->
@@ -34,13 +40,10 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory'; // Only MemoryDto needed
-import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // Only AiPhotoAnalysisInputDto needed
-import type { MemoryFaceState } from '@/stores/memory.store'; // NEW IMPORT
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
 import MemoryStep2GeneralInfo from './MemoryStep2GeneralInfo.vue';
 import MemoryStep3ReviewSave from './MemoryStep3ReviewSave.vue';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useMemoryStore } from '@/stores/memory.store'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -52,11 +55,10 @@ const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-const memoryStore = useMemoryStore(); // Initialize memory store
 const activeStep = ref(1);
 
 const step1Ref = ref<InstanceType<typeof MemoryStep1PhotoUpload> | null>(null);
-const step2Ref = ref<InstanceType<typeof MemoryStep2GeneralInfo> | null>(null);
+const step2Ref = ref<InstanceType<typeof MemoryStep2GeneralInfo> & { validate: () => Promise<boolean>, triggerAiAnalysis: () => Promise<void> } | null>(null);
 
 // Use a computed property for internal model to handle v-model
 const internalMemory = computed<MemoryDto>({
@@ -109,60 +111,6 @@ const validateStep = async (step: number) => {
   return true; // Step 3 (review) always valid for direct progression
 };
 
-// Helper function to build AiPhotoAnalysisInputDto
-const buildAiPhotoAnalysisInput = (
-  memory: MemoryDto,
-  faceRecognitionState: MemoryFaceState // Pass the entire faceRecognition state
-): AiPhotoAnalysisInputDto => {
-  const aiInput: AiPhotoAnalysisInputDto = {
-    imageUrl: faceRecognitionState.resizedImageUrl || memory.photoUrl, // Use resized URL if available
-    imageBase64: faceRecognitionState.resizedImageUrl ? undefined : memory.photo, // Use base64 only if no resized URL
-    imageSize: memory.imageSize || '512x512',
-    exif: memory.exifData,
-    targetFaceId: memory.targetFaceId,
-    targetFaceCropUrl: undefined, // Initialize as undefined
-
-    faces: memory.faces!.map(face => ({
-      faceId: face.id,
-      bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
-      emotionLocal: {
-        dominant: face.emotion || '',
-        confidence: face.emotionConfidence || 0,
-      },
-      quality: face.quality || 'unknown',
-    })),
-    memberInfo: undefined,
-    otherFacesSummary: [],
-  };
-
-  const targetMemberFace = memory.faces!.find(
-    (face) => face.id === aiInput.targetFaceId
-  );
-
-  if (targetMemberFace) {
-    aiInput.targetFaceCropUrl = targetMemberFace.thumbnail; // Assign the thumbnail URL if target face exists
-
-    if (targetMemberFace.memberId) {
-              aiInput.memberInfo = {
-                id: targetMemberFace.memberId,
-                name: targetMemberFace.memberName,
-                age: targetMemberFace.birthYear
-                  ? (targetMemberFace.deathYear
-                      ? targetMemberFace.deathYear - targetMemberFace.birthYear
-                      : new Date().getFullYear() - targetMemberFace.birthYear)
-                  : undefined,
-              };    }
-  }
-
-  aiInput.otherFacesSummary = memory.faces!
-    .filter(face => face.id !== aiInput.targetFaceId)
-    .map(face => ({
-      emotionLocal: face.emotion || '',
-    }));
-
-  return aiInput;
-};
-
 const nextStep = async () => {
   if (props.readonly) {
     activeStep.value++;
@@ -176,24 +124,9 @@ const nextStep = async () => {
     return; // Do not proceed if current step is not valid
   }
 
-  if (currentStep === 1) {
-    const aiInput = buildAiPhotoAnalysisInput(internalMemory.value, memoryStore.faceRecognition);
-    const aiResult = await memoryStore.services.ai.analyzePhoto({ Input: aiInput });
-
-    if (aiResult.ok) {
-      internalMemory.value.photoAnalysisResult = aiResult.value;
-      activeStep.value++; // Proceed to next step only on success
-    } else {
-      showSnackbar(
-        aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
-        'error'
-      );
-      // Do not proceed to next step
-    }
-  } else {
-    // For other steps, just advance
-    activeStep.value++;
-  }
+  // AI analysis is now optional and triggered manually in MemoryStep2GeneralInfo.
+  // We just advance if the current step (or prior steps) are valid.
+  activeStep.value++;
 };
 
 const prevStep = () => {
@@ -202,9 +135,8 @@ const prevStep = () => {
   }
 };
 
-// Expose validate function and selectedFiles to parent component
 defineExpose({
-  validateStep,
+  validateStep, // Re-expose validateStep
   activeStep,
   nextStep,
   prevStep,

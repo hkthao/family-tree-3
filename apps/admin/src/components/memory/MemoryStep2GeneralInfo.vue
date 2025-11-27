@@ -10,6 +10,27 @@
       </v-col>
 
       <v-col cols="12">
+        <v-alert
+          type="info"
+          variant="tonal"
+          class="mb-4"
+          icon="mdi-robot-outline"
+        >
+          {{ t('memory.create.aiSuggestionDisclaimer') }}
+        </v-alert>
+
+        <v-btn
+          v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0"
+          color="primary"
+          class="mb-4"
+          prepend-icon="mdi-brain"
+          @click="triggerAiAnalysis"
+          :loading="isAnalyzingAi"
+          :disabled="isAnalyzingAi"
+        >
+          {{ t('memory.create.analyzePhotoWithAi') }}
+        </v-btn>
+
         <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
@@ -77,7 +98,10 @@ import { ref, watch, computed, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
 import type { MemoryDto } from '@/types/memory';
-// import type { DetectedFace } from '@/types'; // Removed unused import
+import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // NEW IMPORT
+import type { MemoryFaceState } from '@/stores/memory.store'; // NEW IMPORT
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // NEW IMPORT
+import { useMemoryStore } from '@/stores/memory.store'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -85,10 +109,13 @@ const props = defineProps<{
   memberId?: string | null;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'aiAnalysisCompleted']); // NEW EMIT
 
 const { t } = useI18n();
+const { showSnackbar } = useGlobalSnackbar(); // NEW
+const memoryStore = useMemoryStore(); // NEW
 const formStep2 = ref<HTMLFormElement | null>(null);
+const isAnalyzingAi = ref(false); // NEW loading state
 
 const internalMemory = computed<MemoryDto>({
   get: () => {
@@ -108,11 +135,91 @@ const internalMemory = computed<MemoryDto>({
   set: (value: MemoryDto) => emit('update:modelValue', value),
 });
 
+// Helper function to build AiPhotoAnalysisInputDto
+const buildAiPhotoAnalysisInput = (
+  memory: MemoryDto,
+  faceRecognitionState: MemoryFaceState // Pass the entire faceRecognition state
+): AiPhotoAnalysisInputDto => {
+  const aiInput: AiPhotoAnalysisInputDto = {
+    imageUrl: faceRecognitionState.resizedImageUrl || memory.photoUrl, // Use resized URL if available
+    imageBase64: faceRecognitionState.resizedImageUrl ? undefined : memory.photo, // Use base64 only if no resized URL
+    imageSize: memory.imageSize || '512x512',
+    exif: memory.exifData,
+    targetFaceId: memory.targetFaceId,
+    targetFaceCropUrl: undefined, // Initialize as undefined
+
+    faces: memory.faces!.map(face => ({
+      faceId: face.id,
+      bbox: [face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height],
+      emotionLocal: {
+        dominant: face.emotion || '',
+        confidence: face.emotionConfidence || 0,
+      },
+      quality: face.quality || 'unknown',
+    })),
+    memberInfo: undefined,
+    otherFacesSummary: [],
+  };
+
+  const targetMemberFace = memory.faces!.find(
+    (face) => face.id === aiInput.targetFaceId
+  );
+
+  if (targetMemberFace) {
+    aiInput.targetFaceCropUrl = targetMemberFace.thumbnailUrl || targetMemberFace.thumbnail; // Assign the thumbnail URL if target face exists
+
+    if (targetMemberFace.memberId) {
+              aiInput.memberInfo = {
+                id: targetMemberFace.memberId,
+                name: targetMemberFace.memberName,
+                age: targetMemberFace.birthYear
+                  ? (targetMemberFace.deathYear
+                      ? targetMemberFace.deathYear - targetMemberFace.birthYear
+                      : new Date().getFullYear() - targetMemberFace.birthYear)
+                  : undefined,
+              };    }
+  }
+
+  aiInput.otherFacesSummary = memory.faces!
+    .filter(face => face.id !== aiInput.targetFaceId)
+    .map(face => ({
+      emotionLocal: face.emotion || '',
+    }));
+
+  return aiInput;
+};
+
 watch(() => props.memberId, (newMemberId) => {
   if (newMemberId && !internalMemory.value.memberId) {
     internalMemory.value.memberId = newMemberId;
   }
 }, { immediate: true });
+
+const triggerAiAnalysis = async () => {
+  if (props.readonly) return;
+
+  isAnalyzingAi.value = true;
+  try {
+    const aiInput = buildAiPhotoAnalysisInput(internalMemory.value, memoryStore.faceRecognition);
+    const aiResult = await memoryStore.services.ai.analyzePhoto({ Input: aiInput });
+
+    if (aiResult.ok) {
+      internalMemory.value.photoAnalysisResult = aiResult.value;
+      showSnackbar(t('memory.create.aiAnalysisSuccess'), 'success');
+      emit('aiAnalysisCompleted'); // Signal to parent that analysis is done
+    } else {
+      showSnackbar(
+        aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
+        'error'
+      );
+    }
+  } catch (error: any) {
+    showSnackbar(error.message || t('memory.errors.aiAnalysisFailed'), 'error');
+  } finally {
+    isAnalyzingAi.value = false;
+  }
+};
+
 
 // AI Event Suggestions (now derived from photoAnalysisResult or fallback)
 const aiEventSuggestions: ComputedRef<string[]> = computed(() => { // Explicitly typed
@@ -149,5 +256,6 @@ const validate = async () => {
 
 defineExpose({
   validate,
+  triggerAiAnalysis,
 });
 </script>

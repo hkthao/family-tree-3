@@ -1051,6 +1051,10 @@
   "memory.validation.noPhotoUploaded": "Vui lòng tải ảnh lên cho ký ức này.",
   "memory.validation.noFacesDetectedInPhoto": "Không tìm thấy khuôn mặt nào trong ảnh đã tải lên. Vui lòng tải ảnh có ít nhất một khuôn mặt.",
 
+  "memory.create.aiSuggestionDisclaimer": "Các gợi ý từ AI chỉ mang tính chất tham khảo, dựa trên phân tích hình ảnh bạn đã tải lên. Vui lòng xem xét và chỉnh sửa cho phù hợp.",
+  "memory.create.analyzePhotoWithAi": "Xem gợi ý từ AI",
+  "memory.create.aiAnalysisSuccess": "Phân tích ảnh bằng AI thành công!",
+
   "memory.style.nostalgic": "Hoài niệm",
   "memory.style.warm": "Ấm áp",
   "memory.style.formal": "Trang trọng",
