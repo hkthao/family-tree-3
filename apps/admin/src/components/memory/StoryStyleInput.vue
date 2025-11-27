@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h4 class="mt-4">{{ t('memory.create.storyStyle.question') }}</h4>
+    <h4 class="mt-2">{{ t('memory.create.storyStyle.question') }}</h4>
     <v-chip-group
       :model-value="modelValue"
       @update:model-value="(newValue) => emit('update:modelValue', newValue)"

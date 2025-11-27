@@ -18,16 +18,10 @@
             selectable @face-selected="openSelectMemberDialog" />
           <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
-
-          <!-- Target Member Selection -->
-          <v-card flat>
-            <v-card-title>{{ t('memory.create.selectTargetMember') }}</v-card-title>
-            <v-card-text>
-              <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
-                <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
-              </v-chip-group>
-            </v-card-text>
-          </v-card>
+          <h4>{{ t('memory.create.selectTargetMember') }}</h4>
+          <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
+            <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
+          </v-chip-group>
         </div>
         <v-alert v-else-if="!memoryStore.faceRecognition.loading && !memoryStore.faceRecognition.uploadedImage"
           type="info">{{
@@ -41,8 +35,8 @@
     <!-- Raw Input & Story Style -->
     <v-row>
       <v-col cols="12">
-        <h4 class="text-h6">{{ t('memory.create.rawInputPlaceholder') }}</h4>
-        <v-textarea class="mt-3" :model-value="internalMemory.rawInput" :rows="2"
+        <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
+        <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
           @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
           :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
         <StoryStyleInput :model-value="internalMemory.storyStyle"
@@ -53,7 +47,7 @@
     <!-- Perspective -->
     <v-row>
       <v-col cols="12">
-        <h4 class="text-h6">{{ t('memory.create.perspective.question') }}</h4>
+        <h4>{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective"
           @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column
           :disabled="readonly">
@@ -73,7 +67,7 @@
     <!-- Title and Story -->
     <v-row>
       <v-col cols="12">
-        <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
+        <h4 class="text-h6 mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
         <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
         <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined
@@ -89,10 +83,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryDto, ExifDataDto } from '@/types/memory'; // Added ExifDataDto
+import type { MemoryDto, ExifDataDto } from '@/types/memory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-
-// NEW IMPORTS from MemoryStep1PhotoUpload.vue
 import { useMemoryStore } from '@/stores/memory.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace, Member } from '@/types';
@@ -103,40 +95,31 @@ import type { PhotoAnalysisPersonDto } from '@/types/ai';
 const props = defineProps<{
   modelValue: MemoryDto;
   readonly?: boolean;
-  memberId?: string | null; // Prop to potentially pre-fill memberId
-  familyId?: string; // Prop from MemoryStep1PhotoUpload
+  memberId?: string | null;
+  familyId?: string;
 }>();
-
-// Updated emit to include 'story-generated'
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
-
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-
-// REFS AND COMPUTED from MemoryStep1PhotoUpload.vue
 const memoryStore = useMemoryStore();
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null);
-
 const aiPerspectiveSuggestions = ref([
   { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
-
 const generatedStory = ref<string | null>(null);
 const generatedTitle = ref<string | null>(null);
 const generatingStory = ref(false);
 const storyEditorValid = ref(true);
-
 const canGenerateStory = computed(() => {
   return (internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10) ||
     (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
 });
 
-// FUNCTIONS from MemoryStep1PhotoUpload.vue
 const updateMemory = (payload: Partial<MemoryDto>) => {
   emit('update:modelValue', { ...internalMemory.value, ...payload });
 };
