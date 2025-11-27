@@ -62,6 +62,18 @@
       </v-col>
     </v-row>
 
+    <v-row v-if="hasUploadedImage && !isLoading">
+      <v-col cols="12">
+        <v-btn color="primary" :disabled="readonly || generatingStory || isLoading || !canGenerateStory"
+          :loading="generatingStory" @click="generateStory">
+          {{ t('memory.create.generateStoryButton') }}
+        </v-btn>
+        <v-alert type="info" class="mt-4">
+          {{ t('memory.create.aiConsentInfo') }}
+        </v-alert>
+      </v-col>
+    </v-row>
+
     <!-- Title and Story -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
