@@ -2,35 +2,6 @@
   <v-form ref="formStep2">
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete 
-        :disabled="true"
-        class="mt-2" v-model="internalMemory.memberId" :label="t('member.form.member')"
-          :rules="readonly ? [] : [(v: string) => !!v || t('common.validations.required')]"
-          :readonly="readonly || !!memberId" required></MemberAutocomplete>
-      </v-col>
-
-      <v-col cols="12">
-        <v-alert
-          type="info"
-          variant="tonal"
-          class="mb-4"
-          icon="mdi-robot-outline"
-        >
-          {{ t('memory.create.aiSuggestionDisclaimer') }}
-        </v-alert>
-
-        <v-btn
-          v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0"
-          color="primary"
-          class="mb-4"
-          prepend-icon="mdi-brain"
-          @click="triggerAiAnalysis"
-          :loading="isAnalyzingAi"
-          :disabled="isAnalyzingAi"
-        >
-          {{ t('memory.create.analyzePhotoWithAi') }}
-        </v-btn>
-
         <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
@@ -47,6 +18,27 @@
       </v-col>
 
       <v-col cols="12">
+           <v-alert
+          type="info"
+          variant="tonal"
+          class="mb-4"
+          icon="mdi-robot-outline"
+        >
+          {{ t('memory.create.aiSuggestionDisclaimer') }}
+            <template v-slot:append>
+                <v-btn
+                  v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0"
+                  color="primary"
+                  icon="mdi-brain"
+                  variant="text"
+                  @click="triggerAiAnalysis"
+                  :loading="isAnalyzingAi"
+                  :disabled="isAnalyzingAi"
+                  :aria-label="t('memory.create.analyzePhotoWithAi')"
+                ></v-btn>
+            </template>
+        </v-alert>
+
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter variant="tonal">
@@ -56,7 +48,7 @@
             {{ t('memory.create.aiEventSuggestion.unsure') }}
           </v-chip>
         </v-chip-group>
-        <v-text-field class="mt-2" v-if="internalMemory.eventSuggestion === 'unsure'"
+        <v-text-field class="my-2" v-if="internalMemory.eventSuggestion === 'unsure'"
           v-model="internalMemory.customEventDescription"
           :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
         <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
