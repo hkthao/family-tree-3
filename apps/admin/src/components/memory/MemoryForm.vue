@@ -2,7 +2,7 @@
   <v-container>
     <!-- Photo Upload Input -->
     <v-row>
-      <v-col v-if="memoryStore.faceRecognition.loading" cols="12">
+      <v-col v-if="isLoading" cols="12">
         <v-progress-linear indeterminate color="primary"></v-progress-linear>
       </v-col>
       <v-col cols="12">
@@ -12,26 +12,26 @@
     <!-- Face Detection and Selection -->
     <v-row>
       <v-col cols="12">
-        <div v-if="hasUploadedImage && internalMemory.faces && internalMemory.faces.length > 0 && uploadedImageUrl">
-          <FaceBoundingBoxViewer :image-src="uploadedImageUrl" :faces="internalMemory.faces" selectable
-            @face-selected="openSelectMemberDialog" />
-          <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
-            @remove-face="handleRemoveFace" />
-          <h4>{{ t('memory.create.selectTargetMember') }}</h4>
-          <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
-            <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
-          </v-chip-group>
+        <div v-if="hasUploadedImage">
+          <div v-if="internalMemory.faces && internalMemory.faces.length > 0">
+            <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="internalMemory.faces" selectable
+              @face-selected="openSelectMemberDialog" />
+            <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
+              @remove-face="handleRemoveFace" />
+            <h4>{{ t('memory.create.selectTargetMember') }}</h4>
+            <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
+              <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
+            </v-chip-group>
+          </div>
+          <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
         </div>
-        <v-alert v-else-if="!memoryStore.faceRecognition.loading && !hasUploadedImage" type="info">{{
+        <v-alert v-else type="info">{{
           t('face.recognition.uploadPrompt') }}</v-alert>
-        <v-alert
-          v-else-if="!memoryStore.faceRecognition.loading && hasUploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0"
-          type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
       </v-col>
     </v-row>
 
     <!-- Raw Input & Story Style -->
-    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
+    <v-row v-if="hasUploadedImage">
       <v-col cols="12">
         <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
         <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
@@ -43,7 +43,7 @@
     </v-row>
 
     <!-- Perspective -->
-    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
+    <v-row v-if="hasUploadedImage">
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective"
@@ -63,7 +63,7 @@
     </v-row>
 
     <!-- Title and Story -->
-    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
+    <v-row v-if="hasUploadedImage">
       <v-col cols="12">
         <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
         <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
@@ -115,6 +115,7 @@ const generatedTitle = ref<string | null>(null);
 const generatingStory = ref(false);
 const storyEditorValid = ref(true);
 const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
+const isLoading = computed(() => memoryStore.faceRecognition.loading);
 const canGenerateStory = computed(() => {
   return (internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10) ||
     (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
@@ -237,7 +238,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
         selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
       }
 
-    } else if (!memoryStore.faceRecognition.loading && uploadedImageUrl.value && memoryStore.faceRecognition.detectedFaces.length === 0) {
+    } else if (!isLoading && uploadedImageUrl.value && memoryStore.faceRecognition.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
       updateMemory({
         faces: [],
@@ -291,7 +292,7 @@ const handleRemoveFace = (faceId: string) => {
 };
 
 defineExpose({
-  isValid: computed(() => !memoryStore.faceRecognition.loading),
+  isValid: computed(() => !isLoading.value),
   memoryFaceStore: memoryStore.faceRecognition,
   faceUploadInputRef,
   selectedTargetMemberFaceId,
