@@ -25,23 +25,7 @@
         'face-item--newly-labeled': face.status === 'newly-labeled',
         'face-item--selected': face.id === selectedFaceId,
       }" @click="$emit('face-selected', face.id)">
-        <template v-slot:prepend>
-          <v-avatar size="40" rounded="sm">
-            <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
-          </v-avatar>
-        </template>
-        <v-list-item-title>
-          <span v-if="face.memberId">{{ face.memberName }}</span>
-          <span v-else>{{ t('face.sidebar.unlabeled') }}</span>
-        </v-list-item-title>
-        <v-list-item-subtitle v-if="face.memberId">
-          <div class="text-caption text-medium-emphasis">{{ face.familyName }}</div>
-          <div class="text-caption text-medium-emphasis">
-            <span v-if="face.birthYear">{{ face.birthYear }}</span>
-            <span v-if="face.birthYear && face.deathYear"> - </span>
-            <span v-if="face.deathYear">{{ face.deathYear }}</span>
-          </div>
-        </v-list-item-subtitle>
+        <MemberFaceDisplay :face="face" />
         <template v-slot:append>
           <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
           <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
@@ -61,7 +45,8 @@
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
 import { type PropType, computed } from 'vue';
-import { createBase64ImageSrc } from '@/utils/image.utils'; // NEW IMPORT
+// import { createBase64ImageSrc } from '@/utils/image.utils'; // Removed
+import MemberFaceDisplay from '../common/MemberFaceDisplay.vue'; // NEW IMPORT
 
 const { t } = useI18n();
 

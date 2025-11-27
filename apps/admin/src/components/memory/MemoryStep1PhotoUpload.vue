@@ -21,14 +21,8 @@
             <v-card-title>{{ t('memory.create.selectTargetMember') }}</v-card-title>
             <v-card-text>
               <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
-                <v-chip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id" :value="face.id"
-                  variant="outlined" color="primary" filter>
-                  <v-avatar left>
-                    <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
-                  </v-avatar>
-                  <span class="ml-2">{{ face.memberName || t('common.unknown') }}</span>
-                  <v-chip v-if="face.emotion"  class="ml-2">{{ face.emotion }}</v-chip>
-                </v-chip>
+                <MemberFaceChip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id"
+                  :face="face" :value="face.id" />
               </v-chip-group>
             </v-card-text>
           </v-card>
@@ -53,7 +47,8 @@ import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMembe
 import type { MemoryDto, ExifDataDto } from '@/types/memory'; // Added ExifDataDto
 import type { DetectedFace, Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { createBase64ImageSrc } from '@/utils/image.utils'; // NEW IMPORT
+// import { createBase64ImageSrc } from '@/utils/image.utils'; // Removed
+import MemberFaceChip from '../common/MemberFaceChip.vue'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;
