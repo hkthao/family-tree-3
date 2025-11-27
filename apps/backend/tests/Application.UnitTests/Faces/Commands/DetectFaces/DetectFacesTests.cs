@@ -76,7 +76,7 @@ public class DetectFacesTests : TestBase
         var detectedFace = result.Value.DetectedFaces.First();
         detectedFace.BoundingBox.X.Should().Be(1);
         detectedFace.Confidence.Should().Be(0.9f);
-        detectedFace.Thumbnail.Should().Be("http://mock.image.url/face1_thumbnail.jpeg");
+        detectedFace.ThumbnailUrl.Should().Be("http://mock.image.url/face1_thumbnail.jpeg");
         detectedFace.Embedding.Should().NotBeNull().And.HaveCount(2);
         detectedFace.MemberId.Should().BeNull();
     }

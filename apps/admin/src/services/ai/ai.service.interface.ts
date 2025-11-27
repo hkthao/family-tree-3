@@ -2,7 +2,7 @@
 
 import type { Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai';
+import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/ai/analyzed-data'; // NEW IMPORT
 
@@ -16,4 +16,5 @@ export interface IAiService {
     language?: string,
   ): Promise<Result<BiographyResultDto, ApiError>>;
   analyzeContent(content: string, sessionId: string, familyId: string): Promise<Result<AnalyzedDataDto, ApiError>>; // UPDATED METHOD SIGNATURE
+  generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>>;
 }

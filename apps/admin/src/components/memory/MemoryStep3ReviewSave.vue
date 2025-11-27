@@ -135,7 +135,6 @@ const generateStory = async () => {
 
   const requestPayload = {
     memberId: internalMemory.value.memberId,
-    photoAnalysisId: memoryStore.faceRecognition.uploadedImageId,
     rawText: internalMemory.value.rawInput,
     style: internalMemory.value.storyStyle,
     maxWords: 500, // Hardcoded for now

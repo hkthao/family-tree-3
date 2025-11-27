@@ -69,3 +69,37 @@ export interface PhotoAnalysisPersonDto {
   confidence?: number;
   relationPrompt?: string; // NEW PROPERTY
 }
+
+export interface GenerateStoryCommand {
+  memberId?: string | null;
+  rawText?: string;
+  style?: string; // e.g., nostalgic|warm|formal|folk
+  perspective?: string;
+  event?: string;
+  customEventDescription?: string;
+  emotionContexts?: string[];
+
+  // Granular properties from PhotoAnalysisResultDto
+  photoSummary?: string;
+  photoScene?: string;
+  photoEventAnalysis?: string;
+  photoEmotionAnalysis?: string;
+  photoYearEstimate?: string;
+  photoObjects?: string[];
+  photoPersons?: PhotoAnalysisPersonDto[];
+
+  maxWords?: number;
+}
+
+export interface GenerateStoryResponseDto {
+  title: string;
+  draftStory: string;
+  tags: string[];
+  keywords: string[];
+  timeline: TimelineEntryDto[];
+}
+
+export interface TimelineEntryDto {
+  year: number;
+  event: string;
+}

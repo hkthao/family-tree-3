@@ -3,7 +3,7 @@
 import type { IAiService } from './ai.service.interface';
 import type { ApiClientMethods, ApiError } from '@/plugins/axios';
 import type { Result } from '@/types'; // Still need Result type
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai';
+import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/ai/analyzed-data'; // NEW IMPORT
 
@@ -36,5 +36,9 @@ export class ApiAiService implements IAiService {
 
   async analyzeContent(content: string, sessionId: string, familyId: string): Promise<Result<AnalyzedDataDto, ApiError>> { // UPDATED METHOD SIGNATURE
     return this.apiClient.post<AnalyzedDataDto>(`${AI_BASE_URL}/analyze-natural-language`, { content, sessionId, familyId }); // UPDATED
+  }
+
+  async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {
+    return this.apiClient.post<GenerateStoryResponseDto>(`${AI_BASE_URL}/generate-story`, command);
   }
 }

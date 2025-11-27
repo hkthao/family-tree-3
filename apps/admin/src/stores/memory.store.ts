@@ -2,7 +2,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { DetectedFace, SearchResult, Member, Result } from '@/types'; // Removed Paginated
 import type { MemoryDto } from '@/types/memory';
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
+import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { MemoryFilter } from '@/services/memory/memory.service.interface';
@@ -258,12 +258,21 @@ export const useMemoryStore = defineStore('memory', {
       }
     },
 
-    async generateStory(command: any): Promise<Result<any, ApiError>> {
-      this.list.loading = true; // Use list loading for now
+    async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {
+      this.aiAnalysis.loading = true; // Use aiAnalysis loading for AI operations
       this.error = null;
-      const result = await this.services.memory.generateStory(command);
-      this.list.loading = false;
-      return result;
+      try {
+        const result = await this.services.ai.generateStory(command);
+        if (!result.ok) {
+          this.error = result.error?.message || i18n.global.t('memory.errors.storyGenerationFailed');
+        }
+        return result;
+      } catch (error: any) {
+        this.error = error.message || i18n.global.t('memory.errors.unexpectedError');
+        return { ok: false, error: { message: this.error } as ApiError };
+      } finally {
+        this.aiAnalysis.loading = false;
+      }
     },
 
     // Actions for Face Recognition

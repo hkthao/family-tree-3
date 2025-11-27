@@ -4,6 +4,8 @@ using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
 using backend.Application.AI.DTOs; // UPDATED IMPORT
 using backend.Application.AI.Models; // NEW IMPORT
+using backend.Application.Memories.Commands.GenerateStory;
+using backend.Application.Memories.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -67,6 +69,18 @@ public class AIController : ControllerBase
     /// <returns>Kết quả phân tích văn bản.</returns>
     [HttpPost("analyze-natural-language")]
     public async Task<ActionResult<AnalyzedResultDto>> AnalyzeNaturalLanguage([FromBody] AnalyzeNaturalLanguageCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Tạo câu chuyện bằng AI.
+    /// </summary>
+    /// <param name="command">Lệnh chứa thông tin cần thiết để tạo câu chuyện.</param>
+    /// <returns>Câu chuyện đã tạo.</returns>
+    [HttpPost("generate-story")]
+    public async Task<ActionResult<GenerateStoryResponseDto>> GenerateStory([FromBody] GenerateStoryCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
