@@ -57,6 +57,7 @@ const editedMemory = ref<MemoryDto>({
   title: '',
   rawInput: undefined, // Changed from story to rawInput and made optional
   story: undefined, // Added new field
+  storyStyle: 'nostalgic', // NEW: Initialize storyStyle
   photoAnalysisId: undefined,
   photoUrl: undefined, // This will temporarily hold a file name if files are selected
   tags: [],

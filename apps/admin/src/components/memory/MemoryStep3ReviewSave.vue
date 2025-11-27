@@ -46,7 +46,7 @@
           internalMemory.customEmotionContext }}
       </p>
       <p class="mb-4" v-if="internalMemory.perspective">
-        <strong>{{ t('memory.create.perspective.title') }}:</strong>
+        <strong>{{ t('memory.create.perspective.question') }}:</strong>
         {{ aiPerspectiveSuggestions.find(p => p.value === internalMemory.perspective)?.text || internalMemory.perspective }}
       </p>
     </v-col>
@@ -55,7 +55,7 @@
     <v-col cols="12" class="mb-4">
       <h4 class="mb-2">{{ t('memory.create.step3.rawTextInput') }}</h4>
       <p class="mb-1"><strong>{{ t('memory.create.rawInputPlaceholder') }}:</strong> {{ internalMemory.rawInput || t('common.na') }}</p>
-      <p class="mb-1"><strong>{{ t('memory.create.step3.storyStyle') }}:</strong> {{ internalMemory.storyStyle || t('common.na') }}</p>
+      <p class="mb-1"><strong>{{ t('memory.create.storyStyle.question') }}:</strong> {{ internalMemory.storyStyle || t('common.na') }}</p>
     </v-col>
 
     <!-- Generate Story Button -->

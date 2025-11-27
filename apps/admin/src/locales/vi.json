@@ -992,8 +992,11 @@
   "memory.create.perspective.firstPerson": "Từ góc nhìn của người tạo (ngôi thứ nhất)",
   "memory.create.perspective.neutralPersonal": "Trung lập nhưng mang cảm xúc cá nhân",
   "memory.create.perspective.fullyNeutral": "Trung lập hoàn toàn",
+  "memory.create.perspective.question": "Bạn muốn câu chuyện được kể theo góc nhìn nào?",
 
   "memory.create.aiEmotionContextSuggestion.title": "Cảm nhận được cảm xúc và bối cảnh gì?",
+
+  "memory.create.storyStyle.question": "Bạn muốn câu chuyện được viết theo phong cách nào?",
   "memory.create.aiEmotionContextSuggestion.suggestion1": "Nụ cười hạnh phúc 😊",
   "memory.create.aiEmotionContextSuggestion.suggestion2": "Không khí gia đình ấm cúng",
   "memory.create.aiEmotionContextSuggestion.suggestion3": "Ảnh chụp trong phòng khách cũ",

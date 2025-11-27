@@ -63,13 +63,32 @@
         </v-chip-group>
       </v-col>
 
+      <v-col cols="12">
+        <v-textarea
+          v-model="internalMemory.rawInput"
+          :label="t('memory.create.rawInputPlaceholder')"
+          :readonly="readonly"
+          outlined
+          rows="5"
+          auto-grow
+        ></v-textarea>
+        <h4 class="mt-4">{{ t('memory.create.storyStyle.question') }}</h4>
+        <v-chip-group
+          v-model="internalMemory.storyStyle"
+          color="primary"
+          mandatory
+          column
+          :disabled="readonly"
+        >
+          <v-chip v-for="style in storyStyles" :key="style" :value="style" filter variant="tonal">
+            {{ t(`memory.style.${style}`) }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+      <!-- END NEW -->
 
       <v-col cols="12">
-        <v-textarea v-model="internalMemory.rawInput" :label="t('memory.create.rawInputPlaceholder')"
-          :readonly="readonly"></v-textarea>
-      </v-col>
-      <v-col cols="12">
-        <h4>{{ t('memory.create.perspective.title') }}</h4>
+        <h4>{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, perspective: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
@@ -82,9 +101,7 @@
           </v-chip>
         </v-chip-group>
       </v-col>
-      <v-col cols="12" v-if="internalMemory.story">
-        <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" readonly></v-textarea>
-      </v-col>
+
     </v-row>
   </v-form>
 </template>
@@ -294,6 +311,8 @@ const aiPerspectiveSuggestions = ref([
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
+
+const storyStyles = ['nostalgic', 'warm', 'formal', 'folk'];
 
 const validate = async () => {
   return formStep2.value ? (await formStep2.value.validate()).valid : false;
