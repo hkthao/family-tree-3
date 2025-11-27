@@ -7,7 +7,7 @@
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
             <v-card>
               <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px" contain></v-img>
-              <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">
+              <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" >
               </MemberAutocomplete>
               <v-text-field class="mt-2" v-model="face.relationPrompt"
                 :label="t('memory.create.aiCharacterSuggestion.relationPrompt')" :readonly="readonly"></v-text-field>

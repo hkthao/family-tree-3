@@ -204,6 +204,8 @@ const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) =>
 
 const handleRemoveFace = (faceId: string) => {
   memoryStore.removeFace(faceId);
+  // Synchronize internalMemory.value.faces with the updated detectedFaces from the store
+  internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
   // If the removed face was the main character, clear selection
   if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
     selectedTargetMemberFaceId.value = null;

@@ -17,7 +17,11 @@
     <v-btn v-if="memoryFormValidAndLoaded && currentStep > 1 && !isSaving" color="blue-darken-1" variant="text" @click="memoryFormRef?.prevStep()">
       {{ t('common.back') }}
     </v-btn>
-    <v-btn v-if="memoryFormValidAndLoaded && currentStep < 3" color="blue-darken-1" variant="text" @click="memoryFormRef?.nextStep()" :loading="isSaving">
+    <v-btn v-if="memoryFormValidAndLoaded && currentStep < 3"
+      color="blue-darken-1" variant="text"
+      @click="memoryFormRef?.nextStep()"
+      :loading="isSaving || (currentStep === 1 && isStep1Processing)"
+      :disabled="isSaving || (currentStep === 1 && isStep1Processing)">
       {{ t('common.next') }}
     </v-btn>
     <v-btn v-else color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
@@ -71,6 +75,13 @@ const currentStep = computed(() => memoryFormRef.value?.activeStep ?? 1);
 
 // Computed property to check if memoryFormRef is loaded and valid
 const memoryFormValidAndLoaded = computed(() => memoryFormRef.value !== null);
+
+// NEW: Computed property to check if Step 1 (Photo Upload) is currently processing
+const isStep1Processing = computed(() => {
+  // Access the isValid property exposed by MemoryStep1PhotoUpload
+  // If step1Ref is null, assume not processing
+  return currentStep.value === 1 && memoryFormRef.value?.step1Ref?.isValid === false;
+});
 
 // Watch for changes in memberId prop to update editedMemory
 watch(() => props.memberId, (newMemberId) => {
