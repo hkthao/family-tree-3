@@ -72,18 +72,7 @@
           rows="5"
           auto-grow
         ></v-textarea>
-        <h4 class="mt-4">{{ t('memory.create.storyStyle.question') }}</h4>
-        <v-chip-group
-          v-model="internalMemory.storyStyle"
-          color="primary"
-          mandatory
-          column
-          :disabled="readonly"
-        >
-          <v-chip v-for="style in storyStyles" :key="style" :value="style" filter variant="tonal">
-            {{ t(`memory.style.${style}`) }}
-          </v-chip>
-        </v-chip-group>
+        <StoryStyleInput v-model="internalMemory.storyStyle" :readonly="readonly" />
       </v-col>
       <!-- END NEW -->
 
@@ -312,7 +301,8 @@ const aiPerspectiveSuggestions = ref([
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
 
-const storyStyles = ['nostalgic', 'warm', 'formal', 'folk'];
+// NEW: Import StoryStyleInput
+import StoryStyleInput from './StoryStyleInput.vue';
 
 const validate = async () => {
   return formStep2.value ? (await formStep2.value.validate()).valid : false;

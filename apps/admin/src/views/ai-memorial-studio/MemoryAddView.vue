@@ -55,7 +55,7 @@ const isSaving = ref(false); // To manage loading state for buttons
 const editedMemory = ref<MemoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
-  rawInput: undefined, // Changed from story to rawInput and made optional
+  rawInput: '', // Changed from undefined to ''
   story: undefined, // Added new field
   storyStyle: 'nostalgic', // NEW: Initialize storyStyle
   photoAnalysisId: undefined,
