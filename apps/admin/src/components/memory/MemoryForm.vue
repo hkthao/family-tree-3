@@ -73,9 +73,14 @@ const internalMemory = computed<MemoryDto>({
       ...model,
       title: model.title ?? null, // Default to null if undefined
       story: model.story ?? null, // Default to null if undefined
+      rawInput: model.rawInput ?? '', // Default to '' if undefined
+      storyStyle: model.storyStyle ?? 'nostalgic', // Default to 'nostalgic' if undefined
+      perspective: model.perspective ?? 'firstPerson', // Default to 'firstPerson' if undefined
+      eventSuggestion: model.eventSuggestion ?? null, // Default to null if undefined
+      customEventDescription: model.customEventDescription ?? null, // Default to null if undefined
+      emotionContextTags: model.emotionContextTags ?? [], // Default to [] if undefined
       // Ensure faces is an array to prevent .map() errors if it's null/undefined
       faces: model.faces ?? [],
-      emotionContextTags: model.emotionContextTags ?? [],
       // photoAnalysisResult can be null, so no need to default to a specific value other than null
     } as MemoryDto;
   },

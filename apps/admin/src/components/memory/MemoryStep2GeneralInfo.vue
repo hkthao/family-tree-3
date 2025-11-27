@@ -42,7 +42,7 @@
         </v-alert>
 
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
-        <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
+        <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => updateMemory({ eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter variant="tonal">
             <v-icon v-if="eventItem.isAi" size="small" start>mdi-robot-outline</v-icon>
             {{ eventItem.text }}
@@ -52,10 +52,11 @@
           </v-chip>
         </v-chip-group>
         <v-text-field class="my-2" v-if="internalMemory.eventSuggestion === 'unsure'"
-          v-model="internalMemory.customEventDescription"
+          :model-value="internalMemory.customEventDescription"
+          @update:model-value="(newValue) => updateMemory({ customEventDescription: newValue })"
           :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
         <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
-        <v-chip-group :model-value="internalMemory.emotionContextTags" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, emotionContextTags: newValue })" multiple filter color="primary" column :disabled="readonly">
+        <v-chip-group :model-value="internalMemory.emotionContextTags" @update:model-value="(newValue) => updateMemory({ emotionContextTags: newValue })" multiple filter color="primary" column :disabled="readonly">
           <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text" filter variant="tonal">
             <v-icon v-if="emotionItem.isAi" size="small" start>mdi-robot-outline</v-icon>
             {{ emotionItem.text }}
@@ -65,20 +66,25 @@
 
       <v-col cols="12">
         <v-textarea
-          v-model="internalMemory.rawInput"
+          :model-value="internalMemory.rawInput"
+          @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
           :label="t('memory.create.rawInputPlaceholder')"
           :readonly="readonly"
           outlined
           rows="5"
           auto-grow
         ></v-textarea>
-        <StoryStyleInput v-model="internalMemory.storyStyle" :readonly="readonly" />
+        <StoryStyleInput
+          :model-value="internalMemory.storyStyle"
+          @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })"
+          :readonly="readonly"
+        />
       </v-col>
       <!-- END NEW -->
 
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
-        <v-chip-group :model-value="internalMemory.perspective" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, perspective: newValue })" color="primary" mandatory column :disabled="readonly">
+        <v-chip-group :model-value="internalMemory.perspective" @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
           </v-chip>
@@ -120,6 +126,11 @@ const memoryStore = useMemoryStore(); // NEW
 const formStep2 = ref<HTMLFormElement | null>(null);
 const isAnalyzingAi = ref(false); // NEW loading state
 
+// Helper function to update the model and emit the change
+const updateMemory = (payload: Partial<MemoryDto>) => {
+  emit('update:modelValue', { ...internalMemory.value, ...payload });
+};
+
 interface SuggestionItem {
   text: string;
   isAi: boolean;
@@ -148,6 +159,7 @@ const internalMemory = computed<MemoryDto>({
       ...model,
       rawInput: model.rawInput ?? undefined,
       story: model.story ?? undefined,
+      storyStyle: model.storyStyle ?? 'nostalgic', // NEW: Include storyStyle and default
       eventSuggestion: model.eventSuggestion ?? undefined, // No longer reference aiEventSuggestions directly
       customEventDescription: model.customEventDescription ?? undefined,
       emotionContextTags: model.emotionContextTags ?? [],
