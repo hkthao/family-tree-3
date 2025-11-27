@@ -7,8 +7,8 @@
       <!-- Step 2: General Information -->
       <v-stepper-item :value="2" :title="t('memory.create.step2.title')" :complete="activeStep > 2"></v-stepper-item>
       <v-divider></v-divider>
-      <!-- Step 3: Review & Save -->
-      <v-stepper-item :value="3" :title="t('memory.create.step3.title')" :complete="activeStep > 3"></v-stepper-item>
+      <!-- Step 3: Review & Generate Story -->
+      <v-stepper-item :value="3" :title="t('memory.create.step5.reviewAndSave')" :complete="activeStep > 3"></v-stepper-item>
     </v-stepper-header>
 
     <v-stepper-window>
@@ -27,16 +27,21 @@
         />
       </v-stepper-window-item>
 
-      <!-- Step 3 Content: Review & Save -->
+      <!-- Step 3 Content: Review & Generate Story -->
       <v-stepper-window-item :value="3">
-        <MemoryStep3ReviewSave v-model="internalMemory" :readonly="readonly" />
+        <MemoryStep3ReviewSave
+          ref="step3Ref"
+          v-model="internalMemory"
+          :readonly="readonly"
+          @story-generated="handleStoryGenerated"
+        />
       </v-stepper-window-item>
     </v-stepper-window>
   </v-stepper>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory'; // Only MemoryDto needed
 import MemoryStep1PhotoUpload from './MemoryStep1PhotoUpload.vue';
@@ -58,6 +63,7 @@ const activeStep = ref(1);
 
 const step1Ref = ref<InstanceType<typeof MemoryStep1PhotoUpload> | null>(null);
 const step2Ref = ref<InstanceType<typeof MemoryStep2GeneralInfo> & { validate: () => Promise<boolean>, triggerAiAnalysis: () => Promise<void> } | null>(null);
+const step3Ref = ref<InstanceType<typeof MemoryStep3ReviewSave> & { generateStory: () => Promise<void>, generatedStory: Ref<string | null>, generatedTitle: Ref<string | null>, storyEditorValid: Ref<boolean> } | null>(null);
 
 // Use a computed property for internal model to handle v-model
 const internalMemory = computed<MemoryDto>({
@@ -65,6 +71,8 @@ const internalMemory = computed<MemoryDto>({
     const model = props.modelValue;
     return {
       ...model,
+      title: model.title ?? null, // Default to null if undefined
+      story: model.story ?? null, // Default to null if undefined
       // Ensure faces is an array to prevent .map() errors if it's null/undefined
       faces: model.faces ?? [],
       emotionContextTags: model.emotionContextTags ?? [],
@@ -80,6 +88,12 @@ watch(() => props.memberId, (newMemberId) => {
     internalMemory.value.memberId = newMemberId;
   }
 }, { immediate: true });
+
+const handleStoryGenerated = (payload: { story: string | null; title: string | null }) => {
+  internalMemory.value.story = payload.story;
+  internalMemory.value.title = payload.title;
+  // No automatic step advancement here, user clicks Next/Save
+};
 
 const validateStep = async (step: number) => {
   if (step === 1) {
@@ -106,13 +120,20 @@ const validateStep = async (step: number) => {
     return true; // All checks passed for step 1
   } else if (step === 2) {
     return step2Ref.value ? await step2Ref.value.validate() : false;
+  } else if (step === 3) { // NEW: Validate Step 3 (Review & Generate Story)
+    if (!internalMemory.value.story || internalMemory.value.story.trim() === '') {
+      showSnackbar(t('memory.validation.noStoryGenerated'), 'warning');
+      return false;
+    }
+    // If StoryEditor has internal validation, call it. For now, assume story generated is sufficient
+    return step3Ref.value ? await step3Ref.value.storyEditorValid.value : true;
   }
-  return true; // Step 3 (review) always valid for direct progression
+  return true; // Default to valid for other steps
 };
 
 const nextStep = async () => {
   if (props.readonly) {
-    activeStep.value++;
+    if (activeStep.value < 3) activeStep.value++; // Max step is 3 now
     return;
   }
 
@@ -123,9 +144,13 @@ const nextStep = async () => {
     return; // Do not proceed if current step is not valid
   }
 
-  // AI analysis is now optional and triggered manually in MemoryStep2GeneralInfo.
-  // We just advance if the current step (or prior steps) are valid.
-  activeStep.value++;
+  // Max step is 3 now
+  if (activeStep.value < 3) { // Only advance if not already at the last step
+    activeStep.value++;
+  } else {
+    // If at the last step (3) and valid, then trigger submit for parent to save
+    emit('submit');
+  }
 };
 
 const prevStep = () => {
@@ -140,6 +165,7 @@ defineExpose({
   nextStep,
   prevStep,
   step1Ref, // Expose step1Ref for direct access to its properties
+  step3Ref, // Expose step3Ref for direct access to its properties
 });
 </script>
 

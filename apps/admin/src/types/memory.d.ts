@@ -7,9 +7,10 @@ import type { PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
 export interface MemoryDto {
   id?: string; // Made optional to support new creation
   memberId: string | null;
-  title: string;
+  title?: string | null; // Allow null or undefined
   rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
-  story?: string; // New field for AI-generated story
+  story?: string | null; // Allow null or undefined
+  storyStyle?: string; // NEW: Added storyStyle property
   photoAnalysisId?: string | null;
   photoUrl?: string | null;
   photo?: string | null; // New field for temporary photo data (e.g., base64 string)
