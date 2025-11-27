@@ -12,7 +12,7 @@
     <!-- Face Detection and Selection -->
     <v-row>
       <v-col cols="12">
-        <div v-if="hasUploadedImage">
+        <div v-if="hasUploadedImage && !isLoading">
           <div v-if="internalMemory.faces && internalMemory.faces.length > 0">
             <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="internalMemory.faces" selectable
               @face-selected="openSelectMemberDialog" />
@@ -31,7 +31,7 @@
     </v-row>
 
     <!-- Raw Input & Story Style -->
-    <v-row v-if="hasUploadedImage">
+    <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
         <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
@@ -43,7 +43,7 @@
     </v-row>
 
     <!-- Perspective -->
-    <v-row v-if="hasUploadedImage">
+    <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective"
@@ -63,7 +63,7 @@
     </v-row>
 
     <!-- Title and Story -->
-    <v-row v-if="hasUploadedImage">
+    <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
         <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
@@ -204,8 +204,6 @@ const loadImage = (file: File): Promise<HTMLImageElement> => {
     img.src = URL.createObjectURL(file);
   });
 };
-
-
 
 const handleFileUpload = async (file: File | File[] | null) => {
   if (props.readonly) return;
