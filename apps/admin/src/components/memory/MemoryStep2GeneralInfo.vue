@@ -201,7 +201,8 @@ const triggerAiAnalysis = async () => {
     if (aiResult.ok) {
       internalMemory.value.photoAnalysisResult = aiResult.value;
       showSnackbar(t('memory.create.aiAnalysisSuccess'), 'success');
-      emit('aiAnalysisCompleted'); // Signal to parent that analysis is done
+      // Removed emit('aiAnalysisCompleted') to prevent automatic step advancement
+
     } else {
       showSnackbar(
         aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),

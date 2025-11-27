@@ -24,7 +24,6 @@
           v-model="internalMemory"
           :readonly="readonly"
           :member-id="memberId"
-          @aiAnalysisCompleted="activeStep++"
         />
       </v-stepper-window-item>
 
