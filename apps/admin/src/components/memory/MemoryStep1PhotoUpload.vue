@@ -10,10 +10,10 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <div v-if="memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length > 0">
-          <FaceBoundingBoxViewer :image-src="memoryStore.faceRecognition.uploadedImage" :faces="memoryStore.faceRecognition.detectedFaces"
+        <div v-if="memoryStore.faceRecognition.uploadedImage && internalMemory.faces && internalMemory.faces.length > 0">
+          <FaceBoundingBoxViewer :image-src="memoryStore.faceRecognition.uploadedImage" :faces="internalMemory.faces"
             selectable @face-selected="openSelectMemberDialog" />
-          <FaceDetectionSidebar :faces="memoryStore.faceRecognition.detectedFaces" @face-selected="openSelectMemberDialog"
+          <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
 
           <!-- Target Member Selection -->
@@ -21,7 +21,7 @@
             <v-card-title>{{ t('memory.create.selectTargetMember') }}</v-card-title>
             <v-card-text>
               <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
-                <MemberFaceChip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id"
+                <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id"
                   :face="face" :value="face.id" />
               </v-chip-group>
             </v-card-text>
@@ -66,6 +66,11 @@ const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null); // Renamed ref
 
+// Helper function to update the model and emit the change
+const updateMemory = (payload: Partial<MemoryDto>) => {
+  emit('update:modelValue', { ...internalMemory.value, ...payload });
+};
+
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
   set: (value: MemoryDto) => emit('update:modelValue', value),
@@ -81,7 +86,7 @@ watch(() => memoryStore.faceRecognition.error, (newError) => {
 watch(selectedTargetMemberFaceId, (newId) => { // Updated ref name
   internalMemory.value.targetFaceId = newId ?? undefined; // Set targetFaceId, convert null to undefined
   if (newId) {
-    const selectedFace = memoryStore.faceRecognition.detectedFaces.find(face => face.id === newId);
+    const selectedFace = internalMemory.value.faces?.find(face => face.id === newId); // Use internalMemory.faces
     if (selectedFace && selectedFace.memberId) {
       internalMemory.value.memberId = selectedFace.memberId;
     } else {
@@ -135,52 +140,57 @@ const handleFileUpload = async (file: File | File[] | null) => {
     // Set image size
     try {
       const img = await loadImage(uploadedFile);
-      internalMemory.value.imageSize = `${img.width}x${img.height}`;
+      updateMemory({ imageSize: `${img.width}x${img.height}` });
     } catch (e) {
       console.error('Failed to load image for dimensions:', e);
-      internalMemory.value.imageSize = undefined; // Clear or set default
+      updateMemory({ imageSize: undefined }); // Clear or set default
     }
 
     // Extract EXIF data
     try {
-      internalMemory.value.exifData = await extractExifData(uploadedFile);
+      updateMemory({ exifData: await extractExifData(uploadedFile) });
     } catch (e) {
       console.error('Failed to extract EXIF data:', e);
-      internalMemory.value.exifData = undefined;
+      updateMemory({ exifData: undefined });
     }
 
     if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-      internalMemory.value.photoAnalysisId = 'generated_id';
-      internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
-      internalMemory.value.photoUrl = memoryStore.faceRecognition.uploadedImage;
-      internalMemory.value.photo = memoryStore.faceRecognition.uploadedImage; // Assign to the new 'photo' property
+      updateMemory({
+        photoAnalysisId: 'generated_id',
+        faces: memoryStore.faceRecognition.detectedFaces,
+        photoUrl: memoryStore.faceRecognition.uploadedImage,
+        photo: memoryStore.faceRecognition.uploadedImage, // Assign to the new 'photo' property
+      });
       // Automatically select the first face as main character if any faces are detected
       if (memoryStore.faceRecognition.detectedFaces.length > 0) {
         selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id; // Updated ref name
       }
     } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-      internalMemory.value.faces = []; // Clear faces if none detected
+      updateMemory({
+        faces: [], // Clear faces if none detected
+        photo: undefined, // Clear photo if no faces detected
+        imageSize: undefined,
+        exifData: undefined,
+      });
       selectedTargetMemberFaceId.value = null; // Updated ref name
-      internalMemory.value.photo = undefined; // Clear photo if no faces detected
-      internalMemory.value.imageSize = undefined;
-      internalMemory.value.exifData = undefined;
     }
   } else {
     memoryStore.resetFaceRecognitionState();
-    internalMemory.value.photoAnalysisId = undefined;
-    internalMemory.value.faces = [];
-    internalMemory.value.photoUrl = undefined;
-    internalMemory.value.photo = undefined; // Clear the 'photo' property
+    updateMemory({
+      photoAnalysisId: undefined,
+      faces: [],
+      photoUrl: undefined,
+      photo: undefined, // Clear the 'photo' property
+      imageSize: undefined,
+      exifData: undefined,
+    });
     selectedTargetMemberFaceId.value = null; // Updated ref name
-    internalMemory.value.imageSize = undefined;
-    internalMemory.value.exifData = undefined;
   }
 };
 
 const openSelectMemberDialog = (faceId: string) => {
-  memoryStore.selectFace(faceId);
-  const face = memoryStore.currentSelectedFace;
+  const face = internalMemory.value.faces?.find(f => f.id === faceId); // Use internalMemory.faces
   if (face) {
     faceToLabel.value = face;
     showSelectMemberDialog.value = true;
@@ -188,21 +198,25 @@ const openSelectMemberDialog = (faceId: string) => {
 };
 
 const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {
-  memoryStore.labelFace(faceId, memberDetails.id, memberDetails);
+  // Update internalMemory.faces to reflect the labeled member
+  const updatedFaces = internalMemory.value.faces?.map(face =>
+    face.id === faceId ? { ...face, memberId: memberDetails.id, memberName: memberDetails.fullName } : face
+  ) || [];
+  updateMemory({ faces: updatedFaces });
+
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
   // If the labeled face is currently selected as main character, update internalMemory.memberId
-  if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
+  if (selectedTargetMemberFaceId.value === faceId) {
     internalMemory.value.memberId = memberDetails.id;
   }
 };
 
 const handleRemoveFace = (faceId: string) => {
-  memoryStore.removeFace(faceId);
-  // Synchronize internalMemory.value.faces with the updated detectedFaces from the store
-  internalMemory.value.faces = memoryStore.faceRecognition.detectedFaces;
+  const updatedFaces = internalMemory.value.faces?.filter(face => face.id !== faceId) || [];
+  updateMemory({ faces: updatedFaces });
   // If the removed face was the main character, clear selection
-  if (selectedTargetMemberFaceId.value === faceId) { // Updated ref name
+  if (selectedTargetMemberFaceId.value === faceId) {
     selectedTargetMemberFaceId.value = null;
   }
 };

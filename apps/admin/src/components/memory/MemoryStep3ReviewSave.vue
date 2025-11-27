@@ -55,7 +55,7 @@
         </v-chip>
 
         <v-chip size="large">
-          {{ internalMemory.storyStyle || t('common.na') }}
+          {{ internalMemory.storyStyle ? t(`memory.style.${internalMemory.storyStyle}`) : t('common.na') }}
         </v-chip>
       </v-chip-group>
     </v-col>
