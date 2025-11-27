@@ -44,6 +44,9 @@
               {{ t('memory.create.photoAnalysisResult.yearEstimate') }}: {{
                 internalMemory.photoAnalysisResult.yearEstimate }}
             </p>
+            <p v-if="internalMemory.photoAnalysisResult.objects && internalMemory.photoAnalysisResult.objects.length > 0" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.objects') }}: {{ internalMemory.photoAnalysisResult.objects.join(', ') }}
+            </p>
           </div>
         </div>
         <p v-else-if="!internalMemory.photoAnalysisResult && (internalMemory.photoUrl || memoryStore.faceRecognition.uploadedImage)"

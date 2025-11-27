@@ -1068,6 +1068,7 @@
   "memory.create.photoAnalysisResult.eventAnalysis": "Sự kiện",
   "memory.create.photoAnalysisResult.emotionAnalysis": "Cảm xúc",
   "memory.create.photoAnalysisResult.yearEstimate": "Ước tính năm",
+  "memory.create.photoAnalysisResult.objects": "Vật thể được phát hiện",
   "memory.create.photoAnalysisResult.sceneSuggestions": "Gợi ý bối cảnh",
   "memory.create.photoAnalysisResult.eventSuggestions": "Gợi ý sự kiện",
   "memory.create.photoAnalysisResult.emotionSuggestions": "Gợi ý cảm xúc",

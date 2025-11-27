@@ -970,6 +970,7 @@
   "memory.create.photoAnalysisResult.eventAnalysis": "Event",
   "memory.create.photoAnalysisResult.emotionAnalysis": "Emotion",
   "memory.create.photoAnalysisResult.yearEstimate": "Year Estimate",
+  "memory.create.photoAnalysisResult.objects": "Objects",
   "memory.create.photoAnalysisResult.noResult": "No photo analysis result to display.",
   "memory.create.aiSuggestionDisclaimer": "AI suggestions are for reference only, based on your uploaded image. Please review and edit as needed.",
   "memory.create.analyzePhotoWithAi": "Analyze Photo",
