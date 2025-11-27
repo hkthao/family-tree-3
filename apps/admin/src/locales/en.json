@@ -831,6 +831,7 @@
   "face.search.title": "Face Search",
   "face.selectMemberDialog.title": "Select Member",
   "face.selectMemberDialog.selectMember": "Select Member",
+  "face.selectMemberDialog.relationPromptLabel": "Relation Prompt (e.g., Mother, Father, Friend)",
   "admin.config.title": "System Configuration",
   "systemConfig.title": "System Configuration",
   "systemConfig.tabs.aiChat": "AI Chat",

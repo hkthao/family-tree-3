@@ -897,6 +897,7 @@
   "face.search.title": "Tìm kiếm Khuôn mặt",
   "face.selectMemberDialog.title": "Chọn Thành viên",
   "face.selectMemberDialog.selectMember": "Chọn Thành viên",
+  "face.selectMemberDialog.relationPromptLabel": "Gợi ý Quan hệ (ví dụ: Mẹ, Cha, Bạn bè)",
   "admin.config.title": "Cấu hình Hệ thống",
   "systemConfig.title": "Cấu hình Hệ thống",
   "systemConfig.tabs.aiChat": "AI Chat",

@@ -87,8 +87,11 @@ const canSaveLabels = computed(() => {
   );
 });
 
-const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {
-  faceStore.labelFace(faceId, memberDetails.id, memberDetails);
+const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
+  const index = faceStore.detectedFaces.findIndex(f => f.id === updatedFace.id);
+  if (index !== -1) {
+    faceStore.detectedFaces.splice(index, 1, updatedFace); // Replace the old face with the updated one
+  }
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
 };

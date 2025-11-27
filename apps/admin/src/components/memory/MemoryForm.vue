@@ -86,7 +86,8 @@
     </v-row>
 
     <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
-      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId" />
+      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId"
+      :show-relation-prompt-field="true" />
   </v-container>
 </template>
 
@@ -281,15 +282,15 @@ const openSelectMemberDialog = (faceId: string) => {
   }
 };
 
-const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {
+const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => { // Changed signature
   const updatedFaces = internalMemory.value.faces?.map(face =>
-    face.id === faceId ? { ...face, memberId: memberDetails.id, memberName: memberDetails.fullName } : face
+    face.id === updatedFace.id ? updatedFace : face // Replace with the updated face object
   ) || [];
   updateMemory({ faces: updatedFaces });
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
-  if (selectedTargetMemberFaceId.value === faceId) {
-    internalMemory.value.memberId = memberDetails.id;
+  if (selectedTargetMemberFaceId.value === updatedFace.id) { // Use updatedFace.id
+    internalMemory.value.memberId = updatedFace.memberId; // Use updatedFace.memberId
   }
 };
 
