@@ -27,7 +27,7 @@
       }" @click="$emit('face-selected', face.id)">
         <template v-slot:prepend>
           <v-avatar size="40" rounded="sm">
-            <v-img :src="face.thumbnail" alt="Face"></v-img>
+            <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
           </v-avatar>
         </template>
         <v-list-item-title>
@@ -61,6 +61,7 @@
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
 import { type PropType, computed } from 'vue';
+import { createBase64ImageSrc } from '@/utils/image.utils'; // NEW IMPORT
 
 const { t } = useI18n();
 
