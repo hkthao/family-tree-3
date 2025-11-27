@@ -43,8 +43,9 @@
 
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
-          <v-chip v-for="event in aiEventSuggestions" :key="event" :value="event" filter variant="tonal">
-            {{ event }}
+          <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter variant="tonal">
+            <v-icon v-if="eventItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+            {{ eventItem.text }}
           </v-chip>
           <v-chip value="unsure" filter variant="tonal">
             {{ t('memory.create.aiEventSuggestion.unsure') }}
@@ -55,8 +56,9 @@
           :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
         <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.emotionContextTags" @update:model-value="(newValue) => emit('update:modelValue', { ...props.modelValue, emotionContextTags: newValue })" multiple filter color="primary" column :disabled="readonly">
-          <v-chip v-for="tag in aiEmotionContextSuggestions" :key="tag" :value="tag" filter variant="tonal">
-            {{ tag }}
+          <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text" filter variant="tonal">
+            <v-icon v-if="emotionItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+            {{ emotionItem.text }}
           </v-chip>
         </v-chip-group>
       </v-col>
@@ -88,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, type ComputedRef } from 'vue';
+import { ref, watch, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
 import type { MemoryDto } from '@/types/memory';
@@ -111,6 +113,27 @@ const { showSnackbar } = useGlobalSnackbar(); // NEW
 const memoryStore = useMemoryStore(); // NEW
 const formStep2 = ref<HTMLFormElement | null>(null);
 const isAnalyzingAi = ref(false); // NEW loading state
+
+interface SuggestionItem {
+  text: string;
+  isAi: boolean;
+}
+
+const defaultEventSuggestions: Ref<SuggestionItem[]> = ref([
+  { text: t('memory.create.aiEventSuggestion.suggestion1'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion2'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion3'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion4'), isAi: false },
+]);
+
+const defaultEmotionContextSuggestions: Ref<SuggestionItem[]> = ref([
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion1'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion2'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion3'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion4'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion5'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion6'), isAi: false },
+]);
 
 const internalMemory = computed<MemoryDto>({
   get: () => {
@@ -201,8 +224,29 @@ const triggerAiAnalysis = async () => {
     if (aiResult.ok) {
       internalMemory.value.photoAnalysisResult = aiResult.value;
       showSnackbar(t('memory.create.aiAnalysisSuccess'), 'success');
-      // Removed emit('aiAnalysisCompleted') to prevent automatic step advancement
 
+      // Append AI generated event suggestions
+      if (aiResult.value.suggestions?.event && aiResult.value.suggestions.event.length > 0) {
+        const newAiEvents: SuggestionItem[] = aiResult.value.suggestions.event.map(text => ({ text, isAi: true }));
+        // Only add unique AI suggestions
+        newAiEvents.forEach(newItem => {
+          if (!defaultEventSuggestions.value.some((existingItem: SuggestionItem) => existingItem.text === newItem.text)) {
+            defaultEventSuggestions.value.push(newItem);
+          }
+        });
+      }
+
+      // Append AI generated emotion suggestions
+      if (aiResult.value.suggestions?.emotion && aiResult.value.suggestions.emotion.length > 0) {
+        const newAiEmotions: SuggestionItem[] = aiResult.value.suggestions.emotion.map(text => ({ text, isAi: true }));
+        // Only add unique AI suggestions
+        newAiEmotions.forEach(newItem => {
+          if (!defaultEmotionContextSuggestions.value.some((existingItem: SuggestionItem) => existingItem.text === newItem.text)) {
+            defaultEmotionContextSuggestions.value.push(newItem);
+          }
+        });
+      }
+      // Removed emit('aiAnalysisCompleted') to prevent automatic step advancement
     } else {
       showSnackbar(
         aiResult.error?.message || t('memory.errors.aiAnalysisFailed'),
@@ -216,27 +260,32 @@ const triggerAiAnalysis = async () => {
   }
 };
 
-
-// AI Event Suggestions (now derived from photoAnalysisResult or fallback)
-const aiEventSuggestions: ComputedRef<string[]> = computed(() => { // Explicitly typed
-  return internalMemory.value.photoAnalysisResult?.suggestions?.event || [
-    t('memory.create.aiEventSuggestion.suggestion1'),
-    t('memory.create.aiEventSuggestion.suggestion2'),
-    t('memory.create.aiEventSuggestion.suggestion3'),
-    t('memory.create.aiEventSuggestion.suggestion4'),
-  ];
+// AI Event Suggestions (combines default and AI-generated, ensures uniqueness)
+const aiEventSuggestions: ComputedRef<SuggestionItem[]> = computed(() => {
+  const suggestions = [...defaultEventSuggestions.value];
+  if (internalMemory.value.photoAnalysisResult?.suggestions?.event) {
+    internalMemory.value.photoAnalysisResult.suggestions.event.forEach(aiText => {
+      // Add only if not already present in the combined list
+      if (!suggestions.some(item => item.text === aiText)) {
+        suggestions.push({ text: aiText, isAi: true });
+      }
+    });
+  }
+  return suggestions;
 });
 
-// AI Emotion & Context Suggestions (now derived from photoAnalysisResult or fallback)
-const aiEmotionContextSuggestions: ComputedRef<string[]> = computed(() => { // Explicitly typed
-  return internalMemory.value.photoAnalysisResult?.suggestions?.emotion || [
-    t('memory.create.aiEmotionContextSuggestion.suggestion1'),
-    t('memory.create.aiEmotionContextSuggestion.suggestion2'),
-    t('memory.create.aiEmotionContextSuggestion.suggestion3'),
-    t('memory.create.aiEmotionContextSuggestion.suggestion4'),
-    t('memory.create.aiEmotionContextSuggestion.suggestion5'),
-    t('memory.create.aiEmotionContextSuggestion.suggestion6'),
-  ];
+// AI Emotion & Context Suggestions (combines default and AI-generated, ensures uniqueness)
+const aiEmotionContextSuggestions: ComputedRef<SuggestionItem[]> = computed(() => {
+  const suggestions = [...defaultEmotionContextSuggestions.value];
+  if (internalMemory.value.photoAnalysisResult?.suggestions?.emotion) {
+    internalMemory.value.photoAnalysisResult.suggestions.emotion.forEach(aiText => {
+      // Add only if not already present in the combined list
+      if (!suggestions.some(item => item.text === aiText)) {
+        suggestions.push({ text: aiText, isAi: true });
+      }
+    });
+  }
+  return suggestions;
 });
 
 // AI Perspective Suggestions (remains fixed as no AI suggestions for this)
