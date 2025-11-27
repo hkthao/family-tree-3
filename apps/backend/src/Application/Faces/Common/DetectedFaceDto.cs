@@ -8,6 +8,7 @@ public class DetectedFaceDto
     public BoundingBoxDto BoundingBox { get; set; } = null!;
     public float Confidence { get; set; }
     public string? Thumbnail { get; set; } // Base64 encoded image
+    public string? ThumbnailUrl { get; set; } // Public URL for the thumbnail
     public Guid? MemberId { get; set; } // Nullable, if not yet labeled
     public string? MemberName { get; set; } // For display
     public Guid? FamilyId { get; set; }

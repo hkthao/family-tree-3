@@ -159,7 +159,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         Height = faceResult.BoundingBox.Height
                     },
                     Confidence = faceResult.Confidence,
-                    Thumbnail = thumbnailUrl, // Use the public URL
+                    Thumbnail = faceResult.Thumbnail, // Assign the original base64 thumbnail
+                    ThumbnailUrl = thumbnailUrl, // Use the public URL
                     Embedding = faceResult.Embedding?.ToList(),
                     MemberId = null,
                     MemberName = null,
