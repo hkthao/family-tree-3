@@ -453,29 +453,33 @@ const skipPhotoAnalysis = () => {
 
 const usePhotoContext = () => {
   // Logic to use photo context to pre-fill rawText or suggest prompts
-  if (photoAnalysisResult.value?.summary) {
+  if (photoAnalysisResult.value?.summary && !rawText.value) { // Only pre-fill if rawText is empty
     rawText.value = photoAnalysisResult.value.summary;
   }
   // Optionally use other analysis results for tags, year, etc.
-  if (photoAnalysisResult.value?.yearEstimate) {
+  if (photoAnalysisResult.value?.yearEstimate && memoryYear.value === null) { // Only pre-fill if empty
     memoryYear.value = parseInt(photoAnalysisResult.value.yearEstimate);
   }
-  // Add tags from objects or events
+  // Add tags from objects or events (always append, not replace existing)
   if (photoAnalysisResult.value?.objects && photoAnalysisResult.value.objects.length > 0) {
     memoryTags.value = [...new Set([...memoryTags.value, ...photoAnalysisResult.value.objects])];
   }
-  if (photoAnalysisResult.value?.event) {
+  if (photoAnalysisResult.value?.event && !memoryTags.value.includes(photoAnalysisResult.value.event)) { // Only add if not already present
     memoryTags.value = [...new Set([...memoryTags.value, photoAnalysisResult.value.event])];
   }
 
   // NEW: Populate event and emotion selections from AI analysis results
-  if (photoAnalysisResult.value?.event) {
+  if (photoAnalysisResult.value?.event && eventSelection.value === undefined) { // Only pre-fill if empty
     eventSelection.value = photoAnalysisResult.value.event;
   }
   if (photoAnalysisResult.value?.emotion) {
-    // If emotion is a single string, wrap it in an array for emotionContextsSelection
     const newEmotionContexts = Array.isArray(photoAnalysisResult.value.emotion) ? photoAnalysisResult.value.emotion : [photoAnalysisResult.value.emotion];
-    emotionContextsSelection.value = [...new Set([...emotionContextsSelection.value, ...newEmotionContexts])];
+    // Append only unique new emotion contexts
+    newEmotionContexts.forEach(newEmotion => {
+      if (!emotionContextsSelection.value.includes(newEmotion)) {
+        emotionContextsSelection.value.push(newEmotion);
+      }
+    });
   }
 
 
@@ -591,6 +595,12 @@ watch(photoFile, (newFile) => {
     photoPreviewUrl.value = null;
     photoAnalysisResult.value = null;
     photoAnalysisId.value = null;
+  }
+});
+
+watch(currentStep, (newStep) => {
+  if (newStep === 3 && rawText.value === '' && photoAnalysisResult.value?.summary) {
+    rawText.value = photoAnalysisResult.value.summary;
   }
 });
 
