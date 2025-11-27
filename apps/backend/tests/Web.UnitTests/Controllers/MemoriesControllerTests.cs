@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Memories.Commands.AnalyzePhoto;
+using backend.Application.AI.Commands.AnalyzePhoto;
 using backend.Application.Memories.Commands.CreateMemory;
 using backend.Application.Memories.Commands.DeleteMemory;
 using backend.Application.Memories.Commands.GenerateStory;

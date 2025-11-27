@@ -180,24 +180,7 @@ public static class PromptBuilder
             promptBuilder.AppendLine($"\nGóc nhìn bài viết: {request.Perspective}");
         }
 
-        if (!string.IsNullOrEmpty(request.Event))
-        {
-            promptBuilder.AppendLine($"Sự kiện chính: {request.Event}");
-        }
 
-        if (!string.IsNullOrEmpty(request.CustomEventDescription))
-        {
-            promptBuilder.AppendLine($"Mô tả sự kiện tùy chỉnh: {request.CustomEventDescription}");
-        }
-
-        if (request.EmotionContexts != null && request.EmotionContexts.Any())
-        {
-            promptBuilder.AppendLine("Cảm xúc và bối cảnh được chọn:");
-            foreach (var context in request.EmotionContexts)
-            {
-                promptBuilder.AppendLine($"- {context}");
-            }
-        }
 
         if (!string.IsNullOrEmpty(request.RawText))
         {
@@ -206,47 +189,12 @@ public static class PromptBuilder
         }
 
         // --- Photo Analysis Result Details ---
-        if (request.ResizedImageUrl != null ||
-            request.PhotoSummary != null ||
-            request.PhotoScene != null ||
-            request.PhotoEventAnalysis != null ||
-            request.PhotoEmotionAnalysis != null ||
-            request.PhotoYearEstimate != null ||
-            (request.PhotoObjects != null && request.PhotoObjects.Any()) ||
-            (request.PhotoPersons != null && request.PhotoPersons.Any()))
+        if (request.ResizedImageUrl != null || (request.PhotoPersons != null && request.PhotoPersons.Any()))
         {
             promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
             if (!string.IsNullOrEmpty(request.ResizedImageUrl))
             {
                 promptBuilder.AppendLine($"- URL ảnh đã điều chỉnh kích thước: {request.ResizedImageUrl}");
-            }
-            if (!string.IsNullOrEmpty(request.PhotoSummary))
-            {
-                promptBuilder.AppendLine($"- Tóm tắt ảnh: {request.PhotoSummary}");
-            }
-            if (!string.IsNullOrEmpty(request.PhotoScene))
-            {
-                promptBuilder.AppendLine($"- Cảnh ảnh: {request.PhotoScene}");
-            }
-            if (!string.IsNullOrEmpty(request.PhotoEventAnalysis))
-            {
-                promptBuilder.AppendLine($"- Phân tích sự kiện ảnh: {request.PhotoEventAnalysis}");
-            }
-            if (!string.IsNullOrEmpty(request.PhotoEmotionAnalysis))
-            {
-                promptBuilder.AppendLine($"- Phân tích cảm xúc ảnh: {request.PhotoEmotionAnalysis}");
-            }
-            if (!string.IsNullOrEmpty(request.PhotoYearEstimate))
-            {
-                promptBuilder.AppendLine($"- Ước tính năm ảnh: {request.PhotoYearEstimate}");
-            }
-            if (request.PhotoObjects != null && request.PhotoObjects.Any())
-            {
-                promptBuilder.AppendLine("- Đối tượng trong ảnh:");
-                foreach (var obj in request.PhotoObjects)
-                {
-                    promptBuilder.AppendLine($"  - {obj}");
-                }
             }
             if (request.PhotoPersons != null && request.PhotoPersons.Any())
             {
