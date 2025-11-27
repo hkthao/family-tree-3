@@ -29,13 +29,15 @@
                 <v-btn
                   v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0"
                   color="primary"
-                  icon="mdi-brain"
+                  prepend-icon="mdi-lightbulb-on-outline"
                   variant="text"
+                  size="small"
                   @click="triggerAiAnalysis"
                   :loading="isAnalyzingAi"
                   :disabled="isAnalyzingAi"
-                  :aria-label="t('memory.create.analyzePhotoWithAi')"
-                ></v-btn>
+                >
+                  {{ t('memory.create.analyzePhotoWithAi') }}
+                </v-btn>
             </template>
         </v-alert>
 
