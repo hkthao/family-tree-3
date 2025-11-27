@@ -63,8 +63,9 @@ export interface PhotoAnalysisSuggestionsDto {
 
 export interface PhotoAnalysisPersonDto {
   id?: string;
-  memberId?: string;
+  memberId?: string | null;
   name?: string;
   emotion?: string;
-  confidence?: number; // NEW PROPERTY
+  confidence?: number;
+  relationPrompt?: string; // NEW PROPERTY
 }

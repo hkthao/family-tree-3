@@ -127,6 +127,54 @@
                   multiple
                   chips
                 ></v-combobox>
+
+                <v-select
+                  v-model="perspectiveSelection"
+                  :items="aiPerspectiveSuggestions"
+                  item-title="text"
+                  item-value="value"
+                  :label="t('memory.create.perspective.title')"
+                  outlined
+                  class="mt-4"
+                ></v-select>
+
+                <h4 class="mt-4">{{ t('memory.create.aiEventSuggestion.title') }}</h4>
+                <v-chip-group
+                  v-model="eventSelection"
+                  color="primary"
+                  mandatory
+                  column
+                >
+                  <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter variant="tonal">
+                    <v-icon v-if="eventItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+                    {{ eventItem.text }}
+                  </v-chip>
+                  <v-chip value="unsure" filter variant="tonal">
+                    {{ t('memory.create.aiEventSuggestion.unsure') }}
+                  </v-chip>
+                </v-chip-group>
+                <v-text-field
+                  v-if="eventSelection === 'unsure'"
+                  v-model="customEventDescriptionInput"
+                  :label="t('memory.create.aiEventSuggestion.customDescription')"
+                  clearable
+                  class="my-2"
+                ></v-text-field>
+
+                <h4 class="mt-4">{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
+                <v-chip-group
+                  v-model="emotionContextsSelection"
+                  multiple
+                  filter
+                  color="primary"
+                  column
+                >
+                  <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text" filter variant="tonal">
+                    <v-icon v-if="emotionItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+                    {{ emotionItem.text }}
+                  </v-chip>
+                </v-chip-group>
+
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -179,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, type Ref, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemoryStore } from '@/stores/memory.store';
 import PhotoAnalyzerPreview from './PhotoAnalyzerPreview.vue'; 
@@ -190,6 +238,7 @@ import type { ExifDataDto } from '@/types/memory'; // NEW IMPORT
 import type {
   AiPhotoAnalysisInputDto,
   PhotoAnalysisResultDto, // Keep PhotoAnalysisResultDto
+  PhotoAnalysisPersonDto, // NEW IMPORT
 } from '@/types/ai'; // Only import necessary AI DTOs
 
 
@@ -221,6 +270,69 @@ const memoryTitle = ref('');
 const memoryYear = ref<number | null>(null);
 const memoryTags = ref<string[]>([]);
 const generatingStory = ref(false);
+
+// NEW: Local state for user selections from Step 2 equivalent inputs
+const perspectiveSelection = ref<string | undefined>(undefined);
+const eventSelection = ref<string | undefined>(undefined);
+const customEventDescriptionInput = ref<string | undefined>(undefined);
+const emotionContextsSelection = ref<string[]>([]);
+
+// NEW: SuggestionItem interface and suggestion lists for local use
+interface SuggestionItem {
+  text: string;
+  isAi: boolean;
+}
+
+const defaultEventSuggestions: Ref<SuggestionItem[]> = ref([
+  { text: t('memory.create.aiEventSuggestion.suggestion1'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion2'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion3'), isAi: false },
+  { text: t('memory.create.aiEventSuggestion.suggestion4'), isAi: false },
+]);
+
+const defaultEmotionContextSuggestions: Ref<SuggestionItem[]> = ref([
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion1'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion2'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion3'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion4'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion5'), isAi: false },
+  { text: t('memory.create.aiEmotionContextSuggestion.suggestion6'), isAi: false },
+]);
+
+// AI Event Suggestions (combines default and AI-generated, ensures uniqueness)
+const aiEventSuggestions: ComputedRef<SuggestionItem[]> = computed(() => {
+  const suggestions = [...defaultEventSuggestions.value];
+  if (photoAnalysisResult.value?.suggestions?.event) {
+    photoAnalysisResult.value.suggestions.event.forEach(aiText => {
+      // Add only if not already present in the combined list
+      if (!suggestions.some(item => item.text === aiText)) {
+        suggestions.push({ text: aiText, isAi: true });
+      }
+    });
+  }
+  return suggestions;
+});
+
+// AI Emotion & Context Suggestions (combines default and AI-generated, ensures uniqueness)
+const aiEmotionContextSuggestions: ComputedRef<SuggestionItem[]> = computed(() => {
+  const suggestions = [...defaultEmotionContextSuggestions.value];
+  if (photoAnalysisResult.value?.suggestions?.emotion) {
+    photoAnalysisResult.value.suggestions.emotion.forEach(aiText => {
+      // Add only if not already present in the combined list
+      if (!suggestions.some(item => item.text === aiText)) {
+        suggestions.push({ text: aiText, isAi: true });
+      }
+    });
+  }
+  return suggestions;
+});
+
+// AI Perspective Suggestions (remains fixed as no AI suggestions for this)
+const aiPerspectiveSuggestions = ref([
+  { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
+  { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
+  { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
+]);
 
 // Step 4: Story Editor
 const story = ref<any | null>(null);
@@ -356,6 +468,17 @@ const usePhotoContext = () => {
     memoryTags.value = [...new Set([...memoryTags.value, photoAnalysisResult.value.event])];
   }
 
+  // NEW: Populate event and emotion selections from AI analysis results
+  if (photoAnalysisResult.value?.event) {
+    eventSelection.value = photoAnalysisResult.value.event;
+  }
+  if (photoAnalysisResult.value?.emotion) {
+    // If emotion is a single string, wrap it in an array for emotionContextsSelection
+    const newEmotionContexts = Array.isArray(photoAnalysisResult.value.emotion) ? photoAnalysisResult.value.emotion : [photoAnalysisResult.value.emotion];
+    emotionContextsSelection.value = [...new Set([...emotionContextsSelection.value, ...newEmotionContexts])];
+  }
+
+
   currentStep.value = 3; // Move to Raw Text Input
 };
 
@@ -374,12 +497,37 @@ const generateStory = async () => {
   if (!canGenerateStory.value) return;
 
   generatingStory.value = true;
+
+  const photoPersonsPayload: PhotoAnalysisPersonDto[] = memoryStore.faceRecognition.detectedFaces.map(face => ({
+    id: face.id,
+    memberId: face.memberId,
+    name: face.memberName,
+    emotion: face.emotion,
+    confidence: face.emotionConfidence, // Assuming confidence is what emotionConfidence maps to
+    relationPrompt: face.relationPrompt, // Include relationPrompt
+  }));
+
   const requestPayload = {
     memberId: props.memberId,
     photoAnalysisId: photoAnalysisId.value,
     rawText: rawText.value,
     style: storyStyle.value,
     maxWords: 500, // Hardcoded for now
+
+    // New granular photo analysis properties
+    photoSummary: photoAnalysisResult.value?.summary,
+    photoScene: photoAnalysisResult.value?.scene,
+    photoEventAnalysis: photoAnalysisResult.value?.event,
+    photoEmotionAnalysis: photoAnalysisResult.value?.emotion,
+    photoYearEstimate: photoAnalysisResult.value?.yearEstimate,
+    photoObjects: photoAnalysisResult.value?.objects,
+    photoPersons: photoPersonsPayload,
+
+    // User selected context
+    perspective: perspectiveSelection.value,
+    event: eventSelection.value,
+    customEventDescription: customEventDescriptionInput.value,
+    emotionContexts: emotionContextsSelection.value,
   };
 
   const result = await memoryStore.generateStory(requestPayload);

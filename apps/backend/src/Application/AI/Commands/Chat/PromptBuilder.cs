@@ -147,8 +147,7 @@ public static class PromptBuilder
     public static string BuildStoryGenerationPrompt(
         backend.Application.Memories.Commands.GenerateStory.GenerateStoryCommand request,
         Member member,
-        Family? family,
-        PhotoAnalysisResultDto? photoAnalysisResult)
+        Family? family)
     {
         var promptBuilder = new StringBuilder();
         promptBuilder.AppendLine($"Tạo một câu chuyện về thành viên gia đình sau với phong cách: {request.Style}");
@@ -206,15 +205,52 @@ public static class PromptBuilder
             promptBuilder.AppendLine(request.RawText);
         }
 
-        if (photoAnalysisResult != null)
+        // --- Photo Analysis Result Details ---
+        if (request.PhotoSummary != null ||
+            request.PhotoScene != null ||
+            request.PhotoEventAnalysis != null ||
+            request.PhotoEmotionAnalysis != null ||
+            request.PhotoYearEstimate != null ||
+            (request.PhotoObjects != null && request.PhotoObjects.Any()) ||
+            (request.PhotoPersons != null && request.PhotoPersons.Any()))
         {
             promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
-            var options = new JsonSerializerOptions
+            if (!string.IsNullOrEmpty(request.PhotoSummary))
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = false
-            };
-            promptBuilder.AppendLine(System.Text.Json.JsonSerializer.Serialize(photoAnalysisResult, options));
+                promptBuilder.AppendLine($"- Tóm tắt ảnh: {request.PhotoSummary}");
+            }
+            if (!string.IsNullOrEmpty(request.PhotoScene))
+            {
+                promptBuilder.AppendLine($"- Cảnh ảnh: {request.PhotoScene}");
+            }
+            if (!string.IsNullOrEmpty(request.PhotoEventAnalysis))
+            {
+                promptBuilder.AppendLine($"- Phân tích sự kiện ảnh: {request.PhotoEventAnalysis}");
+            }
+            if (!string.IsNullOrEmpty(request.PhotoEmotionAnalysis))
+            {
+                promptBuilder.AppendLine($"- Phân tích cảm xúc ảnh: {request.PhotoEmotionAnalysis}");
+            }
+            if (!string.IsNullOrEmpty(request.PhotoYearEstimate))
+            {
+                promptBuilder.AppendLine($"- Ước tính năm ảnh: {request.PhotoYearEstimate}");
+            }
+            if (request.PhotoObjects != null && request.PhotoObjects.Any())
+            {
+                promptBuilder.AppendLine("- Đối tượng trong ảnh:");
+                foreach (var obj in request.PhotoObjects)
+                {
+                    promptBuilder.AppendLine($"  - {obj}");
+                }
+            }
+            if (request.PhotoPersons != null && request.PhotoPersons.Any())
+            {
+                promptBuilder.AppendLine("- Người trong ảnh:");
+                foreach (var person in request.PhotoPersons)
+                {
+                    promptBuilder.AppendLine($"  - {person.Name} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {person.Confidence ?? 0:P}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
+                }
+            }
         }
 
         // Add instructions from the system prompt

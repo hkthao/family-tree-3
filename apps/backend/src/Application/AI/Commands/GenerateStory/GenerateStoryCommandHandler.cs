@@ -40,7 +40,7 @@ public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand,
 
         // Build the user message for the AI Agent
         var sessionId = Guid.NewGuid().ToString(); // Generate a new session ID for this generation
-        var userMessage = PromptBuilder.BuildStoryGenerationPrompt(request, member, member.Family, request.PhotoAnalysisResult);
+        var userMessage = PromptBuilder.BuildStoryGenerationPrompt(request, member, member.Family);
 
         // Call n8n Chat Webhook for story generation
         var n8nChatResult = await _n8nService.CallChatWebhookAsync(sessionId, userMessage, cancellationToken);
