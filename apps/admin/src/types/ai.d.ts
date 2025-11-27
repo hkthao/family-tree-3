@@ -72,6 +72,8 @@ export interface PhotoAnalysisPersonDto {
 
 export interface GenerateStoryCommand {
   memberId?: string | null;
+  resizedImageUrl?: string | null;
+  photoSummary?: string;
   rawText?: string;
   style?: string; // e.g., nostalgic|warm|formal|folk
   perspective?: string;
@@ -93,7 +95,7 @@ export interface GenerateStoryCommand {
 
 export interface GenerateStoryResponseDto {
   title: string;
-  draftStory: string;
+  story: string;
   tags: string[];
   keywords: string[];
   timeline: TimelineEntryDto[];

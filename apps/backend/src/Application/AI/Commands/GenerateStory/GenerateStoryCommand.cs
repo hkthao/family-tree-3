@@ -15,6 +15,7 @@ public record GenerateStoryCommand : IRequest<Result<GenerateStoryResponseDto>>
     public string? CustomEventDescription { get; init; }
     public List<string>? EmotionContexts { get; init; }
     public string? ResizedImageUrl { get; init; }
+    public string? PhotoSummary { get; init; }
     public string? PhotoScene { get; init; }
     public string? PhotoEventAnalysis { get; init; }
     public string? PhotoEmotionAnalysis { get; init; }

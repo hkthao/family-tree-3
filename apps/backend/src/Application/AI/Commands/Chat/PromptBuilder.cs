@@ -206,7 +206,8 @@ public static class PromptBuilder
         }
 
         // --- Photo Analysis Result Details ---
-        if (request.PhotoSummary != null ||
+        if (request.ResizedImageUrl != null ||
+            request.PhotoSummary != null ||
             request.PhotoScene != null ||
             request.PhotoEventAnalysis != null ||
             request.PhotoEmotionAnalysis != null ||
@@ -215,6 +216,10 @@ public static class PromptBuilder
             (request.PhotoPersons != null && request.PhotoPersons.Any()))
         {
             promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
+            if (!string.IsNullOrEmpty(request.ResizedImageUrl))
+            {
+                promptBuilder.AppendLine($"- URL ảnh đã điều chỉnh kích thước: {request.ResizedImageUrl}");
+            }
             if (!string.IsNullOrEmpty(request.PhotoSummary))
             {
                 promptBuilder.AppendLine($"- Tóm tắt ảnh: {request.PhotoSummary}");

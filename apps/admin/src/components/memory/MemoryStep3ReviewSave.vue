@@ -135,6 +135,7 @@ const generateStory = async () => {
 
   const requestPayload = {
     memberId: internalMemory.value.memberId,
+    resizedImageUrl: memoryStore.faceRecognition.resizedImageUrl,
     rawText: internalMemory.value.rawInput,
     style: internalMemory.value.storyStyle,
     maxWords: 500, // Hardcoded for now
@@ -157,7 +158,7 @@ const generateStory = async () => {
 
   const result = await memoryStore.generateStory(requestPayload);
   if (result.ok) {
-    generatedStory.value = result.value.draftStory;
+    generatedStory.value = result.value.story;
     generatedTitle.value = result.value.title;
     // Update internalMemory directly with the generated story and title
     internalMemory.value.story = generatedStory.value;
