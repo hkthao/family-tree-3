@@ -1,73 +1,69 @@
 <template>
   <v-row>
     <!-- Section 1: Uploaded Image -->
-    <v-col cols="12" v-if="memoryStore.faceRecognition.uploadedImage">
-      <h4 class="mb-2">{{ t('memory.create.step1.title') }}</h4>
-      <v-img :src="memoryStore.faceRecognition.uploadedImage" max-height="200" contain class="mb-4"></v-img>
+    <v-col cols="6">
+      <v-img v-if="memoryStore.faceRecognition.uploadedImage" :src="memoryStore.faceRecognition.uploadedImage"
+        max-height="200" contain class="mb-4"></v-img>
+
     </v-col>
 
-    <!-- Section 2: Detected Faces & Relationships -->
-    <v-col cols="12" v-if="internalMemory.faces && internalMemory.faces.length > 0">
-      <h4 class="mb-2">{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
-      <v-list density="compact" class="mb-4">
-        <v-list-item v-for="(face, index) in internalMemory.faces" :key="index">
-          <template v-slot:prepend>
-            <v-avatar size="40" rounded="sm" class="mr-2">
-              <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
-            </v-avatar>
-          </template>
-          <v-list-item-title>
-            {{ t('member.form.member') }}: {{ face.memberName || t('common.unknown') }}
-          </v-list-item-title>
-          <v-list-item-subtitle v-if="face.relationPrompt">
-            {{ t('memory.create.aiCharacterSuggestion.relationPrompt') }}: {{ face.relationPrompt }}
-          </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
+    <v-col cols="6">
+      <v-chip-group v-if="internalMemory.faces && internalMemory.faces.length > 0" column>
+        <v-chip v-for="(face, index) in internalMemory.faces" :key="index" class="mb-2 me-2" size="large"
+          :prepend-avatar="createBase64ImageSrc(face.thumbnail)">
+          {{ face.memberName || t('common.unknown') }}
+          <span v-if="face.relationPrompt" class="ml-1 text-medium-emphasis">({{ face.relationPrompt }})</span>
+        </v-chip>
+      </v-chip-group>
     </v-col>
-
-    <!-- Section 3: User Selections (Event, Context, Emotion, Perspective) -->
+  </v-row>
+  <v-row>
     <v-col cols="12">
-      <h4 class="mb-2">{{ t('memory.create.step2.title') }}</h4>
+      <v-chip-group column>
+        <!-- Section 3: User Selections (Event, Context, Emotion, Perspective) -->
+        <!-- Event Suggestion -->
+        <div v-if="internalMemory.eventSuggestion">
+          <v-chip size="large">
+            {{ internalMemory.eventSuggestion }}
+            <span v-if="internalMemory.customEventDescription && internalMemory.eventSuggestion === 'unsure'">
+              ({{ internalMemory.customEventDescription }})
+            </span>
+          </v-chip>
+        </div>
 
-      <p class="mb-1" v-if="internalMemory.eventSuggestion">
-        <strong>{{ t('memory.create.aiEventSuggestion.title') }}:</strong> {{ internalMemory.eventSuggestion }}
-        <span v-if="internalMemory.customEventDescription && internalMemory.eventSuggestion === 'unsure'">
-          ({{ internalMemory.customEventDescription }})
-        </span>
-      </p>
+        <!-- Emotion Context Tags -->
+        <div v-if="internalMemory.emotionContextTags && internalMemory.emotionContextTags.length > 0">
+          <v-chip-group column>
+            <v-chip size="large" v-for="(tag, i) in internalMemory.emotionContextTags" :key="i">
+              {{ tag }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+        <div v-if="internalMemory.customEmotionContext">
+          <v-chip size="large">{{ internalMemory.customEmotionContext }}</v-chip>
+        </div>
 
-      <p class="mb-1" v-if="internalMemory.emotionContextTags && internalMemory.emotionContextTags.length > 0">
-        <strong>{{ t('memory.create.aiEmotionContextSuggestion.title') }}:</strong> {{
-          internalMemory.emotionContextTags.join(', ') }}
-      </p>
-      <p class="mb-1" v-if="internalMemory.customEmotionContext">
-        <strong>{{ t('memory.create.aiEmotionContextSuggestion.customInput') }}:</strong> {{
-          internalMemory.customEmotionContext }}
-      </p>
-      <p class="mb-4" v-if="internalMemory.perspective">
-        <strong>{{ t('memory.create.perspective.question') }}:</strong>
-        {{ aiPerspectiveSuggestions.find(p => p.value === internalMemory.perspective)?.text || internalMemory.perspective }}
-      </p>
-    </v-col>
+        <!-- Perspective -->
+        <v-chip size="large" v-if="internalMemory.perspective">
+          {{aiPerspectiveSuggestions.find(p => p.value === internalMemory.perspective)?.text ||
+            internalMemory.perspective}}
+        </v-chip>
 
-    <!-- Section 4: Raw Input & Style -->
-    <v-col cols="12" class="mb-4">
-      <h4 class="mb-2">{{ t('memory.create.step3.rawTextInput') }}</h4>
-      <p class="mb-1"><strong>{{ t('memory.create.rawInputPlaceholder') }}:</strong> {{ internalMemory.rawInput || t('common.na') }}</p>
-      <p class="mb-1"><strong>{{ t('memory.create.storyStyle.question') }}:</strong> {{ internalMemory.storyStyle || t('common.na') }}</p>
+        <!-- Section 4: Raw Input & Style -->
+        <v-chip v-if="internalMemory.rawInput" size="large">
+          {{ internalMemory.rawInput }}
+        </v-chip>
+
+        <v-chip size="large">
+          {{ internalMemory.storyStyle || t('common.na') }}
+        </v-chip>
+      </v-chip-group>
     </v-col>
 
     <!-- Generate Story Button -->
     <v-col cols="12" class="text-center">
-      <v-btn
-        color="primary"
-        size="large"
-        @click="generateStory"
-        :loading="generatingStory"
-        :disabled="!canGenerateStory || generatingStory"
-        class="mb-4"
-      >
+      <v-btn color="primary" size="large" @click="generateStory" :loading="generatingStory"
+        :disabled="!canGenerateStory || generatingStory" class="mb-4">
         {{ t('memory.create.step4.generateStory') }}
       </v-btn>
     </v-col>
@@ -75,20 +71,12 @@
     <!-- Section 5: Editable Story Title and Content -->
     <v-col cols="12" v-if="generatedStory">
       <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
-      <v-text-field
-        v-model="internalMemory.title"
-        :label="t('memory.storyEditor.title')"
-        outlined
-        class="mb-4"
-      ></v-text-field>
-      <v-textarea
-        v-model="internalMemory.story"
-        :label="t('memory.storyEditor.storyContent')"
-        outlined
-        rows="10"
-        auto-grow
-      ></v-textarea>
+      <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
+        class="mb-4"></v-text-field>
+      <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined rows="10"
+        auto-grow></v-textarea>
     </v-col>
+    
     <v-col cols="12" v-else>
       <v-alert type="info" variant="tonal">{{ t('memory.create.step4.noStoryGenerated') }}</v-alert>
     </v-col>
@@ -128,7 +116,7 @@ const storyEditorValid = ref(true); // To track validation from StoryEditor
 const canGenerateStory = computed(() => {
   // Simplified condition for this step; refine based on actual requirements
   return (internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10) ||
-         (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
+    (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
 });
 
 const generateStory = async () => {

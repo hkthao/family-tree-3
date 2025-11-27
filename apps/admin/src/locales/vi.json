@@ -984,8 +984,7 @@
   "memory.create.aiEventSuggestion.unsure": "Không chắc",
   "memory.create.aiEventSuggestion.customDescription": "Mô tả sự kiện theo ý bạn (tùy chọn)",
 
-  "memory.create.aiCharacterSuggestion.title": "Bạn có thể cho biết đây là ai không?",
-  "memory.create.aiCharacterSuggestion.relationPrompt": "Đây là ai? / Quan hệ với bạn?",
+      "memory.create.aiCharacterSuggestion.title": "Thông tin khuôn mặt",  "memory.create.aiCharacterSuggestion.relationPrompt": "Đây là ai? / Quan hệ với bạn?",
   "memory.create.aiCharacterSuggestion.noFacesDetected": "Không tìm thấy khuôn mặt nào trong ảnh. Vui lòng tải ảnh có người.",
   "memory.create.selectTargetMember": "Bạn muốn tạo ký ức về ai",
   "memory.create.perspective.title": "Góc nhìn bài viết",
