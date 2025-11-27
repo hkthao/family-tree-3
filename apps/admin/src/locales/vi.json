@@ -1056,7 +1056,7 @@
   "memory.validation.noStoryGenerated": "Vui lòng tạo câu chuyện trước khi lưu.",
 
   "memory.create.aiSuggestionDisclaimer": "Các gợi ý từ AI chỉ mang tính chất tham khảo, dựa trên phân tích hình ảnh bạn đã tải lên. Vui lòng xem xét và chỉnh sửa cho phù hợp.",
-  "memory.create.analyzePhotoWithAi": "Xem gợi ý từ AI",
+  "memory.create.analyzePhotoWithAi": "Phân tích hình ảnh",
   "memory.create.aiAnalysisSuccess": "Phân tích ảnh bằng AI thành công!",
 
   "memory.create.detectedObjects.title": "Đối tượng được phát hiện",
