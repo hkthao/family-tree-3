@@ -990,7 +990,9 @@
   "memory.create.perspective.title": "Góc nhìn bài viết",
   "memory.create.perspective.firstPerson": "Từ góc nhìn của người tạo (ngôi thứ nhất)",
   "memory.create.perspective.neutralPersonal": "Trung lập nhưng mang cảm xúc cá nhân",
-  "memory.create.perspective.fullyNeutral": "Trung lập hoàn toàn",
+            "memory.create.perspective.fullyNeutral": "Trung lập hoàn toàn",
+            "generateStoryButton": "Tạo Story với AI",
+            "aiConsentInfo": "Bằng cách nhấp vào 'Tạo Story với AI', bạn đồng ý rằng hình ảnh đã tải lên và dữ liệu liên quan của bạn sẽ được xử lý bởi các dịch vụ AI để tạo câu chuyện. Dữ liệu này có thể được sử dụng để cải thiện các mô hình AI.",
   "memory.create.perspective.question": "Bạn muốn câu chuyện được kể theo góc nhìn nào?",
 
   "memory.create.aiEmotionContextSuggestion.title": "Cảm nhận được cảm xúc và bối cảnh gì?",
@@ -1054,25 +1056,7 @@
   "memory.validation.noPhotoUploaded": "Vui lòng tải ảnh lên cho ký ức này.",
   "memory.validation.noFacesDetectedInPhoto": "Không tìm thấy khuôn mặt nào trong ảnh đã tải lên. Vui lòng tải ảnh có ít nhất một khuôn mặt.",
   "memory.validation.noStoryGenerated": "Vui lòng tạo câu chuyện trước khi lưu.",
-
   "memory.create.aiSuggestionDisclaimer": "Các gợi ý từ AI chỉ mang tính chất tham khảo, dựa trên phân tích hình ảnh bạn đã tải lên. Vui lòng xem xét và chỉnh sửa cho phù hợp.",
-  "memory.create.analyzePhotoWithAi": "Phân tích hình ảnh",
-  "memory.create.aiAnalysisSuccess": "Phân tích ảnh bằng AI thành công!",
-
-  "memory.create.detectedObjects.title": "Đối tượng được phát hiện",
-  "memory.create.detectedObjects.noObjects": "Không tìm thấy đối tượng nào trong ảnh.",
-
-  "memory.create.photoAnalysisResult.title": "Kết quả phân tích ảnh",
-  "memory.create.photoAnalysisResult.summary": "Tóm tắt",
-  "memory.create.photoAnalysisResult.scene": "Bối cảnh",
-  "memory.create.photoAnalysisResult.eventAnalysis": "Sự kiện",
-  "memory.create.photoAnalysisResult.emotionAnalysis": "Cảm xúc",
-  "memory.create.photoAnalysisResult.yearEstimate": "Ước tính năm",
-  "memory.create.photoAnalysisResult.objects": "Vật thể được phát hiện",
-  "memory.create.photoAnalysisResult.sceneSuggestions": "Gợi ý bối cảnh",
-  "memory.create.photoAnalysisResult.eventSuggestions": "Gợi ý sự kiện",
-  "memory.create.photoAnalysisResult.emotionSuggestions": "Gợi ý cảm xúc",
-  "memory.create.photoAnalysisResult.noResult": "Chưa có kết quả phân tích ảnh nào.",
 
   "memory.style.nostalgic": "Hoài niệm",
   "memory.style.warm": "Ấm áp",
