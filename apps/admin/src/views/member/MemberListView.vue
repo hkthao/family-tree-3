@@ -55,6 +55,7 @@ import { onMounted, ref } from 'vue';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
 
 interface MemberListViewProps {
   familyId?: string;
@@ -102,8 +103,9 @@ const handleFilterUpdate = async (filters: MemberFilter) => {
 };
 
 const handleSearchUpdate = async (search: string) => {
-  searchQuery.value = search;
-  memberStore.list.filters = { ...memberStore.list.filters, searchQuery: searchQuery.value, familyId: props.familyId };
+  const processedSearch = removeDiacritics(search); // NEW: Preprocess search
+  searchQuery.value = search; // Keep original search query for display if needed
+  memberStore.list.filters = { ...memberStore.list.filters, searchQuery: processedSearch, familyId: props.familyId }; // Use processed search
   await memberStore._loadItems();
 };
 

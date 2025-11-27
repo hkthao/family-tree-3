@@ -2,6 +2,7 @@ import { ref, watch } from 'vue';
 import { useMemberAutocompleteStore } from '@/stores/member-autocomplete.store';
 import { debounce } from 'lodash';
 import type { Member } from '@/types';
+import { removeDiacritics } from '../utils/string.utils'; // NEW IMPORT
 
 interface UseMemberAutocompleteOptions {
   familyId?: string;
@@ -19,8 +20,9 @@ export function useMemberAutocomplete(options?: UseMemberAutocompleteOptions) {
   const loadItems = async (query: string): Promise<Member[]> => {
     loading.value = true;
     try {
+      const processedQuery = removeDiacritics(query); // NEW: Preprocess query
       const result = await memberAutocompleteStore.search({
-        searchQuery: query,
+        searchQuery: processedQuery, // Use processed query
         familyId: options?.familyId,
       });
       items.value = result;

@@ -2,7 +2,8 @@
   <v-autocomplete v-bind="$attrs" v-model="internalSelectedItems" @update:model-value="handleUpdateModelValue"
     :items="items" :item-title="itemTitle" :item-value="itemValue" :label="label" :rules="rules" :readonly="readOnly"
     :clearable="clearable" :loading="loading || internalLoading" :search="searchQuery" @update:search="onSearchChange"
-    :multiple="multiple" :chips="chips"    :closable-chips="!props.disabled && closableChips" :return-object="true" :disabled="props.disabled">
+    :multiple="multiple" :chips="chips"    :closable-chips="!props.disabled && closableChips" :return-object="true" :disabled="props.disabled"
+    :custom-filter="() => true" > <!-- NEW: Disable internal filtering -->
     <template v-if="$slots.chip" #chip="scope">
       <slot name="chip" v-bind="scope"></slot>
     </template>
