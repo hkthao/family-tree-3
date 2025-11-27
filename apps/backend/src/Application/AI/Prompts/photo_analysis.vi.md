@@ -6,7 +6,7 @@ YÊU CẦU:
 2. Xác định bối cảnh (scene), sự kiện (event), cảm xúc chung (emotion).
 3. Ước lượng thời gian chụp (yearEstimate).
 4. Nhận diện các đối tượng trong ảnh: người, đồ vật quan trọng.
-5. Nhận diện từng người (nếu “memberId” được cung cấp từ client) và cảm xúc của họ.
+5. Nhận diện từng người (nếu “memberId” được cung cấp từ client) và cảm xúc của họ. Nếu có, hãy xem xét `relationPrompt` để hiểu mối quan hệ của họ trong ngữ cảnh ảnh.
 6. QUAN TRỌNG: Tạo danh sách gợi ý (5–7 mục) cho mỗi loại:
    - gợi ý về scene
    - gợi ý về event
@@ -28,7 +28,8 @@ FORMAT TRẢ VỀ (bắt buộc):
       "memberId": "<null hoặc id>",
       "name": "<null hoặc tên>",
       "emotion": "",
-      "confidence": 0-1
+      "confidence": 0-1,
+      "relationPrompt": "<null hoặc lời nhắc mối quan hệ>"
     }
   ],
   "suggestions": {
