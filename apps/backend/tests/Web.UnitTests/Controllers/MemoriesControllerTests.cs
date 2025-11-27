@@ -230,7 +230,7 @@ public class MemoriesControllerTests
             RawText = "Some raw text",
             Style = "nostalgic"
         };
-        var expectedDto = new GenerateStoryResponseDto { Title = "Generated Story", DraftStory = "..." };
+        var expectedDto = new GenerateStoryResponseDto { Title = "Generated Story", Story = "..." };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<GenerateStoryResponseDto>.Success(expectedDto));
 

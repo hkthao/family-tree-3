@@ -100,7 +100,7 @@ public class GenerateStoryCommandTests : TestBase
         var generatedStoryResponse = new GenerateStoryResponseDto
         {
             Title = "A Nostalgic Tale",
-            DraftStory = "This is a beautiful story...",
+            Story = "This is a beautiful story...",
             Tags = new[] { "nostalgia", "childhood" },
             Keywords = new[] { "Nguyễn Văn A", "gia đình" }
         };
@@ -118,7 +118,7 @@ public class GenerateStoryCommandTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Title.Should().Be(generatedStoryResponse.Title);
-        result.Value.DraftStory.Should().Be(generatedStoryResponse.DraftStory);
+        result.Value.Story.Should().Be(generatedStoryResponse.Story);
     }
 
     [Fact]
