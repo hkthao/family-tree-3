@@ -35,7 +35,7 @@
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
             <v-card>
-              <v-img class="rounded-sm my-4" :src="face.thumbnail" height="100px" contain></v-img>
+              <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px" contain></v-img>
               <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" :disabled="true">
               </MemberAutocomplete>
               <v-text-field class="mt-2" v-model="face.relationPrompt"
@@ -102,6 +102,7 @@ import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // NEW IMPORT
 import type { MemoryFaceState } from '@/stores/memory.store'; // NEW IMPORT
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // NEW IMPORT
 import { useMemoryStore } from '@/stores/memory.store'; // NEW IMPORT
+import { createBase64ImageSrc } from '@/utils/image.utils'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;

@@ -50,7 +50,8 @@ export const useFaceStore = defineStore('face', {
           this.detectedFaces = result.value.detectedFaces.map((face) => ({
             id: face.id,
             boundingBox: face.boundingBox,
-            thumbnail: face.thumbnail,
+            thumbnail: face.thumbnail, // Assign backend thumbnail (base64) to frontend thumbnail
+            thumbnailUrl: face.thumbnailUrl, // Assign backend thumbnailUrl (public URL) to frontend thumbnailUrl
             memberId: face.memberId,
             originalMemberId: face.memberId, // Store the original memberId
             memberName: face.memberName,

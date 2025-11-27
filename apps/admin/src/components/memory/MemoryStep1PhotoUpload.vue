@@ -24,10 +24,10 @@
                 <v-chip v-for="face in memoryStore.faceRecognition.detectedFaces" :key="face.id" :value="face.id"
                   variant="outlined" color="primary" filter>
                   <v-avatar left>
-                    <v-img :src="face.thumbnail" alt="Face"></v-img>
+                    <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
                   </v-avatar>
                   <span class="ml-2">{{ face.memberName || t('common.unknown') }}</span>
-                  <v-chip v-if="face.emotion" size="x-small" class="ml-2">{{ face.emotion }}</v-chip>
+                  <v-chip v-if="face.emotion"  class="ml-2">{{ face.emotion }}</v-chip>
                 </v-chip>
               </v-chip-group>
             </v-card-text>
@@ -53,6 +53,7 @@ import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMembe
 import type { MemoryDto, ExifDataDto } from '@/types/memory'; // Added ExifDataDto
 import type { DetectedFace, Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { createBase64ImageSrc } from '@/utils/image.utils'; // NEW IMPORT
 
 const props = defineProps<{
   modelValue: MemoryDto;
