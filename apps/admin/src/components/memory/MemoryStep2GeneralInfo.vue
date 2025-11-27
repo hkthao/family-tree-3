@@ -5,9 +5,13 @@
         <h4>{{ t('memory.create.aiCharacterSuggestion.title') }}</h4>
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
-            <v-card>
+            <v-card variant="tonal" class="pa-2 position-relative">
+              <v-btn icon="mdi-close-circle" variant="text" size="small" class="remove-face-button"
+                @click="handleRemoveFace(face.id)" :disabled="readonly"></v-btn>
               <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px" contain></v-img>
-              <MemberAutocomplete v-model="face.memberId" :label="t('member.form.member')" >
+              <MemberAutocomplete :model-value="face.memberId"
+                @update:model-value="(newValue) => handleMemberIdUpdate(face.id, newValue)"
+                :label="t('member.form.member')">
               </MemberAutocomplete>
               <v-text-field class="mt-2" v-model="face.relationPrompt"
                 :label="t('memory.create.aiCharacterSuggestion.relationPrompt')" :readonly="readonly"></v-text-field>
@@ -18,32 +22,23 @@
       </v-col>
 
       <v-col cols="12">
-           <v-alert
-          type="info"
-          variant="tonal"
-          class="mb-4"
-          icon="mdi-robot-outline"
-        >
+        <v-alert type="info" variant="tonal" class="mb-4" icon="mdi-robot-outline">
           {{ t('memory.create.aiSuggestionDisclaimer') }}
-            <template v-slot:append>
-                <v-btn
-                  v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0"
-                  color="primary"
-                  prepend-icon="mdi-lightbulb-on-outline"
-                  variant="text"
-                  size="small"
-                  @click="triggerAiAnalysis"
-                  :loading="isAnalyzingAi"
-                  :disabled="isAnalyzingAi"
-                >
-                  {{ t('memory.create.analyzePhotoWithAi') }}
-                </v-btn>
-            </template>
+          <template v-slot:append>
+            <v-btn v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0" color="primary"
+              prepend-icon="mdi-lightbulb-on-outline" variant="text" size="small" @click="triggerAiAnalysis"
+              :loading="isAnalyzingAi" :disabled="isAnalyzingAi">
+              {{ t('memory.create.analyzePhotoWithAi') }}
+            </v-btn>
+          </template>
         </v-alert>
 
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
-        <v-chip-group :model-value="internalMemory.eventSuggestion" @update:model-value="(newValue) => updateMemory({ eventSuggestion: newValue })" color="primary" mandatory column :disabled="readonly">
-          <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter variant="tonal">
+        <v-chip-group :model-value="internalMemory.eventSuggestion"
+          @update:model-value="(newValue) => updateMemory({ eventSuggestion: newValue })" color="primary" mandatory
+          column :disabled="readonly">
+          <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter
+            variant="tonal">
             <v-icon v-if="eventItem.isAi" size="small" start>mdi-robot-outline</v-icon>
             {{ eventItem.text }}
           </v-chip>
@@ -56,8 +51,11 @@
           @update:model-value="(newValue) => updateMemory({ customEventDescription: newValue })"
           :label="t('memory.create.aiEventSuggestion.customDescription')" clearable :readonly="readonly"></v-text-field>
         <h4>{{ t('memory.create.aiEmotionContextSuggestion.title') }}</h4>
-        <v-chip-group :model-value="internalMemory.emotionContextTags" @update:model-value="(newValue) => updateMemory({ emotionContextTags: newValue })" multiple filter color="primary" column :disabled="readonly">
-          <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text" filter variant="tonal">
+        <v-chip-group :model-value="internalMemory.emotionContextTags"
+          @update:model-value="(newValue) => updateMemory({ emotionContextTags: newValue })" multiple filter
+          color="primary" column :disabled="readonly">
+          <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text"
+            filter variant="tonal">
             <v-icon v-if="emotionItem.isAi" size="small" start>mdi-robot-outline</v-icon>
             {{ emotionItem.text }}
           </v-chip>
@@ -65,26 +63,19 @@
       </v-col>
 
       <v-col cols="12">
-        <v-textarea
-          :model-value="internalMemory.rawInput"
+        <v-textarea :model-value="internalMemory.rawInput" :rows="2"
           @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
-          :label="t('memory.create.rawInputPlaceholder')"
-          :readonly="readonly"
-          outlined
-          rows="5"
-          auto-grow
-        ></v-textarea>
-        <StoryStyleInput
-          :model-value="internalMemory.storyStyle"
-          @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })"
-          :readonly="readonly"
-        />
+          :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
+        <StoryStyleInput :model-value="internalMemory.storyStyle"
+          @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" :readonly="readonly" />
       </v-col>
       <!-- END NEW -->
 
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
-        <v-chip-group :model-value="internalMemory.perspective" @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column :disabled="readonly">
+        <v-chip-group :model-value="internalMemory.perspective"
+          @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column
+          :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
           </v-chip>
@@ -105,7 +96,7 @@
 import { ref, watch, computed, type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberAutocomplete } from '@/components/common';
-import type { MemoryDto } from '@/types/memory';
+import type { Member, MemoryDto } from '@/types';
 import type { AiPhotoAnalysisInputDto } from '@/types/ai'; // NEW IMPORT
 import type { MemoryFaceState } from '@/stores/memory.store'; // NEW IMPORT
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // NEW IMPORT
@@ -205,15 +196,16 @@ const buildAiPhotoAnalysisInput = (
     aiInput.targetFaceCropUrl = targetMemberFace.thumbnailUrl || targetMemberFace.thumbnail; // Assign the thumbnail URL if target face exists
 
     if (targetMemberFace.memberId) {
-              aiInput.memberInfo = {
-                id: targetMemberFace.memberId,
-                name: targetMemberFace.memberName,
-                age: targetMemberFace.birthYear
-                  ? (targetMemberFace.deathYear
-                      ? targetMemberFace.deathYear - targetMemberFace.birthYear
-                      : new Date().getFullYear() - targetMemberFace.birthYear)
-                  : undefined,
-              };    }
+      aiInput.memberInfo = {
+        id: targetMemberFace.memberId,
+        name: targetMemberFace.memberName,
+        age: targetMemberFace.birthYear
+          ? (targetMemberFace.deathYear
+            ? targetMemberFace.deathYear - targetMemberFace.birthYear
+            : new Date().getFullYear() - targetMemberFace.birthYear)
+          : undefined,
+      };
+    }
   }
 
   aiInput.otherFacesSummary = memory.faces!
@@ -313,6 +305,33 @@ const aiPerspectiveSuggestions = ref([
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
 ]);
 
+const handleRemoveFace = (faceId: string) => {
+  const updatedFaces = internalMemory.value.faces?.filter(face => face.id !== faceId) || [];
+  updateMemory({ faces: updatedFaces });
+};
+
+const handleMemberIdUpdate = async (faceId: string, newMemberId: string | null) => {
+  let memberDetails: Member | undefined = undefined;
+  if (newMemberId) {
+    memberDetails = await memoryStore.fetchMemberDetails(newMemberId);
+  }
+
+  const updatedFaces = internalMemory.value.faces?.map(face => {
+    if (face.id === faceId) {
+      return {
+        ...face,
+        memberId: newMemberId,
+        memberName: memberDetails?.fullName ?? undefined,
+        familyName: memberDetails?.familyName ?? undefined,
+        birthYear: memberDetails?.dateOfBirth ? new Date(memberDetails.dateOfBirth).getFullYear() : undefined,
+        deathYear: memberDetails?.dateOfDeath ? new Date(memberDetails.dateOfDeath).getFullYear() : undefined,
+      };
+    }
+    return face;
+  }) || [];
+  updateMemory({ faces: updatedFaces });
+};
+
 // NEW: Import StoryStyleInput
 import StoryStyleInput from './StoryStyleInput.vue';
 
@@ -325,3 +344,12 @@ defineExpose({
   triggerAiAnalysis,
 });
 </script>
+
+<style scoped>
+.remove-face-button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 10;
+}
+</style>

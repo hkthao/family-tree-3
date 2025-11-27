@@ -406,6 +406,17 @@ export const useMemoryStore = defineStore('memory', {
       }
     },
 
+    async fetchMemberDetails(memberId: string): Promise<Member | undefined> {
+      const result = await this.services.member.getById(memberId);
+      if (result.ok && result.value) {
+        return result.value;
+      } else if (!result.ok) {
+        const errorResult = result as { ok: false; error: ApiError };
+        console.error("Failed to fetch member details for ID:", memberId, errorResult.error);
+        return undefined;
+      }
+    },
+
     resetFaceRecognitionState(): void {
       this.faceRecognition.uploadedImage = null;
       this.faceRecognition.uploadedImageId = null;
