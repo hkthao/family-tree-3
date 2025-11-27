@@ -6,7 +6,7 @@
         <v-row v-if="internalMemory.faces && internalMemory.faces.length > 0">
           <v-col v-for="face in internalMemory.faces" :key="face.id" cols="6">
             <v-card variant="tonal" class="pa-2 position-relative">
-              <v-btn icon="mdi-close-circle" variant="text" size="small" class="remove-face-button"
+              <v-btn icon="mdi-close-circle" variant="text" class="remove-face-button"
                 @click="handleRemoveFace(face.id)" :disabled="readonly"></v-btn>
               <v-img class="rounded-sm my-4" :src="createBase64ImageSrc(face.thumbnail)" height="100px" contain></v-img>
               <MemberAutocomplete :model-value="face.memberId"
@@ -26,12 +26,63 @@
           {{ t('memory.create.aiSuggestionDisclaimer') }}
           <template v-slot:append>
             <v-btn v-if="!readonly && internalMemory.faces && internalMemory.faces.length > 0" color="primary"
-              prepend-icon="mdi-lightbulb-on-outline" variant="text" size="small" @click="triggerAiAnalysis"
-              :loading="isAnalyzingAi" :disabled="isAnalyzingAi">
+              prepend-icon="mdi-lightbulb-on-outline" variant="text" @click="triggerAiAnalysis" :loading="isAnalyzingAi"
+              :disabled="isAnalyzingAi">
               {{ t('memory.create.analyzePhotoWithAi') }}
             </v-btn>
           </template>
         </v-alert>
+
+        <!-- New: Photo Analysis Results Display -->
+        <div v-if="internalMemory.photoAnalysisResult">
+          <h4>{{ t('memory.create.photoAnalysisResult.title') }}</h4>
+          <v-chip-group column>
+            <v-chip v-if="internalMemory.photoAnalysisResult.summary" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.summary') }}: {{ internalMemory.photoAnalysisResult.summary }}
+            </v-chip>
+            <v-chip v-if="internalMemory.photoAnalysisResult.scene" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.scene') }}: {{ internalMemory.photoAnalysisResult.scene }}
+            </v-chip>
+            <v-chip v-if="internalMemory.photoAnalysisResult.event" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.eventAnalysis') }}: {{ internalMemory.photoAnalysisResult.event }}
+            </v-chip>
+            <v-chip v-if="internalMemory.photoAnalysisResult.emotion" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.emotionAnalysis') }}: {{
+                internalMemory.photoAnalysisResult.emotion }}
+            </v-chip>
+            <v-chip v-if="internalMemory.photoAnalysisResult.yearEstimate" class="mb-1">
+              {{ t('memory.create.photoAnalysisResult.yearEstimate') }}: {{
+                internalMemory.photoAnalysisResult.yearEstimate }}
+            </v-chip>
+
+            <!-- AI Suggestions -->
+            <div
+              v-if="internalMemory.photoAnalysisResult.suggestions?.scene && internalMemory.photoAnalysisResult.suggestions.scene.length > 0">
+              <v-chip class="mb-1">
+                {{ t('memory.create.photoAnalysisResult.sceneSuggestions') }}: {{
+                  internalMemory.photoAnalysisResult.suggestions.scene.join(', ') }}
+              </v-chip>
+            </div>
+            <div
+              v-if="internalMemory.photoAnalysisResult.suggestions?.event && internalMemory.photoAnalysisResult.suggestions.event.length > 0">
+              <v-chip class="mb-1">
+                {{ t('memory.create.photoAnalysisResult.eventSuggestions') }}: {{
+                  internalMemory.photoAnalysisResult.suggestions.event.join(', ') }}
+              </v-chip>
+            </div>
+            <div
+              v-if="internalMemory.photoAnalysisResult.suggestions?.emotion && internalMemory.photoAnalysisResult.suggestions.emotion.length > 0">
+              <v-chip class="mb-1">
+                {{ t('memory.create.photoAnalysisResult.emotionSuggestions') }}: {{
+                  internalMemory.photoAnalysisResult.suggestions.emotion.join(', ') }}
+              </v-chip>
+            </div>
+          </v-chip-group>
+        </div>
+        <p v-else-if="!internalMemory.photoAnalysisResult && (internalMemory.photoUrl || memoryStore.faceRecognition.uploadedImage)"
+          class="text-body-2 text-grey mb-4">
+          {{ t('memory.create.photoAnalysisResult.noResult') }}
+        </p>
 
         <h4>{{ t('memory.create.aiEventSuggestion.title') }}</h4>
         <v-chip-group :model-value="internalMemory.eventSuggestion"
@@ -39,7 +90,7 @@
           column :disabled="readonly">
           <v-chip v-for="eventItem in aiEventSuggestions" :key="eventItem.text" :value="eventItem.text" filter
             variant="tonal">
-            <v-icon v-if="eventItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+            <v-icon v-if="eventItem.isAi" start>mdi-robot-outline</v-icon>
             {{ eventItem.text }}
           </v-chip>
           <v-chip value="unsure" filter variant="tonal">
@@ -56,7 +107,7 @@
           color="primary" column :disabled="readonly">
           <v-chip v-for="emotionItem in aiEmotionContextSuggestions" :key="emotionItem.text" :value="emotionItem.text"
             filter variant="tonal">
-            <v-icon v-if="emotionItem.isAi" size="small" start>mdi-robot-outline</v-icon>
+            <v-icon v-if="emotionItem.isAi" start>mdi-robot-outline</v-icon>
             {{ emotionItem.text }}
           </v-chip>
         </v-chip-group>
@@ -193,7 +244,7 @@ const buildAiPhotoAnalysisInput = (
   );
 
   if (targetMemberFace) {
-    aiInput.targetFaceCropUrl = targetMemberFace.thumbnailUrl || targetMemberFace.thumbnail; // Assign the thumbnail URL if target face exists
+    aiInput.targetFaceCropUrl = targetMemberFace.thumbnailUrl; // Assign the thumbnail URL if target face exists
 
     if (targetMemberFace.memberId) {
       aiInput.memberInfo = {

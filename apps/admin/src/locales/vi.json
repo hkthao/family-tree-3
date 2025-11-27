@@ -1058,6 +1058,20 @@
   "memory.create.analyzePhotoWithAi": "Xem gợi ý từ AI",
   "memory.create.aiAnalysisSuccess": "Phân tích ảnh bằng AI thành công!",
 
+  "memory.create.detectedObjects.title": "Đối tượng được phát hiện",
+  "memory.create.detectedObjects.noObjects": "Không tìm thấy đối tượng nào trong ảnh.",
+
+  "memory.create.photoAnalysisResult.title": "Kết quả phân tích ảnh",
+  "memory.create.photoAnalysisResult.summary": "Tóm tắt",
+  "memory.create.photoAnalysisResult.scene": "Bối cảnh",
+  "memory.create.photoAnalysisResult.eventAnalysis": "Sự kiện",
+  "memory.create.photoAnalysisResult.emotionAnalysis": "Cảm xúc",
+  "memory.create.photoAnalysisResult.yearEstimate": "Ước tính năm",
+  "memory.create.photoAnalysisResult.sceneSuggestions": "Gợi ý bối cảnh",
+  "memory.create.photoAnalysisResult.eventSuggestions": "Gợi ý sự kiện",
+  "memory.create.photoAnalysisResult.emotionSuggestions": "Gợi ý cảm xúc",
+  "memory.create.photoAnalysisResult.noResult": "Chưa có kết quả phân tích ảnh nào.",
+
   "memory.style.nostalgic": "Hoài niệm",
   "memory.style.warm": "Ấm áp",
   "memory.style.formal": "Trang trọng",
