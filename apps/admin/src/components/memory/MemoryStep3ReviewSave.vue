@@ -3,7 +3,7 @@
     <!-- Section 1: Uploaded Image -->
     <v-col cols="12" v-if="memoryStore.faceRecognition.uploadedImage">
       <h4 class="mb-2">{{ t('memory.create.step1.title') }}</h4>
-      <v-img :src="memoryStore.faceRecognition.uploadedImage" contain class="mb-4"></v-img>
+      <v-img :src="memoryStore.faceRecognition.uploadedImage" max-height="200" contain class="mb-4"></v-img>
     </v-col>
 
     <!-- Section 2: Detected Faces & Relationships -->

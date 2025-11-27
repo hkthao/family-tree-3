@@ -10,7 +10,6 @@
       <v-img :src="createBase64ImageSrc(face.thumbnail)" alt="Face"></v-img>
     </v-avatar>
     <span class="ml-2">{{ face.memberName || t('common.unknown') }}</span>
-    <v-chip  v-if="face.emotion" class="chip-face-emotion">{{ face.emotion }}</v-chip>
   </v-chip>
 </template>
 
@@ -26,10 +25,3 @@ const { face, value } = defineProps<{
 
 const { t } = useI18n();
 </script>
-
-<style scoped>
-.chip-face-emotion{
-  margin-left: 10px;
-  margin-right: -12px;
-}
-</style>
