@@ -176,6 +176,30 @@ public static class PromptBuilder
             promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
         }
 
+        if (!string.IsNullOrEmpty(request.Perspective))
+        {
+            promptBuilder.AppendLine($"\nGóc nhìn bài viết: {request.Perspective}");
+        }
+
+        if (!string.IsNullOrEmpty(request.Event))
+        {
+            promptBuilder.AppendLine($"Sự kiện chính: {request.Event}");
+        }
+
+        if (!string.IsNullOrEmpty(request.CustomEventDescription))
+        {
+            promptBuilder.AppendLine($"Mô tả sự kiện tùy chỉnh: {request.CustomEventDescription}");
+        }
+
+        if (request.EmotionContexts != null && request.EmotionContexts.Any())
+        {
+            promptBuilder.AppendLine("Cảm xúc và bối cảnh được chọn:");
+            foreach (var context in request.EmotionContexts)
+            {
+                promptBuilder.AppendLine($"- {context}");
+            }
+        }
+
         if (!string.IsNullOrEmpty(request.RawText))
         {
             promptBuilder.AppendLine("\nThông tin bổ sung từ người dùng:");

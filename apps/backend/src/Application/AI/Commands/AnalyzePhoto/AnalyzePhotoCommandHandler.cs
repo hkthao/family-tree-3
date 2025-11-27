@@ -1,4 +1,3 @@
-using System.Net.Http.Json; // Added for ReadFromJsonAsync
 using System.Text.Json; // Added for JsonDocument
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Prompts; // NEW
