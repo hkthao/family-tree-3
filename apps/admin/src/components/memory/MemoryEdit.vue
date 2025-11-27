@@ -84,7 +84,7 @@ const saveMemory = async () => {
     memberId: editableMemory.value.memberId,
     title: editableMemory.value.title,
     story: editableMemory.value.draftStory || editableMemory.value.story,
-    photoAnalysisId: editableMemory.value.photoAnalysisId,
+
     photoUrl: editableMemory.value.photoUrl,
     tags: editableMemory.value.tags,
     keywords: editableMemory.value.keywords,

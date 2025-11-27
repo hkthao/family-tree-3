@@ -12,10 +12,9 @@
     <!-- Face Detection and Selection -->
     <v-row>
       <v-col cols="12">
-        <div
-          v-if="memoryStore.faceRecognition.uploadedImage && internalMemory.faces && internalMemory.faces.length > 0">
-          <FaceBoundingBoxViewer :image-src="memoryStore.faceRecognition.uploadedImage" :faces="internalMemory.faces"
-            selectable @face-selected="openSelectMemberDialog" />
+        <div v-if="hasUploadedImage && internalMemory.faces && internalMemory.faces.length > 0 && uploadedImageUrl">
+          <FaceBoundingBoxViewer :image-src="uploadedImageUrl" :faces="internalMemory.faces" selectable
+            @face-selected="openSelectMemberDialog" />
           <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
           <h4>{{ t('memory.create.selectTargetMember') }}</h4>
@@ -23,17 +22,16 @@
             <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
           </v-chip-group>
         </div>
-        <v-alert v-else-if="!memoryStore.faceRecognition.loading && !memoryStore.faceRecognition.uploadedImage"
-          type="info">{{
-            t('face.recognition.uploadPrompt') }}</v-alert>
+        <v-alert v-else-if="!memoryStore.faceRecognition.loading && !hasUploadedImage" type="info">{{
+          t('face.recognition.uploadPrompt') }}</v-alert>
         <v-alert
-          v-else-if="!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0"
+          v-else-if="!memoryStore.faceRecognition.loading && hasUploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0"
           type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
       </v-col>
     </v-row>
 
     <!-- Raw Input & Story Style -->
-    <v-row>
+    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
       <v-col cols="12">
         <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
         <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
@@ -45,7 +43,7 @@
     </v-row>
 
     <!-- Perspective -->
-    <v-row>
+    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="internalMemory.perspective"
@@ -65,9 +63,9 @@
     </v-row>
 
     <!-- Title and Story -->
-    <v-row>
+    <v-row v-if="memoryStore.faceRecognition.uploadedImage">
       <v-col cols="12">
-        <h4 class="text-h6 mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
+        <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
         <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
         <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined
@@ -83,7 +81,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryDto, ExifDataDto } from '@/types/memory';
+import type { MemoryDto } from '@/types/memory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useMemoryStore } from '@/stores/memory.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
@@ -106,6 +104,7 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null);
+const uploadedImageUrl = ref<string | null>(null);
 const aiPerspectiveSuggestions = ref([
   { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
@@ -115,6 +114,7 @@ const generatedStory = ref<string | null>(null);
 const generatedTitle = ref<string | null>(null);
 const generatingStory = ref(false);
 const storyEditorValid = ref(true);
+const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
 const canGenerateStory = computed(() => {
   return (internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10) ||
     (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
@@ -144,7 +144,6 @@ const generateStory = async () => {
     rawText: internalMemory.value.rawInput,
     style: internalMemory.value.storyStyle,
     maxWords: 500,
-
     photoSummary: internalMemory.value.photoAnalysisResult?.summary,
     photoScene: internalMemory.value.photoAnalysisResult?.scene,
     photoEventAnalysis: internalMemory.value.photoAnalysisResult?.event,
@@ -152,7 +151,6 @@ const generateStory = async () => {
     photoYearEstimate: internalMemory.value.photoAnalysisResult?.yearEstimate,
     photoObjects: internalMemory.value.photoAnalysisResult?.objects,
     photoPersons: photoPersonsPayload,
-
     perspective: internalMemory.value.perspective,
     event: internalMemory.value.eventSuggestion,
     customEventDescription: internalMemory.value.customEventDescription,
@@ -206,29 +204,19 @@ const loadImage = (file: File): Promise<HTMLImageElement> => {
   });
 };
 
-const extractExifData = async (file: File): Promise<ExifDataDto | undefined> => {
-  console.log('Attempting to extract EXIF from file:', file.name);
-  return {
-    datetime: new Date().toISOString(),
-    gps: '50.123, 10.456',
-    cameraInfo: 'DummyCameraModel',
-  };
-};
+
 
 const handleFileUpload = async (file: File | File[] | null) => {
   if (props.readonly) return;
-
   let uploadedFile: File | null = null;
-
   if (file instanceof File) {
     uploadedFile = file;
   } else if (Array.isArray(file) && file.length > 0) {
     uploadedFile = file[0];
   }
-
   if (uploadedFile) {
+    uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
     await memoryStore.detectFaces(uploadedFile, true);
-
     try {
       const img = await loadImage(uploadedFile);
       updateMemory({ imageSize: `${img.width}x${img.height}` });
@@ -237,24 +225,19 @@ const handleFileUpload = async (file: File | File[] | null) => {
       updateMemory({ imageSize: undefined });
     }
 
-    try {
-      updateMemory({ exifData: await extractExifData(uploadedFile) });
-    } catch (e) {
-      console.error('Failed to extract EXIF data:', e);
-      updateMemory({ exifData: undefined });
-    }
 
     if (memoryStore.faceRecognition.detectedFaces.length > 0) {
       updateMemory({
-        photoAnalysisId: 'generated_id',
         faces: memoryStore.faceRecognition.detectedFaces,
-        photoUrl: memoryStore.faceRecognition.uploadedImage,
-        photo: memoryStore.faceRecognition.uploadedImage,
+        photoUrl: uploadedImageUrl.value,
+        photo: uploadedImageUrl.value,
       });
+
       if (memoryStore.faceRecognition.detectedFaces.length > 0) {
         selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
       }
-    } else if (!memoryStore.faceRecognition.loading && memoryStore.faceRecognition.uploadedImage && memoryStore.faceRecognition.detectedFaces.length === 0) {
+
+    } else if (!memoryStore.faceRecognition.loading && uploadedImageUrl.value && memoryStore.faceRecognition.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
       updateMemory({
         faces: [],
@@ -264,10 +247,11 @@ const handleFileUpload = async (file: File | File[] | null) => {
       });
       selectedTargetMemberFaceId.value = null;
     }
+
   } else {
     memoryStore.resetFaceRecognitionState();
+    uploadedImageUrl.value = null; // Clear local image URL
     updateMemory({
-      photoAnalysisId: undefined,
       faces: [],
       photoUrl: undefined,
       photo: undefined,
@@ -291,7 +275,6 @@ const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) =>
     face.id === faceId ? { ...face, memberId: memberDetails.id, memberName: memberDetails.fullName } : face
   ) || [];
   updateMemory({ faces: updatedFaces });
-
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
   if (selectedTargetMemberFaceId.value === faceId) {

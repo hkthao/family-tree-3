@@ -7,7 +7,7 @@
     ref="memoryFormRef"
     v-model="editedMemory"
     :member-id="editedMemory.memberId"
-    @update:selectedFiles="handleSelectedFilesUpdate"
+
     :readonly="false"
   />
   <v-card-text v-else>
@@ -18,15 +18,10 @@
     <v-btn color="blue-darken-1" variant="text" @click="handleClose">
       {{ t('common.cancel') }}
     </v-btn>
-    <v-btn v-if="memoryFormValidAndLoaded && currentStep > 1 && !isSaving" color="blue-darken-1" variant="text" @click="memoryFormRef?.prevStep()">
-      {{ t('common.back') }}
-    </v-btn>
-    <v-btn v-if="memoryFormValidAndLoaded && currentStep < 3" color="blue-darken-1" variant="text" @click="memoryFormRef?.nextStep()" :loading="isSaving">
-      {{ t('common.next') }}
-    </v-btn>
-    <v-btn v-else color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
+    <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
       {{ t('common.save') }}
     </v-btn>
+
   </v-card-actions>
 </template>
 
@@ -50,65 +45,21 @@ const { showSnackbar } = useGlobalSnackbar();
 
 const memoryFormRef = ref<InstanceType<typeof MemoryForm> | null>(null);
 const editedMemory = ref<MemoryDto | null>(null); // Changed to MemoryDto
-const selectedFiles = ref<File[]>([]);
+
 const isSaving = ref(false); // To manage loading state for buttons
-
-// Computed property for safe access to activeStep
-const currentStep = computed(() => memoryFormRef.value?.activeStep ?? 1);
-
-// Computed property to check if memoryFormRef is loaded and valid
-const memoryFormValidAndLoaded = computed(() => memoryFormRef.value !== null);
-
-const fetchMemory = async (id: string) => {
-  const memory = await memoryStore.getById(id);
-  if (memory) {
-    editedMemory.value = memory; // Direct assignment, as editedMemory is now MemoryDto
-  } else {
-    showSnackbar(t('memory.edit.notFound'), 'error');
-    emit('close');
-  }
-};
-
-onMounted(() => {
-  if (props.memoryId) {
-    fetchMemory(props.memoryId);
-  }
-});
-
-watch(() => props.memoryId, (newId) => {
-  if (newId) {
-    fetchMemory(newId);
-  }
-});
-
-const handleSelectedFilesUpdate = (files: File[]) => {
-  selectedFiles.value = files;
-};
 
 const handleSave = async () => {
   if (!editedMemory.value || !memoryFormRef.value) return;
 
   isSaving.value = true;
   try {
-    // Validate all steps before saving
-    const step1Valid = await memoryFormRef.value.validateStep(1);
-    const step2Valid = await memoryFormRef.value.validateStep(2);
-
-    if (!step1Valid || !step2Valid) {
-        isSaving.value = false;
-        showSnackbar(t('common.validations.required'), 'error'); // Generic validation error message
-        return;
+    if (!memoryFormRef.value.isValid) {
+      isSaving.value = false;
+      showSnackbar(t('common.validations.required'), 'error'); // Generic validation error message
+      return;
     }
 
-    // Placeholder for file upload logic (if new files are selected)
-    if (selectedFiles.value.length > 0) {
-      console.log('Files to upload for edit:', selectedFiles.value);
-      // In a real application, you would upload files to a server here.
-      // For now, we'll just assign the name of the first selected file as photoUrl
-      editedMemory.value.photoUrl = selectedFiles.value[0]?.name || undefined;
-      // Corrected showSnackbar call: message as first arg, color as second
-      showSnackbar(`${selectedFiles.value.length} files selected for upload. Upload logic to be implemented.`, 'info');
-    }
+
 
     const result = await memoryStore.updateItem(editedMemory.value);
     if (result.ok) {

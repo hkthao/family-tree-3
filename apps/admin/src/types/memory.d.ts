@@ -11,7 +11,7 @@ export interface MemoryDto {
   rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
   story?: string | null; // Allow null or undefined
   storyStyle?: string; // NEW: Added storyStyle property
-  photoAnalysisId?: string | null;
+
   photoUrl?: string | null;
   photo?: string | null; // New field for temporary photo data (e.g., base64 string)
   targetFaceId?: string; // New field for the ID of the main character face

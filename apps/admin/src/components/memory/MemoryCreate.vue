@@ -260,7 +260,7 @@ const analyzingPhoto = ref(false);
 
 // Step 2: Photo Analysis
 const photoAnalysisResult = ref<PhotoAnalysisResultDto | null>(null); // Use PhotoAnalysisResultDto
-const photoAnalysisId = ref<string | null>(null); // Will store createdAt from analysis result
+
 
 // Step 3: Raw Text Input
 const rawText = ref('');
@@ -430,7 +430,7 @@ const analyzePhoto = async () => {
     
     if (result.ok) {
       photoAnalysisResult.value = result.value;
-      photoAnalysisId.value = result.value?.createdAt || null; // Use createdAt as ID
+
       currentStep.value = 2; // Move to Photo Analysis step
     } else {
       showSnackbar(result.error?.message || t('memory.errors.aiAnalysisFailed'), 'error');
@@ -447,7 +447,6 @@ const skipPhotoAnalysis = () => {
   photoFile.value = null;
   photoPreviewUrl.value = null;
   photoAnalysisResult.value = null;
-  photoAnalysisId.value = null;
   currentStep.value = 3; // Move directly to Raw Text Input
 };
 
@@ -494,7 +493,7 @@ const editPhotoContext = () => {
 };
 
 const canGenerateStory = computed(() => {
-  return (rawText.value && rawText.value.length >= 10) || photoAnalysisId.value;
+  return (rawText.value && rawText.value.length >= 10) || photoFile.value;
 });
 
 const generateStory = async () => {
@@ -512,8 +511,7 @@ const generateStory = async () => {
   }));
 
   const requestPayload = {
-    memberId: props.memberId,
-    photoAnalysisId: photoAnalysisId.value,
+
     rawText: rawText.value,
     style: storyStyle.value,
     maxWords: 500, // Hardcoded for now
@@ -560,7 +558,7 @@ const saveMemory = async () => {
     memberId: props.memberId,
     title: memoryTitle.value || story.value.title,
     story: story.value.draftStory,
-    photoAnalysisId: photoAnalysisId.value,
+
     photoUrl: photoPreviewUrl.value, // Save the original photo URL (or restored if we integrate photo revival)
     tags: memoryTags.value,
     keywords: story.value.keywords || [],
@@ -594,7 +592,7 @@ watch(photoFile, (newFile) => {
   if (!newFile) {
     photoPreviewUrl.value = null;
     photoAnalysisResult.value = null;
-    photoAnalysisId.value = null;
+
   }
 });
 
