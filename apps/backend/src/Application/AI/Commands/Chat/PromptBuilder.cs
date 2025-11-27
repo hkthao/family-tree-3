@@ -4,6 +4,7 @@ using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
 using backend.Application.AI.DTOs; // NEW USING for AiPhotoAnalysisInputDto
 using backend.Application.AI.Models; // NEW USING
+using backend.Application.Memories.Commands.GenerateStory;
 using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
@@ -145,7 +146,7 @@ public static class PromptBuilder
     /// <param name="photoAnalysisResult">Kết quả phân tích ảnh liên quan (nếu có).</param>
     /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
     public static string BuildStoryGenerationPrompt(
-        backend.Application.Memories.Commands.GenerateStory.GenerateStoryCommand request,
+        GenerateStoryCommand request,
         Member member,
         Family? family)
     {
@@ -170,6 +171,7 @@ public static class PromptBuilder
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
         }
+       
         if (!string.IsNullOrEmpty(member.WifeFullName))
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
@@ -180,15 +182,12 @@ public static class PromptBuilder
             promptBuilder.AppendLine($"\nGóc nhìn bài viết: {request.Perspective}");
         }
 
-
-
         if (!string.IsNullOrEmpty(request.RawText))
         {
             promptBuilder.AppendLine("\nThông tin bổ sung từ người dùng:");
             promptBuilder.AppendLine(request.RawText);
         }
 
-        // --- Photo Analysis Result Details ---
         if (request.ResizedImageUrl != null || (request.PhotoPersons != null && request.PhotoPersons.Any()))
         {
             promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
@@ -206,7 +205,6 @@ public static class PromptBuilder
             }
         }
 
-        // Add instructions from the system prompt
         promptBuilder.AppendLine("\nTuân thủ các quy tắc đã được đặt ra trong system prompt để tạo ra câu chuyện.");
 
         return promptBuilder.ToString();
