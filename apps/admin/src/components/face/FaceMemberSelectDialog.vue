@@ -26,7 +26,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="secondary" @click="$emit('update:show', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :disabled="!selectedMemberId" @click="handleSave">{{ t('common.save') }}</v-btn>
+        <v-btn color="primary" :disabled="!props.disableSaveValidation && !selectedMemberId" @click="handleSave">{{ t('common.save') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -45,7 +45,8 @@ const props = defineProps({
   show: { type: Boolean, required: true },
   selectedFace: { type: Object as () => DetectedFace | null, default: null },
   familyId: { type: String, default: undefined },
-  showRelationPromptField: { type: Boolean, default: false }, // New prop
+  showRelationPromptField: { type: Boolean, default: false },
+  disableSaveValidation: { type: Boolean, default: false }, // NEW PROP
 });
 
 const emit = defineEmits<{

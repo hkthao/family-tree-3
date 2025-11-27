@@ -557,7 +557,7 @@ const saveMemory = async () => {
   const createPayload = {
     memberId: props.memberId,
     title: memoryTitle.value || story.value.title,
-    story: story.value.draftStory,
+    story: story.value.story,
 
     photoUrl: photoPreviewUrl.value, // Save the original photo URL (or restored if we integrate photo revival)
     tags: memoryTags.value,

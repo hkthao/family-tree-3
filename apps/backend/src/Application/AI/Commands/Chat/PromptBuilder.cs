@@ -200,7 +200,7 @@ public static class PromptBuilder
                 promptBuilder.AppendLine("- Người trong ảnh:");
                 foreach (var person in request.PhotoPersons)
                 {
-                    promptBuilder.AppendLine($"  - {person.Name} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {person.Confidence ?? 0:P}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
+                    promptBuilder.AppendLine($"  - {person.Name ?? "Không rõ"} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {person.Confidence ?? 0:P}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
                 }
             }
         }

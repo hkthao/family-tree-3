@@ -7,6 +7,7 @@ import type { PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
 export interface MemoryDto {
   id?: string; // Made optional to support new creation
   memberId: string | null;
+  memberName?: string | null; // NEW: Added memberName property
   title?: string | null; // Allow null or undefined
   rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
   story?: string | null; // Allow null or undefined
@@ -19,14 +20,9 @@ export interface MemoryDto {
   exifData?: ExifDataDto; // New field for EXIF metadata
   tags?: string[];
   keywords?: string[];
-  eventSuggestion?: string;
-  customEventDescription?: string;
-  emotionContextTags?: string[];
-  customEmotionContext?: string;
   faces?: MemoryFaceDto[]; // Changed back to MemoryFaceDto[]
   perspective?: string; // New field for story perspective
   createdAt?: string; // Made optional to support new creation
-  photoAnalysisResult?: PhotoAnalysisResultDto | null;
   // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị
 }
 

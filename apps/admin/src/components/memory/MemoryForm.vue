@@ -77,7 +77,6 @@
     <!-- Title and Story -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <h4 class="mb-2">{{ t('memory.create.step4.reviewEdit') }}</h4>
         <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
         <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined
@@ -87,7 +86,8 @@
 
     <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
       :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId"
-      :show-relation-prompt-field="true" />
+      :show-relation-prompt-field="true"
+      :disable-save-validation="true" />
   </v-container>
 </template>
 
@@ -130,8 +130,11 @@ const storyEditorValid = ref(true);
 const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
 const isLoading = computed(() => memoryStore.faceRecognition.loading);
 const canGenerateStory = computed(() => {
-  return (internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10) ||
-    (memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0);
+  const hasMinRawInput = internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10;
+  const hasDetectedFaces = memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0;
+  const hasMemberSelected = internalMemory.value.memberId && internalMemory.value.memberId !== '00000000-0000-0000-0000-000000000000';
+
+  return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
 });
 
 const updateMemory = (payload: Partial<MemoryDto>) => {
@@ -140,6 +143,12 @@ const updateMemory = (payload: Partial<MemoryDto>) => {
 
 const generateStory = async () => {
   if (!canGenerateStory.value) return;
+
+  if (!internalMemory.value.memberId || internalMemory.value.memberId === '00000000-0000-0000-0000-000000000000') {
+    showSnackbar(t('memory.errors.memberIdRequired'), 'error');
+    generatingStory.value = false; // Ensure loading state is reset if validation fails
+    return;
+  }
 
   generatingStory.value = true;
 
@@ -154,21 +163,13 @@ const generateStory = async () => {
 
   const requestPayload = {
     memberId: internalMemory.value.memberId,
+    memberName: internalMemory.value.memberName, // Added this line
     resizedImageUrl: memoryStore.faceRecognition.resizedImageUrl,
     rawText: internalMemory.value.rawInput,
     style: internalMemory.value.storyStyle,
     maxWords: 500,
-    photoSummary: internalMemory.value.photoAnalysisResult?.summary,
-    photoScene: internalMemory.value.photoAnalysisResult?.scene,
-    photoEventAnalysis: internalMemory.value.photoAnalysisResult?.event,
-    photoEmotionAnalysis: internalMemory.value.photoAnalysisResult?.emotion,
-    photoYearEstimate: internalMemory.value.photoAnalysisResult?.yearEstimate,
-    photoObjects: internalMemory.value.photoAnalysisResult?.objects,
     photoPersons: photoPersonsPayload,
     perspective: internalMemory.value.perspective,
-    event: internalMemory.value.eventSuggestion,
-    customEventDescription: internalMemory.value.customEventDescription,
-    emotionContexts: internalMemory.value.emotionContextTags,
   };
 
   const result = await memoryStore.generateStory(requestPayload);
@@ -201,11 +202,14 @@ watch(selectedTargetMemberFaceId, (newId) => {
     const selectedFace = internalMemory.value.faces?.find(face => face.id === newId);
     if (selectedFace && selectedFace.memberId) {
       internalMemory.value.memberId = selectedFace.memberId;
+      internalMemory.value.memberName = selectedFace.memberName; // Added this line
     } else {
       internalMemory.value.memberId = null;
+      internalMemory.value.memberName = null; // Added this line
     }
   } else {
     internalMemory.value.memberId = null;
+    internalMemory.value.memberName = null; // Added this line
   }
 });
 

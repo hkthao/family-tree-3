@@ -8,7 +8,7 @@
         class="mb-4"
       ></v-text-field>
       <v-textarea
-        v-model="editableDraft.draftStory"
+        v-model="editableDraft.story"
         :label="t('memory.storyEditor.storyContent')"
         outlined
         rows="10"
@@ -82,7 +82,7 @@ interface TimelineEntry {
 
 interface Draft {
   title: string;
-  draftStory: string;
+  story: string;
   tags?: string[];
   keywords?: string[];
   timeline?: TimelineEntry[];
