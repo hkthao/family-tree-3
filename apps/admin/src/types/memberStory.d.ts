@@ -15,5 +15,8 @@ export interface MemberStoryDto {
   imageSize?: string | null; // e.g., "1920x1080"
   exifData?: any; // e.g., for storing EXIF metadata from photo
   targetFaceId?: string | null; // The ID of the face selected as the primary subject for the story
+  memberFullName?: string | null;
+  memberAvatarUrl?: string | null;
+  memberGender?: string | null;
 }
 

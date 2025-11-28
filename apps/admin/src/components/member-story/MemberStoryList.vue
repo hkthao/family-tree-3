@@ -22,8 +22,8 @@
           {{ item.title }}
         </a>
       </template>
-      <template #item.memberName="{ item }">
-        {{ item.memberName || t('common.unknown') }}
+      <template #item.memberFullName="{ item }">
+        <MemberName :full-name="item.memberFullName" :avatar-url="item.memberAvatarUrl" :gender="item.memberGender" />
       </template>
       <template #item.actions="{ item }">
         <v-menu>
@@ -50,6 +50,7 @@
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { DataTableHeader } from 'vuetify';
+import { MemberName } from '@/components/member';
 
 interface MemberStoryListProps {
   items: MemberStoryDto[];

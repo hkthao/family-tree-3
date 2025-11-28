@@ -25,7 +25,7 @@ public class SearchStoriesQueryHandler : IRequestHandler<SearchStoriesQuery, Res
 
     public async Task<Result<PaginatedList<MemberStoryDto>>> Handle(SearchStoriesQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<MemberStory> query = _context.MemberStories;
+        IQueryable<MemberStory> query = _context.MemberStories.Include(ms => ms.Member);
 
         if (request.MemberId.HasValue)
         {

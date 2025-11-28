@@ -7,7 +7,8 @@ public class MemberStoryDto
     public string Title { get; set; } = string.Empty;
     public string Story { get; set; } = string.Empty;
     public string? PhotoUrl { get; set; }
-    public string[] Tags { get; set; } = Array.Empty<string>();
-    public string[] Keywords { get; set; } = Array.Empty<string>();
-    public DateTime CreatedAt { get; set; }
+    // Thêm thông tin thành viên
+    public string MemberFullName { get; set; } = string.Empty;
+    public string? MemberAvatarUrl { get; set; }
+    public string? MemberGender { get; set; } // Giới tính (ví dụ: "Male", "Female", "Other", "Unknown")
 }

@@ -9,7 +9,10 @@ public class MemberStoryMappingProfile : Profile
 {
     public MemberStoryMappingProfile()
     {
-        CreateMap<MemberStory, MemberStoryDto>();
+        CreateMap<MemberStory, MemberStoryDto>()
+            .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member.FullName))
+            .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member.AvatarUrl))
+            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member.Gender));
         CreateMap<CreateMemberStoryCommand, MemberStory>();
         CreateMap<UpdateMemberStoryCommand, MemberStory>();
     }

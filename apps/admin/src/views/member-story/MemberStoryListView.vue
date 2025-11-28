@@ -76,7 +76,7 @@ const headers = computed<DataTableHeader[]>(() => { // NEW: Headers computed pro
     },
     {
       title: t('member.list.headers.fullName'),
-      key: 'memberName',
+      key: 'memberFullName',
       align: 'start' as const,
     },
     {
