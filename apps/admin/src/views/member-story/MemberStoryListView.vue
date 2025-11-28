@@ -1,104 +1,71 @@
 <template>
   <v-container fluid>
-
-    <v-data-table-server v-model:items-per-page="memberStoryStore.list.itemsPerPage" :headers="headers"
-      :items="memberStoryStore.list.items" :items-length="memberStoryStore.list.totalItems" :loading="memberStoryStore.list.loading"
-      @update:options="handleListOptionsUpdate" item-value="id" class="elevation-0">
-      <template #top>
-        <v-toolbar flat>
-          <v-toolbar-title>{{ t('memberStory.list.title') }}</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-tooltip :text="t('memberStory.list.action.create')" location="bottom">
-            <template v-slot:activator="{ props }">
-              <v-btn color="primary" class="mr-2" v-bind="props" @click="openAddDrawer()" variant="text" icon>
-                <v-icon>mdi-plus</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-          <v-text-field v-model="searchQuery" class="mr-2" append-inner-icon="mdi-magnify" :label="t('common.search')"
-            single-line hide-details></v-text-field>
-        </v-toolbar>
-      </template>
-
-      <template v-slot:item.title="{ item }">
-        <a @click="openDetailDrawer(item.id!)"
-          class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-          {{ item.title }}
-        </a>
-      </template>
-      <template v-slot:item.memberName="{ item }">
-        {{ item.memberId || t('common.unknown') }}
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-menu>
-          <template v-slot:activator="{ props: menuProps }">
-            <v-btn icon variant="text" v-bind="menuProps" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="openEditDrawer(item.id!)">
-              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="confirmDelete(item)">
-              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
-      <!-- No data message can be handled by the table itself or left empty if not needed -->
-    </v-data-table-server>
+    <MemberStoryList
+      :items="memberStoryStore.list.items"
+      :total-items="memberStoryStore.list.totalItems"
+      :loading="memberStoryStore.list.loading"
+      :items-per-page="memberStoryStore.list.itemsPerPage"
+      :headers="headers"
+      :search="searchQuery"
+      @update:options="handleListOptionsUpdate"
+      @update:search="handleSearchUpdate"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
+      @delete="confirmDelete"
+      @create="openAddDrawer"
+    />
 
     <!-- Add MemberStory Drawer -->
-    <BaseCrudDrawer v-model="addDrawer" @close="handleCrudDrawerClosed">
-      <MemberStoryAddView v-if="addDrawer" @close="handleCrudDrawerClosed" @saved="handleCrudDrawerSaved" />
+    <BaseCrudDrawer v-model="addDrawer" @close="handleMemberStoryClosed">
+      <MemberStoryAddView v-if="addDrawer" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" />
     </BaseCrudDrawer>
 
     <!-- Edit MemberStory Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" @close="handleCrudDrawerClosed">
+    <BaseCrudDrawer v-model="editDrawer" @close="handleMemberStoryClosed">
+      <MemberStoryEditView v-if="selectedItemId && editDrawer" :member-story-id="selectedItemId" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" />
     </BaseCrudDrawer>
 
     <!-- Detail MemberStory Drawer -->
-    <BaseCrudDrawer v-model="detailDrawer" @close="handleCrudDrawerClosed">
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleMemberStoryClosed">
       <MemberStoryDetailView v-if="selectedItemId && detailDrawer" :member-story-id="selectedItemId"
-        @close="handleCrudDrawerClosed" @edit-item="openEditDrawer" />
+        @close="handleMemberStoryClosed" @edit-item="openEditDrawer" />
     </BaseCrudDrawer>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted, ref } from 'vue';
+import { watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useMemberStoryStore } from '@/stores/memberStory.store'; // Use the new member story store // Updated
-import type { MemberStoryDto } from '@/types/memberStory'; // Import MemberStoryDto // Updated
-import MemberStoryAddView from './MemberStoryAddView.vue'; // Will be created // Updated
-
-import MemberStoryDetailView from './MemberStoryDetailView.vue'; // Will be created // Updated
-
+import { useMemberStoryStore } from '@/stores/memberStory.store';
+import type { MemberStoryDto } from '@/types/memberStory';
+import MemberStoryAddView from './MemberStoryAddView.vue';
+import MemberStoryEditView from './MemberStoryEditView.vue'; // NEW IMPORT
+import MemberStoryDetailView from './MemberStoryDetailView.vue';
+import MemberStoryList from '@/components/member-story/MemberStoryList.vue';
+import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
 
 interface MemberStoryListViewProps {
-  memberId?: string; // The member ID to list member stories for // Updated
+  memberId?: string;
 }
 
 const props = defineProps<MemberStoryListViewProps>();
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore(); // Updated
-const { headers } = storeToRefs(memberStoryStore); // Get headers from the member story store // Updated
-const searchQuery = ref('');
-const showNoMemberSelectedMessage = ref(false); // New: to control visibility of "no member selected" message
+const memberStoryStore = useMemberStoryStore();
+const { headers } = storeToRefs(memberStoryStore);
+const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
 
 const {
   addDrawer,
   editDrawer,
   detailDrawer,
   selectedItemId,
-  openAddDrawer: _openAddDrawer, // Rename to avoid conflict
+  openAddDrawer, // Use directly from useCrudDrawer
   openEditDrawer,
   openDetailDrawer,
   closeAllDrawers,
@@ -107,9 +74,41 @@ const {
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-// New: Wrapper for openAddDrawer to check for memberId
-const openAddDrawer = () => {
-  _openAddDrawer();
+const confirmDelete = async (item: MemberStoryDto) => {
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('memberStory.list.confirmDelete', { title: item.title || '' }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    confirmColor: 'error',
+  });
+
+  if (confirmed) {
+    await handleDeleteConfirm(item);
+  }
+};
+
+const handleDeleteConfirm = async (item: MemberStoryDto) => {
+  if (item && item.id) {
+    await memberStoryStore.deleteItem(item.id);
+    if (memberStoryStore.error) {
+      showSnackbar(
+        t('memberStory.messages.deleteError', { error: memberStoryStore.error }),
+        'error',
+      );
+    } else {
+      showSnackbar(
+        t('memberStory.messages.deleteSuccess'),
+        'success',
+      );
+    }
+  } else {
+    showSnackbar(
+      t('memberStory.messages.deleteError', { error: t('common.invalidId') }),
+      'error',
+    );
+  }
+  memberStoryStore._loadItems();
 };
 
 const handleListOptionsUpdate = (options: {
@@ -120,71 +119,30 @@ const handleListOptionsUpdate = (options: {
   memberStoryStore.setListOptions(options); // Updated
 };
 
-const handleCrudDrawerClosed = () => {
+const handleMemberStoryClosed = () => {
   closeAllDrawers();
 };
 
-const handleCrudDrawerSaved = () => {
+const handleMemberStorySaved = () => {
   closeAllDrawers();
-  memberStoryStore._loadItems(); // Updated
+  memberStoryStore._loadItems();
 };
 
-const confirmDelete = async (memberStory: MemberStoryDto) => { // Updated
-  const confirmed = await showConfirmDialog({
-    title: t('memberStory.delete.confirmTitle'), // Updated
-    message: t('memberStory.delete.confirmMessage', { title: memberStory.title }), // Updated
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    confirmColor: 'error',
-  });
-
-  if (confirmed) {
-    await handleDeleteConfirm(memberStory);
-  }
+const handleSearchUpdate = async (search: string) => {
+  const processedSearch = removeDiacritics(search);
+  searchQuery.value = search; // Giữ nguyên chuỗi tìm kiếm gốc cho hiển thị nếu cần
+  memberStoryStore.setFilters({ searchQuery: processedSearch, memberId: props.memberId });
+  memberStoryStore._loadItems();
 };
-
-const handleDeleteConfirm = async (memberStory: MemberStoryDto) => { // Updated
-  if (memberStory) {
-    await memberStoryStore.deleteItem(memberStory.id!); // Use non-null assertion as memberStory.id is expected for existing member story // Updated
-    if (memberStoryStore.error) { // Updated
-      showSnackbar(t('memberStory.delete.error', { error: memberStoryStore.error }), 'error'); // Updated
-    } else {
-      showSnackbar(t('memberStory.delete.success'), 'success'); // Updated
-    }
-  }
-  memberStoryStore._loadItems(); // Updated
-};
-
-
-
-// Watch for changes in searchQuery to update filters and reload items
-watch(searchQuery, (newSearchQuery) => {
-    memberStoryStore.setFilters({ searchQuery: newSearchQuery, memberId: props.memberId }); // Updated
-    memberStoryStore._loadItems(); // Updated
-});
 
 // Watch for changes in memberId prop to update filters and reload items
 watch(() => props.memberId, (newMemberId) => {
-  if (newMemberId) {
-    showNoMemberSelectedMessage.value = false;
-    memberStoryStore.setFilters({ memberId: newMemberId }); // Updated
-    memberStoryStore._loadItems(); // Updated
-  } else {
-    memberStoryStore.setFilters({ memberId: undefined }); // Clear filter // Updated
-    memberStoryStore.list.items = []; // Clear current items // Updated
-    memberStoryStore.list.totalItems = 0; // Updated
-    showNoMemberSelectedMessage.value = true;
-  }
-});
+  memberStoryStore.setFilters({ memberId: newMemberId || undefined, searchQuery: searchQuery.value });
+  memberStoryStore._loadItems();
+}, { immediate: true }); // Immediate to load on initial mount
 
-onMounted(() => {
-  if (props.memberId) {
-    showNoMemberSelectedMessage.value = false;
-    memberStoryStore.setFilters({ memberId: props.memberId }); // Updated
-    memberStoryStore._loadItems(); // Updated
-  } else {
-    showNoMemberSelectedMessage.value = true;
-  }
-});
+
+
+
 
 </script>

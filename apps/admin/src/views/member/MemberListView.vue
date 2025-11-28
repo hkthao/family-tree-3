@@ -10,7 +10,7 @@
 
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
-      <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId as string"
+      <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId"
         @close="handleMemberClosed" @saved="handleMemberSaved" />
     </BaseCrudDrawer>
 

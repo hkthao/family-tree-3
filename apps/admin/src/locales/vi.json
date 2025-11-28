@@ -941,8 +941,11 @@
   "memberStory.list.action.create": "Tạo Ký ức",
 
   "memberStory.form.memberIdLabel": "Thành viên mục tiêu",
+  "memberStory.form.rules.memberIdRequired": "ID thành viên là bắt buộc.",
+  "memberStory.form.rules.rawInputMinLength": "Tối thiểu {length} ký tự là bắt buộc.",
   "memberStory.create.title": "Tạo Ký ức Mới",
   "memberStory.create.rawInputPlaceholder": "Kể lại điều bạn nhớ về khoảnh khắc này...",
+  "memberStory.form.rules.photoUrlRequiredIfRawInputEmpty": "Yêu cầu ảnh nếu phần nhập liệu thô trống.",
   "memberStory.create.aiCharacterSuggestion.relationPrompt": "Đây là ai? / Quan hệ với bạn?",
   "memberStory.create.selectTargetMember": "Bạn muốn tạo ký ức về ai",
   "memberStory.create.perspective.title": "Góc nhìn bài viết",

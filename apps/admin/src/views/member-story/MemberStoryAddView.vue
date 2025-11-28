@@ -48,6 +48,7 @@ const editedMemberStory = ref<MemberStoryDto>({
   story: '',
   photoUrl: '',
   faces: [], // Initialize faces as an empty array
+  rawInput: null,
 });
 
 const handleSave = async () => {

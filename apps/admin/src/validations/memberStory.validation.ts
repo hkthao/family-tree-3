@@ -1,4 +1,4 @@
-import { required, minLength, requiredIf } from '@vuelidate/validators';
+import { required, minLength } from '@vuelidate/validators';
 import i18n from '@/plugins/i18n'; // Correct import path
 
 const { t } = i18n.global;
@@ -7,7 +7,7 @@ export const memberStoryValidationRules = {
   memberId: {
     required: {
       $validator: required,
-      $message: () => t('memberStory.form.rules.memberIdRequired'),
+      $message: () => t('common.validations.required'),
     },
   },
   rawInput: {
@@ -19,20 +19,18 @@ export const memberStoryValidationRules = {
   title: {
     required: {
       $validator: required,
-      $message: () => t('memberStory.form.rules.titleRequired'),
+      $message: () => t('common.validations.required'),
     },
   },
   story: {
     required: {
       $validator: required,
-      $message: () => t('memberStory.form.rules.storyRequired'),
+      $message: () => t('common.validations.required'),
     },
   },
   photoUrl: {
     required: {
-      $validator: requiredIf(function (this: any) {
-        return !this.rawInput;
-      }),
+      $validator: required,
       $message: () => t('memberStory.form.rules.photoUrlRequiredIfRawInputEmpty'),
     },
   },

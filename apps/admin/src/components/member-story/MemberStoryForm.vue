@@ -7,21 +7,18 @@
           @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue }); v$.memberId.$touch(); }"
           :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')"
           :error-messages="v$.memberId.$errors.map(e => e.$message as string)"
-          :error="v$.memberId.$invalid && v$.memberId.$dirty"
-        />
+          :error="v$.memberId.$invalid && v$.memberId.$dirty" />
       </v-col>
     </v-row>
     <!-- Photo Upload Input -->
-    <v-row>
+    <v-row v-if="modelValue.memberId">
       <v-col v-if="isLoading" cols="12">
         <v-progress-linear indeterminate color="primary"></v-progress-linear>
       </v-col>
       <v-col cols="12">
         <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
       </v-col>
-    </v-row>
-    <!-- Face Detection and Selection -->
-    <v-row>
+      <!-- Face Detection and Selection -->
       <v-col cols="12">
         <div v-if="hasUploadedImage && !isLoading">
           <div v-if="modelValue.faces && modelValue.faces.length > 0">
@@ -45,8 +42,7 @@
           @update:model-value="(newValue) => { updateModelValue({ rawInput: newValue }); v$.rawInput.$touch(); }"
           :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow
           :error-messages="v$.rawInput.$errors.map(e => e.$message as string)"
-          :error="v$.rawInput.$invalid && v$.rawInput.$dirty"
-        ></v-textarea>
+          :error="v$.rawInput.$invalid && v$.rawInput.$dirty"></v-textarea>
       </v-col>
       <v-col cols="12">
         <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
@@ -97,18 +93,14 @@
       <v-col cols="12">
         <v-text-field :model-value="modelValue.title"
           @update:model-value="(newValue) => { updateModelValue({ title: newValue }); v$.title.$touch(); }"
-          :label="t('memberStory.storyEditor.title')" outlined
-          class="mb-4"
+          :label="t('memberStory.storyEditor.title')" outlined class="mb-4"
           :error-messages="v$.title.$errors.map(e => e.$message as string)"
-          :error="v$.title.$invalid && v$.title.$dirty"
-        ></v-text-field>
+          :error="v$.title.$invalid && v$.title.$dirty"></v-text-field>
         <v-textarea :model-value="modelValue.story"
           @update:model-value="(newValue) => { updateModelValue({ story: newValue }); v$.story.$touch(); }"
-          :label="t('memberStory.storyEditor.storyContent')" outlined
-          auto-grow
+          :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow
           :error-messages="v$.story.$errors.map(e => e.$message as string)"
-          :error="v$.story.$invalid && v$.story.$dirty"
-        ></v-textarea>
+          :error="v$.story.$invalid && v$.story.$dirty"></v-textarea>
       </v-col>
     </v-row>
 
@@ -119,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useVuelidate from '@vuelidate/core';
 import { memberStoryValidationRules } from '@/validations/memberStory.validation';

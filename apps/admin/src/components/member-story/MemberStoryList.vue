@@ -1,185 +1,114 @@
 <template>
-  <v-card flat>
-    <v-card-title class="d-flex align-center">
-      <span class="text-h6">{{ t('memberStory.list.title') }}</span>
+  <div>
+    <v-toolbar flat v-if="!hideToolbar">
+      <v-toolbar-title>{{ t('memberStory.list.title') }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-text-field
-        v-model="search"
-        append-inner-icon="mdi-magnify"
-        :label="t('common.search')"
-        single-line
-        hide-details
-        density="compact"
-        class="flex-grow-0"
-        style="max-width: 200px;"
-      ></v-text-field>
-    </v-card-title>
-    <v-card-text>
-      <v-data-table-server
-        v-model:items-per-page="itemsPerPage"
-        :headers="headers"
-        :items="memberStories"
-        :items-length="totalMemberStories"
-        :loading="loading"
-        @update:options="loadMemberStories"
-        class="elevation-0"
-      >
-        <template v-slot:item.title="{ item }">
-          <router-link :to="{ name: 'MemberStoryDetail', params: { memberStoryId: item.id } }">
-            {{ item.title }}
-          </router-link>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-btn icon flat small @click="viewMemberStory(item)" color="info" data-testid="view-member-story-button">
-            <v-icon>mdi-eye</v-icon>
-          </v-btn>
-          <v-btn icon flat small @click="editMemberStory(item)" color="warning" data-testid="edit-member-story-button">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <v-btn icon flat small @click="confirmDeleteMemberStory(item)" color="error" data-testid="delete-member-story-button">
-            <v-icon>mdi-delete</v-icon>
+      <v-tooltip :text="t('memberStory.list.action.create')" location="bottom">
+        <template v-slot:activator="{ props }">
+          <v-btn color="primary" class="mr-2" v-bind="props" @click="createItem()" variant="text" icon>
+            <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
-        <template v-slot:no-data>
-          <v-alert :value="true" color="info" icon="mdi-information">
-            {{ t('memberStory.list.noMemberStoriesFound') }}
-          </v-alert>
-        </template>
-      </v-data-table-server>
-    </v-card-text>
-  </v-card>
+      </v-tooltip>
+      <v-text-field :model-value="search" @update:model-value="updateSearch"
+        class="mr-2" append-inner-icon="mdi-magnify" :label="t('common.search')" single-line hide-details>
+      </v-text-field>
+    </v-toolbar>
 
-  <!-- MemberStory Detail Drawer -->
-  <BaseCrudDrawer v-model="detailMemberStoryDrawer" @close="closeDetailMemberStory" width="800">
-    <MemberStoryDetail v-if="detailMemberStoryDrawer && selectedMemberStoryId" :member-story-id="selectedMemberStoryId" @close="closeDetailMemberStory" />
-  </BaseCrudDrawer>
-
-  <!-- Edit MemberStory Drawer -->
-  <BaseCrudDrawer v-model="editMemberStoryDrawer" @close="closeEditMemberStory">
-
-  </BaseCrudDrawer>
-
-  <!-- Delete Confirmation Dialog -->
-  <ConfirmDialog
-    v-model="deleteConfirmDialog"
-    :title="t('memberStory.delete.confirmTitle')"
-    :message="t('memberStory.delete.confirmMessage', { title: selectedMemberStory?.title })"
-    @confirm="deleteMemberStory"
-    @cancel="cancelDeleteMemberStory"
-  />
+    <v-data-table-server :items-per-page="itemsPerPage" @update:items-per-page="updateItemsPerPage" :headers="headers" :items="items"
+      :items-length="totalItems" :loading="loading" @update:options="updateOptions"
+      item-value="id" class="elevation-0">
+      <template #item.title="{ item }">
+        <a @click="viewItem(item.id)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+          {{ item.title }}
+        </a>
+      </template>
+      <template #item.memberName="{ item }">
+        {{ item.memberName || t('common.unknown') }}
+      </template>
+      <template #item.actions="{ item }">
+        <v-menu>
+          <template v-slot:activator="{ props: menuProps }">
+            <v-btn icon variant="text" v-bind="menuProps" size="small">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="editItem(item.id)">
+              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deleteItem(item)">
+              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </v-data-table-server>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-// import { useRouter } from 'vue-router'; // Removed unused import
-import { useMemberStoryStore } from '@/stores/memberStory.store'; // Updated
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
-import MemberStoryDetail from './MemberStoryDetail.vue'; // Updated
+import type { MemberStoryDto } from '@/types/memberStory';
+import type { DataTableHeader } from 'vuetify';
 
-import type { MemberStoryDto } from '@/types/memberStory.d'; // Updated
-
-interface Props {
-  memberId: string;
+interface MemberStoryListProps {
+  items: MemberStoryDto[];
+  totalItems: number;
+  loading: boolean;
+  itemsPerPage: number;
+  search?: string;
+  headers: DataTableHeader[];
+  hideToolbar?: boolean;
 }
-const props = defineProps<Props>();
+
+const {
+  items,
+  totalItems,
+  loading,
+  itemsPerPage,
+  search,
+  headers,
+  hideToolbar,
+} = defineProps<MemberStoryListProps>();
+
+const emit = defineEmits<{
+  (e: 'update:options', options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }): void;
+  (e: 'update:itemsPerPage', value: number): void;
+  (e: 'update:search', search: string): void;
+  (e: 'view', id: string): void;
+  (e: 'edit', id: string): void;
+  (e: 'delete', item: MemberStoryDto): void;
+  (e: 'create'): void;
+}>();
 
 const { t } = useI18n();
-const memoryStore = useMemberStoryStore();
-const search = ref('');
-const memberStories = ref<MemberStoryDto[]>([]); 
-const totalMemberStories = ref(0);
-const loading = ref(false);
-const itemsPerPage = ref(10);
-const detailMemberStoryDrawer = ref(false);
-const editMemberStoryDrawer = ref(false);
-const deleteConfirmDialog = ref(false);
-const selectedMemberStoryId = ref<string | undefined>(undefined);
-const selectedMemberStory = ref<MemberStoryDto | null>(null); 
 
-const headers = ref([
-  { title: t('memberStory.list.header.title'), key: 'title' },
-  { title: t('memberStory.list.header.actions'), key: 'actions', sortable: false },
-]);
-
-
-
-  const loadMemberStories = async (options: {
-  page: number;
-  itemsPerPage: number;
-  sortBy: { key: string; order: string }[];
-}) => {
-  loading.value = true;
-  memoryStore.list.filters.memberId = props.memberId;
-  memoryStore.list.filters.searchQuery = search.value;
-  memoryStore.list.currentPage = options.page;
-  memoryStore.list.itemsPerPage = options.itemsPerPage;
-  memoryStore.list.sortBy = options.sortBy;
-
-  await memoryStore._loadItems();
-  
-  memberStories.value = memoryStore.list.items;
-  totalMemberStories.value = memoryStore.list.totalItems;
-  loading.value = false;
-};
-const viewMemberStory = (item: MemberStoryDto) => {
-  selectedMemberStoryId.value = item.id;
-  detailMemberStoryDrawer.value = true;
+const viewItem = (id: string | undefined) => {
+  if (id) emit('view', id);
 };
 
-const editMemberStory = (item: MemberStoryDto) => {
-  selectedMemberStoryId.value = item.id;
-  editMemberStoryDrawer.value = true;
+const editItem = (id: string | undefined) => {
+  if (id) emit('edit', id);
 };
 
-const confirmDeleteMemberStory = (item: MemberStoryDto) => {
-  selectedMemberStory.value = item;
-  selectedMemberStoryId.value = item.id;
-  deleteConfirmDialog.value = true;
+const deleteItem = (item: MemberStoryDto) => {
+  emit('delete', item);
 };
 
-const closeDetailMemberStory = () => {
-  detailMemberStoryDrawer.value = false;
-  selectedMemberStoryId.value = undefined;
+const createItem = () => {
+  emit('create');
 };
 
-const closeEditMemberStory = () => {
-  editMemberStoryDrawer.value = false;
-  selectedMemberStoryId.value = undefined;
+const updateSearch = (search: string) => {
+  emit('update:search', search);
 };
 
-
-const deleteMemberStory = async () => {
-  if (selectedMemberStoryId.value) {
-    const result = await memoryStore.deleteItem(selectedMemberStoryId.value);
-    if (result.ok) {
-      loadMemberStories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload list
-      selectedMemberStoryId.value = undefined;
-      selectedMemberStory.value = null;
-    }
-  }
+const updateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) => {
+  emit('update:options', options);
 };
 
-const cancelDeleteMemberStory = () => {
-  selectedMemberStoryId.value = undefined;
-  selectedMemberStory.value = null;
+const updateItemsPerPage = (value: number) => {
+  emit('update:itemsPerPage', value);
 };
-
-
-
-onMounted(() => {
-  loadMemberStories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
-});
-
-watch(
-  () => props.memberId,
-  () => {
-    loadMemberStories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
-  }
-);
 </script>
-
-<style scoped>
-/* Scoped styles for MemoryList */
-</style>

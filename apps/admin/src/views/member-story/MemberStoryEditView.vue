@@ -3,40 +3,40 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.edit.title') }}</span>
     </v-card-title>
-    <MemberStoryForm
-      v-if="editedMemberStory"
-      ref="memberStoryFormRef"
-      :model-value="editedMemberStory"
-      @update:modelValue="handleMemberStoryFormUpdate"
-      :member-id="editedMemberStory.memberId"
-      :readonly="false"
-    />
-    <v-card-text v-else>
-      <v-alert type="info">{{ t('memberStory.edit.loading') }}</v-alert>
+    <v-card-text v-if="loading">
+      <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      <div class="text-center mt-2">{{ t('memberStory.edit.loading') }}</div>
     </v-card-text>
-    <v-card-actions>
+    <v-card-text v-else-if="!editedMemberStory">
+      <v-alert type="error">{{ t('memberStory.edit.notFound') }}</v-alert>
+    </v-card-text>
+    <MemberStoryForm v-else
+      ref="memberStoryFormRef"
+      v-model="editedMemberStory"
+      :readonly="false"
+      :member-id="editedMemberStory.memberId"
+    />
+    <v-card-actions v-if="editedMemberStory">
       <v-spacer></v-spacer>
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">
         {{ t('common.cancel') }}
       </v-btn>
-      <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
+      <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving" :disabled="!memberStoryFormRef?.isValid">
         {{ t('common.save') }}
       </v-btn>
-
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
-import type { DetectedFace } from '@/types'; // Added this import
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 
-const { memberStoryId } = defineProps<{
+const props = defineProps<{
   memberStoryId: string;
 }>();
 
@@ -48,44 +48,43 @@ const { showSnackbar } = useGlobalSnackbar();
 
 const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null);
 const editedMemberStory = ref<MemberStoryDto | null>(null);
-
+const loading = ref(false);
 const isSaving = ref(false);
 
-onMounted(async () => {
-  console.log('MemberStoryEditView mounted, memberStoryId:', memberStoryId);
-  const story = await memberStoryStore.getById(memberStoryId);
-  if (story) {
-    editedMemberStory.value = story;
-    // Ensure faces is an array
-    if (!editedMemberStory.value.faces) {
-      editedMemberStory.value.faces = [];
+const loadMemberStory = async (id: string) => {
+  loading.value = true;
+  try {
+    const result: MemberStoryDto | undefined = await memberStoryStore.getById(id);
+    if (result) {
+      editedMemberStory.value = {
+        ...result,
+        rawInput: result.rawInput ?? null
+      };
+    } else {
+      editedMemberStory.value = null; // Ensure it's null if not found
+      showSnackbar(t('memberStory.edit.notFound'), 'error');
     }
-    console.log('editedMemberStory on mount:', editedMemberStory.value);
-    console.log('editedMemberStory.faces on mount:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
+  } catch (error) {
+    console.error('Error loading member story:', error);
+    showSnackbar((error as Error).message, 'error');
+  } finally {
+    loading.value = false;
   }
-});
-
-const handleMemberStoryFormUpdate = (newValue: MemberStoryDto) => {
-  console.log('MemberStoryForm emitted update:modelValue with newValue:', newValue);
-  console.log('Faces in emitted newValue:', newValue.faces?.map(f => f.id));
-  editedMemberStory.value = newValue;
-  console.log('editedMemberStory after update:', editedMemberStory.value);
-  console.log('editedMemberStory.faces after update:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
 };
 
 const handleSave = async () => {
-  if (!editedMemberStory.value || !memberStoryFormRef.value) return;
+  if (!memberStoryFormRef.value || !memberStoryFormRef.value.isValid) return;
 
   isSaving.value = true;
-  console.log('Saving editedMemberStory:', editedMemberStory.value);
-  console.log('Faces in editedMemberStory before save:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
   try {
-    const result = await memberStoryStore.updateItem(editedMemberStory.value);
-    if (result.ok) {
-      showSnackbar(t('memberStory.edit.saveSuccess'), 'success');
-      emit('saved');
-    } else {
-      showSnackbar(t('memberStory.edit.saveFailed'), 'error');
+    if (editedMemberStory.value) {
+      const result = await memberStoryStore.updateItem(editedMemberStory.value);
+      if (result.ok) {
+        showSnackbar(t('memberStory.edit.saveSuccess'), 'success');
+        emit('saved');
+      } else {
+        showSnackbar(t('memberStory.edit.saveFailed'), 'error');
+      }
     }
   } catch (error) {
     console.error('Error saving member story:', error);
@@ -99,4 +98,15 @@ const handleClose = () => {
   emit('close');
 };
 
+onMounted(() => {
+  if (props.memberStoryId) {
+    loadMemberStory(props.memberStoryId);
+  }
+});
+
+watch(() => props.memberStoryId, (newId) => {
+  if (newId) {
+    loadMemberStory(newId);
+  }
+});
 </script>
