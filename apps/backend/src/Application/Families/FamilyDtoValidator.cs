@@ -1,4 +1,4 @@
-namespace backend.Application.Families;
+namespace backend.Application.Families.Queries;
 
 public class FamilyDtoValidator : AbstractValidator<FamilyDto>
 {
