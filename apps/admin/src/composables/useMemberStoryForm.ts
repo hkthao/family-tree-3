@@ -31,11 +31,10 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   ]);
 
   const storyStyles = ref([
-    { value: 'narrative', text: t('memberStory.create.storyStyle.narrative') },
-    { value: 'descriptive', text: t('memberStory.create.storyStyle.descriptive') },
-    { value: 'reflective', text: t('memberStory.create.storyStyle.reflective') },
-    { value: 'journalistic', text: t('memberStory.create.storyStyle.journalistic') },
-    { value: 'poetic', text: t('memberStory.create.storyStyle.poetic') },
+    { value: 'nostalgic', text: t('memberStory.style.nostalgic') },
+    { value: 'warm', text: t('memberStory.style.warm') },
+    { value: 'formal', text: t('memberStory.style.formal') },
+    { value: 'folk', text: t('memberStory.style.folk') },
   ]);
 
   const generatedStory = ref<string | null>(null);

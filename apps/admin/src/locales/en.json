@@ -919,40 +919,28 @@
   "memberStory.studio.title": "AI Memorial Studio for {memberName}",
   "memberStory.studio.addMemory": "Add Memory",
   "memberStory.studio.loadingMember": "Loading member details...",
-
   "memberStory.list.title": "Memories",
   "memberStory.list.header.title": "Title",
   "memberStory.list.header.tags": "Tags",
   "memberStory.list.header.createdAt": "Created At",
   "memberStory.list.header.actions": "Actions",
   "memberStory.list.noMemberStoriesFound": "No memories found for this member.",
-
   "memberStory.list.action.create": "Create Memory",
-
   "memberStory.form.memberIdLabel": "Target Member",
-
   "memberStory.create.title": "Create New Memory",
   "memberStory.create.selectTargetMember": "You want to create a memory about whom",
   "memberStory.create.rawInputPlaceholder": "Recount what you remember about this moment...",
   "memberStory.create.storyStyle.question": "You want the story to be written in what style?",
-  "memberStory.create.storyStyle.narrative": "Narrative",
-  "memberStory.create.storyStyle.descriptive": "Descriptive",
-  "memberStory.create.storyStyle.reflective": "Reflective",
-  "memberStory.create.storyStyle.journalistic": "Journalistic",
-  "memberStory.create.storyStyle.poetic": "Poetic",
   "memberStory.create.perspective.question": "From what perspective do you want the story to be told?",
   "memberStory.create.perspective.firstPerson": "From the creator's perspective (first person)",
   "memberStory.create.perspective.neutralPersonal": "Neutral but with personal emotion",
   "memberStory.create.perspective.fullyNeutral": "Completely neutral",
   "memberStory.create.generateStoryButton": "Generate Story with AI",
   "memberStory.create.aiConsentInfo": "By clicking 'Generate Story with AI', you consent to your uploaded image and associated data being processed by AI services to generate a story. This data may be used to improve AI models.",
-
   "memberStory.errors.memberIdRequired": "Member ID is required to generate a story.",
   "memberStory.errors.storyGenerationFailed": "Failed to generate story.",
-
   "memberStory.faceRecognition.noFacesDetected": "No faces detected in the image.",
   "memberStory.faceRecognition.uploadPrompt": "Upload an image to start face detection.",
-
   "memberStory.detail.titleDefault": "MemberStory Details",
   "memberStory.detail.loading": "Loading member story details...",
   "memberStory.detail.notFound": "MemberStory not found.",
@@ -974,28 +962,21 @@
   "memberStory.style.formal": "Formal",
   "memberStory.style.folk": "Folk",
   "memberStory.create.aiEventSuggestion.title": "Can you tell us what this event could be?",
+
   "tour.familyList.search.title": "Search and Filter",
   "tour.familyList.search.description": "Here you can search for families by name or use advanced filters.",
-
   "tour.familyList.create.title": "Create Family",
   "tour.familyList.create.description": "Click here to create a new family.",
-
   "tour.familyList.list.title": "Family List",
   "tour.familyList.list.description": "This is the list of your families.",
-
   "tour.familyList.view.title": "View Family",
   "tour.familyList.view.description": "Click here to view the details of a family.",
-
   "tour.familyList.delete.title": "Delete Family",
   "tour.familyList.delete.description": "Click here to delete a family.",
-
-
   "tour.faceSearch.upload.title": "Upload Image",
   "tour.faceSearch.upload.description": "Start by uploading an image containing faces you want to search for.",
-
   "tour.faceSearch.viewer.title": "Image Viewer",
   "tour.faceSearch.viewer.description": "Detected faces will be highlighted here. You can click on a face to select it.",
-
   "tour.faceSearch.sidebar.title": "Detection Sidebar",
   "tour.faceSearch.sidebar.description": "Review the detected faces and label them."
 }

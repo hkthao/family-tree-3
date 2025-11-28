@@ -954,19 +954,11 @@
 
   "memberStory.errors.memberIdRequired": "Vui lòng chọn một thành viên để tạo câu chuyện.",
   "memberStory.errors.storyGenerationFailed": "Không thể tạo câu chuyện. Vui lòng thử lại.",
-
   "memberStory.faceRecognition.noFacesDetected": "Không tìm thấy khuôn mặt nào trong ảnh.",
   "memberStory.faceRecognition.uploadPrompt": "Tải lên một hình ảnh để bắt đầu nhận diện khuôn mặt.",
   "memberStory.create.perspective.question": "Bạn muốn câu chuyện được kể theo góc nhìn nào?",
   "memberStory.create.storyStyle": "Phong cách câu chuyện",
   "memberStory.create.storyStyle.question": "Bạn muốn câu chuyện được viết theo phong cách nào?",
-  "memberStory.create.storyStyle.narrative": "Tự sự",
-  "memberStory.create.storyStyle.descriptive": "Miêu tả",
-  "memberStory.create.storyStyle.reflective": "Suy tư",
-  "memberStory.create.storyStyle.journalistic": "Báo chí",
-  "memberStory.create.storyStyle.poetic": "Thơ mộng",
-
-
   "memberStory.storyEditor.title": "Tiêu đề câu chuyện",
   "memberStory.storyEditor.storyContent": "Nội dung câu chuyện",
   "memberStory.detail.titleDefault": "Chi tiết ký ức",
