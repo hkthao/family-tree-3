@@ -16,7 +16,7 @@ interface UseMemberStoryFormOptions {
 }
 
 export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
-  const { modelValue: propsModelValue, readonly, updateModelValue, onStoryGenerated } = options;
+  const { modelValue, readonly, updateModelValue, onStoryGenerated } = options;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const memberStoryStore = useMemberStoryStore();
@@ -24,9 +24,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const showSelectMemberDialog = ref(false);
   const faceToLabel = ref<DetectedFace | null>(null);
   const uploadedImageUrl = ref<string | null>(null);
-
-  // Create a computed property to ensure modelValue is always reactive
-  const internalModelValue = computed(() => propsModelValue);
 
   const aiPerspectiveSuggestions = ref([
     { value: 'firstPerson', text: t('memberStory.create.perspective.firstPerson') },
@@ -50,16 +47,16 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
 
   const canGenerateStory = computed(() => {
-    const hasMinRawInput = internalModelValue.value.rawInput && internalModelValue.value.rawInput.length >= 10;
-    const hasDetectedFaces = internalModelValue.value.faces && internalModelValue.value.faces.length > 0; // Check modelValue.faces directly
-    const hasMemberSelected = internalModelValue.value.memberId;
+    const hasMinRawInput = modelValue.rawInput && modelValue.rawInput.length >= 10;
+    const hasDetectedFaces = modelValue.faces && modelValue.faces.length > 0; // Check modelValue.faces directly
+    const hasMemberSelected = modelValue.memberId;
     return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
   });
 
   const generateStory = async () => {
     if (!canGenerateStory.value) return;
 
-    if (!internalModelValue.value.memberId || internalModelValue.value.memberId === '00000000-0000-0000-0000-000000000000') {
+    if (!modelValue.memberId || modelValue.memberId === '00000000-0000-0000-0000-000000000000') {
       showSnackbar(t('memberStory.errors.memberIdRequired'), 'error');
       generatingStory.value = false;
       return;
@@ -77,12 +74,12 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     }));
 
     const requestPayload = {
-      memberId: internalModelValue.value.memberId,
+      memberId: modelValue.memberId,
       resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
-      rawText: internalModelValue.value.rawInput,
-      style: internalModelValue.value.storyStyle,
+      rawText: modelValue.rawInput,
+      style: modelValue.storyStyle,
       photoPersons: photoPersonsPayload,
-      perspective: internalModelValue.value.perspective,
+      perspective: modelValue.perspective,
     } as GenerateStoryCommand;
 
     const result = await memberStoryStore.generateStory(requestPayload);
@@ -167,15 +164,11 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
 
   const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
     // Make a shallow copy of the faces array to ensure reactivity update
-    const currentFaces = internalModelValue.value.faces ? [...internalModelValue.value.faces] : [];
+    const currentFaces = modelValue.faces ? [...modelValue.faces] : [];
     const index = currentFaces.findIndex(face => face.id === updatedFace.id);
     if (index !== -1) {
       // Create a new object for the updated face to ensure full reactivity update
       currentFaces[index] = { ...updatedFace };
-    } else {
-      // If for some reason the face wasn't found (shouldn't happen with current flow)
-      // We might want to add it or log an error. For now, we assume it's found.
-      console.warn(`Face with ID ${updatedFace.id} not found in currentFaces for update.`);
     }
     updateModelValue({ faces: currentFaces }); // Update with the new array
     showSelectMemberDialog.value = false;
@@ -183,9 +176,8 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const handleRemoveFace = (faceId: string) => {
-    const updatedFaces = internalModelValue.value.faces?.filter(face => face.id !== faceId) || [];
+    const updatedFaces = modelValue.faces?.filter(face => face.id !== faceId) || [];
     updateModelValue({ faces: updatedFaces });
-
   };
 
   return {
