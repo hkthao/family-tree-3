@@ -9,4 +9,5 @@ export * from './useMemberAutocomplete';
 export * from './useOnboardingTour';
 export * from './useServices';
 export * from './useUserAutocomplete';
+export * from './useMemberStoryForm';
 

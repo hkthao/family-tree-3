@@ -13,14 +13,14 @@
     <v-row>
       <v-col cols="12">
         <div v-if="hasUploadedImage && !isLoading">
-          <div v-if="internalMemory.faces && internalMemory.faces.length > 0">
-            <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="internalMemory.faces" selectable
+          <div v-if="modelValue.faces && modelValue.faces.length > 0">
+            <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="modelValue.faces" selectable
               @face-selected="openSelectMemberDialog" />
-            <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
+            <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
             <h4>{{ t('memory.create.selectTargetMember') }}</h4>
             <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
-              <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
+              <MemberFaceChip v-for="face in modelValue.faces" :key="face.id" :face="face" :value="face.id" />
             </v-chip-group>
           </div>
           <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
@@ -34,13 +34,13 @@
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
-        <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
-          @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
+        <v-textarea class="mt-4" :model-value="modelValue.rawInput" :rows="2"
+          @update:model-value="(newValue) => updateModelValue({ rawInput: newValue })"
           :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
         <v-container fluid class="pa-0">
           <h4>{{ t('memory.create.storyStyle.question') }}</h4>
-          <v-chip-group :model-value="internalMemory.storyStyle"
-            @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" color="primary" mandatory column
+          <v-chip-group :model-value="modelValue.storyStyle"
+            @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory column
             :disabled="readonly">
             <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
               {{ style.text }}
@@ -55,8 +55,8 @@
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <h4>{{ t('memory.create.perspective.question') }}</h4>
-        <v-chip-group :model-value="internalMemory.perspective"
-          @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column
+        <v-chip-group :model-value="modelValue.perspective"
+          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory column
           :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
@@ -86,9 +86,9 @@
     <!-- Title and Story -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
+        <v-text-field v-model="modelValue.title" :label="t('memory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
-        <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined
+        <v-textarea v-model="modelValue.story" :label="t('memory.storyEditor.storyContent')" outlined
           auto-grow></v-textarea>
       </v-col>
     </v-row>
@@ -100,15 +100,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from '@/types';
 import MemberFaceChip from '../common/MemberFaceChip.vue';
-
-import { useMemberStoryStore } from '@/stores/memberStory.store';
+import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -118,208 +115,52 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
-const memberStoryStore = useMemberStoryStore(); // Will be created later
-const showSelectMemberDialog = ref(false);
-const faceToLabel = ref<DetectedFace | null>(null);
-const selectedTargetMemberFaceId = ref<string | null>(null);
-const uploadedImageUrl = ref<string | null>(null);
-const aiPerspectiveSuggestions = ref([
-  { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
-  { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
-  { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
-]);
-
-const storyStyles = ref([
-  { value: 'narrative', text: t('memory.create.storyStyle.narrative') },
-  { value: 'descriptive', text: t('memory.create.storyStyle.descriptive') },
-  { value: 'reflective', text: t('memory.create.storyStyle.reflective') },
-  { value: 'journalistic', text: t('memory.create.storyStyle.journalistic') },
-  { value: 'poetic', text: t('memory.create.storyStyle.poetic') },
-]);
-const generatedStory = ref<string | null>(null);
-const generatedTitle = ref<string | null>(null);
-const generatingStory = ref(false);
-const storyEditorValid = ref(true);
-const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
-const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
-const canGenerateStory = computed(() => {
-  const hasMinRawInput = internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10;
-  const hasDetectedFaces = memberStoryStore.faceRecognition.detectedFaces.length > 0;
-  const hasMemberSelected = internalMemory.value.memberId;
-  return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
-});
-
-const updateMemory = (payload: Partial<MemoryDto>) => {
-  emit('update:modelValue', { ...internalMemory.value, ...payload });
-};
-
-const generateStory = async () => {
-  if (!canGenerateStory.value) return;
-
-  if (!internalMemory.value.memberId || internalMemory.value.memberId === '00000000-0000-0000-0000-000000000000') {
-    showSnackbar(t('memory.errors.memberIdRequired'), 'error');
-    generatingStory.value = false; // Ensure loading state is reset if validation fails
-    return;
-  }
-
-  generatingStory.value = true;
-
-  const photoPersonsPayload: PhotoAnalysisPersonDto[] = memberStoryStore.faceRecognition.detectedFaces.map((face: DetectedFace) => ({
-    id: face.id,
-    memberId: face.memberId,
-    name: face.memberName,
-    emotion: face.emotion,
-    confidence: face.emotionConfidence,
-    relationPrompt: face.relationPrompt,
-  }));
-
-  const requestPayload = {
-    memberId: internalMemory.value.memberId,
-    resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
-    rawText: internalMemory.value.rawInput,
-    style: internalMemory.value.storyStyle,
-    photoPersons: photoPersonsPayload,
-    perspective: internalMemory.value.perspective,
-  } as GenerateStoryCommand;
-
-  const result = await memberStoryStore.generateStory(requestPayload);
-  if (result.ok) {
-    generatedStory.value = result.value.story;
-    generatedTitle.value = result.value.title;
-    internalMemory.value.story = generatedStory.value;
-    internalMemory.value.title = generatedTitle.value;
-    emit('story-generated', { story: generatedStory.value, title: generatedTitle.value });
-  } else {
-    showSnackbar(result.error?.message || t('memory.errors.storyGenerationFailed'), 'error');
-  }
-  generatingStory.value = false;
-};
 
 const internalMemory = computed<MemoryDto>({
   get: () => props.modelValue,
   set: (value: MemoryDto) => emit('update:modelValue', value),
 });
 
-watch(() => memberStoryStore.faceRecognition.error, (newError) => {
-  if (newError) {
-    showSnackbar(newError, 'error');
-  }
+const updateModelValue = (payload: Partial<MemoryDto>) => {
+  emit('update:modelValue', { ...internalMemory.value, ...payload });
+};
+
+const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
+  emit('story-generated', payload);
+};
+
+const {
+  showSelectMemberDialog,
+  faceToLabel,
+  selectedTargetMemberFaceId,
+  uploadedImageUrl,
+  aiPerspectiveSuggestions,
+  storyStyles,
+  generatedStory,
+  generatedTitle,
+  generatingStory,
+  storyEditorValid,
+  hasUploadedImage,
+  isLoading,
+  canGenerateStory,
+  generateStory,
+  handleFileUpload,
+  openSelectMemberDialog,
+  handleLabelFaceAndCloseDialog,
+  handleRemoveFace,
+  memberStoryStoreFaceRecognition,
+} = useMemberStoryForm({
+  modelValue: internalMemory.value,
+  readonly: props.readonly,
+  memberId: props.memberId,
+  familyId: props.familyId,
+  updateModelValue,
+  onStoryGenerated,
 });
-
-watch(selectedTargetMemberFaceId, (newId) => {
-  internalMemory.value.targetFaceId = newId ?? undefined;
-  if (newId) {
-    const selectedFace = internalMemory.value.faces?.find(face => face.id === newId);
-    if (selectedFace && selectedFace.memberId) {
-      internalMemory.value.memberId = selectedFace.memberId;
-      internalMemory.value.memberName = selectedFace.memberName; // Added this line
-    } else {
-      internalMemory.value.memberId = null;
-      internalMemory.value.memberName = null; // Added this line
-    }
-  } else {
-    internalMemory.value.memberId = null;
-    internalMemory.value.memberName = null; // Added this line
-  }
-});
-
-const loadImage = (file: File): Promise<HTMLImageElement> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-};
-
-const handleFileUpload = async (file: File | File[] | null) => {
-  if (props.readonly) return;
-  let uploadedFile: File | null = null;
-  if (file instanceof File) {
-    uploadedFile = file;
-  } else if (Array.isArray(file) && file.length > 0) {
-    uploadedFile = file[0];
-  }
-  if (uploadedFile) {
-    uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
-    await memberStoryStore.detectFaces(uploadedFile, true);
-    try {
-      const img = await loadImage(uploadedFile);
-      updateMemory({ imageSize: `${img.width}x${img.height}` });
-    } catch (e) {
-      console.error('Failed to load image for dimensions:', e);
-      updateMemory({ imageSize: undefined });
-    }
-
-
-    if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
-      updateMemory({
-        faces: memberStoryStore.faceRecognition.detectedFaces,
-        photoUrl: uploadedImageUrl.value,
-        photo: uploadedImageUrl.value,
-      });
-
-      if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
-        selectedTargetMemberFaceId.value = memberStoryStore.faceRecognition.detectedFaces[0].id;
-      }
-
-    } else if (!isLoading && uploadedImageUrl.value && memberStoryStore.faceRecognition.detectedFaces.length === 0) {
-      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
-      updateMemory({
-        faces: [],
-        photo: undefined,
-        imageSize: undefined,
-        exifData: undefined,
-      });
-      selectedTargetMemberFaceId.value = null;
-    }
-
-  } else {
-    memberStoryStore.resetFaceRecognitionState();
-    uploadedImageUrl.value = null; // Clear local image URL
-    updateMemory({
-      faces: [],
-      photoUrl: undefined,
-      photo: undefined,
-      imageSize: undefined,
-      exifData: undefined,
-    });
-    selectedTargetMemberFaceId.value = null;
-  }
-};
-
-const openSelectMemberDialog = (faceId: string) => {
-  const face = internalMemory.value.faces?.find(f => f.id === faceId);
-  if (face) {
-    faceToLabel.value = face;
-    showSelectMemberDialog.value = true;
-  }
-};
-
-const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => { // Changed signature
-  const updatedFaces = internalMemory.value.faces?.map(face =>
-    face.id === updatedFace.id ? updatedFace : face // Replace with the updated face object
-  ) || [];
-  updateMemory({ faces: updatedFaces });
-  showSelectMemberDialog.value = false;
-  faceToLabel.value = null;
-  if (selectedTargetMemberFaceId.value === updatedFace.id) { // Use updatedFace.id
-    internalMemory.value.memberId = updatedFace.memberId; // Use updatedFace.memberId
-  }
-};
-
-const handleRemoveFace = (faceId: string) => {
-  const updatedFaces = internalMemory.value.faces?.filter(face => face.id !== faceId) || [];
-  updateMemory({ faces: updatedFaces });
-  if (selectedTargetMemberFaceId.value === faceId) {
-    selectedTargetMemberFaceId.value = null;
-  }
-};
 
 defineExpose({
   isValid: computed(() => !isLoading.value),
-  memoryFaceStore: memberStoryStore.faceRecognition,
+  memoryFaceStore: memberStoryStoreFaceRecognition,
   selectedTargetMemberFaceId,
   generateStory,
   generatedStory,
