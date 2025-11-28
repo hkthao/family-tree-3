@@ -58,7 +58,7 @@ const handleSave = async () => {
   try {
     const result = await memberStoryStore.addItem(editedMemberStory.value); // Updated
     if (result.ok) {
-      showSnackbar(t('memberStory.create.step5.saveSuccess'), 'success'); // Updated
+      showSnackbar(t('memberStory.create.saveSuccess'), 'success'); // Updated
       emit('saved');
     } else {
       showSnackbar(t('memberStory.create.step5.saveFailed'), 'error'); // Updated

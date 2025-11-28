@@ -27,7 +27,7 @@
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
           </div>
-          <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+          <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
         </div>
         <v-alert v-else type="info">{{
           t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
