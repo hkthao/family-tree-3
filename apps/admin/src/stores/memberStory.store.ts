@@ -78,35 +78,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
     },
   }),
 
-  getters: {
-    headers: (_state) => { // Renamed state to _state
-      const t = i18n.global.t;
-      return [
-        {
-          title: t('memberStory.list.header.title'), // Updated
-          align: 'start' as const,
-        },
-        {
-          title: t('member.list.headers.fullName'), // Assuming we want to show member name
-          key: 'memberId',
-          align: 'start' as const,
-        },
-        {
-          title: t('memberStory.list.header.actions'), // Updated
-          key: 'actions',
-          sortable: false,
-          align: 'end' as const,
-        },
-      ];
-    },
-    // Getters for Face Recognition
-    currentSelectedFace: (state) =>
-      state.faceRecognition.detectedFaces.find((face) => face.id === state.faceRecognition.selectedFaceId),
-    unlabeledFaces: (state) =>
-      state.faceRecognition.detectedFaces.filter((face) => !face.memberId),
-    labeledFaces: (state) =>
-      state.faceRecognition.detectedFaces.filter((face) => face.memberId),
-  },
+
 
   actions: {
     async _loadItems() {

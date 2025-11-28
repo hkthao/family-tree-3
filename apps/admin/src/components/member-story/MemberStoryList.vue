@@ -10,14 +10,13 @@
           </v-btn>
         </template>
       </v-tooltip>
-      <v-text-field :model-value="search" @update:model-value="updateSearch"
-        class="mr-2" append-inner-icon="mdi-magnify" :label="t('common.search')" single-line hide-details>
+      <v-text-field :model-value="search" @update:model-value="updateSearch" class="mr-2"
+        append-inner-icon="mdi-magnify" :label="t('common.search')" single-line hide-details>
       </v-text-field>
     </v-toolbar>
-
-    <v-data-table-server :items-per-page="itemsPerPage" @update:items-per-page="updateItemsPerPage" :headers="headers" :items="items"
-      :items-length="totalItems" :loading="loading" @update:options="updateOptions"
-      item-value="id" class="elevation-0">
+    <v-data-table-server :items-per-page="itemsPerPage" @update:items-per-page="updateItemsPerPage" :headers="headers"
+      :items="items" :items-length="totalItems" :loading="loading" @update:options="updateOptions" item-value="id"
+      class="elevation-0">
       <template #item.title="{ item }">
         <a @click="viewItem(item.id)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
           {{ item.title }}

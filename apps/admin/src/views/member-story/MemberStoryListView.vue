@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref } from 'vue';
+import { watch, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
@@ -48,6 +48,8 @@ import MemberStoryEditView from './MemberStoryEditView.vue'; // NEW IMPORT
 import MemberStoryDetailView from './MemberStoryDetailView.vue';
 import MemberStoryList from '@/components/member-story/MemberStoryList.vue';
 import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
+import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
+import type { DataTableHeader } from 'vuetify'; // NEW IMPORT
 
 interface MemberStoryListViewProps {
   memberId?: string;
@@ -57,8 +59,43 @@ const props = defineProps<MemberStoryListViewProps>();
 
 const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
-const { headers } = storeToRefs(memberStoryStore);
 const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
+
+const { isAdmin, isFamilyManager } = useAuth(); // NEW: Use auth composable
+
+const canPerformActions = computed(() => { // NEW: canPerformActions computed property
+  return isAdmin.value || isFamilyManager.value;
+});
+
+const headers = computed<DataTableHeader[]>(() => { // NEW: Headers computed property
+  const baseHeaders: DataTableHeader[] = [
+    {
+      title: t('memberStory.list.header.title'),
+      key: 'title',
+      align: 'start' as const,
+    },
+    {
+      title: t('member.list.headers.fullName'),
+      key: 'memberName',
+      align: 'start' as const,
+    },
+    {
+      title: t('memberStory.list.header.createdAt'),
+      key: 'createdAt',
+      align: 'start' as const,
+    },
+  ];
+
+  if (canPerformActions.value) {
+    baseHeaders.push({
+      title: t('memberStory.list.header.actions'),
+      key: 'actions',
+      sortable: false,
+      align: 'end' as const,
+    });
+  }
+  return baseHeaders;
+});
 
 const {
   addDrawer,
