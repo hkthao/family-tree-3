@@ -30,10 +30,7 @@
               @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
-            <h4>{{ t('memberStory.create.selectTargetMember') }}</h4>
-            <v-chip-group mandatory column>
-              <MemberFaceChip v-for="face in modelValue.faces" :key="face.id" :face="face" :value="face.id" />
-            </v-chip-group>
+
           </div>
           <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
         </div>
@@ -116,7 +113,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import MemberFaceChip from '../common/MemberFaceChip.vue';
+
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
 
@@ -145,7 +142,6 @@ const onStoryGenerated = (payload: { story: string | null; title: string | null 
 const {
   showSelectMemberDialog,
   faceToLabel,
-  selectedTargetMemberFaceId,
   uploadedImageUrl,
   aiPerspectiveSuggestions,
   storyStyles,
