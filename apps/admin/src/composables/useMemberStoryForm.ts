@@ -1,5 +1,5 @@
 
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
@@ -7,7 +7,7 @@ import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from 
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 
 interface UseMemberStoryFormOptions {
-  modelValue: MemberStoryDto; // Changed from MemoryDto
+  modelValue: ComputedRef<MemberStoryDto>; // Changed from MemberStoryDto
   readonly?: boolean;
   memberId?: string | null;
   familyId?: string;
@@ -23,7 +23,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
 
   const showSelectMemberDialog = ref(false);
   const faceToLabel = ref<DetectedFace | null>(null);
-  const uploadedImageUrl = ref<string | null>(null);
 
   const aiPerspectiveSuggestions = ref([
     { value: 'firstPerson', text: t('memberStory.create.perspective.firstPerson') },
@@ -43,20 +42,22 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const generatedTitle = ref<string | null>(null);
   const generatingStory = ref(false);
   const storyEditorValid = ref(true); // TODO: Implement validation logic
-  const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
+  const hasUploadedImage = computed(() => {
+    return !!modelValue.value.photoUrl;
+  });
   const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
 
   const canGenerateStory = computed(() => {
-    const hasMinRawInput = modelValue.rawInput && modelValue.rawInput.length >= 10;
-    const hasDetectedFaces = modelValue.faces && modelValue.faces.length > 0; // Check modelValue.faces directly
-    const hasMemberSelected = modelValue.memberId;
+    const hasMinRawInput = modelValue.value.rawInput && modelValue.value.rawInput.length >= 10;
+    const hasDetectedFaces = modelValue.value.faces && modelValue.value.faces.length > 0; // Check modelValue.faces directly
+    const hasMemberSelected = modelValue.value.memberId;
     return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
   });
 
   const generateStory = async () => {
     if (!canGenerateStory.value) return;
 
-    if (!modelValue.memberId || modelValue.memberId === '00000000-0000-0000-0000-000000000000') {
+    if (!modelValue.value.memberId || modelValue.value.memberId === '00000000-0000-0000-0000-000000000000') {
       showSnackbar(t('memberStory.errors.memberIdRequired'), 'error');
       generatingStory.value = false;
       return;
@@ -74,12 +75,12 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     }));
 
     const requestPayload = {
-      memberId: modelValue.memberId,
+      memberId: modelValue.value.memberId,
       resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
-      rawText: modelValue.rawInput,
-      style: modelValue.storyStyle,
+      rawText: modelValue.value.rawInput,
+      style: modelValue.value.storyStyle,
       photoPersons: photoPersonsPayload,
-      perspective: modelValue.perspective,
+      perspective: modelValue.value.perspective,
     } as GenerateStoryCommand;
 
     const result = await memberStoryStore.generateStory(requestPayload);
@@ -118,37 +119,29 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       uploadedFile = file[0];
     }
     if (uploadedFile) {
-      uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
+      const newImageUrl = URL.createObjectURL(uploadedFile); // Create the URL directly
+      updateModelValue({ photoUrl: newImageUrl });
+
       await memberStoryStore.detectFaces(uploadedFile, true);
       try {
         const img = await loadImage(uploadedFile);
-        updateModelValue({ photoUrl: uploadedImageUrl.value, photo: uploadedImageUrl.value, imageSize: `${img.width}x${img.height}` });
+        updateModelValue({ photoUrl: newImageUrl, imageSize: `${img.width}x${img.height}` });
       } catch (e) {
         console.error('Failed to load image for dimensions:', e);
         updateModelValue({ imageSize: undefined });
       }
 
-
       if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
         updateModelValue({
-          faces: memberStoryStore.faceRecognition.detectedFaces,
-        });
-      } else if (!isLoading.value && uploadedImageUrl.value && memberStoryStore.faceRecognition.detectedFaces.length === 0) {
-        showSnackbar(t('memberStory.faceRecognition.noFacesDetected'), 'info');
-        updateModelValue({
-          faces: [],
-          photo: undefined,
-          imageSize: undefined,
-          exifData: undefined,
+          faces: [...memberStoryStore.faceRecognition.detectedFaces],
         });
       }
 
     } else {
       memberStoryStore.resetFaceRecognitionState();
-      uploadedImageUrl.value = null; // Clear local image URL
       updateModelValue({
         faces: [],
-        photoUrl: undefined,
+        photoUrl: undefined, // Clear photoUrl
         photo: undefined,
         imageSize: undefined,
         exifData: undefined,
@@ -157,14 +150,13 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const openSelectMemberDialog = (face: DetectedFace) => {
-    console.log('openSelectMemberDialog received face:', face);
     faceToLabel.value = face;
     showSelectMemberDialog.value = true;
   };
 
   const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
     // Make a shallow copy of the faces array to ensure reactivity update
-    const currentFaces = modelValue.faces ? [...modelValue.faces] : [];
+    const currentFaces = modelValue.value.faces ? [...modelValue.value.faces] : [];
     const index = currentFaces.findIndex(face => face.id === updatedFace.id);
     if (index !== -1) {
       // Create a new object for the updated face to ensure full reactivity update
@@ -176,7 +168,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const handleRemoveFace = (faceId: string) => {
-    const updatedFaces = modelValue.faces?.filter(face => face.id !== faceId) || [];
+    const updatedFaces = modelValue.value.faces?.filter(face => face.id !== faceId) || [];
     updateModelValue({ faces: updatedFaces });
   };
 
@@ -184,7 +176,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     // State
     showSelectMemberDialog,
     faceToLabel,
-    uploadedImageUrl,
     aiPerspectiveSuggestions,
     storyStyles,
     generatedStory,

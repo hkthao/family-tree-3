@@ -47,7 +47,7 @@ const editedMemberStory = ref<MemberStoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
   story: '',
-  photoUrl: undefined,
+  photoUrl: '',
   faces: [], // Initialize faces as an empty array
 });
 

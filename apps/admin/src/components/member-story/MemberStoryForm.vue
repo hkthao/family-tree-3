@@ -22,7 +22,7 @@
       <v-col cols="12">
         <div v-if="hasUploadedImage && !isLoading">
           <div v-if="modelValue.faces && modelValue.faces.length > 0">
-            <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="modelValue.faces" selectable
+            <FaceBoundingBoxViewer :image-src="modelValue.photoUrl!" :faces="modelValue.faces" selectable
               @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
@@ -121,13 +121,8 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
 const { t } = useI18n();
 
-const internalMemory = computed<MemberStoryDto>({
-  get: () => props.modelValue,
-  set: (value: MemberStoryDto) => emit('update:modelValue', value),
-});
-
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
-  emit('update:modelValue', { ...internalMemory.value, ...payload });
+  emit('update:modelValue', { ...props.modelValue, ...payload });
 };
 
 const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
@@ -137,7 +132,6 @@ const onStoryGenerated = (payload: { story: string | null; title: string | null 
 const {
   showSelectMemberDialog,
   faceToLabel,
-  uploadedImageUrl,
   aiPerspectiveSuggestions,
   storyStyles,
   generatedStory,
@@ -154,7 +148,7 @@ const {
   handleRemoveFace,
   memberStoryStoreFaceRecognition,
 } = useMemberStoryForm({
-  modelValue: internalMemory.value,
+  modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
   memberId: props.memberId,
   familyId: props.familyId,
