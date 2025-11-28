@@ -3,13 +3,9 @@
     <!-- Member Selection -->
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete
-          v-model="modelValue.memberId"
+        <MemberAutocomplete v-model="modelValue.memberId"
           @update:modelValue="(newValue: string | null) => updateModelValue({ memberId: newValue })"
-          :readonly="readonly"
-          :family-id="familyId"
-          :label="t('memberStory.form.memberIdLabel')"
-        />
+          :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')" />
       </v-col>
     </v-row>
     <!-- Photo Upload Input -->
@@ -46,17 +42,16 @@
         <v-textarea class="mt-4" :model-value="modelValue.rawInput" :rows="2"
           @update:model-value="(newValue) => updateModelValue({ rawInput: newValue })"
           :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
-        <v-container fluid class="pa-0">
-          <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
-          <v-chip-group :model-value="modelValue.storyStyle"
-            @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory column
-            :disabled="readonly">
-            <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
-              {{ style.text }}
-            </v-chip>
-          </v-chip-group>
-        </v-container>
-
+      </v-col>
+      <v-col cols="12">
+        <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
+        <v-chip-group :model-value="modelValue.storyStyle"
+          @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory
+          column :disabled="readonly">
+          <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
+            {{ style.text }}
+          </v-chip>
+        </v-chip-group>
       </v-col>
     </v-row>
 
@@ -65,8 +60,8 @@
       <v-col cols="12">
         <h4>{{ t('memberStory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="modelValue.perspective"
-          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory column
-          :disabled="readonly">
+          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory
+          column :disabled="readonly">
           <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
             {{ aiPerspectiveSuggestions[0].text }}
           </v-chip>
@@ -113,7 +108,6 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
 

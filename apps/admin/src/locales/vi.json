@@ -960,6 +960,11 @@
   "memberStory.create.perspective.question": "Bạn muốn câu chuyện được kể theo góc nhìn nào?",
   "memberStory.create.storyStyle": "Phong cách câu chuyện",
   "memberStory.create.storyStyle.question": "Bạn muốn câu chuyện được viết theo phong cách nào?",
+  "memberStory.create.storyStyle.narrative": "Tự sự",
+  "memberStory.create.storyStyle.descriptive": "Miêu tả",
+  "memberStory.create.storyStyle.reflective": "Suy tư",
+  "memberStory.create.storyStyle.journalistic": "Báo chí",
+  "memberStory.create.storyStyle.poetic": "Thơ mộng",
 
 
   "memberStory.storyEditor.title": "Tiêu đề câu chuyện",
