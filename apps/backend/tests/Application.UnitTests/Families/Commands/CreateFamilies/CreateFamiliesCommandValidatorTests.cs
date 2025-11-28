@@ -1,4 +1,4 @@
-using backend.Application.Families;
+using backend.Application.Families.Queries;
 using backend.Application.Families.Commands.CreateFamilies;
 using FluentAssertions;
 using FluentValidation.TestHelper;

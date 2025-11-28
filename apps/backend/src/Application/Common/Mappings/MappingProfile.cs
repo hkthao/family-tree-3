@@ -2,10 +2,12 @@ using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Families;
+using backend.Application.Families.Queries;
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.ExportImport.Commands; // New using statement
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetFamilyDetails;
 using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement

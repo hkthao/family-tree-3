@@ -1,4 +1,4 @@
-using backend.Application.Families;
+using backend.Application.Families.Queries;
 using FluentValidation.TestHelper;
 using Xunit;
 

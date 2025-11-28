@@ -1,6 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Families;
+using backend.Application.Families.Queries;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
