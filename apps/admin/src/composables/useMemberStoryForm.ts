@@ -103,8 +103,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     }
   });
 
-
-
   const loadImage = (file: File): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -163,19 +161,25 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
 
   const openSelectMemberDialog = (face: DetectedFace) => {
     console.log('openSelectMemberDialog received face:', face);
-    
     faceToLabel.value = face;
     showSelectMemberDialog.value = true;
   };
 
   const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
-    const updatedFaces = internalModelValue.value.faces?.map(face =>
-      face.id === updatedFace.id ? updatedFace : face
-    ) || [];
-    updateModelValue({ faces: updatedFaces });
+    // Make a shallow copy of the faces array to ensure reactivity update
+    const currentFaces = internalModelValue.value.faces ? [...internalModelValue.value.faces] : [];
+    const index = currentFaces.findIndex(face => face.id === updatedFace.id);
+    if (index !== -1) {
+      // Create a new object for the updated face to ensure full reactivity update
+      currentFaces[index] = { ...updatedFace };
+    } else {
+      // If for some reason the face wasn't found (shouldn't happen with current flow)
+      // We might want to add it or log an error. For now, we assume it's found.
+      console.warn(`Face with ID ${updatedFace.id} not found in currentFaces for update.`);
+    }
+    updateModelValue({ faces: currentFaces }); // Update with the new array
     showSelectMemberDialog.value = false;
     faceToLabel.value = null;
-
   };
 
   const handleRemoveFace = (faceId: string) => {

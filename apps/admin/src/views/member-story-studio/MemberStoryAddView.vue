@@ -3,7 +3,6 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
-    {{ editedMemberStory.faces?.map((e: DetectedFace)=>e.id) }}
     <MemberStoryForm
       ref="memberStoryFormRef"
       v-model="editedMemberStory"
@@ -28,7 +27,6 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
-import type { DetectedFace } from '@/types'; // Added this import
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 
 const props = defineProps<{

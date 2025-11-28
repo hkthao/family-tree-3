@@ -26,7 +26,6 @@
               @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
-            {{ modelValue.faces?.map(e=>e.id) }}
           </div>
           <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
         </div>
