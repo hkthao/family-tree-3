@@ -3,7 +3,7 @@
     <!-- Member Selection -->
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete v-model="modelValue.memberId"
+        <MemberAutocomplete :model-value="modelValue.memberId"
           @update:modelValue="(newValue: string | null) => updateModelValue({ memberId: newValue })"
           :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')" />
       </v-col>
@@ -26,7 +26,7 @@
               @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
-
+            {{ modelValue.faces?.map(e=>e.id) }}
           </div>
           <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
         </div>
@@ -90,9 +90,11 @@
     <!-- Title and Story -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <v-text-field v-model="modelValue.title" :label="t('memberStory.storyEditor.title')" outlined
+        <v-text-field :model-value="modelValue.title"
+          @update:model-value="(newValue) => updateModelValue({ title: newValue })" :label="t('memberStory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
-        <v-textarea v-model="modelValue.story" :label="t('memberStory.storyEditor.storyContent')" outlined
+        <v-textarea :model-value="modelValue.story"
+          @update:model-value="(newValue) => updateModelValue({ story: newValue })" :label="t('memberStory.storyEditor.storyContent')" outlined
           auto-grow></v-textarea>
       </v-col>
     </v-row>

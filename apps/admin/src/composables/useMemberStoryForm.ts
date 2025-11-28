@@ -16,7 +16,7 @@ interface UseMemberStoryFormOptions {
 }
 
 export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
-  const { modelValue, readonly, familyId, updateModelValue, onStoryGenerated } = options;
+  const { modelValue: propsModelValue, readonly, updateModelValue, onStoryGenerated } = options;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const memberStoryStore = useMemberStoryStore();
@@ -24,6 +24,9 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const showSelectMemberDialog = ref(false);
   const faceToLabel = ref<DetectedFace | null>(null);
   const uploadedImageUrl = ref<string | null>(null);
+
+  // Create a computed property to ensure modelValue is always reactive
+  const internalModelValue = computed(() => propsModelValue);
 
   const aiPerspectiveSuggestions = ref([
     { value: 'firstPerson', text: t('memberStory.create.perspective.firstPerson') },
@@ -47,16 +50,16 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
 
   const canGenerateStory = computed(() => {
-    const hasMinRawInput = modelValue.rawInput && modelValue.rawInput.length >= 10;
-    const hasDetectedFaces = modelValue.faces && modelValue.faces.length > 0; // Check modelValue.faces directly
-    const hasMemberSelected = modelValue.memberId;
+    const hasMinRawInput = internalModelValue.value.rawInput && internalModelValue.value.rawInput.length >= 10;
+    const hasDetectedFaces = internalModelValue.value.faces && internalModelValue.value.faces.length > 0; // Check modelValue.faces directly
+    const hasMemberSelected = internalModelValue.value.memberId;
     return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
   });
 
   const generateStory = async () => {
     if (!canGenerateStory.value) return;
 
-    if (!modelValue.memberId || modelValue.memberId === '00000000-0000-0000-0000-000000000000') {
+    if (!internalModelValue.value.memberId || internalModelValue.value.memberId === '00000000-0000-0000-0000-000000000000') {
       showSnackbar(t('memberStory.errors.memberIdRequired'), 'error');
       generatingStory.value = false;
       return;
@@ -74,12 +77,12 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     }));
 
     const requestPayload = {
-      memberId: modelValue.memberId,
+      memberId: internalModelValue.value.memberId,
       resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
-      rawText: modelValue.rawInput,
-      style: modelValue.storyStyle,
+      rawText: internalModelValue.value.rawInput,
+      style: internalModelValue.value.storyStyle,
       photoPersons: photoPersonsPayload,
-      perspective: modelValue.perspective,
+      perspective: internalModelValue.value.perspective,
     } as GenerateStoryCommand;
 
     const result = await memberStoryStore.generateStory(requestPayload);
@@ -158,17 +161,15 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     }
   };
 
-  const openSelectMemberDialog = (faceId: string) => {
-    const face = modelValue.faces?.find(f => f.id === faceId);
-    if (face) {
-      faceToLabel.value = face;
-      showSelectMemberDialog.value = true;
-    } else {
-    }
+  const openSelectMemberDialog = (face: DetectedFace) => {
+    console.log('openSelectMemberDialog received face:', face);
+    
+    faceToLabel.value = face;
+    showSelectMemberDialog.value = true;
   };
 
   const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
-    const updatedFaces = modelValue.faces?.map(face =>
+    const updatedFaces = internalModelValue.value.faces?.map(face =>
       face.id === updatedFace.id ? updatedFace : face
     ) || [];
     updateModelValue({ faces: updatedFaces });
@@ -178,7 +179,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const handleRemoveFace = (faceId: string) => {
-    const updatedFaces = modelValue.faces?.filter(face => face.id !== faceId) || [];
+    const updatedFaces = internalModelValue.value.faces?.filter(face => face.id !== faceId) || [];
     updateModelValue({ faces: updatedFaces });
 
   };

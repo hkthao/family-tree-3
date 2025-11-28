@@ -3,11 +3,11 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
+    {{ editedMemberStory.faces?.map((e: DetectedFace)=>e.id) }}
     <MemberStoryForm
       ref="memberStoryFormRef"
       v-model="editedMemberStory"
       :member-id="memberId"
-
       :readonly="false"
     />
     <v-card-actions>
@@ -25,10 +25,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStoryStore } from '@/stores/memberStory.store'; // Updated
+import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { MemberStoryDto } from '@/types/memberStory'; // Updated
-import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue'; // Updated
+import type { MemberStoryDto } from '@/types/memberStory';
+import type { DetectedFace } from '@/types'; // Added this import
+import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -37,18 +38,19 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore(); // Updated
+const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
 const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null); // Updated
 
 const isSaving = ref(false); // To manage loading state for buttons
 
-const editedMemberStory = ref<MemberStoryDto>({ // Updated
+const editedMemberStory = ref<MemberStoryDto>({
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
   story: '',
   photoUrl: undefined,
+  faces: [], // Initialize faces as an empty array
 });
 
 const handleSave = async () => {

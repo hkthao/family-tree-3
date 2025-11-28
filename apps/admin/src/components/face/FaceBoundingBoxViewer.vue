@@ -9,7 +9,7 @@
           'bounding-box--newly-labeled': face.status === 'newly-labeled',
           'bounding-box--selected': selectable && face.id === selectedFaceId,
           'bounding-box--selectable': selectable,
-        }" @click="selectable && $emit('face-selected', face.id)">
+        }" @click="selectable && $emit('face-selected', face)">
           <div v-if="face.memberId" class="bounding-box__name">
             {{ face.memberName }}
           </div>

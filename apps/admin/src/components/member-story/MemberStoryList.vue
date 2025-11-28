@@ -166,10 +166,7 @@ const cancelDeleteMemberStory = () => {
   selectedMemberStory.value = null;
 };
 
-const handleMemberStorySaved = () => {
-  editMemberStoryDrawer.value = false;
-  loadMemberStories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload list
-};
+
 
 onMounted(() => {
   loadMemberStories({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });

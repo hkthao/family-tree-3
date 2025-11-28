@@ -33,6 +33,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
+import type { DetectedFace } from '@/types'; // Added this import
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 
 const { memberStoryId } = defineProps<{
@@ -55,8 +56,12 @@ onMounted(async () => {
   const story = await memberStoryStore.getById(memberStoryId);
   if (story) {
     editedMemberStory.value = story;
+    // Ensure faces is an array
+    if (!editedMemberStory.value.faces) {
+      editedMemberStory.value.faces = [];
+    }
     console.log('editedMemberStory on mount:', editedMemberStory.value);
-    console.log('editedMemberStory.faces on mount:', editedMemberStory.value?.faces?.map(f => f.id));
+    console.log('editedMemberStory.faces on mount:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
   }
 });
 
@@ -65,7 +70,7 @@ const handleMemberStoryFormUpdate = (newValue: MemberStoryDto) => {
   console.log('Faces in emitted newValue:', newValue.faces?.map(f => f.id));
   editedMemberStory.value = newValue;
   console.log('editedMemberStory after update:', editedMemberStory.value);
-  console.log('editedMemberStory.faces after update:', editedMemberStory.value?.faces?.map(f => f.id));
+  console.log('editedMemberStory.faces after update:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
 };
 
 const handleSave = async () => {
@@ -73,7 +78,7 @@ const handleSave = async () => {
 
   isSaving.value = true;
   console.log('Saving editedMemberStory:', editedMemberStory.value);
-  console.log('Faces in editedMemberStory before save:', editedMemberStory.value?.faces?.map(f => f.id));
+  console.log('Faces in editedMemberStory before save:', editedMemberStory.value?.faces?.map((f: DetectedFace) => f.id));
   try {
     const result = await memberStoryStore.updateItem(editedMemberStory.value);
     if (result.ok) {

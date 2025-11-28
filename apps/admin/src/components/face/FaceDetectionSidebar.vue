@@ -24,7 +24,7 @@
         'face-item--unrecognized': face.status === 'unrecognized',
         'face-item--newly-labeled': face.status === 'newly-labeled',
         'face-item--selected': face.id === selectedFaceId,
-      }" @click="$emit('face-selected', face.id)">
+      }" @click="$emit('face-selected', face)">
         <MemberFaceDisplay :face="face" />
         <template v-slot:append>
           <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
