@@ -4,7 +4,7 @@ using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
 using backend.Application.AI.DTOs; // NEW USING for AiPhotoAnalysisInputDto
 using backend.Application.AI.Models; // NEW USING
-using backend.Application.Memories.Commands.GenerateStory;
+using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;

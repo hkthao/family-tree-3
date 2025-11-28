@@ -81,9 +81,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Memory.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
     /// </summary>
-    public DbSet<Memory> Memories => Set<Memory>();
+    public DbSet<MemberStory> MemberStories => Set<MemberStory>();
 
 
 

@@ -1,11 +1,11 @@
-namespace backend.Application.Memories.Commands.UpdateMemory;
+namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
 
-public class UpdateMemoryCommandValidator : AbstractValidator<UpdateMemoryCommand>
+public class UpdateMemberStoryCommandValidator : AbstractValidator<UpdateMemberStoryCommand> // Updated
 {
-    public UpdateMemoryCommandValidator()
+    public UpdateMemberStoryCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty().WithMessage("Memory ID is required.");
+            .NotEmpty().WithMessage("MemberStory ID is required."); // Updated message
 
         RuleFor(v => v.MemberId)
             .NotEmpty().WithMessage("Member ID is required.");

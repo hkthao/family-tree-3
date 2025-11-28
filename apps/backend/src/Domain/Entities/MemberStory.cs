@@ -4,12 +4,13 @@ using backend.Domain.Common;
 
 namespace backend.Domain.Entities;
 
-public class Memory : BaseAuditableEntity, IAggregateRoot, ISoftDelete
+public class MemberStory : BaseAuditableEntity, ISoftDelete
 {
     // Id is inherited from BaseAuditableEntity
     public Guid MemberId { get; set; }
     public string Title { get; set; } = string.Empty; // max 120
     public string Story { get; set; } = string.Empty; // long text
+    public string? PhotoUrl { get; set; } // Added PhotoUrl
 
     // Navigation properties
     public Member Member { get; set; } = default!;

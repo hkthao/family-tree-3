@@ -3,16 +3,16 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Localization;
 
-namespace backend.Application.Memories.Commands.UpdateMemory;
+namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
 
-public class UpdateMemoryCommandHandler : IRequestHandler<UpdateMemoryCommand, Result>
+public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStoryCommand, Result> // Updated
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IStringLocalizer<UpdateMemoryCommandHandler> _localizer;
+    private readonly IStringLocalizer<UpdateMemberStoryCommandHandler> _localizer; // Updated
 
-    public UpdateMemoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemoryCommandHandler> localizer)
+    public UpdateMemberStoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberStoryCommandHandler> localizer) // Updated
     {
         _context = context;
         _mapper = mapper;
@@ -20,7 +20,7 @@ public class UpdateMemoryCommandHandler : IRequestHandler<UpdateMemoryCommand, R
         _localizer = localizer;
     }
 
-    public async Task<Result> Handle(UpdateMemoryCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
     {
         // Authorization check
         if (!_authorizationService.CanManageFamily(request.MemberId)) // Assuming memberId can be used to check family access
@@ -28,14 +28,14 @@ public class UpdateMemoryCommandHandler : IRequestHandler<UpdateMemoryCommand, R
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        var memory = await _context.Memories.FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken);
+        var memberStory = await _context.MemberStories.FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken); // Updated
 
-        if (memory == null)
+        if (memberStory == null)
         {
-            return Result.Failure(string.Format(ErrorMessages.NotFound, $"Memory with ID {request.Id}"), ErrorSources.NotFound);
+            return Result.Failure(string.Format(ErrorMessages.NotFound, $"MemberStory with ID {request.Id}"), ErrorSources.NotFound); // Updated
         }
 
-        _mapper.Map(request, memory); // Map command to existing entity
+        _mapper.Map(request, memberStory); // Map command to existing entity // Updated
 
         await _context.SaveChangesAsync(cancellationToken);
 

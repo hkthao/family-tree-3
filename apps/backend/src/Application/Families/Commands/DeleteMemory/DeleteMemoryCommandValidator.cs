@@ -1,10 +1,10 @@
-namespace backend.Application.Memories.Commands.DeleteMemory;
+namespace backend.Application.MemberStories.Commands.DeleteMemberStory; // Updated
 
-public class DeleteMemoryCommandValidator : AbstractValidator<DeleteMemoryCommand>
+public class DeleteMemberStoryCommandValidator : AbstractValidator<DeleteMemberStoryCommand> // Updated
 {
-    public DeleteMemoryCommandValidator()
+    public DeleteMemberStoryCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty().WithMessage("Memory ID is required.");
+            .NotEmpty().WithMessage("MemberStory ID is required."); // Updated message
     }
 }

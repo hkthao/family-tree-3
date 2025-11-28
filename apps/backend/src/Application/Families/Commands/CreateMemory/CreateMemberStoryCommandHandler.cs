@@ -4,16 +4,16 @@ using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Localization;
 
-namespace backend.Application.Memories.Commands.CreateMemory;
+namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
-public class CreateMemoryCommandHandler : IRequestHandler<CreateMemoryCommand, Result<Guid>>
+public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStoryCommand, Result<Guid>> // Updated
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IStringLocalizer<CreateMemoryCommandHandler> _localizer;
+    private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer; // Updated
 
-    public CreateMemoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<CreateMemoryCommandHandler> localizer)
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer) // Updated
     {
         _context = context;
         _mapper = mapper;
@@ -21,7 +21,7 @@ public class CreateMemoryCommandHandler : IRequestHandler<CreateMemoryCommand, R
         _localizer = localizer;
     }
 
-    public async Task<Result<Guid>> Handle(CreateMemoryCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
     {
         // Authorization check
         if (!_authorizationService.CanManageFamily(request.MemberId)) // Assuming memberId can be used to check family access
@@ -36,12 +36,12 @@ public class CreateMemoryCommandHandler : IRequestHandler<CreateMemoryCommand, R
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
 
-        var memory = _mapper.Map<Memory>(request);
-        memory.Id = Guid.NewGuid(); // Assign a new ID
+        var memberStory = _mapper.Map<MemberStory>(request); // Updated
+        memberStory.Id = Guid.NewGuid(); // Assign a new ID
 
-        _context.Memories.Add(memory);
+        _context.MemberStories.Add(memberStory); // Updated
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(memory.Id);
+        return Result<Guid>.Success(memberStory.Id); // Updated
     }
 }

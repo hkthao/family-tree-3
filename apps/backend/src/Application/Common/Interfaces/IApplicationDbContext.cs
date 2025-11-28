@@ -69,9 +69,9 @@ public interface IApplicationDbContext
     DbSet<FamilyDict> FamilyDicts { get; }
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Memory.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
     /// </summary>
-    DbSet<Memory> Memories { get; }
+    DbSet<MemberStory> MemberStories { get; }
 
 
 

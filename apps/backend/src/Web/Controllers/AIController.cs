@@ -4,8 +4,8 @@ using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
 using backend.Application.AI.DTOs; // UPDATED IMPORT
 using backend.Application.AI.Models; // NEW IMPORT
-using backend.Application.Memories.Commands.GenerateStory;
-using backend.Application.Memories.DTOs;
+using backend.Application.MemberStories.Commands.GenerateStory; // Updated
+using backend.Application.MemberStories.DTOs; // Updated
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

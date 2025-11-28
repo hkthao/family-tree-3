@@ -3,9 +3,9 @@ using backend.Application.AI.Prompts;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Memories.DTOs; // PhotoAnalysisResultDto, GenerateStoryResponseDto
+using backend.Application.MemberStories.DTOs; // PhotoAnalysisResultDto, GenerateStoryResponseDto // Updated
 
-namespace backend.Application.Memories.Commands.GenerateStory;
+namespace backend.Application.MemberStories.Commands.GenerateStory; // Updated
 
 public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand, Result<GenerateStoryResponseDto>>
 {

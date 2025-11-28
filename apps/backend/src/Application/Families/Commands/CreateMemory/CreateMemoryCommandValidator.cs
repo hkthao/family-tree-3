@@ -1,8 +1,8 @@
-namespace backend.Application.Memories.Commands.CreateMemory;
+namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
-public class CreateMemoryCommandValidator : AbstractValidator<CreateMemoryCommand>
+public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberStoryCommand> // Updated
 {
-    public CreateMemoryCommandValidator()
+    public CreateMemberStoryCommandValidator()
     {
         RuleFor(v => v.MemberId)
             .NotEmpty().WithMessage("Member ID is required.");

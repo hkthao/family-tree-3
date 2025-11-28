@@ -1,4 +1,4 @@
-namespace backend.Application.Memories.DTOs;
+namespace backend.Application.MemberStories.DTOs; // Updated
 
 public class GenerateStoryResponseDto
 {

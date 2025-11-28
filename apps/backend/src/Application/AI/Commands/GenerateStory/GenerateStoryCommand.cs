@@ -1,8 +1,8 @@
 using backend.Application.AI.DTOs; // For PhotoAnalysisPersonDto
 using backend.Application.Common.Models;
-using backend.Application.Memories.DTOs; // GenerateStoryResponseDto
+using backend.Application.MemberStories.DTOs; // GenerateStoryResponseDto // Updated
 
-namespace backend.Application.Memories.Commands.GenerateStory;
+namespace backend.Application.MemberStories.Commands.GenerateStory; // Updated
 
 public record GenerateStoryCommand : IRequest<Result<GenerateStoryResponseDto>>
 {

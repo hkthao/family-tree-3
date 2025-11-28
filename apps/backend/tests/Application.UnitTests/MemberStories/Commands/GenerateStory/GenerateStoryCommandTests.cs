@@ -4,15 +4,15 @@ using backend.Application.AI.Prompts; // PromptBuilder
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Memories.Commands.GenerateStory;
-using backend.Application.Memories.DTOs; // GenerateStoryResponseDto
+using backend.Application.MemberStories.Commands.GenerateStory; // Updated
+using backend.Application.MemberStories.DTOs; // GenerateStoryResponseDto // Updated
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace backend.Application.UnitTests.Memories.Commands.GenerateStory;
+namespace backend.Application.UnitTests.MemberStories.Commands.GenerateStory; // Updated
 
 public class GenerateStoryCommandTests : TestBase
 {

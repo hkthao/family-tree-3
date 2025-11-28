@@ -1,4 +1,4 @@
-namespace backend.Application.Memories.Commands.GenerateStory;
+namespace backend.Application.MemberStories.Commands.GenerateStory; // Updated
 
 public class GenerateStoryCommandValidator : AbstractValidator<GenerateStoryCommand>
 {
