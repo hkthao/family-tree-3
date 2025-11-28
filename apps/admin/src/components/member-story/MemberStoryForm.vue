@@ -1,5 +1,17 @@
 <template>
   <v-container>
+    <!-- Member Selection -->
+    <v-row>
+      <v-col cols="12">
+        <MemberAutocomplete
+          v-model="modelValue.memberId"
+          @update:modelValue="(newValue: string | null) => updateModelValue({ memberId: newValue })"
+          :readonly="readonly"
+          :family-id="familyId"
+          :label="t('memberStory.form.memberIdLabel')"
+        />
+      </v-col>
+    </v-row>
     <!-- Photo Upload Input -->
     <v-row>
       <v-col v-if="isLoading" cols="12">
@@ -105,6 +117,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import MemberFaceChip from '../common/MemberFaceChip.vue';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
 
 const props = defineProps<{

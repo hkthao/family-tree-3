@@ -56,8 +56,6 @@
 
     <!-- Edit MemberStory Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleCrudDrawerClosed">
-
-        @saved="handleCrudDrawerSaved" />
     </BaseCrudDrawer>
 
     <!-- Detail MemberStory Drawer -->
