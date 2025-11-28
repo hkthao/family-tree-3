@@ -37,8 +37,17 @@
         <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
           @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
           :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
-        <StoryStyleInput :model-value="internalMemory.storyStyle"
-          @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" :readonly="readonly" />
+        <v-container fluid class="pa-0">
+          <h4>{{ t('memory.create.storyStyle.question') }}</h4>
+          <v-chip-group :model-value="internalMemory.storyStyle"
+            @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" color="primary" mandatory column
+            :disabled="readonly">
+            <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
+              {{ style.text }}
+            </v-chip>
+          </v-chip-group>
+        </v-container>
+
       </v-col>
     </v-row>
 
@@ -98,7 +107,7 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from '@/types';
 import MemberFaceChip from '../common/MemberFaceChip.vue';
-import StoryStyleInput from './StoryStyleInput.vue';
+
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 
 const props = defineProps<{
@@ -119,6 +128,14 @@ const aiPerspectiveSuggestions = ref([
   { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
   { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
   { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
+]);
+
+const storyStyles = ref([
+  { value: 'narrative', text: t('memory.create.storyStyle.narrative') },
+  { value: 'descriptive', text: t('memory.create.storyStyle.descriptive') },
+  { value: 'reflective', text: t('memory.create.storyStyle.reflective') },
+  { value: 'journalistic', text: t('memory.create.storyStyle.journalistic') },
+  { value: 'poetic', text: t('memory.create.storyStyle.poetic') },
 ]);
 const generatedStory = ref<string | null>(null);
 const generatedTitle = ref<string | null>(null);
