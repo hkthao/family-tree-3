@@ -14,10 +14,9 @@
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">
         {{ t('common.cancel') }}
       </v-btn>
-      <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving">
-        {{ t('common.save') }}
-      </v-btn>
-    </v-card-actions>
+          <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving" :disabled="!memberStoryFormRef?.isValid">
+              {{ t('common.save') }}
+          </v-btn>    </v-card-actions>
   </v-card>
 </template>
 
