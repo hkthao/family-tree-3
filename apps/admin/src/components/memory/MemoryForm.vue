@@ -98,7 +98,7 @@ import type { MemoryDto } from '@/types/memory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useMemoryStore } from '@/stores/memory.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { DetectedFace, Member } from '@/types';
+import type { DetectedFace } from '@/types';
 import MemberFaceChip from '../common/MemberFaceChip.vue';
 import StoryStyleInput from './StoryStyleInput.vue';
 import type { PhotoAnalysisPersonDto } from '@/types/ai';

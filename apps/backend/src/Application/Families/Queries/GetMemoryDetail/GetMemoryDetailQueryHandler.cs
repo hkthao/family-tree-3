@@ -21,8 +21,7 @@ public class GetMemoryDetailQueryHandler : IRequestHandler<GetMemoryDetailQuery,
     public async Task<Result<MemoryDto>> Handle(GetMemoryDetailQuery request, CancellationToken cancellationToken)
     {
         var memory = await _context.Memories
-            .Include(m => m.Member) // Include Member for authorization check
-            .Include(m => m.PhotoAnalysisResult)
+            .Include(m => m.Member)
             .FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken);
 
         if (memory == null)

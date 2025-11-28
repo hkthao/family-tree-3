@@ -1,6 +1,6 @@
+using backend.Application.AI.DTOs; // For PhotoAnalysisPersonDto
 using backend.Application.Common.Models;
 using backend.Application.Memories.DTOs; // GenerateStoryResponseDto
-using backend.Application.AI.DTOs; // For PhotoAnalysisPersonDto
 
 namespace backend.Application.Memories.Commands.GenerateStory;
 

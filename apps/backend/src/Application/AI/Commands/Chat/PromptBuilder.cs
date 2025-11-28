@@ -171,7 +171,7 @@ public static class PromptBuilder
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
         }
-       
+
         if (!string.IsNullOrEmpty(member.WifeFullName))
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");

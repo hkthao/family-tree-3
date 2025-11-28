@@ -73,10 +73,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<Memory> Memories { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể PhotoAnalysisResult.
-    /// </summary>
-    DbSet<PhotoAnalysisResult> PhotoAnalysisResults { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.

@@ -35,7 +35,6 @@ public class GetMemoriesByMemberIdQueryHandler : IRequestHandler<GetMemoriesByMe
 
         var query = _context.Memories
             .Where(m => m.MemberId == request.MemberId && !m.IsDeleted)
-            .Include(m => m.PhotoAnalysisResult)
             .OrderByDescending(m => m.Created) // Default sort (Changed from CreatedAt to Created)
             .AsNoTracking();
 
