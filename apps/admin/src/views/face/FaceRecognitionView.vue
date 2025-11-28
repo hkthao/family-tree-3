@@ -69,8 +69,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
   }
 };
 
-const openSelectMemberDialog = (faceId: string) => {
-  const face = faceStore.detectedFaces.find(f => f.id === faceId);
+const openSelectMemberDialog = (face: DetectedFace) => {
   if (face) {
     faceToLabel.value = face;
     showSelectMemberDialog.value = true;
