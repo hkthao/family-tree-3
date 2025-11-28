@@ -31,7 +31,7 @@
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
             <h4>{{ t('memberStory.create.selectTargetMember') }}</h4>
-            <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
+            <v-chip-group mandatory column>
               <MemberFaceChip v-for="face in modelValue.faces" :key="face.id" :face="face" :value="face.id" />
             </v-chip-group>
           </div>
@@ -174,7 +174,6 @@ const {
 defineExpose({
   isValid: computed(() => !isLoading.value),
   memoryFaceStore: memberStoryStoreFaceRecognition,
-  selectedTargetMemberFaceId,
   generateStory,
   generatedStory,
   generatedTitle,

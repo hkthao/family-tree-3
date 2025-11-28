@@ -210,7 +210,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     // State
     showSelectMemberDialog,
     faceToLabel,
-    selectedTargetMemberFaceId,
     uploadedImageUrl,
     aiPerspectiveSuggestions,
     storyStyles,
