@@ -106,13 +106,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryDto } from '@/types/memory';
+import type { MemberStoryDto } from '@/types/memberStory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
 
 const props = defineProps<{
-  modelValue: MemoryDto;
+  modelValue: MemberStoryDto;
   readonly?: boolean;
   memberId?: string | null;
   familyId?: string;
@@ -120,12 +120,12 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
 const { t } = useI18n();
 
-const internalMemory = computed<MemoryDto>({
+const internalMemory = computed<MemberStoryDto>({
   get: () => props.modelValue,
-  set: (value: MemoryDto) => emit('update:modelValue', value),
+  set: (value: MemberStoryDto) => emit('update:modelValue', value),
 });
 
-const updateModelValue = (payload: Partial<MemoryDto>) => {
+const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   emit('update:modelValue', { ...internalMemory.value, ...payload });
 };
 

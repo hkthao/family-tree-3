@@ -45,7 +45,6 @@
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
 import { type PropType, computed } from 'vue';
-// import { createBase64ImageSrc } from '@/utils/image.utils'; // Removed
 import MemberFaceDisplay from '../common/MemberFaceDisplay.vue'; // NEW IMPORT
 
 const { t } = useI18n();
