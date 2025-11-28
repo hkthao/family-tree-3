@@ -6,9 +6,9 @@
     <MemberStoryForm
       v-if="editedMemberStory"
       ref="memberStoryFormRef"
-      v-model="editedMemberStory"
+      :model-value="editedMemberStory"
+      @update:modelValue="handleMemberStoryFormUpdate"
       :member-id="editedMemberStory.memberId"
-
       :readonly="false"
     />
     <v-card-text v-else>
@@ -51,27 +51,39 @@ const editedMemberStory = ref<MemberStoryDto | null>(null);
 const isSaving = ref(false);
 
 onMounted(async () => {
+  console.log('MemberStoryEditView mounted, memberStoryId:', memberStoryId);
   const story = await memberStoryStore.getById(memberStoryId);
   if (story) {
     editedMemberStory.value = story;
+    console.log('editedMemberStory on mount:', editedMemberStory.value);
+    console.log('editedMemberStory.faces on mount:', editedMemberStory.value?.faces?.map(f => f.id));
   }
 });
 
+const handleMemberStoryFormUpdate = (newValue: MemberStoryDto) => {
+  console.log('MemberStoryForm emitted update:modelValue with newValue:', newValue);
+  console.log('Faces in emitted newValue:', newValue.faces?.map(f => f.id));
+  editedMemberStory.value = newValue;
+  console.log('editedMemberStory after update:', editedMemberStory.value);
+  console.log('editedMemberStory.faces after update:', editedMemberStory.value?.faces?.map(f => f.id));
+};
+
 const handleSave = async () => {
-  if (!editedMemberStory.value || !memberStoryFormRef.value) return; // Updated
+  if (!editedMemberStory.value || !memberStoryFormRef.value) return;
 
   isSaving.value = true;
+  console.log('Saving editedMemberStory:', editedMemberStory.value);
+  console.log('Faces in editedMemberStory before save:', editedMemberStory.value?.faces?.map(f => f.id));
   try {
-    const result = await memberStoryStore.updateItem(editedMemberStory.value); // Updated
+    const result = await memberStoryStore.updateItem(editedMemberStory.value);
     if (result.ok) {
-      showSnackbar(t('memberStory.edit.saveSuccess'), 'success'); // Updated
+      showSnackbar(t('memberStory.edit.saveSuccess'), 'success');
       emit('saved');
     } else {
-      showSnackbar(t('memberStory.edit.saveFailed'), 'error'); // Updated
+      showSnackbar(t('memberStory.edit.saveFailed'), 'error');
     }
   } catch (error) {
-    console.error('Error saving member story:', error); // Updated
-    // Corrected showSnackbar call: message as first arg, color as second
+    console.error('Error saving member story:', error);
     showSnackbar((error as Error).message, 'error');
   } finally {
     isSaving.value = false;

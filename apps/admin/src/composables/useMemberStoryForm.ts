@@ -122,7 +122,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     if (uploadedFile) {
       uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
       await memberStoryStore.detectFaces(uploadedFile, true);
-      console.log('memberStoryStore.faceRecognition.detectedFaces after detectFaces:', memberStoryStore.faceRecognition.detectedFaces.map(f => f.id));
       try {
         const img = await loadImage(uploadedFile);
         updateModelValue({ photoUrl: uploadedImageUrl.value, photo: uploadedImageUrl.value, imageSize: `${img.width}x${img.height}` });
@@ -136,10 +135,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
         updateModelValue({
           faces: memberStoryStore.faceRecognition.detectedFaces,
         });
-        console.log('modelValue.faces (from modelValue) after updateModelValue in handleFileUpload:', modelValue.faces?.map(f => f.id));
-
-
-
       } else if (!isLoading.value && uploadedImageUrl.value && memberStoryStore.faceRecognition.detectedFaces.length === 0) {
         showSnackbar(t('memberStory.faceRecognition.noFacesDetected'), 'info');
         updateModelValue({
@@ -148,7 +143,6 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
           imageSize: undefined,
           exifData: undefined,
         });
-
       }
 
     } else {
@@ -165,17 +159,11 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const openSelectMemberDialog = (faceId: string) => {
-    console.log('openSelectMemberDialog called with faceId:', faceId);
-    console.log('modelValue.faces available in openSelectMemberDialog:', modelValue.faces?.map(f => f.id));
-    
     const face = modelValue.faces?.find(f => f.id === faceId);
     if (face) {
-      console.log('Face found:', face.id);
       faceToLabel.value = face;
       showSelectMemberDialog.value = true;
-      console.log('showSelectMemberDialog.value set to:', showSelectMemberDialog.value);
     } else {
-      console.log('Face not found for faceId:', faceId, 'in modelValue.faces');
     }
   };
 
