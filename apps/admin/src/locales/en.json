@@ -824,8 +824,6 @@
   "face.errors.noFacesDetectedForSearch": "No faces detected for search.",
   "face.uploadInput.selectImage": "Select Image",
   "face.recognition.saveLabelsButton": "Save Labels",
-  "face.recognition.noFacesDetected": "No faces detected in the image.",
-  "face.recognition.saveSuccess": "Face labels saved successfully!",
   "face.boundingBox.labeledAs": "Labeled as {name}",
   "face.boundingBox.unlabeled": "Unlabeled",
   "face.search.title": "Face Search",
@@ -931,6 +929,8 @@
 
   "memberStory.list.action.create": "Create Memory",
 
+  "memberStory.form.memberIdLabel": "Target Member",
+
   "memberStory.create.title": "Create New Memory",
   "memberStory.create.selectTargetMember": "You want to create a memory about whom",
   "memberStory.create.rawInputPlaceholder": "Recount what you remember about this moment...",
@@ -941,6 +941,12 @@
   "memberStory.create.perspective.fullyNeutral": "Completely neutral",
   "memberStory.create.generateStoryButton": "Generate Story with AI",
   "memberStory.create.aiConsentInfo": "By clicking 'Generate Story with AI', you consent to your uploaded image and associated data being processed by AI services to generate a story. This data may be used to improve AI models.",
+
+  "memberStory.errors.memberIdRequired": "Member ID is required to generate a story.",
+  "memberStory.errors.storyGenerationFailed": "Failed to generate story.",
+
+  "memberStory.faceRecognition.noFacesDetected": "No faces detected in the image.",
+  "memberStory.faceRecognition.uploadPrompt": "Upload an image to start face detection.",
 
   "memberStory.detail.titleDefault": "MemberStory Details",
   "memberStory.detail.loading": "Loading member story details...",

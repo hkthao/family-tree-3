@@ -30,7 +30,7 @@
               @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
-            <h4>{{ t('memory.create.selectTargetMember') }}</h4>
+            <h4>{{ t('memberStory.create.selectTargetMember') }}</h4>
             <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
               <MemberFaceChip v-for="face in modelValue.faces" :key="face.id" :face="face" :value="face.id" />
             </v-chip-group>
@@ -38,19 +38,19 @@
           <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
         </div>
         <v-alert v-else type="info">{{
-          t('face.recognition.uploadPrompt') }}</v-alert>
+          t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
       </v-col>
     </v-row>
 
     <!-- Raw Input & Story Style -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
+        <h4>{{ t('memberStory.create.rawInputPlaceholder') }}</h4>
         <v-textarea class="mt-4" :model-value="modelValue.rawInput" :rows="2"
           @update:model-value="(newValue) => updateModelValue({ rawInput: newValue })"
-          :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
+          :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
         <v-container fluid class="pa-0">
-          <h4>{{ t('memory.create.storyStyle.question') }}</h4>
+          <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
           <v-chip-group :model-value="modelValue.storyStyle"
             @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory column
             :disabled="readonly">
@@ -66,7 +66,7 @@
     <!-- Perspective -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <h4>{{ t('memory.create.perspective.question') }}</h4>
+        <h4>{{ t('memberStory.create.perspective.question') }}</h4>
         <v-chip-group :model-value="modelValue.perspective"
           @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory column
           :disabled="readonly">
@@ -87,10 +87,10 @@
       <v-col cols="12">
         <v-btn color="primary" :disabled="readonly || generatingStory || isLoading || !canGenerateStory"
           :loading="generatingStory" @click="generateStory">
-          {{ t('memory.create.generateStoryButton') }}
+          {{ t('memberStory.create.generateStoryButton') }}
         </v-btn>
         <v-alert type="info" class="mt-4">
-          {{ t('memory.create.aiConsentInfo') }}
+          {{ t('memberStory.create.aiConsentInfo') }}
         </v-alert>
       </v-col>
     </v-row>
@@ -98,9 +98,9 @@
     <!-- Title and Story -->
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
-        <v-text-field v-model="modelValue.title" :label="t('memory.storyEditor.title')" outlined
+        <v-text-field v-model="modelValue.title" :label="t('memberStory.storyEditor.title')" outlined
           class="mb-4"></v-text-field>
-        <v-textarea v-model="modelValue.story" :label="t('memory.storyEditor.storyContent')" outlined
+        <v-textarea v-model="modelValue.story" :label="t('memberStory.storyEditor.storyContent')" outlined
           auto-grow></v-textarea>
       </v-col>
     </v-row>

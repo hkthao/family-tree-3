@@ -27,17 +27,17 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const uploadedImageUrl = ref<string | null>(null);
 
   const aiPerspectiveSuggestions = ref([
-    { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
-    { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
-    { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
+    { value: 'firstPerson', text: t('memberStory.create.perspective.firstPerson') },
+    { value: 'neutralPersonal', text: t('memberStory.create.perspective.neutralPersonal') },
+    { value: 'fullyNeutral', text: t('memberStory.create.perspective.fullyNeutral') },
   ]);
 
   const storyStyles = ref([
-    { value: 'narrative', text: t('memory.create.storyStyle.narrative') },
-    { value: 'descriptive', text: t('memory.create.storyStyle.descriptive') },
-    { value: 'reflective', text: t('memory.create.storyStyle.reflective') },
-    { value: 'journalistic', text: t('memory.create.storyStyle.journalistic') },
-    { value: 'poetic', text: t('memory.create.storyStyle.poetic') },
+    { value: 'narrative', text: t('memberStory.create.storyStyle.narrative') },
+    { value: 'descriptive', text: t('memberStory.create.storyStyle.descriptive') },
+    { value: 'reflective', text: t('memberStory.create.storyStyle.reflective') },
+    { value: 'journalistic', text: t('memberStory.create.storyStyle.journalistic') },
+    { value: 'poetic', text: t('memberStory.create.storyStyle.poetic') },
   ]);
 
   const generatedStory = ref<string | null>(null);
@@ -58,7 +58,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     if (!canGenerateStory.value) return;
 
     if (!modelValue.memberId || modelValue.memberId === '00000000-0000-0000-0000-000000000000') {
-      showSnackbar(t('memory.errors.memberIdRequired'), 'error');
+      showSnackbar(t('memberStory.errors.memberIdRequired'), 'error');
       generatingStory.value = false;
       return;
     }
@@ -90,7 +90,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       updateModelValue({ story: generatedStory.value, title: generatedTitle.value });
       onStoryGenerated({ story: generatedStory.value, title: generatedTitle.value });
     } else {
-      showSnackbar(result.error?.message || t('memory.errors.storyGenerationFailed'), 'error');
+      showSnackbar(result.error?.message || t('memberStory.errors.storyGenerationFailed'), 'error');
     }
     generatingStory.value = false;
   };
@@ -154,7 +154,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
         }
 
       } else if (!isLoading.value && uploadedImageUrl.value && memberStoryStore.faceRecognition.detectedFaces.length === 0) {
-        showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+        showSnackbar(t('memberStory.faceRecognition.noFacesDetected'), 'info');
         updateModelValue({
           faces: [],
           photo: undefined,
