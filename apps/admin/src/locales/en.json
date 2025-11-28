@@ -968,6 +968,8 @@
   "memberStory.style.formal": "Formal",
   "memberStory.style.folk": "Folk",
   "memberStory.create.aiEventSuggestion.title": "Can you tell us what this event could be?",
+  "memberStory.storyEditor.title": "Story Title",
+  "memberStory.storyEditor.storyContent": "Story Content",
 
   "tour.familyList.search.title": "Search and Filter",
   "tour.familyList.search.description": "Here you can search for families by name or use advanced filters.",
