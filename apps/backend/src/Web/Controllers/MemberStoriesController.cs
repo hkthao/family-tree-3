@@ -4,8 +4,8 @@ using backend.Application.MemberStories.Commands.DeleteMemberStory; // Updated
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
 using backend.Application.MemberStories.DTOs; // Updated
-using backend.Application.MemberStories.Queries.GetMemberStoryDetail; // Updated
-using backend.Application.MemberStories.Queries.GetMemoriesByMemberId; // Updated
+using backend.Application.MemberStories.Queries.GetMemberStoryDetail;
+using backend.Application.MemberStories.Queries.SearchStories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -87,20 +87,21 @@ public class MemberStoriesController : ControllerBase // Updated
     }
 
     /// <summary>
-    /// Gets a list of member stories for a specific member.
+    /// Gets a paginated list of member stories based on various filters.
     /// </summary>
-    [HttpGet("member/{memberId}")]
-    [ProducesResponseType(typeof(PaginatedList<MemberStoryDto>), StatusCodes.Status200OK)] // Updated
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> GetMemberStoriesByMemberId(Guid memberId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) // Updated
+    [HttpGet] // Route will be api/member-stories
+    [ProducesResponseType(typeof(PaginatedList<MemberStoryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> GetMemberStories(
+        [FromQuery] SearchStoriesQuery query,
+        CancellationToken cancellationToken)
     {
-        var query = new GetMemberStoriesByMemberIdQuery(memberId, pageNumber, pageSize); // Updated
-        var result = await _mediator.Send(query, HttpContext.RequestAborted);
+        var result = await _mediator.Send(query, cancellationToken);
         if (result.IsSuccess)
         {
             return Ok(result.Value);
         }
-        return NotFound(result.Error);
+        return BadRequest(result.Error);
     }
 
     /// <summary>
