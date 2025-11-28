@@ -23,7 +23,7 @@
         </a>
       </template>
       <template #item.memberFullName="{ item }">
-        <MemberName :full-name="item.memberFullName" :avatar-url="item.memberAvatarUrl" :gender="item.memberGender" />
+        <MemberName :full-name="item.memberFullName ?? undefined" :avatar-url="item.memberAvatarUrl ?? undefined" :gender="item.memberGender ?? undefined" />
       </template>
       <template #item.actions="{ item }">
         <v-menu>
