@@ -1,11 +1,10 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { DetectedFace, SearchResult, Member, Result } from '@/types'; // Removed Paginated
+import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter } from '@/types'; // Removed Paginated
 import type { MemberStoryDto } from '@/types/memberStory'; // Updated
 import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
-import type { MemberStoryFilter } from '@/services/memberStory/memberStory.service.interface'; // Updated
 
 export interface MemberStoryFaceState { // Updated
   uploadedImage: string | null; // Base64 or URL of the uploaded image
@@ -30,7 +29,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       filters: {
         memberId: undefined, // Default to undefined for filtering
         searchQuery: '',
-      } as MemberStoryFilter, // Updated
+      } as SearchStoriesFilter, // Updated
       currentPage: 1,
       itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
       totalItems: 0,
@@ -113,15 +112,6 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      
-      if (!this.list.filters.memberId) {
-        this.list.items = [];
-        this.list.totalItems = 0;
-        this.list.totalPages = 1;
-        this.list.loading = false;
-        return;
-      }
-
       const result = await this.services.memberStory.loadItems( // Updated
         {
           memberId: this.list.filters.memberId,
@@ -224,7 +214,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       return undefined;
     },
 
-    setFilters(filters: MemberStoryFilter) { // Updated
+    setFilters(filters: SearchStoriesFilter) { // Updated
       this.list.filters = { ...this.list.filters, ...filters };
     },
 

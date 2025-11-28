@@ -1,13 +1,8 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
 using backend.Application.Common.Extensions;
 using backend.Application.MemberStories.DTOs;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
 
 namespace backend.Application.MemberStories.Queries.SearchStories;
 

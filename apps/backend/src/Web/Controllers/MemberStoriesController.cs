@@ -89,10 +89,10 @@ public class MemberStoriesController : ControllerBase // Updated
     /// <summary>
     /// Gets a paginated list of member stories based on various filters.
     /// </summary>
-    [HttpGet] // Route will be api/member-stories
+    [HttpGet("search")] // Route sẽ là api/member-stories/search
     [ProducesResponseType(typeof(PaginatedList<MemberStoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> GetMemberStories(
+    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> SearchMemberStories(
         [FromQuery] SearchStoriesQuery query,
         CancellationToken cancellationToken)
     {

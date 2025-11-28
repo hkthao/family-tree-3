@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 using backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
 using backend.Application.MemberStories.DTOs; // Updated

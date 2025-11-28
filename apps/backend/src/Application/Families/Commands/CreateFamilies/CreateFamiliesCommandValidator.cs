@@ -1,5 +1,4 @@
 using backend.Application.Families.Queries;
-using FluentValidation;
 
 namespace backend.Application.Families.Commands.CreateFamilies;
 

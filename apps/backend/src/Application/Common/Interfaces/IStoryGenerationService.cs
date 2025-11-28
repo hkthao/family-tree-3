@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.MemberStories.Commands.GenerateStory; // Added
 using backend.Application.MemberStories.DTOs; // Updated
 
 namespace backend.Application.Common.Interfaces;

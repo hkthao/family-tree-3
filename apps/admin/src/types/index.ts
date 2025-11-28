@@ -19,3 +19,12 @@ export * from './biography.d'; // NEW EXPORT
 export * from './ai/analyzed-data.d'; // NEW EXPORT
 export * from './memory.d'; // NEW EXPORT
 export type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from './ai/analyzed-data';
+
+// Define a filter interface for member stories if needed for searching/filtering // Updated
+export interface SearchStoriesFilter { // Updated
+  memberId?: string; // Filter by member
+  searchQuery?: string; // Search by title/story
+  // Add other filters as needed (e.g., date range, tags)
+  sortBy?: string; // Column name to sort by
+  sortOrder?: 'asc' | 'desc'; // Sort order
+}

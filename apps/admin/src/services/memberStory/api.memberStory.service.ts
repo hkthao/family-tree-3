@@ -1,7 +1,6 @@
-import type { MemberStoryDto } from '@/types/memberStory.d';
-import type { IMemberStoryService, MemberStoryFilter } from './memberStory.service.interface';
+import type { IMemberStoryService } from './memberStory.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok, type Result, type Paginated } from '@/types'; // Import 'ok' from '@/types'
+import { ok, type Result, type Paginated, type MemberStoryDto, type SearchStoriesFilter } from '@/types'; // Import 'ok' from '@/types' and SearchStoriesFilter
 
 export class ApiMemberStoryService implements IMemberStoryService {
   private baseRoute = '/member-stories'; // Base route for the MemberStoriesController // Updated
@@ -10,7 +9,7 @@ export class ApiMemberStoryService implements IMemberStoryService {
 
   async fetch(): Promise<Result<MemberStoryDto[], ApiError>> {
     // This method is part of ICrudService, but MemberStoriesController doesn't have a direct /member-stories GET endpoint for all member stories.
-    // We'll rely on loadItems or getMemberStoriesByMemberId for listing.
+    // We'll rely on loadItems or searchMemberStories for listing.
     // For now, returning an empty list or throwing an error, or just not using this method.
     // Let's implement this as fetching all member stories (if the backend supports it, which it doesn't directly now)
     // or simply return an empty list or error if not intended.
@@ -76,34 +75,26 @@ export class ApiMemberStoryService implements IMemberStoryService {
   }
 
   async loadItems(
-    filters: MemberStoryFilter,
+    filters: SearchStoriesFilter,
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<MemberStoryDto>, ApiError>> {
-    // MemberStoriesController only has GetMemberStoriesByMemberId, not a general loadItems for all member stories
-    // So this will delegate to getMemberStoriesByMemberId if memberId is provided, otherwise return empty
-    if (filters.memberId) {
-      return this.getMemberStoriesByMemberId(filters.memberId, page, itemsPerPage, filters);
-    }
-
-    // If no memberId is provided, and no general member stories endpoint, return empty paginated list
-    return {
-      ok: true,
-      value: { items: [], page: 1, totalItems: 0, totalPages: 0 }
-    } as Result<Paginated<MemberStoryDto>, ApiError>;
+    return this.searchMemberStories(filters, page, itemsPerPage);
   }
 
-  async getMemberStoriesByMemberId(
-    memberId: string,
+  async searchMemberStories(
+    filters: SearchStoriesFilter,
     page: number,
     itemsPerPage: number,
-    filters: MemberStoryFilter, // Add filters parameter
   ): Promise<Result<Paginated<MemberStoryDto>, ApiError>> {
     const params = new URLSearchParams();
     params.append('pageNumber', page.toString());
     params.append('pageSize', itemsPerPage.toString());
 
-    if (filters.searchQuery) { // Added for search functionality
+    if (filters.memberId) {
+      params.append('memberId', filters.memberId);
+    }
+    if (filters.searchQuery) {
       params.append('searchQuery', filters.searchQuery);
     }
     if (filters.sortBy) {
@@ -114,9 +105,8 @@ export class ApiMemberStoryService implements IMemberStoryService {
     }
 
     const result = await this.http.get<Paginated<MemberStoryDto>>(
-      `${this.baseRoute}/member/${memberId}?${params.toString()}`,
+      `${this.baseRoute}/search?${params.toString()}`,
     );
     return result;
   }
-  // Removed analyzePhoto and generateStory
 }

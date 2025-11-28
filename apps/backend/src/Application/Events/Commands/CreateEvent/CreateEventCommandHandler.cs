@@ -2,7 +2,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Events.Specifications;
 using backend.Application.Members.Specifications;
 using backend.Domain.Entities;
 

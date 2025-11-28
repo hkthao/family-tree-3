@@ -1,7 +1,6 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Families;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.ExportImport.Commands; // New using statement
