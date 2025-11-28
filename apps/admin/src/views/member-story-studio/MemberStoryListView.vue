@@ -56,7 +56,7 @@
 
     <!-- Edit MemberStory Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleCrudDrawerClosed">
-      <MemberStoryEditView v-if="selectedItemId && editDrawer" :member-story-id="selectedItemId" @close="handleCrudDrawerClosed"
+
         @saved="handleCrudDrawerSaved" />
     </BaseCrudDrawer>
 
@@ -79,7 +79,7 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useMemberStoryStore } from '@/stores/memberStory.store'; // Use the new member story store // Updated
 import type { MemberStoryDto } from '@/types/memberStory'; // Import MemberStoryDto // Updated
 import MemberStoryAddView from './MemberStoryAddView.vue'; // Will be created // Updated
-import MemberStoryEditView from './MemberStoryEditView.vue'; // Will be created // Updated
+
 import MemberStoryDetailView from './MemberStoryDetailView.vue'; // Will be created // Updated
 
 

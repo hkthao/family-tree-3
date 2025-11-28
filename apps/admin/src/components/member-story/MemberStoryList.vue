@@ -56,7 +56,7 @@
 
   <!-- Edit MemberStory Drawer -->
   <BaseCrudDrawer v-model="editMemberStoryDrawer" @close="closeEditMemberStory">
-    <MemberStoryEdit v-if="editMemberStoryDrawer && selectedMemberStoryId" :member-story-id="selectedMemberStoryId" @close="closeEditMemberStory" @saved="handleMemberStorySaved" />
+
   </BaseCrudDrawer>
 
   <!-- Delete Confirmation Dialog -->
@@ -77,7 +77,7 @@ import { useMemberStoryStore } from '@/stores/memberStory.store'; // Updated
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 import MemberStoryDetail from './MemberStoryDetail.vue'; // Updated
-import MemberStoryEdit from './MemberStoryEdit.vue'; // Updated
+
 import type { MemberStoryDto } from '@/types/memberStory.d'; // Updated
 
 interface Props {
