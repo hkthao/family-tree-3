@@ -1,13 +1,13 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { DetectedFace, SearchResult, Member, Result } from '@/types'; // Removed Paginated
-import type { MemoryDto } from '@/types/memory';
+import type { MemberStoryDto } from '@/types/memberStory'; // Updated
 import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
-import type { MemoryFilter } from '@/services/memory/memory.service.interface';
+import type { MemberStoryFilter } from '@/services/memberStory/memberStory.service.interface'; // Updated
 
-export interface MemoryFaceState {
+export interface MemberStoryFaceState { // Updated
   uploadedImage: string | null; // Base64 or URL of the uploaded image
   uploadedImageId: string | null; // ID of the uploaded image from the backend
   resizedImageUrl: string | null; // NEW: URL of the resized image for analysis
@@ -18,19 +18,19 @@ export interface MemoryFaceState {
   error: string | null;
 }
 
-export const useMemoryStore = defineStore('memory', {
+export const useMemberStoryStore = defineStore('memberStory', { // Updated
   state: () => ({
     // General state
     error: null as string | null,
 
     // State for list operations
     list: {
-      items: [] as MemoryDto[],
-      loading: false, // Loading state for the list of memories
+      items: [] as MemberStoryDto[], // Updated
+      loading: false, // Loading state for the list of member stories // Updated
       filters: {
         memberId: undefined, // Default to undefined for filtering
         searchQuery: '',
-      } as MemoryFilter,
+      } as MemberStoryFilter, // Updated
       currentPage: 1,
       itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
       totalItems: 0,
@@ -40,8 +40,8 @@ export const useMemoryStore = defineStore('memory', {
 
     // State for single item operations
     detail: {
-      item: null as MemoryDto | null,
-      loading: false, // Loading state for a single memory
+      item: null as MemberStoryDto | null, // Updated
+      loading: false, // Loading state for a single member story // Updated
     },
 
     // State for add operations
@@ -59,7 +59,7 @@ export const useMemoryStore = defineStore('memory', {
       loading: false,
     },
 
-    // Face Recognition State for memory creation
+    // Face Recognition State for member story creation // Updated
     faceRecognition: {
       uploadedImage: null,
       uploadedImageId: null,
@@ -69,7 +69,7 @@ export const useMemoryStore = defineStore('memory', {
       loading: false,
       error: null,
       resizedImageUrl: null
-    } as MemoryFaceState,
+    } as MemberStoryFaceState, // Updated
 
     // AI Analysis State for photo analysis
     aiAnalysis: { // NEW STATE
@@ -84,27 +84,16 @@ export const useMemoryStore = defineStore('memory', {
       const t = i18n.global.t;
       return [
         {
-          title: t('memory.list.header.title'),
+          title: t('memberStory.list.header.title'), // Updated
           align: 'start' as const,
         },
         {
           title: t('member.list.headers.fullName'), // Assuming we want to show member name
-          key: 'memberName',
+          key: 'memberId',
           align: 'start' as const,
         },
         {
-          title: t('memory.list.header.tags'),
-          key: 'tags',
-          sortable: false,
-          align: 'start' as const,
-        },
-        {
-          title: t('memory.list.header.createdAt'),
-          key: 'createdAt',
-          align: 'end' as const,
-        },
-        {
-          title: t('memory.list.header.actions'),
+          title: t('memberStory.list.header.actions'), // Updated
           key: 'actions',
           sortable: false,
           align: 'end' as const,
@@ -133,7 +122,7 @@ export const useMemoryStore = defineStore('memory', {
         return;
       }
 
-      const result = await this.services.memory.loadItems(
+      const result = await this.services.memberStory.loadItems( // Updated
         {
           memberId: this.list.filters.memberId,
           searchQuery: this.list.filters.searchQuery,
@@ -149,7 +138,7 @@ export const useMemoryStore = defineStore('memory', {
         this.list.totalItems = result.value.totalItems;
         this.list.totalPages = result.value.totalPages;
       } else {
-        this.error = i18n.global.t('memory.errors.load');
+        this.error = i18n.global.t('memberStory.errors.load'); // Updated
         this.list.items = [];
         this.list.totalItems = 0;
         this.list.totalPages = 1;
@@ -158,28 +147,28 @@ export const useMemoryStore = defineStore('memory', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from CreateMemoryDto
+    async addItem(newItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> { // Updated
       this.add.loading = true;
       this.error = null;
-      const result = await this.services.memory.add(newItem);
+      const result = await this.services.memberStory.add(newItem); // Updated
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = i18n.global.t('memory.errors.add');
+        this.error = i18n.global.t('memberStory.errors.add'); // Updated
         console.error(result.error);
       }
       this.add.loading = false;
       return result;
     },
 
-    async updateItem(updatedItem: MemoryDto): Promise<Result<MemoryDto, ApiError>> { // Changed from UpdateMemoryDto
+    async updateItem(updatedItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> { // Updated
       this.update.loading = true;
       this.error = null;
-      const result = await this.services.memory.update(updatedItem);
+      const result = await this.services.memberStory.update(updatedItem); // Updated
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = i18n.global.t('memory.errors.update');
+        this.error = i18n.global.t('memberStory.errors.update'); // Updated
         console.error(result.error);
       }
       this.update.loading = false;
@@ -189,11 +178,11 @@ export const useMemoryStore = defineStore('memory', {
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this._delete.loading = true;
       this.error = null;
-      const result = await this.services.memory.delete(id);
+      const result = await this.services.memberStory.delete(id); // Updated
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = result.error.message || i18n.global.t('memory.errors.delete');
+        this.error = result.error.message || i18n.global.t('memberStory.errors.delete'); // Updated
         console.error(result.error);
       }
       this._delete.loading = false;
@@ -218,10 +207,10 @@ export const useMemoryStore = defineStore('memory', {
       this._loadItems();
     },
 
-    async getById(id: string): Promise<MemoryDto | undefined> {
+    async getById(id: string): Promise<MemberStoryDto | undefined> { // Updated
       this.detail.loading = true;
       this.error = null;
-      const result = await this.services.memory.getById(id);
+      const result = await this.services.memberStory.getById(id); // Updated
       this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
@@ -229,13 +218,13 @@ export const useMemoryStore = defineStore('memory', {
           return result.value;
         }
       } else {
-        this.error = i18n.global.t('memory.errors.loadById');
+        this.error = i18n.global.t('memberStory.errors.loadById'); // Updated
         console.error(result.error);
       }
       return undefined;
     },
 
-    setFilters(filters: MemoryFilter) {
+    setFilters(filters: MemberStoryFilter) { // Updated
       this.list.filters = { ...this.list.filters, ...filters };
     },
 
@@ -247,11 +236,11 @@ export const useMemoryStore = defineStore('memory', {
         if (result.ok) {
           this.aiAnalysis.result = result.value;
         } else {
-          this.aiAnalysis.error = result.error?.message || i18n.global.t('memory.errors.aiAnalysisFailed');
+          this.aiAnalysis.error = result.error?.message || i18n.global.t('memberStory.errors.aiAnalysisFailed'); // Updated
         }
         return result;
       } catch (error: any) {
-        this.aiAnalysis.error = error.message || i18n.global.t('memory.errors.unexpectedError');
+        this.aiAnalysis.error = error.message || i18n.global.t('memberStory.errors.unexpectedError'); // Updated
         return { ok: false, error: { message: this.aiAnalysis.error } as ApiError };
       } finally {
         this.aiAnalysis.loading = false;
@@ -264,11 +253,11 @@ export const useMemoryStore = defineStore('memory', {
       try {
         const result = await this.services.ai.generateStory(command);
         if (!result.ok) {
-          this.error = result.error?.message || i18n.global.t('memory.errors.storyGenerationFailed');
+          this.error = result.error?.message || i18n.global.t('memberStory.errors.storyGenerationFailed'); // Updated
         }
         return result;
       } catch (error: any) {
-        this.error = error.message || i18n.global.t('memory.errors.unexpectedError');
+        this.error = error.message || i18n.global.t('memberStory.errors.unexpectedError'); // Updated
         return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.aiAnalysis.loading = false;

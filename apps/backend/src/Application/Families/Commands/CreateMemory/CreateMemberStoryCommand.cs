@@ -8,5 +8,4 @@ public record CreateMemberStoryCommand : IRequest<Result<Guid>> // Updated
     public string Title { get; init; } = string.Empty;
     public string Story { get; init; } = string.Empty;
     public string? PhotoUrl { get; init; }
-    public string[] Tags { get; init; } = Array.Empty<string>();
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h4 class="mt-2">{{ t('memory.create.storyStyle.question') }}</h4>
+    <h4 class="mt-2">{{ t('memberStory.create.storyStyle.question') }}</h4>
     <v-chip-group
       :model-value="modelValue"
       @update:model-value="(newValue) => emit('update:modelValue', newValue)"
@@ -10,7 +10,7 @@
       :disabled="readonly"
     >
       <v-chip v-for="style in storyStyles" :key="style" :value="style" filter variant="tonal">
-        {{ t(`memory.style.${style}`) }}
+        {{ t(`memberStory.style.${style}`) }}
       </v-chip>
     </v-chip-group>
   </div>

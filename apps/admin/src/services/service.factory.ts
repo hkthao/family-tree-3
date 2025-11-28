@@ -36,8 +36,8 @@ import { ApiUserService } from './user/api.user.service';
 // import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service'; // REMOVED IMPORT
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; // Add familyDict service interface
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service'; // Add familyDict service implementation
-import type { IMemoryService } from './memory/memory.service.interface'; // New
-import { ApiMemoryService } from './memory/api.memory.service'; // New
+import type { IMemberStoryService } from './memberStory/memberStory.service.interface'; // Updated
+import { ApiMemberStoryService } from './memberStory/api.memberStory.service'; // Updated
 import type { IAiService } from './ai/ai.service.interface'; // NEW IMPORT
 import { ApiAiService } from './ai/api.ai.service'; // NEW IMPORT
 
@@ -65,7 +65,7 @@ export interface AppServices {
   // familyData: IFamilyDataService; // REMOVED SERVICE
   // privacyConfiguration: IPrivacyConfigurationService; // REMOVED SERVICE
   familyDict: IFamilyDictService; // Add familyDict service
-  memory: IMemoryService; // New
+  memberStory: IMemberStoryService; // New // Updated
   ai: IAiService; // NEW SERVICE
 }
 
@@ -154,10 +154,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyDictService(apiClient)
         : testServices?.familyDict || new ApiFamilyDictService(apiClient),
-    memory: // New
+    memberStory: // New // Updated
       mode === 'real'
-        ? new ApiMemoryService(apiClient)
-        : testServices?.memory || new ApiMemoryService(apiClient),
+        ? new ApiMemberStoryService(apiClient)
+        : testServices?.memberStory || new ApiMemberStoryService(apiClient),
     ai: // NEW SERVICE
       mode === 'real'
         ? new ApiAiService(apiClient)

@@ -1,41 +1,19 @@
-import type { DetectedFace } from '@/types/face'; // Import DetectedFace
-import type { PhotoAnalysisResultDto } from '@/types/ai'; // NEW IMPORT
+import type { DetectedFace } from './face';
 
-// ... (other interfaces)
-
-// DTO cho Memory đầy đủ (khi hiển thị chi tiết hoặc trong danh sách)
 export interface MemoryDto {
-  id?: string; // Made optional to support new creation
+  id?: string;
   memberId: string | null;
-  memberName?: string | null; // NEW: Added memberName property
-  title?: string | null; // Allow null or undefined
-  rawInput?: string; // Changed from 'story' to 'rawInput' and made optional
-  story?: string | null; // Allow null or undefined
-  storyStyle?: string; // NEW: Added storyStyle property
-
-  photoUrl?: string | null;
-  photo?: string | null; // New field for temporary photo data (e.g., base64 string)
-  targetFaceId?: string; // New field for the ID of the main character face
-  imageSize?: string; // New field for image size, e.g., "512x512"
-  exifData?: ExifDataDto; // New field for EXIF metadata
-  tags?: string[];
-  keywords?: string[];
-  faces?: MemoryFaceDto[]; // Changed back to MemoryFaceDto[]
-  perspective?: string; // New field for story perspective
-  createdAt?: string; // Made optional to support new creation
-  // Các trường auditable khác từ BaseAuditableEntity nếu cần hiển thị
-}
-
-// DTO for EXIF metadata
-export interface ExifDataDto {
-  datetime?: string;
-  gps?: string; // Or a more structured GPS object if needed
-  cameraInfo?: string;
-}
-
-// DTO for identified faces in a memory
-export interface MemoryFaceDto extends DetectedFace { // Extend DetectedFace
-  // faceId, memberId, relationPrompt are already in DetectedFace or should be used from it
-  // If you need a specific faceId in MemoryFaceDto different from DetectedFace.id, define it here
-  relationPrompt?: string; // Mô tả của người dùng cho "đây là ai?" hoặc "quan hệ?"
+  memberName?: string | null;
+  title?: string | null;
+  story?: string | null;
+  photoUrl?: string | null; // URL of the original uploaded photo
+  photo?: string | null; // Base64 or URL of the photo (can be resized/processed)
+  imageSize?: string | null; // e.g., "1920x1080"
+  exifData?: Record<string, any> | null;
+  rawInput?: string | null;
+  storyStyle?: string | null;
+  perspective?: 'firstPerson' | 'neutralPersonal' | 'fullyNeutral' | null;
+  faces?: DetectedFace[] | null;
+  targetFaceId?: string | null; // ID of the face selected as the primary subject
+  uploadedImageId?: string | null; // ID from face recognition service
 }

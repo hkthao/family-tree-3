@@ -6,7 +6,7 @@
         <v-progress-linear indeterminate color="primary"></v-progress-linear>
       </v-col>
       <v-col cols="12">
-        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" :readonly="readonly" />
+        <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
       </v-col>
     </v-row>
     <!-- Face Detection and Selection -->
@@ -86,8 +86,7 @@
 
     <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
       :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId"
-      :show-relation-prompt-field="true"
-      :disable-save-validation="true" />
+      :show-relation-prompt-field="true" :disable-save-validation="true" />
   </v-container>
 </template>
 
@@ -96,12 +95,11 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryDto } from '@/types/memory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useMemoryStore } from '@/stores/memory.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { DetectedFace } from '@/types';
+import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from '@/types';
 import MemberFaceChip from '../common/MemberFaceChip.vue';
 import StoryStyleInput from './StoryStyleInput.vue';
-import type { PhotoAnalysisPersonDto } from '@/types/ai';
+import { useMemberStoryStore } from '@/stores/memberStory.store';
 
 const props = defineProps<{
   modelValue: MemoryDto;
@@ -112,8 +110,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-const memoryStore = useMemoryStore();
-const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
+const memberStoryStore = useMemberStoryStore(); // Will be created later
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const selectedTargetMemberFaceId = ref<string | null>(null);
@@ -128,12 +125,11 @@ const generatedTitle = ref<string | null>(null);
 const generatingStory = ref(false);
 const storyEditorValid = ref(true);
 const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
-const isLoading = computed(() => memoryStore.faceRecognition.loading);
+const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
 const canGenerateStory = computed(() => {
   const hasMinRawInput = internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10;
-  const hasDetectedFaces = memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0;
-  const hasMemberSelected = internalMemory.value.memberId && internalMemory.value.memberId !== '00000000-0000-0000-0000-000000000000';
-
+  const hasDetectedFaces = memberStoryStore.faceRecognition.detectedFaces.length > 0;
+  const hasMemberSelected = internalMemory.value.memberId;
   return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
 });
 
@@ -152,7 +148,7 @@ const generateStory = async () => {
 
   generatingStory.value = true;
 
-  const photoPersonsPayload: PhotoAnalysisPersonDto[] = memoryStore.faceRecognition.detectedFaces.map(face => ({
+  const photoPersonsPayload: PhotoAnalysisPersonDto[] = memberStoryStore.faceRecognition.detectedFaces.map((face: DetectedFace) => ({
     id: face.id,
     memberId: face.memberId,
     name: face.memberName,
@@ -163,16 +159,14 @@ const generateStory = async () => {
 
   const requestPayload = {
     memberId: internalMemory.value.memberId,
-    memberName: internalMemory.value.memberName, // Added this line
-    resizedImageUrl: memoryStore.faceRecognition.resizedImageUrl,
+    resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
     rawText: internalMemory.value.rawInput,
     style: internalMemory.value.storyStyle,
-    maxWords: 500,
     photoPersons: photoPersonsPayload,
     perspective: internalMemory.value.perspective,
-  };
+  } as GenerateStoryCommand;
 
-  const result = await memoryStore.generateStory(requestPayload);
+  const result = await memberStoryStore.generateStory(requestPayload);
   if (result.ok) {
     generatedStory.value = result.value.story;
     generatedTitle.value = result.value.title;
@@ -190,7 +184,7 @@ const internalMemory = computed<MemoryDto>({
   set: (value: MemoryDto) => emit('update:modelValue', value),
 });
 
-watch(() => memoryStore.faceRecognition.error, (newError) => {
+watch(() => memberStoryStore.faceRecognition.error, (newError) => {
   if (newError) {
     showSnackbar(newError, 'error');
   }
@@ -232,7 +226,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
   }
   if (uploadedFile) {
     uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
-    await memoryStore.detectFaces(uploadedFile, true);
+    await memberStoryStore.detectFaces(uploadedFile, true);
     try {
       const img = await loadImage(uploadedFile);
       updateMemory({ imageSize: `${img.width}x${img.height}` });
@@ -242,18 +236,18 @@ const handleFileUpload = async (file: File | File[] | null) => {
     }
 
 
-    if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+    if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
       updateMemory({
-        faces: memoryStore.faceRecognition.detectedFaces,
+        faces: memberStoryStore.faceRecognition.detectedFaces,
         photoUrl: uploadedImageUrl.value,
         photo: uploadedImageUrl.value,
       });
 
-      if (memoryStore.faceRecognition.detectedFaces.length > 0) {
-        selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+      if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
+        selectedTargetMemberFaceId.value = memberStoryStore.faceRecognition.detectedFaces[0].id;
       }
 
-    } else if (!isLoading && uploadedImageUrl.value && memoryStore.faceRecognition.detectedFaces.length === 0) {
+    } else if (!isLoading && uploadedImageUrl.value && memberStoryStore.faceRecognition.detectedFaces.length === 0) {
       showSnackbar(t('face.recognition.noFacesDetected'), 'info');
       updateMemory({
         faces: [],
@@ -265,7 +259,7 @@ const handleFileUpload = async (file: File | File[] | null) => {
     }
 
   } else {
-    memoryStore.resetFaceRecognitionState();
+    memberStoryStore.resetFaceRecognitionState();
     uploadedImageUrl.value = null; // Clear local image URL
     updateMemory({
       faces: [],
@@ -308,8 +302,7 @@ const handleRemoveFace = (faceId: string) => {
 
 defineExpose({
   isValid: computed(() => !isLoading.value),
-  memoryFaceStore: memoryStore.faceRecognition,
-  faceUploadInputRef,
+  memoryFaceStore: memberStoryStore.faceRecognition,
   selectedTargetMemberFaceId,
   generateStory,
   generatedStory,

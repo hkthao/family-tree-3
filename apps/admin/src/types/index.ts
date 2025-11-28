@@ -14,7 +14,8 @@ export * from './auth.d';
 export * from './user.d';
 export * from './chat.d';
 export * from './api-error.d';
-export * from './memory.d'; // Added new memory types
+export * from './memberStory.d'; // Added new memberStory types
 export * from './biography.d'; // NEW EXPORT
 export * from './ai/analyzed-data.d'; // NEW EXPORT
+export * from './memory.d'; // NEW EXPORT
 export type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from './ai/analyzed-data';

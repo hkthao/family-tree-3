@@ -52,16 +52,12 @@ const menu: MenuSection[] = [
         to: '/face/search',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
-    ],
-  },
-  {
-    titleKey: 'menu.utilitiesAndAI', // New section for AI Memorial Studio
-    items: [
       {
-        titleKey: 'menu.aiMemorialStudio', // New consolidated menu item
-        icon: 'mdi-brain', // A suitable icon for AI Memorial Studio
-        to: '/ai-memorial-studio', // Points to the selection page
-        roles: ['Admin', 'FamilyManager', 'Editor'],
+        titleKey: 'memberStory.list.title', // New: Title for MemberStory List
+        icon: 'mdi-book-open-outline', // New: Icon for MemberStory List
+        to: '/member-story-studio/list', // New: Route for MemberStory List
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], // New: Roles for MemberStory List
+        exact: true,
       },
     ],
   },

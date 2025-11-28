@@ -73,24 +73,9 @@ export interface PhotoAnalysisPersonDto {
 export interface GenerateStoryCommand {
   memberId?: string | null;
   resizedImageUrl?: string | null;
-  photoSummary?: string;
   rawText?: string;
   style?: string; // e.g., nostalgic|warm|formal|folk
   perspective?: string;
-  event?: string;
-  customEventDescription?: string;
-  emotionContexts?: string[];
-
-  // Granular properties from PhotoAnalysisResultDto
-  photoSummary?: string;
-  photoScene?: string;
-  photoEventAnalysis?: string;
-  photoEmotionAnalysis?: string;
-  photoYearEstimate?: string;
-  photoObjects?: string[];
-  photoPersons?: PhotoAnalysisPersonDto[];
-
-  maxWords?: number;
 }
 
 export interface GenerateStoryResponseDto {

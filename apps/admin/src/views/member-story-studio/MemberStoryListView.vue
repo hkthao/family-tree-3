@@ -1,14 +1,14 @@
 <template>
   <v-container fluid>
 
-    <v-data-table-server v-model:items-per-page="memoryStore.list.itemsPerPage" :headers="headers"
-      :items="memoryStore.list.items" :items-length="memoryStore.list.totalItems" :loading="memoryStore.list.loading"
+    <v-data-table-server v-model:items-per-page="memberStoryStore.list.itemsPerPage" :headers="headers"
+      :items="memberStoryStore.list.items" :items-length="memberStoryStore.list.totalItems" :loading="memberStoryStore.list.loading"
       @update:options="handleListOptionsUpdate" item-value="id" class="elevation-0">
       <template #top>
         <v-toolbar flat>
-          <v-toolbar-title>{{ t('memory.list.title') }}</v-toolbar-title>
+          <v-toolbar-title>{{ t('memberStory.list.title') }}</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-tooltip :text="t('memory.list.action.create')" location="bottom">
+          <v-tooltip :text="t('memberStory.list.action.create')" location="bottom">
             <template v-slot:activator="{ props }">
               <v-btn color="primary" class="mr-2" v-bind="props" @click="openAddDrawer()" variant="text" icon>
                 <v-icon>mdi-plus</v-icon>
@@ -28,12 +28,6 @@
       </template>
       <template v-slot:item.memberName="{ item }">
         {{ item.memberId || t('common.unknown') }}
-      </template>
-      <template v-slot:item.tags="{ item }">
-        <v-chip v-for="tag in item.tags" :key="tag" size="small" class="mr-1 my-1">{{ tag }}</v-chip>
-      </template>
-      <template v-slot:item.createdAt="{ item }">
-        {{ formatDate(item.createdAt!) }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-menu>
@@ -55,20 +49,20 @@
       <!-- No data message can be handled by the table itself or left empty if not needed -->
     </v-data-table-server>
 
-    <!-- Add Memory Drawer -->
+    <!-- Add MemberStory Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleCrudDrawerClosed">
-      <MemoryAddView v-if="addDrawer" @close="handleCrudDrawerClosed" @saved="handleCrudDrawerSaved" />
+      <MemberStoryAddView v-if="addDrawer" @close="handleCrudDrawerClosed" @saved="handleCrudDrawerSaved" />
     </BaseCrudDrawer>
 
-    <!-- Edit Memory Drawer -->
+    <!-- Edit MemberStory Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleCrudDrawerClosed">
-      <MemoryEditView v-if="selectedItemId && editDrawer" :memory-id="selectedItemId" @close="handleCrudDrawerClosed"
+      <MemberStoryEditView v-if="selectedItemId && editDrawer" :member-story-id="selectedItemId" @close="handleCrudDrawerClosed"
         @saved="handleCrudDrawerSaved" />
     </BaseCrudDrawer>
 
-    <!-- Detail Memory Drawer -->
+    <!-- Detail MemberStory Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleCrudDrawerClosed">
-      <MemoryDetailView v-if="selectedItemId && detailDrawer" :memory-id="selectedItemId"
+      <MemberStoryDetailView v-if="selectedItemId && detailDrawer" :member-story-id="selectedItemId"
         @close="handleCrudDrawerClosed" @edit-item="openEditDrawer" />
     </BaseCrudDrawer>
   </v-container>
@@ -82,22 +76,22 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useMemoryStore } from '@/stores/memory.store'; // Use the new memory store
-import type { MemoryDto } from '@/types/memory'; // Import MemoryDto
-import MemoryAddView from './MemoryAddView.vue'; // Will be created
-import MemoryEditView from './MemoryEditView.vue'; // Will be created
-import MemoryDetailView from './MemoryDetailView.vue'; // Will be created
-import i18n from '@/plugins/i18n'; // Import i18n instance
+import { useMemberStoryStore } from '@/stores/memberStory.store'; // Use the new member story store // Updated
+import type { MemberStoryDto } from '@/types/memberStory'; // Import MemberStoryDto // Updated
+import MemberStoryAddView from './MemberStoryAddView.vue'; // Will be created // Updated
+import MemberStoryEditView from './MemberStoryEditView.vue'; // Will be created // Updated
+import MemberStoryDetailView from './MemberStoryDetailView.vue'; // Will be created // Updated
 
-interface MemoryListViewProps {
-  memberId?: string; // The member ID to list memories for
+
+interface MemberStoryListViewProps {
+  memberId?: string; // The member ID to list member stories for // Updated
 }
 
-const props = defineProps<MemoryListViewProps>();
+const props = defineProps<MemberStoryListViewProps>();
 
 const { t } = useI18n();
-const memoryStore = useMemoryStore();
-const { headers } = storeToRefs(memoryStore); // Get headers from the memory store
+const memberStoryStore = useMemberStoryStore(); // Updated
+const { headers } = storeToRefs(memberStoryStore); // Get headers from the member story store // Updated
 const searchQuery = ref('');
 const showNoMemberSelectedMessage = ref(false); // New: to control visibility of "no member selected" message
 
@@ -125,7 +119,7 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  memoryStore.setListOptions(options);
+  memberStoryStore.setListOptions(options); // Updated
 };
 
 const handleCrudDrawerClosed = () => {
@@ -134,55 +128,53 @@ const handleCrudDrawerClosed = () => {
 
 const handleCrudDrawerSaved = () => {
   closeAllDrawers();
-  memoryStore._loadItems();
+  memberStoryStore._loadItems(); // Updated
 };
 
-const confirmDelete = async (memory: MemoryDto) => {
+const confirmDelete = async (memberStory: MemberStoryDto) => { // Updated
   const confirmed = await showConfirmDialog({
-    title: t('memory.delete.confirmTitle'),
-    message: t('memory.delete.confirmMessage', { title: memory.title }),
+    title: t('memberStory.delete.confirmTitle'), // Updated
+    message: t('memberStory.delete.confirmMessage', { title: memberStory.title }), // Updated
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     confirmColor: 'error',
   });
 
   if (confirmed) {
-    await handleDeleteConfirm(memory);
+    await handleDeleteConfirm(memberStory);
   }
 };
 
-const handleDeleteConfirm = async (memory: MemoryDto) => {
-  if (memory) {
-    await memoryStore.deleteItem(memory.id!); // Use non-null assertion as memory.id is expected for existing memory
-    if (memoryStore.error) {
-      showSnackbar(t('memory.delete.error', { error: memoryStore.error }), 'error');
+const handleDeleteConfirm = async (memberStory: MemberStoryDto) => { // Updated
+  if (memberStory) {
+    await memberStoryStore.deleteItem(memberStory.id!); // Use non-null assertion as memberStory.id is expected for existing member story // Updated
+    if (memberStoryStore.error) { // Updated
+      showSnackbar(t('memberStory.delete.error', { error: memberStoryStore.error }), 'error'); // Updated
     } else {
-      showSnackbar(t('memory.delete.success'), 'success');
+      showSnackbar(t('memberStory.delete.success'), 'success'); // Updated
     }
   }
-  memoryStore._loadItems();
+  memberStoryStore._loadItems(); // Updated
 };
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString(i18n.global.locale.value);
-};
+
 
 // Watch for changes in searchQuery to update filters and reload items
 watch(searchQuery, (newSearchQuery) => {
-    memoryStore.setFilters({ searchQuery: newSearchQuery, memberId: props.memberId });
-    memoryStore._loadItems();
+    memberStoryStore.setFilters({ searchQuery: newSearchQuery, memberId: props.memberId }); // Updated
+    memberStoryStore._loadItems(); // Updated
 });
 
 // Watch for changes in memberId prop to update filters and reload items
 watch(() => props.memberId, (newMemberId) => {
   if (newMemberId) {
     showNoMemberSelectedMessage.value = false;
-    memoryStore.setFilters({ memberId: newMemberId });
-    memoryStore._loadItems();
+    memberStoryStore.setFilters({ memberId: newMemberId }); // Updated
+    memberStoryStore._loadItems(); // Updated
   } else {
-    memoryStore.setFilters({ memberId: undefined }); // Clear filter
-    memoryStore.list.items = []; // Clear current items
-    memoryStore.list.totalItems = 0;
+    memberStoryStore.setFilters({ memberId: undefined }); // Clear filter // Updated
+    memberStoryStore.list.items = []; // Clear current items // Updated
+    memberStoryStore.list.totalItems = 0; // Updated
     showNoMemberSelectedMessage.value = true;
   }
 });
@@ -190,8 +182,8 @@ watch(() => props.memberId, (newMemberId) => {
 onMounted(() => {
   if (props.memberId) {
     showNoMemberSelectedMessage.value = false;
-    memoryStore.setFilters({ memberId: props.memberId });
-    memoryStore._loadItems();
+    memberStoryStore.setFilters({ memberId: props.memberId }); // Updated
+    memberStoryStore._loadItems(); // Updated
   } else {
     showNoMemberSelectedMessage.value = true;
   }

@@ -1,282 +1,323 @@
-Dưới đây là **ĐẶC TẢ CHI TIẾT – FULL SPEC** dành cho tính năng **AI Memorial Studio**, thiết kế theo chuẩn product spec
-
-# 🕊️ **AI MEMORIAL STUDIO – FULL PRODUCT SPEC**
-
-### *“Phòng ghi nhớ & phục dựng ký ức tổ tiên bằng AI”*
-
----
-
-# 1️⃣ MỤC TIÊU TÍNH NĂNG (PRODUCT GOALS)
-
-1. Giúp người dùng **tái tạo – lưu giữ – truyền lại ký ức gia đình** qua 3 loại dữ liệu:
-   * **Story (text)**
-   * **Photo (image)**
-   * **Voice (audio)**
-2. Cung cấp một trải nghiệm **nhân văn – cảm xúc – không creepy**.
-3. Tạo ra **dữ liệu di sản số (digital legacy)** gắn trực tiếp với từng thành viên trong gia phả.
-4. Có thể xuất bản:
-
-   * PDF
-   * Photo album
-   * Audio memories
-   * Video slideshow (ở giai đoạn sau)
-
----
-
-# 2️⃣ KIẾN TRÚC MODULE
-
-```
-AI Memorial Studio
- ├── Story Memory (NLP)
- ├── Photo Revival (Image Restoration)
- └── Voice Revival (Audio Reconstruction)
-```
-
-## 🔧 Công nghệ chính:
-
-* **Story** → LLM (OpenAI/Gemini)
-* **Photo** → Image Restoration pipeline (GFPGAN + Colorization + Upscale)
-* **Voice** → Voice Cloning (Edge-TTS, OpenVoice, XTTS, hoặc ElevenLabs API)
-
----
-
-# 3️⃣ FLOW NGƯỜI DÙNG (USER FLOW)
-
-## 3.1 Chọn thành viên gia đình
-
-User vào hồ sơ > bấm **“AI Memorial Studio”**
-→ Chọn 1 trong 3 tool: Story / Photo / Voice.
-
----
-
-# 4️⃣ MODULE 1 – STORY MEMORY (AI LIFE STORY BUILDER)
-
-## 🎯 Mục đích
-
-Biến:
-
-* ghi chú
-* ảnh
-* sự kiện
-* ký ức rời rạc
-
-→ thành **một câu chuyện hoàn chỉnh**, có giọng văn tự nhiên.
-
----
-
-## 📌 FLOW
-
-1. Upload dữ liệu:
-
-   * Ảnh
-   * Sự kiện (năm sinh, nơi sinh, nghề nghiệp,…)
-   * Các đoạn text hoặc voice mô tả ký ức
-2. User chọn style:
-
-   * Giọng kể người lớn tuổi
-   * Giọng hiện đại
-   * Giọng dân dã
-   * Giọng nghiêm trang / sử thi
-3. AI gợi ý câu hỏi:
-
-   * “Bạn có thể mô tả thêm về tính cách của ông không?”
-   * “Gia đình nhớ nhất điều gì về bà?”
-4. User trả lời → AI refine story
-5. Output:
-
-   * Story dạng chương
-   * Timeline tóm tắt
-
----
-
-## 📌 JSON Structure (Lưu DB)
-
-```json
-{
-  "memberId": "guild",
-  "storyId": "guild",
-  "title": "Cuộc đời ông Nguyễn Văn A",
-  "storyContent": "string-long",
-  "timeline": [
-    { "year": 1952, "event": "Sinh tại Bình Định" },
-    { "year": 1970, "event": "Đi quân sự" }
-  ],
-  "createdAt": "2025-11-24T07:00:00Z",
-  "style": "traditional"
-}
-```
-
----
-
-# 5️⃣ MODULE 2 – PHOTO REVIVAL (IMAGE RESTORATION & COLORIZATION)
-
-## 🎯 Mục đích
-
-* Phục chế ảnh cũ, mờ, rách.
-* Tô màu.
-* Nâng độ phân giải.
-* Giữ lại nét mặt nguyên bản, không deepfake.
-
----
-
-## 📌 FLOW
-
-1. Upload ảnh (JPG/PNG/HEIC)
-2. AI tự phân tích:
-
-   * mức độ hư hại
-   * khuôn mặt
-   * background
-3. 3 chế độ phục chế:
-
-   * **Basic Restore:** làm nét + xóa noise
-   * **Colorize:** tô màu tự nhiên
-   * **Revive Max:** full pipeline (GFPGAN + ESRGAN + Colorization)
-4. Hiển thị Before/After slider
-5. Người dùng chọn mức độ:
-
-   * 25% / 50% / 75% / 100%
-6. Lưu output vào profile thành viên
-
----
-
-## 📌 JSON Structure
-
-```json
-{
-  "photoId": "string",
-  "memberId": "string",
-  "originalUrl": "string",
-  "restoredUrl": "string",
-  "mode": "revive-max",
-  "intensity": 80,
-  "createdAt": "2025-11-24T07:00:00Z"
-}
-```
-
----
-
-# 6️⃣ MODULE 3 – VOICE REVIVAL (VOICE RESTORATION & MEMORY PLAYBACK)
-
-## 🎯 Mục đích
-
-* Phục hồi giọng nói từ file cũ.
-* Tạo “Voice Memory” (voice sample).
-* Cho phép nghe lại hoặc nói chuyện hạn chế.
-
----
-
-## 📌 2 CHẾ ĐỘ CHÍNH
-
-### **Chế độ 1: Voice Memory Playback (an toàn – nhân văn)**
-
-* AI làm sạch audio cũ (noise reduction).
-* Chuẩn hoá giọng.
-* Chỉ phát lại các câu đã có trong dữ liệu gốc.
-
-### **Chế độ 2: AI Limited Conversation**
-
-* Tạo voice clone từ sample (nếu gia đình đồng ý).
-* Người dùng có thể hỏi:
-
-  * “Ông thích món gì?”
-  * “Hồi nhỏ ông làm gì?”
-* AI trả lời dựa trên:
-
-  * dữ liệu trong profile
-  * story memory
-  * ghi âm/thư cũ
-    **Không được tạo dự đoán về tương lai → tránh spooky.**
-
----
-
-## 📌 FLOW
-
-1. Upload file audio (mp3/wav/m4a).
-2. AI phân tích:
-
-   * chất lượng
-   * noise
-   * xác suất clone được hay không
-3. User chọn:
-
-   * Chỉ phục chế (không clone)
-   * Tạo Voice Memory (clone)
-4. AI xử lý
-5. Output:
-
-   * Audio file
-   * Hoặc WebRTC chat với giọng người thân
-
----
-
-## 📌 JSON Structure
-
-```json
-{
-  "voiceId": "string",
-  "memberId": "string",
-  "mode": "memory-playback",
-  "originalUrl": "string",
-  "cleanUrl": "string",
-  "cloneModelUrl": "string",
-  "createdAt": "2025-11-24T07:00:00Z"
-}
-```
-
----
-
-# 7️⃣ TRANG UI CHÍNH – AI MEMORIAL STUDIO
-
-### Header:
-
-* Avatar thành viên
-* Tên
-* Năm sinh – năm mất
-
-### 3 Button lớn:
-
-1. **Story Memory**
-2. **Photo Revival**
-3. **Voice Revival**
-
-### Mỗi module hiển thị:
-
-* List các sản phẩm đã tạo
-* Nút “Tạo mới”
-* Modal preview
-
----
-
-# 8️⃣ GÓC NHẠY CẢM – CẦN LƯU Ý (ETHICS)
-
-### ✔ Thông báo khi dùng Voice Cloning
-
-> “Đây là giọng mô phỏng dựa trên dữ liệu gia đình cung cấp.
-> Chúng tôi không tạo nội dung mà người thân chưa từng nói nếu không có ngữ cảnh phù hợp.”
-
-### ✔ Không trả lời tương lai
-
-> “Tôi không thể nói về những điều mà ông/bà chưa từng chia sẻ.”
-
-### ✔ Lưu metadata để kiểm soát
-
-* Ai upload
-* Khi nào
-* Giọng gốc dài bao nhiêu
-
----
-
-# 9️⃣ API BACKEND (ASP.NET CORE)
-
-## POST /api/memorial/story
-
-## POST /api/memorial/photo
-
-## POST /api/memorial/voice
-
-## GET /api/memorial/{memberId}
-
-## DELETE /api/memorial/{id}
-
----
+<template>
+  <v-container>
+    <!-- Photo Upload Input -->
+    <v-row>
+      <v-col v-if="isLoading" cols="12">
+        <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      </v-col>
+      <v-col cols="12">
+        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" :readonly="readonly" />
+      </v-col>
+    </v-row>
+    <!-- Face Detection and Selection -->
+    <v-row>
+      <v-col cols="12">
+        <div v-if="hasUploadedImage && !isLoading">
+          <div v-if="internalMemory.faces && internalMemory.faces.length > 0">
+            <FaceBoundingBoxViewer :image-src="uploadedImageUrl!" :faces="internalMemory.faces" selectable
+              @face-selected="openSelectMemberDialog" />
+            <FaceDetectionSidebar :faces="internalMemory.faces" @face-selected="openSelectMemberDialog"
+              @remove-face="handleRemoveFace" />
+            <h4>{{ t('memory.create.selectTargetMember') }}</h4>
+            <v-chip-group v-model="selectedTargetMemberFaceId" mandatory column>
+              <MemberFaceChip v-for="face in internalMemory.faces" :key="face.id" :face="face" :value="face.id" />
+            </v-chip-group>
+          </div>
+          <v-alert v-else type="info">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+        </div>
+        <v-alert v-else type="info">{{
+          t('face.recognition.uploadPrompt') }}</v-alert>
+      </v-col>
+    </v-row>
+
+    <!-- Raw Input & Story Style -->
+    <v-row v-if="hasUploadedImage && !isLoading">
+      <v-col cols="12">
+        <h4>{{ t('memory.create.rawInputPlaceholder') }}</h4>
+        <v-textarea class="mt-4" :model-value="internalMemory.rawInput" :rows="2"
+          @update:model-value="(newValue) => updateMemory({ rawInput: newValue })"
+          :label="t('memory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow></v-textarea>
+        <StoryStyleInput :model-value="internalMemory.storyStyle"
+          @update:model-value="(newValue) => updateMemory({ storyStyle: newValue })" :readonly="readonly" />
+      </v-col>
+    </v-row>
+
+    <!-- Perspective -->
+    <v-row v-if="hasUploadedImage && !isLoading">
+      <v-col cols="12">
+        <h4>{{ t('memory.create.perspective.question') }}</h4>
+        <v-chip-group :model-value="internalMemory.perspective"
+          @update:model-value="(newValue) => updateMemory({ perspective: newValue })" color="primary" mandatory column
+          :disabled="readonly">
+          <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[0].text }}
+          </v-chip>
+          <v-chip :value="aiPerspectiveSuggestions[1].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[1].text }}
+          </v-chip>
+          <v-chip :value="aiPerspectiveSuggestions[2].value" filter variant="tonal">
+            {{ aiPerspectiveSuggestions[2].text }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+    </v-row>
+
+    <v-row v-if="hasUploadedImage && !isLoading">
+      <v-col cols="12">
+        <v-btn color="primary" :disabled="readonly || generatingStory || isLoading || !canGenerateStory"
+          :loading="generatingStory" @click="generateStory">
+          {{ t('memory.create.generateStoryButton') }}
+        </v-btn>
+        <v-alert type="info" class="mt-4">
+          {{ t('memory.create.aiConsentInfo') }}
+        </v-alert>
+      </v-col>
+    </v-row>
+
+    <!-- Title and Story -->
+    <v-row v-if="hasUploadedImage && !isLoading">
+      <v-col cols="12">
+        <v-text-field v-model="internalMemory.title" :label="t('memory.storyEditor.title')" outlined
+          class="mb-4"></v-text-field>
+        <v-textarea v-model="internalMemory.story" :label="t('memory.storyEditor.storyContent')" outlined
+          auto-grow></v-textarea>
+      </v-col>
+    </v-row>
+
+    <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
+      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId"
+      :show-relation-prompt-field="true"
+      :disable-save-validation="true" />
+  </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { MemoryDto } from '@/types/memory';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useMemoryStore } from '@/stores/memory.store';
+import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
+import type { DetectedFace } from '@/types';
+import MemberFaceChip from '../common/MemberFaceChip.vue';
+import StoryStyleInput from './StoryStyleInput.vue';
+import type { PhotoAnalysisPersonDto } from '@/types/ai';
+
+const props = defineProps<{
+  modelValue: MemoryDto;
+  readonly?: boolean;
+  memberId?: string | null;
+  familyId?: string;
+}>();
+const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
+const { t } = useI18n();
+const { showSnackbar } = useGlobalSnackbar();
+const memoryStore = useMemoryStore();
+const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
+const showSelectMemberDialog = ref(false);
+const faceToLabel = ref<DetectedFace | null>(null);
+const selectedTargetMemberFaceId = ref<string | null>(null);
+const uploadedImageUrl = ref<string | null>(null);
+const aiPerspectiveSuggestions = ref([
+  { value: 'firstPerson', text: t('memory.create.perspective.firstPerson') },
+  { value: 'neutralPersonal', text: t('memory.create.perspective.neutralPersonal') },
+  { value: 'fullyNeutral', text: t('memory.create.perspective.fullyNeutral') },
+]);
+const generatedStory = ref<string | null>(null);
+const generatedTitle = ref<string | null>(null);
+const generatingStory = ref(false);
+const storyEditorValid = ref(true);
+const hasUploadedImage = computed(() => !!uploadedImageUrl.value);
+const isLoading = computed(() => memoryStore.faceRecognition.loading);
+const canGenerateStory = computed(() => {
+  const hasMinRawInput = internalMemory.value.rawInput && internalMemory.value.rawInput.length >= 10;
+  const hasDetectedFaces = memoryStore.faceRecognition.uploadedImageId && memoryStore.faceRecognition.detectedFaces.length > 0;
+  const hasMemberSelected = internalMemory.value.memberId && internalMemory.value.memberId !== '00000000-0000-0000-0000-000000000000';
+
+  return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
+});
+
+const updateMemory = (payload: Partial<MemoryDto>) => {
+  emit('update:modelValue', { ...internalMemory.value, ...payload });
+};
+
+const generateStory = async () => {
+  if (!canGenerateStory.value) return;
+
+  if (!internalMemory.value.memberId || internalMemory.value.memberId === '00000000-0000-0000-0000-000000000000') {
+    showSnackbar(t('memory.errors.memberIdRequired'), 'error');
+    generatingStory.value = false; // Ensure loading state is reset if validation fails
+    return;
+  }
+
+  generatingStory.value = true;
+
+  const photoPersonsPayload: PhotoAnalysisPersonDto[] = memoryStore.faceRecognition.detectedFaces.map(face => ({
+    id: face.id,
+    memberId: face.memberId,
+    name: face.memberName,
+    emotion: face.emotion,
+    confidence: face.emotionConfidence,
+    relationPrompt: face.relationPrompt,
+  }));
+
+  const requestPayload = {
+    memberId: internalMemory.value.memberId,
+    memberName: internalMemory.value.memberName, // Added this line
+    resizedImageUrl: memoryStore.faceRecognition.resizedImageUrl,
+    rawText: internalMemory.value.rawInput,
+    style: internalMemory.value.storyStyle,
+    maxWords: 500,
+    photoPersons: photoPersonsPayload,
+    perspective: internalMemory.value.perspective,
+  };
+
+  const result = await memoryStore.generateStory(requestPayload);
+  if (result.ok) {
+    generatedStory.value = result.value.story;
+    generatedTitle.value = result.value.title;
+    internalMemory.value.story = generatedStory.value;
+    internalMemory.value.title = generatedTitle.value;
+    emit('story-generated', { story: generatedStory.value, title: generatedTitle.value });
+  } else {
+    showSnackbar(result.error?.message || t('memory.errors.storyGenerationFailed'), 'error');
+  }
+  generatingStory.value = false;
+};
+
+const internalMemory = computed<MemoryDto>({
+  get: () => props.modelValue,
+  set: (value: MemoryDto) => emit('update:modelValue', value),
+});
+
+watch(() => memoryStore.faceRecognition.error, (newError) => {
+  if (newError) {
+    showSnackbar(newError, 'error');
+  }
+});
+
+watch(selectedTargetMemberFaceId, (newId) => {
+  internalMemory.value.targetFaceId = newId ?? undefined;
+  if (newId) {
+    const selectedFace = internalMemory.value.faces?.find(face => face.id === newId);
+    if (selectedFace && selectedFace.memberId) {
+      internalMemory.value.memberId = selectedFace.memberId;
+      internalMemory.value.memberName = selectedFace.memberName; // Added this line
+    } else {
+      internalMemory.value.memberId = null;
+      internalMemory.value.memberName = null; // Added this line
+    }
+  } else {
+    internalMemory.value.memberId = null;
+    internalMemory.value.memberName = null; // Added this line
+  }
+});
+
+const loadImage = (file: File): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+const handleFileUpload = async (file: File | File[] | null) => {
+  if (props.readonly) return;
+  let uploadedFile: File | null = null;
+  if (file instanceof File) {
+    uploadedFile = file;
+  } else if (Array.isArray(file) && file.length > 0) {
+    uploadedFile = file[0];
+  }
+  if (uploadedFile) {
+    uploadedImageUrl.value = URL.createObjectURL(uploadedFile);
+    await memoryStore.detectFaces(uploadedFile, true);
+    try {
+      const img = await loadImage(uploadedFile);
+      updateMemory({ imageSize: `${img.width}x${img.height}` });
+    } catch (e) {
+      console.error('Failed to load image for dimensions:', e);
+      updateMemory({ imageSize: undefined });
+    }
+
+
+    if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+      updateMemory({
+        faces: memoryStore.faceRecognition.detectedFaces,
+        photoUrl: uploadedImageUrl.value,
+        photo: uploadedImageUrl.value,
+      });
+
+      if (memoryStore.faceRecognition.detectedFaces.length > 0) {
+        selectedTargetMemberFaceId.value = memoryStore.faceRecognition.detectedFaces[0].id;
+      }
+
+    } else if (!isLoading && uploadedImageUrl.value && memoryStore.faceRecognition.detectedFaces.length === 0) {
+      showSnackbar(t('face.recognition.noFacesDetected'), 'info');
+      updateMemory({
+        faces: [],
+        photo: undefined,
+        imageSize: undefined,
+        exifData: undefined,
+      });
+      selectedTargetMemberFaceId.value = null;
+    }
+
+  } else {
+    memoryStore.resetFaceRecognitionState();
+    uploadedImageUrl.value = null; // Clear local image URL
+    updateMemory({
+      faces: [],
+      photoUrl: undefined,
+      photo: undefined,
+      imageSize: undefined,
+      exifData: undefined,
+    });
+    selectedTargetMemberFaceId.value = null;
+  }
+};
+
+const openSelectMemberDialog = (faceId: string) => {
+  const face = internalMemory.value.faces?.find(f => f.id === faceId);
+  if (face) {
+    faceToLabel.value = face;
+    showSelectMemberDialog.value = true;
+  }
+};
+
+const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => { // Changed signature
+  const updatedFaces = internalMemory.value.faces?.map(face =>
+    face.id === updatedFace.id ? updatedFace : face // Replace with the updated face object
+  ) || [];
+  updateMemory({ faces: updatedFaces });
+  showSelectMemberDialog.value = false;
+  faceToLabel.value = null;
+  if (selectedTargetMemberFaceId.value === updatedFace.id) { // Use updatedFace.id
+    internalMemory.value.memberId = updatedFace.memberId; // Use updatedFace.memberId
+  }
+};
+
+const handleRemoveFace = (faceId: string) => {
+  const updatedFaces = internalMemory.value.faces?.filter(face => face.id !== faceId) || [];
+  updateMemory({ faces: updatedFaces });
+  if (selectedTargetMemberFaceId.value === faceId) {
+    selectedTargetMemberFaceId.value = null;
+  }
+};
+
+defineExpose({
+  isValid: computed(() => !isLoading.value),
+  memoryFaceStore: memoryStore.faceRecognition,
+  faceUploadInputRef,
+  selectedTargetMemberFaceId,
+  generateStory,
+  generatedStory,
+  generatedTitle,
+  storyEditorValid,
+});
+</script>
+
+<style scoped>
+/* Remove stepper-header styles as stepper is removed */
+</style>
