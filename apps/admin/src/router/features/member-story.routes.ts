@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
-import MemberStoryListView from '@/views/member-story-studio/MemberStoryListView.vue'; // Updated
+import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue'; // Updated
 
-export const memberStoryStudioRoutes: RouteRecordRaw[] = [ // Updated
+export const memberStoryRoutes: RouteRecordRaw[] = [ // Updated
   {
     path: '/member-story-studio', // Updated
     redirect: '/member-story-studio/list', // Redirect to the member story list // Updated

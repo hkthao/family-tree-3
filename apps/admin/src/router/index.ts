@@ -20,7 +20,7 @@ import { nlEditorRoutes } from './features/nl-editor.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
-import { memberStoryStudioRoutes } from './features/member-story-studio.routes'; // Updated
+import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,7 +34,7 @@ const router = createRouter({
         ...dashboardRoutes, // Replaced
         ...memberRoutes,
 
-        ...memberStoryStudioRoutes, // Updated
+        ...memberStoryRoutes, // Updated
         ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,
