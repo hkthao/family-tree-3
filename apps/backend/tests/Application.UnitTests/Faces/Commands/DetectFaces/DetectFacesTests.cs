@@ -22,14 +22,15 @@ public class DetectFacesTests : TestBase
 
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
     private readonly Mock<IN8nService> _mockN8nService;
-    private readonly Mock<IMediator> _mediatorMock; // NEW
+    private readonly Mock<IMediator> _mediatorMock;
+    private readonly DetectFacesCommandHandler _handler; // Ensure this is explicitly declared
 
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
         _mockN8nService = new Mock<IN8nService>();
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
-        _mediatorMock = new Mock<IMediator>(); // NEW
+        _mediatorMock = new Mock<IMediator>();
 
         // Default setup for CallImageUploadWebhookAsync to prevent early failures
         _mockN8nService.Setup(s => s.CallImageUploadWebhookAsync(
@@ -52,7 +53,7 @@ public class DetectFacesTests : TestBase
             _context,
             _mockLogger.Object,
             _mockN8nService.Object,
-            _mediatorMock.Object); // NEW
+            _mediatorMock.Object);
     }
 
     [Fact]
