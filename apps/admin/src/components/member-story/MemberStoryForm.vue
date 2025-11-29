@@ -4,10 +4,9 @@
     <v-row>
       <v-col cols="12">
         <MemberAutocomplete :model-value="modelValue.memberId"
-          @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue }); v$.memberId.$touch(); }"
+          @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue }); }"
           :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')"
-          :error-messages="v$.memberId.$errors.map(e => e.$message as string)"
-          :error="v$.memberId.$invalid && v$.memberId.$dirty" />
+          :rules="[rules.memberId.required]" @update:focused="(focused: boolean) => { if (!focused) memberIdValid = true }" />
       </v-col>
     </v-row>
     <!-- Photo Upload Input -->
@@ -39,10 +38,9 @@
       <v-col cols="12">
         <h4>{{ t('memberStory.create.rawInputPlaceholder') }}</h4>
         <v-textarea class="mt-4" :model-value="modelValue.rawInput" :rows="2"
-          @update:model-value="(newValue) => { updateModelValue({ rawInput: newValue }); v$.rawInput.$touch(); }"
+          @update:model-value="(newValue) => { updateModelValue({ rawInput: newValue }); }"
           :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow
-          :error-messages="v$.rawInput.$errors.map(e => e.$message as string)"
-          :error="v$.rawInput.$invalid && v$.rawInput.$dirty"></v-textarea>
+          :rules="[rules.rawInput.minLength]" @update:focused="(focused: boolean) => { if (!focused) rawInputValid = true }"></v-textarea>
       </v-col>
       <v-col cols="12">
         <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
@@ -92,15 +90,13 @@
     <v-row v-if="hasUploadedImage && !isLoading">
       <v-col cols="12">
         <v-text-field :model-value="modelValue.title"
-          @update:model-value="(newValue) => { updateModelValue({ title: newValue }); v$.title.$touch(); }"
+          @update:model-value="(newValue) => { updateModelValue({ title: newValue }); }"
           :label="t('memberStory.storyEditor.title')" outlined class="mb-4"
-          :error-messages="v$.title.$errors.map(e => e.$message as string)"
-          :error="v$.title.$invalid && v$.title.$dirty"></v-text-field>
+          :rules="[rules.title.required]" @update:focused="(focused: boolean) => { if (!focused) titleValid = true }"></v-text-field>
         <v-textarea :model-value="modelValue.story"
-          @update:model-value="(newValue) => { updateModelValue({ story: newValue }); v$.story.$touch(); }"
+          @update:model-value="(newValue) => { updateModelValue({ story: newValue }); }"
           :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow
-          :error-messages="v$.story.$errors.map(e => e.$message as string)"
-          :error="v$.story.$invalid && v$.story.$dirty"></v-textarea>
+          :rules="[rules.story.required]" @update:focused="(focused: boolean) => { if (!focused) storyValid = true }"></v-textarea>
       </v-col>
     </v-row>
 
@@ -111,10 +107,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import useVuelidate from '@vuelidate/core';
-import { memberStoryValidationRules } from '@/validations/memberStory.validation';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
@@ -129,21 +123,37 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
 const { t } = useI18n();
 
-const vuelidateState = computed(() => ({
-  memberId: props.modelValue.memberId,
-  rawInput: props.modelValue.rawInput,
-  title: props.modelValue.title,
-  story: props.modelValue.story,
-  // photoUrl removed from validation
-}));
+// Validation refs
+const memberIdValid = ref(false);
+const rawInputValid = ref(false);
+const titleValid = ref(false);
+const storyValid = ref(false);
 
-const v$ = useVuelidate(memberStoryValidationRules, vuelidateState);
+const rules = {
+  memberId: {
+    required: (value: string | null) => !!value || t('common.validations.required'),
+  },
+  rawInput: {
+    minLength: (value: string | null) => (value && value.length >= 10) || t('memberStory.form.rules.rawInputMinLength', { length: 10 }),
+  },
+  title: {
+    required: (value: string | null) => !!value || t('common.validations.required'),
+  },
+  story: {
+    required: (value: string | null) => !!value || t('common.validations.required'),
+  },
+};
+
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   emit('update:modelValue', { ...props.modelValue, ...payload });
 };
 const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
   emit('story-generated', payload);
 };
+
+const formValid = computed(() => {
+  return memberIdValid.value && rawInputValid.value && titleValid.value && storyValid.value;
+});
 
 const {
   showSelectMemberDialog,
@@ -172,7 +182,7 @@ const {
 });
 
 defineExpose({
-  isValid: computed(() => !v$.value.$invalid),
+  isValid: computed(() => formValid.value),
   memoryFaceStore: memberStoryStoreFaceRecognition,
   generateStory,
   generatedTitle,

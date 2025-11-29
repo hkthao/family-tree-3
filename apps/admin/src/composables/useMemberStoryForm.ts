@@ -44,7 +44,13 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const hasUploadedImage = computed(() => {
     return !!modelValue.value.originalImageUrl; // Updated to check resizedImageUrl
   });
-  const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
+  const isLoading = computed(() => {
+    return memberStoryStore.faceRecognition.loading ||
+           memberStoryStore.add.loading ||
+           memberStoryStore.update.loading ||
+           memberStoryStore._delete.loading ||
+           memberStoryStore.aiAnalysis.loading;
+  });
 
   const canGenerateStory = computed(() => {
     const hasMinRawInput = modelValue.value.rawInput && modelValue.value.rawInput.length >= 10;

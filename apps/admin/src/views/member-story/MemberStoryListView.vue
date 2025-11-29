@@ -36,7 +36,6 @@
 <script setup lang="ts">
 import { watch, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
