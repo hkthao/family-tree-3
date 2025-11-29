@@ -17,6 +17,9 @@
     <v-data-table-server :items-per-page="itemsPerPage" @update:items-per-page="updateItemsPerPage" :headers="headers"
       :items="items" :items-length="totalItems" :loading="loading" @update:options="updateOptions" item-value="id"
       class="elevation-0">
+      <template #item.originalImageUrl="{ item }">
+        <v-img :src="item.resizedImageUrl ?? item.originalImageUrl ?? getFamilyAvatarUrl(null)" max-height="50" max-width="50" cover class="my-1 rounded"></v-img>
+      </template>
       <template #item.title="{ item }">
         <a @click="viewItem(item.id)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
           {{ item.title }}
@@ -31,7 +34,7 @@
       <template #item.perspective="{ item }">
         {{ getPerspectiveText(item.perspective) }}
       </template>
-      <template #item.actions="{ item }">
+      <template #item.actions="{ item: rowItem }">
         <v-menu>
           <template v-slot:activator="{ props: menuProps }">
             <v-btn icon variant="text" v-bind="menuProps" size="small">
@@ -39,10 +42,10 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item @click="editItem(item.id)">
+            <v-list-item @click="() => editItem(rowItem.id)">
               <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="deleteItem(item)">
+            <v-list-item @click="() => deleteItem(rowItem)">
               <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -59,6 +62,7 @@ import type { DataTableHeader } from 'vuetify';
 import { MemberName } from '@/components/member';
 import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
 import { computed } from 'vue'; // Import computed
+import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // Import getFamilyAvatarUrl
 
 interface MemberStoryListProps {
   items: MemberStoryDto[];
@@ -91,6 +95,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const headers = computed<DataTableHeader[]>(() => [
+  { title: t('memberStory.list.headers.coverPhoto'), key: 'originalImageUrl', sortable: false },
   { title: t('memberStory.list.headers.title'), key: 'title' },
   { title: t('memberStory.list.headers.memberFullName'), key: 'memberFullName' },
   { title: t('memberStory.list.headers.storyStyle'), key: 'storyStyle' },

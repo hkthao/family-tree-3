@@ -933,6 +933,7 @@
   "memberStory.studio.addMemory": "Thêm Ký ức",
   "memberStory.studio.loadingMember": "Đang tải chi tiết thành viên...",
   "memberStory.list.title": "Ký ức",
+  "memberStory.list.headers.coverPhoto": "Ảnh bìa",
   "memberStory.list.headers.title": "Tiêu đề",
   "memberStory.list.headers.memberFullName": "Thành viên",
   "memberStory.list.headers.storyStyle": "Phong cách câu chuyện",
