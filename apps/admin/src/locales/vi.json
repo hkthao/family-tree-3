@@ -940,6 +940,7 @@
   "memberStory.list.headers.perspective": "Góc nhìn",
   "memberStory.list.headers.actions": "Hành động",
   "memberStory.list.noMemoriesFound": "Không tìm thấy ký ức nào cho thành viên này.",
+  "memberStory.list.confirmDelete": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",
   "memberStory.list.action.create": "Tạo Ký ức",
 
   "memberStory.form.memberIdLabel": "Thành viên mục tiêu",
