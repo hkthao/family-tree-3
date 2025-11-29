@@ -25,6 +25,12 @@
       <template #item.memberFullName="{ item }">
         <MemberName :full-name="item.memberFullName ?? undefined" :avatar-url="item.memberAvatarUrl ?? undefined" :gender="item.memberGender ?? undefined" />
       </template>
+      <template #item.storyStyle="{ item }">
+        {{ getStoryStyleText(item.storyStyle) }}
+      </template>
+      <template #item.perspective="{ item }">
+        {{ getPerspectiveText(item.perspective) }}
+      </template>
       <template #item.actions="{ item }">
         <v-menu>
           <template v-slot:activator="{ props: menuProps }">
@@ -51,6 +57,8 @@ import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { DataTableHeader } from 'vuetify';
 import { MemberName } from '@/components/member';
+import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
+import { computed } from 'vue'; // Import computed
 
 interface MemberStoryListProps {
   items: MemberStoryDto[];
@@ -58,7 +66,6 @@ interface MemberStoryListProps {
   loading: boolean;
   itemsPerPage: number;
   search?: string;
-  headers: DataTableHeader[];
   hideToolbar?: boolean;
 }
 
@@ -68,7 +75,6 @@ const {
   loading,
   itemsPerPage,
   search,
-  headers,
   hideToolbar,
 } = defineProps<MemberStoryListProps>();
 
@@ -83,6 +89,37 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const headers = computed<DataTableHeader[]>(() => [
+  { title: t('memberStory.list.headers.title'), key: 'title' },
+  { title: t('memberStory.list.headers.memberFullName'), key: 'memberFullName' },
+  { title: t('memberStory.list.headers.storyStyle'), key: 'storyStyle' },
+  { title: t('memberStory.list.headers.perspective'), key: 'perspective' },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
+]);
+
+// Helper to get display text for story style
+const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string => {
+  switch (style) {
+    case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
+    case MemberStoryStyle.Warm: return t('memberStory.style.warm');
+    case MemberStoryStyle.Formal: return t('memberStory.style.formal');
+    case MemberStoryStyle.Folk: return t('memberStory.style.folk');
+    default: return '';
+  }
+};
+
+// Helper to get display text for perspective
+const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefined): string => {
+  switch (perspective) {
+    case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
+    case MemberStoryPerspective.ThirdPerson: return t('memberStory.create.perspective.thirdPerson');
+    case MemberStoryPerspective.FamilyMember: return t('memberStory.create.perspective.familyMember');
+    case MemberStoryPerspective.NeutralPersonal: return t('memberStory.create.perspective.neutralPersonal');
+    case MemberStoryPerspective.FullyNeutral: return t('memberStory.create.perspective.fullyNeutral');
+    default: return '';
+  }
+};
 
 const viewItem = (id: string | undefined) => {
   if (id) emit('view', id);

@@ -10,11 +10,9 @@
     <v-card-text v-else-if="!editedMemberStory">
       <v-alert type="error">{{ t('memberStory.edit.notFound') }}</v-alert>
     </v-card-text>
-    <MemberStoryForm v-else
+    <MemberStoryLimitedEditForm v-else
       ref="memberStoryFormRef"
       v-model="editedMemberStory"
-      :readonly="false"
-      :member-id="editedMemberStory.memberId"
     />
     <v-card-actions v-if="editedMemberStory">
       <v-spacer></v-spacer>
@@ -34,7 +32,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
-import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
+import MemberStoryLimitedEditForm from '@/components/member-story/MemberStoryLimitedEditForm.vue';
 
 const props = defineProps<{
   memberStoryId: string;
@@ -46,7 +44,7 @@ const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
-const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null);
+const memberStoryFormRef = ref<InstanceType<typeof MemberStoryLimitedEditForm> | null>(null);
 const editedMemberStory = ref<MemberStoryDto | null>(null);
 const loading = ref(false);
 const isSaving = ref(false);

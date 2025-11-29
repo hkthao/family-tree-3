@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from '@/types';
+import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 
 interface UseMemberStoryFormOptions {
@@ -25,16 +26,16 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const faceToLabel = ref<DetectedFace | null>(null);
 
   const aiPerspectiveSuggestions = ref([
-    { value: 'firstPerson', text: t('memberStory.create.perspective.firstPerson') },
-    { value: 'neutralPersonal', text: t('memberStory.create.perspective.neutralPersonal') },
-    { value: 'fullyNeutral', text: t('memberStory.create.perspective.fullyNeutral') },
+    { value: MemberStoryPerspective.FirstPerson, text: t('memberStory.create.perspective.firstPerson') },
+    { value: MemberStoryPerspective.NeutralPersonal, text: t('memberStory.create.perspective.neutralPersonal') },
+    { value: MemberStoryPerspective.FullyNeutral, text: t('memberStory.create.perspective.fullyNeutral') },
   ]);
 
   const storyStyles = ref([
-    { value: 'nostalgic', text: t('memberStory.style.nostalgic') },
-    { value: 'warm', text: t('memberStory.style.warm') },
-    { value: 'formal', text: t('memberStory.style.formal') },
-    { value: 'folk', text: t('memberStory.style.folk') },
+    { value: MemberStoryStyle.Nostalgic, text: t('memberStory.style.nostalgic') },
+    { value: MemberStoryStyle.Warm, text: t('memberStory.style.warm') },
+    { value: MemberStoryStyle.Formal, text: t('memberStory.style.formal') },
+    { value: MemberStoryStyle.Folk, text: t('memberStory.style.folk') },
   ]);
 
   const generatedStory = ref<string | null>(null);

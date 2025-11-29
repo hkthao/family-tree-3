@@ -1,4 +1,5 @@
-import type { DetectedFace } from './face.d'; // Assuming DetectedFace is in detectedFace.d.ts
+import type { DetectedFace } from './face.d';
+import { MemberStoryPerspective, MemberStoryStyle } from './enums';
 
 export interface MemberStoryDto {
   id?: string;
@@ -8,8 +9,8 @@ export interface MemberStoryDto {
   story?: string | null;
   detectedFaces?: DetectedFace[]; // Renamed from faces
   rawInput?: string | null; // Raw input text for AI generation
-  storyStyle?: string | null; // Style for AI story generation
-  perspective?: string | null; // Perspective for AI story generation
+    storyStyle?: MemberStoryStyle | null; // Style for AI story generation
+  perspective?: MemberStoryPerspective | null; // Perspective for AI story generation
   photo?: string | null; // Base64 or URL of the uploaded photo for display
   imageSize?: string | null; // e.g., "1920x1080"
   exifData?: any; // e.g., for storing EXIF metadata from photo
