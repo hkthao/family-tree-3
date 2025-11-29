@@ -6,7 +6,7 @@
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw.address">
         <template #prepend>
-          <v-avatar :image="getFamilyAvatar(item.raw)" size="small"></v-avatar>
+          <v-avatar :image="getFamilyAvatarUrl(item.raw.avatarUrl)" size="small"></v-avatar>
         </template>
       </v-list-item>
     </template>
@@ -17,7 +17,7 @@
 import type { Family } from '@/types';
 import RemoteAutocomplete from './RemoteAutocomplete.vue';
 import { useFamilyAutocomplete } from '@/composables/useFamilyAutocomplete';
-import familyDefaultAvatar from '@/assets/images/family_avatar.png';
+import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 interface FamilyAutocompleteProps {
   modelValue: string | string[] | undefined | null;
@@ -37,10 +37,6 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
   multiple: props.multiple,
   initialValue: props.modelValue ?? undefined,
 });
-
-const getFamilyAvatar = (family: Family) => {
-  return family.avatarUrl || familyDefaultAvatar;
-};
 
 const searchFunction = async (query: string): Promise<Family[]> => {
   onSearchChange(query);

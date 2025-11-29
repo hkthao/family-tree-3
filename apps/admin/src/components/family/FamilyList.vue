@@ -23,7 +23,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img :src="item.avatarUrl || familyDefaultAvatar" :alt="item.name" />
+          <v-img :src="getFamilyAvatarUrl(item.avatarUrl)" :alt="item.name" />
         </v-avatar>
       </div>
     </template>
@@ -91,7 +91,7 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import familyDefaultAvatar from '@/assets/images/family_avatar.png'; // Import default family avatar
+import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const props = defineProps<{
   items: Family[];
