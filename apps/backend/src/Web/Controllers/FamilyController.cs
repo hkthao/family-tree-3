@@ -1,9 +1,9 @@
 using backend.Application.Common.Models;
-using backend.Application.Families.Queries;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.UpdateFamily;
+using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetFamilyDetails;
