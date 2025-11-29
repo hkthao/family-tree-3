@@ -1,4 +1,5 @@
 using backend.Application.AI.DTOs; // UPDATED USING
+using backend.Application.AI.Models; // NEW USING
 using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Interfaces;
@@ -32,4 +33,12 @@ public interface IN8nService
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả chứa phản hồi tải ảnh lên.</returns>
     Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để upsert/search/delete.
+    /// </summary>
+    /// <param name="dto">Đối tượng chứa dữ liệu và hành động vector khuôn mặt.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả chứa thông tin về hoạt động vector khuôn mặt.</returns>
+    Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookAsync(FaceVectorOperationDto dto, CancellationToken cancellationToken);
 }

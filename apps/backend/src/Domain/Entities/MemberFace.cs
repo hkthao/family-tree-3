@@ -22,6 +22,11 @@ public class MemberFace : BaseAuditableEntity
     public double EmotionConfidence { get; set; }
 
     /// <summary>
+    /// ID của vector trong cơ sở dữ liệu vector (Qdrant).
+    /// </summary>
+    public string? VectorDbId { get; set; }
+
+    /// <summary>
     /// Đánh dấu xem thông tin khuôn mặt đã được đồng bộ hóa với cơ sở dữ liệu vector hay chưa.
     /// </summary>
     public bool IsVectorDbSynced { get; set; } = false;

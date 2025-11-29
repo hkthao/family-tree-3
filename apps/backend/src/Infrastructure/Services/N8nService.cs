@@ -5,6 +5,7 @@ using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AI;
+using backend.Application.AI.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Logging;
@@ -151,7 +152,7 @@ public class N8nService : IN8nService
             dto.ActionType,
             dto.EntityData,
             dto.Description,
-            _n8nSettings.CollectionName // Add CollectionName to payload
+            _n8nSettings.Face.CollectionName // Add CollectionName to payload
         };
 
         var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -292,6 +293,97 @@ public class N8nService : IN8nService
         {
             _logger.LogError(ex, "An exception occurred while calling the n8n image upload webhook.");
             return Result<ImageUploadResponseDto>.Failure($"An error occurred: {ex.Message}", "Exception");
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookAsync(FaceVectorOperationDto dto, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(_n8nSettings.FaceVectorWebhookUrl) || _n8nSettings.FaceVectorWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        {
+            _logger.LogWarning("n8n face vector webhook URL is not configured.");
+            return Result<FaceVectorOperationResultDto>.Failure("n8n face vector integration is not configured.", "Configuration");
+        }
+
+        var httpClient = _httpClientFactory.CreateClient();
+
+        // Generate JWT Token if JwtSecret is configured
+        if (!string.IsNullOrEmpty(_n8nSettings.JwtSecret))
+        {
+            var jwtHelper = _jwtHelperFactory.Create(_n8nSettings.JwtSecret);
+            // Use collection name or action type as ID for token payload
+            var tokenPayloadId = _n8nSettings.Face.CollectionName ?? dto.ActionType ?? Guid.NewGuid().ToString();
+            var token = jwtHelper.GenerateToken(tokenPayloadId, DateTime.UtcNow.AddMinutes(5)); // Token expires in 5 minutes
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        else
+        {
+            _logger.LogWarning("N8nSettings.JwtSecret is not configured. Skipping JWT token generation for face vector webhook.");
+        }
+
+        var payload = new
+        {
+            dto.ActionType,
+            dto.Vector,
+            dto.Filter,
+            dto.Payload,
+            dto.Limit,
+            dto.Threshold,
+            dto.ReturnFields,
+            CollectionName = _n8nSettings.Face.CollectionName // Add CollectionName here
+        };
+        var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        try
+        {
+            _logger.LogInformation("Calling n8n face vector webhook at {Url} with payload: {Payload}", _n8nSettings.FaceVectorWebhookUrl, jsonPayload);
+            var response = await httpClient.PostAsync(_n8nSettings.FaceVectorWebhookUrl, content, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Failed to call n8n face vector webhook. Status: {StatusCode}, Response: {ErrorContent}", response.StatusCode, errorContent);
+                return Result<FaceVectorOperationResultDto>.Failure($"Failed to perform face vector operation via n8n webhook. Status: {response.StatusCode}", "ExternalService");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogInformation("Received from n8n face vector webhook: {ResponseContent}", responseContent);
+
+            if (string.IsNullOrWhiteSpace(responseContent))
+            {
+                _logger.LogWarning("Received empty response content from n8n face vector webhook.");
+                return Result<FaceVectorOperationResultDto>.Failure("Invalid response format from n8n: Received empty response.", "ExternalService");
+            }
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            FaceVectorOperationResultDto? operationResult = null;
+            try
+            {
+                operationResult = JsonSerializer.Deserialize<FaceVectorOperationResultDto>(responseContent, options);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize n8n face vector webhook response. Raw response: {RawResponse}", responseContent);
+                return Result<FaceVectorOperationResultDto>.Failure($"Invalid response format from n8n: Failed to deserialize face vector operation response. Raw response: {responseContent}", "ExternalService");
+            }
+
+            if (operationResult == null)
+            {
+                _logger.LogWarning("Received empty or invalid face vector operation response from n8n.");
+                return Result<FaceVectorOperationResultDto>.Failure("Invalid response format from n8n: Empty or invalid face vector operation response.", "ExternalService");
+            }
+
+            return Result<FaceVectorOperationResultDto>.Success(operationResult);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred while calling the n8n face vector webhook.");
+            return Result<FaceVectorOperationResultDto>.Failure($"An error occurred: {ex.Message}", "Exception");
         }
     }
 }
