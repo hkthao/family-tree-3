@@ -1,6 +1,5 @@
 using backend.Application.AI.Commands;
 using backend.Application.AI.DTOs;
-using backend.Application.AI.Models;
 using backend.Application.AI.Prompts;
 using backend.Application.MemberStories.Commands.GenerateStory;
 using backend.Domain.Entities;

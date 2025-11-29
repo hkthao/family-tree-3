@@ -1,6 +1,4 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.AI.Commands;
-using backend.Application.AI.Prompts;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
@@ -8,10 +6,7 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
-using System.Linq.Expressions;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using Ardalis.Specification;
 
 namespace backend.Application.UnitTests.AI.Commands;
 

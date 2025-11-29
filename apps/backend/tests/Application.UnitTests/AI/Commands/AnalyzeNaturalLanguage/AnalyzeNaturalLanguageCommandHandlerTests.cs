@@ -1,14 +1,11 @@
 using backend.Application.AI.Commands.AnalyzeNaturalLanguage;
-using backend.Application.AI.DTOs;
 using backend.Application.AI.Models;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Text.Json;
 using Xunit;

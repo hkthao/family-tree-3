@@ -3,8 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using FluentAssertions;
 using Moq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.AI.Chat;

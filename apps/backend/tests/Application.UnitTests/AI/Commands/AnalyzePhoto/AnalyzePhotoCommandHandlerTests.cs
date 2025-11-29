@@ -1,13 +1,11 @@
 using backend.Application.AI.Commands.AnalyzePhoto;
 using backend.Application.AI.DTOs;
-using backend.Application.AI.Prompts;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Text.Json;
 using Xunit;
