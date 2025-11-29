@@ -10,6 +10,7 @@ using MediatR; // NEW
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
 using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
 using System.IO; // NEW for Path.GetExtension
+using Microsoft.Extensions.Logging; // NEW
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
@@ -20,13 +21,15 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
     private readonly IAuthorizationService _authorizationService;
     private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer; // Updated
     private readonly IMediator _mediator; // NEW
+    private readonly ILogger<CreateMemberStoryCommandHandler> _logger; // NEW
 
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator) // Updated
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator, ILogger<CreateMemberStoryCommandHandler> logger) // Updated
     {
         _context = context;
         _authorizationService = authorizationService;
         _localizer = localizer;
         _mediator = mediator; // NEW
+        _logger = logger; // NEW
     }
 
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
@@ -78,6 +81,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 "original_image", // Generic filename
                 familyId,
                 storyId,
+                "photos", // subFolder for original images
                 cancellationToken);
 
             if (!originalUploadResult.IsSuccess)
@@ -95,6 +99,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 "resized_image", // Generic filename
                 familyId,
                 storyId,
+                "photos", // subFolder for resized images
                 cancellationToken);
 
             if (!resizedUploadResult.IsSuccess)
@@ -112,6 +117,34 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         {
             foreach (var detectedFaceDto in request.DetectedFaces)
             {
+                string? finalThumbnailUrl = detectedFaceDto.ThumbnailUrl;
+
+                // Check and upload ThumbnailUrl if it's a temporary URL
+                if (!string.IsNullOrEmpty(detectedFaceDto.ThumbnailUrl) && detectedFaceDto.ThumbnailUrl.Contains("/temp/"))
+                {
+                    // Generate a unique file name for the face thumbnail
+                    var thumbnailFileName = $"face_thumbnail_{Guid.NewGuid()}{Path.GetExtension(detectedFaceDto.ThumbnailUrl)}";
+
+                    var thumbnailUploadResult = await UploadImageFromTempUrlAsync(
+                        detectedFaceDto.ThumbnailUrl,
+                        thumbnailFileName, // Pass the generated unique filename
+                        familyId,
+                        storyId,
+                        "faces", // Use a specific subfolder for faces
+                        cancellationToken);
+
+                    if (!thumbnailUploadResult.IsSuccess)
+                    {
+                        _logger.LogWarning("Face thumbnail upload failed: {Error}", thumbnailUploadResult.Error ?? "Failed to upload face thumbnail from temporary URL.");
+                        // Optionally, return failure here if face thumbnail upload is critical
+                        // return Result<Guid>.Failure(thumbnailUploadResult.Error ?? "Failed to upload face thumbnail from temporary URL.", thumbnailUploadResult.ErrorSource);
+                    }
+                    else
+                    {
+                        finalThumbnailUrl = thumbnailUploadResult.Value!.Url;
+                    }
+                }
+
                 var memberFace = new MemberFace
                 {
                     MemberId = request.MemberId, // Link to the member from the story
@@ -124,7 +157,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                         Height = detectedFaceDto.BoundingBox.Height
                     },
                     Confidence = detectedFaceDto.Confidence,
-                    ThumbnailUrl = detectedFaceDto.ThumbnailUrl,
+                    ThumbnailUrl = finalThumbnailUrl, // Use the final (permanent or original temporary) thumbnail URL
                     OriginalImageUrl = memberStory.OriginalImageUrl, // Use the updated original image URL from the story
                     Embedding = detectedFaceDto.Embedding ?? new List<double>(), // Ensure embedding is not null
                     Emotion = detectedFaceDto.Emotion,
@@ -142,14 +175,14 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
     }
 
     private async Task<Result<ImageUploadResponseDto>> UploadImageFromTempUrlAsync(
-        string imageUrl, string fileNamePrefix, Guid familyId, Guid storyId, CancellationToken cancellationToken)
+        string imageUrl, string fileNamePrefix, Guid familyId, Guid storyId, string subFolder, CancellationToken cancellationToken)
     {
         var command = new UploadFileFromUrlCommand
         {
             FileUrl = imageUrl,
             FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", // Generate unique name
             Cloud = "cloudinary", // Assuming cloudinary as default for permanent storage
-            Folder = $"families/{familyId}/stories/{storyId}/photos"
+            Folder = $"families/{familyId}/stories/{storyId}/{subFolder}" // Use subFolder here
         };
         return await _mediator.Send(command, cancellationToken);
     }

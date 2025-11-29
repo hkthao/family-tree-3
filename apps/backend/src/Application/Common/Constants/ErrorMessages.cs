@@ -18,6 +18,7 @@ public static class ErrorMessages
     public const string InvalidFileType = "Invalid file type. Only JPG, JPEG, PNG, PDF, DOCX are allowed.";
     public const string FileUploadFailed = "File upload failed.";
     public const string FileUploadNullUrl = "File upload succeeded but returned a null URL.";
+    public const string FaceThumbnailUploadFailed = "Face thumbnail upload failed.";
     public const string ExternalIdNotFound = "External ID (sub claim) not found in claims.";
     public const string InvalidUserIdFormat = "Invalid user ID format.";
 }
