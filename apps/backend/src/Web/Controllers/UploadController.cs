@@ -55,23 +55,4 @@ public class UploadController(IMediator mediator) : ControllerBase
 
         return result.IsSuccess ? (ActionResult<Result<string>>)Ok(result) : (ActionResult<Result<string>>)BadRequest(result);
     }
-
-    // Removed GetUploadedFile endpoint as it is no longer relevant with the new external storage approach
-    /*
-    /// <summary>
-    /// Truy xuất một tệp đã tải lên để xem trước, yêu cầu xác thực.
-    /// </summary>
-    /// <param name="fileName">Tên của tệp cần truy xuất.</param>
-    /// <returns>Nội dung tệp hoặc 404 Not Found nếu không tìm thấy.</returns>
-    [HttpGet("preview/{fileName}")]
-    public async Task<IActionResult> GetUploadedFile(string fileName)
-    {
-        var query = new GetUploadedFileQuery { FileName = fileName };
-        var result = await _mediator.Send(query);
-
-        return result.IsSuccess && result.Value != null
-            ? File(result.Value.Content, result.Value.ContentType)
-            : result.ErrorSource == "NotFound" ? NotFound() : BadRequest(result.Error);
-    }
-    */
 }

@@ -151,7 +151,7 @@ public class N8nService : IN8nService
             dto.ActionType,
             dto.EntityData,
             dto.Description,
-            CollectionName = _n8nSettings.CollectionName // Add CollectionName to payload
+            _n8nSettings.CollectionName // Add CollectionName to payload
         };
 
         var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -242,7 +242,7 @@ public class N8nService : IN8nService
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "data", dto.FileName!);
 
-        var url = $"{_n8nSettings.ImageUploadWebhookUrl}?cloud=${dto.Cloud}&folder=${dto.Folder}";
+        var url = $"{_n8nSettings.ImageUploadWebhookUrl}?cloud={dto.Cloud}&folder={dto.Folder}";
         try
         {
             _logger.LogInformation("Calling n8n image upload webhook at {Url}", url);

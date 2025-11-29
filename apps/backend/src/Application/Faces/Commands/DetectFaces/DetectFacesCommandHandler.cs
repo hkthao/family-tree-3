@@ -29,6 +29,10 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string? originalImageUrl = null;
             byte[]? imageBytesToAnalyze = request.ImageBytes;
             string? resizedImageUrl = null;
+            string cloud = "cloudinary";
+            string uploadFolder = "temp/uploads";
+            string faceFolder = "temp/faces";
+            string resizeFolder = "temp/512x512";
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
@@ -36,8 +40,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 {
                     ImageData = request.ImageBytes,
                     FileName = effectiveFileName, // Use effectiveFileName
-                    Cloud = request.Cloud,
-                    Folder = request.Folder
+                    Cloud = cloud,
+                    Folder = uploadFolder
                 };
 
                 var n8nImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
@@ -69,8 +73,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         {
                             ImageData = resizedImageBytes,
                             FileName = resizedFileName,
-                            Cloud = request.Cloud,
-                            Folder = request.Folder
+                            Cloud = cloud,
+                            Folder = resizeFolder
                         };
 
                         var n8nResizedImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(resizedImageUploadDto, cancellationToken);
@@ -124,8 +128,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         {
                             ImageData = thumbnailBytes,
                             FileName = thumbnailFileName,
-                            Cloud = request.Cloud,
-                            Folder = request.Folder
+                            Cloud = cloud,
+                            Folder = faceFolder
                         };
 
                         var n8nThumbnailUploadResult = await _n8nService.CallImageUploadWebhookAsync(thumbnailUploadDto, cancellationToken);
