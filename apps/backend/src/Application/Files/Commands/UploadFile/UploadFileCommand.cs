@@ -1,11 +1,12 @@
 using backend.Application.Common.Models;
+using backend.Application.AI.DTOs; // NEW
 
 namespace backend.Application.Files.UploadFile;
 
 /// <summary>
 /// Command to upload a file to external storage via n8n webhook.
 /// </summary>
-public record UploadFileCommand : IRequest<Result<string>>
+public record UploadFileCommand : IRequest<Result<ImageUploadResponseDto>>
 {
     /// <summary>
     /// The image data in bytes.

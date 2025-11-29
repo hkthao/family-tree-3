@@ -124,4 +124,7 @@ public class ImageUploadResponseDto
 
     [JsonPropertyName("extension")]
     public string Extension { get; set; } = string.Empty;
+
+    [JsonPropertyName("content_type")]
+    public string ContentType { get; set; } = string.Empty;
 }
