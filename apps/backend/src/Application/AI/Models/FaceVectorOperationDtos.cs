@@ -47,3 +47,24 @@ public class DeleteFaceVectorOperationDto
 {
     public Dictionary<string, object> Filter { get; set; } = new Dictionary<string, object>();
 }
+
+// New DTOs for n8n webhook response
+public class N8nFaceVectorPoint
+{
+    public string Id { get; set; } = null!;
+    public float Score { get; set; }
+    public Dictionary<string, object>? Payload { get; set; }
+}
+
+public class N8nFaceVectorResult
+{
+    public List<N8nFaceVectorPoint>? Points { get; set; }
+}
+
+public class N8nFaceVectorResponse
+{
+    public N8nFaceVectorResult? Result { get; set; }
+    public string Status { get; set; } = null!;
+    public double Time { get; set; }
+}
+

@@ -394,22 +394,35 @@ public class N8nService : IN8nService
                 PropertyNameCaseInsensitive = true,
             };
 
-            FaceVectorOperationResultDto? operationResult = null;
+            N8nFaceVectorResponse? n8nResponse = null;
             try
             {
-                operationResult = JsonSerializer.Deserialize<FaceVectorOperationResultDto>(responseContent, options);
+                n8nResponse = JsonSerializer.Deserialize<N8nFaceVectorResponse>(responseContent, options);
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Failed to deserialize n8n face vector webhook response. Raw response: {RawResponse}", responseContent);
+                _logger.LogError(ex, "Failed to deserialize n8n face vector webhook response as N8nFaceVectorResponse. Raw response: {RawResponse}", responseContent);
                 return Result<FaceVectorOperationResultDto>.Failure($"Invalid response format from n8n: Failed to deserialize face vector operation response. Raw response: {responseContent}", "ExternalService");
             }
 
-            if (operationResult == null)
+            if (n8nResponse == null)
             {
-                _logger.LogWarning("Received empty or invalid face vector operation response from n8n.");
+                _logger.LogWarning("Received empty or invalid N8nFaceVectorResponse from n8n.");
                 return Result<FaceVectorOperationResultDto>.Failure("Invalid response format from n8n: Empty or invalid face vector operation response.", "ExternalService");
             }
+
+            var operationResult = new FaceVectorOperationResultDto
+            {
+                Success = n8nResponse.Status == "ok",
+                Message = n8nResponse.Status == "ok" ? "Operation successful" : "Operation failed",
+                SearchResults = n8nResponse.Result?.Points?.Select(p => new FaceVectorSearchResultDto
+                {
+                    Id = p.Id,
+                    Score = p.Score,
+                    Payload = p.Payload
+                }).ToList(),
+                AffectedCount = n8nResponse.Status == "ok" ? n8nResponse.Result?.Points?.Count ?? 0 : 0 // Assuming affected count is number of points for successful operations
+            };
 
             return Result<FaceVectorOperationResultDto>.Success(operationResult);
         }
