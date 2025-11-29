@@ -2,12 +2,9 @@ using Ardalis.Specification.EntityFrameworkCore; // NEW
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications; // NEW
-using backend.Application.Faces.Common;
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
@@ -28,8 +25,18 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
 
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
     {
+        // Get FamilyId from Member
+        var familyId = await _context.Members
+                                     .WithSpecification(new FamilyIdByMemberIdSpecification(request.MemberId))
+                                     .FirstOrDefaultAsync(cancellationToken);
+
+        if (familyId == Guid.Empty) // Member not found or FamilyId is default
+        {
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
+        }
+
         // Authorization check
-        if (!_authorizationService.CanManageFamily(request.MemberId)) // Assuming memberId can be used to check family access
+        if (!_authorizationService.CanManageFamily(familyId)) // Check FamilyId for access
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
