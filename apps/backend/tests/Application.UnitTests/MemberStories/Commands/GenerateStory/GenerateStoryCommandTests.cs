@@ -1,6 +1,4 @@
 using System.Text.Json;
-using backend.Application.AI.DTOs; // PhotoAnalysisResultDto
-using backend.Application.AI.Prompts; // PromptBuilder
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;

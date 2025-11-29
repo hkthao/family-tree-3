@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace backend.Application.UnitTests.FamilyDicts;
+namespace backend.Application.UnitTests.FamilyDicts.Commands.CreateFamilyDict;
 
 public class CreateFamilyDictCommandTests : TestBase
 {

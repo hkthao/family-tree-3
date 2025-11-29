@@ -5,7 +5,7 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
 
-namespace backend.Application.UnitTests.FamilyDicts;
+namespace backend.Application.UnitTests.FamilyDicts.Queries.GetSpecialFamilyDicts;
 
 public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
 {

@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED USING
 using backend.Application.AI.DTOs; // UPDATED USING
@@ -11,7 +10,6 @@ using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
-using Moq.Protected;
 using Xunit;
 
 namespace backend.Application.UnitTests.Memories.Commands;
