@@ -117,8 +117,8 @@ const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefin
   }
 };
 
-const storyStyleText = computed(() => getStoryStyleText(memberStory.value?.storyStyle));
-const perspectiveText = computed(() => getPerspectiveText(memberStory.value?.perspective));
+const storyStyleText = computed(() => getStoryStyleText(memberStory.value?.storyStyle as MemberStoryStyle));
+const perspectiveText = computed(() => getPerspectiveText(memberStory.value?.perspective as MemberStoryPerspective));
 
 
 onMounted(() => {

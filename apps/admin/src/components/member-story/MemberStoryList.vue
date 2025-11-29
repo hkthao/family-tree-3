@@ -29,10 +29,10 @@
         <MemberName :full-name="item.memberFullName ?? undefined" :avatar-url="item.memberAvatarUrl ?? undefined" :gender="item.memberGender ?? undefined" />
       </template>
       <template #item.storyStyle="{ item }">
-        {{ getStoryStyleText(item.storyStyle) }}
+        {{ getStoryStyleText(item.storyStyle as MemberStoryStyle) }}
       </template>
       <template #item.perspective="{ item }">
-        {{ getPerspectiveText(item.perspective) }}
+        {{ getPerspectiveText(item.perspective as MemberStoryPerspective) }}
       </template>
       <template #item.actions="{ item: rowItem }">
         <v-menu>
