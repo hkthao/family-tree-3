@@ -63,7 +63,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             MemberId = request.MemberId,
             Title = request.Title,
             Story = request.Story,
-            PhotoUrl = request.PhotoUrl,
             OriginalImageUrl = request.OriginalImageUrl, // Assign initial value
             ResizedImageUrl = request.ResizedImageUrl // Assign initial value
         };
@@ -86,11 +85,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
             }
             memberStory.OriginalImageUrl = originalUploadResult.Value!.Url;
-            // Also update PhotoUrl if it's currently pointing to the original temp image
-            if (memberStory.PhotoUrl == request.OriginalImageUrl)
-            {
-                memberStory.PhotoUrl = originalUploadResult.Value.Url;
-            }
         }
 
         // Check and upload ResizedImageUrl if it's a temporary URL
@@ -108,11 +102,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
             }
             memberStory.ResizedImageUrl = resizedUploadResult.Value!.Url;
-            // Also update PhotoUrl if it's currently pointing to the resized temp image
-            if (memberStory.PhotoUrl == request.ResizedImageUrl)
-            {
-                memberStory.PhotoUrl = resizedUploadResult.Value.Url;
-            }
         }
         // --- End logic to handle /temp/ URLs ---
 
