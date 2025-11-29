@@ -1,15 +1,15 @@
+using System.IO; // NEW for Path.GetExtension
 using Ardalis.Specification.EntityFrameworkCore; // NEW
+using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
-using Microsoft.Extensions.Localization;
 using MediatR; // NEW
-using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
-using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
-using System.IO; // NEW for Path.GetExtension
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging; // NEW
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
@@ -67,9 +67,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             Title = request.Title,
             Story = request.Story,
             OriginalImageUrl = request.OriginalImageUrl, // Assign initial value
-            ResizedImageUrl = request.ResizedImageUrl // Assign initial value
+            ResizedImageUrl = request.ResizedImageUrl, // Assign initial value
+            RawInput = request.RawInput, // NEW
+            StoryStyle = request.StoryStyle, // NEW
+            Perspective = request.Perspective // NEW
         };
-        
+
         // --- Logic to handle /temp/ URLs ---
         var storyId = memberStory.Id; // Get the generated ID for the new story
 

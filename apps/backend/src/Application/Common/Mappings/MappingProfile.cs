@@ -20,6 +20,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
+using backend.Application.MemberStories.DTOs; // NEW
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Mappings;
@@ -91,5 +92,9 @@ public class MappingProfile : Profile
 
         // PdfTemplate DTO
         CreateMap<PdfTemplate, PdfTemplateDto>();
+        CreateMap<MemberStory, MemberStoryDto>()
+            .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : string.Empty))
+            .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
+            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null));
     }
 }

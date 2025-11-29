@@ -19,5 +19,6 @@ export interface MemberStoryDto {
   memberGender?: string | null;
   originalImageUrl?: string | null;
   resizedImageUrl?: string | null;
+  createdAt?: string; // NEW: Add created date
 }
 

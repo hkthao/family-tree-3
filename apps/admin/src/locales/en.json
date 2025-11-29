@@ -951,6 +951,10 @@
   "memberStory.detail.notFound": "MemberStory not found.",
   "memberStory.detail.exportPdf": "Export PDF",
   "memberStory.detail.share": "Share MemberStory",
+  "memberStory.detail.forMember": "For Member",
+  "memberStory.detail.storyContent": "Story Content",
+  "memberStory.detail.shortDescription": "Short Description",
+  "memberStory.detail.styleAndPerspective": "Style and Perspective",
 
   "memberStory.edit.title": "Edit MemberStory",
   "memberStory.edit.loading": "Loading member story for editing...",
