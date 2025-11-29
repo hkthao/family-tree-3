@@ -23,7 +23,7 @@
       <v-card-text class="pa-0">
         <!-- Story Content -->
         <div class="mb-6">
-          <p class="text-body-1 text-justify">{{ memberStory.story }}</p>
+          <div class="text-body-1" style="white-space: pre-wrap;">{{ memberStory.story }}</div>
         </div>
 
         <!-- Short Description (Raw Input) -->
@@ -73,6 +73,7 @@ import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
+import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
 
 const props = defineProps<{
   memberStoryId: string;
@@ -93,30 +94,32 @@ const fetchMemberStory = async (id: string) => {
   }
 };
 
-const storyStyleText = computed(() => { // NEW
-  if (!memberStory.value?.storyStyle) return '';
-  // Assuming a similar structure for story styles as in useMemberStoryForm
-  // TODO: Centralize these definitions or retrieve from a shared source
-  const styles = {
-    nostalgic: t('memberStory.style.nostalgic'),
-    warm: t('memberStory.style.warm'),
-    formal: t('memberStory.style.formal'),
-    folk: t('memberStory.style.folk'),
-  };
-  return styles[memberStory.value.storyStyle as keyof typeof styles] || memberStory.value.storyStyle;
-});
+// Helper to get display text for story style
+const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string => {
+  switch (style) {
+    case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
+    case MemberStoryStyle.Warm: return t('memberStory.style.warm');
+    case MemberStoryStyle.Formal: return t('memberStory.style.formal');
+    case MemberStoryStyle.Folk: return t('memberStory.style.folk');
+    default: return '';
+  }
+};
 
-const perspectiveText = computed(() => { // NEW
-  if (!memberStory.value?.perspective) return '';
-  // Assuming a similar structure for perspectives as in useMemberStoryForm
-  // TODO: Centralize these definitions or retrieve from a shared source
-  const perspectives = {
-    firstPerson: t('memberStory.create.perspective.firstPerson'),
-    neutralPersonal: t('memberStory.create.perspective.neutralPersonal'),
-    fullyNeutral: t('memberStory.create.perspective.fullyNeutral'),
-  };
-  return perspectives[memberStory.value.perspective as keyof typeof perspectives] || memberStory.value.perspective;
-});
+// Helper to get display text for perspective
+const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefined): string => {
+  switch (perspective) {
+    case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
+    case MemberStoryPerspective.ThirdPerson: return t('memberStory.create.perspective.thirdPerson');
+    case MemberStoryPerspective.FamilyMember: return t('memberStory.create.perspective.familyMember');
+    case MemberStoryPerspective.NeutralPersonal: return t('memberStory.create.perspective.neutralPersonal');
+    case MemberStoryPerspective.FullyNeutral: return t('memberStory.create.perspective.fullyNeutral');
+    default: return '';
+  }
+};
+
+const storyStyleText = computed(() => getStoryStyleText(memberStory.value?.storyStyle));
+const perspectiveText = computed(() => getPerspectiveText(memberStory.value?.perspective));
+
 
 onMounted(() => {
   if (props.memberStoryId) {
