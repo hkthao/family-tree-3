@@ -15,12 +15,12 @@ using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.MemberStories.DTOs; // NEW
 using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
-using backend.Application.MemberStories.DTOs; // NEW
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Mappings;

@@ -42,18 +42,18 @@
 
     <!-- Father column -->
     <template #item.father="{ item }">
-      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="item.fatherGender" />
+      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="Gender.Male" />
     </template>
 
     <!-- Mother column -->
     <template #item.mother="{ item }">
-      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="item.motherGender" />
+      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="Gender.Female" />
     </template>
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="item.husbandGender" />
-      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="item.wifeGender" />
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="Gender.Male" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="Gender.Female" />
     </template>
 
     <!-- Family column -->
@@ -106,7 +106,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Member } from '@/types';
+import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { ChipLookup } from '@/components/common';
