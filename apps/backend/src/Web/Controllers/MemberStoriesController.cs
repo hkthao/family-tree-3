@@ -82,7 +82,7 @@ public class MemberStoriesController : ControllerBase // Updated
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
-        await _mediator.Send(new DeleteMemberStoryCommand(memberStoryId), cancellationToken); // Updated
+        await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
         return NoContent();
     }
 
