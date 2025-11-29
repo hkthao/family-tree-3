@@ -15,14 +15,13 @@ namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updat
 public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStoryCommand, Result<Guid>> // Updated
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+
     private readonly IAuthorizationService _authorizationService;
     private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer; // Updated
 
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer) // Updated
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer) // Updated
     {
         _context = context;
-        _mapper = mapper;
         _authorizationService = authorizationService;
         _localizer = localizer;
     }
@@ -46,7 +45,13 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         }
 
         // Create MemberStory and add to the aggregate
-        var memberStory = _mapper.Map<MemberStory>(request);
+        var memberStory = new MemberStory
+        {
+            MemberId = request.MemberId,
+            Title = request.Title,
+            Story = request.Story,
+            PhotoUrl = request.PhotoUrl
+        };
         member.AddStory(memberStory); // Use the aggregate method
         _context.MemberStories.Add(memberStory); // Add to DbContext
         // Process and save detected faces to the aggregate
