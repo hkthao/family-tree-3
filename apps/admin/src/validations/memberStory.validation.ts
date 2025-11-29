@@ -28,10 +28,4 @@ export const memberStoryValidationRules = {
       $message: () => t('common.validations.required'),
     },
   },
-  photoUrl: {
-    required: {
-      $validator: required,
-      $message: () => t('memberStory.form.rules.photoUrlRequiredIfRawInputEmpty'),
-    },
-  },
 };

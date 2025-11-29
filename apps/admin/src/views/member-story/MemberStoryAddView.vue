@@ -3,20 +3,17 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
-    <MemberStoryForm
-      ref="memberStoryFormRef"
-      v-model="editedMemberStory"
-      :member-id="memberId"
-      :readonly="false"
-    />
+    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :member-id="memberId" :readonly="false" />
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">
         {{ t('common.cancel') }}
       </v-btn>
-          <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving" :disabled="!memberStoryFormRef?.isValid">
-              {{ t('common.save') }}
-          </v-btn>    </v-card-actions>
+      <v-btn color="blue-darken-1" variant="text" @click="handleSave" :loading="isSaving"
+        :disabled="!memberStoryFormRef?.isValid">
+        {{ t('common.save') }}
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -25,8 +22,10 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { MemberStoryDto } from '@/types/memberStory';
+import type { MemberStoryDto } from '@/types/memberStory'; // Keep MemberStoryDto for local state
+import type { CreateMemberStory } from '@/types/createMemberStory'; // New import
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
+import type { DetectedFace } from '@/types';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -37,35 +36,45 @@ const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
-
 const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null); // Updated
-
 const isSaving = ref(false); // To manage loading state for buttons
-
-const editedMemberStory = ref<MemberStoryDto>({
+const editedMemberStory = ref<MemberStoryDto>({ // Keep as MemberStoryDto for form compatibility
   memberId: props.memberId || '', // Pre-fill if memberId is provided
   title: '',
   story: '',
-  photoUrl: '',
-  faces: [], // Initialize faces as an empty array
-  rawInput: null,
+  detectedFaces: [], // Initialize detectedFaces
+  originalImageUrl: '',
+  resizedImageUrl: '',
+  rawInput: null, // Keep for AI generation
 });
 
 const handleSave = async () => {
-  if (!memberStoryFormRef.value) return; // Updated
+  if (!memberStoryFormRef.value || !editedMemberStory.value.memberId || !editedMemberStory.value.title || !editedMemberStory.value.story) return;
 
   isSaving.value = true;
   try {
-    const result = await memberStoryStore.addItem(editedMemberStory.value); // Updated
+    // Map MemberStoryDto to CreateMemberStory for the backend call
+    const createPayload: CreateMemberStory = {
+      memberId: editedMemberStory.value.memberId,
+      title: editedMemberStory.value.title,
+      story: editedMemberStory.value.story,
+      originalImageUrl: editedMemberStory.value.originalImageUrl,
+      resizedImageUrl: editedMemberStory.value.resizedImageUrl,
+      detectedFaces: (editedMemberStory.value.detectedFaces || []).map(face => ({
+        ...face,
+        thumbnail: ''
+      } as DetectedFace)),
+    };
+
+    const result = await memberStoryStore.addItem(createPayload); // Pass the mapped payload
     if (result.ok) {
       showSnackbar(t('memberStory.create.saveSuccess'), 'success'); // Updated
       emit('saved');
     } else {
-      showSnackbar(t('memberStory.create.step5.saveFailed'), 'error'); // Updated
+      showSnackbar(t('memberStory.create.saveFailed'), 'error'); // Updated
     }
   } catch (error) {
     console.error('Error saving member story:', error); // Updated
-    // Corrected showSnackbar call: message as first arg, color as second
     showSnackbar((error as Error).message, 'error');
   } finally {
     isSaving.value = false;

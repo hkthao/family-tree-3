@@ -37,7 +37,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
-                var originalUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
+                var originalUploadCommand = new UploadFileCommand // Ensure correct namespace
                 {
                     ImageData = request.ImageBytes,
                     FileName = effectiveFileName,
@@ -65,7 +65,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); // Resize to 512px width, auto height
                         var resizedFileName = $"resized_{effectiveFileName}";
 
-                        var resizedUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
+                        var resizedUploadCommand = new UploadFileCommand // Ensure correct namespace
                         {
                             ImageData = resizedImageBytes,
                             FileName = resizedFileName,

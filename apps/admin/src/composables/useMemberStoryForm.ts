@@ -42,13 +42,13 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const generatingStory = ref(false);
   const storyEditorValid = ref(true); // TODO: Implement validation logic
   const hasUploadedImage = computed(() => {
-    return !!modelValue.value.photoUrl;
+    return !!modelValue.value.originalImageUrl; // Updated to check resizedImageUrl
   });
   const isLoading = computed(() => memberStoryStore.faceRecognition.loading);
 
   const canGenerateStory = computed(() => {
     const hasMinRawInput = modelValue.value.rawInput && modelValue.value.rawInput.length >= 10;
-    const hasDetectedFaces = modelValue.value.faces && modelValue.value.faces.length > 0; // Check modelValue.faces directly
+    const hasDetectedFaces = modelValue.value.detectedFaces && modelValue.value.detectedFaces.length > 0; // Check detectedFaces
     const hasMemberSelected = modelValue.value.memberId;
     return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
   });
@@ -118,29 +118,30 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       uploadedFile = file[0];
     }
     if (uploadedFile) {
-      const newImageUrl = URL.createObjectURL(uploadedFile); // Create the URL directly
-      updateModelValue({ photoUrl: newImageUrl });
+      // Clear previous face recognition state before new upload
+      memberStoryStore.resetFaceRecognitionState(); 
+      // Update photo for display to temporary URL
+      updateModelValue({ photo: URL.createObjectURL(uploadedFile) });
 
       await memberStoryStore.detectFaces(uploadedFile, true);
       try {
         const img = await loadImage(uploadedFile);
-        updateModelValue({ photoUrl: newImageUrl, imageSize: `${img.width}x${img.height}` });
+        updateModelValue({
+          originalImageUrl: memberStoryStore.faceRecognition.originalImageUrl, // Get from store
+          resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl, // Get from store
+          imageSize: `${img.width}x${img.height}`,
+          detectedFaces: memberStoryStore.faceRecognition.detectedFaces, // Update detectedFaces
+        });
       } catch (e) {
         console.error('Failed to load image for dimensions:', e);
         updateModelValue({ imageSize: undefined });
       }
-
-      if (memberStoryStore.faceRecognition.detectedFaces.length > 0) {
-        updateModelValue({
-          faces: [...memberStoryStore.faceRecognition.detectedFaces],
-        });
-      }
-
     } else {
       memberStoryStore.resetFaceRecognitionState();
       updateModelValue({
-        faces: [],
-        photoUrl: undefined, // Clear photoUrl
+        detectedFaces: [], // Clear detectedFaces
+        originalImageUrl: undefined,
+        resizedImageUrl: undefined,
         photo: undefined,
         imageSize: undefined,
         exifData: undefined,
@@ -154,21 +155,21 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   };
 
   const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
-    // Make a shallow copy of the faces array to ensure reactivity update
-    const currentFaces = modelValue.value.faces ? [...modelValue.value.faces] : [];
+    // Make a shallow copy of the detectedFaces array to ensure reactivity update
+    const currentFaces = modelValue.value.detectedFaces ? [...modelValue.value.detectedFaces] : [];
     const index = currentFaces.findIndex(face => face.id === updatedFace.id);
     if (index !== -1) {
       // Create a new object for the updated face to ensure full reactivity update
       currentFaces[index] = { ...updatedFace };
     }
-    updateModelValue({ faces: currentFaces }); // Update with the new array
+    updateModelValue({ detectedFaces: currentFaces }); // Update with the new array
     showSelectMemberDialog.value = false;
     faceToLabel.value = null;
   };
 
   const handleRemoveFace = (faceId: string) => {
-    const updatedFaces = modelValue.value.faces?.filter(face => face.id !== faceId) || [];
-    updateModelValue({ faces: updatedFaces });
+    const updatedFaces = modelValue.value.detectedFaces?.filter(face => face.id !== faceId) || [];
+    updateModelValue({ detectedFaces: updatedFaces });
   };
 
   return {

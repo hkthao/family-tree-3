@@ -21,10 +21,10 @@
       <!-- Face Detection and Selection -->
       <v-col cols="12">
         <div v-if="hasUploadedImage && !isLoading">
-          <div v-if="modelValue.faces && modelValue.faces.length > 0">
-            <FaceBoundingBoxViewer :image-src="modelValue.photoUrl!" :faces="modelValue.faces" selectable
+          <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
+            <FaceBoundingBoxViewer :image-src="modelValue.originalImageUrl!" :faces="modelValue.detectedFaces" selectable
               @face-selected="openSelectMemberDialog" />
-            <FaceDetectionSidebar :faces="modelValue.faces" @face-selected="openSelectMemberDialog"
+            <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
           </div>
           <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
@@ -111,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useVuelidate from '@vuelidate/core';
 import { memberStoryValidationRules } from '@/validations/memberStory.validation';
@@ -134,19 +134,13 @@ const vuelidateState = computed(() => ({
   rawInput: props.modelValue.rawInput,
   title: props.modelValue.title,
   story: props.modelValue.story,
-  photoUrl: props.modelValue.photoUrl,
+  // photoUrl removed from validation
 }));
 
 const v$ = useVuelidate(memberStoryValidationRules, vuelidateState);
-
-watch(() => props.modelValue.photoUrl, () => {
-  v$.value.photoUrl.$touch();
-});
-
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   emit('update:modelValue', { ...props.modelValue, ...payload });
 };
-
 const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
   emit('story-generated', payload);
 };
@@ -156,7 +150,6 @@ const {
   faceToLabel,
   aiPerspectiveSuggestions,
   storyStyles,
-  generatedStory,
   generatedTitle,
   generatingStory,
   storyEditorValid,
@@ -182,7 +175,6 @@ defineExpose({
   isValid: computed(() => !v$.value.$invalid),
   memoryFaceStore: memberStoryStoreFaceRecognition,
   generateStory,
-  generatedStory,
   generatedTitle,
   storyEditorValid,
 });

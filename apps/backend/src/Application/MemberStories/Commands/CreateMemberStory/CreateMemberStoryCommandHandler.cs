@@ -182,7 +182,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             FileUrl = imageUrl,
             FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", // Generate unique name
             Cloud = "cloudinary", // Assuming cloudinary as default for permanent storage
-            Folder = $"families/{familyId}/stories/{storyId}/{subFolder}" // Use subFolder here
+            Folder = $"gpv-app/families/{familyId}/stories/{storyId}/{subFolder}" // Use subFolder here
         };
         return await _mediator.Send(command, cancellationToken);
     }

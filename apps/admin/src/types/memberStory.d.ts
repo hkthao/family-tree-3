@@ -6,8 +6,7 @@ export interface MemberStoryDto {
   memberName?: string | null; // Added for convenience in form
   title?: string | null;
   story?: string | null;
-  photoUrl?: string | null;
-  faces?: DetectedFace[];
+  detectedFaces?: DetectedFace[]; // Renamed from faces
   rawInput?: string | null; // Raw input text for AI generation
   storyStyle?: string | null; // Style for AI story generation
   perspective?: string | null; // Perspective for AI story generation

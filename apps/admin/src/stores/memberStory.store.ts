@@ -5,6 +5,7 @@ import type { MemberStoryDto } from '@/types/memberStory'; // Updated
 import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai'; // NEW IMPORT
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
+import type { CreateMemberStory } from '@/types/createMemberStory';
 
 export interface MemberStoryFaceState { // Updated
   uploadedImage: string | null; // Base64 or URL of the uploaded image
@@ -15,6 +16,7 @@ export interface MemberStoryFaceState { // Updated
   faceSearchResults: SearchResult[]; // Results from face search
   loading: boolean;
   error: string | null;
+  originalImageUrl: string | null; // NEW: URL of the original uploaded image
 }
 
 export const useMemberStoryStore = defineStore('memberStory', { // Updated
@@ -67,7 +69,8 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       faceSearchResults: [],
       loading: false,
       error: null,
-      resizedImageUrl: null
+      resizedImageUrl: null,
+      originalImageUrl: null
     } as MemberStoryFaceState, // Updated
 
     // AI Analysis State for photo analysis
@@ -109,7 +112,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       this.list.loading = false;
     },
 
-    async addItem(newItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> { // Updated
+    async addItem(newItem: CreateMemberStory): Promise<Result<MemberStoryDto, ApiError>> { // Updated
       this.add.loading = true;
       this.error = null;
       const result = await this.services.memberStory.add(newItem); // Updated
@@ -253,6 +256,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
           }));
           // Store the resized image URL if available
           this.faceRecognition.resizedImageUrl = result.value.resizedImageUrl ?? null;
+          this.faceRecognition.originalImageUrl = result.value.originalImageUrl ?? null;
           return { ok: true, value: undefined };
         } else {
           this.faceRecognition.error =
