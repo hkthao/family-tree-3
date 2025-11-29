@@ -20,6 +20,7 @@ using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
+using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
 
@@ -96,5 +97,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : string.Empty))
             .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
             .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null));
+        CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()
+            .ForMember(dest => dest.PublicMemberProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()));
     }
 }
