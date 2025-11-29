@@ -2,7 +2,7 @@
   <div class="chip-lookup-group">
     <v-chip v-for="item in selectedItems" :key="item[valueExpr]" size="small">
       <v-avatar v-if="imageExpr" start>
-        <v-img :src="getAvatarSrc(item)"></v-img>
+        <v-img :src="getAvatarUrl(props.imageExpr ? item[props.imageExpr] : undefined, item.gender)"></v-img>
       </v-avatar>
       {{ item[displayExpr] }}
     </v-chip>
@@ -11,9 +11,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
-import { Gender } from '@/types';
+import { getAvatarUrl } from '@/utils/avatar.utils';
 
 // Define Props
 interface ChipLookupProps {
@@ -31,19 +29,6 @@ const props = withDefaults(defineProps<ChipLookupProps>(), {
 });
 
 const selectedItems = ref<any[]>([]);
-
-const getAvatarSrc = (item: any) => {
-  if (props.imageExpr && item[props.imageExpr]) {
-    return item[props.imageExpr];
-  }
-  if (item.gender === Gender.Male) {
-    return maleAvatar;
-  }
-  if (item.gender === Gender.Female) {
-    return femaleAvatar;
-  }
-  return maleAvatar; // Fallback for 'Other' or undefined gender
-};
 
 // Check if dataSource is a Pinia store
 const isStore = computed(() => {

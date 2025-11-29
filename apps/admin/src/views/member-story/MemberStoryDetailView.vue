@@ -4,22 +4,21 @@
       <!-- Cover Image -->
       <v-img v-if="memberStory.resizedImageUrl" :src="memberStory.resizedImageUrl" cover class="mb-4">
         <v-row class="fill-height align-end meta-data">
-          <v-col class="pa-4" style="background: rgba(0, 0, 0, 0.4);">
+          <v-col class="pa-2" style="background: rgba(0, 0, 0, 0.4);">
             <h1 class="text-h4 text-white text-shadow">{{ memberStory.title || t('memberStory.detail.titleDefault') }}
             </h1>
             <div class="d-flex align-center text-white mt-2">
               <v-avatar size="28" class="mr-2">
-                <v-img :src="memberStory.memberAvatarUrl || 'https://via.placeholder.com/150'"
+                <v-img :src="getAvatarUrl(memberStory.memberAvatarUrl, memberStory.memberGender)"
                   alt="Member Avatar"></v-img>
               </v-avatar>
-              <span class="text-body-2 font-weight-bold">{{ memberName }}</span>
+              <span class="text-body-2 font-weight-bold">{{ memberStory.memberFullName }}</span>
               <v-icon size="small" class="mx-2">mdi-circle-small</v-icon>
               <span class="text-caption" v-if="memberStory.createdAt">{{ new
                 Date(memberStory.createdAt).toLocaleDateString() }}</span>
             </div>
           </v-col>
-        </v-row>
-      </v-img>
+        </v-row> </v-img>
 
       <v-card-text class="pa-0">
         <!-- Story Content -->
@@ -73,8 +72,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
-import { useMemberStore } from '@/stores/member.store'; // NEW
-import type { Member } from '@/types'; // NEW
+import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const props = defineProps<{
   memberStoryId: string;
@@ -84,21 +82,12 @@ const emit = defineEmits(['close', 'edit-item']);
 
 const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
-const memberStore = useMemberStore(); // NEW
 const { showSnackbar } = useGlobalSnackbar();
 
 const memberStory = ref<MemberStoryDto | null>(null);
-const memberName = ref<string | null>(null); // NEW
 
 const fetchMemberStory = async (id: string) => {
   memberStory.value = await memberStoryStore.getById(id) || null;
-  if (memberStory.value?.memberId) {
-    const member: Member | undefined = await memberStore.getById(memberStory.value.memberId);
-    memberName.value = member?.fullName || null;
-  } else {
-    memberName.value = null;
-  }
-
   if (!memberStory.value) {
     showSnackbar(t('memberStory.detail.notFound'), 'error');
   }

@@ -8,9 +8,7 @@ import * as d3 from 'd3';
 import type { Member, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
-
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
+import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const { t } = useI18n();
 
@@ -48,7 +46,7 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
     id: String(m.id),
     name: m.fullName || `${m.firstName} ${m.lastName}`,
     gender: m.gender,
-    avatarUrl: m.avatarUrl || (m.gender === Gender.Male ? maleAvatar : femaleAvatar),
+    avatarUrl: getAvatarUrl(m.avatarUrl, m.gender),
     depth: -1, // Initialize depth
     isRoot: m.isRoot,
   }));

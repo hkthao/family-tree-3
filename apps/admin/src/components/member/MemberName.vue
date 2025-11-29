@@ -10,8 +10,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
+import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const props = defineProps<{
   fullName?: string;
@@ -19,24 +18,11 @@ const props = defineProps<{
   gender?: string; // Add gender prop for default avatar logic
 }>();
 
-const getMemberAvatar = (member: { avatarUrl?: string; gender?: string }) => {
-  if (member.avatarUrl) {
-    return member.avatarUrl;
-  }
-  if (member.gender === 'Male') {
-    return maleAvatar;
-  }
-  if (member.gender === 'Female') {
-    return femaleAvatar;
-  }
-  return maleAvatar; // Fallback for 'Other' or undefined gender
-};
-
 const memberDisplayData = computed(() => {
   if (props.fullName) {
     return {
       fullName: props.fullName,
-      avatarUrl: getMemberAvatar({ avatarUrl: props.avatarUrl, gender: props.gender }),
+      avatarUrl: getAvatarUrl(props.avatarUrl, props.gender),
     };
   }
   return null;

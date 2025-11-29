@@ -3,9 +3,7 @@ import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import type { Member, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
-
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
+import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 // Define the type for the data used in the family chart cards
 interface CardData {
@@ -40,7 +38,7 @@ export function useHierarchicalTreeChart(
           fullName: person.fullName || `${person.firstName} ${person.lastName}`,
           birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
           deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
-          avatar: person.avatarUrl || (person.gender === Gender.Male ? maleAvatar : femaleAvatar),
+          avatar: getAvatarUrl(person.avatarUrl, person.gender),
           gender: person.gender === Gender.Male ? 'M' : 'F',
         },
         rels: {
