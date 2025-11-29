@@ -16,6 +16,40 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
     private readonly IN8nService _n8nService = n8nService;
 
+    // Private helper method to handle image uploads to n8n
+    private async Task<Result<ImageUploadResponseDto>> UploadImageToN8nAsync(
+        byte[] imageData,
+        string fileName,
+        string cloud,
+        string folder,
+        CancellationToken cancellationToken)
+    {
+        var imageUploadDto = new ImageUploadWebhookDto
+        {
+            ImageData = imageData,
+            FileName = fileName,
+            Cloud = cloud,
+            Folder = folder
+        };
+
+        var n8nResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
+
+        if (n8nResult.IsSuccess && n8nResult.Value != null)
+        {
+            if (string.IsNullOrEmpty(n8nResult.Value.Url))
+            {
+                _logger.LogWarning("n8n image upload returned success but no URL for file {FileName} in folder {Folder}.", fileName, folder);
+                return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
+            }
+            return Result<ImageUploadResponseDto>.Success(n8nResult.Value);
+        }
+        else
+        {
+            _logger.LogError("Failed to upload image {FileName} to n8n in folder {Folder}: {Error}", fileName, folder, n8nResult.Error);
+            return Result<ImageUploadResponseDto>.Failure(n8nResult.Error ?? ErrorMessages.FileUploadFailed, ErrorSources.ExternalServiceError);
+        }
+    }
+
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
         try
@@ -36,29 +70,21 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
-                var imageUploadDto = new ImageUploadWebhookDto
-                {
-                    ImageData = request.ImageBytes,
-                    FileName = effectiveFileName, // Use effectiveFileName
-                    Cloud = cloud,
-                    Folder = uploadFolder
-                };
-
-                var n8nImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
+                var n8nImageUploadResult = await UploadImageToN8nAsync(
+                    request.ImageBytes,
+                    effectiveFileName,
+                    cloud,
+                    uploadFolder,
+                    cancellationToken
+                );
 
                 if (n8nImageUploadResult.IsSuccess && n8nImageUploadResult.Value != null)
                 {
                     originalImageUrl = n8nImageUploadResult.Value.Url;
-                    if (string.IsNullOrEmpty(originalImageUrl))
-                    {
-                        _logger.LogWarning("n8n image upload returned success but no URL for original image.");
-                        return Result<FaceDetectionResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
-                    }
                 }
-                else if (!n8nImageUploadResult.IsSuccess)
+                else
                 {
-                    _logger.LogError("Failed to upload original image to n8n: {Error}", n8nImageUploadResult.Error);
-                    return Result<FaceDetectionResponseDto>.Failure(n8nImageUploadResult.Error ?? ErrorMessages.FileUploadFailed, ErrorSources.ExternalServiceError);
+                    return Result<FaceDetectionResponseDto>.Failure(n8nImageUploadResult.Error ?? ErrorMessages.FileUploadFailed);
                 }
 
                 // If resizing is requested, resize the image and upload it
@@ -69,32 +95,20 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); // Resize to 512px width, auto height
                         var resizedFileName = $"resized_{effectiveFileName}";
 
-                        var resizedImageUploadDto = new ImageUploadWebhookDto
-                        {
-                            ImageData = resizedImageBytes,
-                            FileName = resizedFileName,
-                            Cloud = cloud,
-                            Folder = resizeFolder
-                        };
-
-                        var n8nResizedImageUploadResult = await _n8nService.CallImageUploadWebhookAsync(resizedImageUploadDto, cancellationToken);
+                        var n8nResizedImageUploadResult = await UploadImageToN8nAsync(
+                            resizedImageBytes,
+                            resizedFileName,
+                            cloud,
+                            resizeFolder,
+                            cancellationToken
+                        );
 
                         if (n8nResizedImageUploadResult.IsSuccess && n8nResizedImageUploadResult.Value != null)
                         {
                             resizedImageUrl = n8nResizedImageUploadResult.Value.Url;
-                            if (string.IsNullOrEmpty(resizedImageUrl))
-                            {
-                                _logger.LogWarning("n8n image upload returned success but no URL for resized image.");
-                            }
-                            else
-                            {
-                                imageBytesToAnalyze = resizedImageBytes; // Use resized image for detection
-                            }
+                            imageBytesToAnalyze = resizedImageBytes; // Use resized image for detection
                         }
-                        else if (!n8nResizedImageUploadResult.IsSuccess)
-                        {
-                            _logger.LogError("Failed to upload resized image to n8n: {Error}", n8nResizedImageUploadResult.Error);
-                        }
+                        // Logging for failure is handled inside UploadImageToN8nAsync
                     }
                     catch (Exception ex)
                     {
@@ -124,27 +138,19 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
                         var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
 
-                        var thumbnailUploadDto = new ImageUploadWebhookDto
-                        {
-                            ImageData = thumbnailBytes,
-                            FileName = thumbnailFileName,
-                            Cloud = cloud,
-                            Folder = faceFolder
-                        };
+                        var n8nThumbnailUploadResult = await UploadImageToN8nAsync(
+                            thumbnailBytes,
+                            thumbnailFileName,
+                            cloud,
+                            faceFolder,
+                            cancellationToken
+                        );
 
-                        var n8nThumbnailUploadResult = await _n8nService.CallImageUploadWebhookAsync(thumbnailUploadDto, cancellationToken);
                         if (n8nThumbnailUploadResult.IsSuccess && n8nThumbnailUploadResult.Value != null)
                         {
-                            thumbnailUrl = n8nThumbnailUploadResult.Value?.Url;
-                            if (string.IsNullOrEmpty(thumbnailUrl))
-                            {
-                                _logger.LogWarning("n8n image upload returned success but no URL for face thumbnail {FaceId}.", faceResult.Id);
-                            }
+                            thumbnailUrl = n8nThumbnailUploadResult.Value.Url;
                         }
-                        else if (!n8nThumbnailUploadResult.IsSuccess)
-                        {
-                            _logger.LogError("Failed to upload face thumbnail {FaceId} to n8n: {Error}", faceResult.Id, n8nThumbnailUploadResult.Error);
-                        }
+                        // Logging for failure is handled inside UploadImageToN8nAsync
                     }
                     catch (Exception ex)
                     {
