@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Files.Commands.UploadFileFromUrl;
 
 public class UploadFileFromUrlCommandValidator : AbstractValidator<UploadFileFromUrlCommand>

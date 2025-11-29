@@ -1,5 +1,3 @@
-using System.Net.Http; // For HttpClient
-using System.Net.Http.Headers; // For MediaTypeHeaderValue
 using backend.Application.AI.DTOs; // For ImageUploadWebhookDto
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;

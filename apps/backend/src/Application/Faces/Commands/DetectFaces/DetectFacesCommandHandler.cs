@@ -1,12 +1,10 @@
 using System.Text.RegularExpressions; // NEW USING FOR REGEX
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGEUPLOADWEBHOOKDTO
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using backend.Application.Files.UploadFile; // NEW
-using MediatR; // NEW
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
@@ -117,7 +115,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
                         var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
 
-                        var thumbnailUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
+                        var thumbnailUploadCommand = new UploadFileCommand // Ensure correct namespace
                         {
                             ImageData = thumbnailBytes,
                             FileName = thumbnailFileName,
