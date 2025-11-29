@@ -120,6 +120,7 @@ public class Member : BaseAuditableEntity
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
     public ICollection<Face> Faces { get; set; } = new List<Face>();
     public ICollection<MemberStory> MemberStories { get; private set; } = new List<MemberStory>();
+    public ICollection<MemberFace> MemberFaces { get; private set; } = new List<MemberFace>(); // NEW
 
     public Member() { }
 
@@ -145,6 +146,16 @@ public class Member : BaseAuditableEntity
     public void RemoveStory(MemberStory story)
     {
         MemberStories.Remove(story);
+    }
+
+    // New method to manage MemberFace
+    public void AddFace(MemberFace face)
+    {
+        if (face.MemberId != Id)
+        {
+            throw new InvalidOperationException("MemberFace must belong to this Member.");
+        }
+        MemberFaces.Add(face);
     }
 
 

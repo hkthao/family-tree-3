@@ -2,9 +2,13 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.ValueObjects; // NEW
-using backend.Application.Faces.Common; // NEW
+using backend.Domain.ValueObjects;
+using backend.Application.Faces.Common;
 using Microsoft.Extensions.Localization;
+using Microsoft.EntityFrameworkCore;
+using backend.Application.Common.Specifications; // NEW
+using backend.Application.Members.Specifications; // NEW
+using Ardalis.Specification.EntityFrameworkCore; // NEW
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
@@ -31,27 +35,27 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // Find the member to ensure it exists and belongs to the family
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        // Load the Member aggregate including its MemberStories and MemberFaces
+        var member = await _context.Members
+                                   .WithSpecification(new MemberByIdWithStoriesAndFacesSpecification(request.MemberId))
+                                   .FirstOrDefaultAsync(cancellationToken);
+
         if (member == null)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
 
-        var memberStory = _mapper.Map<MemberStory>(request); // Updated
-        memberStory.Id = Guid.NewGuid(); // Assign a new ID
-
-        _context.MemberStories.Add(memberStory); // Updated
-        await _context.SaveChangesAsync(cancellationToken);
-
-        // Process and save detected faces
-        if (request.DetectedFaces != null && request.DetectedFaces.Any())
+        // Create MemberStory and add to the aggregate
+        var memberStory = _mapper.Map<MemberStory>(request);
+        member.AddStory(memberStory); // Use the aggregate method
+        _context.MemberStories.Add(memberStory); // Add to DbContext
+        // Process and save detected faces to the aggregate
+        if (request.DetectedFaces != null && request.DetectedFaces.Count > 0)
         {
             foreach (var detectedFaceDto in request.DetectedFaces)
             {
                 var memberFace = new MemberFace
                 {
-                    Id = Guid.NewGuid(),
                     MemberId = request.MemberId, // Link to the member from the story
                     FaceId = detectedFaceDto.Id,
                     BoundingBox = new BoundingBox
@@ -68,11 +72,14 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                     Emotion = detectedFaceDto.Emotion,
                     EmotionConfidence = (double?)detectedFaceDto.EmotionConfidence ?? 0.0
                 };
-                _context.MemberFaces.Add(memberFace);
+                member.AddFace(memberFace); // Use the aggregate method
+                _context.MemberFaces.Add(memberFace); // Add to DbContext
             }
-            await _context.SaveChangesAsync(cancellationToken); // Save the detected faces
         }
 
-        return Result<Guid>.Success(memberStory.Id); // Updated
+        // Save all changes made to the aggregate
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result<Guid>.Success(memberStory.Id);
     }
 }
