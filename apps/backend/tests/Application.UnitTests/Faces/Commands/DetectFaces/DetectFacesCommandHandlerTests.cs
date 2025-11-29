@@ -20,16 +20,14 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
 
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
-        private readonly Mock<IN8nService> _n8nServiceMock;
-        private readonly Mock<IMediator> _mediatorMock; // NEW
+        private readonly Mock<IMediator> _mediatorMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
 
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
-            _n8nServiceMock = new Mock<IN8nService>();
-            _mediatorMock = new Mock<IMediator>(); // NEW
+            _mediatorMock = new Mock<IMediator>();
 
             // Setup for mediator to handle UploadFileCommand
             _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
@@ -74,15 +72,11 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _context.Members.Add(member);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<string>.Success(memberId.ToString())); // Return memberId from n8n
-
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _n8nServiceMock.Object,
-                _mediatorMock.Object); // NEW
+                _mediatorMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -116,15 +110,11 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new List<FaceDetectionResultDto>());
 
-            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<string>.Success(string.Empty)); // No member found
-
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _n8nServiceMock.Object,
-                _mediatorMock.Object); // NEW
+                _mediatorMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -147,13 +137,11 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 
             _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ThrowsAsync(new System.Exception("Face detection service error"));
-
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _n8nServiceMock.Object,
-                _mediatorMock.Object); // NEW
+                _mediatorMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -187,15 +175,13 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     }
                 });
 
-            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<string>.Success(string.Empty)); // Not relevant for this test, but needed for constructor
+
 
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _n8nServiceMock.Object,
-                _mediatorMock.Object); // NEW
+                _mediatorMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);

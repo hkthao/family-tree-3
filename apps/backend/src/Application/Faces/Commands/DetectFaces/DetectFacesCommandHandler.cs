@@ -9,12 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IN8nService n8nService, IMediator mediator) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IMediator mediator) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
-    private readonly IN8nService _n8nService = n8nService;
     private readonly IMediator _mediator = mediator; // NEW
 
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
@@ -167,34 +166,29 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
-                    var embeddingDto = new EmbeddingWebhookDto
+                    var searchFaceQuery = new SearchMemberFaceQuery
                     {
-                        EntityType = "Face",
-                        EntityId = detectedFaceDto.Id,
-                        ActionType = "SearchFaceEmbedding",
-                        EntityData = new { Embedding = detectedFaceDto.Embedding },
-                        Description = $"Search face embedding for FaceId {detectedFaceDto.Id}"
+                        Vector = detectedFaceDto.Embedding,
+                        Limit = 1, // We only need the best match for a detected face
+                        Threshold = 0.7f // Default threshold for face matching
                     };
 
-                    var n8nResult = await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
+                    var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
 
-                    if (n8nResult.IsSuccess && !string.IsNullOrEmpty(n8nResult.Value))
+                    if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
                     {
-                        try
-                        {
-                            var memberIdFromN8n = Guid.Parse(n8nResult.Value);
-                            detectedFaceDto.MemberId = memberIdFromN8n;
-                            memberIdsToFetch.Add(memberIdFromN8n);
-                            faceMemberMap[detectedFaceDto.Id] = memberIdFromN8n;
-                        }
-                        catch (FormatException ex)
-                        {
-                            _logger.LogError(ex, "Failed to parse MemberId from n8n result: {N8nResultValue}", n8nResult.Value);
-                        }
+                        var foundFace = searchResult.Value.First(); // Get the best match
+                        detectedFaceDto.MemberId = foundFace.MemberId;
+                        memberIdsToFetch.Add(foundFace.MemberId);
+                        faceMemberMap[detectedFaceDto.Id] = foundFace.MemberId;
                     }
-                    else if (!n8nResult.IsSuccess)
+                    else if (!searchResult.IsSuccess)
                     {
-                        _logger.LogError("Failed to search face embedding for FaceId {FaceId} in n8n: {Error}", detectedFaceDto.Id, n8nResult.Error);
+                        _logger.LogError("Failed to search face embedding for FaceId {FaceId}: {Error}", detectedFaceDto.Id, searchResult.Error);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No matching face found for FaceId {FaceId}.", detectedFaceDto.Id);
                     }
                 }
                 detectedFaceDtos.Add(detectedFaceDto);

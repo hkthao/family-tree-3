@@ -20,23 +20,18 @@ public class DetectFacesTests : TestBase
     private readonly Mock<IFaceApiService> _mockFaceApiService;
 
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
-    private readonly Mock<IN8nService> _mockN8nService;
+
     private readonly Mock<IMediator> _mediatorMock;
     private readonly DetectFacesCommandHandler _handler; // Ensure this is explicitly declared
 
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
-        _mockN8nService = new Mock<IN8nService>();
+
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
 
-        // Default setup for CallImageUploadWebhookAsync to prevent early failures
-        _mockN8nService.Setup(s => s.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync((ImageUploadWebhookDto dto, CancellationToken token) =>
-                Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = $"http://mock.image.url/{dto.FileName}" }));
+
 
         // Default setup for mediator to handle UploadFileCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
@@ -51,7 +46,6 @@ public class DetectFacesTests : TestBase
             _mockFaceApiService.Object,
             _context,
             _mockLogger.Object,
-            _mockN8nService.Object,
             _mediatorMock.Object);
     }
 
@@ -74,8 +68,7 @@ public class DetectFacesTests : TestBase
         };
         _mockFaceApiService.Setup(s => s.DetectFacesAsync(imageBytes, contentType, true))
             .Returns(Task.FromResult(faceApiResult));
-        _mockN8nService.Setup(s => s.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Failure("No member found")); // Simulate no member found
+
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
@@ -113,8 +106,7 @@ public class DetectFacesTests : TestBase
         };
         _mockFaceApiService.Setup(s => s.DetectFacesAsync(imageBytes, contentType, true))
             .Returns(Task.FromResult(faceApiResult));
-        _mockN8nService.Setup(s => s.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Failure("N8n service error")); // Simulate n8n failure
+
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
@@ -147,8 +139,7 @@ public class DetectFacesTests : TestBase
         };
         _mockFaceApiService.Setup(s => s.DetectFacesAsync(imageBytes, contentType, true))
             .Returns(Task.FromResult(faceApiResult));
-        _mockN8nService.Setup(s => s.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success("invalid-guid")); // Simulate invalid GUID from n8n
+
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
@@ -210,8 +201,7 @@ public class DetectFacesTests : TestBase
         };
         _mockFaceApiService.Setup(s => s.DetectFacesAsync(imageBytes, contentType, true))
             .Returns(Task.FromResult(faceApiResult));
-        _mockN8nService.Setup(s => s.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success(memberId.ToString())); // Simulate member found
+
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
