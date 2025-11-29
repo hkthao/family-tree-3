@@ -35,30 +35,50 @@
     </v-row>
 
     <!-- Story Style -->
-    <v-row v-if="modelValue.storyStyle">
+    <v-row>
       <v-col cols="12">
-        <v-text-field
-          :label="t('memberStory.create.storyStyle.question')"
-          :model-value="getStoryStyleText(modelValue.storyStyle)"
-          readonly
-          variant="outlined"
-          density="compact"
-          class="mb-2"
-        ></v-text-field>
+        <h4 class="mb-2">{{ t('memberStory.create.storyStyle.question') }}</h4>
+        <v-chip-group
+          :model-value="modelValue.storyStyle"
+          @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })"
+          color="primary"
+          mandatory
+          column
+        >
+          <v-chip
+            v-for="style in storyStyles"
+            :key="style.value"
+            :value="style.value"
+            filter
+            variant="tonal"
+          >
+            {{ style.text }}
+          </v-chip>
+        </v-chip-group>
       </v-col>
     </v-row>
 
     <!-- Perspective -->
-    <v-row v-if="modelValue.perspective">
+    <v-row>
       <v-col cols="12">
-        <v-text-field
-          :label="t('memberStory.create.perspective.question')"
-          :model-value="getPerspectiveText(modelValue.perspective)"
-          readonly
-          variant="outlined"
-          density="compact"
-          class="mb-2"
-        ></v-text-field>
+        <h4 class="mb-2">{{ t('memberStory.create.perspective.question') }}</h4>
+        <v-chip-group
+          :model-value="modelValue.perspective"
+          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })"
+          color="primary"
+          mandatory
+          column
+        >
+          <v-chip
+            v-for="perspective in aiPerspectiveSuggestions"
+            :key="perspective.value"
+            :value="perspective.value"
+            filter
+            variant="tonal"
+          >
+            {{ perspective.text }}
+          </v-chip>
+        </v-chip-group>
       </v-col>
     </v-row>
 
@@ -110,6 +130,19 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
+
+const aiPerspectiveSuggestions = computed(() => ([
+  { value: MemberStoryPerspective.FirstPerson, text: t('memberStory.create.perspective.firstPerson') },
+  { value: MemberStoryPerspective.NeutralPersonal, text: t('memberStory.create.perspective.neutralPersonal') },
+  { value: MemberStoryPerspective.FullyNeutral, text: t('memberStory.create.perspective.fullyNeutral') },
+]));
+
+const storyStyles = computed(() => ([
+  { value: MemberStoryStyle.Nostalgic, text: t('memberStory.style.nostalgic') },
+  { value: MemberStoryStyle.Warm, text: t('memberStory.style.warm') },
+  { value: MemberStoryStyle.Formal, text: t('memberStory.style.formal') },
+  { value: MemberStoryStyle.Folk, text: t('memberStory.style.folk') },
+]));
 
 const rules = {
   title: {
