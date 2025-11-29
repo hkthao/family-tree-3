@@ -17,5 +17,13 @@ public class MemberStory : BaseAuditableEntity, ISoftDelete
 
     // Navigation properties
     public Member Member { get; set; } = default!;
+
+    public void Update(string title, string story, string? storyStyle, string? perspective)
+    {
+        Title = title;
+        Story = story;
+        StoryStyle = storyStyle;
+        Perspective = perspective;
+    }
 }
 

@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Domain.Entities; // NEW
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
@@ -8,14 +9,12 @@ namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updat
 public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStoryCommand, Result> // Updated
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
     private readonly IStringLocalizer<UpdateMemberStoryCommandHandler> _localizer; // Updated
 
-    public UpdateMemberStoryCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberStoryCommandHandler> localizer) // Updated
+    public UpdateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberStoryCommandHandler> localizer) // Updated
     {
         _context = context;
-        _mapper = mapper;
         _authorizationService = authorizationService;
         _localizer = localizer;
     }
@@ -35,7 +34,7 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
             return Result.Failure(string.Format(ErrorMessages.NotFound, $"MemberStory with ID {request.Id}"), ErrorSources.NotFound); // Updated
         }
 
-        _mapper.Map(request, memberStory); // Map command to existing entity // Updated
+        memberStory.Update(request.Title, request.Story, request.StoryStyle, request.Perspective); // Use domain entity's update method
 
         await _context.SaveChangesAsync(cancellationToken);
 
