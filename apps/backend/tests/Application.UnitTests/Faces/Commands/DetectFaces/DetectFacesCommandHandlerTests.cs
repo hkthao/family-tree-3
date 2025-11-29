@@ -9,6 +9,9 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using MediatR; // NEW
+using backend.Application.AI.DTOs; // NEW
+using backend.Application.Files.UploadFile; // NEW
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 {
@@ -18,6 +21,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
         private readonly Mock<IN8nService> _n8nServiceMock;
+        private readonly Mock<IMediator> _mediatorMock; // NEW
 
         public DetectFacesCommandHandlerTests()
         {
@@ -25,6 +29,16 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
             _n8nServiceMock = new Mock<IN8nService>();
+            _mediatorMock = new Mock<IMediator>(); // NEW
+
+            // Setup for mediator to handle UploadFileCommand
+            _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto
+                {
+                    Url = "http://mock.uploaded.url/image.jpg",
+                    Filename = "mock.jpg",
+                    ContentType = "image/jpeg"
+                }));
         }
 
         [Fact]
@@ -66,9 +80,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-
                 _loggerMock.Object,
-                _n8nServiceMock.Object);
+                _n8nServiceMock.Object,
+                _mediatorMock.Object); // NEW
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -108,9 +122,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-
                 _loggerMock.Object,
-                _n8nServiceMock.Object);
+                _n8nServiceMock.Object,
+                _mediatorMock.Object); // NEW
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -137,9 +151,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-
                 _loggerMock.Object,
-                _n8nServiceMock.Object);
+                _n8nServiceMock.Object,
+                _mediatorMock.Object); // NEW
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -179,9 +193,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-
                 _loggerMock.Object,
-                _n8nServiceMock.Object);
+                _n8nServiceMock.Object,
+                _mediatorMock.Object); // NEW
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);

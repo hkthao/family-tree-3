@@ -11,6 +11,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using MediatR; // NEW
+using backend.Application.Files.UploadFile; // NEW
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 
@@ -20,13 +22,14 @@ public class DetectFacesTests : TestBase
 
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
     private readonly Mock<IN8nService> _mockN8nService;
-    private readonly DetectFacesCommandHandler _handler;
+    private readonly Mock<IMediator> _mediatorMock; // NEW
 
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
         _mockN8nService = new Mock<IN8nService>();
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
+        _mediatorMock = new Mock<IMediator>(); // NEW
 
         // Default setup for CallImageUploadWebhookAsync to prevent early failures
         _mockN8nService.Setup(s => s.CallImageUploadWebhookAsync(
@@ -34,12 +37,22 @@ public class DetectFacesTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync((ImageUploadWebhookDto dto, CancellationToken token) =>
                 Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = $"http://mock.image.url/{dto.FileName}" }));
+        
+        // Default setup for mediator to handle UploadFileCommand
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto
+            {
+                Url = "http://mock.uploaded.url/image.jpg",
+                Filename = "mock.jpg",
+                ContentType = "image/jpeg"
+            }));
 
         _handler = new DetectFacesCommandHandler(
             _mockFaceApiService.Object,
             _context,
             _mockLogger.Object,
-            _mockN8nService.Object);
+            _mockN8nService.Object,
+            _mediatorMock.Object); // NEW
     }
 
     [Fact]
@@ -76,7 +89,7 @@ public class DetectFacesTests : TestBase
         var detectedFace = result.Value.DetectedFaces.First();
         detectedFace.BoundingBox.X.Should().Be(1);
         detectedFace.Confidence.Should().Be(0.9f);
-        detectedFace.ThumbnailUrl.Should().Be("http://mock.image.url/face1_thumbnail.jpeg");
+        detectedFace.ThumbnailUrl.Should().Be("http://mock.uploaded.url/image.jpg"); // Updated assertion
         detectedFace.Embedding.Should().NotBeNull().And.HaveCount(2);
         detectedFace.MemberId.Should().BeNull();
     }

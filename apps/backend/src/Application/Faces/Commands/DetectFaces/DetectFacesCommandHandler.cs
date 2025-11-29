@@ -6,49 +6,18 @@ using backend.Application.Common.Models;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using Microsoft.Extensions.Logging;
+using MediatR; // NEW
+using backend.Application.Files.UploadFile; // NEW
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IN8nService n8nService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IN8nService n8nService, IMediator mediator) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
     private readonly IN8nService _n8nService = n8nService;
-
-    // Private helper method to handle image uploads to n8n
-    private async Task<Result<ImageUploadResponseDto>> UploadImageToN8nAsync(
-        byte[] imageData,
-        string fileName,
-        string cloud,
-        string folder,
-        CancellationToken cancellationToken)
-    {
-        var imageUploadDto = new ImageUploadWebhookDto
-        {
-            ImageData = imageData,
-            FileName = fileName,
-            Cloud = cloud,
-            Folder = folder
-        };
-
-        var n8nResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
-
-        if (n8nResult.IsSuccess && n8nResult.Value != null)
-        {
-            if (string.IsNullOrEmpty(n8nResult.Value.Url))
-            {
-                _logger.LogWarning("n8n image upload returned success but no URL for file {FileName} in folder {Folder}.", fileName, folder);
-                return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
-            }
-            return Result<ImageUploadResponseDto>.Success(n8nResult.Value);
-        }
-        else
-        {
-            _logger.LogError("Failed to upload image {FileName} to n8n in folder {Folder}: {Error}", fileName, folder, n8nResult.Error);
-            return Result<ImageUploadResponseDto>.Failure(n8nResult.Error ?? ErrorMessages.FileUploadFailed, ErrorSources.ExternalServiceError);
-        }
-    }
+    private readonly IMediator _mediator = mediator; // NEW
 
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
@@ -70,21 +39,24 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
-                var n8nImageUploadResult = await UploadImageToN8nAsync(
-                    request.ImageBytes,
-                    effectiveFileName,
-                    cloud,
-                    uploadFolder,
-                    cancellationToken
-                );
-
-                if (n8nImageUploadResult.IsSuccess && n8nImageUploadResult.Value != null)
+                var originalUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
                 {
-                    originalImageUrl = n8nImageUploadResult.Value.Url;
+                    ImageData = request.ImageBytes,
+                    FileName = effectiveFileName,
+                    Cloud = cloud,
+                    Folder = uploadFolder,
+                    ContentType = request.ContentType
+                };
+
+                var originalUploadResult = await _mediator.Send(originalUploadCommand, cancellationToken);
+
+                if (originalUploadResult.IsSuccess && originalUploadResult.Value != null)
+                {
+                    originalImageUrl = originalUploadResult.Value.Url;
                 }
                 else
                 {
-                    return Result<FaceDetectionResponseDto>.Failure(n8nImageUploadResult.Error ?? ErrorMessages.FileUploadFailed);
+                    return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
                 }
 
                 // If resizing is requested, resize the image and upload it
@@ -95,20 +67,27 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); // Resize to 512px width, auto height
                         var resizedFileName = $"resized_{effectiveFileName}";
 
-                        var n8nResizedImageUploadResult = await UploadImageToN8nAsync(
-                            resizedImageBytes,
-                            resizedFileName,
-                            cloud,
-                            resizeFolder,
-                            cancellationToken
-                        );
-
-                        if (n8nResizedImageUploadResult.IsSuccess && n8nResizedImageUploadResult.Value != null)
+                        var resizedUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
                         {
-                            resizedImageUrl = n8nResizedImageUploadResult.Value.Url;
+                            ImageData = resizedImageBytes,
+                            FileName = resizedFileName,
+                            Cloud = cloud,
+                            Folder = resizeFolder,
+                            ContentType = request.ContentType
+                        };
+
+                        var resizedUploadResult = await _mediator.Send(resizedUploadCommand, cancellationToken);
+
+                        if (resizedUploadResult.IsSuccess && resizedUploadResult.Value != null)
+                        {
+                            resizedImageUrl = resizedUploadResult.Value.Url;
                             imageBytesToAnalyze = resizedImageBytes; // Use resized image for detection
                         }
-                        // Logging for failure is handled inside UploadImageToN8nAsync
+                        else
+                        {
+                            _logger.LogWarning("Failed to upload resized image to n8n: {Error}", resizedUploadResult.Error);
+                            // Continue with original image if resizing upload fails, but log the error.
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -138,19 +117,25 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
                         var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
 
-                        var n8nThumbnailUploadResult = await UploadImageToN8nAsync(
-                            thumbnailBytes,
-                            thumbnailFileName,
-                            cloud,
-                            faceFolder,
-                            cancellationToken
-                        );
-
-                        if (n8nThumbnailUploadResult.IsSuccess && n8nThumbnailUploadResult.Value != null)
+                        var thumbnailUploadCommand = new Files.UploadFile.UploadFileCommand // Ensure correct namespace
                         {
-                            thumbnailUrl = n8nThumbnailUploadResult.Value.Url;
+                            ImageData = thumbnailBytes,
+                            FileName = thumbnailFileName,
+                            Cloud = cloud,
+                            Folder = faceFolder,
+                            ContentType = "image/jpeg" // Assuming thumbnail is always jpeg
+                        };
+
+                        var thumbnailUploadResult = await _mediator.Send(thumbnailUploadCommand, cancellationToken);
+
+                        if (thumbnailUploadResult.IsSuccess && thumbnailUploadResult.Value != null)
+                        {
+                            thumbnailUrl = thumbnailUploadResult.Value.Url;
                         }
-                        // Logging for failure is handled inside UploadImageToN8nAsync
+                        else
+                        {
+                            _logger.LogWarning("Failed to upload face thumbnail to n8n: {Error}", thumbnailUploadResult.Error);
+                        }
                     }
                     catch (Exception ex)
                     {
