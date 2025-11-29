@@ -74,17 +74,11 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
                     continue;
                 }
 
-                if (!searchResult.Payload.TryGetValue("faceId", out var faceIdObj) || faceIdObj == null)
-                {
-                    _logger.LogWarning("faceId missing or invalid in search result payload for vector {VectorId}.", searchResult.Id);
-                    continue;
-                }
-
                 var foundFaceDto = new FoundFaceDto
                 {
                     MemberFaceId = localDbId,
                     MemberId = memberId,
-                    FaceId = faceIdObj.ToString()!,
+                    FaceId = searchResult.Id.ToString(), // Use the vector ID as FaceId
                     Score = searchResult.Score,
                     ThumbnailUrl = searchResult.Payload.TryGetValue("thumbnailUrl", out var thumbnailUrlObj) ? thumbnailUrlObj?.ToString() : null,
                     OriginalImageUrl = searchResult.Payload.TryGetValue("originalImageUrl", out var originalImageUrlObj) ? originalImageUrlObj?.ToString() : null,
