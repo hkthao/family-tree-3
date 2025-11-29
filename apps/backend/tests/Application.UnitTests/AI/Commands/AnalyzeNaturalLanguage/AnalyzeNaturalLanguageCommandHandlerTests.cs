@@ -1,3 +1,4 @@
+using System.Text.Json;
 using backend.Application.AI.Commands.AnalyzeNaturalLanguage;
 using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces;
@@ -7,7 +8,6 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace backend.Application.UnitTests.AI.Commands.AnalyzeNaturalLanguage;

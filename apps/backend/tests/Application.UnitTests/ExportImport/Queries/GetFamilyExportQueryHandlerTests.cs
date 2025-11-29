@@ -1,3 +1,6 @@
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
+using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -7,9 +10,6 @@ using backend.Application.Families.Specifications;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Ardalis.Specification;
-using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

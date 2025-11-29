@@ -2,10 +2,10 @@ using System.Net.Http.Headers; // For MediaTypeHeaderValue
 using System.Text; // NEW USING
 using System.Text.Json; // NEW USING
 using backend.Application.AI.DTOs; // UPDATED USING
+using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AI;
-using backend.Application.AI.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Logging;
@@ -296,13 +296,52 @@ public class N8nService : IN8nService
         }
     }
 
+
     /// <inheritdoc />
-    public async Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookAsync(FaceVectorOperationDto dto, CancellationToken cancellationToken)
+    public async Task<Result<FaceVectorOperationResultDto>> CallUpsertFaceVectorWebhookAsync(UpsertFaceVectorOperationDto dto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_n8nSettings.FaceVectorWebhookUrl) || _n8nSettings.FaceVectorWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        return await CallFaceVectorWebhookInternalAsync(
+            _n8nSettings.Face.UpsertWebhookUrl,
+            dto.Payload != null && dto.Payload.TryGetValue("localDbId", out var idValue) && idValue != null
+                ? idValue.ToString() ?? Guid.NewGuid().ToString()
+                : Guid.NewGuid().ToString(),
+            dto,
+            cancellationToken
+        );
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<FaceVectorOperationResultDto>> CallSearchFaceVectorWebhookAsync(SearchFaceVectorOperationDto dto, CancellationToken cancellationToken)
+    {
+        return await CallFaceVectorWebhookInternalAsync(
+            _n8nSettings.Face.SearchWebhookUrl,
+            dto.Filter != null && dto.Filter.TryGetValue("memberId", out var idValue) && idValue != null
+                ? idValue.ToString() ?? Guid.NewGuid().ToString()
+                : Guid.NewGuid().ToString(),
+            dto,
+            cancellationToken
+        );
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<FaceVectorOperationResultDto>> CallDeleteFaceVectorWebhookAsync(DeleteFaceVectorOperationDto dto, CancellationToken cancellationToken)
+    {
+        return await CallFaceVectorWebhookInternalAsync(
+            _n8nSettings.Face.DeleteWebhookUrl,
+            dto.Filter != null && dto.Filter.TryGetValue("vectorDbId", out var idValue) && idValue != null
+                ? idValue.ToString() ?? Guid.NewGuid().ToString()
+                : Guid.NewGuid().ToString(),
+            dto,
+            cancellationToken
+        );
+    }
+
+    private async Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookInternalAsync(string webhookUrl, string tokenPayloadId, object dto, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(webhookUrl) || webhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
-            _logger.LogWarning("n8n face vector webhook URL is not configured.");
-            return Result<FaceVectorOperationResultDto>.Failure("n8n face vector integration is not configured.", "Configuration");
+            _logger.LogWarning("n8n face vector webhook URL is not configured: {WebhookUrl}", webhookUrl);
+            return Result<FaceVectorOperationResultDto>.Failure($"n8n face vector integration for {webhookUrl} is not configured.", "Configuration");
         }
 
         var httpClient = _httpClientFactory.CreateClient();
@@ -311,8 +350,6 @@ public class N8nService : IN8nService
         if (!string.IsNullOrEmpty(_n8nSettings.JwtSecret))
         {
             var jwtHelper = _jwtHelperFactory.Create(_n8nSettings.JwtSecret);
-            // Use collection name or action type as ID for token payload
-            var tokenPayloadId = _n8nSettings.Face.CollectionName ?? dto.ActionType ?? Guid.NewGuid().ToString();
             var token = jwtHelper.GenerateToken(tokenPayloadId, DateTime.UtcNow.AddMinutes(5)); // Token expires in 5 minutes
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
@@ -321,24 +358,20 @@ public class N8nService : IN8nService
             _logger.LogWarning("N8nSettings.JwtSecret is not configured. Skipping JWT token generation for face vector webhook.");
         }
 
-        var payload = new
+        // Include CollectionName in the payload that is sent to n8n
+        var payloadWithCollection = new
         {
-            dto.ActionType,
-            dto.Vector,
-            dto.Filter,
-            dto.Payload,
-            dto.Limit,
-            dto.Threshold,
-            dto.ReturnFields,
-            CollectionName = _n8nSettings.Face.CollectionName // Add CollectionName here
+            CollectionName = _n8nSettings.Face.CollectionName,
+            RequestData = dto // The specific DTO for the operation
         };
-        var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+        var jsonPayload = JsonSerializer.Serialize(payloadWithCollection, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
         try
         {
-            _logger.LogInformation("Calling n8n face vector webhook at {Url} with payload: {Payload}", _n8nSettings.FaceVectorWebhookUrl, jsonPayload);
-            var response = await httpClient.PostAsync(_n8nSettings.FaceVectorWebhookUrl, content, cancellationToken);
+            _logger.LogInformation("Calling n8n face vector webhook at {Url} with payload: {Payload}", webhookUrl, jsonPayload);
+            var response = await httpClient.PostAsync(webhookUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -386,4 +419,6 @@ public class N8nService : IN8nService
             return Result<FaceVectorOperationResultDto>.Failure($"An error occurred: {ex.Message}", "Exception");
         }
     }
+
+
 }

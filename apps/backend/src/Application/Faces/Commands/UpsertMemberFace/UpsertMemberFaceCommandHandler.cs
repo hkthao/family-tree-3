@@ -34,22 +34,66 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // 3. Retrieve or Create MemberFace entity
-        MemberFace? memberFace = null;
-        if (!string.IsNullOrEmpty(request.VectorDbId))
+        // 3. Perform n8n vector search for existing face
+        var searchFaceVectorDto = new SearchFaceVectorOperationDto
         {
-            memberFace = await _context.MemberFaces.FirstOrDefaultAsync(mf => mf.VectorDbId == request.VectorDbId, cancellationToken);
-        }
-        else
+            Vector = request.Embedding.Select(d => (float)d).ToList(),
+            Limit = 1, // We only need one match to check for existence
+            Threshold = 0.95f, // High threshold for exact match
+            Filter = new Dictionary<string, object>
+            {
+                { "faceId", request.FaceId } // Search specifically for this FaceId
+            },
+            ReturnFields = new List<string> { "localDbId", "memberId" }
+        };
+
+        var n8nSearchResult = await _n8nService.CallSearchFaceVectorWebhookAsync(searchFaceVectorDto, cancellationToken);
+
+        if (!n8nSearchResult.IsSuccess || n8nSearchResult.Value == null || !n8nSearchResult.Value.Success)
         {
-            // If no VectorDbId is provided, try to find by FaceId and MemberId
-            memberFace = await _context.MemberFaces
-                .FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
+            _logger.LogWarning("Failed to search face vector for FaceId {FaceId} in n8n during upsert: {Error}. Proceeding with new face creation.", request.FaceId, n8nSearchResult.Error ?? n8nSearchResult.Value?.Message);
+            // If search fails or returns no results, treat as new face
         }
+        else if (n8nSearchResult.Value.SearchResults != null && n8nSearchResult.Value.SearchResults.Any())
+        {
+            var foundVector = n8nSearchResult.Value.SearchResults.First();
+            if (foundVector.Payload != null && foundVector.Payload.TryGetValue("memberId", out var memberIdObj) && Guid.TryParse(memberIdObj?.ToString(), out var foundMemberId))
+            {
+                if (foundMemberId != request.MemberId)
+                {
+                    // Conflict: Face found, but associated with a different member
+                    _logger.LogWarning("Face with FaceId {FaceId} found in vector DB, but associated with different MemberId {FoundMemberId} (requested: {RequestedMemberId}).", request.FaceId, foundMemberId, request.MemberId);
+                    return Result<Guid>.Failure($"Face with ID {request.FaceId} is already associated with another member.", ErrorSources.Conflict);
+                }
+                else
+                {
+                    // Face found and associated with the same member, skip saving (per user instruction)
+                    _logger.LogInformation("Face with FaceId {FaceId} already exists in vector DB and is associated with MemberId {MemberId}. Skipping upsert.", request.FaceId, request.MemberId);
+
+                    // Retrieve local MemberFace and return its ID
+                    var existingLocalMemberFace = await _context.MemberFaces.FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
+                    if (existingLocalMemberFace != null)
+                    {
+                        return Result<Guid>.Success(existingLocalMemberFace.Id);
+                    }
+                    else
+                    {
+                        // If for some reason local entity doesn't exist, create it locally
+                        _logger.LogWarning("Vector DB reports existing face {FaceId} for MemberId {MemberId}, but local MemberFace entity not found. Creating local entity.", request.FaceId, request.MemberId);
+                        // Fall through to new face creation below, which will also upsert to vector DB.
+                    }
+                }
+            }
+        }
+
+        // 4. If no conflict and not skipped, proceed to create/update local MemberFace and upsert to vector DB
+        MemberFace? memberFace = await _context.MemberFaces
+            .FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
 
 
         if (memberFace == null)
         {
+
             memberFace = new MemberFace
             {
                 Id = Guid.NewGuid(), // Generate new ID for local entity
@@ -69,6 +113,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         }
         else
         {
+            // Update existing local entity
             memberFace.BoundingBox = new BoundingBox { X = request.BoundingBox.X, Y = request.BoundingBox.Y, Width = request.BoundingBox.Width, Height = request.BoundingBox.Height };
             memberFace.Confidence = request.Confidence;
             memberFace.ThumbnailUrl = request.ThumbnailUrl;
@@ -79,16 +124,10 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             _logger.LogInformation("Updated existing MemberFace entity with ID {MemberFaceId} for MemberId {MemberId} and FaceId {FaceId}.", memberFace.Id, request.MemberId, request.FaceId);
         }
 
-        // 4. Call n8n Face Vector Webhook for Upsert
-        var faceVectorDto = new FaceVectorOperationDto
+        // 5. Call n8n Face Vector Webhook for Upsert (if not skipped)
+        var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
         {
-            ActionType = "upsert",
-            Vector = request.Embedding.Select(d => (float)d).ToList(), // Convert double to float for FaceVectorOperationDto
-            Filter = new Dictionary<string, object>
-            {
-                { "memberId", request.MemberId.ToString() },
-                { "faceId", request.FaceId }
-            },
+            Vector = request.Embedding.Select(d => (float)d).ToList(), // Convert double to float
             Payload = new Dictionary<string, object>
             {
                 { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity
@@ -101,34 +140,35 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             }
         };
 
-        // If updating an existing vector, include its VectorDbId in filter
-        if (!string.IsNullOrEmpty(request.VectorDbId))
+        // If it's an update, ensure VectorDbId is in the filter for n8n
+        if (!string.IsNullOrEmpty(memberFace.VectorDbId))
         {
-            faceVectorDto.Filter.Add("vectorDbId", request.VectorDbId);
+            upsertFaceVectorDto.Filter = new Dictionary<string, object>
+            {
+                { "vectorDbId", memberFace.VectorDbId }
+            };
         }
 
-        var n8nResult = await _n8nService.CallFaceVectorWebhookAsync(faceVectorDto, cancellationToken);
+        var n8nUpsertResult = await _n8nService.CallUpsertFaceVectorWebhookAsync(upsertFaceVectorDto, cancellationToken);
 
-        if (!n8nResult.IsSuccess || n8nResult.Value == null || !n8nResult.Value.Success)
+        if (!n8nUpsertResult.IsSuccess || n8nUpsertResult.Value == null || !n8nUpsertResult.Value.Success)
         {
-            _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n: {Error}", memberFace.Id, n8nResult.Error ?? n8nResult.Value?.Message);
-            // Even if n8n fails, we save the local entity. Sync status will be false.
+            _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n: {Error}", memberFace.Id, n8nUpsertResult.Error ?? n8nUpsertResult.Value?.Message);
+            memberFace.IsVectorDbSynced = false; // Mark as not synced if n8n fails
         }
         else
         {
-            // Update VectorDbId from n8n response if available (for newly created vectors)
-            // Or ensure it's set if it was provided in the request
-            if (string.IsNullOrEmpty(memberFace.VectorDbId) && n8nResult.Value.AffectedCount > 0 && n8nResult.Value.SearchResults != null && n8nResult.Value.SearchResults.Any())
+            // For newly created vectors, update VectorDbId from n8n response if available.
+            // For existing ones, ensure VectorDbId is retained.
+            if (string.IsNullOrEmpty(memberFace.VectorDbId) && n8nUpsertResult.Value.SearchResults != null && n8nUpsertResult.Value.SearchResults.Any())
             {
-                memberFace.VectorDbId = n8nResult.Value.SearchResults.First().Id; // Assuming n8n returns the vector DB ID
-            } else if (!string.IsNullOrEmpty(request.VectorDbId)) {
-                memberFace.VectorDbId = request.VectorDbId; // Use the provided one if it was an update
+                memberFace.VectorDbId = n8nUpsertResult.Value.SearchResults.First().Id; // Assuming n8n returns the vector DB ID
             }
             memberFace.IsVectorDbSynced = true;
             _logger.LogInformation("Successfully upserted face vector for MemberFaceId {MemberFaceId} in n8n. VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
         }
 
-        // 5. Save changes to local database
+        // 6. Save changes to local database
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(memberFace.Id);

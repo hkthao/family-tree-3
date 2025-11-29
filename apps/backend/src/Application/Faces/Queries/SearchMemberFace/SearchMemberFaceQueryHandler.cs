@@ -30,29 +30,26 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
         }
 
-        var faceVectorDto = new FaceVectorOperationDto
+        var searchFaceVectorDto = new SearchFaceVectorOperationDto
         {
-            ActionType = "search",
             Vector = request.Vector.Select(d => (float)d).ToList(),
             Limit = request.Limit,
             Threshold = request.Threshold,
-            Payload = new Dictionary<string, object>(), // Add filters to payload
+            Filter = new Dictionary<string, object>(), // Add filters based on query parameters
             ReturnFields = new List<string> { "localDbId", "memberId", "faceId", "thumbnailUrl", "originalImageUrl", "emotion", "emotionConfidence" }
         };
 
         // Add filters based on query parameters
         if (request.FamilyId.HasValue)
         {
-            faceVectorDto.Filter = faceVectorDto.Filter ?? new Dictionary<string, object>();
-            faceVectorDto.Filter.Add("familyId", request.FamilyId.Value.ToString());
+            searchFaceVectorDto.Filter.Add("familyId", request.FamilyId.Value.ToString());
         }
         if (request.MemberId.HasValue)
         {
-            faceVectorDto.Filter = faceVectorDto.Filter ?? new Dictionary<string, object>();
-            faceVectorDto.Filter.Add("memberId", request.MemberId.Value.ToString());
+            searchFaceVectorDto.Filter.Add("memberId", request.MemberId.Value.ToString());
         }
 
-        var n8nResult = await _n8nService.CallFaceVectorWebhookAsync(faceVectorDto, cancellationToken);
+        var n8nResult = await _n8nService.CallSearchFaceVectorWebhookAsync(searchFaceVectorDto, cancellationToken);
 
         if (!n8nResult.IsSuccess || n8nResult.Value == null || !n8nResult.Value.Success)
         {

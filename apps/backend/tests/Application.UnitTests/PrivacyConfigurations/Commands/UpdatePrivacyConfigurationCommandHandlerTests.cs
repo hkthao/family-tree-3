@@ -5,8 +5,8 @@ using backend.Application.PrivacyConfigurations.Commands;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.PrivacyConfigurations.Commands;

@@ -41,16 +41,15 @@ public class DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         // 3. Call n8n Face Vector Webhook for Delete
         if (!string.IsNullOrEmpty(memberFace.VectorDbId))
         {
-            var faceVectorDto = new FaceVectorOperationDto
+            var deleteFaceVectorDto = new DeleteFaceVectorOperationDto
             {
-                ActionType = "delete",
                 Filter = new Dictionary<string, object>
                 {
                     { "vectorDbId", memberFace.VectorDbId }
                 }
             };
 
-            var n8nResult = await _n8nService.CallFaceVectorWebhookAsync(faceVectorDto, cancellationToken);
+            var n8nResult = await _n8nService.CallDeleteFaceVectorWebhookAsync(deleteFaceVectorDto, cancellationToken);
 
             if (!n8nResult.IsSuccess || n8nResult.Value == null || !n8nResult.Value.Success)
             {

@@ -11,5 +11,6 @@ public static class ErrorSources
     public const string Validation = "Validation";
     public const string NoContent = "NoContent";
     public const string BadRequest = "BadRequest";
+    public const string Conflict = "Conflict"; // NEW
     public const string ExternalServiceError = "ExternalServiceError";
 }

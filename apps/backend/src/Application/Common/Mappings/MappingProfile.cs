@@ -17,10 +17,10 @@ using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.MemberStories.DTOs; // NEW
 using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
+using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
-using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
 

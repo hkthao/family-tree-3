@@ -1,3 +1,4 @@
+using System.Net;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
@@ -7,7 +8,6 @@ using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;
 using Moq.Protected;
-using System.Net;
 using Xunit;
 
 namespace backend.Application.UnitTests.Files.Commands.UploadFileFromUrl;

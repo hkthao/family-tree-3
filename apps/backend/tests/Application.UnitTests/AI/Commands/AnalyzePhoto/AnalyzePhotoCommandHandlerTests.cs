@@ -1,3 +1,4 @@
+using System.Text.Json;
 using backend.Application.AI.Commands.AnalyzePhoto;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
@@ -7,7 +8,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace backend.Application.UnitTests.AI.Commands.AnalyzePhoto;

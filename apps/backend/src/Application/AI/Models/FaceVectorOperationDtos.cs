@@ -26,3 +26,24 @@ public class FaceVectorOperationResultDto
     public List<FaceVectorSearchResultDto>? SearchResults { get; set; } // For search operations
     public int? AffectedCount { get; set; } // For upsert/delete operations
 }
+
+public class UpsertFaceVectorOperationDto
+{
+    public List<float> Vector { get; set; } = new List<float>();
+    public Dictionary<string, object> Payload { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object>? Filter { get; set; } // Optional, for updating existing vectors by filter
+}
+
+public class SearchFaceVectorOperationDto
+{
+    public List<float> Vector { get; set; } = new List<float>();
+    public Dictionary<string, object>? Filter { get; set; }
+    public int Limit { get; set; } = 10;
+    public float Threshold { get; set; } = 0.7f;
+    public List<string>? ReturnFields { get; set; }
+}
+
+public class DeleteFaceVectorOperationDto
+{
+    public Dictionary<string, object> Filter { get; set; } = new Dictionary<string, object>();
+}

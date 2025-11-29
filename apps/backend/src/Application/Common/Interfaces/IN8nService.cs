@@ -35,10 +35,17 @@ public interface IN8nService
     Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gọi webhook xử lý vector khuôn mặt của n8n để upsert/search/delete.
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để upsert.
     /// </summary>
-    /// <param name="dto">Đối tượng chứa dữ liệu và hành động vector khuôn mặt.</param>
-    /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Kết quả chứa thông tin về hoạt động vector khuôn mặt.</returns>
-    Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookAsync(FaceVectorOperationDto dto, CancellationToken cancellationToken);
+    Task<Result<FaceVectorOperationResultDto>> CallUpsertFaceVectorWebhookAsync(UpsertFaceVectorOperationDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để search.
+    /// </summary>
+    Task<Result<FaceVectorOperationResultDto>> CallSearchFaceVectorWebhookAsync(SearchFaceVectorOperationDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để delete.
+    /// </summary>
+    Task<Result<FaceVectorOperationResultDto>> CallDeleteFaceVectorWebhookAsync(DeleteFaceVectorOperationDto dto, CancellationToken cancellationToken);
 }
