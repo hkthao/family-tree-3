@@ -1,4 +1,4 @@
-import type { DetectedFace } from './detectedFace'; // Assuming DetectedFace is in detectedFace.d.ts
+import type { DetectedFace } from './face.d'; // Assuming DetectedFace is in detectedFace.d.ts
 
 export interface MemberStoryDto {
   id?: string;
@@ -18,5 +18,7 @@ export interface MemberStoryDto {
   memberFullName?: string | null;
   memberAvatarUrl?: string | null;
   memberGender?: string | null;
+  originalImageUrl?: string | null;
+  resizedImageUrl?: string | null;
 }
 

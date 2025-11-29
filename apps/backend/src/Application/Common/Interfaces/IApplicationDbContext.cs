@@ -73,6 +73,11 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<MemberStory> MemberStories { get; }
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
+    /// </summary>
+    DbSet<MemberFace> MemberFaces { get; }
+
 
 
     /// <summary>

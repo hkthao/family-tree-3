@@ -85,6 +85,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<MemberStory> MemberStories => Set<MemberStory>();
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
+    /// </summary>
+    public DbSet<MemberFace> MemberFaces => Set<MemberFace>();
+
 
 
     /// <summary>
@@ -166,6 +171,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
 
         builder.ApplySnakeCaseNamingConvention();
+
+        builder.Entity<MemberFace>(mb =>
+        {
+            mb.OwnsOne(mf => mf.BoundingBox);
+            // Configure Embedding to be stored as JSON
+            mb.Property(mf => mf.Embedding)
+              .HasConversion(
+                  v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                  v => JsonSerializer.Deserialize<List<double>>(v, (JsonSerializerOptions?)null) ?? new List<double>()
+              );
+        });
     }
 }
 
