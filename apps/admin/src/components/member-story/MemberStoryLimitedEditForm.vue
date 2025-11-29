@@ -1,23 +1,20 @@
 <template>
   <v-container>
     <!-- Cover Image -->
-    <v-row v-if="modelValue.originalImageUrl">
+    <v-row v-if="modelValue.resizedImageUrl">
       <v-col cols="12" class="text-center">
-        <v-img :src="modelValue.originalImageUrl" max-height="300" contain class="mb-4"></v-img>
+        <v-img :src="modelValue.resizedImageUrl" contain class="mb-4"></v-img>
       </v-col>
     </v-row>
 
     <!-- Member -->
     <v-row v-if="modelValue.memberId">
       <v-col cols="12">
-        <v-text-field
+        <MemberAutocomplete
+          :model-value="modelValue.memberId"
           :label="t('memberStory.form.memberIdLabel')"
-          :model-value="modelValue.memberName"
-          readonly
-          variant="outlined"
-          density="compact"
-          class="mb-2"
-        ></v-text-field>
+          disabled
+        ></MemberAutocomplete>
       </v-col>
     </v-row>
 
@@ -103,6 +100,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 
 const props = defineProps<{
