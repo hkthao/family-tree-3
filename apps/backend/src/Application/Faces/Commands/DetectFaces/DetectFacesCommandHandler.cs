@@ -5,9 +5,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
-using Microsoft.Extensions.Logging;
-using MediatR; // NEW
 using backend.Application.Files.UploadFile; // NEW
+using MediatR; // NEW
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 

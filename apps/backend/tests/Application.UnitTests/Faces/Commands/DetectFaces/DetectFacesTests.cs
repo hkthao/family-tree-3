@@ -4,15 +4,15 @@ using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this line
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Common;
+using backend.Application.Files.UploadFile; // NEW
 using backend.Application.MemberStories.DTOs; // Updated
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using MediatR; // NEW
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using MediatR; // NEW
-using backend.Application.Files.UploadFile; // NEW
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 
@@ -38,7 +38,7 @@ public class DetectFacesTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync((ImageUploadWebhookDto dto, CancellationToken token) =>
                 Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = $"http://mock.image.url/{dto.FileName}" }));
-        
+
         // Default setup for mediator to handle UploadFileCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto

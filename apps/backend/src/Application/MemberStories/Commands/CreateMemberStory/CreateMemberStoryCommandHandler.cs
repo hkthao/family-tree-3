@@ -1,14 +1,14 @@
+using Ardalis.Specification.EntityFrameworkCore; // NEW
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Specifications; // NEW
+using backend.Application.Faces.Common;
+using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
-using backend.Application.Faces.Common;
-using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Specifications; // NEW
-using backend.Application.Members.Specifications; // NEW
-using Ardalis.Specification.EntityFrameworkCore; // NEW
+using Microsoft.Extensions.Localization;
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
