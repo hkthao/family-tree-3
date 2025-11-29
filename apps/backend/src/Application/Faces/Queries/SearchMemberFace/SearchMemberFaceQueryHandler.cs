@@ -66,11 +66,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             {
                 if (searchResult.Payload == null) continue;
 
-                if (!searchResult.Payload.TryGetValue("localDbId", out var localDbIdObj) || !Guid.TryParse(localDbIdObj?.ToString(), out var localDbId))
-                {
-                    _logger.LogWarning("localDbId missing or invalid in search result payload for vector {VectorId}.", searchResult.Id);
-                    continue;
-                }
+                var localDbId = Guid.Parse(searchResult.Id); // Use the vector ID as localDbId
 
                 if (!searchResult.Payload.TryGetValue("memberId", out var memberIdObj) || !Guid.TryParse(memberIdObj?.ToString(), out var memberId))
                 {
