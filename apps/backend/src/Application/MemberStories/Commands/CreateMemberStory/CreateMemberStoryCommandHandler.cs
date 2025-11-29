@@ -6,6 +6,10 @@ using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Localization;
+using MediatR; // NEW
+using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
+using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
+using System.IO; // NEW for Path.GetExtension
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
@@ -15,12 +19,14 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
 
     private readonly IAuthorizationService _authorizationService;
     private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer; // Updated
+    private readonly IMediator _mediator; // NEW
 
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer) // Updated
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator) // Updated
     {
         _context = context;
         _authorizationService = authorizationService;
         _localizer = localizer;
+        _mediator = mediator; // NEW
     }
 
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
@@ -57,8 +63,59 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             MemberId = request.MemberId,
             Title = request.Title,
             Story = request.Story,
-            PhotoUrl = request.PhotoUrl
+            PhotoUrl = request.PhotoUrl,
+            OriginalImageUrl = request.OriginalImageUrl, // Assign initial value
+            ResizedImageUrl = request.ResizedImageUrl // Assign initial value
         };
+        
+        // --- Logic to handle /temp/ URLs ---
+        var storyId = memberStory.Id; // Get the generated ID for the new story
+
+        // Check and upload OriginalImageUrl if it's a temporary URL
+        if (!string.IsNullOrEmpty(request.OriginalImageUrl) && request.OriginalImageUrl.Contains("/temp/"))
+        {
+            var originalUploadResult = await UploadImageFromTempUrlAsync(
+                request.OriginalImageUrl,
+                "original_image", // Generic filename
+                familyId,
+                storyId,
+                cancellationToken);
+
+            if (!originalUploadResult.IsSuccess)
+            {
+                return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+            }
+            memberStory.OriginalImageUrl = originalUploadResult.Value!.Url;
+            // Also update PhotoUrl if it's currently pointing to the original temp image
+            if (memberStory.PhotoUrl == request.OriginalImageUrl)
+            {
+                memberStory.PhotoUrl = originalUploadResult.Value.Url;
+            }
+        }
+
+        // Check and upload ResizedImageUrl if it's a temporary URL
+        if (!string.IsNullOrEmpty(request.ResizedImageUrl) && request.ResizedImageUrl.Contains("/temp/"))
+        {
+            var resizedUploadResult = await UploadImageFromTempUrlAsync(
+                request.ResizedImageUrl,
+                "resized_image", // Generic filename
+                familyId,
+                storyId,
+                cancellationToken);
+
+            if (!resizedUploadResult.IsSuccess)
+            {
+                return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+            }
+            memberStory.ResizedImageUrl = resizedUploadResult.Value!.Url;
+            // Also update PhotoUrl if it's currently pointing to the resized temp image
+            if (memberStory.PhotoUrl == request.ResizedImageUrl)
+            {
+                memberStory.PhotoUrl = resizedUploadResult.Value.Url;
+            }
+        }
+        // --- End logic to handle /temp/ URLs ---
+
         member.AddStory(memberStory); // Use the aggregate method
         _context.MemberStories.Add(memberStory); // Add to DbContext
         // Process and save detected faces to the aggregate
@@ -79,7 +136,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                     },
                     Confidence = detectedFaceDto.Confidence,
                     ThumbnailUrl = detectedFaceDto.ThumbnailUrl,
-                    OriginalImageUrl = request.PhotoUrl ?? request.OriginalImageUrl, // Use the photo/original image URL from the story
+                    OriginalImageUrl = memberStory.OriginalImageUrl, // Use the updated original image URL from the story
                     Embedding = detectedFaceDto.Embedding ?? new List<double>(), // Ensure embedding is not null
                     Emotion = detectedFaceDto.Emotion,
                     EmotionConfidence = (double?)detectedFaceDto.EmotionConfidence ?? 0.0
@@ -93,5 +150,18 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(memberStory.Id);
+    }
+
+    private async Task<Result<ImageUploadResponseDto>> UploadImageFromTempUrlAsync(
+        string imageUrl, string fileNamePrefix, Guid familyId, Guid storyId, CancellationToken cancellationToken)
+    {
+        var command = new UploadFileFromUrlCommand
+        {
+            FileUrl = imageUrl,
+            FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", // Generate unique name
+            Cloud = "cloudinary", // Assuming cloudinary as default for permanent storage
+            Folder = $"families/{familyId}/stories/{storyId}/photos"
+        };
+        return await _mediator.Send(command, cancellationToken);
     }
 }

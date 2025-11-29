@@ -10,6 +10,8 @@ public class MemberStory : BaseAuditableEntity, ISoftDelete
     public string Title { get; set; } = string.Empty; // max 120
     public string Story { get; set; } = string.Empty; // long text
     public string? PhotoUrl { get; set; } // Added PhotoUrl
+    public string? OriginalImageUrl { get; set; } // NEW
+    public string? ResizedImageUrl { get; set; } // NEW
 
     // Navigation properties
     public Member Member { get; set; } = default!;
