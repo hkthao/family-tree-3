@@ -10,14 +10,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.UpsertMemberFace;
 
-public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<UpsertMemberFaceCommandHandler> logger) : IRequestHandler<UpsertMemberFaceCommand, Result<Guid>>
+public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<UpsertMemberFaceCommandHandler> logger) : IRequestHandler<UpsertMemberFaceCommand, Result<UpsertMemberFaceCommandResultDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IN8nService _n8nService = n8nService;
     private readonly ILogger<UpsertMemberFaceCommandHandler> _logger = logger;
 
-    public async Task<Result<Guid>> Handle(UpsertMemberFaceCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UpsertMemberFaceCommandResultDto>> Handle(UpsertMemberFaceCommand request, CancellationToken cancellationToken)
     {
         // 1. Validate Member
         var member = await _context.Members
@@ -25,13 +25,13 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
 
         if (member == null)
         {
-            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId} not found."), ErrorSources.NotFound);
+            return Result<UpsertMemberFaceCommandResultDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId} not found."), ErrorSources.NotFound);
         }
 
         // 2. Authorize
-        if (!_authorizationService.CanAccessFamily(member.FamilyId))
+        if (!_authorizationService.CanAccessFamily(request.FamilyId))
         {
-            return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+            return Result<UpsertMemberFaceCommandResultDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         // 3. Perform n8n vector search for existing face
@@ -42,7 +42,8 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             Threshold = 0.95f, // High threshold for exact match
             Filter = new Dictionary<string, object>
             {
-                { "faceId", request.FaceId } // Search specifically for this FaceId
+                { "faceId", request.FaceId }, // Search specifically for this FaceId
+                { "familyId", request.FamilyId.ToString() } // NEW: Filter by family ID
             },
             ReturnFields = new List<string> { "localDbId", "memberId" }
         };
@@ -63,7 +64,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 {
                     // Conflict: Face found, but associated with a different member
                     _logger.LogWarning("Face with FaceId {FaceId} found in vector DB, but associated with different MemberId {FoundMemberId} (requested: {RequestedMemberId}).", request.FaceId, foundMemberId, request.MemberId);
-                    return Result<Guid>.Failure($"Face with ID {request.FaceId} is already associated with another member.", ErrorSources.Conflict);
+                    return Result<UpsertMemberFaceCommandResultDto>.Failure($"Face with ID {request.FaceId} is already associated with another member.", ErrorSources.Conflict);
                 }
                 else
                 {
@@ -74,7 +75,10 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                     var existingLocalMemberFace = await _context.MemberFaces.FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
                     if (existingLocalMemberFace != null)
                     {
-                        return Result<Guid>.Success(existingLocalMemberFace.Id);
+                        return Result<UpsertMemberFaceCommandResultDto>.Success(new UpsertMemberFaceCommandResultDto
+                        {
+                            VectorDbId = existingLocalMemberFace.VectorDbId ?? "" // Return existing VectorDbId
+                        });
                     }
                     else
                     {
@@ -171,6 +175,9 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         // 6. Save changes to local database
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(memberFace.Id);
+        return Result<UpsertMemberFaceCommandResultDto>.Success(new UpsertMemberFaceCommandResultDto
+        {
+            VectorDbId = memberFace.VectorDbId ?? "" // Ensure it's not null, though it should be set if successful
+        });
     }
 }

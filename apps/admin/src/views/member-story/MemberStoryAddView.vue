@@ -46,6 +46,8 @@ const editedMemberStory = ref<MemberStoryDto>({ // Keep as MemberStoryDto for fo
   originalImageUrl: '',
   resizedImageUrl: '',
   rawInput: null, // Keep for AI generation
+  storyStyle: null, // NEW
+  perspective: null, // NEW
 });
 
 const handleSave = async () => {
@@ -60,6 +62,9 @@ const handleSave = async () => {
       story: editedMemberStory.value.story,
       originalImageUrl: editedMemberStory.value.originalImageUrl,
       resizedImageUrl: editedMemberStory.value.resizedImageUrl,
+      rawInput: editedMemberStory.value.rawInput, // NEW
+      storyStyle: editedMemberStory.value.storyStyle, // NEW
+      perspective: editedMemberStory.value.perspective, // NEW
       detectedFaces: (editedMemberStory.value.detectedFaces || []).map(face => ({
         ...face,
         thumbnail: ''

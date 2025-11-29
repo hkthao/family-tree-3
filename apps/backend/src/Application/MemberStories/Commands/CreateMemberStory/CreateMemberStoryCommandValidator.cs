@@ -17,14 +17,17 @@ public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberS
             .NotEmpty().WithMessage("Story content is required.")
             .MaximumLength(4000).WithMessage("Story content must not exceed 4000 characters."); // Arbitrary max length
 
+        RuleFor(v => v.RawInput)
+            .MaximumLength(4000).WithMessage("Raw input must not exceed 4000 characters."); // Arbitrary max length
+
         RuleFor(v => v.StoryStyle)
-            .NotNull().WithMessage("Story style is required.")
             .IsEnumName(typeof(MemberStoryStyle), caseSensitive: false)
-            .WithMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.");
+            .WithMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.")
+            .Unless(v => string.IsNullOrEmpty(v.StoryStyle));
 
         RuleFor(v => v.Perspective)
-            .NotNull().WithMessage("Perspective is required.")
             .IsEnumName(typeof(MemberStoryPerspective), caseSensitive: false)
-            .WithMessage($"Invalid perspective. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryPerspective)))}.");
+            .WithMessage($"Invalid perspective. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryPerspective)))}.")
+            .Unless(v => string.IsNullOrEmpty(v.Perspective));
     }
 }

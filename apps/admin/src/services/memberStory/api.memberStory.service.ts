@@ -1,4 +1,5 @@
 import type { IMemberStoryService } from './memberStory.service.interface';
+import type { CreateMemberStory } from '@/types/createMemberStory';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import { ok, type Result, type Paginated, type MemberStoryDto, type SearchStoriesFilter } from '@/types'; // Import 'ok' from '@/types' and SearchStoriesFilter
 
@@ -41,7 +42,7 @@ export class ApiMemberStoryService implements IMemberStoryService {
     return ok(fetchedMemberStories);
   }
 
-  async add(newItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> { // Changed from CreateMemberStoryDto
+  async add(newItem: CreateMemberStory): Promise<Result<MemberStoryDto, ApiError>> {
     // Backend CreateMemberStoryCommand expects CreateMemberStoryCommand (which maps from CreateMemberStoryDto)
     const result = await this.http.post<string>(this.baseRoute, newItem); // Backend returns Guid
     if (result.ok) {

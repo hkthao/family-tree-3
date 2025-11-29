@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="12">
         <MemberAutocomplete :model-value="modelValue.memberId"
-          @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue }); }"
+          @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue || '' }); }"
           :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')"
           :rules="[rules.memberId.required]" @update:focused="(focused: boolean) => { if (!focused) memberIdValid = true }" />
       </v-col>
