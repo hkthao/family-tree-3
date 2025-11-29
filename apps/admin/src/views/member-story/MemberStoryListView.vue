@@ -79,11 +79,6 @@ const headers = computed<DataTableHeader[]>(() => { // NEW: Headers computed pro
       key: 'memberFullName',
       align: 'start' as const,
     },
-    {
-      title: t('memberStory.list.header.createdAt'),
-      key: 'createdAt',
-      align: 'start' as const,
-    },
   ];
 
   if (canPerformActions.value) {

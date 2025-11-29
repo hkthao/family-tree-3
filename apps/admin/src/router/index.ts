@@ -78,6 +78,7 @@ router.beforeEach(async (to, from, next) => {
   if (requiresAuth && !authStore.isAuthenticated) {
     // If the route requires authentication and the user is not authenticated, redirect to login
     await authService.login({ appState: { target: to.fullPath } });
+    next(false); // Ngăn chặn điều hướng tiếp theo vì authService.login() sẽ xử lý chuyển hướng.
     return;
   } else if (requiredRoles && !canAccessMenu(authStore.user?.roles || [], requiredRoles)) {
     // If the route requires specific roles and the user doesn't have them
