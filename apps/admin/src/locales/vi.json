@@ -984,7 +984,7 @@
   "memberStory.edit.saveFailed": "Cập nhật ký ức thất bại.",
   "memberStory.delete.confirmTitle": "Xác nhận xóa ký ức",
   "memberStory.delete.confirmMessage": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",
-  "memberStory.delete.success": "Xóa ký ức thành công!",
+  "memberStory.messages.deleteSuccess": "Xóa ký ức thành công!",
   "memberStory.delete.error": "Lỗi khi xóa ký ức.",
   "memberStory.create.saveSuccess": "Đã tạo câu chuyện thành công!",
   "memberStory.style.nostalgic": "Hoài niệm",

@@ -5,7 +5,6 @@
       :total-items="memberStoryStore.list.totalItems"
       :loading="memberStoryStore.list.loading"
       :items-per-page="memberStoryStore.list.itemsPerPage"
-      :headers="headers"
       :search="searchQuery"
       @update:options="handleListOptionsUpdate"
       @update:search="handleSearchUpdate"
@@ -48,7 +47,6 @@ import MemberStoryDetailView from './MemberStoryDetailView.vue';
 import MemberStoryList from '@/components/member-story/MemberStoryList.vue';
 import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
 import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
-import type { DataTableHeader } from 'vuetify'; // NEW IMPORT
 
 interface MemberStoryListViewProps {
   memberId?: string;
@@ -64,31 +62,6 @@ const { isAdmin, isFamilyManager } = useAuth(); // NEW: Use auth composable
 
 const canPerformActions = computed(() => { // NEW: canPerformActions computed property
   return isAdmin.value || isFamilyManager.value;
-});
-
-const headers = computed<DataTableHeader[]>(() => { // NEW: Headers computed property
-  const baseHeaders: DataTableHeader[] = [
-    {
-      title: t('memberStory.list.header.title'),
-      key: 'title',
-      align: 'start' as const,
-    },
-    {
-      title: t('member.list.headers.fullName'),
-      key: 'memberFullName',
-      align: 'start' as const,
-    },
-  ];
-
-  if (canPerformActions.value) {
-    baseHeaders.push({
-      title: t('memberStory.list.header.actions'),
-      key: 'actions',
-      sortable: false,
-      align: 'end' as const,
-    });
-  }
-  return baseHeaders;
 });
 
 const {

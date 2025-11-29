@@ -965,7 +965,7 @@
 
   "memberStory.delete.confirmTitle": "Confirm Delete MemberStory",
   "memberStory.delete.confirmMessage": "Are you sure you want to delete the member story '{title}'?",
-  "memberStory.delete.success": "MemberStory deleted successfully!",
+  "memberStory.messages.deleteSuccess": "MemberStory deleted successfully!",
   "memberStory.delete.error": "Error deleting member story.",
   "memberStory.create.saveSuccess": "Story created successfully!",
   "memberStory.style.nostalgic": "Nostalgic",
