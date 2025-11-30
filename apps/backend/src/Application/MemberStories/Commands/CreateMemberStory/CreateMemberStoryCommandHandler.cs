@@ -4,12 +4,12 @@ using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Faces.Commands.UpsertMemberFace; // NEW
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using MediatR; // NEW
-using backend.Application.Faces.Commands.UpsertMemberFace; // NEW
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging; // NEW
 
@@ -66,9 +66,8 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         {
             MemberId = request.MemberId,
             Title = request.Title,
-            Story = request.Story,
-            OriginalImageUrl = request.OriginalImageUrl, // Assign initial value
-            ResizedImageUrl = request.ResizedImageUrl, // Assign initial value
+            OriginalImageUrl = (string?)request.OriginalImageUrl,
+            ResizedImageUrl = request.ResizedImageUrl,
             RawInput = request.RawInput, // NEW
             StoryStyle = request.StoryStyle, // NEW
             Perspective = request.Perspective // NEW
@@ -92,7 +91,10 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             {
                 return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
             }
-            memberStory.OriginalImageUrl = originalUploadResult.Value!.Url;
+            if (originalUploadResult.Value != null)
+            {
+                memberStory.OriginalImageUrl = originalUploadResult.Value.Url;
+            }
         }
 
         // Check and upload ResizedImageUrl if it's a temporary URL
@@ -110,7 +112,10 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             {
                 return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
             }
-            memberStory.ResizedImageUrl = resizedUploadResult.Value!.Url;
+            if (resizedUploadResult.Value != null)
+            {
+                memberStory.ResizedImageUrl = resizedUploadResult.Value.Url;
+            }
         }
         // --- End logic to handle /temp/ URLs ---
 
@@ -118,6 +123,30 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         _context.MemberStories.Add(memberStory); // Add to DbContext
         // Save all changes made to the aggregate
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Handle DetectedFaces if any
+        foreach (var detectedFace in request.DetectedFaces)
+        {
+            var upsertFaceCommand = new UpsertMemberFaceCommand
+            {
+                MemberId = request.MemberId,
+                FamilyId = familyId, // Pass FamilyId for authorization
+                FaceId = detectedFace.Id,
+                BoundingBox = detectedFace.BoundingBox,
+                Confidence = (double)detectedFace.Confidence,
+                ThumbnailUrl = detectedFace.ThumbnailUrl,
+                OriginalImageUrl = request.OriginalImageUrl,
+                Embedding = detectedFace.Embedding ?? new List<double>(),
+                Emotion = detectedFace.Emotion,
+                EmotionConfidence = (double)(detectedFace.EmotionConfidence ?? 0.0f)
+            };
+            var upsertResult = await _mediator.Send(upsertFaceCommand, cancellationToken);
+            if (!upsertResult.IsSuccess)
+            {
+                _logger.LogWarning("Failed to upsert face {FaceId} for Member {MemberId}: {Error}", detectedFace.Id, request.MemberId, upsertResult.Error);
+                // Continue processing other faces even if one fails
+            }
+        }
 
         return Result<Guid>.Success(memberStory.Id);
     }

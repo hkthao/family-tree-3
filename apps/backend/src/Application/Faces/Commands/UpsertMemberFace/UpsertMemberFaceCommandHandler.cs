@@ -55,7 +55,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             _logger.LogWarning("Failed to search face vector for FaceId {FaceId} in n8n during upsert: {Error}. Proceeding with new face creation.", request.FaceId, n8nSearchResult.Error ?? n8nSearchResult.Value?.Message);
             // If search fails or returns no results, treat as new face
         }
-        else if (n8nSearchResult.Value.SearchResults != null && n8nSearchResult.Value.SearchResults.Any())
+        else if (n8nSearchResult.Value.SearchResults != null && n8nSearchResult.Value.SearchResults.Count != 0)
         {
             var foundVector = n8nSearchResult.Value.SearchResults.First();
             if (foundVector.Payload != null && foundVector.Payload.TryGetValue("memberId", out var memberIdObj) && Guid.TryParse(memberIdObj?.ToString(), out var foundMemberId))
@@ -91,13 +91,11 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         }
 
         // 4. If no conflict and not skipped, proceed to create/update local MemberFace and upsert to vector DB
-        MemberFace? memberFace = await _context.MemberFaces
-            .FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
-
+        MemberFace? memberFace = null;
+        var vectorDbId = Guid.NewGuid();;
 
         if (memberFace == null)
         {
-
             memberFace = new MemberFace
             {
                 Id = Guid.NewGuid(), // Generate new ID for local entity
@@ -110,27 +108,17 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 Embedding = request.Embedding,
                 Emotion = request.Emotion,
                 EmotionConfidence = request.EmotionConfidence,
-                IsVectorDbSynced = false // Will be updated after n8n call
+                IsVectorDbSynced = false,
+                VectorDbId = vectorDbId.ToString() 
             };
             _context.MemberFaces.Add(memberFace);
             _logger.LogInformation("Created new MemberFace entity for MemberId {MemberId} and FaceId {FaceId}.", request.MemberId, request.FaceId);
-        }
-        else
-        {
-            // Update existing local entity
-            memberFace.BoundingBox = new BoundingBox { X = request.BoundingBox.X, Y = request.BoundingBox.Y, Width = request.BoundingBox.Width, Height = request.BoundingBox.Height };
-            memberFace.Confidence = request.Confidence;
-            memberFace.ThumbnailUrl = request.ThumbnailUrl;
-            memberFace.OriginalImageUrl = request.OriginalImageUrl;
-            memberFace.Embedding = request.Embedding;
-            memberFace.Emotion = request.Emotion;
-            memberFace.EmotionConfidence = request.EmotionConfidence;
-            _logger.LogInformation("Updated existing MemberFace entity with ID {MemberFaceId} for MemberId {MemberId} and FaceId {FaceId}.", memberFace.Id, request.MemberId, request.FaceId);
         }
 
         // 5. Call n8n Face Vector Webhook for Upsert (if not skipped)
         var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
         {
+            Id = vectorDbId,
             Vector = request.Embedding.Select(d => (float)d).ToList(), // Convert double to float
             Payload = new Dictionary<string, object>
             {
@@ -140,21 +128,12 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 { "thumbnailUrl", request.ThumbnailUrl ?? "" },
                 { "originalImageUrl", request.OriginalImageUrl ?? "" },
                 { "emotion", request.Emotion ?? "" },
-                { "emotionConfidence", request.EmotionConfidence }
+                { "emotionConfidence", request.EmotionConfidence },
+                { "vectorDbId", vectorDbId }
             }
         };
 
-        // If it's an update, ensure VectorDbId is in the filter for n8n
-        if (!string.IsNullOrEmpty(memberFace.VectorDbId))
-        {
-            upsertFaceVectorDto.Filter = new Dictionary<string, object>
-            {
-                { "vectorDbId", memberFace.VectorDbId }
-            };
-        }
-
         var n8nUpsertResult = await _n8nService.CallUpsertFaceVectorWebhookAsync(upsertFaceVectorDto, cancellationToken);
-
         if (!n8nUpsertResult.IsSuccess || n8nUpsertResult.Value == null || !n8nUpsertResult.Value.Success)
         {
             _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n: {Error}", memberFace.Id, n8nUpsertResult.Error ?? n8nUpsertResult.Value?.Message);
@@ -164,10 +143,6 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             // For newly created vectors, update VectorDbId from n8n response if available.
             // For existing ones, ensure VectorDbId is retained.
-            if (string.IsNullOrEmpty(memberFace.VectorDbId) && n8nUpsertResult.Value.SearchResults != null && n8nUpsertResult.Value.SearchResults.Any())
-            {
-                memberFace.VectorDbId = n8nUpsertResult.Value.SearchResults.First().Id; // Assuming n8n returns the vector DB ID
-            }
             memberFace.IsVectorDbSynced = true;
             _logger.LogInformation("Successfully upserted face vector for MemberFaceId {MemberFaceId} in n8n. VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
         }

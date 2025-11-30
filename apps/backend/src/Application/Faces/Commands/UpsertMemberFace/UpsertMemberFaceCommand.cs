@@ -14,10 +14,10 @@ public record UpsertMemberFaceCommand : IRequest<Result<UpsertMemberFaceCommandR
     public string? OriginalImageUrl { get; init; }
     public List<double> Embedding { get; init; } = new List<double>();
     public string? Emotion { get; init; }
-        public double EmotionConfidence { get; init; }
-    }
-    
-    public record UpsertMemberFaceCommandResultDto
-    {
-        public string VectorDbId { get; init; } = null!;
-    }
+    public double EmotionConfidence { get; init; }
+}
+
+public record UpsertMemberFaceCommandResultDto
+{
+    public string VectorDbId { get; init; } = null!;
+}

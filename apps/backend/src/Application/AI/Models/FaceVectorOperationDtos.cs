@@ -29,6 +29,7 @@ public class FaceVectorOperationResultDto
 
 public class UpsertFaceVectorOperationDto
 {
+    public Guid Id { get; set; }
     public List<float> Vector { get; set; } = new List<float>();
     public Dictionary<string, object> Payload { get; set; } = new Dictionary<string, object>();
     public Dictionary<string, object>? Filter { get; set; } // Optional, for updating existing vectors by filter
