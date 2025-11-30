@@ -29,8 +29,7 @@ public static class DependencyInjection
     /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<DispatchDomainEventsInterceptor>();
-        services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         services.AddHttpContextAccessor(); // Required for ICurrentUser
         services.AddScoped<ICurrentUser, CurrentUser>(); // Register ICurrentUser with its implementation
@@ -38,11 +37,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                       mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null))
-                   .AddInterceptors(
-                       serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                       serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
-                       ;
+                       mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null)));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -71,10 +66,6 @@ public static class DependencyInjection
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
-
-        // Register Story Generation Service and configure its HttpClient
-        services.AddScoped<IStoryGenerationService, StoryGenerationService>();
-        services.AddHttpClient<IStoryGenerationService, StoryGenerationService>(); // For HttpClient injection
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>

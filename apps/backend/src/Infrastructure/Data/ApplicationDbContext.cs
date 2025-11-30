@@ -5,15 +5,19 @@ using backend.Domain.Common;
 using backend.Domain.Entities;
 using backend.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
-
 namespace backend.Infrastructure.Data;
-
 /// <summary>
 /// Đại diện cho cơ sở dữ liệu ứng dụng và là điểm truy cập chính để tương tác với dữ liệu.
 /// </summary>
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
+public class ApplicationDbContext(
+    DbContextOptions<ApplicationDbContext> options,
+    IDomainEventDispatcher domainEventDispatcher,
+    ICurrentUser currentUser,
+    IDateTime dateTime) : DbContext(options), IApplicationDbContext
 {
-
+    private readonly IDomainEventDispatcher _domainEventDispatcher = domainEventDispatcher;
+    private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
@@ -54,84 +58,71 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileUsage.
     /// </summary>
     public DbSet<FileUsage> FileUsages => Set<FileUsage>();
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
-
-
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.
     /// </summary>
     public DbSet<PrivacyConfiguration> PrivacyConfigurations => Set<PrivacyConfiguration>();
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
     /// </summary>
     public DbSet<MemberStory> MemberStories => Set<MemberStory>();
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
     public DbSet<MemberFace> MemberFaces => Set<MemberFace>();
-
-
-
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
-
-
-    //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    //{
-    // foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
-    // {
-    //     switch (entry.State)
-    //     {
-    //         case EntityState.Added:
-    //             if (entry.Entity is BaseAuditableEntity auditableEntity)
-    //             {
-    //                 auditableEntity.CreatedBy = _currentUser.Id?.ToString();
-    //                 auditableEntity.Created = _dateTime.Now;
-    //             }
-    //             break;
-
-    //         case EntityState.Modified:
-    //             if (entry.Entity is BaseAuditableEntity auditableEntityModified)
-    //             {
-    //                 auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
-    //                 auditableEntityModified.LastModified = _dateTime.Now;
-    //             }
-    //             break;
-
-    //         case EntityState.Deleted:
-    //             if (entry.Entity is ISoftDelete softDeleteEntity)
-    //             {
-    //                 softDeleteEntity.IsDeleted = true;
-    //                 softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
-    //                 softDeleteEntity.DeletedDate = _dateTime.Now;
-    //                 entry.State = EntityState.Modified;
-    //             }
-    //             break;
-    //     }
-    // }
-
-    // return await base.SaveChangesAsync(cancellationToken);
-    // }
-
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
+            var entitiesWithDomainEvents = ChangeTracker
+                .Entries<BaseEntity>()
+                .Where(entry => entry.Entity.DomainEvents.Any())
+                .Select(entry => entry.Entity)
+                .ToList();
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.Entity is BaseAuditableEntity auditableEntity)
+                {
+                    switch (entry.State)
+                    {
+                        case EntityState.Added:
+                            auditableEntity.CreatedBy = _currentUser.UserId.ToString();
+                            auditableEntity.Created = _dateTime.Now;
+                            break;
+                        case EntityState.Modified:
+                            auditableEntity.LastModifiedBy = _currentUser.UserId.ToString();
+                            auditableEntity.LastModified = _dateTime.Now;
+                            break;
+                    }
+                }
+                if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
+                {
+                    softDeleteEntity.IsDeleted = true;
+                    softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
+                    softDeleteEntity.DeletedDate = _dateTime.Now;
+                    entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
+                }
+            }
+            var result = await base.SaveChangesAsync(cancellationToken);
+            // Điều phối các sự kiện miền sau khi SaveChanges thành công
+            await _domainEventDispatcher.DispatchAndClearEvents(entitiesWithDomainEvents);
+            return result;
+        }
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.
     /// </summary>
@@ -139,9 +130,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
         builder.Ignore<JsonDocument>();
-
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
@@ -149,9 +138,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 entityType.AddSoftDeleteQueryFilter();
             }
         }
-
         base.OnModelCreating(builder);
-
         // Convert all DateTime properties to UTC
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
@@ -166,9 +153,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 }
             }
         }
-
         builder.ApplySnakeCaseNamingConvention();
-
         builder.Entity<MemberFace>(mb =>
         {
             mb.OwnsOne(mf => mf.BoundingBox);
@@ -181,4 +166,3 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         });
     }
 }
-
