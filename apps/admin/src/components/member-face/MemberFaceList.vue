@@ -8,13 +8,6 @@
           <v-toolbar flat>
             <v-toolbar-title>{{ t('memberFace.list.title') }}</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="canPerformActions" color="primary" icon @click="emit('ai-create')">
-              <v-tooltip :text="t('memberFace.list.action.aiCreate')">
-                <template v-slot:activator="{ props }">
-                  <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-                </template>
-              </v-tooltip>
-            </v-btn>
             <v-btn v-if="canPerformActions" color="primary" icon @click="emit('create')"
               data-testid="create-member-face-button">
               <v-tooltip :text="t('common.create')">
@@ -29,8 +22,11 @@
           </v-toolbar>
         </template>
         <template v-slot:item.thumbnail="{ item }">
-          <v-img v-if="item.thumbnailUrl" :src="item.thumbnailUrl" height="40" width="40" cover class="my-1"></v-img>
-          <v-icon v-else>mdi-image-off</v-icon>
+          <div class="d-flex justify-center align-center" style="height: 100%;">
+            <v-img v-if="item.thumbnailUrl" rounded :src="item.thumbnailUrl" width="50" height="50" 
+              class="my-1"></v-img>
+            <v-icon v-else>mdi-image-off</v-icon>
+          </div>
         </template>
         <template v-slot:item.memberName="{ item }">
           <MemberName :fullName="item.memberName" :gender="item.memberGender" :avatarUrl="item.memberAvatarUrl" />
@@ -82,8 +78,9 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
-import { useAuth } from '@/composables/useAuth'; // NEW
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination'; // NEW
+import { useAuth } from '@/composables/useAuth';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import type { DataTableHeader } from 'vuetify'; // NEW
 
 interface MemberFaceListProps {
   items: MemberFace[];
@@ -129,11 +126,11 @@ const canPerformActions = computed(() => { // NEW
   return !props.readOnly && (isAdmin.value || isFamilyManager.value);
 });
 
-const headers = computed(() => [
-  { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '120px' },
+const headers = computed<DataTableHeader[]>(() => [
+  { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '120px', align: 'center' },
   { title: t('memberFace.list.headers.memberName'), key: 'memberName' },
   { title: t('memberFace.list.headers.familyName'), key: 'familyName' },
-  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '120px' },
+  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
 
