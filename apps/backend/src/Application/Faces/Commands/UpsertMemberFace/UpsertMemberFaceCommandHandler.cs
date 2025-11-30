@@ -1,9 +1,7 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.AI.Models;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Faces.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
@@ -92,7 +90,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
 
         // 4. If no conflict and not skipped, proceed to create/update local MemberFace and upsert to vector DB
         MemberFace? memberFace = null;
-        var vectorDbId = Guid.NewGuid();;
+        var vectorDbId = Guid.NewGuid(); ;
 
         if (memberFace == null)
         {
@@ -109,7 +107,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 Emotion = request.Emotion,
                 EmotionConfidence = request.EmotionConfidence,
                 IsVectorDbSynced = false,
-                VectorDbId = vectorDbId.ToString() 
+                VectorDbId = vectorDbId.ToString()
             };
             _context.MemberFaces.Add(memberFace);
             _logger.LogInformation("Created new MemberFace entity for MemberId {MemberId} and FaceId {FaceId}.", request.MemberId, request.FaceId);
@@ -119,7 +117,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
         {
             Id = vectorDbId,
-            Vector = request.Embedding.Select(d => (float)d).ToList(), // Convert double to float
+            Vector = [.. request.Embedding.Select(d => (float)d)], // Convert double to float
             Payload = new Dictionary<string, object>
             {
                 { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity

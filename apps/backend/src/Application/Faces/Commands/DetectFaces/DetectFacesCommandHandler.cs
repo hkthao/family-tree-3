@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions; // NEW USING FOR REGEX
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -31,7 +30,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string? resizedImageUrl = null;
             string cloud = "cloudinary";
             string uploadFolder = "temp/uploads";
-            string faceFolder = "temp/faces";
             string resizeFolder = "temp/512x512";
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
@@ -105,40 +103,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             foreach (var faceResult in detectedFacesResult)
             {
-                // Upload face thumbnail to n8n to get a public URL
+                // Upload face thumbnail logic removed for performance.
                 string? thumbnailUrl = null;
-                if (!string.IsNullOrEmpty(faceResult.Thumbnail))
-                {
-                    try
-                    {
-                        var thumbnailBytes = ConvertBase64ToBytes(faceResult.Thumbnail);
-                        var thumbnailFileName = $"{faceResult.Id}_thumbnail.jpeg"; // Use face ID for unique name
-
-                        var thumbnailUploadCommand = new UploadFileCommand // Ensure correct namespace
-                        {
-                            ImageData = thumbnailBytes,
-                            FileName = thumbnailFileName,
-                            Cloud = cloud,
-                            Folder = faceFolder,
-                            ContentType = "image/jpeg" // Assuming thumbnail is always jpeg
-                        };
-
-                        var thumbnailUploadResult = await _mediator.Send(thumbnailUploadCommand, cancellationToken);
-
-                        if (thumbnailUploadResult.IsSuccess && thumbnailUploadResult.Value != null)
-                        {
-                            thumbnailUrl = thumbnailUploadResult.Value.Url;
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Failed to upload face thumbnail to n8n: {Error}", thumbnailUploadResult.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to convert or upload base64 thumbnail for face {FaceId}.", faceResult.Id);
-                    }
-                }
 
                 var detectedFaceDto = new DetectedFaceDto
                 {
@@ -234,14 +200,4 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
         }
     }
 
-    private byte[] ConvertBase64ToBytes(string base64String)
-    {
-        // Remove "data:image/jpeg;base64," or "data:image/png;base64," prefix if present
-        var base64Data = Regex.Match(base64String, @"data:image/(?<type>.+?);base64,(?<data>.+)").Groups["data"].Value;
-        if (string.IsNullOrEmpty(base64Data))
-        {
-            base64Data = base64String; // Fallback if no prefix or not an image data URI
-        }
-        return Convert.FromBase64String(base64Data);
-    }
 }

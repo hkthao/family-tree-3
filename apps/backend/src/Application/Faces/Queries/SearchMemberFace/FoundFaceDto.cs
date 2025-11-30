@@ -1,5 +1,3 @@
-using backend.Application.Faces.Common;
-
 namespace backend.Application.Faces.Queries.SearchMemberFace;
 
 public class FoundFaceDto

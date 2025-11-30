@@ -1,4 +1,3 @@
-using System.IO; // NEW for Path.GetExtension
 using Ardalis.Specification.EntityFrameworkCore; // NEW
 using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
 using backend.Application.Common.Constants;
@@ -8,8 +7,6 @@ using backend.Application.Faces.Commands.UpsertMemberFace; // NEW
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
-using backend.Domain.ValueObjects;
-using MediatR; // NEW
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging; // NEW
 
@@ -136,7 +133,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 Confidence = (double)detectedFace.Confidence,
                 ThumbnailUrl = detectedFace.ThumbnailUrl,
                 OriginalImageUrl = request.OriginalImageUrl,
-                Embedding = detectedFace.Embedding ?? new List<double>(),
+                Embedding = detectedFace.Embedding ?? [],
                 Emotion = detectedFace.Emotion,
                 EmotionConfidence = (double)(detectedFace.EmotionConfidence ?? 0.0f)
             };
