@@ -42,21 +42,57 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
             return Result<PaginatedList<MemberFaceDto>>.Success(new PaginatedList<MemberFaceDto>(new List<MemberFaceDto>(), 0, request.Page, request.ItemsPerPage));
         }
         // Sorting
-        Expression<Func<MemberFace, object>> orderByExpression = request.SortBy?.ToLowerInvariant() switch
+        if (!string.IsNullOrWhiteSpace(request.SortBy))
         {
-            "faceid" => mf => mf.FaceId,
-            "confidence" => mf => mf.Confidence,
-            "membername" => mf => mf.Member!.FullName, // Needs to be careful with nullables here
-            "familyname" => mf => mf.Member!.Family!.Name,
-            _ => mf => mf.Created // Default sort by creation date
-        };
-        if (request.SortOrder?.ToLowerInvariant() == "asc")
-        {
-            query = query.OrderBy(orderByExpression);
+            var sortOrder = request.SortOrder?.ToLowerInvariant();
+            if (request.SortBy.Equals("membername", StringComparison.OrdinalIgnoreCase))
+            {
+                if (sortOrder == "asc")
+                {
+                    query = query.OrderBy(mf => mf.Member!.LastName)
+                                 .ThenBy(mf => mf.Member.FirstName);
+                }
+                else
+                {
+                    query = query.OrderByDescending(mf => mf.Member!.LastName)
+                                 .ThenByDescending(mf => mf.Member.FirstName);
+                }
+            }
+            else if (request.SortBy.Equals("familyname", StringComparison.OrdinalIgnoreCase))
+            {
+                if (sortOrder == "asc")
+                {
+                    query = query.OrderBy(mf => mf.Member!.Family!.Name);
+                }
+                else
+                {
+                    query = query.OrderByDescending(mf => mf.Member!.Family!.Name);
+                }
+            }
+            else
+            {
+                // Fallback to dynamic expression building for other properties
+                Expression<Func<MemberFace, object>> orderByExpression = request.SortBy.ToLowerInvariant() switch
+                {
+                    "faceid" => mf => mf.FaceId,
+                    "confidence" => mf => mf.Confidence,
+                    _ => mf => mf.Created // Default sort by creation date
+                };
+
+                if (sortOrder == "asc")
+                {
+                    query = query.OrderBy(orderByExpression);
+                }
+                else
+                {
+                    query = query.OrderByDescending(orderByExpression);
+                }
+            }
         }
         else
         {
-            query = query.OrderByDescending(orderByExpression);
+            // Default sorting if no SortBy is specified
+            query = query.OrderByDescending(mf => mf.Created);
         }
         var paginatedList = await PaginatedList<MemberFaceDto>.CreateAsync(
             query.Select(mf => new MemberFaceDto
@@ -79,7 +115,7 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
                 EmotionConfidence = mf.EmotionConfidence,
                 IsVectorDbSynced = mf.IsVectorDbSynced,
                 VectorDbId = mf.VectorDbId,
-                MemberName = mf.Member!.FullName,
+                MemberName = mf.Member!.LastName + " " + mf.Member.FirstName,
                 MemberGender = mf.Member!.Gender, // NEW
                 MemberAvatarUrl = mf.Member!.AvatarUrl, // NEW
                 FamilyId = mf.Member!.FamilyId,
