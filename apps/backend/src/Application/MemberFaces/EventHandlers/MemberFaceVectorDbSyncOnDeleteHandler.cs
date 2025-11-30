@@ -29,10 +29,7 @@ public class MemberFaceVectorDbSyncOnDeleteHandler : INotificationHandler<Member
 
         var deleteFaceVectorDto = new DeleteFaceVectorOperationDto
         {
-            Filter = new Dictionary<string, object>
-            {
-                { "id", vectorDbId } // vectorDbId is already a string
-            }
+            PointIds = new List<string> { vectorDbId }
         };
 
         var n8nDeleteResult = await _n8nService.CallDeleteFaceVectorWebhookAsync(deleteFaceVectorDto, cancellationToken);

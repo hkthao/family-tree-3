@@ -328,9 +328,7 @@ public class N8nService : IN8nService
     {
         return await CallFaceVectorWebhookInternalAsync(
             _n8nSettings.Face.DeleteWebhookUrl,
-            dto.Filter != null && dto.Filter.TryGetValue("vectorDbId", out var idValue) && idValue != null
-                ? idValue.ToString() ?? Guid.NewGuid().ToString()
-                : Guid.NewGuid().ToString(),
+            dto.PointIds.FirstOrDefault() ?? Guid.NewGuid().ToString(),
             dto,
             cancellationToken
         );

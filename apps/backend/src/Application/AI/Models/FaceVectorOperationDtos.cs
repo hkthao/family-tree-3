@@ -46,7 +46,7 @@ public class SearchFaceVectorOperationDto
 
 public class DeleteFaceVectorOperationDto
 {
-    public Dictionary<string, object> Filter { get; set; } = new Dictionary<string, object>();
+    public List<string> PointIds { get; set; } = [];
 }
 
 // New DTOs for n8n webhook response
