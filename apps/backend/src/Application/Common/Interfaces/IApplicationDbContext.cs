@@ -53,10 +53,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<EventMember> EventMembers { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Face.
-    /// </summary>
-    DbSet<Face> Faces { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.

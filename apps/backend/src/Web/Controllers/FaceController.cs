@@ -1,7 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Commands.DeleteFacesByMemberId;
 using backend.Application.Faces.Commands.DetectFaces;
-using backend.Application.Faces.Commands.SaveFaceLabels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -51,30 +49,5 @@ public class FaceController(IMediator mediator) : ControllerBase
             return Ok(result.Value);
         }
         return BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý POST request để lưu nhãn cho các khuôn mặt đã phát hiện.
-    /// </summary>
-    /// <param name="command">Lệnh lưu nhãn khuôn mặt.</param>
-    /// <returns>Kết quả của thao tác lưu.</returns>
-    [HttpPost("labels")]
-    public async Task<ActionResult<Result<Unit>>> SaveFaceLabels([FromBody] SaveFaceLabelsCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Result<Unit>>)Ok(result) : (ActionResult<Result<Unit>>)BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý DELETE request để xóa tất cả dữ liệu khuôn mặt cho một thành viên.
-    /// </summary>
-    /// <param name="memberId">ID của thành viên.</param>
-    /// <returns>Kết quả của thao tác xóa.</returns>
-    [HttpDelete("member/{memberId}")]
-    public async Task<ActionResult<Result<Unit>>> DeleteFacesByMemberId(Guid memberId)
-    {
-        var command = new DeleteFacesByMemberIdCommand(memberId);
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Result<Unit>>)Ok(result) : (ActionResult<Result<Unit>>)BadRequest(result.Error);
     }
 }

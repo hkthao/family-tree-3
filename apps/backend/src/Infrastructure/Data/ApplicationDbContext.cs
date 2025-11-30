@@ -65,10 +65,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Face.
-    /// </summary>
-    public DbSet<Face> Faces => Set<Face>();
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.
