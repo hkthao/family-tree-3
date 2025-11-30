@@ -1,0 +1,131 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.MemberFaces.Commands.CreateMemberFace;
+using backend.Application.MemberFaces.Commands.DeleteMemberFace;
+using backend.Application.MemberFaces.Commands.UpdateMemberFace;
+using backend.Application.MemberFaces.Queries.GetMemberFaceById;
+using backend.Application.MemberFaces.Queries.SearchMemberFaces; // Changed to SearchMemberFaces
+using backend.Application.MemberFaces.Queries.MemberFaces;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
+using backend.Domain.ValueObjects;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
+using MediatR; // Required for Unit.Value
+using System.Linq;
+
+namespace backend.Application.UnitTests.MemberFaces.Queries.GetMemberFaceById;
+
+public class GetMemberFaceByIdQueryHandlerTests : TestBase
+{
+    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<ILogger<GetMemberFaceByIdQueryHandler>> _getByIdLoggerMock;
+
+    public GetMemberFaceByIdQueryHandlerTests()
+    {
+        _authorizationServiceMock = new Mock<IAuthorizationService>();
+        _getByIdLoggerMock = new Mock<ILogger<GetMemberFaceByIdQueryHandler>>();
+        // Default authorization setup for tests
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+    }
+
+    private GetMemberFaceByIdQueryHandler CreateGetByIdHandler()
+    {
+        return new GetMemberFaceByIdQueryHandler(_context, _authorizationServiceMock.Object);
+    }
+
+    [Fact]
+    public async Task GetMemberFaceById_ShouldReturnMemberFace_WhenAuthorized()
+    {
+        // Arrange
+        var family = new Family { Name = "Test Family", Code = "TF" };
+        var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
+        var memberFace = new MemberFace
+        {
+            MemberId = member.Id,
+            FaceId = "face123",
+            BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
+            Confidence = 0.99,
+            ThumbnailUrl = "http://thumbnail.url",
+            OriginalImageUrl = "http://original.url",
+            Embedding = new List<double> { 0.1, 0.2, 0.3 },
+            Emotion = "happy",
+            EmotionConfidence = 0.95,
+            IsVectorDbSynced = true
+        };
+        await _context.Families.AddAsync(family);
+        await _context.Members.AddAsync(member);
+        await _context.MemberFaces.AddAsync(memberFace);
+        await _context.SaveChangesAsync();
+
+        var query = new GetMemberFaceByIdQuery { Id = memberFace.Id };
+        var handler = CreateGetByIdHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().Be(memberFace.Id);
+        result.Value.MemberId.Should().Be(member.Id);
+        result.Value.FaceId.Should().Be(memberFace.FaceId);
+        result.Value.FamilyId.Should().Be(family.Id);
+    }
+
+    [Fact]
+    public async Task GetMemberFaceById_ShouldReturnFailure_WhenMemberFaceNotFound()
+    {
+        // Arrange
+        var query = new GetMemberFaceByIdQuery { Id = Guid.NewGuid() }; // Non-existent ID
+        var handler = CreateGetByIdHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
+    }
+
+    [Fact]
+    public async Task GetMemberFaceById_ShouldReturnFailure_WhenUnauthorized()
+    {
+        // Arrange
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // Unauthorized
+
+        var family = new Family { Name = "Test Family", Code = "TF" };
+        var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
+        var memberFace = new MemberFace
+        {
+            MemberId = member.Id,
+            FaceId = "face123",
+            BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
+            Confidence = 0.99,
+            ThumbnailUrl = "http://thumbnail.url",
+            OriginalImageUrl = "http://original.url",
+            Embedding = new List<double> { 0.1, 0.2, 0.3 },
+            Emotion = "happy",
+            EmotionConfidence = 0.95,
+            IsVectorDbSynced = true
+        };
+        await _context.Families.AddAsync(family);
+        await _context.Members.AddAsync(member);
+        await _context.MemberFaces.AddAsync(memberFace);
+        await _context.SaveChangesAsync();
+
+        var query = new GetMemberFaceByIdQuery { Id = memberFace.Id };
+        var handler = CreateGetByIdHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+    }
+}
