@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Common; // For BoundingBoxDto
+using backend.Application.MemberFaces.Common; // For BoundingBoxDto
 
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 

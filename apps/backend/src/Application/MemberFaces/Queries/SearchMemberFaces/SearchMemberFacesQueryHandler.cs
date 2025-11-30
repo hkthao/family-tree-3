@@ -2,40 +2,33 @@ using System.Linq.Expressions;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
+using backend.Application.MemberFaces.Common; // For MemberFaceDto and BoundingBoxDto
 using backend.Domain.Entities;
-
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;
-
 public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQuery, Result<PaginatedList<MemberFaceDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-
     public SearchMemberFacesQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
     {
         _context = context;
         _authorizationService = authorizationService;
     }
-
     public async Task<Result<PaginatedList<MemberFaceDto>>> Handle(SearchMemberFacesQuery request, CancellationToken cancellationToken)
     {
         IQueryable<MemberFace> query = _context.MemberFaces
             .Include(mf => mf.Member) // Include Member to get FamilyId
             .ThenInclude(m => m!.Family); // Then include Family to get FamilyName
-
         // Filter by FamilyId
         if (request.FamilyId.HasValue)
         {
             query = query.Where(mf => mf.Member != null && mf.Member.FamilyId == request.FamilyId.Value);
         }
-
         // Filter by MemberId
         if (request.MemberId.HasValue)
         {
             query = query.Where(mf => mf.MemberId == request.MemberId.Value);
         }
-
         // TODO: Implement proper authorization for listing multiple faces.
         // For now, if a FamilyId is provided, authorize access to that family.
         if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))
@@ -44,12 +37,10 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
         }
         // If no FamilyId is provided, we would need to filter by all families the user can access.
         // As GetAccessibleFamilyIds is not available, this is left as a TODO for now.
-
         if (!await query.AnyAsync(cancellationToken)) // Use AnyAsync here
         {
             return Result<PaginatedList<MemberFaceDto>>.Success(new PaginatedList<MemberFaceDto>(new List<MemberFaceDto>(), 0, request.Page, request.ItemsPerPage));
         }
-
         // Sorting
         Expression<Func<MemberFace, object>> orderByExpression = request.SortBy?.ToLowerInvariant() switch
         {
@@ -59,7 +50,6 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
             "familyname" => mf => mf.Member!.Family!.Name,
             _ => mf => mf.Created // Default sort by creation date
         };
-
         if (request.SortOrder?.ToLowerInvariant() == "asc")
         {
             query = query.OrderBy(orderByExpression);
@@ -68,14 +58,13 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
         {
             query = query.OrderByDescending(orderByExpression);
         }
-
         var paginatedList = await PaginatedList<MemberFaceDto>.CreateAsync(
             query.Select(mf => new MemberFaceDto
             {
                 Id = mf.Id,
                 MemberId = mf.MemberId,
                 FaceId = mf.FaceId,
-                BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto
+                BoundingBox = new BoundingBoxDto
                 {
                     X = (int)mf.BoundingBox.X,
                     Y = (int)mf.BoundingBox.Y,
@@ -99,7 +88,6 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
             request.Page,
             request.ItemsPerPage
         );
-
         return Result<PaginatedList<MemberFaceDto>>.Success(paginatedList);
     }
 }

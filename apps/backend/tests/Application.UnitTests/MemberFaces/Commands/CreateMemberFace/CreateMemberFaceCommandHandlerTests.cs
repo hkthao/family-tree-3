@@ -1,17 +1,17 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Faces.Queries; // For List<FoundFaceDto>
-using backend.Application.Faces.Queries.SearchMemberFace; // NEW: For SearchMemberFaceQuery and FoundFaceDto
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
+using backend.Application.MemberFaces.Common; 
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Events; // For MemberFaceCreatedEvent
+using backend.Domain.Events.MemberFaces; 
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.MemberFaces.Queries.SearchVectorFace;
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.CreateMemberFace;
 
@@ -51,7 +51,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         {
             MemberId = member.Id,
             FaceId = "face123",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
+            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring", // Provide a base64 string
             ThumbnailUrl = "http://thumbnail.url",
@@ -101,7 +101,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         {
             MemberId = Guid.NewGuid(), // Non-existent member
             FaceId = "face123",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
+            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
@@ -143,7 +143,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         {
             MemberId = member.Id,
             FaceId = "face123",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
+            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
@@ -191,7 +191,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         {
             MemberId = member.Id,
             FaceId = "face123",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
+            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring",
             ThumbnailUrl = "http://thumbnail.url",

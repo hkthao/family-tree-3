@@ -1,4 +1,4 @@
-using backend.Application.Faces.Commands;
+using backend.Application.MemberFaces.Common; // NEW: Add this using for FaceDetectionResultDto
 
 namespace backend.Application.Common.Interfaces;
 

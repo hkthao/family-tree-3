@@ -4,9 +4,8 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
-using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
+using backend.Application.MemberFaces.Common; // For MemberFaceDto
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
-using MediatR; // Required for Unit.Value
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

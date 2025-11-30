@@ -14,13 +14,10 @@ namespace backend.Application.UnitTests.MemberFaces.Queries.GetMemberFaceById;
 public class GetMemberFaceByIdQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<ILogger<GetMemberFaceByIdQueryHandler>> _getByIdLoggerMock;
 
     public GetMemberFaceByIdQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _getByIdLoggerMock = new Mock<ILogger<GetMemberFaceByIdQueryHandler>>();
-        // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 

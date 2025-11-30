@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
+using backend.Application.MemberFaces.Common;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
@@ -66,7 +67,7 @@ public class UpdateMemberFaceCommandHandlerTests : TestBase
             Id = existingMemberFace.Id,
             MemberId = member.Id,
             FaceId = "updatedFaceId",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 15, Y = 25, Width = 55, Height = 65 },
+            BoundingBox = new BoundingBoxDto { X = 15, Y = 25, Width = 55, Height = 65 },
             Confidence = 0.95,
             ThumbnailUrl = "http://updated.thumbnail.url",
             OriginalImageUrl = "http://updated.original.url",
@@ -109,7 +110,7 @@ public class UpdateMemberFaceCommandHandlerTests : TestBase
             Id = Guid.NewGuid(), // Non-existent ID
             MemberId = Guid.NewGuid(),
             FaceId = "nonExistent",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 1, Y = 1, Width = 1, Height = 1 },
+            BoundingBox = new BoundingBoxDto { X = 1, Y = 1, Width = 1, Height = 1 },
             Confidence = 0.5
         };
         var handler = CreateHandler();
@@ -137,7 +138,7 @@ public class UpdateMemberFaceCommandHandlerTests : TestBase
             Id = existingMemberFace.Id,
             MemberId = member.Id,
             FaceId = "face123",
-            BoundingBox = new backend.Application.Faces.Common.BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
+            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
         };
         var handler = CreateHandler();

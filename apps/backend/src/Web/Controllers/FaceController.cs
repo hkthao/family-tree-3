@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Commands.DetectFaces;
+using backend.Application.MemberFaces.Commands.DetectFaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

@@ -1,48 +1,41 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Faces.Common;
-using backend.Application.Faces.Queries;
-using backend.Application.Files.UploadFile; // NEW
+using backend.Application.MemberFaces.Common;
+using backend.Application.Files.UploadFile; 
 using Microsoft.Extensions.Logging;
+using backend.Application.MemberFaces.Queries.SearchVectorFace;
 
-namespace backend.Application.Faces.Commands.DetectFaces;
+namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
 public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IMediator mediator) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
-    private readonly IMediator _mediator = mediator; // NEW
-
+    private readonly IMediator _mediator = mediator; 
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            // Ensure fileName is valid for the webhook
             string effectiveFileName = string.IsNullOrWhiteSpace(request.FileName)
                 ? $"uploaded_image_{Guid.NewGuid()}{Path.GetExtension(request.ContentType)}"
                 : request.FileName;
-
-            // 1. Upload original image to n8n webhook to get a public URL
             string? originalImageUrl = null;
             byte[]? imageBytesToAnalyze = request.ImageBytes;
             string? resizedImageUrl = null;
             string uploadFolder = UploadConstants.TemporaryUploadsFolder;
             string resizeFolder = UploadConstants.TemporaryUploadsFolder;
-
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
-                var originalUploadCommand = new UploadFileCommand // Ensure correct namespace
+                var originalUploadCommand = new UploadFileCommand 
                 {
                     ImageData = request.ImageBytes,
                     FileName = effectiveFileName,
                     Folder = uploadFolder,
                     ContentType = request.ContentType
                 };
-
                 var originalUploadResult = await _mediator.Send(originalUploadCommand, cancellationToken);
-
                 if (originalUploadResult.IsSuccess && originalUploadResult.Value != null)
                 {
                     originalImageUrl = originalUploadResult.Value.Url;
@@ -51,59 +44,46 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 {
                     return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
                 }
-
-                // If resizing is requested, resize the image and upload it
                 if (request.ResizeImageForAnalysis)
                 {
                     try
                     {
-                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); // Resize to 512px width, auto height
+                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); 
                         var resizedFileName = $"resized_{effectiveFileName}";
-
-                        var resizedUploadCommand = new UploadFileCommand // Ensure correct namespace
+                        var resizedUploadCommand = new UploadFileCommand 
                         {
                             ImageData = resizedImageBytes,
                             FileName = resizedFileName,
                             Folder = resizeFolder,
                             ContentType = request.ContentType
                         };
-
                         var resizedUploadResult = await _mediator.Send(resizedUploadCommand, cancellationToken);
-
                         if (resizedUploadResult.IsSuccess && resizedUploadResult.Value != null)
                         {
                             resizedImageUrl = resizedUploadResult.Value.Url;
-                            imageBytesToAnalyze = resizedImageBytes; // Use resized image for detection
+                            imageBytesToAnalyze = resizedImageBytes; 
                         }
                         else
                         {
                             _logger.LogWarning("Failed to upload resized image to n8n: {Error}", resizedUploadResult.Error);
-                            // Continue with original image if resizing upload fails, but log the error.
                         }
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Failed to resize or upload image for analysis.");
-                        // Continue with original image if resizing fails, but log the error.
                     }
                 }
             }
-
             var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
-
-            // Generate a unique ImageId for this detection session
             var imageId = Guid.NewGuid();
-
             var detectedFaceDtos = new List<DetectedFaceDto>();
             var memberIdsToFetch = new HashSet<Guid>();
-            var faceMemberMap = new Dictionary<string, Guid>(); // Map faceId to memberId from n8n
-
+            var faceMemberMap = new Dictionary<string, Guid>(); 
             foreach (var faceResult in detectedFacesResult)
             {
-                // Upload face thumbnail logic removed for performance.
                 var detectedFaceDto = new DetectedFaceDto
                 {
-                    Id = Guid.NewGuid().ToString(), // Generate a unique ID for each detected face
+                    Id = Guid.NewGuid().ToString(), 
                     BoundingBox = new BoundingBoxDto
                     {
                         X = faceResult.BoundingBox.X,
@@ -112,7 +92,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         Height = faceResult.BoundingBox.Height
                     },
                     Confidence = faceResult.Confidence,
-                    Thumbnail = faceResult.Thumbnail, // Assign the original base64 thumbnail
+                    Thumbnail = faceResult.Thumbnail, 
                     Embedding = faceResult.Embedding?.ToList(),
                     MemberId = null,
                     MemberName = null,
@@ -122,23 +102,20 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     DeathYear = null,
                     Emotion = faceResult.Emotion,
                     EmotionConfidence = faceResult.EmotionConfidence,
-                    Status = "unrecognized" // Default to unrecognized
+                    Status = "unrecognized" 
                 };
-
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
                     var searchFaceQuery = new SearchMemberFaceQuery
                     {
                         Vector = detectedFaceDto.Embedding,
-                        Limit = 1, // We only need the best match for a detected face
-                        Threshold = 0.7f // Default threshold for face matching
+                        Limit = 1, 
+                        Threshold = 0.7f 
                     };
-
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
-
                     if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
                     {
-                        var foundFace = searchResult.Value.First(); // Get the best match
+                        var foundFace = searchResult.Value.First(); 
                         detectedFaceDto.MemberId = foundFace.MemberId;
                         memberIdsToFetch.Add(foundFace.MemberId);
                         faceMemberMap[detectedFaceDto.Id] = foundFace.MemberId;
@@ -152,19 +129,15 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         _logger.LogInformation("No matching face found for FaceId {FaceId}.", detectedFaceDto.Id);
                     }
                 }
-                // NEW: Set Status based on whether MemberId has a value
                 detectedFaceDto.Status = detectedFaceDto.MemberId.HasValue ? "recognized" : "unrecognized";
                 detectedFaceDtos.Add(detectedFaceDto);
             }
-
-            // Fetch member details for all unique member IDs found
             if (memberIdsToFetch.Any())
             {
                 var members = await _context.Members
                     .Where(m => memberIdsToFetch.Contains(m.Id))
                     .Include(m => m.Family)
                     .ToListAsync(cancellationToken);
-
                 foreach (var faceDto in detectedFaceDtos)
                 {
                     if (faceDto.MemberId.HasValue)
@@ -181,12 +154,11 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     }
                 }
             }
-
             return Result<FaceDetectionResponseDto>.Success(new FaceDetectionResponseDto
             {
                 ImageId = imageId,
-                OriginalImageUrl = originalImageUrl, // Populate the OriginalImageUrl
-                ResizedImageUrl = resizedImageUrl, // Populate the ResizedImageUrl
+                OriginalImageUrl = originalImageUrl, 
+                ResizedImageUrl = resizedImageUrl, 
                 DetectedFaces = detectedFaceDtos
             });
         }
@@ -196,5 +168,4 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             return Result<FaceDetectionResponseDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
-
 }

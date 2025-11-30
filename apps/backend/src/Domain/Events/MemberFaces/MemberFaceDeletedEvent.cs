@@ -1,4 +1,4 @@
-namespace backend.Domain.Events;
+namespace backend.Domain.Events.MemberFaces;
 
 public class MemberFaceDeletedEvent : BaseEvent
 {

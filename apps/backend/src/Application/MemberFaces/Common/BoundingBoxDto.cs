@@ -1,4 +1,4 @@
-namespace backend.Application.Faces.Common;
+namespace backend.Application.MemberFaces.Common;
 
 public class BoundingBoxDto
 {

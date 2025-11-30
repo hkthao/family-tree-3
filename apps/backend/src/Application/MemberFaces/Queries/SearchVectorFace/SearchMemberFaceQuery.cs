@@ -1,8 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Queries.SearchMemberFace;
-
-namespace backend.Application.Faces.Queries;
-
+namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 public record SearchMemberFaceQuery : IRequest<Result<List<FoundFaceDto>>>
 {
     public Guid? FamilyId { get; init; } // Optional: filter search to a specific family

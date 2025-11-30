@@ -1,6 +1,6 @@
 using backend.Domain.Entities;
 
-namespace backend.Domain.Events;
+namespace backend.Domain.Events.MemberFaces;
 
 public class MemberFaceCreatedEvent : BaseEvent
 {

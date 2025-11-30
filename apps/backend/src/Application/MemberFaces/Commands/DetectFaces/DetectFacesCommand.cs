@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Faces.Commands.DetectFaces;
+namespace backend.Application.MemberFaces.Commands.DetectFaces;
 public class DetectFacesCommand : IRequest<Result<FaceDetectionResponseDto>>
 {
     public byte[] ImageBytes { get; set; } = null!;

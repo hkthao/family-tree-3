@@ -1,7 +1,7 @@
 
-using backend.Application.Faces.Common;
+using backend.Application.MemberFaces.Common; // For BoundingBoxDto
 
-namespace backend.Application.Faces.Queries;
+namespace backend.Application.MemberFaces.Common;
 public class DetectedFaceDto
 {
     public string Id { get; set; } = string.Empty;

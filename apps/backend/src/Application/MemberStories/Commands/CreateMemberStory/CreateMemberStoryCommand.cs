@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Queries;
+using backend.Application.MemberFaces.Common;
 
 namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 

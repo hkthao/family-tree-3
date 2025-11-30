@@ -1,4 +1,4 @@
-namespace backend.Application.Faces.Queries.SearchMemberFace;
+namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 
 public class FoundFaceDto
 {

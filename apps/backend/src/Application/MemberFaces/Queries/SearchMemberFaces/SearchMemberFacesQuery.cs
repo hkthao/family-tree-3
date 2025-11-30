@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
+using backend.Application.MemberFaces.Common; // For MemberFaceDto
 
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;
 

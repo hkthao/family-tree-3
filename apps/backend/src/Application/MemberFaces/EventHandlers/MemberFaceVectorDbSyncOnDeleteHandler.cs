@@ -1,9 +1,9 @@
 using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Events;
+using backend.Domain.Events.MemberFaces;
 using Microsoft.Extensions.Logging;
 
-namespace backend.Application.Faces.EventHandlers;
+namespace backend.Application.MemberFaces.EventHandlers;
 
 public class MemberFaceVectorDbSyncOnDeleteHandler : INotificationHandler<MemberFaceDeletedEvent>
 {

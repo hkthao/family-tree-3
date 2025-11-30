@@ -5,7 +5,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 
-namespace backend.Application.Faces.Queries.SearchMemberFace;
+namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 
 public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
 {

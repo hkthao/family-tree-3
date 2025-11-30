@@ -1,11 +1,11 @@
 using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Faces.Commands; // Added this using directive
-using backend.Application.Faces.Commands.DetectFaces;
-using backend.Application.Faces.Common;
-using backend.Application.Faces.Queries;
-using backend.Application.Faces.Queries.SearchMemberFace; // Add this line
+using backend.Application.MemberFaces.Commands;
+using backend.Application.MemberFaces.Commands.DetectFaces;
+using backend.Application.MemberFaces.Common;
+using backend.Application.MemberFaces.Queries;
+using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -61,10 +61,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             {
                 new FaceDetectionResultDto
                 {
-                    Id = "face1",
                     BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                     Confidence = 0.99f,
-                    Embedding = new double[] { 1.0, 2.0, 3.0 }
+                    Embedding = new List<double> { 1.0, 2.0, 3.0 }
                 }
             };
 
@@ -186,10 +185,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 {
                     new FaceDetectionResultDto
                     {
-                        Id = "face1",
                         BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                         Confidence = 0.99f,
-                        Embedding = new double[] { 1.0, 2.0, 3.0 },
+                        Embedding = new List<double> { 1.0, 2.0, 3.0 },
                         Thumbnail = null // Should be null when ReturnCrop is false
                     }
                 });
