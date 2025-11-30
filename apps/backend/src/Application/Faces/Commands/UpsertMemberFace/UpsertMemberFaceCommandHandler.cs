@@ -4,6 +4,7 @@ using backend.Application.AI.Models;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Faces.Queries; // Added for SearchMemberFaceQuery and FoundFaceDto
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             {
                 var thumbnailBytes = ImageUtils.ConvertBase64ToBytes(request.Thumbnail);
                 var thumbnailFileName = $"{request.FaceId}_thumbnail.jpeg"; // Use FaceId for unique name
-                string faceFolder = "temp/faces";
+                string faceFolder = string.Format(UploadConstants.FamilyFaceFolder, member.FamilyId); // Use FamilyFaceFolder constant for folder path
 
                 var thumbnailUploadCommand = new UploadFileCommand
                 {
@@ -70,58 +71,51 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             }
         }
 
-        // 4. Perform n8n vector search for existing face
-        var searchFaceVectorDto = new SearchFaceVectorOperationDto
+        // 4. Perform face vector search for existing face using SearchMemberFaceQuery
+        var searchMemberFaceQuery = new SearchMemberFaceQuery
         {
-            Vector = request.Embedding.Select(d => (float)d).ToList(),
-            Limit = 1, // We only need one match to check for existence
-            Threshold = 0.95f, // High threshold for exact match
-            Filter = new Dictionary<string, object>
-            {
-                { "faceId", request.FaceId }, // Search specifically for this FaceId
-                { "familyId", request.FamilyId.ToString() } // NEW: Filter by family ID
-            },
-            ReturnFields = new List<string> { "localDbId", "memberId" }
+            FamilyId = request.FamilyId,
+            MemberId = request.MemberId,
+            Vector = request.Embedding.ToList(),
+            Limit = 1,
+            Threshold = 0.95f // Use the same threshold as before
         };
 
-        var n8nSearchResult = await _n8nService.CallSearchFaceVectorWebhookAsync(searchFaceVectorDto, cancellationToken);
+        var searchQueryResult = await _mediator.Send(searchMemberFaceQuery, cancellationToken);
 
-        if (!n8nSearchResult.IsSuccess || n8nSearchResult.Value == null || !n8nSearchResult.Value.Success)
+        if (!searchQueryResult.IsSuccess || searchQueryResult.Value == null || !searchQueryResult.Value.Any())
         {
-            _logger.LogWarning("Failed to search face vector for FaceId {FaceId} in n8n during upsert: {Error}. Proceeding with new face creation.", request.FaceId, n8nSearchResult.Error ?? n8nSearchResult.Value?.Message);
+            _logger.LogWarning("Failed to search face vector for FaceId {FaceId}: {Error}. Proceeding with new face creation.", request.FaceId, searchQueryResult.Error);
             // If search fails or returns no results, treat as new face
         }
-        else if (n8nSearchResult.Value.SearchResults != null && n8nSearchResult.Value.SearchResults.Count != 0)
+        else
         {
-            var foundVector = n8nSearchResult.Value.SearchResults.First();
-            if (foundVector.Payload != null && foundVector.Payload.TryGetValue("memberId", out var memberIdObj) && Guid.TryParse(memberIdObj?.ToString(), out var foundMemberId))
+            var foundFace = searchQueryResult.Value.First();
+            if (foundFace.MemberId != request.MemberId)
             {
-                if (foundMemberId != request.MemberId)
+                // Conflict: Face found, but associated with a different member
+                _logger.LogWarning("Face with FaceId {FaceId} found in vector DB, but associated with different MemberId {FoundMemberId} (requested: {RequestedMemberId}).", request.FaceId, foundFace.MemberId, request.MemberId);
+                return Result<UpsertMemberFaceCommandResultDto>.Failure($"Face with ID {request.FaceId} is already associated with another member.", ErrorSources.Conflict);
+            }
+            else
+            {
+                // Face found and associated with the same member, skip saving (per user instruction)
+                _logger.LogInformation("Face with FaceId {FaceId} already exists and is associated with MemberId {MemberId}. Skipping upsert.", request.FaceId, request.MemberId);
+
+                // Retrieve local MemberFace and return its ID
+                var existingLocalMemberFace = await _context.MemberFaces.FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
+                if (existingLocalMemberFace != null)
                 {
-                    // Conflict: Face found, but associated with a different member
-                    _logger.LogWarning("Face with FaceId {FaceId} found in vector DB, but associated with different MemberId {FoundMemberId} (requested: {RequestedMemberId}).", request.FaceId, foundMemberId, request.MemberId);
-                    return Result<UpsertMemberFaceCommandResultDto>.Failure($"Face with ID {request.FaceId} is already associated with another member.", ErrorSources.Conflict);
+                    return Result<UpsertMemberFaceCommandResultDto>.Success(new UpsertMemberFaceCommandResultDto
+                    {
+                        VectorDbId = existingLocalMemberFace.VectorDbId ?? "" // Return existing VectorDbId
+                    });
                 }
                 else
                 {
-                    // Face found and associated with the same member, skip saving (per user instruction)
-                    _logger.LogInformation("Face with FaceId {FaceId} already exists in vector DB and is associated with MemberId {MemberId}. Skipping upsert.", request.FaceId, request.MemberId);
-
-                    // Retrieve local MemberFace and return its ID
-                    var existingLocalMemberFace = await _context.MemberFaces.FirstOrDefaultAsync(mf => mf.FaceId == request.FaceId && mf.MemberId == request.MemberId, cancellationToken);
-                    if (existingLocalMemberFace != null)
-                    {
-                        return Result<UpsertMemberFaceCommandResultDto>.Success(new UpsertMemberFaceCommandResultDto
-                        {
-                            VectorDbId = existingLocalMemberFace.VectorDbId ?? "" // Return existing VectorDbId
-                        });
-                    }
-                    else
-                    {
-                        // If for some reason local entity doesn't exist, create it locally
-                        _logger.LogWarning("Vector DB reports existing face {FaceId} for MemberId {MemberId}, but local MemberFace entity not found. Creating local entity.", request.FaceId, request.MemberId);
-                        // Fall through to new face creation below, which will also upsert to vector DB.
-                    }
+                    // If for some reason local entity doesn't exist, create it locally
+                    _logger.LogWarning("Vector DB reports existing face {FaceId} for MemberId {MemberId}, but local MemberFace entity not found. Creating local entity.", request.FaceId, request.MemberId);
+                    // Fall through to new face creation below, which will also upsert to vector DB.
                 }
             }
         }
