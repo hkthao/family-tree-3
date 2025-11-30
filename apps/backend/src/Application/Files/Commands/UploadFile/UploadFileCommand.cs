@@ -18,10 +18,7 @@ public record UploadFileCommand : IRequest<Result<ImageUploadResponseDto>>
     /// </summary>
     public string FileName { get; init; } = null!;
 
-    /// <summary>
-    /// The cloud storage service to use (e.g., "imgbb").
-    /// </summary>
-    public string Cloud { get; init; } = "imgbb"; // Default to imgbb
+
 
     /// <summary>
     /// The folder in the cloud storage to upload to (e.g., "family-tree-memories").

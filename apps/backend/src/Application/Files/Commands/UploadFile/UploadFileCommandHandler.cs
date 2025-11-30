@@ -20,7 +20,6 @@ public class UploadFileCommandHandler(
         {
             ImageData = request.ImageData,
             FileName = request.FileName,
-            Cloud = request.Cloud,
             Folder = request.Folder,
             ContentType = request.ContentType // Pass content type
         };

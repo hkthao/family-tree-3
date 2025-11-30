@@ -1,4 +1,5 @@
 using backend.Application.AI.DTOs; // ADDED
+using backend.Application.Common.Constants; // Added this line
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this line
@@ -12,28 +13,28 @@ using MediatR; // NEW
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.Faces.Queries; // NEW - for SearchMemberFaceQuery
+using backend.Application.Faces.Queries.SearchMemberFace; // ADDED - for FoundFaceDto
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 
 public class DetectFacesTests : TestBase
 {
     private readonly Mock<IFaceApiService> _mockFaceApiService;
-
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
-
     private readonly Mock<IMediator> _mediatorMock;
     private readonly DetectFacesCommandHandler _handler; // Ensure this is explicitly declared
 
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
-
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
 
+        // Default mock for IMediator.Send for SearchMemberFaceQuery
+        _mediatorMock.Setup(m => m.Send(It.IsAny<SearchMemberFaceQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>())); // Return empty list by default
 
-
-        // Default setup for mediator to handle UploadFileCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto
             {
@@ -72,6 +73,14 @@ public class DetectFacesTests : TestBase
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto
+            {
+                Url = "http://mock.uploaded.url/image.jpg",
+                Filename = "mock.jpg",
+                ContentType = "image/jpeg"
+            }));
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -82,7 +91,8 @@ public class DetectFacesTests : TestBase
         var detectedFace = result.Value.DetectedFaces.First();
         detectedFace.BoundingBox.X.Should().Be(1);
         detectedFace.Confidence.Should().Be(0.9f);
-        detectedFace.ThumbnailUrl.Should().Be("http://mock.uploaded.url/image.jpg"); // Updated assertion
+        detectedFace.Thumbnail.Should().Be("AQID"); // Thumbnail (base64) should still be there if API returns it
+        detectedFace.ThumbnailUrl.Should().BeNull(); // Public URL should be null
         detectedFace.Embedding.Should().NotBeNull().And.HaveCount(2);
         detectedFace.MemberId.Should().BeNull();
     }
@@ -117,6 +127,8 @@ public class DetectFacesTests : TestBase
         result.IsSuccess.Should().BeTrue(); // Should still succeed overall
         result.Value.Should().NotBeNull();
         result.Value!.DetectedFaces.Should().ContainSingle();
+        result.Value.DetectedFaces.First().ThumbnailUrl.Should().BeNull(); // Assert ThumbnailUrl is null
+        result.Value.DetectedFaces.First().ThumbnailUrl.Should().BeNull(); // Assert ThumbnailUrl is null
         result.Value.DetectedFaces.First().MemberId.Should().BeNull(); // MemberId should be null
     }
 
@@ -150,6 +162,7 @@ public class DetectFacesTests : TestBase
         result.IsSuccess.Should().BeTrue(); // Should still succeed overall
         result.Value.Should().NotBeNull();
         result.Value!.DetectedFaces.Should().ContainSingle();
+        result.Value.DetectedFaces.First().ThumbnailUrl.Should().BeNull(); // Assert ThumbnailUrl is null
     }
 
     [Fact]
@@ -202,6 +215,14 @@ public class DetectFacesTests : TestBase
         _mockFaceApiService.Setup(s => s.DetectFacesAsync(imageBytes, contentType, true))
             .Returns(Task.FromResult(faceApiResult));
 
+        // Setup the mediator to return the found member for SearchMemberFaceQuery
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<SearchMemberFaceQuery>(q => q.Vector != null && q.Vector.SequenceEqual(faceApiResult.First().Embedding!)),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>
+            {
+                new FoundFaceDto { MemberId = memberId, Score = 0.9f }
+            }));
 
         var command = new DetectFacesCommand { ImageBytes = imageBytes, ContentType = contentType, ReturnCrop = true };
 
@@ -214,6 +235,7 @@ public class DetectFacesTests : TestBase
         result.Value!.DetectedFaces.Should().ContainSingle();
         var detectedFace = result.Value.DetectedFaces.First();
         detectedFace.MemberId.Should().Be(memberId);
+        detectedFace.ThumbnailUrl.Should().BeNull(); // Assert ThumbnailUrl is null
         detectedFace.MemberName.Should().Be("Doe John"); // Assuming FullName is "LastName FirstName"
         detectedFace.FamilyId.Should().Be(familyId);
         detectedFace.FamilyName.Should().Be("Doe Family");
@@ -235,6 +257,6 @@ public class DetectFacesTests : TestBase
         var result = await _handler.Handle(command, CancellationToken.None);
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("An unexpected error occurred: Face API error");
+        result.Error.Should().Contain(string.Format(ErrorMessages.UnexpectedError, "Face API error"));
     }
 }

@@ -213,7 +213,7 @@ public class N8nService : IN8nService
     /// <inheritdoc />
     public async Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_n8nSettings.ImageUploadWebhookUrl) || _n8nSettings.ImageUploadWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        if (string.IsNullOrEmpty(_n8nSettings.Upload.WebHookUrl))
         {
             _logger.LogWarning("n8n image upload webhook URL is not configured.");
             return Result<ImageUploadResponseDto>.Failure("n8n image upload integration is not configured.", "Configuration");
@@ -243,7 +243,7 @@ public class N8nService : IN8nService
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "data", dto.FileName!);
 
-        var url = $"{_n8nSettings.ImageUploadWebhookUrl}?cloud={dto.Cloud}&folder={dto.Folder}";
+        var url = $"{_n8nSettings.Upload.WebHookUrl}";
         try
         {
             _logger.LogInformation("Calling n8n image upload webhook at {Url}", url);

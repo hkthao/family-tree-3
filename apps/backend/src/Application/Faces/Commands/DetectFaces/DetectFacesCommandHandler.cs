@@ -28,7 +28,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string? originalImageUrl = null;
             byte[]? imageBytesToAnalyze = request.ImageBytes;
             string? resizedImageUrl = null;
-            string cloud = "cloudinary";
             string uploadFolder = "temp/uploads";
             string resizeFolder = "temp/512x512";
 
@@ -38,7 +37,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 {
                     ImageData = request.ImageBytes,
                     FileName = effectiveFileName,
-                    Cloud = cloud,
                     Folder = uploadFolder,
                     ContentType = request.ContentType
                 };
@@ -66,7 +64,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         {
                             ImageData = resizedImageBytes,
                             FileName = resizedFileName,
-                            Cloud = cloud,
                             Folder = resizeFolder,
                             ContentType = request.ContentType
                         };
@@ -104,8 +101,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             foreach (var faceResult in detectedFacesResult)
             {
                 // Upload face thumbnail logic removed for performance.
-                string? thumbnailUrl = null;
-
                 var detectedFaceDto = new DetectedFaceDto
                 {
                     Id = Guid.NewGuid().ToString(), // Generate a unique ID for each detected face
@@ -118,7 +113,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     },
                     Confidence = faceResult.Confidence,
                     Thumbnail = faceResult.Thumbnail, // Assign the original base64 thumbnail
-                    ThumbnailUrl = thumbnailUrl, // Use the public URL
                     Embedding = faceResult.Embedding?.ToList(),
                     MemberId = null,
                     MemberName = null,

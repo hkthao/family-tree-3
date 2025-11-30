@@ -1,3 +1,5 @@
+using backend.Application.Files.UploadFile; // NEW
+using backend.Application.Common.Utils; // NEW
 using backend.Application.AI.Models;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
@@ -8,12 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.UpsertMemberFace;
 
-public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<UpsertMemberFaceCommandHandler> logger) : IRequestHandler<UpsertMemberFaceCommand, Result<UpsertMemberFaceCommandResultDto>>
+public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<UpsertMemberFaceCommandHandler> logger, IMediator mediator) : IRequestHandler<UpsertMemberFaceCommand, Result<UpsertMemberFaceCommandResultDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IN8nService _n8nService = n8nService;
     private readonly ILogger<UpsertMemberFaceCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<UpsertMemberFaceCommandResultDto>> Handle(UpsertMemberFaceCommand request, CancellationToken cancellationToken)
     {
@@ -32,7 +35,42 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             return Result<UpsertMemberFaceCommandResultDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // 3. Perform n8n vector search for existing face
+        string? thumbnailUrl = null;
+
+        if (!string.IsNullOrEmpty(request.Thumbnail))
+        {
+            try
+            {
+                var thumbnailBytes = ImageUtils.ConvertBase64ToBytes(request.Thumbnail);
+                var thumbnailFileName = $"{request.FaceId}_thumbnail.jpeg"; // Use FaceId for unique name
+                string faceFolder = "temp/faces";
+
+                var thumbnailUploadCommand = new UploadFileCommand
+                {
+                    ImageData = thumbnailBytes,
+                    FileName = thumbnailFileName,
+                    Folder = faceFolder,
+                    ContentType = "image/jpeg" // Assuming thumbnail is always jpeg
+                };
+
+                var thumbnailUploadResult = await _mediator.Send(thumbnailUploadCommand, cancellationToken);
+
+                if (thumbnailUploadResult.IsSuccess && thumbnailUploadResult.Value != null)
+                {
+                    thumbnailUrl = thumbnailUploadResult.Value.Url; // Update the local variable
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to upload face thumbnail from base64 for FaceId {FaceId}: {Error}", request.FaceId, thumbnailUploadResult.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to convert or upload base64 thumbnail for face {FaceId}.", request.FaceId);
+            }
+        }
+
+        // 4. Perform n8n vector search for existing face
         var searchFaceVectorDto = new SearchFaceVectorOperationDto
         {
             Vector = request.Embedding.Select(d => (float)d).ToList(),
@@ -101,7 +139,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 FaceId = request.FaceId,
                 BoundingBox = new BoundingBox { X = request.BoundingBox.X, Y = request.BoundingBox.Y, Width = request.BoundingBox.Width, Height = request.BoundingBox.Height },
                 Confidence = request.Confidence,
-                ThumbnailUrl = request.ThumbnailUrl,
+                ThumbnailUrl = thumbnailUrl,
                 OriginalImageUrl = request.OriginalImageUrl,
                 Embedding = request.Embedding,
                 Emotion = request.Emotion,
@@ -123,7 +161,7 @@ public class UpsertMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity
                 { "memberId", request.MemberId.ToString() },
                 { "faceId", request.FaceId },
-                { "thumbnailUrl", request.ThumbnailUrl ?? "" },
+                { "thumbnailUrl", thumbnailUrl ?? "" },
                 { "originalImageUrl", request.OriginalImageUrl ?? "" },
                 { "emotion", request.Emotion ?? "" },
                 { "emotionConfidence", request.EmotionConfidence },

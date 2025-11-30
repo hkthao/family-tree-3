@@ -63,6 +63,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         {
             MemberId = request.MemberId,
             Title = request.Title,
+            Story = request.Story,
             OriginalImageUrl = (string?)request.OriginalImageUrl,
             ResizedImageUrl = request.ResizedImageUrl,
             RawInput = request.RawInput, // NEW
@@ -131,7 +132,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 FaceId = detectedFace.Id,
                 BoundingBox = detectedFace.BoundingBox,
                 Confidence = (double)detectedFace.Confidence,
-                ThumbnailUrl = detectedFace.ThumbnailUrl,
                 OriginalImageUrl = request.OriginalImageUrl,
                 Embedding = detectedFace.Embedding ?? [],
                 Emotion = detectedFace.Emotion,
@@ -155,7 +155,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         {
             FileUrl = imageUrl,
             FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", // Generate unique name
-            Cloud = "cloudinary", // Assuming cloudinary as default for permanent storage
             Folder = $"gpv-app/families/{familyId}/stories/{storyId}/{subFolder}" // Use subFolder here
         };
         return await _mediator.Send(command, cancellationToken);

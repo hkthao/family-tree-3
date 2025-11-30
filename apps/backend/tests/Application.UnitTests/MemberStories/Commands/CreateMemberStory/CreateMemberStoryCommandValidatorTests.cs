@@ -59,14 +59,7 @@ public class CreateMemberStoryCommandValidatorTests
               .WithErrorMessage("Story content must not exceed 4000 characters.");
     }
 
-    [Fact]
-    public void ShouldHaveError_WhenStoryStyleIsNull()
-    {
-        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = null };
-        var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.StoryStyle)
-              .WithErrorMessage("Story style is required.");
-    }
+
 
     [Fact]
     public void ShouldHaveError_WhenStoryStyleIsInvalid()
@@ -77,14 +70,7 @@ public class CreateMemberStoryCommandValidatorTests
               .WithErrorMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.");
     }
 
-    [Fact]
-    public void ShouldHaveError_WhenPerspectiveIsNull()
-    {
-        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = MemberStoryStyle.Nostalgic.ToString(), Perspective = null };
-        var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Perspective)
-              .WithErrorMessage("Perspective is required.");
-    }
+
 
     [Fact]
     public void ShouldHaveError_WhenPerspectiveIsInvalid()

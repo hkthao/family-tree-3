@@ -12,9 +12,7 @@ public class UploadFileCommandValidator : AbstractValidator<UploadFileCommand>
             .NotNull().WithMessage("File name cannot be null.")
             .NotEmpty().WithMessage("File name cannot be empty.");
 
-        RuleFor(v => v.Cloud)
-            .NotNull().WithMessage("Cloud service name cannot be null.")
-            .NotEmpty().WithMessage("Cloud service name cannot be empty.");
+
 
         RuleFor(v => v.Folder)
             .NotNull().WithMessage("Folder name cannot be null.")

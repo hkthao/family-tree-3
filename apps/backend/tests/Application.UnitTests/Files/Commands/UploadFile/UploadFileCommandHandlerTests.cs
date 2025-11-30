@@ -27,7 +27,6 @@ public class UploadFileCommandHandlerTests : TestBase
         {
             ImageData = imageData ?? new byte[] { 1, 2, 3 },
             FileName = "test.jpg",
-            Cloud = "imgbb",
             Folder = "test-folder",
             ContentType = contentType
         };
@@ -58,7 +57,6 @@ public class UploadFileCommandHandlerTests : TestBase
             It.Is<ImageUploadWebhookDto>(dto =>
                 dto.ImageData == command.ImageData &&
                 dto.FileName == command.FileName &&
-                dto.Cloud == command.Cloud &&
                 dto.Folder == command.Folder &&
                 dto.ContentType == command.ContentType
             ),

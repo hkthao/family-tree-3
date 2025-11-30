@@ -47,7 +47,6 @@ public class UploadFileFromUrlCommandHandlerTests : TestBase
         {
             FileUrl = "http://example.com/image.jpg",
             FileName = "image.jpg",
-            Cloud = "imgbb",
             Folder = "family-tree-memories"
         };
         var imageData = new byte[] { 0x01, 0x02, 0x03 };
@@ -82,7 +81,6 @@ public class UploadFileFromUrlCommandHandlerTests : TestBase
             It.Is<ImageUploadWebhookDto>(dto =>
                 dto.ImageData.SequenceEqual(imageData) &&
                 dto.FileName == command.FileName &&
-                dto.Cloud == command.Cloud &&
                 dto.Folder == command.Folder &&
                 dto.ContentType == contentType),
             It.IsAny<CancellationToken>()

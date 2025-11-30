@@ -88,7 +88,7 @@ public class ImageUploadWebhookDto
 {
     public byte[] ImageData { get; set; } = Array.Empty<byte>();
     public string FileName { get; set; } = string.Empty;
-    public string Cloud { get; set; } = string.Empty; // e.g., "imgbb"
+
     public string Folder { get; set; } = string.Empty; // e.g., "test"
     public string ContentType { get; set; } = string.Empty;
 }
