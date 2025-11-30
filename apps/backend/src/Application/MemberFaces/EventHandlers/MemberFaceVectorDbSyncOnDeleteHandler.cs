@@ -18,10 +18,10 @@ public class MemberFaceVectorDbSyncOnDeleteHandler : INotificationHandler<Member
 
     public async Task Handle(MemberFaceDeletedEvent notification, CancellationToken cancellationToken)
     {
-        var memberFaceId = notification.MemberFaceId;
-        var vectorDbId = notification.VectorDbId;
+        var memberFaceId = notification.MemberFace.Id;
+        var vectorDbId = notification.MemberFace.VectorDbId;
 
-        if (vectorDbId == Guid.Empty)
+        if (string.IsNullOrEmpty(vectorDbId))
         {
             _logger.LogWarning("MemberFaceId {MemberFaceId} does not have a valid VectorDbId. Skipping vector DB deletion.", memberFaceId);
             return;
@@ -31,7 +31,7 @@ public class MemberFaceVectorDbSyncOnDeleteHandler : INotificationHandler<Member
         {
             Filter = new Dictionary<string, object>
             {
-                { "id", vectorDbId.ToString() } // Assuming n8n webhook expects 'id' in filter for deletion
+                { "id", vectorDbId } // vectorDbId is already a string
             }
         };
 

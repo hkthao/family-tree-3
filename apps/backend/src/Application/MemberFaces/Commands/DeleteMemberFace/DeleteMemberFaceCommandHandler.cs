@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Domain.Events.MemberFaces; // Add this line
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.DeleteMemberFace;
@@ -36,6 +37,7 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
         }
 
         _context.MemberFaces.Remove(entity);
+        entity.AddDomainEvent(new MemberFaceDeletedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
 

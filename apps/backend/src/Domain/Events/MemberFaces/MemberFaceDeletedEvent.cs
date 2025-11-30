@@ -1,13 +1,23 @@
+using backend.Domain.Entities;
+
 namespace backend.Domain.Events.MemberFaces;
 
+/// <summary>
+/// Sự kiện miền được kích hoạt khi một MemberFace bị xóa.
+/// </summary>
 public class MemberFaceDeletedEvent : BaseEvent
 {
-    public Guid MemberFaceId { get; }
-    public Guid VectorDbId { get; } // NEW: Add VectorDbId for deletion from vector DB
+    /// <summary>
+    /// Đối tượng MemberFace đã bị xóa.
+    /// </summary>
+    public MemberFace MemberFace { get; }
 
-    public MemberFaceDeletedEvent(Guid memberFaceId, Guid vectorDbId)
+    /// <summary>
+    /// Khởi tạo một phiên bản mới của MemberFaceDeletedEvent.
+    /// </summary>
+    /// <param name="memberFace">Đối tượng MemberFace đã bị xóa.</param>
+    public MemberFaceDeletedEvent(MemberFace memberFace)
     {
-        MemberFaceId = memberFaceId;
-        VectorDbId = vectorDbId;
+        MemberFace = memberFace;
     }
 }
