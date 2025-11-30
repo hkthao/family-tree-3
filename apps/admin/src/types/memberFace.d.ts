@@ -10,6 +10,7 @@ export interface MemberFace {
   boundingBox: BoundingBox;
   confidence?: number;
   thumbnailUrl?: string;
+  thumbnail?: string; // NEW: Add thumbnail (base64)
   originalImageUrl?: string | null;
   embedding: number[]; 
   emotion?: string;

@@ -73,6 +73,9 @@ const handleFileUpload = async (file: File | File[] | null) => {
 };
 
 const openSelectMemberDialog = (face: DetectedFace) => {
+  if (face.status === 'recognized') { // NEW: Add this check
+    return;
+  }
   if (face) {
     faceToLabel.value = face;
     showSelectMemberDialog.value = true;
@@ -93,7 +96,17 @@ const handleRemoveFace = (faceId: string) => {
 };
 
 const canSaveLabels = computed(() => {
-  return faceStore.detectedFaces.some(face => face.memberId); // Can save if at least one face has a memberId
+  const hasFacesToSave = faceStore.detectedFaces.some(face =>
+    (face.status === 'labeled') || // User explicitly labeled this face
+    (face.status === 'unrecognized' && face.memberId !== null) || // User labeled a previously unrecognized face
+    (face.status === 'recognized' && face.originalMemberId !== face.memberId) // User changed a recognized face's label
+  );
+
+  const hasUnlabeledFacesLeft = faceStore.detectedFaces.some(face =>
+    face.status === 'unrecognized' && face.memberId === null // Still an unrecognized face that hasn't been labeled
+  );
+
+  return hasFacesToSave && !hasUnlabeledFacesLeft;
 });
 
 const saveAllLabeledFaces = async () => {
@@ -107,6 +120,7 @@ const saveAllLabeledFaces = async () => {
         faceId: face.id, // Use the detected face ID as the backend FaceId
         boundingBox: face.boundingBox,
         confidence: face.confidence,
+        thumbnail: face.thumbnail, // NEW: Include thumbnail (base64)
         thumbnailUrl: face.thumbnailUrl, // Use the detected thumbnail URL
         originalImageUrl: faceStore.uploadedImage, // The original uploaded image URL
         embedding: face.embedding || [],

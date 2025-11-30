@@ -24,13 +24,14 @@
         'face-item--unrecognized': face.status === 'unrecognized',
         'face-item--newly-labeled': face.status === 'newly-labeled',
         'face-item--selected': face.id === selectedFaceId,
-      }" @click="$emit('face-selected', face)">
+        'face-item--disabled': face.status === 'recognized', // NEW: Disabled class for recognized faces
+      }" @click="face.status !== 'recognized' && $emit('face-selected', face)"> <!-- NEW: Prevent click if recognized -->
         <MemberFaceDisplay :face="face" />
         <template v-slot:append>
           <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
           <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
           <v-icon v-else-if="face.status === 'newly-labeled'" color="info">mdi-tag</v-icon>
-          <v-btn v-if="!readOnly" icon="mdi-close-circle" variant="text" size="small"
+          <v-btn v-if="!readOnly && face.status !== 'recognized'" icon="mdi-close-circle" variant="text" size="small"
             @click.stop="removeFace(face.id)"></v-btn>
         </template>
       </v-list-item>
@@ -87,5 +88,11 @@ const unlabeledFacesCount = computed(() => faces.filter(face => !face.memberId).
 
 .face-item--selected {
   background-color: rgba(var(--v-theme-primary), 0.1);
+}
+
+.face-item--disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  border-style: dashed;
 }
 </style>

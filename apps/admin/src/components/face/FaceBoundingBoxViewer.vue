@@ -8,8 +8,9 @@
           'bounding-box--unrecognized': face.status === 'unrecognized',
           'bounding-box--newly-labeled': face.status === 'newly-labeled',
           'bounding-box--selected': selectable && face.id === selectedFaceId,
-          'bounding-box--selectable': selectable,
-        }" @click="selectable && $emit('face-selected', face)">
+          'bounding-box--selectable': selectable && face.status !== 'recognized', // Only selectable if not recognized
+          'bounding-box--disabled': face.status === 'recognized', // NEW: Disabled class for recognized faces
+        }" @click="selectable && face.status !== 'recognized' && $emit('face-selected', face)"> <!-- NEW: Prevent click if recognized -->
           <div v-if="face.memberId" class="bounding-box__name">
             {{ face.memberName }}
           </div>
@@ -160,5 +161,11 @@ watch(() => props.imageSrc, () => {
   min-width: 90px;
   height: 35px;
   text-align: center;;
+}
+
+.bounding-box--disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  border-style: dashed;
 }
 </style>
