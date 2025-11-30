@@ -49,6 +49,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="7.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Moq.EntityFrameworkCore" Version="7.0.0.2" />
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="AutoFixture.AutoMoq" Version="4.18.1" />
     <PackageVersion Include="Google.Cloud.AIPlatform.V1" Version="3.55.0" />

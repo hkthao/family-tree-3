@@ -1,41 +1,78 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
-using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Events.MemberFaces; // Added
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore; // Added
 using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.EntityFrameworkCore; // Added for mock DbSet
 using Xunit;
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.DeleteMemberFace;
 
-public class DeleteMemberFaceCommandHandlerTests : TestBase
+public class DeleteMemberFaceCommandHandlerTests
 {
+    private readonly Mock<IApplicationDbContext> _contextMock;
+    private readonly Mock<DbSet<MemberFace>> _memberFacesDbSetMock;
+    private readonly Mock<DbSet<Family>> _familiesDbSetMock; // Added
+    private readonly Mock<DbSet<Member>> _membersDbSetMock; // Added
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<DeleteMemberFaceCommandHandler>> _loggerMock;
+    private readonly List<MemberFace> _memberFacesData;
+    private readonly List<Family> _familiesData; // Added
+    private readonly List<Member> _membersData; // Added
 
     public DeleteMemberFaceCommandHandlerTests()
     {
+        _contextMock = new Mock<IApplicationDbContext>();
+        _memberFacesDbSetMock = new Mock<DbSet<MemberFace>>();
+        _familiesDbSetMock = new Mock<DbSet<Family>>(); // Initialized
+        _membersDbSetMock = new Mock<DbSet<Member>>(); // Initialized
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _loggerMock = new Mock<ILogger<DeleteMemberFaceCommandHandler>>();
+
+        _memberFacesData = new List<MemberFace>();
+        _familiesData = new List<Family>(); // Initialized
+        _membersData = new List<Member>(); // Initialized
+
+        // Setup mock DbSets
+        _contextMock.Setup(x => x.MemberFaces).ReturnsDbSet(_memberFacesData);
+        _contextMock.Setup(x => x.Families).ReturnsDbSet(_familiesData); // Setup mock for Families
+        _contextMock.Setup(x => x.Members).ReturnsDbSet(_membersData); // Setup mock for Members
+        _contextMock.Setup(x => x.MemberFaces.FindAsync(It.IsAny<object[]>()))
+            .ReturnsAsync((object[] ids) => _memberFacesData.FirstOrDefault(mf => mf.Id == (Guid)ids[0]));
+
+        // Setup Remove for MemberFaces to simulate removing from the list and adding DomainEvent
+        _contextMock.Setup(x => x.MemberFaces.Remove(It.IsAny<MemberFace>()))
+            .Callback<MemberFace>(mf =>
+            {
+                _memberFacesData.Remove(mf);
+            });
+
+        // Mock SaveChangesAsync to do nothing as we are testing the command handler's logic
+        _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private DeleteMemberFaceCommandHandler CreateHandler()
     {
-        return new DeleteMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _loggerMock.Object);
+        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object);
     }
 
-    private async Task<MemberFace> SeedMemberFace(Family family, Member member)
+    private MemberFace SeedMemberFace(Family family, Member member)
     {
-        await _context.Families.AddAsync(family);
-        await _context.Members.AddAsync(member);
+        _familiesData.Add(family);
+        _membersData.Add(member);
         var memberFace = new MemberFace
         {
+            Id = Guid.NewGuid(), // Cần tạo Id rõ ràng vì không dùng DbContext
             MemberId = member.Id,
+            Member = member, // Gán đối tượng Member
             FaceId = "testFaceId",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.9,
@@ -47,8 +84,7 @@ public class DeleteMemberFaceCommandHandlerTests : TestBase
             IsVectorDbSynced = false,
             VectorDbId = "testVectorDbId"
         };
-        await _context.MemberFaces.AddAsync(memberFace);
-        await _context.SaveChangesAsync();
+        _memberFacesData.Add(memberFace);
         return memberFace;
     }
 
@@ -58,7 +94,7 @@ public class DeleteMemberFaceCommandHandlerTests : TestBase
         // Arrange
         var family = new Family { Name = "Test Family", Code = "TF" };
         var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
-        var existingMemberFace = await SeedMemberFace(family, member);
+        var existingMemberFace = SeedMemberFace(family, member);
 
         var command = new DeleteMemberFaceCommand { Id = existingMemberFace.Id };
         var handler = CreateHandler();
@@ -69,14 +105,19 @@ public class DeleteMemberFaceCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
 
-        var deletedMemberFace = await _context.MemberFaces.FindAsync(existingMemberFace.Id);
+        var deletedMemberFace = _memberFacesData.FirstOrDefault(mf => mf.Id == existingMemberFace.Id);
         deletedMemberFace.Should().BeNull();
+
+        existingMemberFace.DomainEvents.Should().ContainSingle(e => e is MemberFaceDeletedEvent);
+        var domainEvent = existingMemberFace.DomainEvents.OfType<MemberFaceDeletedEvent>().Single();
+        domainEvent.MemberFace.Should().Be(existingMemberFace);
+        domainEvent.VectorDbId.Should().Be(existingMemberFace.VectorDbId);
     }
 
     [Fact]
     public async Task DeleteMemberFace_ShouldReturnFailure_WhenMemberFaceNotFound()
     {
-        // Arrange
+        // Arrange - No need to seed, as ID is non-existent
         var command = new DeleteMemberFaceCommand { Id = Guid.NewGuid() }; // Non-existent ID
         var handler = CreateHandler();
 
@@ -96,7 +137,7 @@ public class DeleteMemberFaceCommandHandlerTests : TestBase
 
         var family = new Family { Name = "Test Family", Code = "TF" };
         var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
-        var existingMemberFace = await SeedMemberFace(family, member);
+        var existingMemberFace = SeedMemberFace(family, member);
 
         var command = new DeleteMemberFaceCommand { Id = existingMemberFace.Id };
         var handler = CreateHandler();
@@ -107,5 +148,6 @@ public class DeleteMemberFaceCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        existingMemberFace.DomainEvents.Should().NotContain(e => e is MemberFaceDeletedEvent);
     }
 }
