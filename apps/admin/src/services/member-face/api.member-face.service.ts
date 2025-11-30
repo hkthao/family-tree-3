@@ -1,7 +1,7 @@
-import type { MemberFace, MemberFaceFilter, Paginated, Result } from '@/types';
+import type { MemberFace, MemberFaceFilter, Paginated, Result, FaceDetectionRessult } from '@/types';
 import type { IMemberFaceService } from './member-face.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok } from '@/types'; // Assuming 'ok' is imported from '@/types'
+import { ok } from '@/types'; 
 
 export class ApiMemberFaceService implements IMemberFaceService {
   constructor(private http: ApiClientMethods) {}
@@ -15,7 +15,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
     if (result.ok) {
         return ok(result.value || undefined);
     }
-    return result; // Return the error result directly
+    return result; 
   }
 
   async add(newItem: Omit<MemberFace, 'id'>): Promise<Result<MemberFace, ApiError>> {
@@ -58,5 +58,26 @@ export class ApiMemberFaceService implements IMemberFaceService {
     return await this.http.get<MemberFace[]>(
       `/memberfaces/by-ids?${params.toString()}`,
     );
+  }
+
+  async detect(
+    file: File,
+    resizeImageForAnalysis?: boolean,
+    returnCrop?: boolean,
+  ): Promise<Result<FaceDetectionRessult, ApiError>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (resizeImageForAnalysis !== undefined) {
+      formData.append('resizeImageForAnalysis', resizeImageForAnalysis.toString());
+    }
+    if (returnCrop !== undefined) {
+      formData.append('returnCrop', returnCrop.toString());
+    }
+
+    return await this.http.post<FaceDetectionRessult>(`/memberfaces/detect`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   }
 }

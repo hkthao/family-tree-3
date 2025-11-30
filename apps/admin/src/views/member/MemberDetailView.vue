@@ -28,8 +28,6 @@
         t('common.edit') }}</v-btn>
       <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading"
         v-if="canEditOrDelete">{{ t('ai.bioSuggestShort') }}</v-btn>
-      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{
-        t('face.deleteFaceDataShort') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{
         t('common.delete') }}</v-btn>
     </v-card-actions>
@@ -131,28 +129,6 @@ const handleDelete = async () => {
       }
     } catch (error) {
       showSnackbar(t('member.messages.deleteError'), 'error');
-    }
-  }
-};
-
-const handleDeleteFaceData = async () => {
-  if (!member.value) return;
-
-  const confirmed = await showConfirmDialog({
-    title: t('face.confirmDeleteFaceDataTitle'),
-    message: t('face.confirmDeleteFaceDataMessage', { fullName: member.value.fullName }),
-  });
-
-  if (confirmed) {
-    try {
-      const result = await faceStore.deleteFacesByMemberId(member.value.id);
-      if (result.ok) {
-        showSnackbar(t('face.messages.deleteSuccess'), 'success');
-      } else {
-        showSnackbar(result.error?.message || t('face.messages.deleteError'), 'error');
-      }
-    } catch (error) {
-      showSnackbar(t('face.messages.deleteError'), 'error');
     }
   }
 };

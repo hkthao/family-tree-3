@@ -1,25 +1,44 @@
-import type { DetectedFace } from './face.d';
+import type { DetectedFace } from './memberFace.d';
 import { MemberStoryPerspective, MemberStoryStyle } from './enums';
+
+export interface SearchStoriesFilter { 
+  memberId?: string; 
+  searchQuery?: string; 
+  sortBy?: string; 
+  sortOrder?: 'asc' | 'desc'; 
+}
 
 export interface MemberStoryDto {
   id?: string;
-  memberId: string; // Changed from string | null
-  memberName?: string | null; // Added for convenience in form
+  memberId: string; 
+  memberName?: string | null; 
   title?: string | null;
   story?: string | null;
-  detectedFaces?: DetectedFace[]; // Renamed from faces
-  rawInput?: string | null; // Raw input text for AI generation
-  storyStyle?: string | null; // Changed from MemberStoryStyle | null
-  perspective?: string | null; // Changed from MemberStoryPerspective | null
-  photo?: string | null; // Base64 or URL of the uploaded photo for display
-  imageSize?: string | null; // e.g., "1920x1080"
-  exifData?: any; // e.g., for storing EXIF metadata from photo
-  targetFaceId?: string | null; // The ID of the face selected as the primary subject for the story
+  detectedFaces?: DetectedFace[]; 
+  rawInput?: string | null; 
+  storyStyle?: string | null; 
+  perspective?: string | null; 
+  photo?: string | null; 
+  imageSize?: string | null; 
+  exifData?: any; 
+  targetFaceId?: string | null; 
   memberFullName?: string | null;
   memberAvatarUrl?: string | null;
   memberGender?: string | null;
   originalImageUrl?: string | null;
   resizedImageUrl?: string | null;
-  createdAt?: string; // NEW: Add created date
+  createdAt?: string; 
 }
 
+// Matches backend.Application.MemberStories.Commands.CreateMemberStory.CreateMemberStoryCommand
+export interface CreateMemberStory {
+  memberId: string;
+  title: string;
+  story: string;
+  originalImageUrl?: string | null;
+  resizedImageUrl?: string | null;
+  rawInput?: string | null; // NEW
+  storyStyle?: string | null; // NEW
+  perspective?: string | null; // NEW
+  detectedFaces: DetectedFace[]; // Using the aligned frontend DTO
+}

@@ -1,66 +1,64 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter } from '@/types'; // Removed Paginated
-import type { MemberStoryDto } from '@/types/memberStory'; // Updated
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai'; // NEW IMPORT
+import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter } from '@/types';
+import type { MemberStoryDto } from '@/types/memberStory';
+import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
-import type { CreateMemberStory } from '@/types/createMemberStory';
+import type { CreateMemberStory } from '@/types/memberStory';
 
-export interface MemberStoryFaceState { // Updated
-  uploadedImage: string | null; // Base64 or URL of the uploaded image
-  uploadedImageId: string | null; // ID of the uploaded image from the backend
-  resizedImageUrl: string | null; // NEW: URL of the resized image for analysis
-  detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
-  selectedFaceId: string | undefined; // ID of the currently selected face for labeling
-  faceSearchResults: SearchResult[]; // Results from face search
+export interface MemberStoryFaceState {
+  uploadedImage: string | null;
+  resizedImageUrl: string | null;
+  detectedFaces: DetectedFace[];
+  selectedFaceId: string | undefined;
+  faceSearchResults: SearchResult[];
   loading: boolean;
   error: string | null;
-  originalImageUrl: string | null; // NEW: URL of the original uploaded image
+  originalImageUrl: string | null;
 }
 
-export const useMemberStoryStore = defineStore('memberStory', { // Updated
+export const useMemberStoryStore = defineStore('memberStory', {
   state: () => ({
-    // General state
+
     error: null as string | null,
 
-    // State for list operations
+
     list: {
-      items: [] as MemberStoryDto[], // Updated
-      loading: false, // Loading state for the list of member stories // Updated
+      items: [] as MemberStoryDto[],
+      loading: false,
       filters: {
-        memberId: undefined, // Default to undefined for filtering
+        memberId: undefined,
         searchQuery: '',
-      } as SearchStoriesFilter, // Updated
+      } as SearchStoriesFilter,
       currentPage: 1,
       itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
       totalItems: 0,
       totalPages: 1,
-      sortBy: [] as { key: string; order: string }[], // Sorting key and order
+      sortBy: [] as { key: string; order: string }[],
     },
 
-    // State for single item operations
+
     detail: {
-      item: null as MemberStoryDto | null, // Updated
-      loading: false, // Loading state for a single member story // Updated
+      item: null as MemberStoryDto | null,
+      loading: false,
     },
 
-    // State for add operations
+
     add: {
       loading: false,
     },
 
-    // State for update operations
+
     update: {
       loading: false,
     },
 
-    // State for delete operations
+
     _delete: {
       loading: false,
     },
 
-    // Face Recognition State for member story creation // Updated
     faceRecognition: {
       uploadedImage: null,
       uploadedImageId: null,
@@ -71,10 +69,10 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       error: null,
       resizedImageUrl: null,
       originalImageUrl: null
-    } as MemberStoryFaceState, // Updated
+    } as MemberStoryFaceState,
 
-    // AI Analysis State for photo analysis
-    aiAnalysis: { // NEW STATE
+
+    aiAnalysis: {
       loading: false,
       error: null as string | null,
       result: null as PhotoAnalysisResultDto | null,
@@ -87,7 +85,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.loadItems( // Updated
+      const result = await this.services.memberStory.loadItems(
         {
           memberId: this.list.filters.memberId,
           searchQuery: this.list.filters.searchQuery,
@@ -103,7 +101,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
         this.list.totalItems = result.value.totalItems;
         this.list.totalPages = result.value.totalPages;
       } else {
-        this.error = i18n.global.t('memberStory.errors.load'); // Updated
+        this.error = i18n.global.t('memberStory.errors.load');
         this.list.items = [];
         this.list.totalItems = 0;
         this.list.totalPages = 1;
@@ -112,28 +110,28 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       this.list.loading = false;
     },
 
-    async addItem(newItem: CreateMemberStory): Promise<Result<MemberStoryDto, ApiError>> { // Updated
+    async addItem(newItem: CreateMemberStory): Promise<Result<MemberStoryDto, ApiError>> {
       this.add.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.add(newItem); // Updated
+      const result = await this.services.memberStory.add(newItem);
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = i18n.global.t('memberStory.errors.add'); // Updated
+        this.error = i18n.global.t('memberStory.errors.add');
         console.error(result.error);
       }
       this.add.loading = false;
       return result;
     },
 
-    async updateItem(updatedItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> { // Updated
+    async updateItem(updatedItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> {
       this.update.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.update(updatedItem); // Updated
+      const result = await this.services.memberStory.update(updatedItem);
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = i18n.global.t('memberStory.errors.update'); // Updated
+        this.error = i18n.global.t('memberStory.errors.update');
         console.error(result.error);
       }
       this.update.loading = false;
@@ -143,11 +141,11 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this._delete.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.delete(id); // Updated
+      const result = await this.services.memberStory.delete(id);
       if (result.ok) {
         await this._loadItems();
       } else {
-        this.error = result.error.message || i18n.global.t('memberStory.errors.delete'); // Updated
+        this.error = result.error.message || i18n.global.t('memberStory.errors.delete');
         console.error(result.error);
       }
       this._delete.loading = false;
@@ -172,10 +170,10 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       this._loadItems();
     },
 
-    async getById(id: string): Promise<MemberStoryDto | undefined> { // Updated
+    async getById(id: string): Promise<MemberStoryDto | undefined> {
       this.detail.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.getById(id); // Updated
+      const result = await this.services.memberStory.getById(id);
       this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
@@ -183,29 +181,29 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
           return result.value;
         }
       } else {
-        this.error = i18n.global.t('memberStory.errors.loadById'); // Updated
+        this.error = i18n.global.t('memberStory.errors.loadById');
         console.error(result.error);
       }
       return undefined;
     },
 
-    setFilters(filters: SearchStoriesFilter) { // Updated
+    setFilters(filters: SearchStoriesFilter) {
       this.list.filters = { ...this.list.filters, ...filters };
     },
 
-    async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // MODIFIED
+    async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> {
       this.aiAnalysis.loading = true;
       this.aiAnalysis.error = null;
       try {
-        const result = await this.services.ai.analyzePhoto(command); // Use new ai service
+        const result = await this.services.ai.analyzePhoto(command);
         if (result.ok) {
           this.aiAnalysis.result = result.value;
         } else {
-          this.aiAnalysis.error = result.error?.message || i18n.global.t('memberStory.errors.aiAnalysisFailed'); // Updated
+          this.aiAnalysis.error = result.error?.message || i18n.global.t('memberStory.errors.aiAnalysisFailed');
         }
         return result;
       } catch (error: any) {
-        this.aiAnalysis.error = error.message || i18n.global.t('memberStory.errors.unexpectedError'); // Updated
+        this.aiAnalysis.error = error.message || i18n.global.t('memberStory.errors.unexpectedError');
         return { ok: false, error: { message: this.aiAnalysis.error } as ApiError };
       } finally {
         this.aiAnalysis.loading = false;
@@ -213,31 +211,30 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
     },
 
     async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {
-      this.aiAnalysis.loading = true; // Use aiAnalysis loading for AI operations
+      this.aiAnalysis.loading = true;
       this.error = null;
       try {
         const result = await this.services.ai.generateStory(command);
         if (!result.ok) {
-          this.error = result.error?.message || i18n.global.t('memberStory.errors.storyGenerationFailed'); // Updated
+          this.error = result.error?.message || i18n.global.t('memberStory.errors.storyGenerationFailed');
         }
         return result;
       } catch (error: any) {
-        this.error = error.message || i18n.global.t('memberStory.errors.unexpectedError'); // Updated
+        this.error = error.message || i18n.global.t('memberStory.errors.unexpectedError');
         return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.aiAnalysis.loading = false;
       }
     },
 
-    // Actions for Face Recognition
+
     async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.faceRecognition.loading = true;
       this.faceRecognition.error = null;
       try {
-        const result = await this.services.face.detect(imageFile, resizeImageForAnalysis);
+        const result = await this.services.memberFace.detect(imageFile, resizeImageForAnalysis);
         if (result.ok) {
           this.faceRecognition.uploadedImage = URL.createObjectURL(imageFile);
-          this.faceRecognition.uploadedImageId = result.value.imageId;
           this.faceRecognition.detectedFaces = result.value.detectedFaces.map((face) => ({
             id: face.id,
             boundingBox: face.boundingBox,
@@ -254,7 +251,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
             emotionConfidence: face.emotionConfidence,
             status: face.status || (face.memberId ? 'recognized' : 'unrecognized'),
           }));
-          // Store the resized image URL if available
+
           this.faceRecognition.resizedImageUrl = result.value.resizedImageUrl ?? null;
           this.faceRecognition.originalImageUrl = result.value.originalImageUrl ?? null;
           return { ok: true, value: undefined };
@@ -306,70 +303,6 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
       );
     },
 
-    async saveFaceLabels(): Promise<Result<void, ApiError>> {
-      this.faceRecognition.loading = true;
-      this.faceRecognition.error = null;
-      try {
-        const facesToSave = this.faceRecognition.detectedFaces.filter(
-          (face) =>
-            face.memberId &&
-            (face.originalMemberId === null ||
-              face.originalMemberId === undefined ||
-              face.memberId !== face.originalMemberId),
-        );
-
-        if (facesToSave.length === 0) {
-          this.faceRecognition.loading = false;
-          return { ok: true, value: undefined };
-        }
-
-        const faceLabels = facesToSave.map((face) => ({
-          id: face.id,
-          boundingBox: face.boundingBox,
-          thumbnail: face.thumbnail,
-          memberId: face.memberId,
-          memberName: face.memberName,
-          familyId: face.familyId,
-          familyName: face.familyName,
-          birthYear: face.birthYear,
-          deathYear: face.deathYear,
-          embedding: face.embedding,
-          emotion: face.emotion,
-          emotionConfidence: face.emotionConfidence,
-          status: face.status,
-        }));
-
-        const imageId = this.faceRecognition.uploadedImageId;
-
-        if (!imageId) {
-          const errorMessage = 'Image ID is missing. Cannot save face labels.';
-          this.faceRecognition.error = errorMessage;
-          return { ok: false, error: { message: errorMessage } as ApiError };
-        }
-
-        const result = await this.services.face.saveLabels(faceLabels, imageId);
-
-        if (result.ok) {
-          facesToSave.forEach((face) => {
-            face.originalMemberId = face.memberId;
-            face.status = 'recognized';
-          });
-          return { ok: true, value: undefined };
-        } else {
-          this.faceRecognition.error =
-            result.error?.message ||
-            i18n.global.t('face.errors.saveMappingFailed');
-          return { ok: false, error: result.error };
-        }
-      } catch (err: any) {
-        this.faceRecognition.error =
-          err.message || i18n.global.t('face.errors.unexpectedError');
-        return { ok: false, error: { message: this.faceRecognition.error } as ApiError };
-      } finally {
-        this.faceRecognition.loading = false;
-      }
-    },
-
     async fetchMemberDetails(memberId: string): Promise<Member | undefined> {
       const result = await this.services.member.getById(memberId);
       if (result.ok && result.value) {
@@ -383,7 +316,6 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
 
     resetFaceRecognitionState(): void {
       this.faceRecognition.uploadedImage = null;
-      this.faceRecognition.uploadedImageId = null;
       this.faceRecognition.detectedFaces = [];
       this.faceRecognition.selectedFaceId = undefined;
       this.faceRecognition.faceSearchResults = [];

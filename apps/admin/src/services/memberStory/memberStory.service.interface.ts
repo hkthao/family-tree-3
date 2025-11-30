@@ -2,7 +2,7 @@ import type { MemberStoryDto } from '@/types/memberStory.d'; // Updated
 import type { ApiError } from '@/plugins/axios';
 import type { Result, Paginated, SearchStoriesFilter } from '@/types'; // Import SearchStoriesFilter from '@/types'
 import type { ICrudService } from '../common/crud.service.interface';
-import type { CreateMemberStory } from '@/types/createMemberStory';
+import type { CreateMemberStory } from '@/types/memberStory';
 
 export interface IMemberStoryService extends ICrudService<MemberStoryDto> { // Updated
   // Overriding add/update to use specific DTOs

@@ -42,7 +42,7 @@ export const useFaceStore = defineStore('face', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.face.detect(imageFile, resizeImageForAnalysis);
+        const result = await this.services.memberFace.detect(imageFile, resizeImageForAnalysis);
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
           this.uploadedImageId = result.value.imageId; // Assign the imageId
@@ -116,74 +116,6 @@ export const useFaceStore = defineStore('face', {
       );
     },
 
-    // Action to save all face labels to the backend
-    async saveFaceLabels(): Promise<Result<void, ApiError>> {
-      this.loading = true;
-      this.error = null;
-      try {
-        // Filter for faces that have been newly labeled or had their labels changed
-        const facesToSave = this.detectedFaces.filter(
-          (face) =>
-            face.memberId && // Must have a memberId assigned
-            (face.originalMemberId === null || // Was unlabeled, now labeled
-              face.originalMemberId === undefined || // Was unlabeled, now labeled
-              face.memberId !== face.originalMemberId), // Label has changed
-        );
-
-        if (facesToSave.length === 0) {
-          this.loading = false;
-          return { ok: true, value: undefined }; // Nothing to save
-        }
-
-        const faceLabels = facesToSave.map((face) => ({
-          id: face.id,
-          boundingBox: face.boundingBox,
-          thumbnail: face.thumbnail,
-          memberId: face.memberId,
-          memberName: face.memberName,
-          familyId: face.familyId,
-          familyName: face.familyName,
-          birthYear: face.birthYear,
-          deathYear: face.deathYear,
-          embedding: face.embedding, // Include embedding
-          status: face.status, // Include status
-        }));
-
-        // Assuming imageId is stored somewhere, e.g., in the store state or passed as a prop
-        // For now, let's assume it's available in the store as uploadedImageId
-        const imageId = this.uploadedImageId; // You need to add uploadedImageId to your state
-
-        if (!imageId) {
-          const errorMessage = 'Image ID is missing. Cannot save face labels.';
-          this.error = errorMessage;
-          return { ok: false, error: { message: errorMessage } as ApiError };
-        }
-
-        const result = await this.services.face.saveLabels(faceLabels, imageId);
-
-        if (result.ok) {
-          // After successful save, update originalMemberId for saved faces
-          facesToSave.forEach((face) => {
-            face.originalMemberId = face.memberId;
-            face.status = 'recognized'; // Update status to reflect saved state
-          });
-          return { ok: true, value: undefined };
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('face.errors.saveMappingFailed');
-          return { ok: false, error: result.error };
-        }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('face.errors.unexpectedError');
-        return { ok: false, error: { message: this.error } as ApiError };
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // Reset the store state
     resetState(): void {
       this.uploadedImage = null;
       this.uploadedImageId = null;
@@ -193,27 +125,6 @@ export const useFaceStore = defineStore('face', {
       this.loading = false;
       this.error = null;
     },
+  }, // This closes the actions object
+}); // This closes the defineStore call
 
-    async deleteFacesByMemberId(memberId: string): Promise<Result<void, ApiError>> {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.face.deleteFacesByMemberId(memberId);
-        if (result.ok) {
-          return { ok: true, value: undefined };
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('face.errors.deleteFailed');
-          return { ok: false, error: result.error };
-        }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('face.errors.unexpectedError');
-        return { ok: false, error: { message: this.error } as ApiError };
-      } finally {
-        this.loading = false;
-      }
-    },
-  },
-});

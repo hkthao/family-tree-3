@@ -1,7 +1,7 @@
 export * from './family-dict.d';
 export * from './family.d';
 export * from './member.d';
-export * from './face.d'; // Replaced detectedFace.d with face.d
+
 export * from './dashboard.d';
 export * from './pagination.d';
 export * from './result.d';
@@ -14,18 +14,7 @@ export * from './auth.d';
 export * from './user.d';
 export * from './chat.d';
 export * from './api-error.d';
-export * from './memberStory.d'; // Added new memberStory types
-export * from './biography.d'; // NEW EXPORT
-export * from './ai/analyzed-data.d'; // NEW EXPORT
-export * from './memory.d'; // NEW EXPORT
-export * from './memberFace.d'; // NEW EXPORT for MemberFace
-export type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from './ai/analyzed-data';
+export * from './memberStory.d'; 
+export * from './biography.d'; 
 
-// Define a filter interface for member stories if needed for searching/filtering // Updated
-export interface SearchStoriesFilter { // Updated
-  memberId?: string; // Filter by member
-  searchQuery?: string; // Search by title/story
-  // Add other filters as needed (e.g., date range, tags)
-  sortBy?: string; // Column name to sort by
-  sortOrder?: 'asc' | 'desc'; // Sort order
-}
+export * from './memberFace.d'; 

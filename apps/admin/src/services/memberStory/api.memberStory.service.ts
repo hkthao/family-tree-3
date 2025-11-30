@@ -1,5 +1,5 @@
 import type { IMemberStoryService } from './memberStory.service.interface';
-import type { CreateMemberStory } from '@/types/createMemberStory';
+import type { CreateMemberStory } from '@/types/memberStory';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import { ok, type Result, type Paginated, type MemberStoryDto, type SearchStoriesFilter } from '@/types'; // Import 'ok' from '@/types' and SearchStoriesFilter
 

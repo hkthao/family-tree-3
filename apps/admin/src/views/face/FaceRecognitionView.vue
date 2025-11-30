@@ -20,18 +20,13 @@
       <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
         type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
     </v-card-text>
-    <v-card-actions class="justify-end">
-      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveLabels">
-        {{ t('face.recognition.saveLabelsButton') }}
-      </v-btn>
-    </v-card-actions>
     <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
       :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId" />
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
@@ -76,16 +71,6 @@ const openSelectMemberDialog = (face: DetectedFace) => {
   }
 };
 
-const canSaveLabels = computed(() => {
-  return faceStore.detectedFaces.some(
-    (face) =>
-      face.memberId && // Must have a memberId assigned
-      (face.originalMemberId === null || // Was unlabeled, now labeled
-        face.originalMemberId === undefined || // Was unlabeled, now labeled
-        face.memberId !== face.originalMemberId), // Label has changed
-  );
-});
-
 const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
   const index = faceStore.detectedFaces.findIndex(f => f.id === updatedFace.id);
   if (index !== -1) {
@@ -97,16 +82,5 @@ const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
 
 const handleRemoveFace = (faceId: string) => {
   faceStore.removeFace(faceId);
-};
-
-const saveLabels = async () => {
-  const result = await faceStore.saveFaceLabels();
-  if (result.ok) {
-    showSnackbar(t('face.recognition.saveSuccess'), 'success');
-    faceStore.resetState(); // Reset face store after saving
-    if (faceUploadInputRef.value) {
-      faceUploadInputRef.value.reset(); // Clear the file input
-    }
-  }
 };
 </script>

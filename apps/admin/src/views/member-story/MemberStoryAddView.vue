@@ -23,7 +23,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory'; // Keep MemberStoryDto for local state
-import type { CreateMemberStory } from '@/types/createMemberStory'; // New import
+import type { CreateMemberStory } from '@/types/memberStory';
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 
 const props = defineProps<{

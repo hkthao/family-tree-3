@@ -18,8 +18,7 @@ import type { IFileUploadService } from './file-upload/file-upload.service.inter
 import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
-import type { IFaceService } from './face/face.service.interface';
-import { ApiFaceService } from './face/api.face.service';
+
 import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; 
@@ -42,7 +41,7 @@ export interface AppServices {
   dashboard: IDashboardService;
   fileUpload: IFileUploadService;
   chat: IChatService;
-  face: IFaceService;
+
   user: IUserService;
   familyDict: IFamilyDictService; 
   memberStory: IMemberStoryService; 
@@ -92,10 +91,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiChatService(apiClient)
         : testServices?.chat || new ApiChatService(apiClient),
-    face:
-      mode === 'real'
-        ? new ApiFaceService(apiClient)
-        : testServices?.face || new ApiFaceService(apiClient),
+
     user:
       mode === 'real'
         ? new ApiUserService(apiClient)

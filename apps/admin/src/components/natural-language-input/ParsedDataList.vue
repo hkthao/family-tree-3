@@ -40,7 +40,7 @@
 import ParsedMemberCard from './ParsedMemberCard.vue';
 import ParsedEventCard from './ParsedEventCard.vue';
 import ParsedRelationshipCard from './ParsedRelationshipCard.vue';
-import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/ai/analyzed-data';
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/ai';
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 

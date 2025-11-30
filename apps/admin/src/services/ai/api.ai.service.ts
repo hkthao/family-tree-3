@@ -5,7 +5,7 @@ import type { ApiClientMethods, ApiError } from '@/plugins/axios';
 import type { Result } from '@/types'; // Still need Result type
 import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
-import type { AnalyzedDataDto } from '@/types/ai/analyzed-data'; // NEW IMPORT
+import type { AnalyzedDataDto } from '@/types/ai'; // NEW IMPORT
 
 // const API_BASE_URL = '/api/memories'; // Base URL for memory-related endpoints (non-AI) - REMOVED
 const AI_BASE_URL = '/ai'; // Corrected Base URL for AI-related endpoints (without /api)
