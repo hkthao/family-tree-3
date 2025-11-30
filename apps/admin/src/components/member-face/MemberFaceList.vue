@@ -3,28 +3,15 @@
     <v-card-title class="d-flex align-center">
       <div class="text-h6 text-uppercase">{{ t('memberFace.list.title') }}</div>
       <v-spacer></v-spacer>
-      <v-btn
-        color="primary"
-        @click="emit('create')"
-        data-testid="create-member-face-button"
-      >
+      <v-btn color="primary" @click="emit('create')" data-testid="create-member-face-button">
         <v-icon left>mdi-plus</v-icon>
         {{ t('common.create') }}
       </v-btn>
     </v-card-title>
     <v-card-text>
-      <v-data-table-server
-        v-model:items-per-page="itemsPerPage"
-        v-model:page="page"
-        v-model:sort-by="sortBy"
-        :headers="headers"
-        :items="items"
-        :items-length="totalItems"
-        :loading="loading"
-        class="elevation-0"
-        item-value="id"
-        @update:options="handleUpdateOptions"
-      >
+      <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy"
+        :headers="headers" :items="items" :items-length="totalItems" :loading="loading" class="elevation-0"
+        item-value="id" @update:options="handleUpdateOptions">
         <template v-slot:item.thumbnail="{ item }">
           <v-img v-if="item.thumbnailUrl" :src="item.thumbnailUrl" height="40" width="40" cover class="my-1"></v-img>
           <v-icon v-else>mdi-image-off</v-icon>
@@ -68,12 +55,8 @@
       </v-data-table-server>
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
-      <v-pagination
-        v-model="page"
-        :length="Math.ceil(totalItems / itemsPerPage)"
-        :total-visible="5"
-        rounded="circle"
-      ></v-pagination>
+      <v-pagination v-model="page" :length="Math.ceil(totalItems / itemsPerPage)" :total-visible="5"
+        rounded="circle"></v-pagination>
     </v-card-actions>
   </v-card>
 </template>
@@ -82,7 +65,7 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
-import MemberName from '@/components/member/MemberName.vue'; 
+import MemberName from '@/components/member/MemberName.vue';
 
 interface MemberFaceListProps {
   items: MemberFace[];
@@ -97,13 +80,13 @@ const { t } = useI18n();
 
 const page = ref(1);
 const itemsPerPage = ref(10);
-const sortBy = ref<any[]>([]); 
+const sortBy = ref<any[]>([]);
 
 const headers = computed(() => [
-  { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '80px' }, 
+  { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '120px' },
   { title: t('memberFace.list.headers.memberName'), key: 'memberName' },
-  { title: t('memberFace.list.headers.familyName'), key: 'familyName' }, 
-  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '80px' },
+  { title: t('memberFace.list.headers.familyName'), key: 'familyName' },
+  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '120px' },
 ]);
 
 

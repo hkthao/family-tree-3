@@ -8,9 +8,9 @@ export interface MemberFace {
   memberId: string;
   faceId: string;
   boundingBox: BoundingBox;
-  confidence: number;
+  confidence?: number;
   thumbnailUrl?: string;
-  originalImageUrl?: string;
+  originalImageUrl?: string | null;
   embedding: number[]; 
   emotion?: string;
   emotionConfidence?: number;

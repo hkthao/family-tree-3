@@ -722,7 +722,6 @@
   "terms.aiDisclaimer.paragraph2": "You acknowledge and agree that you are solely responsible for reviewing, verifying, and editing any AI-generated content before saving or sharing it. The Family Tree App is not liable for any inaccuracies or consequences arising from the use of AI-generated content.",
   "terms.changesToTerms.title": "Changes to Terms",
   "terms.changesToTerms.paragraph1": "We may update these Terms from time to time. If we make significant changes, we will notify you through the Service or by other means, such as email. Your continued use of the Service after such changes constitutes your acceptance of the new Terms.",
-
   "privacy.title": "Privacy Policy",
   "privacy.effectiveDate": "Effective Date: {date}",
   "privacy.introduction": "Your privacy is critically important to us. This Privacy Policy describes how Family Tree App collects, uses, and protects your personal information and data when you use our Service.",
@@ -753,7 +752,6 @@
   "privacy.contactSection.title": "Contact Us",
   "privacy.contactSection.paragraph1": "If you have any questions or concerns about this Privacy Policy or your data, please contact us at:",
   "privacy.contactSection.email": "support@familytreeapp.com",
-
   "face.title": "Face",
   "face.sidebar.title": "Face Recognition",
   "face.sidebar.unlabeled": "Unlabeled",
@@ -826,6 +824,8 @@
   "face.errors.noFacesDetectedForSearch": "No faces detected for search.",
   "face.uploadInput.selectImage": "Select Image",
   "face.recognition.saveLabelsButton": "Save Labels",
+  "face.recognition.saveAllLabeledFacesButton": "Save All Labeled Faces",
+  "face.recognition.saveSuccess": "Faces labeled and saved successfully!",
   "face.boundingBox.labeledAs": "Labeled as {name}",
   "face.boundingBox.unlabeled": "Unlabeled",
   "face.search.title": "Face Search",
@@ -922,7 +922,6 @@
   "memberFace.list.headers.familyName": "Family Name",
   "memberFace.list.headers.actions": "Actions",
   "memberFace.list.confirmDelete": "Are you sure you want to delete face '{faceId}'?",
-
   "memberFace.form.editTitle": "Edit Member Face",
   "memberFace.form.addTitle": "Add New Member Face",
   "memberFace.form.id": "ID",
@@ -944,7 +943,6 @@
   "memberFace.form.familyId": "Family ID",
   "memberFace.form.familyName": "Family Name",
   "memberFace.form.viewOriginal": "View Original Image",
-
   "memberFace.validation.memberIdRequired": "Member ID is required.",
   "memberFace.validation.faceIdRequired": "Face ID is required.",
   "memberFace.validation.boundingBoxRequired": "Bounding Box property is required.",
@@ -952,17 +950,17 @@
   "memberFace.validation.minValue": "Minimum value is {min}.",
   "memberFace.validation.maxValue": "Maximum value is {max}.",
   "memberFace.validation.embeddingRequired": "Embedding is required.",
-
   "memberFace.messages.updateSuccess": "Member Face updated successfully!",
   "memberFace.messages.addSuccess": "Member Face added successfully!",
   "memberFace.messages.saveError": "Error saving member face.",
   "memberFace.messages.deleteSuccess": "Member Face deleted successfully!",
   "memberFace.messages.deleteError": "Error deleting member face.",
-
+  "memberFace.messages.noFacesToSave": "No faces with assigned members to save.",
+  "memberFace.messages.saveErrorForFace": "Error saving face {faceId}: {error}",
+  "memberFace.messages.partialSaveError": "Some faces could not be saved.",
   "memberFace.detail.title": "Member Face Details",
   "memberFace.detail.notFound": "Member Face not found.",
   "common.refresh": "Refresh",
-
   "memberStory.studio.title": "AI Memorial Studio for {memberName}",
   "memberStory.studio.addMemory": "Add Memory",
   "memberStory.studio.loadingMember": "Loading member details...",
@@ -996,6 +994,7 @@
   "memberStory.errors.storyGenerationFailed": "Failed to generate story.",
   "memberStory.faceRecognition.noFacesDetected": "No faces detected in the image.",
   "memberStory.faceRecognition.uploadPrompt": "Upload an image to start face detection.",
+  "face.recognition.uploadPrompt": "Upload an image to start face detection.",
   "memberStory.detail.titleDefault": "MemberStory Details",
   "memberStory.detail.loading": "Loading member story details...",
   "memberStory.detail.notFound": "MemberStory not found.",
@@ -1005,13 +1004,11 @@
   "memberStory.detail.storyContent": "Story Content",
   "memberStory.detail.shortDescription": "Short Description",
   "memberStory.detail.styleAndPerspective": "Style and Perspective",
-
   "memberStory.edit.title": "Edit MemberStory",
   "memberStory.edit.loading": "Loading member story for editing...",
   "memberStory.edit.notFound": "MemberStory not found for editing.",
   "memberStory.edit.saveSuccess": "MemberStory updated successfully!",
   "memberStory.edit.saveFailed": "Failed to update member story.",
-
   "memberStory.delete.confirmTitle": "Confirm Delete MemberStory",
   "memberStory.delete.confirmMessage": "Are you sure you want to delete the member story '{title}'?",
   "memberStory.messages.deleteSuccess": "MemberStory deleted successfully!",
@@ -1024,7 +1021,6 @@
   "memberStory.create.aiEventSuggestion.title": "Can you tell us what this event could be?",
   "memberStory.storyEditor.title": "Story Title",
   "memberStory.storyEditor.storyContent": "Story Content",
-
   "tour.familyList.search.title": "Search and Filter",
   "tour.familyList.search.description": "Here you can search for families by name or use advanced filters.",
   "tour.familyList.create.title": "Create Family",

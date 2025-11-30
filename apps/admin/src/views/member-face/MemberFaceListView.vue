@@ -10,7 +10,6 @@
       @delete="confirmDelete"
       @create="openAddDrawer()"
     ></MemberFaceList>
-
     <!-- Edit MemberFace Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberFaceClosed">
       <MemberFaceEditView
@@ -20,7 +19,6 @@
         @saved="handleMemberFaceSaved"
       />
     </BaseCrudDrawer>
-
     <!-- Add MemberFace Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberFaceClosed">
       <MemberFaceAddView
@@ -31,7 +29,6 @@
         @saved="handleMemberFaceSaved"
       />
     </BaseCrudDrawer>
-
     <!-- Detail MemberFace Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
       <MemberFaceDetailView
@@ -43,9 +40,8 @@
     </BaseCrudDrawer>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
@@ -53,27 +49,21 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import type { MemberFace } from '@/types'; // Added MemberFace import
-
-// Components (will be created later)
+import type { MemberFace } from '@/types'; 
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceEditView from '@/views/member-face/MemberFaceEditView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
-
 interface MemberFaceListViewProps {
   memberId?: string;
   familyId?: string;
 }
-
 const props = defineProps<MemberFaceListViewProps>();
-
 const { t } = useI18n();
 const memberFaceStore = useMemberFaceStore();
 const { list } = storeToRefs(memberFaceStore);
 const { showSnackbar } = useGlobalSnackbar();
 const { showConfirmDialog } = useConfirmDialog();
-
 const {
   addDrawer,
   editDrawer,
@@ -84,7 +74,6 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
-
 onMounted(() => {
   memberFaceStore.list.filters = {
     memberId: props.memberId,
@@ -92,7 +81,6 @@ onMounted(() => {
   };
   memberFaceStore._loadItems();
 });
-
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
@@ -101,7 +89,6 @@ const handleListOptionsUpdate = (options: {
   memberFaceStore.setListOptions(options);
   memberFaceStore._loadItems();
 };
-
 const confirmDelete = async (memberFace: MemberFace) => {
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
@@ -110,12 +97,10 @@ const confirmDelete = async (memberFace: MemberFace) => {
     cancelText: t('common.cancel'),
     confirmColor: 'error',
   });
-
   if (confirmed) {
     await handleDeleteConfirm(memberFace);
   }
 };
-
 const handleDeleteConfirm = async (memberFace: MemberFace) => {
   if (memberFace) {
     await memberFaceStore.deleteItem(memberFace.id);
@@ -130,16 +115,13 @@ const handleDeleteConfirm = async (memberFace: MemberFace) => {
   }
   memberFaceStore._loadItems();
 };
-
 const handleMemberFaceSaved = () => {
   closeAllDrawers();
   memberFaceStore._loadItems();
 };
-
 const handleMemberFaceClosed = () => {
   closeAllDrawers();
 };
-
 const handleDetailClosed = () => {
   closeAllDrawers();
 };

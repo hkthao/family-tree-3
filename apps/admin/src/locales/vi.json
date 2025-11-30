@@ -476,7 +476,6 @@
   "member.detail.title": "Chi tiết Thành viên",
   "member.detail.notFound": "Không tìm thấy thành viên.",
   "common.edit": "Chỉnh sửa",
-  "common.viewDetails": "Xem chi tiết",
   "common.unknown": "Không rõ",
   "common.actions": "Hành động",
   "common.collapse": "Thu gọn",
@@ -885,15 +884,15 @@
   "face.sidebar.instructionClickToLabel": "Nhấp vào khuôn mặt để gán nhãn hoặc thay đổi nhãn.",
   "face.sidebar.instructionNoUnlabeled": "Tất cả khuôn mặt đã được gán nhãn.",
   "face.recognition.title": "Nhận diện & Gán nhãn Khuôn mặt",
-
   "face.recognition": "Nhận diện Khuôn mặt",
   "face.face_data": "Dữ liệu Khuôn mặt",
   "face.errors.unexpectedError": "Đã xảy ra lỗi không mong muốn.",
   "face.errors.noFacesDetectedForSearch": "Không tìm thấy khuôn mặt nào để tìm kiếm.",
   "face.uploadInput.selectImage": "Chọn ảnh",
+  "face.recognition.uploadPrompt": "Tải lên một hình ảnh để bắt đầu nhận diện khuôn mặt.",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
-
-
+  "face.recognition.saveAllLabeledFacesButton": "Lưu tất cả khuôn mặt đã gán nhãn",
+  "face.recognition.saveSuccess": "Đã gán nhãn và lưu khuôn mặt thành công!",
   "face.boundingBox.labeledAs": "Được gán nhãn là {name}",
   "face.boundingBox.unlabeled": "Chưa gán nhãn",
   "face.search.title": "Tìm kiếm Khuôn mặt",
@@ -937,7 +936,6 @@
   "memberFace.list.headers.familyName": "Tên Gia đình",
   "memberFace.list.headers.actions": "Hành động",
   "memberFace.list.confirmDelete": "Bạn có chắc muốn xóa khuôn mặt '{faceId}'?",
-
   "memberFace.form.editTitle": "Chỉnh sửa Khuôn mặt Thành viên",
   "memberFace.form.addTitle": "Thêm Khuôn mặt Thành viên mới",
   "memberFace.form.id": "ID",
@@ -959,7 +957,6 @@
   "memberFace.form.familyId": "ID Gia đình",
   "memberFace.form.familyName": "Tên Gia đình",
   "memberFace.form.viewOriginal": "Xem ảnh gốc",
-
   "memberFace.validation.memberIdRequired": "ID Thành viên là bắt buộc.",
   "memberFace.validation.faceIdRequired": "Mã khuôn mặt là bắt buộc.",
   "memberFace.validation.boundingBoxRequired": "Thuộc tính hộp giới hạn là bắt buộc.",
@@ -967,13 +964,14 @@
   "memberFace.validation.minValue": "Giá trị tối thiểu là {min}.",
   "memberFace.validation.maxValue": "Giá trị tối đa là {max}.",
   "memberFace.validation.embeddingRequired": "Nhúng là bắt buộc.",
-
   "memberFace.messages.updateSuccess": "Cập nhật Khuôn mặt Thành viên thành công!",
   "memberFace.messages.addSuccess": "Thêm Khuôn mặt Thành viên thành công!",
   "memberFace.messages.saveError": "Lỗi khi lưu khuôn mặt thành viên.",
   "memberFace.messages.deleteSuccess": "Xóa Khuôn mặt Thành viên thành công!",
   "memberFace.messages.deleteError": "Lỗi khi xóa khuôn mặt thành viên.",
-
+  "memberFace.messages.noFacesToSave": "Không có khuôn mặt nào được gán cho thành viên để lưu.",
+  "memberFace.messages.saveErrorForFace": "Lỗi khi lưu khuôn mặt {faceId}: {error}",
+  "memberFace.messages.partialSaveError": "Một số khuôn mặt không thể lưu.",
   "memberFace.detail.title": "Chi tiết Khuôn mặt Thành viên",
   "memberFace.detail.notFound": "Không tìm thấy Khuôn mặt Thành viên.",
   "memberStory.studio.title": "AI Memorial Studio cho {memberName}",
@@ -989,7 +987,6 @@
   "memberStory.list.noMemoriesFound": "Không tìm thấy ký ức nào cho thành viên này.",
   "memberStory.list.confirmDelete": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",
   "memberStory.list.action.create": "Tạo Ký ức",
-
   "memberStory.form.memberIdLabel": "Thành viên",
   "memberStory.form.rules.memberIdRequired": "ID thành viên là bắt buộc.",
   "memberStory.form.rules.rawInputMinLength": "Tối thiểu {length} ký tự là bắt buộc.",
@@ -1004,7 +1001,6 @@
   "memberStory.create.perspective.fullyNeutral": "Trung lập hoàn toàn",
   "memberStory.create.generateStoryButton": "Tạo Story với AI",
   "memberStory.create.aiConsentInfo": "Bằng cách nhấp vào 'Tạo Story với AI', bạn đồng ý rằng hình ảnh đã tải lên và dữ liệu liên quan của bạn sẽ được xử lý bởi các dịch vụ AI để tạo câu chuyện. Dữ liệu này có thể được sử dụng để cải thiện các mô hình AI.",
-
   "memberStory.errors.memberIdRequired": "Vui lòng chọn một thành viên để tạo câu chuyện.",
   "memberStory.errors.storyGenerationFailed": "Không thể tạo câu chuyện. Vui lòng thử lại.",
   "memberStory.faceRecognition.noFacesDetected": "Không tìm thấy khuôn mặt nào trong ảnh.",
