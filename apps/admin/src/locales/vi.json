@@ -891,7 +891,7 @@
   "face.uploadInput.selectImage": "Chọn ảnh",
   "face.recognition.uploadPrompt": "Tải lên một hình ảnh để bắt đầu nhận diện khuôn mặt.",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
-  "face.recognition.saveAllLabeledFacesButton": "Lưu tất cả khuôn mặt đã gán nhãn",
+  "face.recognition.saveAllLabeledFacesButton": "Lưu",
   "face.recognition.saveSuccess": "Đã gán nhãn và lưu khuôn mặt thành công!",
   "face.boundingBox.labeledAs": "Được gán nhãn là {name}",
   "face.boundingBox.unlabeled": "Chưa gán nhãn",

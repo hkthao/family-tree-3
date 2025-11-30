@@ -121,7 +121,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     BirthYear = null,
                     DeathYear = null,
                     Emotion = faceResult.Emotion,
-                    EmotionConfidence = faceResult.EmotionConfidence
+                    EmotionConfidence = faceResult.EmotionConfidence,
+                    Status = "unrecognized" // Default to unrecognized
                 };
 
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
@@ -151,6 +152,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         _logger.LogInformation("No matching face found for FaceId {FaceId}.", detectedFaceDto.Id);
                     }
                 }
+                // NEW: Set Status based on whether MemberId has a value
+                detectedFaceDto.Status = detectedFaceDto.MemberId.HasValue ? "recognized" : "unrecognized";
                 detectedFaceDtos.Add(detectedFaceDto);
             }
 

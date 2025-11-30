@@ -62,7 +62,7 @@ export const useFaceStore = defineStore('face', {
             embedding: face.embedding, // Include embedding
             emotion: face.emotion,
             emotionConfidence: face.emotionConfidence,
-            status: face.memberId ? 'original-recognized' : 'unrecognized', // Set initial status
+            status: face.status || (face.memberId ? 'original-recognized' : 'unrecognized'), // Use backend status or derive
           }));
           return { ok: true, value: undefined };
         } else {
@@ -165,7 +165,7 @@ export const useFaceStore = defineStore('face', {
           // After successful save, update originalMemberId for saved faces
           facesToSave.forEach((face) => {
             face.originalMemberId = face.memberId;
-            face.status = 'original-recognized'; // Update status to reflect saved state
+            face.status = 'recognized'; // Update status to reflect saved state
           });
           return { ok: true, value: undefined };
         } else {

@@ -8,16 +8,10 @@
       <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
       
       <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
-        <v-row>
-          <v-col cols="12" md="8">
-            <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
-              @face-selected="openSelectMemberDialog" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog"
-              @remove-face="handleRemoveFace" />
-          </v-col>
-        </v-row>
+        <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
+          @face-selected="openSelectMemberDialog" class="mb-4" /> <!-- Added mb-4 for spacing -->
+        <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog"
+          @remove-face="handleRemoveFace" />
       </div>
       <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
         t('face.recognition.uploadPrompt') }}</v-alert>

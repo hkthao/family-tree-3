@@ -252,7 +252,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
             embedding: face.embedding,
             emotion: face.emotion,
             emotionConfidence: face.emotionConfidence,
-            status: face.memberId ? 'original-recognized' : 'unrecognized',
+            status: face.status || (face.memberId ? 'recognized' : 'unrecognized'),
           }));
           // Store the resized image URL if available
           this.faceRecognition.resizedImageUrl = result.value.resizedImageUrl ?? null;
@@ -352,7 +352,7 @@ export const useMemberStoryStore = defineStore('memberStory', { // Updated
         if (result.ok) {
           facesToSave.forEach((face) => {
             face.originalMemberId = face.memberId;
-            face.status = 'original-recognized';
+            face.status = 'recognized';
           });
           return { ok: true, value: undefined };
         } else {

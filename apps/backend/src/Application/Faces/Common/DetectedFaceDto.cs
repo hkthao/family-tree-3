@@ -18,4 +18,5 @@ public class DetectedFaceDto
     public List<double>? Embedding { get; set; }
     public string? Emotion { get; set; }
     public float? EmotionConfidence { get; set; }
+    public string? Status { get; set; } // NEW: Status property
 }
