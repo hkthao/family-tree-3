@@ -81,8 +81,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 request.OriginalImageUrl,
                 "original_image", // Generic filename
                 familyId,
-                storyId,
-                "photos", // subFolder for original images
                 cancellationToken);
 
             if (!originalUploadResult.IsSuccess)
@@ -102,8 +100,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 request.ResizedImageUrl,
                 "resized_image", // Generic filename
                 familyId,
-                storyId,
-                "photos", // subFolder for resized images
                 cancellationToken);
 
             if (!resizedUploadResult.IsSuccess)
@@ -149,13 +145,13 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
     }
 
     private async Task<Result<ImageUploadResponseDto>> UploadImageFromTempUrlAsync(
-        string imageUrl, string fileNamePrefix, Guid familyId, Guid storyId, string subFolder, CancellationToken cancellationToken)
+        string imageUrl, string fileNamePrefix, Guid familyId, CancellationToken cancellationToken)
     {
         var command = new UploadFileFromUrlCommand
         {
             FileUrl = imageUrl,
             FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", // Generate unique name
-            Folder = $"gpv-app/families/{familyId}/stories/{storyId}/{subFolder}" // Use subFolder here
+            Folder = string.Format(UploadConstants.FamilyStoryPhotoFolder, familyId)
         };
         return await _mediator.Send(command, cancellationToken);
     }

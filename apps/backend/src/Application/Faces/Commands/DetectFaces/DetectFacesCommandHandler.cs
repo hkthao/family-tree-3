@@ -28,8 +28,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string? originalImageUrl = null;
             byte[]? imageBytesToAnalyze = request.ImageBytes;
             string? resizedImageUrl = null;
-            string uploadFolder = "temp/uploads";
-            string resizeFolder = "temp/512x512";
+            string uploadFolder = UploadConstants.TemporaryUploadsFolder;
+            string resizeFolder = UploadConstants.TemporaryUploadsFolder;
 
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
