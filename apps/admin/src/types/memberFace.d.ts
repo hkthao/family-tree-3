@@ -1,24 +1,26 @@
 import type { Paginated } from '@/types/pagination.d';
 import type { Result } from '@/types/result.d';
 import type { ApiError } from '@/plugins/axios';
-import type { BoundingBox } from '@/types/face.d'; // Import BoundingBox from face.d
+import type { BoundingBox } from '@/types/face.d'; 
 
 export interface MemberFace {
-  id: string; // Guid on backend is string on frontend
+  id: string; 
   memberId: string;
   faceId: string;
   boundingBox: BoundingBox;
   confidence: number;
   thumbnailUrl?: string;
   originalImageUrl?: string;
-  embedding: number[]; // List<double> on backend is number[] on frontend
+  embedding: number[]; 
   emotion?: string;
   emotionConfidence?: number;
   isVectorDbSynced: boolean;
   vectorDbId?: string;
 
-  // Enriched data
+  
   memberName?: string;
+  memberGender?: string; 
+  memberAvatarUrl?: string; 
   familyId?: string;
   familyName?: string;
 }
@@ -26,7 +28,7 @@ export interface MemberFace {
 export interface MemberFaceFilter {
   memberId?: string;
   familyId?: string;
-  searchQuery?: string; // Add if search functionality is needed
+  searchQuery?: string; 
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }

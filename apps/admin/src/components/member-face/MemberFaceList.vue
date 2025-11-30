@@ -25,41 +25,44 @@
         item-value="id"
         @update:options="handleUpdateOptions"
       >
-        <template v-slot:item.confidence="{ item }">
-          {{ item.confidence?.toFixed(2) }}
+        <template v-slot:item.thumbnail="{ item }">
+          <v-img v-if="item.thumbnailUrl" :src="item.thumbnailUrl" height="40" width="40" cover class="my-1"></v-img>
+          <v-icon v-else>mdi-image-off</v-icon>
         </template>
-        <template v-slot:item.emotionConfidence="{ item }">
-          {{ item.emotionConfidence?.toFixed(2) }}
+        <template v-slot:item.memberName="{ item }">
+          <MemberName :fullName="item.memberName" :gender="item.memberGender" :avatarUrl="item.memberAvatarUrl" />
+        </template>
+        <template v-slot:item.familyName="{ item }">
+          {{ item.familyName }}
         </template>
         <template v-slot:item.actions="{ item }">
-          <v-btn
-            icon
-            flat
-            size="small"
-            @click="emit('view', item)"
-            data-testid="view-member-face-button"
-          >
-            <v-icon>mdi-eye</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            flat
-            size="small"
-            @click="emit('edit', item)"
-            data-testid="edit-member-face-button"
-          >
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            flat
-            size="small"
-            @click="emit('delete', item)"
-            color="error"
-            data-testid="delete-member-face-button"
-          >
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn icon variant="text" size="small" v-bind="props" data-testid="member-face-actions-menu">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="emit('view', item)" data-testid="view-member-face-button">
+                <v-list-item-title>
+                  <v-icon left>mdi-eye</v-icon>
+                  {{ t('common.viewDetails') }}
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="emit('edit', item)" data-testid="edit-member-face-button">
+                <v-list-item-title>
+                  <v-icon left>mdi-pencil</v-icon>
+                  {{ t('common.edit') }}
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="emit('delete', item)" color="error" data-testid="delete-member-face-button">
+                <v-list-item-title>
+                  <v-icon left>mdi-delete</v-icon>
+                  {{ t('common.delete') }}
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
         <template #bottom></template>
       </v-data-table-server>
@@ -79,6 +82,7 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
+import MemberName from '@/components/member/MemberName.vue'; 
 
 interface MemberFaceListProps {
   items: MemberFace[];
@@ -93,18 +97,16 @@ const { t } = useI18n();
 
 const page = ref(1);
 const itemsPerPage = ref(10);
-const sortBy = ref<any[]>([]); // { key: string, order: 'asc' | 'desc' }[]
+const sortBy = ref<any[]>([]); 
 
 const headers = computed(() => [
-  { title: t('memberFace.list.headers.faceId'), key: 'faceId' },
+  { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '80px' }, 
   { title: t('memberFace.list.headers.memberName'), key: 'memberName' },
-  { title: t('memberFace.list.headers.confidence'), key: 'confidence' },
-  { title: t('memberFace.list.headers.emotion'), key: 'emotion' },
-  { title: t('memberFace.list.headers.emotionConfidence'), key: 'emotionConfidence' },
-  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false },
+  { title: t('memberFace.list.headers.familyName'), key: 'familyName' }, 
+  { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '80px' },
 ]);
 
-// Watch for changes in pagination/sorting options and emit to parent
+
 watch([page, itemsPerPage, sortBy], () => {
   emit('update:options', {
     page: page.value,
@@ -113,7 +115,7 @@ watch([page, itemsPerPage, sortBy], () => {
   });
 }, { deep: true });
 
-// Handle direct update from v-data-table-server
+
 const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; }) => {
   page.value = options.page;
   itemsPerPage.value = options.itemsPerPage;

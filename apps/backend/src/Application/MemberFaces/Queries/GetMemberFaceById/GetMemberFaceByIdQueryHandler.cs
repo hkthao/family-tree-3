@@ -23,6 +23,7 @@ public class GetMemberFaceByIdQueryHandler : IRequestHandler<GetMemberFaceByIdQu
     {
         var memberFace = await _context.MemberFaces
             .Include(mf => mf.Member) // Include Member to get FamilyId
+            .ThenInclude(m => m!.Family) // Include Family for FamilyName
             .FirstOrDefaultAsync(mf => mf.Id == request.Id, cancellationToken);
 
         if (memberFace == null)
@@ -57,6 +58,8 @@ public class GetMemberFaceByIdQueryHandler : IRequestHandler<GetMemberFaceByIdQu
             IsVectorDbSynced = memberFace.IsVectorDbSynced,
             VectorDbId = memberFace.VectorDbId,
             MemberName = memberFace.Member?.FullName,
+            MemberGender = memberFace.Member?.Gender, // NEW
+            MemberAvatarUrl = memberFace.Member?.AvatarUrl, // NEW
             FamilyId = memberFace.Member?.FamilyId,
             FamilyName = memberFace.Member?.Family?.Name
         };

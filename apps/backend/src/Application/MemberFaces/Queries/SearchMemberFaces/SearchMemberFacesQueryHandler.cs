@@ -93,6 +93,8 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
                 IsVectorDbSynced = mf.IsVectorDbSynced,
                 VectorDbId = mf.VectorDbId,
                 MemberName = mf.Member!.FullName,
+                MemberGender = mf.Member!.Gender, // NEW
+                MemberAvatarUrl = mf.Member!.AvatarUrl, // NEW
                 FamilyId = mf.Member!.FamilyId,
                 FamilyName = mf.Member!.Family!.Name
             }).AsNoTracking(),
