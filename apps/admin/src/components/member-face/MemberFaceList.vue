@@ -1,17 +1,33 @@
 <template>
   <v-card :elevation="0">
-    <v-card-title class="d-flex align-center">
-      <div class="text-h6 text-uppercase">{{ t('memberFace.list.title') }}</div>
-      <v-spacer></v-spacer>
-      <v-btn color="primary" @click="emit('create')" data-testid="create-member-face-button">
-        <v-icon left>mdi-plus</v-icon>
-        {{ t('common.create') }}
-      </v-btn>
-    </v-card-title>
     <v-card-text>
       <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy"
         :headers="headers" :items="items" :items-length="totalItems" :loading="loading" class="elevation-0"
         item-value="id" @update:options="handleUpdateOptions">
+        <template #top>
+          <v-toolbar flat>
+            <v-toolbar-title>{{ t('memberFace.list.title') }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn v-if="canPerformActions" color="primary" icon @click="emit('ai-create')">
+              <v-tooltip :text="t('memberFace.list.action.aiCreate')">
+                <template v-slot:activator="{ props }">
+                  <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
+                </template>
+              </v-tooltip>
+            </v-btn>
+            <v-btn v-if="canPerformActions" color="primary" icon @click="emit('create')"
+              data-testid="create-member-face-button">
+              <v-tooltip :text="t('common.create')">
+                <template v-slot:activator="{ props }">
+                  <v-icon v-bind="props">mdi-plus</v-icon>
+                </template>
+              </v-tooltip>
+            </v-btn>
+            <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify"
+              single-line hide-details clearable class="mr-2"
+              data-test-id="member-face-list-search-input"></v-text-field>
+          </v-toolbar>
+        </template>
         <template v-slot:item.thumbnail="{ item }">
           <v-img v-if="item.thumbnailUrl" :src="item.thumbnailUrl" height="40" width="40" cover class="my-1"></v-img>
           <v-icon v-else>mdi-image-off</v-icon>
@@ -66,21 +82,52 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
+import { useAuth } from '@/composables/useAuth'; // NEW
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination'; // NEW
 
 interface MemberFaceListProps {
   items: MemberFace[];
   totalItems: number;
   loading: boolean;
+  search?: string; // NEW
+  readOnly?: boolean; // NEW
 }
 
 const props = defineProps<MemberFaceListProps>();
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'ai-create', 'update:search']); // NEW emits
 
 const { t } = useI18n();
+const { isAdmin, isFamilyManager } = useAuth(); // NEW
 
 const page = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Use constant
 const sortBy = ref<any[]>([]);
+
+const searchQuery = ref(props.search); // NEW
+let debounceTimer: ReturnType<typeof setTimeout>; // NEW
+
+const debouncedSearch = computed({ // NEW
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => { // NEW
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
+
+const canPerformActions = computed(() => { // NEW
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
 
 const headers = computed(() => [
   { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '120px' },
@@ -90,18 +137,22 @@ const headers = computed(() => [
 ]);
 
 
-watch([page, itemsPerPage, sortBy], () => {
+watch([page, itemsPerPage, sortBy, debouncedSearch], () => { // ADD debouncedSearch
   emit('update:options', {
     page: page.value,
     itemsPerPage: itemsPerPage.value,
     sortBy: sortBy.value,
+    search: debouncedSearch.value, // Pass search query
   });
 }, { deep: true });
 
 
-const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; }) => {
+const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; search?: string; }) => { // Update interface
   page.value = options.page;
   itemsPerPage.value = options.itemsPerPage;
   sortBy.value = options.sortBy;
+  if (options.search !== undefined) {
+    searchQuery.value = options.search;
+  }
 };
 </script>

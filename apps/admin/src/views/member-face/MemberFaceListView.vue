@@ -1,44 +1,24 @@
 <template>
-  <div data-testid="member-face-list-view">
-    <MemberFaceList
-      :items="memberFaceStore.list.items"
-      :total-items="memberFaceStore.list.totalItems"
-      :loading="list.loading"
-      @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer"
-      @edit="openEditDrawer"
-      @delete="confirmDelete"
-      @create="openAddDrawer()"
-    ></MemberFaceList>
+  <v-container fluid>
+    <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
+      :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer"
+      @delete="confirmDelete" @create="openAddDrawer()"></MemberFaceList>
     <!-- Edit MemberFace Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberFaceClosed">
-      <MemberFaceEditView
-        v-if="selectedItemId && editDrawer"
-        :member-face-id="selectedItemId"
-        @close="handleMemberFaceClosed"
-        @saved="handleMemberFaceSaved"
-      />
+      <MemberFaceEditView v-if="selectedItemId && editDrawer" :member-face-id="selectedItemId"
+        @close="handleMemberFaceClosed" @saved="handleMemberFaceSaved" />
     </BaseCrudDrawer>
     <!-- Add MemberFace Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberFaceClosed">
-      <MemberFaceAddView
-        v-if="addDrawer"
-        :member-id="props.memberId"
-        :family-id="props.familyId"
-        @close="handleMemberFaceClosed"
-        @saved="handleMemberFaceSaved"
-      />
+      <MemberFaceAddView v-if="addDrawer" :member-id="props.memberId" :family-id="props.familyId"
+        @close="handleMemberFaceClosed" @saved="handleMemberFaceSaved" />
     </BaseCrudDrawer>
     <!-- Detail MemberFace Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <MemberFaceDetailView
-        v-if="selectedItemId && detailDrawer"
-        :member-face-id="selectedItemId"
-        @close="handleDetailClosed"
-        @edit-member-face="openEditDrawer"
-      />
+      <MemberFaceDetailView v-if="selectedItemId && detailDrawer" :member-face-id="selectedItemId"
+        @close="handleDetailClosed" @edit-member-face="openEditDrawer" />
     </BaseCrudDrawer>
-  </div>
+  </v-container>
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue';
@@ -49,7 +29,7 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import type { MemberFace } from '@/types'; 
+import type { MemberFace } from '@/types';
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceEditView from '@/views/member-face/MemberFaceEditView.vue';
