@@ -18,6 +18,7 @@ export * from './memberStory.d'; // Added new memberStory types
 export * from './biography.d'; // NEW EXPORT
 export * from './ai/analyzed-data.d'; // NEW EXPORT
 export * from './memory.d'; // NEW EXPORT
+export * from './memberFace.d'; // NEW EXPORT for MemberFace
 export type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from './ai/analyzed-data';
 
 // Define a filter interface for member stories if needed for searching/filtering // Updated

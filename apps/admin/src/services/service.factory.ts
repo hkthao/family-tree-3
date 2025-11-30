@@ -40,6 +40,8 @@ import type { IMemberStoryService } from './memberStory/memberStory.service.inte
 import { ApiMemberStoryService } from './memberStory/api.memberStory.service'; // Updated
 import type { IAiService } from './ai/ai.service.interface'; // NEW IMPORT
 import { ApiAiService } from './ai/api.ai.service'; // NEW IMPORT
+import type { IMemberFaceService } from './member-face/member-face.service.interface'; // NEW IMPORT
+import { ApiMemberFaceService } from './member-face/api.member-face.service'; // NEW IMPORT
 
 
 export type ServiceMode = 'real' | 'test';
@@ -67,6 +69,7 @@ export interface AppServices {
   familyDict: IFamilyDictService; // Add familyDict service
   memberStory: IMemberStoryService; // New // Updated
   ai: IAiService; // NEW SERVICE
+  memberFace: IMemberFaceService; // NEW SERVICE
 }
 
 import apiClient from '@/plugins/axios';
@@ -162,6 +165,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiAiService(apiClient)
         : testServices?.ai || new ApiAiService(apiClient),
+    memberFace: // NEW SERVICE
+      mode === 'real'
+        ? new ApiMemberFaceService(apiClient)
+        : testServices?.memberFace || new ApiMemberFaceService(apiClient),
   };
 }
 
