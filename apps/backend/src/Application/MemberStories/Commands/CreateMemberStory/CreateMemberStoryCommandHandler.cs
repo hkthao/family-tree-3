@@ -1,9 +1,9 @@
 using Ardalis.Specification.EntityFrameworkCore; // NEW
-using backend.Application.AI.DTOs; // NEW for ImageUploadResponseDto
+using backend.Application.AI.DTOs; // For ImageUploadResponseDto
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Faces.Commands.UpsertMemberFace; // NEW
+using backend.Application.Common.Models; // NEW: For Result<T>
+using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
@@ -118,23 +118,22 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         // Handle DetectedFaces if any
         foreach (var detectedFace in request.DetectedFaces)
         {
-            var upsertFaceCommand = new UpsertMemberFaceCommand
+            var createFaceCommand = new CreateMemberFaceCommand
             {
                 MemberId = request.MemberId,
-                FamilyId = familyId, // Pass FamilyId for authorization
                 FaceId = detectedFace.Id,
                 BoundingBox = detectedFace.BoundingBox,
                 Confidence = (double)detectedFace.Confidence,
-                OriginalImageUrl = request.OriginalImageUrl,
+                OriginalImageUrl = request.OriginalImageUrl, // This is the original image URL for the story
                 Embedding = detectedFace.Embedding ?? [],
-                Thumbnail = detectedFace.Thumbnail,
+                Thumbnail = detectedFace.Thumbnail, // Pass the base64 thumbnail
                 Emotion = detectedFace.Emotion,
                 EmotionConfidence = (double)(detectedFace.EmotionConfidence ?? 0.0f)
             };
-            var upsertResult = await _mediator.Send(upsertFaceCommand, cancellationToken);
-            if (!upsertResult.IsSuccess)
+            var createResult = await _mediator.Send(createFaceCommand, cancellationToken);
+            if (!createResult.IsSuccess)
             {
-                _logger.LogWarning("Failed to upsert face {FaceId} for Member {MemberId}: {Error}", detectedFace.Id, request.MemberId, upsertResult.Error);
+                _logger.LogWarning("Failed to create face {FaceId} for Member {MemberId}: {Error}", detectedFace.Id, request.MemberId, createResult.Error);
                 // Continue processing other faces even if one fails
             }
         }

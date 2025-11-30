@@ -69,6 +69,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         services.AddScoped<IPrivacyService, PrivacyService>();
+        services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
 
         // Register Story Generation Service and configure its HttpClient

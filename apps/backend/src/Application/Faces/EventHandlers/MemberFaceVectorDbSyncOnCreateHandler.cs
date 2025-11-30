@@ -1,0 +1,65 @@
+using backend.Application.AI.Models;
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Domain.Entities;
+using backend.Domain.Events;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace backend.Application.Faces.EventHandlers;
+
+public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<MemberFaceCreatedEvent>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IN8nService _n8nService;
+    private readonly ILogger<MemberFaceVectorDbSyncOnCreateHandler> _logger;
+
+    public MemberFaceVectorDbSyncOnCreateHandler(IApplicationDbContext context, IN8nService n8nService, ILogger<MemberFaceVectorDbSyncOnCreateHandler> logger)
+    {
+        _context = context;
+        _n8nService = n8nService;
+        _logger = logger;
+    }
+
+    public async Task Handle(MemberFaceCreatedEvent notification, CancellationToken cancellationToken)
+    {
+        var memberFace = notification.MemberFace;
+
+        // Ensure thumbnail is available for payload, if not, try to fetch from ThumbnailUrl
+        string? effectiveThumbnailUrl = memberFace.ThumbnailUrl;
+
+        var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
+        {
+            Id = Guid.TryParse(memberFace.VectorDbId, out var vectorDbId) ? vectorDbId : Guid.NewGuid(),
+            Vector = [.. memberFace.Embedding.Select(d => (float)d)], // Convert double to float
+            Payload = new Dictionary<string, object>
+            {
+                { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity
+                { "memberId", memberFace.MemberId.ToString() },
+                { "faceId", memberFace.FaceId },
+                { "thumbnailUrl", effectiveThumbnailUrl ?? "" },
+                { "originalImageUrl", memberFace.OriginalImageUrl ?? "" },
+                { "emotion", memberFace.Emotion ?? "" },
+                { "emotionConfidence", memberFace.EmotionConfidence },
+                { "vectorDbId", memberFace.VectorDbId ?? Guid.NewGuid().ToString() } // Use existing or generate new
+            }
+        };
+
+        var n8nUpsertResult = await _n8nService.CallUpsertFaceVectorWebhookAsync(upsertFaceVectorDto, cancellationToken);
+
+        if (!n8nUpsertResult.IsSuccess || n8nUpsertResult.Value == null || !n8nUpsertResult.Value.Success)
+        {
+            _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n (event handler): {Error}", memberFace.Id, n8nUpsertResult.Error ?? n8nUpsertResult.Value?.Message);
+            memberFace.IsVectorDbSynced = false; // Mark as not synced
+        }
+        else
+        {
+            memberFace.IsVectorDbSynced = true;
+            memberFace.VectorDbId = upsertFaceVectorDto.Id.ToString(); // Ensure VectorDbId is set correctly from the DTO sent to n8n
+            _logger.LogInformation("Successfully upserted face vector for MemberFaceId {MemberFaceId} in n8n (event handler). VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}

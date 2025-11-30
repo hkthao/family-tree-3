@@ -16,4 +16,5 @@ public record CreateMemberFaceCommand : IRequest<Result<Guid>>
     public string? Emotion { get; init; }
     public double? EmotionConfidence { get; init; }
     public bool IsVectorDbSynced { get; init; }
+    public string? Thumbnail { get; init; } // NEW: Base64 encoded thumbnail
 }

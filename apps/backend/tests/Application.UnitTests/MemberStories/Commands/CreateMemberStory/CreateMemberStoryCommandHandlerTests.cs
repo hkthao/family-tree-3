@@ -2,7 +2,7 @@ using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Faces.Commands.UpsertMemberFace;
+using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using backend.Application.Files.Commands.UploadFileFromUrl;
@@ -229,8 +229,8 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpsertMemberFaceCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<UpsertMemberFaceCommandResultDto>.Success(new UpsertMemberFaceCommandResultDto { VectorDbId = "test_vector_db_id" }));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateMemberFaceCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid())); // Return a new GUID for the created MemberFace
 
         _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
             cmd => cmd.FileUrl == tempThumbnailUrl), It.IsAny<CancellationToken>()))
@@ -254,7 +254,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         createdStory!.OriginalImageUrl.Should().Be(permanentOriginalUrl);
         createdStory.ResizedImageUrl.Should().Be(permanentResizedUrl);
 
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UpsertMemberFaceCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify UpsertMemberFaceCommand was sent
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateMemberFaceCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify CreateMemberFaceCommand was sent
         _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Verify UploadFileFromUrlCommand was sent for Original and Resized images
     }
 }
