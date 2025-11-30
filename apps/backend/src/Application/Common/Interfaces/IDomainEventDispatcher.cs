@@ -12,5 +12,5 @@ public interface IDomainEventDispatcher
     /// </summary>
     /// <param name="entities">Tập hợp các thực thể có chứa sự kiện miền.</param>
     /// <returns>Một tác vụ đại diện cho hoạt động điều phối không đồng bộ.</returns>
-    Task DispatchAndClearEvents(IEnumerable<BaseEntity> entities);
+    Task DispatchEvents(IList<BaseEvent> domainEvents);
 }

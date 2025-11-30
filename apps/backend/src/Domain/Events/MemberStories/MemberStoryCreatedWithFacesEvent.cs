@@ -13,6 +13,7 @@ public class MemberStoryCreatedWithFacesEvent : BaseEvent
     // Re-introducing nested record to carry face data within the Domain layer
     public record FaceDataForCreation(
         string Id,
+        Guid MemberId,
         BoundingBox BoundingBox,
         double Confidence,
         string? Thumbnail,

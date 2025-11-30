@@ -92,7 +92,7 @@ public class ApplicationDbContext(
             var entitiesWithDomainEvents = ChangeTracker
                 .Entries<BaseEntity>()
                 .Where(entry => entry.Entity.DomainEvents.Any())
-                .Select(entry => entry.Entity)
+                .SelectMany(entry => entry.Entity.DomainEvents)
                 .ToList();
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
             {
@@ -117,10 +117,11 @@ public class ApplicationDbContext(
                     softDeleteEntity.DeletedDate = _dateTime.Now;
                     entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
                 }
+                entry.Entity.ClearDomainEvents();
             }
             var result = await base.SaveChangesAsync(cancellationToken);
             // Điều phối các sự kiện miền sau khi SaveChanges thành công
-            await _domainEventDispatcher.DispatchAndClearEvents(entitiesWithDomainEvents);
+            await _domainEventDispatcher.DispatchEvents(entitiesWithDomainEvents);
             return result;
         }
     /// <summary>

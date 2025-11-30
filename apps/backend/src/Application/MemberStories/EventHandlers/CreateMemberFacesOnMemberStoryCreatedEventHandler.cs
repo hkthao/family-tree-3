@@ -20,7 +20,7 @@ public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHa
         {
             var createFaceCommand = new CreateMemberFaceCommand
             {
-                MemberId = memberStory.MemberId, 
+                MemberId = faceData.MemberId, 
                 FaceId = faceData.Id,
                 BoundingBox = new BoundingBoxDto { X = (int)faceData.BoundingBox.X, Y = (int)faceData.BoundingBox.Y, Width = (int)faceData.BoundingBox.Width, Height = (int)faceData.BoundingBox.Height }, 
                 Confidence = (float)faceData.Confidence, 

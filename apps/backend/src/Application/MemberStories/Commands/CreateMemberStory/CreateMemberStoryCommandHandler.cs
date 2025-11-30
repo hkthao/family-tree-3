@@ -10,7 +10,9 @@ using backend.Domain.Events.MemberStories;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using static backend.Domain.Events.MemberStories.MemberStoryCreatedWithFacesEvent;
 namespace backend.Application.MemberStories.Commands.CreateMemberStory;
+
 public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStoryCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
@@ -28,20 +30,20 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
     }
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken)
     {
-        
+
         var familyId = await _context.Members
                                      .WithSpecification(new FamilyIdByMemberIdSpecification(request.MemberId))
                                      .FirstOrDefaultAsync(cancellationToken);
-        if (familyId == Guid.Empty) 
+        if (familyId == Guid.Empty)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
-        
+
         if (!_authorizationService.CanManageFamily(familyId))
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
-        
+
         var member = await _context.Members
                                    .WithSpecification(new MemberByIdWithStoriesAndFacesSpecification(request.MemberId))
                                    .FirstOrDefaultAsync(cancellationToken);
@@ -49,7 +51,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
-        
+
         var memberStory = new MemberStory
         {
             MemberId = request.MemberId,
@@ -61,12 +63,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             StoryStyle = request.StoryStyle,
             Perspective = request.Perspective
         };
-        
+
         if (!string.IsNullOrEmpty(request.OriginalImageUrl) && request.OriginalImageUrl.Contains("/temp/"))
         {
             var originalUploadResult = await UploadImageFromTempUrlAsync(
                 request.OriginalImageUrl,
-                "original_image", 
+                "original_image",
                 familyId,
                 cancellationToken);
             if (!originalUploadResult.IsSuccess)
@@ -78,12 +80,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 memberStory.OriginalImageUrl = originalUploadResult.Value.Url;
             }
         }
-        
+
         if (!string.IsNullOrEmpty(request.ResizedImageUrl) && request.ResizedImageUrl.Contains("/temp/"))
         {
             var resizedUploadResult = await UploadImageFromTempUrlAsync(
                 request.ResizedImageUrl,
-                "resized_image", 
+                "resized_image",
                 familyId,
                 cancellationToken);
             if (!resizedUploadResult.IsSuccess)
@@ -95,18 +97,17 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 memberStory.ResizedImageUrl = resizedUploadResult.Value.Url;
             }
         }
-        
-        member.AddStory(memberStory); 
-        _context.MemberStories.Add(memberStory); 
-        
-        await _context.SaveChangesAsync(cancellationToken);
-        
+
+        member.AddStory(memberStory);
+        _context.MemberStories.Add(memberStory);
+
         if (request.DetectedFaces != null && request.DetectedFaces.Any())
         {
-            var facesDataForCreation = request.DetectedFaces.Select(df => new MemberStoryCreatedWithFacesEvent.FaceDataForCreation(
+            var facesDataForCreation = request.DetectedFaces.Select(df => new FaceDataForCreation(
                 df.Id,
+                df.MemberId.GetValueOrDefault(),
                 new BoundingBox { X = df.BoundingBox.X, Y = df.BoundingBox.Y, Width = df.BoundingBox.Width, Height = df.BoundingBox.Height },
-                df.Confidence, 
+                df.Confidence,
                 df.Thumbnail,
                 df.Embedding ?? new List<double>(),
                 df.Emotion,
@@ -114,6 +115,8 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             )).ToList();
             memberStory.AddDomainEvent(new MemberStoryCreatedWithFacesEvent(memberStory, facesDataForCreation));
         }
+
+        await _context.SaveChangesAsync(cancellationToken);
         return Result<Guid>.Success(memberStory.Id);
     }
     private async Task<Result<ImageUploadResponseDto>> UploadImageFromTempUrlAsync(
@@ -122,7 +125,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         var command = new UploadFileFromUrlCommand
         {
             FileUrl = imageUrl,
-            FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}", 
+            FileName = $"{fileNamePrefix}_{Guid.NewGuid()}{Path.GetExtension(imageUrl)}",
             Folder = string.Format(UploadConstants.FamilyStoryPhotoFolder, familyId)
         };
         return await _mediator.Send(command, cancellationToken);

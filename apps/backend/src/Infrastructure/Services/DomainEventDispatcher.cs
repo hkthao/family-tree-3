@@ -28,13 +28,8 @@ public class DomainEventDispatcher : IDomainEventDispatcher
     /// Điều phối và xóa tất cả các sự kiện miền từ một tập hợp các thực thể.
     /// </summary>
     /// <param name="entities">Tập hợp các thực thể có chứa sự kiện miền.</param>
-    public async Task DispatchAndClearEvents(IEnumerable<BaseEntity> entities)
+    public async Task DispatchEvents(IList<BaseEvent> domainEvents)
     {
-        var domainEvents = entities
-            .Where(e => e.DomainEvents.Any())
-            .SelectMany(e => e.DomainEvents)
-            .ToList();
-
         if (!domainEvents.Any())
         {
             _logger.LogInformation("Không tìm thấy sự kiện miền nào để điều phối.");
@@ -50,7 +45,6 @@ public class DomainEventDispatcher : IDomainEventDispatcher
         }
 
         // Xóa các sự kiện sau khi chúng đã được điều phối
-        entities.ToList().ForEach(e => e.ClearDomainEvents());
         _logger.LogInformation("Đã xóa tất cả các sự kiện miền khỏi các thực thể.");
     }
 }

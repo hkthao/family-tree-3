@@ -58,7 +58,7 @@ namespace backend.Infrastructure.Data
         // Simple mock implementation of IDomainEventDispatcher for design-time
         private class DesignTimeDomainEventDispatcher : IDomainEventDispatcher
         {
-            public Task DispatchAndClearEvents(IEnumerable<BaseEntity> entities)
+            public Task DispatchEvents(IList<BaseEvent> entities)
             {
                 // Do nothing for design time
                 return Task.CompletedTask;
