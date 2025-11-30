@@ -43,5 +43,6 @@ const closeDrawer = () => {
 <style scoped>
 .btn-close{
   position: absolute;
+  z-index: 100;
 }
 </style>

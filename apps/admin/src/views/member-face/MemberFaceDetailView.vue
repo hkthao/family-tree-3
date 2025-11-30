@@ -1,59 +1,54 @@
 <template>
-  <v-card :elevation="0">
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('memberFace.detail.title') }}</span>
-    </v-card-title>
-    <v-progress-linear v-if="detail.loading" indeterminate color="primary"></v-progress-linear>
-    <v-card-text>
-      <MemberFaceForm
-        v-if="memberFace"
-        :initial-member-face-data="memberFace"
-        :read-only="true"
-      />
-      <v-alert v-else type="info" class="mt-4">{{ t('memberFace.detail.notFound') }}</v-alert>
+  <div>
 
-      <!-- Display other details if necessary -->
-      <v-divider class="my-4"></v-divider>
-      <div v-if="memberFace">
-        <v-list density="compact" class="pa-0">
-          <v-list-item>
-            <v-list-item-title>{{ t('memberFace.form.id') }}:</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">{{ memberFace.id }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>{{ t('memberFace.form.faceId') }}:</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">{{ memberFace.faceId }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>{{ t('memberFace.form.memberName') }}:</v-list-item-title>
-            <v-list-item-subtitle>{{ memberFace.memberName }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title>{{ t('memberFace.form.confidence') }}:</v-list-item-title>
-            <v-list-item-subtitle>{{ memberFace.confidence?.toFixed(2) }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item v-if="memberFace.thumbnailUrl">
-            <v-list-item-title>{{ t('memberFace.form.thumbnail') }}:</v-list-item-title>
-            <v-list-item-subtitle>
-              <v-img :src="memberFace.thumbnailUrl" max-width="100" class="my-2"></v-img>
-            </v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item v-if="memberFace.originalImageUrl">
-            <v-list-item-title>{{ t('memberFace.form.originalImage') }}:</v-list-item-title>
-            <v-list-item-subtitle>
-              <a :href="memberFace.originalImageUrl" target="_blank">{{ t('memberFace.form.viewOriginal') }}</a>
-            </v-list-item-subtitle>
-          </v-list-item>
-          <!-- Add more fields as needed -->
-        </v-list>
-      </div>
-    </v-card-text>
-    <v-card-actions class="justify-end">
-      <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!memberFace || detail.loading">{{ t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!memberFace || detail.loading">{{ t('common.delete') }}</v-btn>
-    </v-card-actions>
-  </v-card>
+    <v-card :elevation="0" v-if="memberFace">
+      <v-card-title class="text-center text-h5 text-uppercase mb-2">
+        {{ t('memberFace.detail.title') }}
+      </v-card-title>
+      <v-card-text>
+        <div v-if="memberFace" class="d-flex flex-column align-center text-center">
+          <!-- Face Thumbnail -->
+          <v-avatar size="120" rounded="lg" class="mb-4">
+            <v-img :src="memberFace.thumbnailUrl || '/family_avatar.png'"
+              :alt="memberFace.memberName || 'Face'"></v-img>
+          </v-avatar>
+
+          <!-- Member Name -->
+          <v-card-title class="text-h5 text-uppercase mb-1">
+            {{ memberFace.memberName || t('common.unknown') }}
+          </v-card-title>
+
+          <!-- Family Name (if available) -->
+          <v-chip v-if="memberFace.familyName" color="primary" size="small" class="mb-2">
+            {{ memberFace.familyName }}
+          </v-chip>
+
+          <v-chip v-if="memberFace.emotion" color="info" size="small" class="mb-4">
+            {{ memberFace.emotion }}
+          </v-chip>
+
+          <v-divider class="my-4 w-100"></v-divider>
+
+          <!-- Other Details in a List -->
+          <v-list class="w-100">
+            <v-list-item v-if="memberFace.originalImageUrl">
+              <v-list-item-title class="font-weight-medium">{{ t('memberFace.form.originalImage')}}:</v-list-item-title>
+              <v-list-item-subtitle>
+                <a :href="memberFace.originalImageUrl" target="_blank">{{ t('memberFace.form.viewOriginal') }}</a>
+              </v-list-item-subtitle>
+            </v-list-item>
+            <!-- Add more fields as needed -->
+          </v-list>
+        </div>
+        <v-alert v-else type="info" class="mt-4">{{ t('memberFace.detail.notFound') }}</v-alert>
+      </v-card-text>
+
+      <v-card-actions class="justify-end">
+              <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>        <v-btn color="error" @click="handleDelete" :disabled="detail.loading">{{ t('common.delete') }}</v-btn>
+      </v-card-actions>
+    </v-card>
+    <v-progress-linear v-else-if="detail.loading" indeterminate color="primary"></v-progress-linear>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -110,11 +105,7 @@ const handleClose = () => {
   emit('close');
 };
 
-const handleEdit = () => {
-  if (memberFace.value) {
-    emit('edit-member-face', memberFace.value.id);
-  }
-};
+
 
 const handleDelete = async () => {
   if (!memberFace.value) return;
@@ -143,4 +134,3 @@ const handleDelete = async () => {
   }
 };
 </script>
-

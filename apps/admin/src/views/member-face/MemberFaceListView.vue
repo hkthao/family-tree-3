@@ -1,13 +1,9 @@
 <template>
   <v-container fluid>
     <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
-      :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer"
+      :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
       @delete="confirmDelete" @create="openAddDrawer()"></MemberFaceList>
-    <!-- Edit MemberFace Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" @close="handleMemberFaceClosed">
-      <MemberFaceEditView v-if="selectedItemId && editDrawer" :member-face-id="selectedItemId"
-        @close="handleMemberFaceClosed" @saved="handleMemberFaceSaved" />
-    </BaseCrudDrawer>
+
     <!-- Add MemberFace Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberFaceClosed">
       <MemberFaceAddView v-if="addDrawer" :member-id="props.memberId" :family-id="props.familyId"
@@ -16,7 +12,7 @@
     <!-- Detail MemberFace Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
       <MemberFaceDetailView v-if="selectedItemId && detailDrawer" :member-face-id="selectedItemId"
-        @close="handleDetailClosed" @edit-member-face="openEditDrawer" />
+        @close="handleDetailClosed" />
     </BaseCrudDrawer>
   </v-container>
 </template>
@@ -32,7 +28,6 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace } from '@/types';
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
-import MemberFaceEditView from '@/views/member-face/MemberFaceEditView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
 interface MemberFaceListViewProps {
   memberId?: string;
@@ -46,11 +41,9 @@ const { showSnackbar } = useGlobalSnackbar();
 const { showConfirmDialog } = useConfirmDialog();
 const {
   addDrawer,
-  editDrawer,
   detailDrawer,
   selectedItemId,
   openAddDrawer,
-  openEditDrawer,
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();

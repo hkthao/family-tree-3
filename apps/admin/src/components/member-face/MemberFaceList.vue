@@ -29,7 +29,9 @@
           </div>
         </template>
         <template v-slot:item.memberName="{ item }">
-          <MemberName :fullName="item.memberName" :gender="item.memberGender" :avatarUrl="item.memberAvatarUrl" />
+          <div @click="emit('view', item.id)" class="cursor-pointer">
+            <MemberName :fullName="item.memberName" :gender="item.memberGender" :avatarUrl="item.memberAvatarUrl" />
+          </div>
         </template>
         <template v-slot:item.familyName="{ item }">
           {{ item.familyName }}
@@ -42,7 +44,7 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="emit('view', item)" data-testid="view-member-face-button">
+              <v-list-item @click="emit('view', item.id)" data-testid="view-member-face-button">
                 <v-list-item-title>
                   <v-icon left>mdi-eye</v-icon>
                   {{ t('common.viewDetails') }}

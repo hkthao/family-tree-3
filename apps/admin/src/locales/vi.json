@@ -947,6 +947,7 @@
   "memberFace.form.boundingBoxHeight": "Chiều cao (hộp giới hạn)",
   "memberFace.form.confidence": "Độ tin cậy",
   "memberFace.form.thumbnailUrl": "URL ảnh thu nhỏ",
+  "memberFace.form.originalImage": "Ảnh gốc",
   "memberFace.form.originalImageUrl": "URL ảnh gốc",
   "memberFace.form.embedding": "Nhúng (mảng JSON)",
   "memberFace.form.emotion": "Cảm xúc",
