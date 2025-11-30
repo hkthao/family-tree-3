@@ -122,7 +122,7 @@ const saveAllLabeledFaces = async () => {
         confidence: face.confidence,
         thumbnail: face.thumbnail, // NEW: Include thumbnail (base64)
         thumbnailUrl: face.thumbnailUrl, // Use the detected thumbnail URL
-        originalImageUrl: faceStore.uploadedImage, // The original uploaded image URL
+        originalImageUrl: faceStore.originalImageUrl, // The original uploaded image URL
         embedding: face.embedding || [],
         emotion: face.emotion,
         emotionConfidence: face.emotionConfidence,

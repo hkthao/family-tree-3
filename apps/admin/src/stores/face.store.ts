@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia';
 import type { DetectedFace, SearchResult, Member, Result } from '@/types';
-import i18n from '@/plugins/i18n'; // For localization
+import i18n from '@/plugins/i18n';
 import type { ApiError } from '@/plugins/axios';
 
 interface FaceState {
-  uploadedImage: string | null; // Base64 or URL of the uploaded image
-  uploadedImageId: string | null; // ID of the uploaded image from the backend
-  resizedImageUrl: string | null; // NEW: URL of the resized image for analysis
-  detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
-  selectedFaceId: string | undefined; // ID of the currently selected face for labeling
-  faceSearchResults: SearchResult[]; // Results from face search
+  uploadedImage: string | null;
+  uploadedImageId: string | null;
+  resizedImageUrl: string | null;
+  originalImageUrl: string | null;
+  detectedFaces: DetectedFace[];
+  selectedFaceId: string | undefined;
+  faceSearchResults: SearchResult[];
   loading: boolean;
   error: string | null;
 }
@@ -17,17 +18,18 @@ interface FaceState {
 export const useFaceStore = defineStore('face', {
   state: (): FaceState => ({
     uploadedImage: null,
-    uploadedImageId: null, // Initialize uploadedImageId
+    uploadedImageId: null,
     detectedFaces: [],
     selectedFaceId: undefined,
     faceSearchResults: [],
     loading: false,
     error: null,
-    resizedImageUrl: null
+    resizedImageUrl: null,
+    originalImageUrl: null,
   }),
 
   getters: {
-    // Getters to retrieve specific data from the state
+
     currentSelectedFace: (state) =>
       state.detectedFaces.find((face) => face.id === state.selectedFaceId),
     unlabeledFaces: (state) =>
@@ -37,7 +39,7 @@ export const useFaceStore = defineStore('face', {
   },
 
   actions: {
-    // Action to handle image upload and face detection
+
     async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
@@ -45,24 +47,25 @@ export const useFaceStore = defineStore('face', {
         const result = await this.services.memberFace.detect(imageFile, resizeImageForAnalysis);
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
-          this.uploadedImageId = result.value.imageId; // Assign the imageId
-          this.resizedImageUrl = result.value.resizedImageUrl ?? null; // Store resized image URL
+          this.uploadedImageId = result.value.imageId;
+          this.resizedImageUrl = result.value.resizedImageUrl ?? null;
+          this.originalImageUrl = result.value.originalImageUrl ?? null;
           this.detectedFaces = result.value.detectedFaces.map((face) => ({
             id: face.id,
             boundingBox: face.boundingBox,
-            thumbnail: face.thumbnail, // Assign backend thumbnail (base64) to frontend thumbnail
-            thumbnailUrl: face.thumbnailUrl, // Assign backend thumbnailUrl (public URL) to frontend thumbnailUrl
+            thumbnail: face.thumbnail,
+            thumbnailUrl: face.thumbnailUrl,
             memberId: face.memberId,
-            originalMemberId: face.memberId, // Store the original memberId
+            originalMemberId: face.memberId,
             memberName: face.memberName,
             familyId: face.familyId,
             familyName: face.familyName,
             birthYear: face.birthYear,
             deathYear: face.deathYear,
-            embedding: face.embedding, // Include embedding
+            embedding: face.embedding,
             emotion: face.emotion,
             emotionConfidence: face.emotionConfidence,
-            status: face.status || (face.memberId ? 'original-recognized' : 'unrecognized'), // Use backend status or derive
+            status: face.status || (face.memberId ? 'original-recognized' : 'unrecognized'),
           }));
           return { ok: true, value: undefined };
         } else {
@@ -80,12 +83,12 @@ export const useFaceStore = defineStore('face', {
       }
     },
 
-    // Action to select a face for labeling
+
     selectFace(faceId: string | undefined): void {
       this.selectedFaceId = faceId;
     },
 
-    // Action to label a detected face with a member ID locally
+
     async labelFace(
       faceId: string,
       memberId: string,
@@ -94,7 +97,7 @@ export const useFaceStore = defineStore('face', {
       const faceIndex = this.detectedFaces.findIndex((f) => f.id === faceId);
       if (faceIndex !== -1) {
         this.detectedFaces[faceIndex].memberId = memberId;
-        this.detectedFaces[faceIndex].status = 'labeled'; // Set status to labeled
+        this.detectedFaces[faceIndex].status = 'labeled';
         if (memberDetails) {
           this.detectedFaces[faceIndex].memberName = memberDetails.fullName;
           this.detectedFaces[faceIndex].familyId = memberDetails.familyId;
@@ -109,7 +112,7 @@ export const useFaceStore = defineStore('face', {
       }
     },
 
-    // Action to remove a detected face
+
     removeFace(faceId: string): void {
       this.detectedFaces = this.detectedFaces.filter(
         (face) => face.id !== faceId,
@@ -125,6 +128,6 @@ export const useFaceStore = defineStore('face', {
       this.loading = false;
       this.error = null;
     },
-  }, // This closes the actions object
-}); // This closes the defineStore call
+  },
+});
 
