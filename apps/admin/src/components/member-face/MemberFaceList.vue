@@ -23,7 +23,7 @@
         </template>
         <template v-slot:item.thumbnail="{ item }">
           <div class="d-flex justify-center align-center" style="height: 100%;">
-            <v-img v-if="item.thumbnailUrl" rounded :src="item.thumbnailUrl" width="50" height="50" 
+            <v-img v-if="item.thumbnailUrl" rounded :src="item.thumbnailUrl" width="50" height="50"
               class="my-1"></v-img>
             <v-icon v-else>mdi-image-off</v-icon>
           </div>
@@ -36,36 +36,27 @@
         <template v-slot:item.familyName="{ item }">
           {{ item.familyName }}
         </template>
+        <template v-slot:item.emotion="{ item }">
+          <v-chip v-if="item.emotion" color="info" size="small">{{ item.emotion }}</v-chip>
+        </template>
         <template v-slot:item.actions="{ item }">
-          <v-menu>
+          <v-tooltip :text="t('common.viewDetails')">
             <template v-slot:activator="{ props }">
-              <v-btn icon variant="text" size="small" v-bind="props" data-testid="member-face-actions-menu">
-                <v-icon>mdi-dots-vertical</v-icon>
+              <v-btn icon variant="text" size="small" v-bind="props" @click="emit('view', item.id)"
+                data-testid="view-member-face-button">
+                <v-icon>mdi-eye</v-icon>
               </v-btn>
             </template>
-            <v-list>
-              <v-list-item @click="emit('view', item.id)" data-testid="view-member-face-button">
-                <v-list-item-title>
-                  <v-icon left>mdi-eye</v-icon>
-                  {{ t('common.viewDetails') }}
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="emit('edit', item)" data-testid="edit-member-face-button">
-                <v-list-item-title>
-                  <v-icon left>mdi-pencil</v-icon>
-                  {{ t('common.edit') }}
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="emit('delete', item)" color="error" data-testid="delete-member-face-button">
-                <v-list-item-title>
-                  <v-icon left>mdi-delete</v-icon>
-                  {{ t('common.delete') }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-        <template #bottom></template>
+          </v-tooltip>
+          <v-tooltip :text="t('common.delete')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon variant="text" size="small" v-bind="props" @click="emit('delete', item)" color="error"
+                data-testid="delete-member-face-button">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </template> <template #bottom></template>
       </v-data-table-server>
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
@@ -132,6 +123,7 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('memberFace.list.headers.thumbnail'), key: 'thumbnail', sortable: false, width: '120px', align: 'center' },
   { title: t('memberFace.list.headers.memberName'), key: 'memberName' },
   { title: t('memberFace.list.headers.familyName'), key: 'familyName' },
+  { title: t('memberFace.list.headers.emotion'), key: 'emotion', sortable: false, width: '100px', align: 'center' },
   { title: t('memberFace.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 

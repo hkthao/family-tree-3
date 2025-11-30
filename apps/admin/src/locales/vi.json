@@ -934,6 +934,7 @@
   "memberFace.list.headers.thumbnail": "Hình ảnh",
   "memberFace.list.headers.memberName": "Tên thành viên",
   "memberFace.list.headers.familyName": "Tên Gia đình",
+  "memberFace.list.headers.emotion": "Cảm xúc",
   "memberFace.list.headers.actions": "Hành động",
   "memberFace.list.confirmDelete": "Bạn có chắc muốn xóa khuôn mặt '{faceId}'?",
   "memberFace.form.editTitle": "Chỉnh sửa Khuôn mặt Thành viên",
