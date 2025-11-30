@@ -3,8 +3,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this using directive
 using backend.Application.Faces.Commands.DetectFaces;
-using backend.Application.Faces.Queries.SearchMemberFace; // Add this line
 using backend.Application.Faces.Common;
+using backend.Application.Faces.Queries;
+using backend.Application.Faces.Queries.SearchMemberFace; // Add this line
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -13,7 +14,6 @@ using MediatR; // NEW
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.Faces.Queries;
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 {

@@ -1,8 +1,8 @@
-using backend.Application.Faces.Commands.UpsertMemberFace;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Faces.Commands.UpsertMemberFace;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
 using backend.Application.Files.Commands.UploadFileFromUrl;

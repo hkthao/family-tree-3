@@ -71,9 +71,6 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             Perspective = request.Perspective // NEW
         };
 
-        // --- Logic to handle /temp/ URLs ---
-        var storyId = memberStory.Id; // Get the generated ID for the new story
-
         // Check and upload OriginalImageUrl if it's a temporary URL
         if (!string.IsNullOrEmpty(request.OriginalImageUrl) && request.OriginalImageUrl.Contains("/temp/"))
         {
@@ -130,6 +127,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                 Confidence = (double)detectedFace.Confidence,
                 OriginalImageUrl = request.OriginalImageUrl,
                 Embedding = detectedFace.Embedding ?? [],
+                Thumbnail = detectedFace.Thumbnail,
                 Emotion = detectedFace.Emotion,
                 EmotionConfidence = (double)(detectedFace.EmotionConfidence ?? 0.0f)
             };

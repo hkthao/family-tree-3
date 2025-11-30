@@ -14,6 +14,7 @@ public class N8nSettings
 public class UploadSettings
 {
     public string WebHookUrl { get; set; } = string.Empty;
+    public string Cloud { get; set; } = "cloudinary";
 }
 
 public class FaceSettings

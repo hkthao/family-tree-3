@@ -243,7 +243,7 @@ public class N8nService : IN8nService
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         content.Add(fileContent, "data", dto.FileName!);
 
-        var url = $"{_n8nSettings.Upload.WebHookUrl}";
+        var url = $"{_n8nSettings.Upload.WebHookUrl}?cloud={_n8nSettings.Upload.Cloud}&folder={dto.Folder}";
         try
         {
             _logger.LogInformation("Calling n8n image upload webhook at {Url}", url);

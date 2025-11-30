@@ -41,13 +41,13 @@ public class UploadFileFromUrlCommandHandler : IRequestHandler<UploadFileFromUrl
         }
 
         // 2. Construct ImageUploadWebhookDto
-                    var imageUploadDto = new ImageUploadWebhookDto
-                    {
-                        ImageData = imageData,
-                        FileName = request.FileName,
-                        Folder = request.Folder,
-                        ContentType = contentType // Pass content type
-                    };
+        var imageUploadDto = new ImageUploadWebhookDto
+        {
+            ImageData = imageData,
+            FileName = request.FileName,
+            Folder = request.Folder,
+            ContentType = contentType // Pass content type
+        };
         // 3. Call n8n Image Upload Webhook
         var n8nUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
         if (!n8nUploadResult.IsSuccess)

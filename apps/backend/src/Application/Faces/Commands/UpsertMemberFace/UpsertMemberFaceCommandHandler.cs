@@ -1,10 +1,10 @@
-using backend.Application.Files.UploadFile; // NEW
-using backend.Application.Common.Utils; // NEW
 using backend.Application.AI.Models;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Utils; // NEW
 using backend.Application.Faces.Queries; // Added for SearchMemberFaceQuery and FoundFaceDto
+using backend.Application.Files.UploadFile; // NEW
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;

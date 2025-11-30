@@ -25,7 +25,6 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory'; // Keep MemberStoryDto for local state
 import type { CreateMemberStory } from '@/types/createMemberStory'; // New import
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
-import type { DetectedFace } from '@/types';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -65,10 +64,7 @@ const handleSave = async () => {
       rawInput: editedMemberStory.value.rawInput, // NEW
       storyStyle: editedMemberStory.value.storyStyle, // NEW
       perspective: editedMemberStory.value.perspective, // NEW
-      detectedFaces: (editedMemberStory.value.detectedFaces || []).map(face => ({
-        ...face,
-        thumbnail: ''
-      } as DetectedFace)),
+      detectedFaces: (editedMemberStory.value.detectedFaces || [])
     };
 
     const result = await memberStoryStore.addItem(createPayload); // Pass the mapped payload
