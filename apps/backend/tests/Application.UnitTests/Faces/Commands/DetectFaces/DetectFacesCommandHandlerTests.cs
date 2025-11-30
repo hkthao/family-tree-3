@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this using directive
 using backend.Application.Faces.Commands.DetectFaces;
+using backend.Application.Faces.Queries.SearchMemberFace; // Add this line
 using backend.Application.Faces.Common;
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
@@ -12,6 +13,7 @@ using MediatR; // NEW
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.Faces.Queries;
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 {
@@ -37,6 +39,12 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     Filename = "mock.jpg",
                     ContentType = "image/jpeg"
                 }));
+
+            // Default mock for IMediator.Send for SearchMemberFaceQuery
+            var emptyFoundFacesResult = Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>());
+            _mediatorMock.Setup(m => m.Send(It.IsAny<SearchMemberFaceQuery>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(emptyFoundFacesResult));
+
         }
 
         [Fact]
@@ -63,7 +71,18 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(detectedFaces);
 
-            var memberId = Guid.NewGuid();
+            var memberId = Guid.NewGuid(); // Move declaration here
+            var foundFacesResult = Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>
+            {
+                new FoundFaceDto { MemberId = memberId, Score = 0.1f }
+            });
+
+            // Setup the mediator to return the found member for SearchMemberFaceQuery
+            _mediatorMock.Setup(m => m.Send(
+                It.Is<SearchMemberFaceQuery>(q => q.Vector != null && q.Vector.SequenceEqual(detectedFaces.First().Embedding!)),
+                It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(foundFacesResult));
+
             var familyId = Guid.NewGuid();
             var family = new Family { Name = "Test Family", Code = "TF" };
             var member = new Member(memberId, "Test", "Member", "TM", familyId, family); // Fixed: Using new constructor
