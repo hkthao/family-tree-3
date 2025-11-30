@@ -1,8 +1,6 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.Specifications;
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Commands.CreateEvent;
@@ -18,11 +16,6 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
-
-        var membersSpec = new MembersByIdsSpec(request.RelatedMembers);
-        var relatedMembers = await _context.Members
-            .WithSpecification(membersSpec)
-            .ToListAsync(cancellationToken);
 
         var entity = new Event(request.Name, request.Code ?? GenerateUniqueCode("EVT"), request.Type, request.FamilyId);
         entity.UpdateEvent(
