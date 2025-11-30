@@ -1,17 +1,13 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using MediatR;
-using System.Linq;
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.DeleteMemberFace;
 

@@ -1,36 +1,37 @@
-using Ardalis.Specification.EntityFrameworkCore; // NEW
-using backend.Application.AI.DTOs; // For ImageUploadResponseDto
+using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // NEW: For Result<T>
-using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
-using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
-using backend.Application.Members.Specifications; // NEW
+using backend.Application.Common.Models;
+using backend.Application.Files.Commands.UploadFileFromUrl;
+using backend.Application.Members.Specifications;
 using backend.Domain.Entities;
+using backend.Domain.Events; // NEW: For MemberStoryCreatedWithFacesEvent
+using backend.Domain.ValueObjects; // NEW: For BoundingBox
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging; // NEW
+using Microsoft.Extensions.Logging;
 
-namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
 
-public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStoryCommand, Result<Guid>> // Updated
+namespace backend.Application.MemberStories.Commands.CreateMemberStory;
+
+public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStoryCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
-
     private readonly IAuthorizationService _authorizationService;
-    private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer; // Updated
-    private readonly IMediator _mediator; // NEW
-    private readonly ILogger<CreateMemberStoryCommandHandler> _logger; // NEW
+    private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer;
+    private readonly IMediator _mediator;
+    private readonly ILogger<CreateMemberStoryCommandHandler> _logger;
 
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator, ILogger<CreateMemberStoryCommandHandler> logger) // Updated
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator, ILogger<CreateMemberStoryCommandHandler> logger)
     {
         _context = context;
         _authorizationService = authorizationService;
         _localizer = localizer;
-        _mediator = mediator; // NEW
-        _logger = logger; // NEW
+        _mediator = mediator;
+        _logger = logger;
     }
 
-    public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
+    public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken)
     {
         // Get FamilyId from Member
         var familyId = await _context.Members
@@ -43,7 +44,7 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         }
 
         // Authorization check
-        if (!_authorizationService.CanManageFamily(familyId)) // Check FamilyId for access
+        if (!_authorizationService.CanManageFamily(familyId))
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
@@ -66,9 +67,9 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             Story = request.Story,
             OriginalImageUrl = (string?)request.OriginalImageUrl,
             ResizedImageUrl = request.ResizedImageUrl,
-            RawInput = request.RawInput, // NEW
-            StoryStyle = request.StoryStyle, // NEW
-            Perspective = request.Perspective // NEW
+            RawInput = request.RawInput,
+            StoryStyle = request.StoryStyle,
+            Perspective = request.Perspective
         };
 
         // Check and upload OriginalImageUrl if it's a temporary URL
@@ -115,27 +116,19 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
         // Save all changes made to the aggregate
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Handle DetectedFaces if any
-        foreach (var detectedFace in request.DetectedFaces)
+        // Emit MemberStoryCreatedWithFacesEvent
+        if (request.DetectedFaces != null && request.DetectedFaces.Any())
         {
-            var createFaceCommand = new CreateMemberFaceCommand
-            {
-                MemberId = request.MemberId,
-                FaceId = detectedFace.Id,
-                BoundingBox = detectedFace.BoundingBox,
-                Confidence = (double)detectedFace.Confidence,
-                OriginalImageUrl = request.OriginalImageUrl, // This is the original image URL for the story
-                Embedding = detectedFace.Embedding ?? [],
-                Thumbnail = detectedFace.Thumbnail, // Pass the base64 thumbnail
-                Emotion = detectedFace.Emotion,
-                EmotionConfidence = (double)(detectedFace.EmotionConfidence ?? 0.0f)
-            };
-            var createResult = await _mediator.Send(createFaceCommand, cancellationToken);
-            if (!createResult.IsSuccess)
-            {
-                _logger.LogWarning("Failed to create face {FaceId} for Member {MemberId}: {Error}", detectedFace.Id, request.MemberId, createResult.Error);
-                // Continue processing other faces even if one fails
-            }
+            var facesDataForCreation = request.DetectedFaces.Select(df => new MemberStoryCreatedWithFacesEvent.FaceDataForCreation(
+                df.Id,
+                new BoundingBox { X = df.BoundingBox.X, Y = df.BoundingBox.Y, Width = df.BoundingBox.Width, Height = df.BoundingBox.Height },
+                df.Confidence, // Changed to just df.Confidence
+                df.Thumbnail,
+                df.Embedding ?? new List<double>(),
+                df.Emotion,
+                df.EmotionConfidence
+            )).ToList();
+            memberStory.AddDomainEvent(new MemberStoryCreatedWithFacesEvent(memberStory, facesDataForCreation));
         }
 
         return Result<Guid>.Success(memberStory.Id);

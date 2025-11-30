@@ -1,11 +1,9 @@
+using System.Linq.Expressions;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
-using System.Linq.Expressions;
+using backend.Domain.Entities;
 
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;
 

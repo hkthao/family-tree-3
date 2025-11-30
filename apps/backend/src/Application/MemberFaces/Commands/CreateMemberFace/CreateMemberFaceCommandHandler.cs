@@ -1,14 +1,11 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Domain.ValueObjects;
-using backend.Application.Common.Constants;
 using backend.Application.Faces.Queries; // NEW: For SearchMemberFaceQuery
+using backend.Domain.Entities;
 using backend.Domain.Events; // NEW: For MemberFaceCreatedEvent
+using backend.Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 

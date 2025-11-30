@@ -1,9 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
 
 namespace backend.Application.MemberFaces.Queries.GetMemberFaceById;

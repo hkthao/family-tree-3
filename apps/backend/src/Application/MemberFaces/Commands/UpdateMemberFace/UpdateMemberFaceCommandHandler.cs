@@ -1,13 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Domain.ValueObjects; // For BoundingBox
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.UpdateMemberFace;
 
@@ -44,7 +39,8 @@ public class UpdateMemberFaceCommandHandler : IRequestHandler<UpdateMemberFaceCo
         // Update properties
         entity.MemberId = request.MemberId;
         entity.FaceId = request.FaceId;
-        entity.BoundingBox = new BoundingBox {
+        entity.BoundingBox = new BoundingBox
+        {
             X = request.BoundingBox.X,
             Y = request.BoundingBox.Y,
             Width = request.BoundingBox.Width,

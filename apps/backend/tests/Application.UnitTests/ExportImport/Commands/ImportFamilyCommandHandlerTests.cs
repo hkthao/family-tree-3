@@ -1,12 +1,10 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.ExportImport.Commands;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

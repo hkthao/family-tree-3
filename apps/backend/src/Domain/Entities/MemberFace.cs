@@ -1,4 +1,3 @@
-using backend.Domain.Common;
 using backend.Domain.ValueObjects;
 
 namespace backend.Domain.Entities;

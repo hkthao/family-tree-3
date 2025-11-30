@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
 using backend.Application.MemberFaces.Queries.MemberFaces; // For MemberFaceDto
 
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;

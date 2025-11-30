@@ -1,6 +1,3 @@
-using backend.Domain.Common;
-using System; 
-
 namespace backend.Domain.Events;
 
 public class MemberFaceDeletedEvent : BaseEvent

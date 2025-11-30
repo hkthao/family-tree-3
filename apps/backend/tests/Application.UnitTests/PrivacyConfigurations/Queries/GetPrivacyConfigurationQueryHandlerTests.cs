@@ -1,11 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

@@ -1,10 +1,7 @@
 using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Faces.EventHandlers;
 

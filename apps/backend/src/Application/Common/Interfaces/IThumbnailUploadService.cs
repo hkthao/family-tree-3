@@ -1,6 +1,4 @@
 using backend.Application.Common.Models; // For Result type
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Common.Interfaces;
 

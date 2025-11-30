@@ -1,6 +1,5 @@
 using backend.Application.Common.Models;
 using backend.Application.Faces.Common; // For BoundingBoxDto
-using MediatR;
 
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 

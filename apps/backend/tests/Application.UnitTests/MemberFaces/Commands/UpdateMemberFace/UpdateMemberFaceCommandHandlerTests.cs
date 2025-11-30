@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -10,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using MediatR;
-using System.Linq;
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.UpdateMemberFace;
 

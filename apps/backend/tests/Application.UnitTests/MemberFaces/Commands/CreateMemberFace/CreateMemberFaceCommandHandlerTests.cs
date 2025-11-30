@@ -1,27 +1,17 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Faces.Queries; // For List<FoundFaceDto>
+using backend.Application.Faces.Queries.SearchMemberFace; // NEW: For SearchMemberFaceQuery and FoundFaceDto
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
-using backend.Application.MemberFaces.Commands.DeleteMemberFace; 
-using backend.Application.MemberFaces.Commands.UpdateMemberFace; 
-using backend.Application.MemberFaces.Queries.GetMemberFaceById; 
-using backend.Application.MemberFaces.Queries.SearchMemberFaces; 
-using backend.Application.MemberFaces.Queries.MemberFaces; 
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.ValueObjects;
+using backend.Domain.Events; // For MemberFaceCreatedEvent
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using MediatR;
-using System.Linq;
-using backend.Application.Faces.Common; // NEW: For BoundingBoxDto
-using backend.Application.Faces.Queries.SearchMemberFace; // NEW: For SearchMemberFaceQuery and FoundFaceDto
-using backend.Domain.Events; // For MemberFaceCreatedEvent
-using System.Collections.Generic;
-using backend.Application.Faces.Queries; // For List<FoundFaceDto>
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.CreateMemberFace;
 
@@ -31,7 +21,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
     private readonly Mock<IMediator> _mediatorMock; // NEW
     private readonly Mock<IThumbnailUploadService> _thumbnailUploadServiceMock; // NEW
-    
+
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
@@ -120,7 +110,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
             It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
         )).ReturnsAsync(Result<string>.Success("http://uploaded.thumbnail.url"));
-        
+
         // Mock mediator for SearchMemberFaceQuery (won't be called if member not found)
         _mediatorMock.Setup(m => m.Send(
             It.IsAny<SearchMemberFaceQuery>(),
@@ -157,7 +147,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-        
+
         // Mock thumbnail upload service (won't be called if unauthorized)
         _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
             It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
@@ -188,7 +178,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var conflictingMemberId = Guid.NewGuid();
         var conflictingFamily = new Family { Id = Guid.NewGuid(), Name = "Conflicting Family", Code = "CF" };
         var conflictingMember = new Member(conflictingMemberId, "Jane", "Doe", "JND", conflictingFamily.Id, conflictingFamily);
-        
+
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member);
         await _context.Families.AddAsync(conflictingFamily);

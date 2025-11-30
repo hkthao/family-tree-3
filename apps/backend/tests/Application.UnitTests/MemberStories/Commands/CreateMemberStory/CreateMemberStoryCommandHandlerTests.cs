@@ -2,15 +2,15 @@ using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
-using backend.Application.Faces.Common;
+using backend.Application.Faces.Common; // NEW: For BoundingBoxDto
 using backend.Application.Faces.Queries;
 using backend.Application.Files.Commands.UploadFileFromUrl;
+using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
 using backend.Application.MemberStories.Commands.CreateMemberStory;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Domain.ValueObjects; // Added this line
+using backend.Domain.Events; // NEW: For MemberStoryCreatedWithFacesEvent
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -254,7 +254,13 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         createdStory!.OriginalImageUrl.Should().Be(permanentOriginalUrl);
         createdStory.ResizedImageUrl.Should().Be(permanentResizedUrl);
 
-        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateMemberFaceCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify CreateMemberFaceCommand was sent
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Verify UploadFileFromUrlCommand was sent for Original and Resized images
+        // Verify that the domain event was added
+        createdStory.DomainEvents.Should().ContainSingle(e => e is MemberStoryCreatedWithFacesEvent);
+        var createdEvent = createdStory.DomainEvents.OfType<MemberStoryCreatedWithFacesEvent>().First();
+        createdEvent.MemberStory.Id.Should().Be(createdStory.Id);
+        createdEvent.FacesData.Should().HaveCount(1); // Changed from DetectedFaces
+        createdEvent.FacesData.First().Id.Should().Be(command.DetectedFaces.First().Id); // Changed from DetectedFaces
+
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Verify UploadFileFromTempUrlCommand was sent for Original and Resized images
     }
 }

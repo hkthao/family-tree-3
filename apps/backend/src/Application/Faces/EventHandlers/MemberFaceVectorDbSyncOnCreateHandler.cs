@@ -1,10 +1,6 @@
 using backend.Application.AI.Models;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Domain.Entities;
 using backend.Domain.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.EventHandlers;
