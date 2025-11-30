@@ -42,7 +42,35 @@ public class SearchStoriesQueryHandler : IRequestHandler<SearchStoriesQuery, Res
         // Apply sorting
         if (!string.IsNullOrWhiteSpace(request.SortBy))
         {
-            query = query.OrderByPropertyName(request.SortBy, request.SortOrder?.ToLower() == "desc");
+            var sortOrder = request.SortOrder?.ToLower();
+            if (request.SortBy.Equals("MemberName", StringComparison.OrdinalIgnoreCase))
+            {
+                if (sortOrder == "desc")
+                {
+                    query = query.OrderByDescending(ms => ms.Member.LastName)
+                                 .ThenByDescending(ms => ms.Member.FirstName);
+                }
+                else
+                {
+                    query = query.OrderBy(ms => ms.Member.LastName)
+                                 .ThenBy(ms => ms.Member.FirstName);
+                }
+            }
+            else if (request.SortBy.Equals("FamilyName", StringComparison.OrdinalIgnoreCase))
+            {
+                if (sortOrder == "desc")
+                {
+                    query = query.OrderByDescending(ms => ms.Member.Family.Name);
+                }
+                else
+                {
+                    query = query.OrderBy(ms => ms.Member.Family.Name);
+                }
+            }
+            else
+            {
+                query = query.OrderByPropertyName(request.SortBy, sortOrder == "desc");
+            }
         }
         else
         {
