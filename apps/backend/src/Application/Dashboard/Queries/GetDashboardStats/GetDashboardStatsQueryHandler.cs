@@ -65,7 +65,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
 
         // Calculate Average Age
         var membersWithKnownBirthDate = members.Where(m => m.DateOfBirth.HasValue).ToList();
-        double averageAge = 0.0;
+        int averageAge = 0;
 
         if (membersWithKnownBirthDate.Any())
         {
