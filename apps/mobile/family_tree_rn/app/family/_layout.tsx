@@ -94,7 +94,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDashboard.tab.dashboard'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />
+            <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
           ),
         }}
       />
@@ -103,7 +103,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.members'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-group" color={color} size={size} />
+            <MaterialCommunityIcons name="account-group-outline" color={color} size={size} />
           ),
         }}
       />
@@ -112,7 +112,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.tree'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="family-tree" color={color} size={size} />
+            <MaterialCommunityIcons name="sitemap-outline" color={color} size={size} />
           ),
         }}
       />
@@ -121,7 +121,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.events'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="calendar-month" color={color} size={size} />
+            <MaterialCommunityIcons name="calendar-month-outline" color={color} size={size} />
           ),
         }}
       />
