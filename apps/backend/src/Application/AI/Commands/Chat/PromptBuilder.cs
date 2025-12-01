@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json; // NEW
 using System.Text.RegularExpressions; // Add using directive for Regex
@@ -68,8 +69,8 @@ public static class PromptBuilder
 
         promptBuilder.AppendLine("\nChi tiết thành viên:");
         promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
-        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy") ?? "N/A"}");
+        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "N/A"}");
         promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nơi mất: {member.PlaceOfDeath ?? "N/A"}");
@@ -143,7 +144,6 @@ public static class PromptBuilder
     /// <param name="request">Lệnh tạo câu chuyện chứa thông tin yêu cầu.</param>
     /// <param name="member">Thông tin chi tiết về thành viên.</param>
     /// <param name="family">Thông tin chi tiết về gia đình.</param>
-    /// <param name="photoAnalysisResult">Kết quả phân tích ảnh liên quan (nếu có).</param>
     /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
     public static string BuildStoryGenerationPrompt(
         GenerateStoryCommand request,
@@ -151,13 +151,11 @@ public static class PromptBuilder
         Family? family)
     {
         var promptBuilder = new StringBuilder();
-        promptBuilder.AppendLine($"Tạo một câu chuyện về thành viên gia đình sau với phong cách: {request.Style}");
-        promptBuilder.AppendLine($"Độ dài câu chuyện khoảng {request.MaxWords} từ.");
-        promptBuilder.AppendLine("Ngôn ngữ đầu ra: Tiếng Việt.");
+        promptBuilder.AppendLine($"Tạo một câu chuyện về thành viên gia đình sau với phong cách: {request.Style} Độ dài câu chuyện khoảng {request.MaxWords} từ. Ngôn ngữ đầu ra: Tiếng Việt.");
         promptBuilder.AppendLine("\nThông tin thành viên:");
         promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
-        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy") ?? "N/A"}");
+        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "N/A"}");
         promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nghề nghiệp: {member.Occupation ?? "Không rõ"}");
@@ -167,24 +165,24 @@ public static class PromptBuilder
             promptBuilder.AppendLine($"- Gia đình: {family.Name}");
         }
 
-        if (!string.IsNullOrEmpty(member.HusbandFullName))
+        // Check for husband/wife based on gender and available spouse info
+        if (Enum.TryParse<Domain.Enums.Gender>(member.Gender, out var memberGender) && memberGender == Domain.Enums.Gender.Female && !string.IsNullOrEmpty(member.HusbandFullName))
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
         }
-
-        if (!string.IsNullOrEmpty(member.WifeFullName))
+        else if (Enum.TryParse<Domain.Enums.Gender>(member.Gender, out memberGender) && memberGender == Domain.Enums.Gender.Male && !string.IsNullOrEmpty(member.WifeFullName))
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
         }
 
         if (!string.IsNullOrEmpty(request.Perspective))
         {
-            promptBuilder.AppendLine($"\nGóc nhìn bài viết: {request.Perspective}");
+            promptBuilder.AppendLine($"Góc nhìn bài viết: {request.Perspective}");
         }
 
         if (!string.IsNullOrEmpty(request.RawText))
         {
-            promptBuilder.AppendLine("\nThông tin bổ sung từ người dùng:");
+            promptBuilder.AppendLine("Thông tin bổ sung từ người dùng:");
             promptBuilder.AppendLine(request.RawText);
         }
 
@@ -200,7 +198,9 @@ public static class PromptBuilder
                 promptBuilder.AppendLine("- Người trong ảnh:");
                 foreach (var person in request.PhotoPersons)
                 {
-                    promptBuilder.AppendLine($"  - {person.Name ?? "Không rõ"} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {person.Confidence ?? 0:P3}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
+                    // Correct confidence format
+                    var confidenceFormatted = $"{(person.Confidence ?? 0) * 100:0.000}%";
+                    promptBuilder.AppendLine($"  - {person.Name ?? "Không rõ"} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {confidenceFormatted}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
                 }
             }
         }
