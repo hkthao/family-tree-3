@@ -53,7 +53,6 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberFaceStore } from '@/stores/member-face.store';
-import { MemberFaceForm } from '@/components/member-face'; // Will be created later
 import type { MemberFace } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';

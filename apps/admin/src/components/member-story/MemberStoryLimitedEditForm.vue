@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums';
@@ -157,29 +157,6 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   emit('update:modelValue', { ...props.modelValue, ...payload });
 };
 
-// Helper to get display text for story style
-const getStoryStyleText = (style: MemberStoryStyle): string => {
-  switch (style) {
-    case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
-    case MemberStoryStyle.Warm: return t('memberStory.style.warm');
-    case MemberStoryStyle.Formal: return t('memberStory.style.formal');
-    case MemberStoryStyle.Folk: return t('memberStory.style.folk');
-    default: return '';
-  }
-};
-
-// Helper to get display text for perspective
-const getPerspectiveText = (perspective: MemberStoryPerspective): string => {
-  switch (perspective) {
-    case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
-    case MemberStoryPerspective.ThirdPerson: return t('memberStory.create.perspective.thirdPerson');
-    case MemberStoryPerspective.FamilyMember: return t('memberStory.create.perspective.familyMember');
-    case MemberStoryPerspective.NeutralPersonal: return t('memberStory.create.perspective.neutralPersonal');
-    case MemberStoryPerspective.FullyNeutral: return t('memberStory.create.perspective.fullyNeutral');
-    default: return '';
-  }
-};
-
 const titleValid = computed(() => !!props.modelValue.title);
 const storyValid = computed(() => !!props.modelValue.story);
 
@@ -187,7 +164,3 @@ defineExpose({
   isValid: computed(() => titleValid.value && storyValid.value),
 });
 </script>
-
-<style scoped>
-/* Add any specific styles for this component if necessary */
-</style>

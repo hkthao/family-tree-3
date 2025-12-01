@@ -38,7 +38,6 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { useFaceStore } from '@/stores/face.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
@@ -55,7 +54,6 @@ const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationsh
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const faceStore = useFaceStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
 const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar

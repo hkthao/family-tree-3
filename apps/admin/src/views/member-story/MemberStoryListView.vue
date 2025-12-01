@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, computed } from 'vue';
+import { watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
@@ -58,11 +58,8 @@ const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
 const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
 
-const { isAdmin, isFamilyManager } = useAuth(); // NEW: Use auth composable
-
-const canPerformActions = computed(() => { // NEW: canPerformActions computed property
-  return isAdmin.value || isFamilyManager.value;
-});
+// No need to destructure isAdmin, isFamilyManager if not used directly here
+useAuth(); // NEW: Use auth composable (just call it if no destructuring needed)
 
 const {
   addDrawer,

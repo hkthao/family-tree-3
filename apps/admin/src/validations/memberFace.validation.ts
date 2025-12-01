@@ -1,4 +1,4 @@
-import { required, helpers, minValue, maxValue } from '@vuelidate/validators';
+import { required, helpers } from '@vuelidate/validators';
 import i18n from '@/plugins/i18n';
 
 const { t } = i18n.global;

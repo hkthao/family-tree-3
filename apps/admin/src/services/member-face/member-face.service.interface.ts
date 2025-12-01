@@ -1,4 +1,4 @@
-import type { MemberFace, MemberFaceFilter, Paginated, Result, DetectedFace, FaceDetectionRessult } from '@/types';
+import type { MemberFace, MemberFaceFilter, Paginated, Result, FaceDetectionRessult } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { ICrudService } from '../common/crud.service.interface';
 

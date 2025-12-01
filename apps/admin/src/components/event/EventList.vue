@@ -106,7 +106,6 @@ import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberLookupStore } from '@/stores/memberLookup.store';
-import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import FamilyName from '@/components/common/FamilyName.vue';
@@ -131,7 +130,6 @@ const emit = defineEmits([
 
 const { t } = useI18n();
 const memberLookupStore = useMemberLookupStore();
-const familyLookupStore = useFamilyLookupStore();
 
 const searchQuery = ref(props.search);
 let debounceTimer: ReturnType<typeof setTimeout>;

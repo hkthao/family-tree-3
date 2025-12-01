@@ -14,7 +14,7 @@ interface Props {
   size?: number; // Optional size prop
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   size: 36, // Default size
 });
 </script>

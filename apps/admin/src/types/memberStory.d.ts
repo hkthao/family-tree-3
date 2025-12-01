@@ -16,8 +16,8 @@ export interface MemberStoryDto {
   story?: string | null;
   detectedFaces?: DetectedFace[]; 
   rawInput?: string | null; 
-  storyStyle?: string | null; 
-  perspective?: string | null; 
+  storyStyle?: MemberStoryStyle | null; 
+  perspective?: MemberStoryPerspective | null; 
   photo?: string | null; 
   imageSize?: string | null; 
   exifData?: any; 

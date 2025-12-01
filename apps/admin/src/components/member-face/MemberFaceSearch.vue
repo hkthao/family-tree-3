@@ -58,17 +58,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'; // Added onMounted
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import type { MemberFaceFilter } from '@/types';
 
-interface MemberFaceSearchProps {
-  // initialFilters prop removed
-}
-
-const props = defineProps<MemberFaceSearchProps>();
+// const props = defineProps<MemberFaceSearchProps>(); // No props are being used anymore
 const emit = defineEmits(['update:filters']);
 
 const { t } = useI18n();

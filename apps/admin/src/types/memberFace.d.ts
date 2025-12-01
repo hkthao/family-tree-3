@@ -1,6 +1,4 @@
 import type { Paginated } from '@/types/pagination.d';
-import type { Result } from '@/types/result.d';
-import type { ApiError } from '@/plugins/axios';
 
 interface BoundingBox {
   x: number;

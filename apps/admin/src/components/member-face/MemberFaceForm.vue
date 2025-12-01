@@ -82,7 +82,6 @@ interface MemberFaceFormProps {
   familyId?: string;
 }
 const props = defineProps<MemberFaceFormProps>();
-const emit = defineEmits(['close']);
 const { t } = useI18n();
 const defaultFormData = (): MemberFace => ({
   id: '',
