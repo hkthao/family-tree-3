@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
+import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore';
 import ProfileCard from '@/components/family/ProfileCard';
@@ -46,7 +46,7 @@ export default function FamilyDetailsScreen() {
       alignItems: 'center',
       padding: SPACING_MEDIUM,
     },
-  }), [theme]);
+  }), []);
 
   if (loading) {
     return (

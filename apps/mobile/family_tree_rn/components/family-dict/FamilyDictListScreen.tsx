@@ -11,7 +11,7 @@ import { Text, Card, Searchbar, useTheme, Appbar, Chip, IconButton } from 'react
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicFamilyDictStore } from '@/stores/usePublicFamilyDictStore';
-import { FamilyDictType, FamilyDictLineage, FamilyDictFilter } from '@/types/public.d';
+import { FamilyDictType, FamilyDictLineage, FamilyDictFilter } from '@/types';
 
 export default function FamilyDictListScreen() {
   const { t } = useTranslation();
@@ -23,7 +23,7 @@ export default function FamilyDictListScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Filters state
-  const [filters, setFilters] = useState<Omit<FamilyDictFilter, 'page' | 'itemsPerPage'>>({
+  const [filters, ] = useState<Omit<FamilyDictFilter, 'page' | 'itemsPerPage'>>({
     searchQuery: '',
     sortBy: 'name',
     sortOrder: 'asc',
@@ -52,32 +52,46 @@ export default function FamilyDictListScreen() {
 
   // Effect for initial load and search query changes
   useEffect(() => {
-    setFilters(prev => ({ ...prev, searchQuery: debouncedSearchQuery })); // Update searchQuery only
+    // Construct the filters object for this fetch
+    const currentFetchFilters: FamilyDictFilter = {
+      searchQuery: debouncedSearchQuery, // Use the debounced search query
+      sortBy: filters.sortBy, // Include existing sortBy
+      sortOrder: filters.sortOrder, // Include existing sortOrder
+    };
     reset(); // Clear data and reset page/hasMore
-    // Pass filters object, then page and itemsPerPage separately
-    fetchFamilyDicts({ ...filters, searchQuery: debouncedSearchQuery }, 1, 10, true);
-  }, [debouncedSearchQuery, fetchFamilyDicts]);
+    fetchFamilyDicts(currentFetchFilters, 1, 10, true);
+  }, [debouncedSearchQuery, fetchFamilyDicts, reset, filters.sortBy, filters.sortOrder]);
 
   const handleRefresh = useCallback(async () => {
     if (!loading) {
       setRefreshing(true);
       try {
         reset(); // Clear data and reset page/hasMore
-        await fetchFamilyDicts(filters, 1, 10, true);
+        const currentRefreshFilters: FamilyDictFilter = {
+          searchQuery: filters.searchQuery,
+          sortBy: filters.sortBy,
+          sortOrder: filters.sortOrder,
+        };
+        await fetchFamilyDicts(currentRefreshFilters, 1, 10, true);
       } finally {
         setRefreshing(false);
       }
     }
-  }, [loading, reset, fetchFamilyDicts, filters]);
+  }, [loading, reset, fetchFamilyDicts, filters.searchQuery, filters.sortBy, filters.sortOrder]);
 
 
   const handleLoadMore = useCallback(async () => {
     if (!loading && hasMore && !isFetchingMore.current) {
       isFetchingMore.current = true;
-      await fetchFamilyDicts(filters, page + 1, 10, false); // Fetch next page, not refreshing
+      const currentLoadMoreFilters: FamilyDictFilter = {
+        searchQuery: filters.searchQuery,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+      };
+      await fetchFamilyDicts(currentLoadMoreFilters, page + 1, 10, false); // Fetch next page, not refreshing
       isFetchingMore.current = false;
     }
-  }, [loading, hasMore, page, fetchFamilyDicts, filters]);
+  }, [loading, hasMore, page, fetchFamilyDicts, filters.searchQuery, filters.sortBy, filters.sortOrder]);
 
   const getFamilyDictTypeTitle = (type: FamilyDictType) => {
     switch (type) {
@@ -263,7 +277,7 @@ export default function FamilyDictListScreen() {
                               {item.namesByRegion.central}
                             </Chip>
                           )}
-                          {Array.isArray(item.namesByRegion.central) && item.namesByRegion.central.map((name, index) => (
+                          {Array.isArray(item.namesByRegion.central) && item.namesByRegion.central.map((name: string, index: number) => (
                             <Chip key={`central-${index}`} icon="map-marker-outline" style={[styles.chip, { backgroundColor: theme.colors.secondaryContainer }]}>
                               {name}
                             </Chip>
@@ -273,7 +287,7 @@ export default function FamilyDictListScreen() {
                               {item.namesByRegion.south}
                             </Chip>
                           )}
-                          {Array.isArray(item.namesByRegion.south) && item.namesByRegion.south.map((name, index) => (
+                          {Array.isArray(item.namesByRegion.south) && item.namesByRegion.south.map((name: string, index: number) => (
                             <Chip key={`south-${index}`} icon="compass" style={[styles.chip, { backgroundColor: theme.colors.tertiaryContainer }]}>
                               {name}
                             </Chip>

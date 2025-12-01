@@ -2,14 +2,14 @@ import { create } from 'zustand';
 import {
   getPublicFamilyDictById,
   getPublicFamilyDicts,
-} from '@/api/publicFamilyDictApiClient';
-import type { FamilyDictDto, PaginatedFamilyDictDto, FamilyDictFilter } from '@/types/public.d';
+} from '@/src/api/publicApiClient';
+import type { FamilyDictDto, PaginatedList, FamilyDictFilter } from '@/types'; // Updated import
 
 const PAGE_SIZE = 10;
 
 interface PublicFamilyDictState {
-  familyDict: FamilyDictDto | null;
-  familyDicts: FamilyDictDto[];
+  familyDict: FamilyDictDto | null; // Changed FamilyDictDto to FamilyDict
+  familyDicts: FamilyDictDto[]; // Changed FamilyDictDto to FamilyDict
   totalItems: number;
   page: number;
   totalPages: number;
@@ -51,7 +51,7 @@ export const usePublicFamilyDictStore = create<PublicFamilyDictStore>((set, get)
   fetchFamilyDicts: async (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const paginatedList: PaginatedFamilyDictDto = await getPublicFamilyDicts(filter, page, itemsPerPage);
+      const paginatedList: PaginatedList<FamilyDictDto> = await getPublicFamilyDicts(filter, page, itemsPerPage); // Updated type
 
       set((state) => ({
         familyDicts: isRefreshing ? paginatedList.items : [...state.familyDicts, ...paginatedList.items],

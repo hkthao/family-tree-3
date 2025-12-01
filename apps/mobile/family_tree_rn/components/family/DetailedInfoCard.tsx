@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, useTheme, Card, List, Divider, Chip } from 'react-native-paper';
+import { useTheme, Card, List, Divider, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
-import { FamilyDetailDto, FamilyUserDto, FamilyRole } from '@/types/public.d';
+import { FamilyDetailDto, FamilyUserDto, FamilyRole } from '@/types';
 
 interface DetailedInfoCardProps {
   family: FamilyDetailDto;

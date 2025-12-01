@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Text, useTheme, Avatar, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png';
-import { FamilyDetailDto } from '@/types/public.d'; // Assuming this is the type for family
+import { FamilyDetailDto } from '@/types'; // Assuming this is the type for family
 
 interface ProfileCardProps {
   family: FamilyDetailDto;

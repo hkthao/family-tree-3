@@ -3,7 +3,7 @@ import { Card, Text, useTheme, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { AgendaEntry } from 'react-native-calendars';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
-import { EventType } from '@/types/public.d'; // Import EventType
+import { EventType } from '@/types'; // Import EventType
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { TouchableOpacity } from 'react-native';
 

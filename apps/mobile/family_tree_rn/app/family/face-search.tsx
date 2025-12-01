@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useCameraPermissions } from 'expo-camera';
 import { detectFaces } from '@/api/publicApiClient';
-import type { DetectedFaceDto } from '@/types/public.d';
+import type { DetectedFaceDto } from '@/types';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useRouter } from 'expo-router';
 export default function FamilyFaceSearchScreen() {

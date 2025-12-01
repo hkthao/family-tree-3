@@ -26,7 +26,8 @@ export default function RootLayout() {
       try {
         const onboarded = await AsyncStorage.getItem('hasOnboarded');
         setHasOnboarded(onboarded === 'true');
-      } catch (e) {
+      } catch (_e) {
+        console.error(_e);
         setHasOnboarded(false); // Assume not onboarded on error
       } finally {
         // No longer hiding splash screen here, moved to a separate useEffect

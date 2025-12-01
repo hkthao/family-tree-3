@@ -18,3 +18,12 @@ export * from './memberStory.d';
 export * from './biography.d'; 
 
 export * from './memberFace.d'; 
+
+// NEWLY ADDED PUBLIC-FACING DTO EXPORTS
+export * from './common-dto.d';
+export * from './public-family.d';
+export * from './public-member.d';
+export * from './public-relationship.d';
+export * from './public-event.d';
+export * from './public-face.d';
+export * from './public-dashboard.d';

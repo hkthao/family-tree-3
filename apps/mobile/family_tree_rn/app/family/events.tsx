@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import AgendaItem from '@/components/events/AgendaItem';
 import { useFamilyStore } from '@/stores/useFamilyStore';
-import type { EventDto, EventType } from '@/types/public.d';
+import type { EventDto, EventType } from '@/types';
 import { debounce } from '@/utils/debounce';
 
 interface EventItem extends AgendaEntry {

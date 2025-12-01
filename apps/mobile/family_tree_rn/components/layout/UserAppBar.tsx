@@ -36,7 +36,7 @@ export default function UserAppBar() {
       fontFamily: 'DancingScript-Regular',
       fontSize: 24, // Adjust as needed
     },
-  }), [theme, fontsLoaded]);
+  }), [theme]);
 
   const handleAvatarPress = () => {
     // Navigate to login or profile based on login status

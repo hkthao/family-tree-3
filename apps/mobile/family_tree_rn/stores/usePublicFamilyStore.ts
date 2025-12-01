@@ -5,7 +5,7 @@ import {
   getPublicFamilyById,
   searchPublicFamilies,
 } from '@/api/publicApiClient';
-import type { FamilyDetailDto, FamilyListDto } from '@/types/public.d';
+import type { FamilyDetailDto, FamilyListDto, PaginatedList } from '@/types'; // Updated import, added Paginated
 
 const PAGE_SIZE = 10; // Define PAGE_SIZE here
 
@@ -53,7 +53,7 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
   fetchFamilies: async (query: { page: number; search?: string }, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const paginatedList = await searchPublicFamilies({
+      const paginatedList: PaginatedList<FamilyListDto> = await searchPublicFamilies({ // Updated type
         page: query.page,
         itemsPerPage: PAGE_SIZE, // Use PAGE_SIZE from FamilySearchScreen
         searchTerm: query.search,
