@@ -50,7 +50,7 @@
           </v-tooltip>
           <v-tooltip :text="t('common.delete')">
             <template v-slot:activator="{ props }">
-              <v-btn icon variant="text" size="small" v-bind="props" @click="emit('delete', item)" color="error"
+              <v-btn v-if="canPerformActions" icon variant="text" size="small" v-bind="props" @click="emit('delete', item)" color="error"
                 data-testid="delete-member-face-button">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
