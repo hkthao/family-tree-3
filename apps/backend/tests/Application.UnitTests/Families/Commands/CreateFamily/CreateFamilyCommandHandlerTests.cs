@@ -3,6 +3,7 @@ using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using backend.Domain.Events.Families;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -53,9 +54,11 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.AvatarUrl.Should().Be(command.AvatarUrl);
         createdFamily.Visibility.Should().Be(command.Visibility);
         createdFamily.Code.Should().StartWith("FAM-");
-        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyCreatedEvent);
-        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
         createdFamily.FamilyUsers.Should().ContainSingle(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is FamilyCreatedEvent) &&
+            events.Any(e => e is FamilyStatsUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

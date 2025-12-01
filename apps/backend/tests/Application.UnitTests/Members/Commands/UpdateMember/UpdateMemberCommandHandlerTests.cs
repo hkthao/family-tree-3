@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -58,7 +59,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Should().NotBeNull();
         updatedMember!.FirstName.Should().Be(command.FirstName);
         updatedMember.LastName.Should().Be(command.LastName);
-        updatedMember.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Members.MemberUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Members.MemberUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

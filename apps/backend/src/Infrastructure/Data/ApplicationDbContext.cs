@@ -117,11 +117,17 @@ public class ApplicationDbContext(
                 softDeleteEntity.DeletedDate = _dateTime.Now;
                 entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
             }
-            entry.Entity.ClearDomainEvents();
         }
         var result = await base.SaveChangesAsync(cancellationToken);
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            entry.Entity.ClearDomainEvents(); // Clear events AFTER dispatch
+        }
+
         // Điều phối các sự kiện miền sau khi SaveChanges thành công
         await _domainEventDispatcher.DispatchEvents(entitiesWithDomainEvents);
+        
         return result;
     }
     /// <summary>

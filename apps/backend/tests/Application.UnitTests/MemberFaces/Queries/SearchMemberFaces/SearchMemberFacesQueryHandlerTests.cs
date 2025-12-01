@@ -204,4 +204,88 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
         result.Value.Items.First().FaceId.Should().Be("faceA");
         result.Value.Items.Last().FaceId.Should().Be("faceB");
     }
+
+    [Fact]
+    public async Task SearchMemberFaces_ShouldPopulateFamilyAvatarUrl()
+    {
+        // Arrange
+        var family = new Family { Name = "Family A", Code = "FA", AvatarUrl = "http://example.com/family-avatar.png" };
+        var member = new Member(Guid.NewGuid(), "Member One", "MO", "MO", family.Id, family);
+        var memberFace = new MemberFace { Id = Guid.NewGuid(), MemberId = member.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 } };
+        await SeedData(family, member, new List<MemberFace> { memberFace });
+
+        var query = new SearchMemberFacesQuery { Page = 1, ItemsPerPage = 10 };
+        var handler = CreateSearchHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().ContainSingle();
+        result.Value.Items.First().FamilyAvatarUrl.Should().Be(family.AvatarUrl);
+    }
+
+    [Fact]
+    public async Task SearchMemberFaces_ShouldFilterBySearchQuery_OnMemberName()
+    {
+        // Arrange
+        var family = new Family { Name = "Family A", Code = "FA" };
+        var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
+        var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
+        
+        var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
+        var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
+        
+        await _context.Families.AddAsync(family);
+        await _context.Members.AddAsync(member1);
+        await _context.MemberFaces.AddAsync(face1);
+        await _context.Members.AddAsync(member2);
+        await _context.MemberFaces.AddAsync(face2);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchMemberFacesQuery { SearchQuery = "john" };
+        var handler = CreateSearchHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().ContainSingle(mf => mf.Id == face1.Id);
+        result.Value.TotalItems.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task SearchMemberFaces_ShouldFilterBySearchQuery_OnEmotion()
+    {
+        // Arrange
+        var family = new Family { Name = "Family A", Code = "FA" };
+        var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
+        var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
+        
+        var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
+        var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
+        
+        await _context.Families.AddAsync(family);
+        await _context.Members.AddAsync(member1);
+        await _context.MemberFaces.AddAsync(face1);
+        await _context.Members.AddAsync(member2);
+        await _context.MemberFaces.AddAsync(face2);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchMemberFacesQuery { SearchQuery = "happy" };
+        var handler = CreateSearchHandler();
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().ContainSingle(mf => mf.Id == face2.Id);
+        result.Value.TotalItems.Should().Be(1);
+    }
 }

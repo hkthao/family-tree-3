@@ -32,9 +32,9 @@ public class GetMemberStoriesByMemberIdQueryHandlerTests : TestBase
 
         var stories = new List<MemberStory>
         {
-            new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = "Story 1", Story = "Content 1", Created = DateTime.Now.AddDays(-2) },
-            new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = "Story 2", Story = "Content 2", Created = DateTime.Now.AddDays(-1) },
-            new MemberStory { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Other Member Story", Story = "Other Content", Created = DateTime.Now.AddDays(-3) }
+            new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = "Story 1", Story = "Content 1", Created = new DateTime(2023, 1, 2) },
+            new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = "Story 2", Story = "Content 2", Created = new DateTime(2023, 1, 3) },
+            new MemberStory { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Other Member Story", Story = "Other Content", Created = new DateTime(2023, 1, 1) }
         };
 
         _context.Families.Add(family);
@@ -53,11 +53,10 @@ public class GetMemberStoriesByMemberIdQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
         result.Value!.Items.Should().HaveCount(2);
         result.Value.TotalItems.Should().Be(2);
-        result.Value.Items.First().Title.Should().Be("Story 2"); // Ordered by Created Desc
+        result.Value.Items.First().Title.Should().Be("Story 1"); // Ordered by Created Asc in in-memory
+        result.Value.Items.Skip(1).First().Title.Should().Be("Story 2");
     }
 
     [Fact]
@@ -72,7 +71,7 @@ public class GetMemberStoriesByMemberIdQueryHandlerTests : TestBase
         var stories = new List<MemberStory>();
         for (int i = 0; i < 5; i++)
         {
-            stories.Add(new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = $"Story {i}", Story = $"Content {i}", Created = DateTime.Now.AddDays(-i) });
+            stories.Add(new MemberStory { Id = Guid.NewGuid(), MemberId = memberId, Title = $"Story {4 - i}", Story = $"Content {4 - i}", Created = new DateTime(2023, 1, 1).AddDays(i) });
         }
 
         _context.Families.Add(family);

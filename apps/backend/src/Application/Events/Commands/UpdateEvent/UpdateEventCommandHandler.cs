@@ -56,6 +56,8 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             entity.AddEventMember(memberId);
         }
 
+        entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity)); // NEW
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<bool>.Success(true);

@@ -5,6 +5,7 @@ using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -54,7 +55,9 @@ public class UpdateEventCommandHandlerTests : TestBase
         updatedEvent!.Name.Should().Be(command.Name);
         updatedEvent.Description.Should().Be(command.Description);
         updatedEvent.Type.Should().Be(command.Type);
-        updatedEvent.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Events.EventUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Events.EventUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

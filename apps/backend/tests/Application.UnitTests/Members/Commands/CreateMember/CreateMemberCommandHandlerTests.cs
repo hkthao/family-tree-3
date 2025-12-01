@@ -4,6 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -53,7 +54,9 @@ public class CreateMemberCommandHandlerTests : TestBase
         createdMember!.FirstName.Should().Be(command.FirstName);
         createdMember.LastName.Should().Be(command.LastName);
         createdMember.FamilyId.Should().Be(command.FamilyId);
-        createdMember.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Members.MemberCreatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Members.MemberCreatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

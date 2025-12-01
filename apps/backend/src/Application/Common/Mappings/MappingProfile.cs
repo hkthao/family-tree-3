@@ -107,7 +107,8 @@ public class MappingProfile : Profile
         CreateMap<MemberStory, MemberStoryDto>()
             .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : string.Empty))
             .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
-            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null));
+            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
+            .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created));
         CreateMap<CreateMemberStoryCommand, MemberStory>();
         CreateMap<UpdateMemberStoryCommand, MemberStory>();
 

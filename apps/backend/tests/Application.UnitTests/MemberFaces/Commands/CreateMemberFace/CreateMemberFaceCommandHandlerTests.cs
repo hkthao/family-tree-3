@@ -7,6 +7,7 @@ using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -90,7 +91,9 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         createdMemberFace.ThumbnailUrl.Should().Be("http://uploaded.thumbnail.url"); // Assert against the mocked URL
 
         // Verify that the domain event was added
-        createdMemberFace.DomainEvents.Should().ContainSingle(e => e is MemberFaceCreatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is MemberFaceCreatedEvent)
+        )), Times.Once);
     }
 
     [Fact]
