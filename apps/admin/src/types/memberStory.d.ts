@@ -33,12 +33,12 @@ export interface MemberStoryDto {
 // Matches backend.Application.MemberStories.Commands.CreateMemberStory.CreateMemberStoryCommand
 export interface CreateMemberStory {
   memberId: string;
-  title: string;
-  story: string;
+  title?: string | null;
+  story?: string | null;
   originalImageUrl?: string | null;
   resizedImageUrl?: string | null;
   rawInput?: string | null; // NEW
   storyStyle?: string | null; // NEW
   perspective?: string | null; // NEW
-  detectedFaces: DetectedFace[]; // Using the aligned frontend DTO
+  detectedFaces?: DetectedFace[]; // Using the aligned frontend DTO
 }

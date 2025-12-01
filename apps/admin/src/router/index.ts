@@ -21,6 +21,7 @@ import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
 import { memberStoryRoutes } from './features/member-story.routes'; // Updated
+import { chatRoutes } from './features/chat.routes'; // New
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,7 @@ const router = createRouter({
         ...eventRoutes,
         ...nlEditorRoutes, // Replaced
         ...infoPagesRoutes, // Replaced
+        ...chatRoutes, // New
       ],
     },
     ...publicRoutes, // Replaced

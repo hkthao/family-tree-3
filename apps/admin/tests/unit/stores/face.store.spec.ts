@@ -8,7 +8,6 @@ import { createServices } from '@/services/service.factory';
 
 // Mock the IFaceService
 const mockDetect = vi.fn();
-const mockSaveLabels = vi.fn();
 const mockSearch = vi.fn();
 const mockDeleteFacesByMemberId = vi.fn(); // Add this mock function
 
@@ -17,7 +16,6 @@ vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     memberFace: {
       detect: mockDetect,
-      saveLabels: mockSaveLabels,
       search: mockSearch,
       deleteFacesByMemberId: mockDeleteFacesByMemberId, // Add this to the mock
     },
@@ -107,11 +105,9 @@ describe('face.store', () => {
 
     // Reset mocks before each test
     (store.services.memberFace.detect as any).mockReset();
-    (store.services.memberFace.saveLabels as any).mockReset();
     mockDeleteFacesByMemberId.mockReset(); // NEW
     // Set default mock resolved values on the injected service mocks
     (store.services.memberFace.detect as any).mockResolvedValue(ok(mockFaceDetectionResult));
-    (store.services.memberFace.saveLabels as any).mockResolvedValue(ok(undefined));
     mockDeleteFacesByMemberId.mockResolvedValue(ok(undefined)); // NEW
   });
 
