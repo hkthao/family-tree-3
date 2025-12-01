@@ -20,8 +20,8 @@ export default function FamilyDetailLayout() {
   // Map tab names to their translated titles
   const getTabTitle = (tabName: string) => {
     switch (tabName) {
-      case 'details':
-        return t('familyDetail.tab.details');
+      case 'dashboard':
+        return t('familyDashboard.tab.dashboard');
       case 'members':
         return t('familyDetail.tab.members');
       case 'tree':
@@ -90,11 +90,11 @@ export default function FamilyDetailLayout() {
         }}
       >
       <Tabs.Screen
-        name="details"
+        name="dashboard"
         options={{
-          title: t('familyDetail.tab.details'),
+          title: t('familyDashboard.tab.dashboard'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="information" color={color} size={size} />
+            <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />
           ),
         }}
       />

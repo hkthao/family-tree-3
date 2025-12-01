@@ -227,5 +227,19 @@
   "featureUnderDevelopment.title": "Feature Under Development",
   "featureUnderDevelopment.message": "This feature is currently under development.",
   "featureUnderDevelopment.description": "We're working hard to bring you this functionality soon. In the meantime, you can manage your family tree on our web platform.",
-  "featureUnderDevelopment.goToAdminWebsite": "Go to Web Platform"
+  "featureUnderDevelopment.goToAdminWebsite": "Go to Web Platform",
+  "familyDashboard.title": "Family Dashboard - {{familyName}}",
+  "familyDashboard.overview": "Overview",
+  "familyDashboard.totalMembers": "Total Members",
+  "familyDashboard.totalRelationships": "Total Relationships",
+  "familyDashboard.totalGenerations": "Total Generations",
+  "familyDashboard.averageAge": "Average Age",
+  "familyDashboard.livingMembers": "Living Members",
+  "familyDashboard.deceasedMembers": "Deceased Members",
+  "familyDashboard.genderRatio": "Gender Ratio",
+  "familyDashboard.membersByGeneration": "Members by Generation",
+  "familyDashboard.tab.dashboard": "Dashboard",
+  "common.male": "Male",
+  "common.female": "Female",
+  "common.other": "Other"
 }
