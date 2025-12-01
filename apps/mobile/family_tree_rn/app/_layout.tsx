@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OnboardingScreen from './onboarding';
 import { useAuth } from '@/hooks/useAuth'; // Import useAuth
+import { StatusBar } from 'expo-status-bar'; // Import StatusBar
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -59,6 +60,7 @@ function AppContent() {
     <PaperProvider theme={paperTheme}>
       <Portal.Host>
         <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <StatusBar backgroundColor={paperTheme.colors.background} style={colorScheme === 'dark' ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="family" options={{ headerShown: false }} />

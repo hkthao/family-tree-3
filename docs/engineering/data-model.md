@@ -21,7 +21,7 @@
 
 ## 1. Giới thiệu
 
-Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của database (MySQL), và các quy tắc ràng buộc nhằm đảm bảo tính nhất quán và toàn vẹn của dữ liệu trong hệ thống Cây Gia Phả. Thiết kế này tuân thủ các nguyên tắc của Domain-Driven Design (DDD), với các Aggregate Root rõ ràng để quản lý vòng đời của các thực thể phụ thuộc.
+Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của database (MySQL), và các quy tắc ràng buộc nhằm đảm bảo tính nhất quán và toàn vẹn của dữ liệu trong hệ thống Gia Phả Việt. Thiết kế này tuân thủ các nguyên tắc của Domain-Driven Design (DDD), với các Aggregate Root rõ ràng để quản lý vòng đời của các thực thể phụ thuộc.
 
 ## 2. Sơ đồ quan hệ thực thể (ERD)
 
@@ -193,7 +193,7 @@ Lưu trữ thông tin của từng thành viên. Thực thể này được qu�
 | `DateOfDeath`   | `date`       | NULL      | Ngày mất.               |
 | `Gender`        | `int`        | NULL      | Giới tính (Enum: 0=Male, 1=Female, 2=Other). |
 | `AvatarUrl`     | `string`     | NULL      | URL ảnh đại diện.       |
-| `IsRoot`        | `boolean`    | NOT NULL  | Đánh dấu nếu là thành viên gốc của cây gia phả. |
+| `IsRoot`        | `boolean`    | NOT NULL  | Đánh dấu nếu là thành viên gốc của Gia Phả Việt. |
 
 ### 3.7. Bảng `Events`
 

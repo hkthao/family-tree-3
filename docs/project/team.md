@@ -9,7 +9,7 @@
 
 ## 1. Giới thiệu
 
-Tài liệu này giới thiệu về đội ngũ phát triển dự án Cây Gia Phả, bao gồm các thành viên chính, vai trò và trách nhiệm của họ. Việc hiểu rõ vai trò của từng thành viên giúp tăng cường sự phối hợp và giao tiếp trong quá trình phát triển dự án.
+Tài liệu này giới thiệu về đội ngũ phát triển dự án Gia Phả Việt, bao gồm các thành viên chính, vai trò và trách nhiệm của họ. Việc hiểu rõ vai trò của từng thành viên giúp tăng cường sự phối hợp và giao tiếp trong quá trình phát triển dự án.
 
 ## 2. Thành viên (updated after refactor)
 

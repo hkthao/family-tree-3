@@ -22,7 +22,7 @@
 
 ---
 
-Tài liệu này hướng dẫn cách cài đặt môi trường, build, và deploy dự án Cây Gia Phả.
+Tài liệu này hướng dẫn cách cài đặt môi trường, build, và deploy dự án Gia Phả Việt.
 
 ## 1. Yêu cầu môi trường
 
