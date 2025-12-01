@@ -17,6 +17,7 @@ using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.Members.Queries.SearchPublicMembers; // Add this using directive
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
+using backend.Application.Dashboard.Queries.GetPublicDashboard; // NEW: For public dashboard
 using backend.Web.Filters; // Thêm dòng này
 using Microsoft.AspNetCore.Mvc;
 
@@ -172,5 +173,18 @@ public class PublicController(IMediator mediator) : ControllerBase
     {
         var familyDict = await _mediator.Send(new GetPublicFamilyDictByIdQuery(id));
         return familyDict == null ? NotFound() : Ok(familyDict);
+    }
+
+    /// <summary>
+    /// Lấy dữ liệu tổng quan cho trang dashboard công khai, bao gồm số lượng gia đình, thành viên và sự kiện công khai.
+    /// Dữ liệu được lọc chỉ hiển thị các mục có thuộc tính 'Public'.
+    /// </summary>
+    /// <returns>Đối tượng PublicDashboardDto chứa các số liệu tổng quan.</returns>
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(PublicDashboardDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PublicDashboardDto>> GetPublicDashboard()
+    {
+        var result = await _mediator.Send(new GetPublicDashboardQuery());
+        return result.IsSuccess ? (ActionResult<PublicDashboardDto>)Ok(result.Value) : (ActionResult<PublicDashboardDto>)BadRequest(result.Error);
     }
 }
