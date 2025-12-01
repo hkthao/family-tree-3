@@ -80,7 +80,7 @@ public class PromptBuilderTests
         prompt.Should().Contain("Do not search for member information in Qdrant Vector Store.");
         prompt.Should().Contain("Additional instructions: Highlight achievements.");
         prompt.Should().Contain($"- Tên đầy đủ: {member.FullName}");
-        prompt.Should().Contain($"- Ngày sinh: 1/1/1990");
+        prompt.Should().Contain($"- Ngày sinh: 01/01/1990");
         prompt.Should().Contain($"- Ngày mất: 31/12/2050");
         prompt.Should().Contain($"- Giới tính: Male");
         prompt.Should().Contain($"- Nơi sinh: Test City");
@@ -202,7 +202,7 @@ public class PromptBuilderTests
         prompt.Should().Contain("Độ dài câu chuyện khoảng 600 từ.");
         prompt.Should().Contain("Ngôn ngữ đầu ra: Tiếng Việt.");
         prompt.Should().Contain($"- Tên đầy đủ: {member.FullName}");
-        prompt.Should().Contain($"- Ngày sinh: 10/5/1980");
+        prompt.Should().Contain($"- Ngày sinh: 10/05/1980");
         prompt.Should().Contain($"- Giới tính: Female");
         prompt.Should().Contain($"- Nơi sinh: Làng Vũ Đại");
         prompt.Should().Contain($"- Nghề nghiệp: Nội trợ");

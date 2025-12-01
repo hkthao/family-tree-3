@@ -66,33 +66,33 @@ public static class PromptBuilder
             promptBuilder.AppendLine($"Additional instructions: {request.UserPrompt}");
         }
 
-        promptBuilder.AppendLine("\nMember Details:");
-        promptBuilder.AppendLine($"- Full Name: {member.FullName}");
-        promptBuilder.AppendLine($"- Date of Birth: {member.DateOfBirth?.ToShortDateString() ?? "Unknown"}");
-        promptBuilder.AppendLine($"- Date of Death: {member.DateOfDeath?.ToShortDateString() ?? "N/A"}");
-        promptBuilder.AppendLine($"- Gender: {member.Gender ?? "Unknown"}");
-        promptBuilder.AppendLine($"- Place of Birth: {member.PlaceOfBirth ?? "Unknown"}");
-        promptBuilder.AppendLine($"- Place of Death: {member.PlaceOfDeath ?? "N/A"}");
-        promptBuilder.AppendLine($"- Occupation: {member.Occupation ?? "Unknown"}");
+        promptBuilder.AppendLine("\nChi tiết thành viên:");
+        promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
+        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy") ?? "N/A"}");
+        promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Nơi mất: {member.PlaceOfDeath ?? "N/A"}");
+        promptBuilder.AppendLine($"- Nghề nghiệp: {member.Occupation ?? "Không rõ"}");
 
         if (family != null)
         {
-            promptBuilder.AppendLine($"- Family: {family.Name}");
-            promptBuilder.AppendLine($"- Family Description: {family.Description ?? "N/A"}");
+            promptBuilder.AppendLine($"- Gia đình: {family.Name}");
+            promptBuilder.AppendLine($"- Mô tả gia đình: {family.Description ?? "N/A"}");
         }
 
         if (father != null)
         {
-            promptBuilder.AppendLine($"- Father: {father.FullName}");
+            promptBuilder.AppendLine($"- Cha: {father.FullName}");
         }
         if (mother != null)
         {
-            promptBuilder.AppendLine($"- Mother: {mother.FullName}");
+            promptBuilder.AppendLine($"- Mẹ: {mother.FullName}");
         }
 
         if (spouses.Any())
         {
-            promptBuilder.AppendLine("- Spouses:");
+            promptBuilder.AppendLine("- Vợ/chồng:");
             foreach (var spouse in spouses)
             {
                 promptBuilder.AppendLine($"  - {spouse.FullName}");
@@ -101,16 +101,16 @@ public static class PromptBuilder
 
         if (request.GeneratedFromDB && !string.IsNullOrEmpty(member.Biography))
         {
-            promptBuilder.AppendLine($"- Existing Biography: {member.Biography}");
-            promptBuilder.AppendLine("Please use this existing biography as a base and enhance it, or rewrite it based on the provided style and additional instructions.");
+            promptBuilder.AppendLine($"- Tiểu sử hiện có: {member.Biography}");
+            promptBuilder.AppendLine("Vui lòng sử dụng tiểu sử hiện có này làm cơ sở và nâng cao nó, hoặc viết lại dựa trên phong cách và các hướng dẫn bổ sung được cung cấp.");
         }
         else if (request.GeneratedFromDB)
         {
-            promptBuilder.AppendLine("No existing biography found in the database. Generate a new one based on the details.");
+            promptBuilder.AppendLine("Không tìm thấy tiểu sử hiện có trong cơ sở dữ liệu. Vui lòng tạo một tiểu sử mới dựa trên các chi tiết.");
         }
         else
         {
-            promptBuilder.AppendLine("Do not use any existing biography from the database. Generate a new one based on the details and user prompt.");
+            promptBuilder.AppendLine("Không sử dụng bất kỳ tiểu sử hiện có nào từ cơ sở dữ liệu. Tạo một tiểu sử mới dựa trên các chi tiết và lời nhắc của người dùng.");
         }
 
         return promptBuilder.ToString();
@@ -156,8 +156,8 @@ public static class PromptBuilder
         promptBuilder.AppendLine("Ngôn ngữ đầu ra: Tiếng Việt.");
         promptBuilder.AppendLine("\nThông tin thành viên:");
         promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
-        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToShortDateString() ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToShortDateString() ?? "N/A"}");
+        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Không rõ"}");
+        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy") ?? "N/A"}");
         promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
         promptBuilder.AppendLine($"- Nghề nghiệp: {member.Occupation ?? "Không rõ"}");

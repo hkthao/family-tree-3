@@ -5,6 +5,7 @@ import { Resize } from 'vuetify/directives';
 import App from './App.vue';
 import router from './router';
 import './styles/variables.scss'; // Custom SASS variables
+import './styles/n8n-chat.scss'; // n8n chat custom variables
 import 'vuetify/styles';
 import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
