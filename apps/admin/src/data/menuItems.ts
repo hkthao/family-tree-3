@@ -55,7 +55,7 @@ const menu: MenuSection[] = [
       {
         titleKey: 'memberFace.list.title',
         icon: 'mdi-face-recognition',
-        to: '/member-faces',
+        to: '/member/faces',
         roles: ['Admin'],
         exact: true,
       },

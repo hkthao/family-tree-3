@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div>
     <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
       :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
       @delete="confirmDelete" @create="openAddDrawer()"></MemberFaceList>
@@ -14,7 +14,7 @@
       <MemberFaceDetailView v-if="selectedItemId && detailDrawer" :member-face-id="selectedItemId"
         @close="handleDetailClosed" />
     </BaseCrudDrawer>
-  </v-container>
+  </div>
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue';

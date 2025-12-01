@@ -21,7 +21,6 @@ import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
 import { memberStoryRoutes } from './features/member-story.routes'; // Updated
-import { memberFaceRoutes } from './features/member-face.routes'; // New
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,7 +33,6 @@ const router = createRouter({
       children: [
         ...dashboardRoutes, // Replaced
         ...memberRoutes,
-        ...memberFaceRoutes, // New
         ...memberStoryRoutes, // Updated
         ...familyDictRoutes,
         ...familyRoutes,
