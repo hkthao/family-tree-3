@@ -4,6 +4,7 @@ using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -55,7 +56,9 @@ public class DeleteEventCommandHandlerTests : TestBase
         deletedEvent!.IsDeleted.Should().BeTrue();
         deletedEvent.DeletedBy.Should().Be(userId.ToString());
         deletedEvent.DeletedDate.Should().Be(now);
-        deletedEvent.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Events.EventDeletedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Events.EventDeletedEvent)
+        )), Times.Once);
     }
 
     [Fact]

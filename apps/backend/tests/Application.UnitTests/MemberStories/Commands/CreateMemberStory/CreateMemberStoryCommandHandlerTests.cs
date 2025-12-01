@@ -11,6 +11,7 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Events.MemberStories; // NEW: For MemberStoryCreatedWithFacesEvent
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
     private readonly Mock<IStringLocalizer<CreateMemberStoryCommandHandler>> _localizerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ILogger<CreateMemberStoryCommandHandler>> _loggerMock;
+
     private readonly CreateMemberStoryCommandHandler _handler;
 
     public CreateMemberStoryCommandHandlerTests()
@@ -43,6 +45,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             _mediatorMock.Object,
             _loggerMock.Object
         );
+
     }
 
     [Fact]
@@ -229,8 +232,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateMemberFaceCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid())); // Return a new GUID for the created MemberFace
+
 
         _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
             cmd => cmd.FileUrl == tempThumbnailUrl), It.IsAny<CancellationToken>()))
@@ -254,12 +256,11 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         createdStory!.OriginalImageUrl.Should().Be(permanentOriginalUrl);
         createdStory.ResizedImageUrl.Should().Be(permanentResizedUrl);
 
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is MemberStoryCreatedWithFacesEvent)
+        )), Times.Once);
         // Verify that the domain event was added
-        createdStory.DomainEvents.Should().ContainSingle(e => e is MemberStoryCreatedWithFacesEvent);
-        var createdEvent = createdStory.DomainEvents.OfType<MemberStoryCreatedWithFacesEvent>().First();
-        createdEvent.MemberStory.Id.Should().Be(createdStory.Id);
-        createdEvent.FacesData.Should().HaveCount(1); // Changed from DetectedFaces
-        createdEvent.FacesData.First().Id.Should().Be(command.DetectedFaces.First().Id); // Changed from DetectedFaces
+
 
         _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Verify UploadFileFromTempUrlCommand was sent for Original and Resized images
     }

@@ -4,14 +4,11 @@ using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.DeleteFamilyDict;
 
-public class DeleteFamilyDictCommandHandler : IRequestHandler<DeleteFamilyDictCommand>
+public class DeleteFamilyDictCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteFamilyDictCommand>
 {
-    private readonly IApplicationDbContext _context;
-
-    public DeleteFamilyDictCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task Handle(DeleteFamilyDictCommand request, CancellationToken cancellationToken)
     {
@@ -24,7 +21,9 @@ public class DeleteFamilyDictCommandHandler : IRequestHandler<DeleteFamilyDictCo
             throw new NotFoundException(nameof(FamilyDict), request.Id.ToString());
         }
 
-        _context.FamilyDicts.Remove(entity);
+        entity.IsDeleted = true;
+        entity.DeletedBy = _currentUser.UserId.ToString();
+        entity.DeletedDate = _dateTime.Now;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

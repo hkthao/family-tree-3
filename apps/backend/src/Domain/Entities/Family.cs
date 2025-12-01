@@ -196,7 +196,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// </summary>
     public void RecalculateTotalMembers()
     {
-        TotalMembers = _members.Count;
+        TotalMembers = _members.Count(m => !m.IsDeleted);
     }
 
     /// <summary>
