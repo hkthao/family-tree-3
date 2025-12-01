@@ -27,8 +27,11 @@ import type { IMemberStoryService } from './memberStory/memberStory.service.inte
 import { ApiMemberStoryService } from './memberStory/api.memberStory.service'; 
 import type { IAiService } from './ai/ai.service.interface'; 
 import { ApiAiService } from './ai/api.ai.service'; 
-import type { IMemberFaceService } from './member-face/member-face.service.interface'; 
+import type { IMemberFaceService } from './member-face/member-face.service.interface';
 import { ApiMemberFaceService } from './member-face/api.member-face.service'; 
+import type { IN8nService } from './n8n/n8n.service.interface'; // NEW IMPORT
+import { ApiN8nService } from './n8n/api.n8n.service'; // NEW IMPORT
+
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
@@ -47,6 +50,7 @@ export interface AppServices {
   memberStory: IMemberStoryService; 
   ai: IAiService; 
   memberFace: IMemberFaceService; 
+  n8n: IN8nService; // NEW SERVICE
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -112,5 +116,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiMemberFaceService(apiClient)
         : testServices?.memberFace || new ApiMemberFaceService(apiClient),
+    n8n: // NEW SERVICE INITIALIZATION
+      mode === 'real'
+        ? new ApiN8nService(apiClient)
+        : testServices?.n8n || new ApiN8nService(apiClient),
   };
 }
+

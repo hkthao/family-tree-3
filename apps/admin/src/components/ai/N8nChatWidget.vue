@@ -17,12 +17,16 @@ import { createChat } from '@n8n/chat';
 import { useI18n } from 'vue-i18n';
 import '@n8n/chat/style.css';
 import { useUserSettingsStore } from '@/stores/user-settings.store';
+import { useAuthService } from '@/services/auth/authService';
+import { useServices } from '@/plugins/services.plugin'; // Updated import to use the composable
 import { Language } from '@/types'; // Import Language enum
 
 const { t } = useI18n();
 const chatOpen = ref(false);
 let chatInstance: ReturnType<typeof createChat> | null = null;
 const userSettingsStore = useUserSettingsStore();
+const authService = useAuthService(); // NEW
+const services = useServices(); // NEW
 
 // Initial fetch of user settings if not already loaded (optional, but good practice)
 if (!userSettingsStore.preferences.language) {
@@ -51,18 +55,37 @@ const currentChatLanguage = computed(() => {
   return userSettingsStore.preferences.language === Language.English ? 'en' : 'vi';
 });
 
-const initializeChat = () => {
+const initializeChat = async () => { // Changed to async
   if (chatInstance) return; // Prevent re-initialization if already created
-  const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL;
+  const WEBHOOK_URL = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL;
   if (!WEBHOOK_URL) {
     console.error('VITE_N8N_WEBHOOK_URL is not defined. N8n chat widget will not function.');
     return;
   }
+
+  // NEW: Get JWT token
+  const user = await authService.getUser();
+  if (!user || !user.id) {
+    console.error('User not logged in or user ID not available. Cannot get JWT for n8n chat.');
+    return;
+  }
+
+  const jwtResult = await services.n8n.getWebhookJwt(user.id);
+
+  if (!jwtResult.ok) {
+    console.error('Failed to get n8n webhook JWT:', jwtResult.error?.message);
+    return;
+  }
+
+  const jwtToken = jwtResult.value;
+
   chatInstance = createChat({
     webhookUrl: WEBHOOK_URL,
     webhookConfig: {
       method: 'POST',
-      headers: {},
+      headers: {
+        'authorization': `Bearer ${jwtToken}`, // Use dynamic token
+      },
     },
     target: '#n8n-chat-target',
     mode: 'fullscreen',
@@ -71,7 +94,7 @@ const initializeChat = () => {
     loadPreviousSession: false,
     metadata: {},
     showWelcomeScreen: false,
-    // @ts-expect-error
+    // @ts-expect-error: The n8n chat widget expects 'vi' and 'en' for languages, not Language enum values.
     defaultLanguage: currentChatLanguage.value,
     initialMessages: [
       t('n8nChat.welcomeMessage'),

@@ -27,3 +27,4 @@ export * from './public-relationship.d';
 export * from './public-event.d';
 export * from './public-face.d';
 export * from './public-dashboard.d';
+export * from './n8n.d'; // NEWLY ADDED N8N DTO EXPORT
