@@ -137,7 +137,7 @@ Frontend được tích hợp vào quy trình CI/CD của GitHub Actions thông 
     *   Cài đặt các phụ thuộc (`npm install`).
     *   Chạy linting (`npm run lint`).
     *   Chạy unit tests và kiểm tra độ bao phủ mã (`npm run test:coverage`).
-*   **`docker-build` job**: Sau khi các kiểm tra và test thành công, một Docker image cho frontend sẽ được xây dựng bằng `infra/Dockerfile.admin` và gắn thẻ `hkthao/family-tree-admin:latest`.
+*   **`docker-build` job**: Sau khi các kiểm tra và test thành công, một Docker image cho frontend sẽ được xây dựng bằng `apps/admin/Dockerfile` và gắn thẻ `hkthao/family-tree-admin:latest`.
 
 ## 7. Cấu hình Biến môi trường
 

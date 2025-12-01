@@ -63,7 +63,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
 
 #### Backend
 
-1.  Đảm bảo bạn có một instance MySQL đang chạy. Bạn có thể sử dụng instance từ tệp `src/infra/docker-compose.yml`:
+    Đảm bảo bạn có một instance MySQL đang chạy. Bạn có thể sử dụng instance từ tệp `infra/docker-compose.yml`:
     ```bash
     docker-compose -f src/infra/docker-compose.yml up -d mysql
     ```
@@ -71,8 +71,8 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
 
 3.  **Chạy backend**: 
     ```bash
-    cd src/backend
-    dotnet run --project src/Web
+    cd apps/backend
+    dotnet run --project apps/backend/src/Web
     ```
     Khi chạy backend ở chế độ Development, hệ thống sẽ tự động áp dụng các migrations và seed dữ liệu mẫu (nếu database trống).
 
@@ -125,7 +125,7 @@ Dự án sử dụng Entity Framework Core Migrations để quản lý schema da
 Khi bạn thay đổi các Entity trong Domain Layer, bạn cần tạo một migration mới để cập nhật schema database. 
 
 ```bash
-dotnet ef migrations add [MigrationName] --project src/Infrastructure --startup-project src/Web
+dotnet ef migrations add [MigrationName] --project apps/backend/src/Infrastructure --startup-project apps/backend/src/Web
 ```
 
 *   Thay thế `[MigrationName]` bằng một tên có ý nghĩa (ví dụ: `AddFamilyAddressField`).
@@ -135,7 +135,7 @@ dotnet ef migrations add [MigrationName] --project src/Infrastructure --startup-
 Sau khi tạo migration, bạn cần áp dụng nó vào database để các thay đổi schema có hiệu lực.
 
 ```bash
-dotnet ef database update --project src/Infrastructure --startup-project src/Web
+dotnet ef database update --project apps/backend/src/Infrastructure --startup-project apps/backend/src/Web
 ```
 
 **Lưu ý:**
@@ -237,7 +237,7 @@ Dự án sử dụng AutoMapper để tự động ánh xạ dữ liệu giữa 
 Các cấu hình mapping được định nghĩa trong các lớp kế thừa từ `Profile` của AutoMapper, ví dụ như `MappingProfile.cs` trong thư mục `Application/Common/Mappings`.
 
 ```csharp
-// backend/src/Application/Common/Mappings/MappingProfile.cs
+// apps/backend/src/Application/Common/Mappings/MappingProfile.cs
 public class MappingProfile : Profile
 {
     public MappingProfile()
