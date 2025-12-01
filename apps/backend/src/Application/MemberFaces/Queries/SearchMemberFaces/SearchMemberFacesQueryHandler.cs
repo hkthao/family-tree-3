@@ -34,6 +34,11 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
         {
             query = query.Where(mf => mf.Emotion != null && mf.Emotion.ToLower() == request.Emotion.ToLower());
         }
+        // Filter by SearchQuery (on MemberName or Emotion)
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
+        {
+            query = query.Where(mf => (mf.Member != null && (mf.Member.FirstName.ToLower().Contains(request.SearchQuery.ToLower()) || mf.Member.LastName.ToLower().Contains(request.SearchQuery.ToLower()))) || (mf.Emotion != null && mf.Emotion.ToLower().Contains(request.SearchQuery.ToLower())));
+        }
         // TODO: Implement proper authorization for listing multiple faces.
         // For now, if a FamilyId is provided, authorize access to that family.
         if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))

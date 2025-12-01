@@ -8,4 +8,5 @@ public record SearchMemberFacesQuery : PaginatedQuery, IRequest<Result<Paginated
     public Guid? MemberId { get; init; }
     public Guid? FamilyId { get; init; }
     public string? Emotion { get; init; }
+    public string? SearchQuery { get; init; }
 }
