@@ -13,6 +13,7 @@ public class SearchPublicMembersQueryHandler(IApplicationDbContext context, IMap
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchPublicMembersQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Members
+            .Include(m => m.Family) // NEW
             .AsNoTracking()
             .Where(m => m.FamilyId == request.FamilyId);
 

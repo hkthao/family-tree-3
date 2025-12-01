@@ -23,4 +23,5 @@ public class MemberFaceDto
     public string? MemberAvatarUrl { get; set; } // NEW
     public Guid? FamilyId { get; set; }
     public string? FamilyName { get; set; }
+    public string? FamilyAvatarUrl { get; set; }
 }

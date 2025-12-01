@@ -12,6 +12,7 @@ public class MemberListDto : BaseAuditableDto
     public string? AvatarUrl { get; set; }
     public Guid FamilyId { get; set; }
     public string? FamilyName { get; set; }
+    public string? FamilyAvatarUrl { get; set; }
     public bool IsRoot { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }

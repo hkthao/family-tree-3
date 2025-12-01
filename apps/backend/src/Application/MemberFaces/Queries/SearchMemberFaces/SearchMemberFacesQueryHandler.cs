@@ -119,7 +119,8 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
                 MemberGender = mf.Member!.Gender, // NEW
                 MemberAvatarUrl = mf.Member!.AvatarUrl, // NEW
                 FamilyId = mf.Member!.FamilyId,
-                FamilyName = mf.Member!.Family!.Name
+                FamilyName = mf.Member!.Family!.Name,
+                FamilyAvatarUrl = mf.Member!.Family!.AvatarUrl
             }).AsNoTracking(),
             request.Page,
             request.ItemsPerPage

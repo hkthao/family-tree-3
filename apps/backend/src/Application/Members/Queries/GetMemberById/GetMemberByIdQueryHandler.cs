@@ -18,6 +18,7 @@ public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper ma
         var spec = new MemberByIdSpecification(request.Id);
         spec.Query.Include(m => m.SourceRelationships);
         spec.Query.Include(m => m.TargetRelationships);
+        spec.Query.Include(m => m.Family); // NEW
 
         // Comment: Specification pattern is applied here to filter the result by ID at the database level.
         var query = _context.Members.AsQueryable().WithSpecification(spec);

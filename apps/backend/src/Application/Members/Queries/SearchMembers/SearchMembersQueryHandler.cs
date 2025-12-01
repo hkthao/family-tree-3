@@ -16,6 +16,7 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Members
+            .Include(m => m.Family) // NEW
             .Include(m => m.SourceRelationships)
                 .ThenInclude(r => r.TargetMember)
             .Include(m => m.TargetRelationships)

@@ -52,7 +52,8 @@ public class GetMemberFaceByIdQueryHandler : IRequestHandler<GetMemberFaceByIdQu
             MemberGender = memberFace.Member?.Gender, // NEW
             MemberAvatarUrl = memberFace.Member?.AvatarUrl, // NEW
             FamilyId = memberFace.Member?.FamilyId,
-            FamilyName = memberFace.Member?.Family?.Name
+            FamilyName = memberFace.Member?.Family?.Name,
+            FamilyAvatarUrl = memberFace.Member?.Family?.AvatarUrl
         };
         return Result<MemberFaceDto>.Success(dto);
     }

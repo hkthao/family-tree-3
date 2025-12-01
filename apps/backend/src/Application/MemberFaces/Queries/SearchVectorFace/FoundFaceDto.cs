@@ -11,4 +11,5 @@ public class FoundFaceDto
     public string? OriginalImageUrl { get; set; }
     public string? Emotion { get; set; }
     public double EmotionConfidence { get; set; }
+    public string? FamilyAvatarUrl { get; set; }
 }

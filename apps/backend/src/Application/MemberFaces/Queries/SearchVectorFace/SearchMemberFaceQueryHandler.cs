@@ -16,13 +16,13 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
     {
-        // Authorize family access if FamilyId is provided
+        
         if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))
         {
             return Result<List<FoundFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // Validate vector
+        
         if (request.Vector == null || !request.Vector.Any())
         {
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
@@ -33,11 +33,11 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             Vector = request.Vector.Select(d => (float)d).ToList(),
             Limit = request.Limit,
             Threshold = request.Threshold,
-            Filter = new Dictionary<string, object>(), // Add filters based on query parameters
+            Filter = new Dictionary<string, object>(), 
             ReturnFields = new List<string> { "localDbId", "memberId", "faceId", "thumbnailUrl", "originalImageUrl", "emotion", "emotionConfidence" }
         };
 
-        // Add filters based on query parameters
+        
         if (request.FamilyId.HasValue)
         {
             searchFaceVectorDto.Filter.Add("familyId", request.FamilyId.Value.ToString());
@@ -64,7 +64,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             {
                 if (searchResult.Payload == null) continue;
 
-                var localDbId = Guid.Parse(searchResult.Id); // Use the vector ID as localDbId
+                var localDbId = Guid.Parse(searchResult.Id); 
 
                 if (!searchResult.Payload.TryGetValue("memberId", out var memberIdObj) || !Guid.TryParse(memberIdObj?.ToString(), out var memberId))
                 {
@@ -76,7 +76,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
                 {
                     MemberFaceId = localDbId,
                     MemberId = memberId,
-                    FaceId = searchResult.Id.ToString(), // Use the vector ID as FaceId
+                    FaceId = searchResult.Id.ToString(), 
                     Score = searchResult.Score,
                     ThumbnailUrl = searchResult.Payload.TryGetValue("thumbnailUrl", out var thumbnailUrlObj) ? thumbnailUrlObj?.ToString() : null,
                     OriginalImageUrl = searchResult.Payload.TryGetValue("originalImageUrl", out var originalImageUrlObj) ? originalImageUrlObj?.ToString() : null,
@@ -88,12 +88,13 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             }
         }
 
-        // Fetch member names for found faces
+        
         if (memberIds.Any())
         {
             var members = await _context.Members
                 .Where(m => memberIds.Contains(m.Id))
-                .Select(m => new { m.Id, m.FirstName, m.LastName })
+                .Include(m => m.Family) // Include Family to get its AvatarUrl
+                .Select(m => new { m.Id, m.FirstName, m.LastName, m.Family }) // Select the Family object
                 .ToListAsync(cancellationToken);
 
             foreach (var foundFace in foundFaces)
@@ -102,6 +103,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
                 if (member != null)
                 {
                     foundFace.MemberName = $"{member.FirstName} {member.LastName}".Trim();
+                    foundFace.FamilyAvatarUrl = member.Family?.AvatarUrl;
                 }
             }
         }
