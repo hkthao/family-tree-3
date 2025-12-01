@@ -3,13 +3,13 @@ using backend.Application.Events;
 using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Events.Queries.GetPublicUpcomingEvents;
 using backend.Application.Events.Queries.SearchPublicEvents;
-using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
 using backend.Application.Families.Queries.GetPublicFamilyById;
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.FamilyDicts; // Thêm dòng này từ PublicFamilyDictsController
 using backend.Application.FamilyDicts.Queries.Public; // Thêm dòng này từ PublicFamilyDictsController
+using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetPublicMemberById;

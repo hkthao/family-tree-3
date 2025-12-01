@@ -2,10 +2,10 @@ using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Common; // NEW: For BoundingBoxDto
-using backend.Application.MemberFaces.Queries;
 using backend.Application.Files.Commands.UploadFileFromUrl;
 using backend.Application.MemberFaces.Commands.CreateMemberFace; // NEW: Using new CreateMemberFaceCommand
+using backend.Application.MemberFaces.Common; // NEW: For BoundingBoxDto
+using backend.Application.MemberFaces.Queries;
 using backend.Application.MemberStories.Commands.CreateMemberStory;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

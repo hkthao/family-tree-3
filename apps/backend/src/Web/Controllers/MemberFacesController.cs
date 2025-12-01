@@ -1,13 +1,13 @@
 using backend.Application.Common.Constants; // Added to resolve ErrorSources
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Commands.DetectFaces;
+using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
+using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
-using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Common; // For MemberFaceDto
+using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.MemberFaces.Commands.CreateMemberFace;
 
 namespace backend.Web.Controllers;
 

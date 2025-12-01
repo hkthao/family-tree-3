@@ -1,9 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.MemberFaces.Queries.SearchVectorFace; 
+using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Domain.Entities;
-using backend.Domain.Events.MemberFaces; 
+using backend.Domain.Events.MemberFaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
@@ -13,8 +13,8 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<CreateMemberFaceCommandHandler> _logger = logger;
-    private readonly IMediator _mediator = mediator; 
-    private readonly IThumbnailUploadService _thumbnailUploadService = thumbnailUploadService; 
+    private readonly IMediator _mediator = mediator;
+    private readonly IThumbnailUploadService _thumbnailUploadService = thumbnailUploadService;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
         var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
@@ -43,7 +43,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             Vector = request.Embedding.ToList(),
             Limit = 1,
-            Threshold = 0.95f 
+            Threshold = 0.95f
         };
         var searchQueryResult = await _mediator.Send(searchMemberFaceQuery, cancellationToken);
         if (searchQueryResult.IsSuccess && searchQueryResult.Value != null && searchQueryResult.Value.Any())
@@ -57,7 +57,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         }
         var entity = new MemberFace
         {
-            Id = Guid.NewGuid(), 
+            Id = Guid.NewGuid(),
             MemberId = request.MemberId,
             FaceId = request.FaceId,
             BoundingBox = new BoundingBox
@@ -68,16 +68,16 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 Height = request.BoundingBox.Height
             },
             Confidence = request.Confidence,
-            ThumbnailUrl = thumbnailUrl, 
+            ThumbnailUrl = thumbnailUrl,
             OriginalImageUrl = request.OriginalImageUrl,
             Embedding = request.Embedding,
             Emotion = request.Emotion,
             EmotionConfidence = request.EmotionConfidence ?? 0.0,
-            IsVectorDbSynced = false, 
-            VectorDbId = null 
+            IsVectorDbSynced = false,
+            VectorDbId = null
         };
         _context.MemberFaces.Add(entity);
-        entity.AddDomainEvent(new MemberFaceCreatedEvent(entity)); 
+        entity.AddDomainEvent(new MemberFaceCreatedEvent(entity));
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Created MemberFace {MemberFaceId} for Member {MemberId}.", entity.Id, request.MemberId);
         return Result<Guid>.Success(entity.Id);

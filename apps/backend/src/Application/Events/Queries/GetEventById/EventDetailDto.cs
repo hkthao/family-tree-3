@@ -14,5 +14,7 @@ public class EventDetailDto : BaseAuditableDto
     public Guid? FamilyId { get; set; }
     public EventType Type { get; set; }
     public string? Color { get; set; }
+    public string? FamilyName { get; set; }
+    public string? FamilyAvatarUrl { get; set; }
     public List<Guid> RelatedMembers { get; set; } = [];
 }

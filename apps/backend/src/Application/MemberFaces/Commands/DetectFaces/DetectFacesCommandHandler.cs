@@ -1,10 +1,10 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.UploadFile;
 using backend.Application.MemberFaces.Common;
-using backend.Application.Files.UploadFile; 
-using Microsoft.Extensions.Logging;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
@@ -13,7 +13,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
-    private readonly IMediator _mediator = mediator; 
+    private readonly IMediator _mediator = mediator;
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
         try
@@ -28,7 +28,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string resizeFolder = UploadConstants.TemporaryUploadsFolder;
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
-                var originalUploadCommand = new UploadFileCommand 
+                var originalUploadCommand = new UploadFileCommand
                 {
                     ImageData = request.ImageBytes,
                     FileName = effectiveFileName,
@@ -48,9 +48,9 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 {
                     try
                     {
-                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512); 
+                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512);
                         var resizedFileName = $"resized_{effectiveFileName}";
-                        var resizedUploadCommand = new UploadFileCommand 
+                        var resizedUploadCommand = new UploadFileCommand
                         {
                             ImageData = resizedImageBytes,
                             FileName = resizedFileName,
@@ -61,7 +61,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         if (resizedUploadResult.IsSuccess && resizedUploadResult.Value != null)
                         {
                             resizedImageUrl = resizedUploadResult.Value.Url;
-                            imageBytesToAnalyze = resizedImageBytes; 
+                            imageBytesToAnalyze = resizedImageBytes;
                         }
                         else
                         {
@@ -78,12 +78,12 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             var imageId = Guid.NewGuid();
             var detectedFaceDtos = new List<DetectedFaceDto>();
             var memberIdsToFetch = new HashSet<Guid>();
-            var faceMemberMap = new Dictionary<string, Guid>(); 
+            var faceMemberMap = new Dictionary<string, Guid>();
             foreach (var faceResult in detectedFacesResult)
             {
                 var detectedFaceDto = new DetectedFaceDto
                 {
-                    Id = Guid.NewGuid().ToString(), 
+                    Id = Guid.NewGuid().ToString(),
                     BoundingBox = new BoundingBoxDto
                     {
                         X = faceResult.BoundingBox.X,
@@ -92,7 +92,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                         Height = faceResult.BoundingBox.Height
                     },
                     Confidence = faceResult.Confidence,
-                    Thumbnail = faceResult.Thumbnail, 
+                    Thumbnail = faceResult.Thumbnail,
                     Embedding = faceResult.Embedding?.ToList(),
                     MemberId = null,
                     MemberName = null,
@@ -102,20 +102,20 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     DeathYear = null,
                     Emotion = faceResult.Emotion,
                     EmotionConfidence = faceResult.EmotionConfidence,
-                    Status = "unrecognized" 
+                    Status = "unrecognized"
                 };
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
                     var searchFaceQuery = new SearchMemberFaceQuery
                     {
                         Vector = detectedFaceDto.Embedding,
-                        Limit = 1, 
-                        Threshold = 0.7f 
+                        Limit = 1,
+                        Threshold = 0.7f
                     };
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
                     if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
                     {
-                        var foundFace = searchResult.Value.First(); 
+                        var foundFace = searchResult.Value.First();
                         detectedFaceDto.MemberId = foundFace.MemberId;
                         memberIdsToFetch.Add(foundFace.MemberId);
                         faceMemberMap[detectedFaceDto.Id] = foundFace.MemberId;
@@ -157,8 +157,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             return Result<FaceDetectionResponseDto>.Success(new FaceDetectionResponseDto
             {
                 ImageId = imageId,
-                OriginalImageUrl = originalImageUrl, 
-                ResizedImageUrl = resizedImageUrl, 
+                OriginalImageUrl = originalImageUrl,
+                ResizedImageUrl = resizedImageUrl,
                 DetectedFaces = detectedFaceDtos
             });
         }

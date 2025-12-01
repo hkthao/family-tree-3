@@ -86,44 +86,44 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
+        var entitiesWithDomainEvents = ChangeTracker
+            .Entries<BaseEntity>()
+            .Where(entry => entry.Entity.DomainEvents.Any())
+            .SelectMany(entry => entry.Entity.DomainEvents)
+            .ToList();
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
-            // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
-            var entitiesWithDomainEvents = ChangeTracker
-                .Entries<BaseEntity>()
-                .Where(entry => entry.Entity.DomainEvents.Any())
-                .SelectMany(entry => entry.Entity.DomainEvents)
-                .ToList();
-            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            if (entry.Entity is BaseAuditableEntity auditableEntity)
             {
-                if (entry.Entity is BaseAuditableEntity auditableEntity)
+                switch (entry.State)
                 {
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            auditableEntity.CreatedBy = _currentUser.UserId.ToString();
-                            auditableEntity.Created = _dateTime.Now;
-                            break;
-                        case EntityState.Modified:
-                            auditableEntity.LastModifiedBy = _currentUser.UserId.ToString();
-                            auditableEntity.LastModified = _dateTime.Now;
-                            break;
-                    }
+                    case EntityState.Added:
+                        auditableEntity.CreatedBy = _currentUser.UserId.ToString();
+                        auditableEntity.Created = _dateTime.Now;
+                        break;
+                    case EntityState.Modified:
+                        auditableEntity.LastModifiedBy = _currentUser.UserId.ToString();
+                        auditableEntity.LastModified = _dateTime.Now;
+                        break;
                 }
-                if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
-                {
-                    softDeleteEntity.IsDeleted = true;
-                    softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
-                    softDeleteEntity.DeletedDate = _dateTime.Now;
-                    entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
-                }
-                entry.Entity.ClearDomainEvents();
             }
-            var result = await base.SaveChangesAsync(cancellationToken);
-            // Điều phối các sự kiện miền sau khi SaveChanges thành công
-            await _domainEventDispatcher.DispatchEvents(entitiesWithDomainEvents);
-            return result;
+            if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
+            {
+                softDeleteEntity.IsDeleted = true;
+                softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
+                softDeleteEntity.DeletedDate = _dateTime.Now;
+                entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
+            }
+            entry.Entity.ClearDomainEvents();
         }
+        var result = await base.SaveChangesAsync(cancellationToken);
+        // Điều phối các sự kiện miền sau khi SaveChanges thành công
+        await _domainEventDispatcher.DispatchEvents(entitiesWithDomainEvents);
+        return result;
+    }
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.
     /// </summary>

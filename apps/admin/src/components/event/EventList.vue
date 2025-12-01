@@ -58,12 +58,9 @@
 
     <!-- Family column -->
     <template #item.familyId="{ item }">
-      <ChipLookup
-        :model-value="item.familyId ?? undefined"
-        :data-source="familyLookupStore"
-        display-expr="name"
-        value-expr="id"
-        image-expr="avatarUrl"
+      <FamilyName
+        :name="item.familyName"
+        :avatar-url="item.familyAvatarUrl"
       />
     </template>
 
@@ -112,6 +109,7 @@ import { useMemberLookupStore } from '@/stores/memberLookup.store';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ChipLookup from '@/components/common/ChipLookup.vue';
+import FamilyName from '@/components/common/FamilyName.vue';
 import { formatDate } from '@/utils/dateUtils';
 
 const props = defineProps<{

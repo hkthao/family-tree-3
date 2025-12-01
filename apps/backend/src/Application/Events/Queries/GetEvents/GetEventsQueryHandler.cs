@@ -14,6 +14,9 @@ public class GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper
     {
         var query = _context.Events.AsQueryable();
 
+        // Ensure Family is included for mapping
+        query = query.Include(e => e.Family);
+
         // Apply individual specifications
         if (request.RelatedMemberId.HasValue)
         {
