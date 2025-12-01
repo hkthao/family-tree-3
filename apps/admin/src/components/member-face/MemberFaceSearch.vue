@@ -21,6 +21,7 @@
                 v-model="internalFilters.memberId"
                 :label="t('memberFace.filters.member')"
                 clearable
+                @update:model-value="applyFilters"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
@@ -28,6 +29,7 @@
                 v-model="internalFilters.familyId"
                 :label="t('memberFace.filters.family')"
                 clearable
+                @update:model-value="applyFilters"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
@@ -38,6 +40,7 @@
                 item-title="title"
                 item-value="value"
                 clearable
+                @update:model-value="applyFilters"
               ></v-select>
             </v-col>
           </v-row>
@@ -62,7 +65,7 @@ import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import type { MemberFaceFilter } from '@/types';
 
 interface MemberFaceSearchProps {
-  initialFilters?: MemberFaceFilter;
+  // initialFilters prop removed
 }
 
 const props = defineProps<MemberFaceSearchProps>();
@@ -71,7 +74,7 @@ const emit = defineEmits(['update:filters']);
 const { t } = useI18n();
 
 const expanded = ref(true); // Default to expanded
-const internalFilters = ref<MemberFaceFilter>(props.initialFilters || {});
+const internalFilters = ref<MemberFaceFilter>({}); // Initialize directly to empty object
 
 const emotionOptions = computed(() => [
   { title: t('memberFace.emotion.happy'), value: 'happy' },
@@ -83,12 +86,7 @@ const emotionOptions = computed(() => [
   { title: t('memberFace.emotion.neutral'), value: 'neutral' },
 ]);
 
-onMounted(() => {
-  if (props.initialFilters) {
-    internalFilters.value = { ...props.initialFilters };
-    applyFilters(); // Apply initial filters on mount
-  }
-});
+// onMounted hook removed as initialFilters prop is no longer used
 
 watch(
   internalFilters.value,
@@ -96,7 +94,7 @@ watch(
     // Apply filters immediately when internal filters change if not expanded,
     // otherwise wait for explicit apply button click.
     if (!expanded.value) {
-      applyFilters();
+      applyFilters(); // Revert to direct apply
     }
   },
   { deep: true }
@@ -108,6 +106,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   internalFilters.value = {}; // Reset all filters
-  emit('update:filters', internalFilters.value);
+  applyFilters(); // Revert to direct apply
 };
 </script>

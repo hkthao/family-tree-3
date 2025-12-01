@@ -107,13 +107,11 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
 import { useAuth } from '@/composables/useAuth';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
-const familyLookupStore = useFamilyLookupStore();
 const { isAdmin, isFamilyManager } = useAuth();
 
 const props = defineProps<{
@@ -162,8 +160,6 @@ watch(() => props.search, (newSearch) => {
     searchQuery.value = newSearch;
   }
 });
-
-
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 

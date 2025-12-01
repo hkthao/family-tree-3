@@ -1,10 +1,10 @@
 <template>
   <div data-testid="member-face-list-view">
-    <MemberFaceSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" :initial-filters="initialFilters" />
+    <MemberFaceSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
 
     <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
-      :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
-      @delete="confirmDelete" @create="openAddDrawer()"></MemberFaceList>
+      :loading="list.loading" :search="searchQuery" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
+      @delete="confirmDelete" @create="openAddDrawer()" @update:search="handleSearchUpdate" />
 
     <!-- Add MemberFace Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberFaceClosed">
@@ -53,13 +53,21 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const initialFilters = ref<MemberFaceFilter>({});
+const searchQuery = ref(''); // NEW
 
 const loadMemberFaces = async () => {
-  memberFaceStore.list.filters = {
-    ...memberFaceStore.list.filters,
+  // Create a base filter from props (route-based)
+  const baseFilters: MemberFaceFilter = {
     memberId: props.memberId,
     familyId: props.familyId,
+  };
+
+  // Merge with existing filters from the store, prioritizing store filters
+  // This means if MemberFaceSearch sets memberId, it overrides props.memberId
+  memberFaceStore.list.filters = {
+    ...baseFilters, // Apply initial route filters
+    ...memberFaceStore.list.filters, // Apply user-set filters from search component
+    searchQuery: searchQuery.value, // Ensure text search is included
   };
   await memberFaceStore._loadItems();
 };
@@ -70,6 +78,13 @@ const handleFilterUpdate = (filters: MemberFaceFilter) => {
     ...filters,
   };
   memberFaceStore.list.options.page = 1; // Reset page to 1 when filters change
+  loadMemberFaces();
+};
+
+const handleSearchUpdate = (search: string) => { // NEW
+  searchQuery.value = search;
+  memberFaceStore.list.filters.searchQuery = search;
+  memberFaceStore.list.options.page = 1; // Reset page on text search
   loadMemberFaces();
 };
 
@@ -124,20 +139,10 @@ const handleDetailClosed = () => {
 };
 
 onMounted(() => {
-  initialFilters.value = {
-    memberId: props.memberId,
-    familyId: props.familyId,
-  };
-  memberFaceStore.list.filters = { ...initialFilters.value }; // Initialize store filters
   loadMemberFaces();
 });
 
 watch([() => props.memberId, () => props.familyId], () => {
-  initialFilters.value = {
-    memberId: props.memberId,
-    familyId: props.familyId,
-  };
-  memberFaceStore.list.filters = { ...initialFilters.value };
   loadMemberFaces();
 });
 </script>
