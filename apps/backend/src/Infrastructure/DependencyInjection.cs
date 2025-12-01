@@ -1,10 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Domain.Enums;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
-using backend.Infrastructure.Files;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -31,8 +29,7 @@ public static class DependencyInjection
     /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<DispatchDomainEventsInterceptor>();
-        services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         services.AddHttpContextAccessor(); // Required for ICurrentUser
         services.AddScoped<ICurrentUser, CurrentUser>(); // Register ICurrentUser with its implementation
@@ -40,11 +37,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                       mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null))
-                   .AddInterceptors(
-                       serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                       serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
-                       ;
+                       mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null)));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -54,8 +47,9 @@ public static class DependencyInjection
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
-        // Register n8nSettings
+        // Register N8nSettings
         services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
+
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
 
@@ -70,7 +64,9 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         services.AddScoped<IPrivacyService, PrivacyService>();
+        services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
+        services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
@@ -83,36 +79,9 @@ public static class DependencyInjection
 
         services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
 
-
-
-        // Register AI Content Generator
-
-        // Register Embedding Settings and Providers
-
-
         // Register Configuration Provider
         services.AddMemoryCache();
 
-
-        // Register File Storage
-        services.AddTransient<LocalFileStorage>();
-        services.AddTransient<S3FileStorage>();
-        services.AddTransient<CloudinaryFileStorage>();
-
-        // Register IFileStorage based on configuration
-        services.AddScoped<IFileStorage>(sp =>
-        {
-            var storageSettings = configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
-            var storageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true);
-
-            return storageProvider switch
-            {
-                StorageProvider.Local => sp.GetRequiredService<LocalFileStorage>(),
-                StorageProvider.Cloudinary => sp.GetRequiredService<CloudinaryFileStorage>(),
-                StorageProvider.S3 => sp.GetRequiredService<S3FileStorage>(),
-                _ => throw new InvalidOperationException($"No file storage provider configured for: {storageProvider}")
-            };
-        });
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         // Register n8n Service

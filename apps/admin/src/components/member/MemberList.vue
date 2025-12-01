@@ -27,11 +27,7 @@
     </template>
     <!-- Avatar column -->
     <template #item.avatarUrl="{ item }">
-      <div class="d-flex justify-center">
-        <v-avatar size="36" class="my-2">
-          <v-img :src="getMemberAvatar(item)" :alt="item.fullName || ''" />
-        </v-avatar>
-      </div>
+      <MemberAvatarDisplay :member="item" />
     </template>
 
     <!-- Full Name column -->
@@ -46,24 +42,23 @@
 
     <!-- Father column -->
     <template #item.father="{ item }">
-      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="item.fatherGender" />
+      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="Gender.Male" />
     </template>
 
     <!-- Mother column -->
     <template #item.mother="{ item }">
-      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="item.motherGender" />
+      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="Gender.Female" />
     </template>
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="item.husbandGender" />
-      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="item.wifeGender" />
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="Gender.Male" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="Gender.Female" />
     </template>
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyLookupStore" display-expr="name" value-expr="id"
-        imageExpr="avatarUrl" />
+      <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
     </template>
 
     <!-- Birth/Death Years column -->
@@ -73,9 +68,7 @@
 
     <!-- Gender column -->
     <template #item.gender="{ item }">
-      <v-chip label size="small" class="text-capitalize">
-        {{ getGenderTitle(item.gender) }}
-      </v-chip>
+      <MemberGenderChip :gender="item.gender" />
     </template>
 
     <!-- Actions column -->
@@ -112,39 +105,21 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Member } from '@/types';
+import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { useFamilyLookupStore } from '@/stores/familyLookup.store';
-import { ChipLookup } from '@/components/common';
-import { MemberName } from '@/components/member';
-import { getGenderTitle } from '@/constants/genders';
+import FamilyName from '@/components/common/FamilyName.vue';
+import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
 import { useAuth } from '@/composables/useAuth';
-import maleAvatar from '@/assets/images/male_avatar.png';
-import femaleAvatar from '@/assets/images/female_avatar.png';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
-const familyLookupStore = useFamilyLookupStore();
 const { isAdmin, isFamilyManager } = useAuth();
-
-const getMemberAvatar = (member: Member) => {
-  if (member.avatarUrl) {
-    return member.avatarUrl;
-  }
-  if (member.gender === 'Male') {
-    return maleAvatar;
-  }
-  if (member.gender === 'Female') {
-    return femaleAvatar;
-  }
-  return maleAvatar; // Fallback for 'Other' or undefined gender
-};
 
 const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
-  search?: string; // Changed to optional
-  readOnly?: boolean; // Add readOnly prop
+  search?: string; 
+  readOnly?: boolean; 
 }>();
 
 const canPerformActions = computed(() => {
@@ -185,8 +160,6 @@ watch(() => props.search, (newSearch) => {
     searchQuery.value = newSearch;
   }
 });
-
-// ... (rest of the file)
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -255,7 +228,7 @@ const headers = computed<DataTableHeader[]>(() => {
 const loadMembers = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[]; // Corrected type
+  sortBy: { key: string; order: string }[]; 
 }) => {
   emit('update:options', options);
 };

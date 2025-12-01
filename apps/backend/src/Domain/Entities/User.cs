@@ -1,7 +1,5 @@
 using System.Text.Json; // Added
-using backend.Domain.Common;
 using backend.Domain.Enums;
-using backend.Domain.Events;
 
 namespace backend.Domain.Entities;
 

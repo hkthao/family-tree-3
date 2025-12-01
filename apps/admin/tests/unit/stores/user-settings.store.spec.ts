@@ -15,28 +15,10 @@ const mockSaveUserPreferences = vi.fn();
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    userPreference: {
+    user: {
       getUserPreferences: mockGetUserPreferences,
       saveUserPreferences: mockSaveUserPreferences,
     },
-    // Add other services as empty objects if they are not directly used by user-settings.store
-    ai: {},
-    auth: {},
-    chat: {},
-    dashboard: {},
-    event: {},
-    face: {},
-    faceMember: {},
-    family: {},
-    fileUpload: {},
-    member: {},
-    naturalLanguageInput: {},
-    notification: {},
-    relationship: {},
-    systemConfig: {},
-    userActivity: {},
-    userProfile: {},
-    userSettings: {},
   })),
 }));
 

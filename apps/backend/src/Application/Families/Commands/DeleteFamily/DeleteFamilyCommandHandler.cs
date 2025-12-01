@@ -32,11 +32,9 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             entity.DeletedDate = _dateTime.Now;
 
             entity.AddDomainEvent(new FamilyDeletedEvent(entity));
+            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.Id));
 
             await _context.SaveChangesAsync(cancellationToken);
-
-            // Update family stats
-            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.Id));
 
             return Result.Success();
         }

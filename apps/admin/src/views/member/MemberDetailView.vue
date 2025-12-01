@@ -28,8 +28,6 @@
         t('common.edit') }}</v-btn>
       <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading"
         v-if="canEditOrDelete">{{ t('ai.bioSuggestShort') }}</v-btn>
-      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{
-        t('face.deleteFaceDataShort') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{
         t('common.delete') }}</v-btn>
     </v-card-actions>
@@ -40,7 +38,6 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { useFaceStore } from '@/stores/face.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
@@ -57,7 +54,6 @@ const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationsh
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const faceStore = useFaceStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
 const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
@@ -131,28 +127,6 @@ const handleDelete = async () => {
       }
     } catch (error) {
       showSnackbar(t('member.messages.deleteError'), 'error');
-    }
-  }
-};
-
-const handleDeleteFaceData = async () => {
-  if (!member.value) return;
-
-  const confirmed = await showConfirmDialog({
-    title: t('face.confirmDeleteFaceDataTitle'),
-    message: t('face.confirmDeleteFaceDataMessage', { fullName: member.value.fullName }),
-  });
-
-  if (confirmed) {
-    try {
-      const result = await faceStore.deleteFacesByMemberId(member.value.id);
-      if (result.ok) {
-        showSnackbar(t('face.messages.deleteSuccess'), 'success');
-      } else {
-        showSnackbar(result.error?.message || t('face.messages.deleteError'), 'error');
-      }
-    } catch (error) {
-      showSnackbar(t('face.messages.deleteError'), 'error');
     }
   }
 };

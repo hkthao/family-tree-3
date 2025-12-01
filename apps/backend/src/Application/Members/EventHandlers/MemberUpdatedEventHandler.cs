@@ -33,17 +33,5 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member update
-
-        // Call n8n webhook for embedding update
-        var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);
-        var embeddingDto = new EmbeddingWebhookDto
-        {
-            EntityType = "Member",
-            EntityId = notification.Member.Id.ToString(),
-            ActionType = "Updated",
-            EntityData = entityData,
-            Description = description
-        };
-        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

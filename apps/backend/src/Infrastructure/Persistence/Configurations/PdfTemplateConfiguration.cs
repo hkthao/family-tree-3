@@ -17,7 +17,7 @@ public class PdfTemplateConfiguration : IEntityTypeConfiguration<PdfTemplate>
 
         builder.Property(t => t.CssContent)
             .IsRequired(); // No max length as CSS can be large
-            
+
         builder.Property(t => t.Placeholders)
             .HasMaxLength(2000); // Store as JSON string, can be large but a limit is good
 

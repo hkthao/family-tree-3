@@ -35,7 +35,7 @@
         </v-window-item>
 
         <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
-          <FaceRecognitionView :family-id="familyId" />
+          <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
 
         <v-window-item v-if="canManageFamily" value="family-settings">
@@ -53,7 +53,7 @@ import { useRoute } from 'vue-router';
 import { TreeChart, FamilyDetail, FamilySettingsTab } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
-import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';
+import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { t } = useI18n();

@@ -8,16 +8,16 @@ import { createServices } from '@/services/service.factory';
 
 // Mock the IFaceService
 const mockDetect = vi.fn();
-const mockSaveLabels = vi.fn();
 const mockSearch = vi.fn();
+const mockDeleteFacesByMemberId = vi.fn(); // Add this mock function
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    face: {
+    memberFace: {
       detect: mockDetect,
-      saveLabels: mockSaveLabels,
       search: mockSearch,
+      deleteFacesByMemberId: mockDeleteFacesByMemberId, // Add this to the mock
     },
     // Add other services as empty objects if they are not directly used by face.store
     ai: {},
@@ -104,12 +104,11 @@ describe('face.store', () => {
     store.services = createServices('test');
 
     // Reset mocks before each test
-    (store.services.face.detect as any).mockReset();
-    (store.services.face.saveLabels as any).mockReset();
-
+    (store.services.memberFace.detect as any).mockReset();
+    mockDeleteFacesByMemberId.mockReset(); // NEW
     // Set default mock resolved values on the injected service mocks
-    (store.services.face.detect as any).mockResolvedValue(ok(mockFaceDetectionResult));
-    (store.services.face.saveLabels as any).mockResolvedValue(ok(undefined));
+    (store.services.memberFace.detect as any).mockResolvedValue(ok(mockFaceDetectionResult));
+    mockDeleteFacesByMemberId.mockResolvedValue(ok(undefined)); // NEW
   });
 
   it('should have correct initial state', () => {
@@ -125,7 +124,7 @@ describe('face.store', () => {
   describe('detectFaces', () => {
     it('should detect faces successfully', async () => {
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
@@ -137,7 +136,7 @@ describe('face.store', () => {
       expect(store.detectedFaces[0].originalMemberId).toBeNull(); // New assertion
       expect(store.detectedFaces[0].status).toBe('unrecognized'); // New assertion
       expect(mockDetect).toHaveBeenCalledTimes(1);
-      expect(mockDetect).toHaveBeenCalledWith(file);
+      expect(mockDetect).toHaveBeenCalledWith(file, false);
     });
 
     it('should handle detect faces failure', async () => {
@@ -145,7 +144,7 @@ describe('face.store', () => {
       mockDetect.mockResolvedValue(err({ message: errorMessage } as ApiError));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
 
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
@@ -160,7 +159,7 @@ describe('face.store', () => {
       mockDetect.mockRejectedValue(new Error(errorMessage));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
 
-      const result = await store.detectFaces(file);
+      const result = await store.detectFaces(file, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
@@ -218,137 +217,7 @@ describe('face.store', () => {
     });
   });
 
-  describe('saveFaceLabels', () => {
-    beforeEach(() => {
-      store.uploadedImageId = 'image-1';
-      // Initial state: one face, originally unrecognized, now labeled
-      store.detectedFaces = [{ ...mockDetectedFace, memberId: 'member-1', originalMemberId: null, status: 'labeled' }];
-    });
 
-    it('should save face labels successfully', async () => {
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBeNull();
-      expect(mockSaveLabels).toHaveBeenCalledTimes(1);
-      expect(mockSaveLabels).toHaveBeenCalledWith(
-        [{
-          id: 'face-1',
-          boundingBox: { x: 10, y: 10, width: 50, height: 50 },
-          thumbnail: 'base64thumb',
-          memberId: 'member-1',
-          memberName: undefined,
-          familyId: undefined,
-          familyName: undefined,
-          birthYear: undefined,
-          deathYear: undefined,
-          embedding: [0.1, 0.2, 0.3],
-          status: 'labeled'
-        }],
-        'image-1',
-      );
-      expect(store.detectedFaces[0].status).toBe('original-recognized');
-      expect(store.detectedFaces[0].originalMemberId).toBe('member-1');
-    });
-
-    it('should only save newly labeled or changed faces', async () => {
-      const face1: DetectedFace = { ...mockDetectedFace, id: 'face-1', memberId: 'member-1', originalMemberId: null, status: 'labeled' }; // Newly labeled
-      const face2: DetectedFace = { ...mockDetectedFace, id: 'face-2', memberId: 'member-2', originalMemberId: 'member-2', status: 'original-recognized' }; // Unchanged
-      const face3: DetectedFace = { ...mockDetectedFace, id: 'face-3', memberId: 'member-3', originalMemberId: 'member-4', status: 'labeled' }; // Changed label
-      const face4: DetectedFace = { ...mockDetectedFace, id: 'face-4', memberId: null, originalMemberId: null, status: 'unrecognized' }; // Unlabeled
-
-      store.detectedFaces = [face1, face2, face3, face4];
-
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(true);
-      expect(mockSaveLabels).toHaveBeenCalledTimes(1);
-      expect(mockSaveLabels).toHaveBeenCalledWith(
-        [
-          {
-            id: 'face-1',
-            boundingBox: { x: 10, y: 10, width: 50, height: 50 },
-            thumbnail: 'base64thumb',
-            memberId: 'member-1',
-            memberName: undefined,
-            familyId: undefined,
-            familyName: undefined,
-            birthYear: undefined,
-            deathYear: undefined,
-            embedding: [0.1, 0.2, 0.3],
-            status: 'labeled'
-          },
-          {
-            id: 'face-3',
-            boundingBox: { x: 10, y: 10, width: 50, height: 50 },
-            thumbnail: 'base64thumb',
-            memberId: 'member-3',
-            memberName: undefined,
-            familyId: undefined,
-            familyName: undefined,
-            birthYear: undefined,
-            deathYear: undefined,
-            embedding: [0.1, 0.2, 0.3],
-            status: 'labeled'
-          },
-        ],
-        'image-1',
-      );
-      expect(store.detectedFaces[0].status).toBe('original-recognized');
-      expect(store.detectedFaces[0].originalMemberId).toBe('member-1');
-      expect(store.detectedFaces[1].status).toBe('original-recognized'); // Unchanged face status should remain
-      expect(store.detectedFaces[1].originalMemberId).toBe('member-2');
-      expect(store.detectedFaces[2].status).toBe('original-recognized');
-      expect(store.detectedFaces[2].originalMemberId).toBe('member-3');
-      expect(store.detectedFaces[3].status).toBe('unrecognized'); // Unlabeled face status should remain
-    });
-
-    it('should handle save face labels failure', async () => {
-      const errorMessage = 'Save failed.';
-      mockSaveLabels.mockResolvedValue(err({ message: errorMessage } as ApiError));
-
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBe(errorMessage);
-      expect(mockSaveLabels).toHaveBeenCalledTimes(1);
-      expect(store.detectedFaces[0].status).toBe('labeled'); // Status should not change on failure
-    });
-
-    it('should handle unexpected error during save face labels', async () => {
-      const errorMessage = 'Network error.';
-      mockSaveLabels.mockRejectedValue(new Error(errorMessage));
-
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBe(errorMessage);
-      expect(mockSaveLabels).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return error if imageId is missing', async () => {
-      store.uploadedImageId = null;
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBe('Image ID is missing. Cannot save face labels.');
-      expect(mockSaveLabels).not.toHaveBeenCalled();
-    });
-
-    it('should not call saveLabels if no faces need saving', async () => {
-      store.detectedFaces = [{ ...mockDetectedFace, id: 'face-1', memberId: 'member-1', originalMemberId: 'member-1', status: 'original-recognized' }]; // Unchanged face
-      const result = await store.saveFaceLabels();
-
-      expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
-      expect(store.error).toBeNull();
-      expect(mockSaveLabels).not.toHaveBeenCalled();
-    });
-  });
 
 
 

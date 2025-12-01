@@ -5,6 +5,12 @@
       <v-card-text>
         <member-auto-complete v-model="selectedMemberId" :label="t('face.selectMemberDialog.selectMember')"
            :clearable="true" :family-id="props.familyId" />
+        <v-text-field
+          v-if="props.showRelationPromptField"
+          v-model="internalRelationPrompt"
+          :label="t('face.selectMemberDialog.relationPromptLabel')"
+          class="mt-4"
+        ></v-text-field>
         <v-card v-if="selectedMemberDetails" class="mt-4 pa-3" variant="outlined">
           <div class="d-flex align-center">
             <v-avatar size="48" rounded="lg" class="mr-3">
@@ -20,7 +26,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="secondary" @click="$emit('update:show', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :disabled="!selectedMemberId" @click="handleSave">{{ t('common.save') }}</v-btn>
+        <v-btn color="primary" :disabled="!props.disableSaveValidation && !selectedMemberId" @click="handleSave">{{ t('common.save') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -38,16 +44,23 @@ const faceMemberSelectStore = useFaceMemberSelectStore();
 const props = defineProps({
   show: { type: Boolean, required: true },
   selectedFace: { type: Object as () => DetectedFace | null, default: null },
-  familyId: { type: String, default: undefined }, // New prop
+  familyId: { type: String, default: undefined },
+  showRelationPromptField: { type: Boolean, default: false },
+  disableSaveValidation: { type: Boolean, default: false }, // NEW PROP
 });
 
-const emit = defineEmits<{ (e: 'update:show', value: boolean): void; (e: 'label-face', faceId: string, memberDetails: Member): void; }>();
+const emit = defineEmits<{
+  (e: 'update:show', value: boolean): void;
+  (e: 'label-face', updatedFace: DetectedFace): void; // Changed to pass updatedFace
+}>();
 
 const selectedMemberId = ref<string | null | undefined>(undefined);
-const selectedMemberDetails = ref<Member | null>(null); // To store full member details
+const selectedMemberDetails = ref<Member | null>(null);
+const internalRelationPrompt = ref<string | undefined>(undefined); // New ref
 
 watch(() => props.selectedFace, (newFace) => {
   selectedMemberId.value = newFace?.memberId;
+  internalRelationPrompt.value = newFace?.relationPrompt; // Initialize from selectedFace
 }, { immediate: true });
 
 watch(selectedMemberId, async (newMemberId) => {
@@ -69,7 +82,13 @@ const faceThumbnailSrc = computed(() => {
 
 const handleSave = () => {
   if (props.selectedFace && selectedMemberId.value && selectedMemberDetails.value) {
-    emit('label-face', props.selectedFace.id, selectedMemberDetails.value);
+    const updatedFace: DetectedFace = {
+      ...props.selectedFace,
+      memberId: selectedMemberDetails.value.id,
+      memberName: selectedMemberDetails.value.fullName,
+      relationPrompt: internalRelationPrompt.value,
+    };
+    emit('label-face', updatedFace); // Emit the fully updated face object
     emit('update:show', false);
   }
 };

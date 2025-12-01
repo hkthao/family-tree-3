@@ -1,31 +1,26 @@
-
 namespace backend.Application.Common.Models.AppSetting;
 
-/// <summary>
-/// Đại diện cho các cài đặt cấu hình cho dịch vụ n8n.
-/// </summary>
 public class N8nSettings
 {
-    /// <summary>
-    /// Tên của phần cấu hình trong tệp cài đặt.
-    /// </summary>
     public const string SectionName = "N8nSettings";
-    /// <summary>
-    /// URL của webhook để kích hoạt quy trình chat AI trên n8n.
-    /// </summary>
-    public string ChatWebhookUrl { get; set; } = null!;
-    /// <summary>
-    /// URL của webhook để kích hoạt quy trình embedding trên n8n.
-    /// </summary>
-    public string EmbeddingWebhookUrl { get; set; } = null!;
+    public string BaseUrl { get; set; } = string.Empty;
+    public string ChatWebhookUrl { get; set; } = string.Empty;
+    public UploadSettings Upload { get; set; } = new UploadSettings(); // NEW
+    public FaceSettings Face { get; set; } = new FaceSettings(); // New nested setting
+    public string JwtSecret { get; set; } = string.Empty;
+}
 
-    /// <summary>
-    /// Tên của collection được sử dụng trong quá trình embedding.
-    /// </summary>
-    public string CollectionName { get; set; } = null!;
+public class UploadSettings
+{
+    public string WebHookUrl { get; set; } = string.Empty;
+    public string Cloud { get; set; } = "cloudinary";
+}
 
-    /// <summary>
-    /// Chuỗi bí mật được sử dụng để tạo và xác thực JWT cho các webhook n8n.
-    /// </summary>
-    public string JwtSecret { get; set; } = null!;
+public class FaceSettings
+{
+    public string CollectionName { get; set; } = string.Empty;
+    public string UpsertWebhookUrl { get; set; } = string.Empty;
+    public string SearchWebhookUrl { get; set; } = string.Empty;
+    public string DeleteWebhookUrl { get; set; } = string.Empty;
+    // Potentially other face-related settings in the future
 }

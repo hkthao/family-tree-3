@@ -13,4 +13,6 @@ public class EventListDto : BaseAuditableDto
     public string? Location { get; set; }
     public EventType Type { get; set; }
     public Guid? FamilyId { get; set; }
+    public string? FamilyName { get; set; }
+    public string? FamilyAvatarUrl { get; set; }
 }

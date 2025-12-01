@@ -4,7 +4,6 @@ using backend.Application.Families.EventHandlers;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -46,6 +45,5 @@ public class FamilyCreatedEventHandlerTests : TestBase
         // Assert
 
         _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

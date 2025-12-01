@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

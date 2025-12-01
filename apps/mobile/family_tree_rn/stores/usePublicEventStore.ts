@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getPublicEventById, searchPublicEvents, getPublicUpcomingEvents } from '@/api/publicApiClient';
-import type { EventDto, PaginatedList, SearchPublicEventsQuery, GetPublicUpcomingEventsQuery } from '@/types/public.d';
+import type { EventDto, PaginatedList, SearchPublicEventsQuery, GetPublicUpcomingEventsQuery } from '@/types';
 
 interface EventState {
   event: EventDto | null;
@@ -44,7 +44,7 @@ export const usePublicEventStore = create<EventStore>((set) => ({
     fetchEvents: async (query: SearchPublicEventsQuery): Promise<PaginatedList<EventDto> | null> => { // Renamed from searchEvents
       set({ loading: true, error: null });
       try {
-        const paginatedEvents = await searchPublicEvents(query);
+        const paginatedEvents: PaginatedList<EventDto> = await searchPublicEvents(query);
         set({ paginatedEvents });
         return paginatedEvents; // Return the fetched events
       } catch (err: any) {

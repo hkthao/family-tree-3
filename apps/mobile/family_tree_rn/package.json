@@ -46,6 +46,7 @@
     "react-i18next": "^16.3.3",
     "react-native": "0.81.5",
     "react-native-calendars": "^1.1313.0",
+    "react-native-chart-kit": "^6.12.0",
     "react-native-image-viewing": "^0.2.2",
     "react-native-paper": "^5.14.5",
     "react-native-reanimated": "^4.1.5",

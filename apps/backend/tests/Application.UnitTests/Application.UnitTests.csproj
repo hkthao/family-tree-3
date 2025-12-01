@@ -22,6 +22,7 @@
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="AutoFixture.AutoMoq" />
     <PackageReference Include="AutoFixture.Xunit2" />
+    <PackageReference Include="Moq.EntityFrameworkCore" />
   </ItemGroup>
 
   <ItemGroup>

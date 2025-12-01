@@ -4,6 +4,7 @@ using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Events.Families;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -53,8 +54,10 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         deletedFamily!.IsDeleted.Should().BeTrue();
         deletedFamily.DeletedBy.Should().Be(userId.ToString());
         deletedFamily.DeletedDate.Should().Be(now);
-        deletedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
-        deletedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is FamilyDeletedEvent) &&
+            events.Any(e => e is FamilyStatsUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

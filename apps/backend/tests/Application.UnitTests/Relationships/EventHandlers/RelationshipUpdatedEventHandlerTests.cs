@@ -40,7 +40,6 @@ public class RelationshipUpdatedEventHandlerTests
 
         // Assert
         _mediatorMock.Verify(x => x.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -52,19 +51,5 @@ public class RelationshipUpdatedEventHandlerTests
 
         // Act
         await handler.Handle(notification, CancellationToken.None);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldUpsertEntityInGlobalSearch()
-    {
-        // Arrange
-        var handler = new RelationshipUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
-        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, null));
-
-        // Act
-        await handler.Handle(notification, CancellationToken.None);
-
-        // Assert
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

@@ -4,6 +4,7 @@ using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -46,8 +47,11 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeTrue();
         var deletedRelationship = await _context.Relationships.FindAsync(relationship.Id);
-        deletedRelationship.Should().BeNull();
-        family.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipDeletedEvent);
+        deletedRelationship.Should().NotBeNull(); // Check that it's not null for soft delete
+        deletedRelationship!.IsDeleted.Should().BeTrue(); // Assert soft delete
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Relationships.RelationshipDeletedEvent)
+        )), Times.Once);
     }
 
     [Fact]

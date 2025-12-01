@@ -21,6 +21,8 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public Guid FamilyId { get; set; }
+    public string? FamilyName { get; set; } // NEW
+    public string? FamilyAvatarUrl { get; set; } // NEW
     public string? Biography { get; set; }
     public bool IsDeceased { get; set; }
     public bool IsRoot { get; set; }

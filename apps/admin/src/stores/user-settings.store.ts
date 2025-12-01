@@ -19,7 +19,7 @@ export const useUserSettingsStore = defineStore('userSettings', {
     async fetchUserSettings(): Promise<Result<UserPreference, ApiError>> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.userPreference.getUserPreferences();
+      const result = await this.services.user.getUserPreferences(); // Use services.user
       if (result.ok) {
         this.preferences = result.value;
         i18n.global.locale.value = this.preferences.language === Language.English ? 'en' : 'vi';
@@ -33,7 +33,7 @@ export const useUserSettingsStore = defineStore('userSettings', {
     async saveUserSettings(): Promise<Result<boolean, ApiError>> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.userPreference.saveUserPreferences(this.preferences);
+      const result = await this.services.user.saveUserPreferences(this.preferences); // Use services.user
       if (!result.ok) {
         this.error = result.error?.message || i18n.global.t('userSettings.preferences.saveError');
       }

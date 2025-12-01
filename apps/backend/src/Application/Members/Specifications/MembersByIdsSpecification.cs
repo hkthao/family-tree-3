@@ -10,5 +10,6 @@ public class MembersByIdsSpecification : Specification<Member>
         Query.Where(m => ids.Contains(m.Id));
         Query.Include(m => m.SourceRelationships);
         Query.Include(m => m.TargetRelationships);
+        Query.Include(m => m.Family);
     }
 }

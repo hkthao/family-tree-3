@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/natural-language.d'; // Update import
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types'; // Update type import to global
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
@@ -27,15 +27,21 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         return false;
       }
 
+      if (!this.familyId) {
+        this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
+        this.loading = false;
+        return false;
+      }
+
       const sessionId = uuidv4(); // Generate sessionId here
 
-      const result = await this.services.naturalLanguage.analyzeContent(this.input, sessionId); // Use new service
+      const result = await this.services.ai.analyzeContent(this.input, sessionId, this.familyId); // Use services.ai, pass familyId
 
       if (result.ok) {
         this.parsedData = result.value; // Directly assign the object
 
         if (this.parsedData) {
-          this.parsedData.members.forEach(member => {
+          this.parsedData.members.forEach((member: MemberDataDto) => { // Explicitly type member
             if (!member.id) {
               member.id = uuidv4(); // Generate ID if missing
             }
@@ -43,7 +49,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
             member.savedSuccessfully = false;
             member.saveAlert = { show: false, type: 'success', message: '' };
           });
-          this.parsedData.events.forEach(event => {
+          this.parsedData.events.forEach((event: EventDataDto) => { // Explicitly type event
             if (!event.id) {
               event.id = uuidv4(); // Generate ID if missing
             }
@@ -51,7 +57,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
             event.savedSuccessfully = false;
             event.saveAlert = { show: false, type: 'success', message: '' };
           });
-          this.parsedData.relationships.forEach(relationship => { // Initialize relationships
+          this.parsedData.relationships.forEach((relationship: RelationshipDataDto) => { // Explicitly type relationship
             if (!relationship.id) {
               relationship.id = uuidv4(); // Generate ID if missing
             }

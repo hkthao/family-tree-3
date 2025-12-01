@@ -40,18 +40,5 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member creation
-
-        // Store member data in Vector DB for search via GlobalSearchService
-        // Call n8n webhook for embedding update
-        var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);
-        var embeddingDto = new EmbeddingWebhookDto
-        {
-            EntityType = "Member",
-            EntityId = notification.Member.Id.ToString(),
-            ActionType = "Created",
-            EntityData = entityData,
-            Description = description
-        };
-        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

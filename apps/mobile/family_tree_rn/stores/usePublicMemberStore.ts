@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { searchPublicMembers, getPublicMemberById } from '@/api/publicApiClient';
-import type { MemberListDto, SearchPublicMembersQuery, MemberDetailDto } from '@/types/public.d';
+import type { MemberListDto, SearchPublicMembersQuery, MemberDetailDto } from '@/types';
 
 
 interface PublicMemberState {

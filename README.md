@@ -1,10 +1,10 @@
-# Dự án Cây Gia Phả (Family Tree Project)
+# Dự án Gia Phả Việt (Family Tree Project)
 
 ![CI Workflow Status](https://github.com/hkthao/family-tree-3/actions/workflows/ci.yml/badge.svg)
 
 ## 1. 🏷️ Thông tin tổng quan (Overview)
 
-Ứng dụng quản lý cây gia phả giúp người dùng tạo, xem và chia sẻ sơ đồ gia đình một cách dễ dàng và chuyên nghiệp.
+Ứng dụng quản lý Gia Phả Việt giúp người dùng tạo, xem và chia sẻ sơ đồ gia đình một cách dễ dàng và chuyên nghiệp.
 
 **Công nghệ chính:**
 *   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation, JWT Authentication, Novu

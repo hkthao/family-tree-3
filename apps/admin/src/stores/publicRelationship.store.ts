@@ -18,6 +18,7 @@ export const usePublicRelationshipStore = defineStore('publicRelationship', {
       const result = await this.services.publicRelationship.getPublicRelationshipsByFamilyId(familyId);
       this.list.loading = false;
       if (result.ok) {
+        this.list.items = result.value; // Update the list items in the store
         return result.value;
       } else {
         this.error = i18n.global.t('relationship.errors.load'); // Assuming a translation key for relationship errors

@@ -47,6 +47,5 @@ public class EventCreatedEventHandlerTests : TestBase
         // Assert
 
         _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

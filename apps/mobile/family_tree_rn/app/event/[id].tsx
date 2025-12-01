@@ -5,7 +5,7 @@ import { Appbar, Text, useTheme, Card, ActivityIndicator, Chip, Avatar } from 'r
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
-import { EventType } from '@/types/public.d'; // Import EventType and EventDto
+import { EventType } from '@/types'; // Import EventType from admin types
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();

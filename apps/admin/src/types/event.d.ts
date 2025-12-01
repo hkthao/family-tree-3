@@ -14,6 +14,8 @@ export interface Event {
   endDate?: Date | null;
   location?: string;
   familyId: string | null;
+  familyName?: string;
+  familyAvatarUrl?: string;
   relatedMembers?: string[];
   type: EventType;
   color?: string;

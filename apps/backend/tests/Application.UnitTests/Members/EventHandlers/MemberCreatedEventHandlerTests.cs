@@ -60,6 +60,5 @@ public class MemberCreatedEventHandlerTests
             cmd.ActionType == UserActionType.CreateMember &&
             cmd.ActivitySummary == _localizerMock.Object["Created member '{0}' in family '{1}'", member.FullName, family.Name].Value
         ), CancellationToken.None), Times.Once);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

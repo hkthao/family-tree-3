@@ -33,18 +33,6 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for family creation
-
-        // Call n8n webhook for embedding update
-        var (entityData, description) = EmbeddingDescriptionFactory.CreateFamilyData(notification.Family);
-        var embeddingDto = new EmbeddingWebhookDto
-        {
-            EntityType = "Family",
-            EntityId = notification.Family.Id.ToString(),
-            ActionType = "Created",
-            EntityData = entityData,
-            Description = description
-        };
-        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }
 

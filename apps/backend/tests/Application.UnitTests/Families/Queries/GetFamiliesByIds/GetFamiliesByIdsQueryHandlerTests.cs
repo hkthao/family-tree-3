@@ -1,5 +1,5 @@
 using AutoMapper;
-using backend.Application.Families;
+using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

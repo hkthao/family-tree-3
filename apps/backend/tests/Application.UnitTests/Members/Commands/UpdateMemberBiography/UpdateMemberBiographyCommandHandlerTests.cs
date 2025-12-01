@@ -4,7 +4,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
 using Xunit;
 
@@ -28,10 +30,9 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        member.UpdateBiography("Old biography.");
+        member.Update("John", "Doe", member.Code, null, null, null, null, null, null, null, null, null, null, "Old biography.", null, 0, false); // Pass all required parameters
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
-        member.ClearDomainEvents(); // Clear events from initial setup
 
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
 
@@ -43,13 +44,15 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedMember = await _context.Members.FindAsync(memberId);
+        var updatedMember = await _context.Members.FirstOrDefaultAsync(m => m.Id == memberId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         updatedMember.Should().NotBeNull();
         updatedMember!.Biography.Should().Be(command.BiographyContent);
-        updatedMember.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Members.MemberBiographyUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Members.MemberBiographyUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

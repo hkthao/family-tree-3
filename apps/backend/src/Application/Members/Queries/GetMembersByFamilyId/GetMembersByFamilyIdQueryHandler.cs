@@ -15,6 +15,7 @@ public class GetMembersByFamilyIdQueryHandler(IApplicationDbContext context, IMa
     public async Task<Result<List<MemberListDto>>> Handle(GetMembersByFamilyIdQuery request, CancellationToken cancellationToken)
     {
         var members = await _context.Members
+            .Include(m => m.Family) // NEW
             .WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId))
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

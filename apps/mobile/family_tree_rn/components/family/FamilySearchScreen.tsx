@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  View,
-  StyleSheet,
-  FlatList,
   ActivityIndicator,
+  FlatList,
   RefreshControl,
+  StyleSheet,
+  View,
 } from 'react-native';
 
-import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Appbar, Chip } from 'react-native-paper';
-import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router'; // Import useRouter
-import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
-import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore'; // Import usePublicFamilyStore
-import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
+import { SPACING_LARGE, SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
+import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore'; // Import usePublicFamilyStore
+import { useRouter } from 'expo-router'; // Import useRouter
+import { useTranslation } from 'react-i18next';
+import { Appbar, Avatar, Card, Chip, IconButton, Searchbar, Text, useTheme } from 'react-native-paper';
 
 export default function FamilySearchScreen() {
   const { t } = useTranslation();
@@ -197,7 +197,7 @@ export default function FamilySearchScreen() {
           renderItem={({ item }) => (
             <Card style={[styles.familyCard, { borderRadius: theme.roundness }]} onPress={() => {
               setCurrentFamilyId(item.id);
-              router.push('/family/details');
+              router.push('/family/dashboard');
             }}>
               <Card.Content style={styles.cardContent}>
                 <Avatar.Image size={48} source={item.avatarUrl ? { uri: item.avatarUrl } : DefaultFamilyAvatar} style={styles.avatar} />

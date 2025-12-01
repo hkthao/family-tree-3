@@ -20,13 +20,13 @@ Sơ đồ này cho thấy cái nhìn tổng quan nhất về hệ thống, bao g
 
 ```mermaid
 graph TD
-    A[Người dùng] -->|Sử dụng| B(Hệ thống Cây Gia Phả)
+    A[Người dùng] -->|Sử dụng| B(Hệ thống Gia Phả Việt)
     B -->|Lưu trữ dữ liệu| C(Cơ sở dữ liệu MySQL)
     B -->|Tích hợp AI| D[Nhà cung cấp AI bên ngoài]
 ```
 
 -   **Người dùng**: Người quản lý gia phả, thành viên gia đình tương tác với hệ thống qua giao diện web.
--   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta, bao gồm backend, frontend và các dịch vụ liên quan.
+-   **Hệ thống Gia Phả Việt**: Ứng dụng web của chúng ta, bao gồm backend, frontend và các dịch vụ liên quan.
 -   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu nghiệp vụ của hệ thống.
 -   **Nhà cung cấp AI bên ngoài**: Các dịch vụ như Google Gemini, OpenAI được sử dụng cho các tính năng thông minh.
 
@@ -36,7 +36,7 @@ Sơ đồ này chia nhỏ hệ thống thành các container (ứng dụng, data
 
 ```mermaid
 graph TD
-    subgraph "Hệ thống Cây Gia Phả"
+    subgraph "Hệ thống Gia Phả Việt"
         A(Frontend - Vue.js) -->|API calls (HTTPS)| B(Backend - ASP.NET Core)
         B -->|Reads/Writes| C(Database - MySQL)
         B -->|Giao tiếp (HTTP/gRPC)| D(Face Service - Python)

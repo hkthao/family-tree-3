@@ -4,6 +4,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Common; // NEW
+using backend.Domain.Events.Members; // NEW
+using backend.Domain.Events.Families; // NEW
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -47,7 +50,12 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        deletedMember.Should().BeNull();
+        deletedMember.Should().NotBeNull();
+        deletedMember!.IsDeleted.Should().BeTrue();
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Members.MemberDeletedEvent) &&
+            events.Any(e => e is Domain.Events.Families.FamilyStatsUpdatedEvent) // FamilyStatsUpdatedEvent is also raised
+        )), Times.Once);
     }
 
     [Fact]

@@ -1,10 +1,8 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;

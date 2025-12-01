@@ -53,10 +53,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<EventMember> EventMembers { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Face.
-    /// </summary>
-    DbSet<Face> Faces { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.
@@ -67,6 +64,18 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
     DbSet<FamilyDict> FamilyDicts { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
+    /// </summary>
+    DbSet<MemberStory> MemberStories { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
+    /// </summary>
+    DbSet<MemberFace> MemberFaces { get; }
+
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.

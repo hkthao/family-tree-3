@@ -1,11 +1,8 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
-using backend.Application.Identity.UserProfiles.Queries;
-using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System.Net.Http; // Added for HttpClient
 
 namespace backend.Application.UnitTests.Common;
 
@@ -19,6 +16,7 @@ public abstract class TestBase : IDisposable
     protected readonly DbContextOptions<ApplicationDbContext> _dbContextOptions;
     protected readonly Mock<ICurrentUser> _mockUser;
     protected readonly Mock<IDateTime> _mockDateTime;
+    protected readonly Mock<IDomainEventDispatcher> _mockDomainEventDispatcher;
     protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
     protected readonly Mock<Microsoft.AspNetCore.Authorization.IAuthorizationService> _mockAspNetCoreAuthorizationService; // Added
     protected readonly Mock<HttpClient> _mockHttpClient; // Added for HttpClient
@@ -33,12 +31,13 @@ public abstract class TestBase : IDisposable
             .UseInMemoryDatabase(_databaseName)
             .Options;
 
-        // Mock ICurrentUser and IDateTime
+        // Mock ICurrentUser and IDateTime and IDomainEventDispatcher
         _mockUser = new Mock<ICurrentUser>();
         _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid()); // Provide a default mocked UserId
         _mockDateTime = new Mock<IDateTime>();
+        _mockDomainEventDispatcher = new Mock<IDomainEventDispatcher>();
 
-        _context = new ApplicationDbContext(_dbContextOptions);
+        _context = new ApplicationDbContext(_dbContextOptions, _mockDomainEventDispatcher.Object, _mockUser.Object, _mockDateTime.Object);
         _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
         // Mock IAuthorizationService and HttpClient

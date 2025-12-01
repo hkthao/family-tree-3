@@ -78,6 +78,9 @@ export interface FamilyExportDto {
   avatarUrl?: string;
   address?: string;
   visibility: number;
+  familyUsers?: any[]; // Added for consistency with test expectations
+  settings?: any; // Added for consistency with test expectations
+  privacyConfiguration?: any; // Added for consistency with test expectations
   members: MemberExportDto[];
   relationships: RelationshipExportDto[];
   events: EventExportDto[];

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, Member, Result } from '@/types';
+import type { BiographyResultDto, Member, Result } from '@/types'; // Consolidated import
+import { BiographyStyle } from '@/types'; // Import as value
 import type { ApiError } from '@/plugins/axios';
-import { BiographyStyle } from '@/types';
 import i18n from '@/plugins/i18n';
 import { err } from '@/types';
 
@@ -27,7 +27,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (result.ok) {
           this.currentMember = result.value!;
           if (this.currentMember.biography) {
-            this.biographyResult = { content: this.currentMember.biography };
+            this.biographyResult = { biography: this.currentMember.biography };
           }
         } else {
           this.error =
@@ -53,7 +53,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.biographyResult = null;
 
       try {
-        const result = await this.services.aiBiography.generateBiography(
+        const result = await this.services.ai.generateBiography( // Use services.ai
           this.memberId,
           this.style,
           this.generatedFromDB,
@@ -62,7 +62,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         );
 
         if (result.ok) {
-          this.biographyResult = { content: result.value };
+          this.biographyResult = result.value;
         } else {
           this.error =
             result.error?.message ||
@@ -83,8 +83,8 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.generatedFromDB = true;
     },
 
-    async saveBiography(memberId: string, content: string): Promise<Result<void, ApiError>> {
-      if (!memberId || !content) {
+    async saveBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> { // Changed parameter name
+      if (!memberId || !biographyContent) {
         this.error = i18n.global.t('aiBiography.errors.saveFailed');
         return err({ message: this.error } as ApiError); // Return an error result
       }
@@ -92,16 +92,16 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.loading = true;
       this.error = null;
 
-      const result = await this.services.member.updateMemberBiography(
+      const result = await this.services.member.updateMemberBiography( // Use services.member
         memberId,
-        content,
-      ); // Changed
+        biographyContent,
+      );
 
       if (result.ok) {
   
         // Optionally, update the currentMember's biography in the store
         if (this.currentMember) {
-          this.currentMember.biography = content;
+          this.currentMember.biography = biographyContent; // Use biographyContent
         }
       } else {
         this.error =

@@ -1,7 +1,6 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace backend.Web.Formatters;
 
@@ -23,7 +22,7 @@ public class HtmlInputFormatter : TextInputFormatter
     {
         var httpContext = context.HttpContext;
         using var reader = new StreamReader(httpContext.Request.Body, encoding);
-        
+
         try
         {
             var htmlContent = await reader.ReadToEndAsync();

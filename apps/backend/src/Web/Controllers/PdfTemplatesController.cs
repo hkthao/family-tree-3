@@ -1,16 +1,11 @@
-using backend.Application.Common.Models;
 using backend.Application.PdfTemplates.Commands.CreatePdfTemplate;
 using backend.Application.PdfTemplates.Commands.DeletePdfTemplate;
 using backend.Application.PdfTemplates.Commands.UpdatePdfTemplate;
 using backend.Application.PdfTemplates.Dtos;
 using backend.Application.PdfTemplates.Queries.GetPdfTemplate;
 using backend.Application.PdfTemplates.Queries.GetPdfTemplates;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace backend.Web.Controllers;
 
@@ -71,7 +66,7 @@ public class PdfTemplatesController(IMediator mediator) : ControllerBase
         if (result.IsSuccess)
         {
             // Add null check for result.Value
-            if (result.Value == null) 
+            if (result.Value == null)
             {
                 return BadRequest("Failed to create template: Result value is null.");
             }

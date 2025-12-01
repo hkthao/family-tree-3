@@ -1,12 +1,12 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Families;
+using backend.Application.ExportImport.Commands; // New using statement
 using backend.Application.Families.Dtos; // New using statement
-using backend.Application.Families.ExportImport; // New using statement
+using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
-using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
+using backend.Application.Families.Queries.GetFamilyDetails;
 using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
@@ -15,10 +15,16 @@ using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.MemberStories.DTOs; // NEW
+using backend.Application.MemberStories.Commands.CreateMemberStory; // NEW
+using backend.Application.MemberStories.Commands.UpdateMemberStory; // NEW
+using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
+using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
+using backend.Application.MemberFaces.Common; // NEW
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Mappings;
@@ -40,14 +46,22 @@ public class MappingProfile : Profile
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
-        CreateMap<Member, MemberDetailDto>();
+        CreateMap<Member, MemberDetailDto>()
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
 
         //Event
-        CreateMap<Event, EventListDto>();
+        CreateMap<Event, EventListDto>()
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
         CreateMap<Event, EventDetailDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)))
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
         CreateMap<Event, EventDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)))
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
 
         //Relationship
         CreateMap<Relationship, RelationshipDto>();
@@ -90,5 +104,21 @@ public class MappingProfile : Profile
 
         // PdfTemplate DTO
         CreateMap<PdfTemplate, PdfTemplateDto>();
+        CreateMap<MemberStory, MemberStoryDto>()
+            .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : string.Empty))
+            .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
+            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
+            .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created));
+        CreateMap<CreateMemberStoryCommand, MemberStory>();
+        CreateMap<UpdateMemberStoryCommand, MemberStory>();
+
+        CreateMap<MemberFace, MemberFaceDto>()
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.AvatarUrl : null));
+
+        // PrivacyConfiguration mapping (already exists, ensuring no duplication)
+        CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()
+            .ForMember(dest => dest.PublicMemberProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()));
     }
 }

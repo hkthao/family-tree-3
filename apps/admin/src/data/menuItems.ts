@@ -52,6 +52,20 @@ const menu: MenuSection[] = [
         to: '/face/search',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
+      {
+        titleKey: 'memberFace.list.title',
+        icon: 'mdi-face-recognition',
+        to: '/member/faces',
+        roles: ['Admin'],
+        exact: true,
+      },
+      {
+        titleKey: 'memberStory.list.title', // New: Title for MemberStory List
+        icon: 'mdi-book-open-outline', // New: Icon for MemberStory List
+        to: '/member-story-studio/list', // New: Route for MemberStory List
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], // New: Roles for MemberStory List
+        exact: true,
+      },
     ],
   },
   {

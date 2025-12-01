@@ -1,0 +1,22 @@
+
+using backend.Application.MemberFaces.Common; // For BoundingBoxDto
+
+namespace backend.Application.MemberFaces.Common;
+public class DetectedFaceDto
+{
+    public string Id { get; set; } = string.Empty;
+    public BoundingBoxDto BoundingBox { get; set; } = null!;
+    public float Confidence { get; set; }
+    public string? Thumbnail { get; set; } // Base64 encoded image
+    public string? ThumbnailUrl { get; set; } // Public URL for the thumbnail
+    public Guid? MemberId { get; set; } // Nullable, if not yet labeled
+    public string? MemberName { get; set; } // For display
+    public Guid? FamilyId { get; set; }
+    public string? FamilyName { get; set; }
+    public int? BirthYear { get; set; }
+    public int? DeathYear { get; set; }
+    public List<double>? Embedding { get; set; }
+    public string? Emotion { get; set; }
+    public float? EmotionConfidence { get; set; }
+    public string? Status { get; set; } // NEW: Status property
+}

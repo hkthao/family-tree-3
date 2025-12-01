@@ -16,7 +16,7 @@
       <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
         t('face.recognition.uploadPrompt') }}</v-alert>
       <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
-        type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+        type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
     </v-card-text>
   </v-card>
 </template>
@@ -46,7 +46,7 @@ const handleFileUpload = async (file: File | null) => {
     faceStore.resetState();
     return;
   }
-  await faceStore.detectFaces(file);
+  await faceStore.detectFaces(file, false);
 };
 
 </script>

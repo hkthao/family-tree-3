@@ -16,7 +16,9 @@ public class GetEventByIdQueryHandler(IApplicationDbContext context, IMapper map
         var spec = new EventByIdSpecification(request.Id);
 
         // Comment: Specification pattern is applied here to filter the result by ID at the database level.
-        var query = _context.Events.AsQueryable().WithSpecification(spec);
+        var query = _context.Events.AsQueryable()
+            .Include(e => e.Family)
+            .WithSpecification(spec);
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.

@@ -1,6 +1,6 @@
 ﻿using backend.Application.Common.Dtos;
 
-namespace backend.Application.Families;
+namespace backend.Application.Families.Queries;
 
 public class FamilyDto : BaseAuditableDto
 {

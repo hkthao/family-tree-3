@@ -14,7 +14,7 @@ export const useUserProfileStore = defineStore('userProfile', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.userProfile.getCurrentUserProfile();
+        const result = await this.services.user.getCurrentUserProfile(); // Use services.user
         if (result.ok) {
           this.userProfile = result.value;
         } else {
@@ -31,7 +31,7 @@ export const useUserProfileStore = defineStore('userProfile', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.userProfile.updateUserProfile(profile);
+        const result = await this.services.user.updateUserProfile(profile); // Use services.user
         if (result.ok) {
           this.userProfile = result.value;
           return true;

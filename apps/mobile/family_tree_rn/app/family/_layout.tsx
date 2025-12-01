@@ -20,8 +20,8 @@ export default function FamilyDetailLayout() {
   // Map tab names to their translated titles
   const getTabTitle = (tabName: string) => {
     switch (tabName) {
-      case 'details':
-        return t('familyDetail.tab.details');
+      case 'dashboard':
+        return t('familyDashboard.tab.dashboard');
       case 'members':
         return t('familyDetail.tab.members');
       case 'tree':
@@ -90,11 +90,11 @@ export default function FamilyDetailLayout() {
         }}
       >
       <Tabs.Screen
-        name="details"
+        name="dashboard"
         options={{
-          title: t('familyDetail.tab.details'),
+          title: t('familyDashboard.tab.dashboard'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="information" color={color} size={size} />
+            <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
           ),
         }}
       />
@@ -103,7 +103,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.members'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-group" color={color} size={size} />
+            <MaterialCommunityIcons name="account-group-outline" color={color} size={size} />
           ),
         }}
       />
@@ -112,7 +112,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.tree'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="family-tree" color={color} size={size} />
+            <MaterialCommunityIcons name="sitemap-outline" color={color} size={size} />
           ),
         }}
       />
@@ -121,7 +121,7 @@ export default function FamilyDetailLayout() {
         options={{
           title: t('familyDetail.tab.events'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="calendar-month" color={color} size={size} />
+            <MaterialCommunityIcons name="calendar-month-outline" color={color} size={size} />
           ),
         }}
       />

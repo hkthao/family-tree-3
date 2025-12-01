@@ -1,0 +1,6 @@
+{
+    "i18n-ally.localesPaths": [
+        "apps/admin/src/locales",
+        "apps/mobile/family_tree_rn/assets/locales"
+    ]
+}

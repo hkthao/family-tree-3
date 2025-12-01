@@ -7,6 +7,6 @@ public class RelationshipsInFamiliesSpec : Specification<Relationship>
 {
     public RelationshipsInFamiliesSpec(IQueryable<Family> familiesQuery)
     {
-        Query.Where(r => familiesQuery.Select(f => f.Id).Contains(r.SourceMember.FamilyId));
+        Query.Where(r => familiesQuery.Select(f => f.Id).Contains(r.SourceMember.FamilyId) && !r.IsDeleted);
     }
 }

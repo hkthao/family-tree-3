@@ -1,15 +1,21 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query
-from typing import List, Optional
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form # Added Form
+from fastapi.responses import JSONResponse, Response # Added Response
+from typing import List, Optional, Tuple # Added Tuple
 import uuid
 import base64
 import io
+import json # Added
 from PIL import Image
 import numpy as np
+import cv2 # Added
 
-from app.services.face_detector import DlibFaceDetector  # Changed
+from pydantic import BaseModel # Added for DTOs
+
+from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
-from app.models.face_detection import FaceDetectionResult, BoundingBox
 
+
+from app.services.get_emotion import get_emotion
 import logging
 
 # Configure logging
@@ -21,18 +27,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Models for face detection results (redefined here from app.models.face_detection)
+class BoundingBox(BaseModel):
+    x: int
+    y: int
+    width: int
+    height: int
+
+class FaceDetectionResult(BaseModel):
+    id: str
+    bounding_box: BoundingBox
+    confidence: float
+    thumbnail: Optional[str] = None
+    embedding: Optional[List[float]] = None
+    emotion: Optional[str] = None
+    emotion_confidence: Optional[float] = None
+
+# New DTOs for image-processing integration
 
 app = FastAPI(
-    title="FaceDetectionService",
+    title="ImageFaceEmotionService", # Changed title
     description=(
-        "A FastAPI service for face detection using Dlib."
-    ),  # Changed
+        "A FastAPI service for face detection, embedding, cropping, and emotion analysis." # Changed description
+    ),
     version="1.0.0",
 )
 
 # Initialize the face detector and embedding service
-face_detector = DlibFaceDetector()  # Changed
-face_embedding_service = FaceEmbeddingService()  # Changed
+face_detector = DlibFaceDetector()
+face_embedding_service = FaceEmbeddingService()
 
 
 @app.post("/detect", response_model=List[FaceDetectionResult])
@@ -86,6 +109,14 @@ async def detect_faces(
             # Crop face
             cropped_face = image.crop((x, y, x + w, y + h))
 
+            # Encode cropped face to base64 for emotion detection
+            buffered_emotion = io.BytesIO()
+            cropped_face.save(buffered_emotion, format="PNG")
+            cropped_face_base64_emotion = base64.b64encode(buffered_emotion.getvalue()).decode("utf-8")
+
+            # Perform emotion analysis
+            predicted_emotion, emotion_confidence = get_emotion(cropped_face_base64_emotion)
+            
             # Generate embedding for the cropped face
             face_embedding = face_embedding_service.get_facenet_embedding(
                 cropped_face
@@ -104,6 +135,8 @@ async def detect_faces(
                 confidence=float(confidence),
                 thumbnail=thumbnail_base64,
                 embedding=face_embedding,
+                emotion=predicted_emotion,
+                emotion_confidence=emotion_confidence,
             )
             results.append(face_result)
             logger.debug(
@@ -120,6 +153,55 @@ async def detect_faces(
             status_code=500,
             detail=f"Face detection failed: {e}"
         )
+
+
+@app.post("/resize")
+async def resize_image(
+    file: UploadFile = File(...),
+    width: int = Query(..., description="Desired width for the resized image"),
+    height: Optional[int] = Query(None, description="Desired height for the resized image (optional, aspect ratio will be maintained if not provided)"),
+):
+    logger.info("Received request to resize image. Filename: %s, Target Width: %s, Target Height: %s", file.filename, width, height)
+
+    if not file.content_type.startswith("image/"):
+        logger.warning(f"Invalid file type received for resize: {file.content_type}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only images are allowed."
+        )
+
+    try:
+        image_data = await file.read()
+        image = Image.open(io.BytesIO(image_data))
+
+        original_width, original_height = image.size
+
+        if height is None:
+            # Maintain aspect ratio
+            aspect_ratio = original_height / original_width
+            new_height = int(width * aspect_ratio)
+            size = (width, new_height)
+            logger.info(f"Resizing image to {size[0]}x{size[1]} (maintaining aspect ratio).")
+            image.thumbnail(size, Image.LANCZOS) # Use thumbnail to maintain aspect ratio and not upscale
+        else:
+            size = (width, height)
+            logger.info(f"Resizing image to exact dimensions {size[0]}x{size[1]}.")
+            image = image.resize(size, Image.LANCZOS) # Use resize for exact dimensions
+
+        buffered = io.BytesIO()
+        image.save(buffered, format=image.format if image.format else "PNG") # Preserve original format if possible
+        buffered.seek(0)
+
+        logger.info(f"Successfully resized image to {image.size[0]}x{image.size[1]}.")
+        return Response(content=buffered.getvalue(), media_type=file.content_type)
+
+    except Exception as e:
+        logger.error(f"Image resize failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Image resize failed: {e}"
+        )
+
 
 if __name__ == "__main__":
     import uvicorn

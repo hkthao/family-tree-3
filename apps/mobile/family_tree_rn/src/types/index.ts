@@ -1,5 +1,6 @@
-// apps/mobile/family_tree_rn/src/types/index.ts
-
-export { UserProfileDto } from './userProfile.d';
-export { ApiError, Result } from './api.d';
-export { ApiClientMethods } from './apiClient.d';
+export * from './userProfile.d';
+export * from './api.d';
+export * from './apiClient.d';
+export * from './public.d';
+export * from './public-dashboard.d';
+export * from './public-face.d';

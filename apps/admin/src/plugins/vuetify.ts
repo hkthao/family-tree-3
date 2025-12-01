@@ -97,13 +97,18 @@ export default createVuetify({
     VTimeline: {
       density: 'compact',
     },
-    VBtnToggle:{
+    VBtnToggle: {
       density: 'compact',
     },
     VProgressLinear: {
       color: 'primary'
     },
-    VCheckbox:{
+    VCheckbox: {
+      density: 'compact',
+      hideDetails: true
+    },
+    VCombobox: {
+      variant: 'outlined',
       density: 'compact',
       hideDetails: true
     }

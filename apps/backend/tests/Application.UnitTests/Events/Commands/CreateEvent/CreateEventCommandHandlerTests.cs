@@ -4,8 +4,9 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
 using Xunit;
 
@@ -49,7 +50,9 @@ public class CreateEventCommandHandlerTests : TestBase
         createdEvent.Should().NotBeNull();
         createdEvent!.Name.Should().Be(command.Name);
         createdEvent.FamilyId.Should().Be(command.FamilyId);
-        createdEvent.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Events.EventCreatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Events.EventCreatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

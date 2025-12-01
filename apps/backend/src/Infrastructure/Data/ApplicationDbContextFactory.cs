@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
+using backend.Domain.Common; // Thêm dòng này
 using backend.Infrastructure.Data.Interceptors;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -36,18 +36,17 @@ namespace backend.Infrastructure.Data
 
             // Register necessary services for DbContext
             _ = services.AddSingleton(new LoggerFactory().CreateLogger<ApplicationDbContextFactory>());
-            services.AddScoped<DispatchDomainEventsInterceptor>();
             services.AddScoped<AuditableEntitySaveChangesInterceptor>();
             services.AddScoped<ICurrentUser, DesignTimeUserService>();
             services.AddScoped<IDateTime, DesignTimeDateTimeService>();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationDbContext).Assembly));
+            services.AddScoped<IDomainEventDispatcher, DesignTimeDomainEventDispatcher>();
 
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
                 options.AddInterceptors(
-                    sp.GetRequiredService<DispatchDomainEventsInterceptor>(),
                     sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>());
             });
 
@@ -55,6 +54,17 @@ namespace backend.Infrastructure.Data
 
             return serviceProvider.GetRequiredService<ApplicationDbContext>();
         }
+
+        // Simple mock implementation of IDomainEventDispatcher for design-time
+        private class DesignTimeDomainEventDispatcher : IDomainEventDispatcher
+        {
+            public Task DispatchEvents(IList<BaseEvent> entities)
+            {
+                // Do nothing for design time
+                return Task.CompletedTask;
+            }
+        }
+
 
         // Simple mock implementation of ICurrentUser for design-time
         private class DesignTimeUserService : ICurrentUser

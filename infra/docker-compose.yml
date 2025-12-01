@@ -54,6 +54,9 @@ services:
     volumes:
       - ../infra/app/models:/face-service/app/models/dlib_models
 
+
+
+
   puppeteer-service:
     build:
       context: ../services/puppeteer-service

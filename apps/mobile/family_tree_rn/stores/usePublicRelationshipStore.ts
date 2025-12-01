@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { getPublicRelationshipsByFamilyId } from '@/api/publicApiClient';
-import type { RelationshipListDto } from '@/types/public.d';
+import type { RelationshipListDto } from '@/types';
 
 interface PublicRelationshipState {
   relationships: RelationshipListDto[];

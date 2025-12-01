@@ -2,8 +2,8 @@
   "x-generator": "NSwag v14.0.3.0 (NJsonSchema v11.0.0.0 (Newtonsoft.Json v13.0.0.0))",
   "openapi": "3.0.0",
   "info": {
-    "title": "API Cây Gia Phả",
-    "description": "API để quản lý thông tin cây gia phả, bao gồm các dòng họ, thành viên, và các mối quan hệ.",
+    "title": "API Gia Phả Việt",
+    "description": "API để quản lý thông tin Gia Phả Việt, bao gồm các dòng họ, thành viên, và các mối quan hệ.",
     "version": "1.0.0"
   },
   "paths": {

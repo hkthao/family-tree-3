@@ -1,23 +1,11 @@
 namespace backend.Domain.ValueObjects;
 
-using backend.Domain.Common;
-
 public class BoundingBox : ValueObject
 {
-    public int X { get; private set; }
-    public int Y { get; private set; }
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-
-    private BoundingBox() { } // For EF Core
-
-    public BoundingBox(int x, int y, int width, int height)
-    {
-        X = x;
-        Y = y;
-        Width = width;
-        Height = height;
-    }
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {

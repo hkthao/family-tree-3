@@ -2,7 +2,9 @@ using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
+using Moq; // NEW
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationship;
@@ -42,7 +44,9 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty();
         var relationship = await _context.Relationships.FindAsync(result.Value);
         relationship.Should().NotBeNull();
-        family.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipCreatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Relationships.RelationshipCreatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

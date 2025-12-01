@@ -12,7 +12,14 @@ RUN apt-get update && \
     libx11-dev \
     python3-dev \
     libgl1-mesa-glx \
-    libglib2.0-0 && \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libfontconfig1 \
+    libjpeg-dev \
+    zlib1g-dev \
+    pkg-config && \
     # Clean up
     rm -rf /var/lib/apt/lists/*
 
@@ -20,6 +27,7 @@ COPY requirements.txt .
 COPY .flake8 .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the new python files along with the app directory
 COPY app ./app
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

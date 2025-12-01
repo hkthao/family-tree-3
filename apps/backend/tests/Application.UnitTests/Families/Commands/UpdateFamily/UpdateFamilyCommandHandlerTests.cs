@@ -4,7 +4,9 @@ using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Events.Families;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
 using Xunit;
 
@@ -45,7 +47,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Act
         var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedFamily = await _context.Families.FindAsync(familyId);
+        var updatedFamily = await _context.Families.FirstOrDefaultAsync(f => f.Id == familyId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -56,8 +58,10 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.AvatarUrl.Should().Be(command.AvatarUrl);
         updatedFamily.Visibility.Should().Be(command.Visibility);
         updatedFamily.Code.Should().Be(command.Code);
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is FamilyUpdatedEvent) &&
+            events.Any(e => e is FamilyStatsUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]
@@ -82,7 +86,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Act
         var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedFamily = await _context.Families.FindAsync(familyId);
+        var updatedFamily = await _context.Families.FirstOrDefaultAsync(f => f.Id == familyId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

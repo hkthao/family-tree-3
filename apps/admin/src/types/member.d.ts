@@ -26,6 +26,7 @@ export interface Member {
   address?: string; // New
   occupation?: string; // New
   familyName?: string; // New
+  familyAvatarUrl?: string; // New
   biography?: string; // New
   isRoot?: boolean;
   isDeceased?: boolean;
@@ -38,16 +39,12 @@ export interface Member {
 
   fatherFullName?: string;
   fatherAvatarUrl?: string;
-  fatherGender?: string;
   motherFullName?: string;
   motherAvatarUrl?: string;
-  motherGender?: string;
   husbandFullName?: string;
   husbandAvatarUrl?: string;
-  husbandGender?: string;
   wifeFullName?: string;
   wifeAvatarUrl?: string;
-  wifeGender?: string;
 
   order?: number; // New: Order of the member in the family
 }

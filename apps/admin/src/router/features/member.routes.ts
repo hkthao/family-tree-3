@@ -38,6 +38,16 @@ export const memberRoutes: RouteRecordRaw[] = [
         component: MemberBiographyView,
         meta: { breadcrumb: 'aiBiography.generator.title' },
       },
+      {
+        path: 'faces',
+        name: 'MemberFaces',
+        component: () => import('@/views/member-face/MemberFaceListView.vue'),
+        meta: {
+          requiresAuth: true,
+          roles: ['Admin', 'Manager'], // Assuming these roles can manage member faces
+          title: 'Member Faces',
+        },
+      },
     ],
   },
 ];

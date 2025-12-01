@@ -1,6 +1,3 @@
-using backend.Domain.Entities;
-using System;
-
 namespace backend.Application.PdfTemplates.Dtos;
 
 public class PdfTemplateDto

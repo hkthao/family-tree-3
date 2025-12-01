@@ -1,3 +1,5 @@
+using backend.Application.AI.DTOs; // UPDATED USING
+using backend.Application.AI.Models; // NEW USING
 using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Interfaces;
@@ -17,10 +19,25 @@ public interface IN8nService
     Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gọi webhook embedding của n8n để xử lý dữ liệu và tạo embedding.
+    /// Gọi webhook tải ảnh lên của n8n để tải ảnh lên dịch vụ lưu trữ ảnh bên ngoài.
     /// </summary>
-    /// <param name="dto">Đối tượng chứa dữ liệu embedding.</param>
+    /// <param name="dto">Đối tượng chứa dữ liệu ảnh và các tham số tải lên.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Kết quả chứa ID thành viên hoặc thông báo lỗi.</returns>
-    Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken);
+    /// <returns>Kết quả chứa phản hồi tải ảnh lên.</returns>
+    Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để upsert.
+    /// </summary>
+    Task<Result<FaceVectorOperationResultDto>> CallUpsertFaceVectorWebhookAsync(UpsertFaceVectorOperationDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để search.
+    /// </summary>
+    Task<Result<FaceVectorOperationResultDto>> CallSearchFaceVectorWebhookAsync(SearchFaceVectorOperationDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook xử lý vector khuôn mặt của n8n để delete.
+    /// </summary>
+    Task<Result<FaceVectorOperationResultDto>> CallDeleteFaceVectorWebhookAsync(DeleteFaceVectorOperationDto dto, CancellationToken cancellationToken);
 }

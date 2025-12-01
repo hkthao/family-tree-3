@@ -13,13 +13,12 @@ export const useUserActivityStore = defineStore('userActivity', {
   }),
   actions: {
     async fetchRecentActivities(itemsPerPage = 10, targetType?: TargetType, targetId?: string, groupId?: string, page = 1) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const response = await this.services.userActivity.getRecentActivities(page, itemsPerPage, targetType, targetId, groupId);
-        if (response.ok) {
-          this.items = response.value.items;
-          this.page = response.value.page;
+              this.loading = true;
+              this.error = null;
+              try {
+                const response = await this.services.user.getRecentActivities(page, itemsPerPage, targetType, targetId, groupId); // Use services.user
+                if (response.ok) {
+                  this.items = response.value.items;          this.page = response.value.page;
           this.totalPages = response.value.totalPages;
           this.totalItems = response.value.totalItems;
         } else {

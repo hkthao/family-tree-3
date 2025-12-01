@@ -2,7 +2,9 @@ using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Common; // NEW
 using FluentAssertions;
+using Moq; // NEW
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationship;
@@ -45,7 +47,9 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         var updatedRelationship = await _context.Relationships.FindAsync(relationship.Id);
         updatedRelationship.Should().NotBeNull();
         updatedRelationship!.Type.Should().Be(RelationshipType.Mother);
-        updatedRelationship.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipUpdatedEvent);
+        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
+            events.Any(e => e is Domain.Events.Relationships.RelationshipUpdatedEvent)
+        )), Times.Once);
     }
 
     [Fact]

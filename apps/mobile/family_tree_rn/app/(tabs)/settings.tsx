@@ -155,7 +155,7 @@ export default function SettingsScreen() {
             </List.Section>
           )}
 
-          {/* {isLoggedIn && ( // Only show Privacy & Security if logged in
+          {isLoggedIn && ( // Only show Privacy & Security if logged in
             <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
@@ -172,7 +172,7 @@ export default function SettingsScreen() {
                 titleStyle={{ color: theme.colors.error }}
               /> 
             </List.Section>
-          )} */}
+          )}
 
           {/* 4. Tuỳ chỉnh giao diện (App Appearance) */}
           <List.Section title={t('settings.appAppearance.title')} style={styles.listSection}>

@@ -19,3 +19,4 @@ export * from './user-preference.store';
 export * from './user-profile.store';
 export * from './user-settings.store';
 export * from './user-autocomplete.store';
+export * from './memberStory.store';

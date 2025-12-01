@@ -13,18 +13,15 @@ import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
 import { donateRoutes } from './features/donate.routes';
-import { eventRoutes } from './features/event.routes'; // New: Import eventRoutes
+import { eventRoutes } from './features/event.routes';
+import { dashboardRoutes } from './features/dashboard.routes'; // New
 
-// Import all pages from the views index
-import {
-  ApplicationInfoPage,
-  SupportLegalPage,
-  LogoutView,
-  DashboardView,
-  NotFoundView,
-  NLEditorView,
-  FaqPage, // Import FaqPage
-} from '@/views';
+import { nlEditorRoutes } from './features/nl-editor.routes'; // New
+import { infoPagesRoutes } from './features/info-pages.routes'; // New
+import { publicRoutes } from './features/public.routes'; // New
+import { miscRoutes } from './features/misc.routes'; // New
+import { memberStoryRoutes } from './features/member-story.routes'; // Updated
+import { chatRoutes } from './features/chat.routes'; // New
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,68 +32,22 @@ const router = createRouter({
       component: MainLayout,
       meta: { requiresAuth: true }, // Add requiresAuth meta
       children: [
-        {
-          path: 'dashboard',
-          name: 'Dashboard',
-          component: DashboardView,
-          meta: { breadcrumb: 'dashboard.title' },
-        },
+        ...dashboardRoutes, // Replaced
         ...memberRoutes,
+        ...memberStoryRoutes, // Updated
         ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,
         ...settingRoutes,
         ...donateRoutes,
-        ...eventRoutes, // New: Include eventRoutes
-        {
-          path: 'nl-editor',
-          name: 'NLEditor',
-          component: NLEditorView,
-          meta: { breadcrumb: 'naturalLanguage.editor.title' },
-        },
-        {
-          path: 'application-info',
-          name: 'ApplicationInfo',
-          component: ApplicationInfoPage,
-          meta: { breadcrumb: 'menu.applicationInfo' },
-        },
-        {
-          path: 'support-legal',
-          name: 'SupportLegal',
-          component: SupportLegalPage,
-          meta: { breadcrumb: 'menu.supportAndLegal' },
-        },
+        ...eventRoutes,
+        ...nlEditorRoutes, // Replaced
+        ...infoPagesRoutes, // Replaced
+        ...chatRoutes, // New
       ],
     },
-    {
-      path: '/logout',
-      name: 'Logout',
-      component: LogoutView,
-      meta: { requiresAuth: false }, // Logout page does not require authentication
-    },
-    {
-      path: '/public/family-tree/:familyId/:rootId?',
-      name: 'PublicFamilyTreeViewer',
-      component: () => import('@/views/PublicFamilyTreeViewer.vue'),
-      meta: { requiresAuth: false }, // Public route does not require authentication
-    },
-    {
-      path: '/public/support-legal',
-      name: 'PublicSupportLegal',
-      component: SupportLegalPage,
-      meta: { requiresAuth: false }, // Public route does not require authentication
-    },
-    {
-      path: '/public/faq', // New public FAQ route
-      name: 'PublicFaqPage',
-      component: FaqPage,
-      meta: { requiresAuth: false }, // Public route does not require authentication
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'NotFound',
-      component: NotFoundView,
-    },
+    ...publicRoutes, // Replaced
+    ...miscRoutes, // Replaced
   ],
 });
 
@@ -128,6 +79,7 @@ router.beforeEach(async (to, from, next) => {
   if (requiresAuth && !authStore.isAuthenticated) {
     // If the route requires authentication and the user is not authenticated, redirect to login
     await authService.login({ appState: { target: to.fullPath } });
+    next(false); // Ngăn chặn điều hướng tiếp theo vì authService.login() sẽ xử lý chuyển hướng.
     return;
   } else if (requiredRoles && !canAccessMenu(authStore.user?.roles || [], requiredRoles)) {
     // If the route requires specific roles and the user doesn't have them
