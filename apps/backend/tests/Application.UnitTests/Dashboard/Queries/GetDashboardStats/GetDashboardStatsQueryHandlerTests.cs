@@ -239,4 +239,105 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         // 💡 Giải thích: Khi một FamilyId được chỉ định, handler sẽ lọc và chỉ tính toán thống kê cho gia đình đó.
     }
+
+    [Fact]
+    public async Task Handle_ShouldCalculateAverageAgeCorrectly()
+    {
+        // 🎯 Mục tiêu của test: Đảm bảo handler tính toán tuổi trung bình chính xác.
+
+        // Arrange:
+        _authorizationServiceMock.Setup(s => s.IsAdmin()).Returns(true);
+        _mockDateTime.Setup(dt => dt.Now).Returns(new DateTime(2024, 1, 1)); // Mock current date
+
+        var family = new Family { Id = Guid.NewGuid(), Name = "Family Age", Code = "FAGE" };
+        _context.Families.Add(family);
+
+        var member1 = new Member("Doe", "John", "JMD1", family.Id, null, Gender.Male.ToString(), new DateTime(1974, 6, 15), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Age: 49 (2024 - 1974, month/day not passed yet)
+        var member2 = new Member("Doe", "Jane", "JFD1", family.Id, null, Gender.Female.ToString(), new DateTime(1994, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Age: 30 (2024 - 1994)
+        var member3 = new Member("Doe", "Jim", "JID1", family.Id, null, Gender.Male.ToString(), new DateTime(2004, 12, 1), new DateTime(2020, 1, 1), null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid() }; // Deceased, not counted for living age
+        var member4 = new Member("Doe", "Jill", "JLD1", family.Id, null, Gender.Female.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true }; // Deleted, not counted
+
+        _context.Members.AddRange(member1, member2, member3, member4);
+        await _context.SaveChangesAsync();
+
+        var query = new GetDashboardStatsQuery();
+
+        // Act:
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert:
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.AverageAge.Should().Be((int)Math.Round((49.0 + 30.0) / 2.0)); // (49+30)/2 = 39.5 -> 40
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCalculateMembersPerGenerationCorrectly()
+    {
+        // 🎯 Mục tiêu của test: Đảm bảo handler tính toán thành viên trên mỗi thế hệ chính xác.
+
+        // Arrange:
+        _authorizationServiceMock.Setup(s => s.IsAdmin()).Returns(true);
+        var family = new Family { Id = Guid.NewGuid(), Name = "Family Generations", Code = "FGEN" };
+        _context.Families.Add(family);
+
+        var gen1_parent1 = new Member("Parent1", "A", "P1", family.Id, null, Gender.Male.ToString(), new DateTime(1950, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var gen1_parent2 = new Member("Parent2", "B", "P2", family.Id, null, Gender.Female.ToString(), new DateTime(1955, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var gen2_child1 = new Member("Child1", "C", "C1", family.Id, null, Gender.Male.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var gen2_child2 = new Member("Child2", "D", "C2", family.Id, null, Gender.Female.ToString(), new DateTime(1985, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var gen3_grandchild1 = new Member("Grandchild1", "E", "G1", family.Id, null, Gender.Male.ToString(), new DateTime(2010, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+
+        _context.Members.AddRange(gen1_parent1, gen1_parent2, gen2_child1, gen2_child2, gen3_grandchild1);
+
+        _context.Relationships.Add(new Relationship(family.Id, gen1_parent1.Id, gen2_child1.Id, RelationshipType.Father, null));
+        _context.Relationships.Add(new Relationship(family.Id, gen1_parent2.Id, gen2_child2.Id, RelationshipType.Mother, null));
+        _context.Relationships.Add(new Relationship(family.Id, gen2_child1.Id, gen3_grandchild1.Id, RelationshipType.Father, null));
+
+        await _context.SaveChangesAsync();
+
+        var query = new GetDashboardStatsQuery();
+
+        // Act:
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert:
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.MembersPerGeneration.Should().HaveCount(3);
+        result.Value.MembersPerGeneration[1].Should().Be(2); // gen1_parent1, gen1_parent2
+        result.Value.MembersPerGeneration[2].Should().Be(2); // gen2_child1, gen2_child2
+        result.Value.MembersPerGeneration[3].Should().Be(1); // gen3_grandchild1
+    }
+
+    [Fact]
+    public async Task Handle_ShouldFilterDeletedEntitiesCorrectly()
+    {
+        // 🎯 Mục tiêu của test: Đảm bảo handler lọc các thực thể đã xóa (IsDeleted = true) và không bao gồm chúng trong thống kê.
+
+        // Arrange:
+        _authorizationServiceMock.Setup(s => s.IsAdmin()).Returns(true);
+        var family = new Family { Id = Guid.NewGuid(), Name = "Family Deleted", Code = "FDELETED" };
+        _context.Families.Add(family);
+
+        var activeMember = new Member("Active", "Mem", "AM1", family.Id) { Id = Guid.NewGuid() };
+        var deletedMember = new Member("Deleted", "Mem", "DM1", family.Id) { Id = Guid.NewGuid(), IsDeleted = true };
+        _context.Members.AddRange(activeMember, deletedMember);
+
+        var activeRelationship = new Relationship(family.Id, activeMember.Id, activeMember.Id, RelationshipType.Father, null);
+        var deletedRelationship = new Relationship(family.Id, activeMember.Id, deletedMember.Id, RelationshipType.Husband, null) { IsDeleted = true };
+        _context.Relationships.AddRange(activeRelationship, deletedRelationship);
+
+        await _context.SaveChangesAsync();
+
+        var query = new GetDashboardStatsQuery();
+
+        // Act:
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert:
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.TotalMembers.Should().Be(1); // Only activeMember
+        result.Value!.TotalRelationships.Should().Be(1); // Only activeRelationship
+    }
 }
