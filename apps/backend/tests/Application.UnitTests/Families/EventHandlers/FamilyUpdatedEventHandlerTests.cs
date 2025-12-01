@@ -44,7 +44,6 @@ public class FamilyUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -61,6 +60,5 @@ public class FamilyUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<IRequest>(), CancellationToken.None), Times.Never);
-        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Never);
     }
 }

@@ -33,18 +33,5 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event creation
-
-        // Store event data in Vector DB for search via GlobalSearchService
-        // Call n8n webhook for embedding update
-        var (entityData, description) = EmbeddingDescriptionFactory.CreateEventData(notification.Event);
-        var embeddingDto = new EmbeddingWebhookDto
-        {
-            EntityType = "Event",
-            EntityId = notification.Event.Id.ToString(),
-            ActionType = "Created",
-            EntityData = entityData,
-            Description = description
-        };
-        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

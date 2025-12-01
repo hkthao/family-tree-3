@@ -34,16 +34,5 @@ public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHan
 
 
         // Store relationship data in Vector DB for search via GlobalSearchService
-        // Call n8n webhook for embedding update
-        var (entityData, description) = EmbeddingDescriptionFactory.CreateRelationshipData(notification.Relationship);
-        var embeddingDto = new EmbeddingWebhookDto
-        {
-            EntityType = "Relationship",
-            EntityId = notification.Relationship.Id.ToString(),
-            ActionType = "Created",
-            EntityData = entityData,
-            Description = description
-        };
-        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

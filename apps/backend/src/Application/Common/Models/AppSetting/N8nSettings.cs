@@ -5,7 +5,6 @@ public class N8nSettings
     public const string SectionName = "N8nSettings";
     public string BaseUrl { get; set; } = string.Empty;
     public string ChatWebhookUrl { get; set; } = string.Empty;
-    public string EmbeddingWebhookUrl { get; set; } = string.Empty;
     public UploadSettings Upload { get; set; } = new UploadSettings(); // NEW
     public FaceSettings Face { get; set; } = new FaceSettings(); // New nested setting
     public string JwtSecret { get; set; } = string.Empty;

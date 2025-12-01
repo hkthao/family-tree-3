@@ -19,14 +19,6 @@ public interface IN8nService
     Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gọi webhook embedding của n8n để xử lý dữ liệu và tạo embedding.
-    /// </summary>
-    /// <param name="dto">Đối tượng chứa dữ liệu embedding.</param>
-    /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Kết quả chứa ID thành viên hoặc thông báo lỗi.</returns>
-    Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken);
-
-    /// <summary>
     /// Gọi webhook tải ảnh lên của n8n để tải ảnh lên dịch vụ lưu trữ ảnh bên ngoài.
     /// </summary>
     /// <param name="dto">Đối tượng chứa dữ liệu ảnh và các tham số tải lên.</param>
