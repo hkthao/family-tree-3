@@ -10,6 +10,6 @@ public class DashboardStatsDto
     public double FemaleRatio { get; set; }
     public int LivingMembersCount { get; set; }
     public int DeceasedMembersCount { get; set; }
-    public double AverageAge { get; set; }
+    public int AverageAge { get; set; }
     public Dictionary<int, int> MembersPerGeneration { get; set; } = new();
 }

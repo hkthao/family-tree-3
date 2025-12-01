@@ -79,7 +79,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 // For living or deceased without DateOfDeath, use current year
                 return DateTime.Now.Year - yearOfBirth;
             });
-            averageAge = (double)totalAge / membersWithKnownBirthDate.Count;
+            averageAge = (int)Math.Round((double)totalAge / membersWithKnownBirthDate.Count);
         }
 
         var membersPerGeneration = CalculateMembersPerGeneration(members, relationships);
