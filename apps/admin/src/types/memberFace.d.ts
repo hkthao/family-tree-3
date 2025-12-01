@@ -69,6 +69,7 @@ export interface MemberFace {
   memberAvatarUrl?: string; 
   familyId?: string;
   familyName?: string;
+  familyAvatarUrl?: string; // NEW
 }
 
 export interface MemberFaceFilter {

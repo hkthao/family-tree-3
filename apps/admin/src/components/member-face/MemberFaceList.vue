@@ -34,7 +34,7 @@
           </div>
         </template>
         <template v-slot:item.familyName="{ item }">
-          {{ item.familyName }}
+          <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
         </template>
         <template v-slot:item.emotion="{ item }">
           <v-chip v-if="item.emotion" color="info" size="small">{{ item.emotion }}</v-chip>
@@ -71,6 +71,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
+import FamilyName from '@/components/common/FamilyName.vue';
 import { useAuth } from '@/composables/useAuth';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { DataTableHeader } from 'vuetify'; // NEW

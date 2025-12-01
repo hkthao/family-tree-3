@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <v-tooltip :text="t('memberStory.list.action.create')" location="bottom">
         <template v-slot:activator="{ props }">
-          <v-btn color="primary" class="mr-2" v-bind="props" @click="createItem()" variant="text" icon>
+          <v-btn v-if="canPerformActions" color="primary" class="mr-2" v-bind="props" @click="createItem()" variant="text" icon>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
         </template>
@@ -45,7 +45,7 @@
             <v-list-item @click="() => editItem(rowItem.id)">
               <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="() => deleteItem(rowItem)">
+            <v-list-item v-if="canPerformActions" @click="() => deleteItem(rowItem)">
               <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -60,9 +60,10 @@ import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { DataTableHeader } from 'vuetify';
 import { MemberName } from '@/components/member';
-import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
-import { computed } from 'vue'; // Import computed
-import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // Import getFamilyAvatarUrl
+import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; 
+import { computed } from 'vue'; 
+import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; 
+import { useAuth } from '@/composables/useAuth'; 
 
 interface MemberStoryListProps {
   items: MemberStoryDto[];
@@ -71,6 +72,7 @@ interface MemberStoryListProps {
   itemsPerPage: number;
   search?: string;
   hideToolbar?: boolean;
+  readOnly?: boolean; 
 }
 
 const {
@@ -80,6 +82,7 @@ const {
   itemsPerPage,
   search,
   hideToolbar,
+  readOnly, 
 } = defineProps<MemberStoryListProps>();
 
 const emit = defineEmits<{
@@ -93,6 +96,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { isAdmin, isFamilyManager } = useAuth(); 
+
+const canPerformActions = computed(() => { 
+  return !readOnly && (isAdmin.value || isFamilyManager.value);
+});
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('memberStory.list.headers.coverPhoto'), key: 'originalImageUrl', sortable: false },
@@ -103,7 +111,7 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
 ]);
 
-// Helper to get display text for story style
+
 const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string => {
   switch (style) {
     case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
@@ -114,7 +122,7 @@ const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string =
   }
 };
 
-// Helper to get display text for perspective
+
 const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefined): string => {
   switch (perspective) {
     case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
