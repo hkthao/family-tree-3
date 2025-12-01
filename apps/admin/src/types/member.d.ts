@@ -26,6 +26,7 @@ export interface Member {
   address?: string; // New
   occupation?: string; // New
   familyName?: string; // New
+  familyAvatarUrl?: string; // New
   biography?: string; // New
   isRoot?: boolean;
   isDeceased?: boolean;

@@ -58,8 +58,7 @@
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyLookupStore" display-expr="name" value-expr="id"
-        imageExpr="avatarUrl" />
+      <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
     </template>
 
     <!-- Birth/Death Years column -->
@@ -109,8 +108,8 @@ import { useI18n } from 'vue-i18n';
 import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
-import { ChipLookup } from '@/components/common';
-import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; // Added MemberAvatarDisplay and MemberGenderChip
+import FamilyName from '@/components/common/FamilyName.vue';
+import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
 import { useAuth } from '@/composables/useAuth';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
@@ -121,8 +120,8 @@ const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
-  search?: string; // Changed to optional
-  readOnly?: boolean; // Add readOnly prop
+  search?: string; 
+  readOnly?: boolean; 
 }>();
 
 const canPerformActions = computed(() => {
@@ -164,7 +163,7 @@ watch(() => props.search, (newSearch) => {
   }
 });
 
-// ... (rest of the file)
+
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -233,7 +232,7 @@ const headers = computed<DataTableHeader[]>(() => {
 const loadMembers = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[]; // Corrected type
+  sortBy: { key: string; order: string }[]; 
 }) => {
   emit('update:options', options);
 };
