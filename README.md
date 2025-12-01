@@ -54,6 +54,14 @@ npm run dev
 ```
 Ứng dụng sẽ chạy trên `http://localhost:5173`.
 
+### 📱 Cách chạy mobile app (riêng lẻ):
+
+```bash
+cd apps/mobile/family_tree_rn
+npm install
+npm run android # hoặc npm run ios
+```
+
 ### 🐳 Chạy bằng Docker Compose (tất cả các service):
 
 Đây là cách nhanh nhất và được khuyến nghị để chạy tất cả các ứng dụng và Database trong môi trường phát triển.
@@ -111,7 +119,8 @@ Dự án sử dụng GitHub Actions để tự động hóa quy trình CI/CD.
 family-tree-3/
 ├── apps/
 │   ├── admin/         # Giao diện quản trị (Vue + Vuetify)
-│   └── backend/       # API Backend (ASP.NET Core)
+│   ├── backend/       # API Backend (ASP.NET Core)
+│   └── mobile/        # Ứng dụng di động (React Native)
 ├── services/
 │   └── face-service/  # Dịch vụ xử lý khuôn mặt (Python)
 ├── packages/
@@ -146,6 +155,8 @@ family-tree-3/
 *   [**Hướng dẫn Frontend (Admin)**](./docs/engineering/frontend-guide.md)
 *   [**Tham chiếu API**](./docs/engineering/api-reference.md)
 *   [**Mô hình Dữ liệu**](./docs/engineering/data-model.md)
+
+*   [**Cơ sở Kiến thức AI cho Chat Assistant**](./docs/engineering/ai-chat-assistant-kb.md)
 *   [**Đội ngũ Phát triển**](./docs/project/team.md)
 
 ## 8. 👥 Đóng góp (Contributing)
