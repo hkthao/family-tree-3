@@ -75,7 +75,8 @@ export interface MemberFace {
 export interface MemberFaceFilter {
   memberId?: string;
   familyId?: string;
-  searchQuery?: string; 
+  searchQuery?: string;
+  emotion?: string; 
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }

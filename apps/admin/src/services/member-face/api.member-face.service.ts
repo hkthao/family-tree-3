@@ -41,6 +41,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
     if (filters.memberId) params.append('memberId', filters.memberId);
     if (filters.familyId) params.append('familyId', filters.familyId);
     if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
+    if (filters.emotion) params.append('emotion', filters.emotion);
     if (sortBy) params.append('sortBy', sortBy);
     if (sortOrder) params.append('sortOrder', sortOrder);
 

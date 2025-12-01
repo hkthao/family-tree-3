@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div data-testid="member-face-list-view">
+    <MemberFaceSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" :initial-filters="initialFilters" />
+
     <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
       :loading="list.loading" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
       @delete="confirmDelete" @create="openAddDrawer()"></MemberFaceList>
@@ -17,7 +19,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
@@ -25,13 +27,16 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import type { MemberFace } from '@/types';
+import type { MemberFace, MemberFaceFilter } from '@/types'; // Import MemberFaceFilter
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
+import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue'; // NEW
+
 interface MemberFaceListViewProps {
   memberId?: string;
   familyId?: string;
+  hideSearch?: boolean; // NEW
 }
 const props = defineProps<MemberFaceListViewProps>();
 const { t } = useI18n();
@@ -47,21 +52,36 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
-onMounted(() => {
+
+const initialFilters = ref<MemberFaceFilter>({});
+
+const loadMemberFaces = async () => {
   memberFaceStore.list.filters = {
+    ...memberFaceStore.list.filters,
     memberId: props.memberId,
     familyId: props.familyId,
   };
-  memberFaceStore._loadItems();
-});
+  await memberFaceStore._loadItems();
+};
+
+const handleFilterUpdate = (filters: MemberFaceFilter) => {
+  memberFaceStore.list.filters = {
+    ...memberFaceStore.list.filters,
+    ...filters,
+  };
+  memberFaceStore.list.options.page = 1; // Reset page to 1 when filters change
+  loadMemberFaces();
+};
+
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
   memberFaceStore.setListOptions(options);
-  memberFaceStore._loadItems();
+  loadMemberFaces();
 };
+
 const confirmDelete = async (memberFace: MemberFace) => {
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
@@ -74,6 +94,7 @@ const confirmDelete = async (memberFace: MemberFace) => {
     await handleDeleteConfirm(memberFace);
   }
 };
+
 const handleDeleteConfirm = async (memberFace: MemberFace) => {
   if (memberFace) {
     await memberFaceStore.deleteItem(memberFace.id);
@@ -86,16 +107,37 @@ const handleDeleteConfirm = async (memberFace: MemberFace) => {
       showSnackbar(t('memberFace.messages.deleteSuccess'), 'success');
     }
   }
-  memberFaceStore._loadItems();
+  loadMemberFaces();
 };
+
 const handleMemberFaceSaved = () => {
   closeAllDrawers();
-  memberFaceStore._loadItems();
+  loadMemberFaces();
 };
+
 const handleMemberFaceClosed = () => {
   closeAllDrawers();
 };
+
 const handleDetailClosed = () => {
   closeAllDrawers();
 };
+
+onMounted(() => {
+  initialFilters.value = {
+    memberId: props.memberId,
+    familyId: props.familyId,
+  };
+  memberFaceStore.list.filters = { ...initialFilters.value }; // Initialize store filters
+  loadMemberFaces();
+});
+
+watch([() => props.memberId, () => props.familyId], () => {
+  initialFilters.value = {
+    memberId: props.memberId,
+    familyId: props.familyId,
+  };
+  memberFaceStore.list.filters = { ...initialFilters.value };
+  loadMemberFaces();
+});
 </script>
