@@ -7,6 +7,6 @@ public class MembersInFamiliesSpec : Specification<Member>
 {
     public MembersInFamiliesSpec(IQueryable<Family> familiesQuery)
     {
-        Query.Where(m => familiesQuery.Select(f => f.Id).Contains(m.FamilyId));
+        Query.Where(m => familiesQuery.Select(f => f.Id).Contains(m.FamilyId) && !m.IsDeleted);
     }
 }

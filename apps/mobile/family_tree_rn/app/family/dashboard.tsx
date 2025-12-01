@@ -131,7 +131,7 @@ export default function FamilyDashboardScreen() {
     backgroundGradientFrom: theme.colors.background,
     backgroundGradientTo: theme.colors.background,
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Use a neutral color for lines/text
-    labelColor: (opacity = 1) => theme.colors.onSurface, // Changed to use theme.colors.onSurface
+    labelColor: (_ = 1) => theme.colors.onSurface, // Changed to use theme.colors.onSurface
     strokeWidth: 2,
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
@@ -145,6 +145,16 @@ export default function FamilyDashboardScreen() {
       generation: parseInt(generation),
       members: dashboardData.membersPerGeneration[parseInt(generation)],
     }));
+  const translatedGenderDistribution = useMemo(() => {
+    if (!dashboardData?.genderDistribution) {
+      return [];
+    }
+    return dashboardData.genderDistribution.map(item => ({
+      ...item,
+      name: item.name === 'Male' ? t('common.male') : (item.name === 'Female' ? t('common.female') : item.name),
+    }));
+  }, [dashboardData, t]);
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -193,7 +203,7 @@ export default function FamilyDashboardScreen() {
             </Text>
             <View style={styles.chartContainer}>
               <PieChart
-                data={dashboardData.genderDistribution}
+                data={translatedGenderDistribution}
                 width={screenWidth - (SPACING_MEDIUM * 2)}
                 height={220}
                 chartConfig={chartConfig}

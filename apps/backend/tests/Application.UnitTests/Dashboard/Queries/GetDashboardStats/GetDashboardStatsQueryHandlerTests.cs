@@ -19,7 +19,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new GetDashboardStatsQueryHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object);
+        _handler = new GetDashboardStatsQueryHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _mockDateTime.Object);
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Value!.TotalFamilies.Should().Be(3);
         result.Value!.TotalMembers.Should().Be(6); // 4 initial + 2 for relationship
         result.Value!.TotalRelationships.Should().Be(1);
-        result.Value!.TotalGenerations.Should().Be(6); // 3 + 2 + 1
+
 
         // 💡 Giải thích: Khi người dùng là admin, handler sẽ tính toán thống kê dựa trên tất cả các gia đình, thành viên và mối quan hệ trong hệ thống.
     }
@@ -136,7 +136,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Value!.TotalFamilies.Should().Be(2);
         result.Value!.TotalMembers.Should().Be(5); // 3 initial accessible + 2 for relationship
         result.Value!.TotalRelationships.Should().Be(1);
-        result.Value!.TotalGenerations.Should().Be(6); // 4 + 2
+
 
         // 💡 Giải thích: Khi người dùng không phải admin, handler sẽ chỉ tính toán thống kê dựa trên các gia đình mà người dùng có quyền truy cập thông qua bảng FamilyUsers.
     }
@@ -179,7 +179,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Value!.TotalFamilies.Should().Be(0);
         result.Value!.TotalMembers.Should().Be(0);
         result.Value!.TotalRelationships.Should().Be(0);
-        result.Value!.TotalGenerations.Should().Be(0);
+
 
         // 💡 Giải thích: Khi người dùng không phải admin và không có quyền truy cập vào bất kỳ gia đình nào, handler sẽ trả về thống kê với tất cả các giá trị bằng 0.
     }
@@ -235,7 +235,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Value!.TotalFamilies.Should().Be(1);
         result.Value!.TotalMembers.Should().Be(4); // 2 initial + 2 for relationship
         result.Value!.TotalRelationships.Should().Be(1);
-        result.Value!.TotalGenerations.Should().Be(5);
+
 
         // 💡 Giải thích: Khi một FamilyId được chỉ định, handler sẽ lọc và chỉ tính toán thống kê cho gia đình đó.
     }
