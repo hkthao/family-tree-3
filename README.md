@@ -155,3 +155,12 @@ Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đ�
 ## 9. 📜 Giấy phép (License)
 
 Dự án này được cấp phép theo Giấy phép MIT. Xem tệp [LICENSE](./LICENSE) để biết chi tiết.
+
+## 10. ❤️ Ủng hộ (Support)
+
+Nếu bạn thấy dự án này hữu ích hoặc muốn ủng hộ công sức phát triển, bạn có thể:
+
+*   **Buy me a coffee**: buymeacoffee.com/thaohk90e
+*   **Momo**: 0946351139
+
+Mọi sự ủng hộ đều là động lực lớn để chúng tôi tiếp tục phát triển và cải thiện dự án!
