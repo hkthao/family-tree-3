@@ -283,6 +283,8 @@
   "chat.messageOptionsShareApp": "Chia sẻ ứng dụng",
   "chat.messageOptionsMoreApps": "Ứng dụng khác",
   "chat.messageOptionsExit": "Thoát",
+  "n8nChat.initialMessageHi": "Chào bạn! 👋",
+  "n8nChat.initialMessageNathan": "Tên tôi là Nathan. Tôi có thể hỗ trợ gì cho bạn hôm nay?",
   "realtime.collab": "Cộng tác real-time",
   "culture.traditions": "Truyền thống & lễ hội",
   "notifications.anniversaries": "Thông báo ngày giỗ/ kỷ niệm",

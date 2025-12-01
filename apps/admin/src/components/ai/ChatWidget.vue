@@ -1,6 +1,5 @@
 <template>
   <v-navigation-drawer v-model="chatOpen" location="right" temporary width="400" class="chat-window">
-
     <v-card flat class="fill-height d-flex flex-column">
       <v-card-text class="chat-messages-container pa-0">
         <vue-advanced-chat :messages="formattedMessages" :current-user-id="currentUserId"

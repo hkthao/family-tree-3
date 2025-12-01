@@ -18,7 +18,7 @@
     </div>
   </v-app-bar>
   <!-- Chat Widget Component -->
-  <ChatWidget v-model="showChatWidget" />
+  <N8nChatWidget v-model="showChatWidget"/>
 </template>
 
 <script setup lang="ts">
@@ -33,7 +33,7 @@ import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
-import ChatWidget from '@/components/ChatWidget.vue'; // Import ChatWidget
+import { N8nChatWidget } from '@/components/ai'; // Import ChatWidget
 
 const { t } = useI18n();
 const theme = useTheme();

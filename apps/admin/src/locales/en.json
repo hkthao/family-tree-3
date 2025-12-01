@@ -249,6 +249,8 @@
   "chat.messageOptionsShareApp": "Share App",
   "chat.messageOptionsMoreApps": "More Apps",
   "chat.messageOptionsExit": "Exit",
+  "n8nChat.initialMessageHi": "Hi there! 👋",
+  "n8nChat.initialMessageNathan": "My name is Nathan. How can I assist you today?",
   "realtime.collab": "Real-time Collaboration",
   "culture.traditions": "Traditions & Festivals",
   "notifications.anniversaries": "Anniversary Notifications",
