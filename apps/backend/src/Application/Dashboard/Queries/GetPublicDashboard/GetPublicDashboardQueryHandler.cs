@@ -64,7 +64,7 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
         {
             var totalAgeInYears = livingMembersWithBirthDate
                 .Sum(m => (_dateTime.Now.Year - m.DateOfBirth!.Value.Year) - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
-            dashboardDto.PublicAverageAge = (double)totalAgeInYears / livingMembersWithBirthDate.Count;
+            dashboardDto.PublicAverageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
         }
 
         // Generations and Members Per Generation

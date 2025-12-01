@@ -10,7 +10,7 @@ public class PublicDashboardDto
     public double PublicFemaleRatio { get; set; }
     public int PublicLivingMembersCount { get; set; }
     public int PublicDeceasedMembersCount { get; set; }
-    public double PublicAverageAge { get; set; }
+    public int PublicAverageAge { get; set; }
     public Dictionary<int, int> PublicMembersPerGeneration { get; set; } = new();
     public int TotalPublicEvents { get; set; }
 }

@@ -101,7 +101,7 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         // memberPF1_Female_Living_Young: 2024 - 2000 = 24
         // memberPF2_Male_Living: 2024 - 1990 = 34
         // Average: (74 + 24 + 34) / 3 = 132 / 3 = 44
-        result.Value.PublicAverageAge.Should().BeApproximately(44.0, 0.001);
+        result.Value.PublicAverageAge.Should().Be(44);
 
         // Generations (Public Family 1 has 2 generations based on relPF1_ParentChild1)
         // Public Family 2 has 1 generation
