@@ -126,6 +126,7 @@ export default function FamilyDashboardScreen() {
       </View>
     );
   }
+
   const screenWidth = Dimensions.get('window').width;
   const chartConfig = {
     backgroundGradientFrom: theme.colors.background,
