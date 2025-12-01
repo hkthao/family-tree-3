@@ -19,9 +19,7 @@
           </v-card-title>
 
           <!-- Family Name (if available) -->
-          <v-chip v-if="memberFace.familyName" color="primary" size="small" class="mb-2">
-            {{ memberFace.familyName }}
-          </v-chip>
+          <FamilyName v-if="memberFace.familyName" :name="memberFace.familyName" :avatar-url="memberFace.familyAvatarUrl" />
 
           <v-chip v-if="memberFace.emotion" color="info" size="small" class="mb-4">
             {{ memberFace.emotion }}
@@ -60,6 +58,7 @@ import type { MemberFace } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import FamilyName from '@/components/common/FamilyName.vue';
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;
