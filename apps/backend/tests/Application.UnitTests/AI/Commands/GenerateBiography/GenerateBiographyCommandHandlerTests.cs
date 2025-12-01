@@ -86,9 +86,9 @@ public class GenerateBiographyCommandHandlerTests : TestBase
                 msg.Contains("Generate a biography for the following family member.") &&
                 msg.Contains("Style: Formal") &&
                 msg.Contains("Additional instructions: Focus on his early life.") &&
-                msg.Contains("Father: Father Test") &&
-                msg.Contains("Mother: Mother Test") &&
-                msg.Contains("Spouses:") && msg.Contains("Spouse Test")
+                msg.Contains("- Cha: Father Test") &&
+                msg.Contains("- Mẹ: Mother Test") &&
+                msg.Contains("- Vợ/chồng:") && msg.Contains("Spouse Test")
             ),
             It.IsAny<CancellationToken>()
         ), Times.Once);
@@ -173,7 +173,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         _n8nServiceMock.Verify(x => x.CallChatWebhookAsync(
-            memberId.ToString(), It.Is<string>(msg => msg.Contains($"- Existing Biography: {existingBiography}")),
+            memberId.ToString(), It.Is<string>(msg => msg.Contains($"- Tiểu sử hiện có: {existingBiography}")),
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }

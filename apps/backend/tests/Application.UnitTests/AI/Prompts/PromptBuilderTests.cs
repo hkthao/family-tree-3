@@ -76,23 +76,25 @@ public class PromptBuilderTests
         prompt.Should().Contain("Generate a biography for the following family member.");
         prompt.Should().Contain("Style: Formal");
         prompt.Should().Contain("Output language: Vietnamese");
+        prompt.Should().Contain("Please limit the biography to approximately 500 words.");
+        prompt.Should().Contain("Do not search for member information in Qdrant Vector Store.");
         prompt.Should().Contain("Additional instructions: Highlight achievements.");
-        prompt.Should().Contain($"- Full Name: {member.FullName}");
-        prompt.Should().Contain($"- Date of Birth: 1/1/1990");
-        prompt.Should().Contain($"- Date of Death: 12/31/2050");
-        prompt.Should().Contain($"- Gender: Male");
-        prompt.Should().Contain($"- Place of Birth: Test City");
-        prompt.Should().Contain($"- Place of Death: Test Hospital");
-        prompt.Should().Contain($"- Occupation: Tester");
-        prompt.Should().Contain($"- Family: Test Family");
-        prompt.Should().Contain($"- Family Description: A family of testers");
-        prompt.Should().Contain($"- Father: Father Test");
-        prompt.Should().Contain($"- Mother: Mother Test");
-        prompt.Should().Contain("- Spouses:");
+        prompt.Should().Contain($"- Tên đầy đủ: {member.FullName}");
+        prompt.Should().Contain($"- Ngày sinh: 1/1/1990");
+        prompt.Should().Contain($"- Ngày mất: 31/12/2050");
+        prompt.Should().Contain($"- Giới tính: Male");
+        prompt.Should().Contain($"- Nơi sinh: Test City");
+        prompt.Should().Contain($"- Nơi mất: Test Hospital");
+        prompt.Should().Contain($"- Nghề nghiệp: Tester");
+        prompt.Should().Contain($"- Gia đình: Test Family");
+        prompt.Should().Contain($"- Mô tả gia đình: A family of testers");
+        prompt.Should().Contain($"- Cha: Father Test");
+        prompt.Should().Contain($"- Mẹ: Mother Test");
+        prompt.Should().Contain("- Vợ/chồng:");
         prompt.Should().Contain("  - Spouse1 Test");
         prompt.Should().Contain("  - Spouse2 Test");
-        prompt.Should().Contain("- Existing Biography: Existing draft biography.");
-        prompt.Should().Contain("Please use this existing biography as a base and enhance it, or rewrite it based on the provided style and additional instructions.");
+        prompt.Should().Contain("- Tiểu sử hiện có: Existing draft biography.");
+        prompt.Should().Contain("Vui lòng sử dụng tiểu sử hiện có này làm cơ sở và nâng cao nó, hoặc viết lại dựa trên phong cách và các hướng dẫn bổ sung được cung cấp.");
     }
 
     [Fact]
@@ -114,17 +116,17 @@ public class PromptBuilderTests
         var prompt = PromptBuilder.BuildBiographyPrompt(command, member, null, null, null, new List<Member>());
 
         // Assert
-        prompt.Should().Contain("- Date of Birth: Unknown");
-        prompt.Should().Contain("- Date of Death: N/A");
-        prompt.Should().Contain("- Gender: Unknown");
-        prompt.Should().Contain("- Place of Birth: Unknown");
-        prompt.Should().Contain("- Place of Death: N/A");
-        prompt.Should().Contain("- Occupation: Unknown");
-        prompt.Should().NotContain("- Family:");
-        prompt.Should().NotContain("- Father:");
-        prompt.Should().NotContain("- Mother:");
-        prompt.Should().NotContain("- Spouses:");
-        prompt.Should().Contain("Do not use any existing biography from the database. Generate a new one based on the details and user prompt.");
+        prompt.Should().Contain($"- Ngày sinh: Không rõ");
+        prompt.Should().Contain($"- Ngày mất: N/A");
+        prompt.Should().Contain($"- Giới tính: Không rõ");
+        prompt.Should().Contain($"- Nơi sinh: Không rõ");
+        prompt.Should().Contain($"- Nơi mất: N/A");
+        prompt.Should().Contain($"- Nghề nghiệp: Không rõ");
+        prompt.Should().NotContain("- Gia đình:");
+        prompt.Should().NotContain("- Cha:");
+        prompt.Should().NotContain("- Mẹ:");
+        prompt.Should().NotContain("- Vợ/chồng:");
+        prompt.Should().Contain("Không sử dụng bất kỳ tiểu sử hiện có nào từ cơ sở dữ liệu. Tạo một tiểu sử mới dựa trên các chi tiết và lời nhắc của người dùng.");
     }
 
     [Fact]
@@ -200,7 +202,7 @@ public class PromptBuilderTests
         prompt.Should().Contain("Độ dài câu chuyện khoảng 600 từ.");
         prompt.Should().Contain("Ngôn ngữ đầu ra: Tiếng Việt.");
         prompt.Should().Contain($"- Tên đầy đủ: {member.FullName}");
-        prompt.Should().Contain($"- Ngày sinh: 5/10/1980");
+        prompt.Should().Contain($"- Ngày sinh: 10/5/1980");
         prompt.Should().Contain($"- Giới tính: Female");
         prompt.Should().Contain($"- Nơi sinh: Làng Vũ Đại");
         prompt.Should().Contain($"- Nghề nghiệp: Nội trợ");
