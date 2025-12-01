@@ -42,7 +42,7 @@
       </v-card-text>
 
       <v-card-actions class="justify-end">
-              <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>        <v-btn color="error" @click="handleDelete" :disabled="detail.loading">{{ t('common.delete') }}</v-btn>
+              <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>        <v-btn v-if="canPerformActions" color="error" @click="handleDelete" :disabled="detail.loading">{{ t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
     <v-progress-linear v-else-if="detail.loading" indeterminate color="primary"></v-progress-linear>
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import { MemberFaceForm } from '@/components/member-face'; // Will be created later
@@ -59,6 +59,7 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import FamilyName from '@/components/common/FamilyName.vue';
+import { useAuth } from '@/composables/useAuth'; // NEW
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;
@@ -71,10 +72,15 @@ const { t } = useI18n();
 const memberFaceStore = useMemberFaceStore();
 const { showSnackbar } = useGlobalSnackbar();
 const { showConfirmDialog } = useConfirmDialog();
+const { isAdmin, isFamilyManager } = useAuth(); // NEW
 
 const { detail } = storeToRefs(memberFaceStore);
 
 const memberFace = ref<MemberFace | undefined>(undefined);
+
+const canPerformActions = computed(() => { // NEW
+  return isAdmin.value || isFamilyManager.value;
+});
 
 const loadMemberFace = async (id: string) => {
   await memberFaceStore.getById(id);

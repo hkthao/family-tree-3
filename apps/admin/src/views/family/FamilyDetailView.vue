@@ -35,7 +35,7 @@
         </v-window-item>
 
         <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
-          <MemberFaceListView :family-id="familyId" />
+          <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
 
         <v-window-item v-if="canManageFamily" value="family-settings">
