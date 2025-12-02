@@ -12,6 +12,10 @@ public class Result<T>
     /// </summary>
     public bool IsSuccess { get; private set; }
     /// <summary>
+    /// Mã trạng thái HTTP liên quan đến kết quả.
+    /// </summary>
+    public int StatusCode { get; private set; } = 200; // Default to 200 OK
+    /// <summary>
     /// Thông báo lỗi nếu thao tác thất bại.
     /// </summary>
     public string? Error { get; private set; }
@@ -29,7 +33,7 @@ public class Result<T>
     /// </summary>
     /// <param name="value">Giá trị trả về.</param>
     /// <returns>Một thể hiện của Result<T> biểu thị thành công.</returns>
-    public static Result<T> Success(T value) => new() { IsSuccess = true, Value = value };
+    public static Result<T> Success(T value) => new() { IsSuccess = true, Value = value, StatusCode = 200 };
     /// <summary>
     /// Tạo một kết quả thất bại với thông báo lỗi và nguồn gốc lỗi.
     /// </summary>
@@ -38,7 +42,17 @@ public class Result<T>
     /// <returns>Một thể hiện của Result<T> biểu thị thất bại.</returns>
     public static Result<T> Failure(string error, string errorSource = "Unknown") =>
         new()
-        { IsSuccess = false, Error = error, ErrorSource = errorSource };
+        { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 400 }; // Default to 400 Bad Request
+
+    /// <summary>
+    /// Tạo một kết quả cấm truy cập (Forbidden) với thông báo lỗi và mã trạng thái 403.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Forbidden".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "Authorization".</param>
+    /// <returns>Một thể hiện của Result<T> biểu thị bị cấm truy cập.</returns>
+    public static Result<T> Forbidden(string error = "Forbidden", string errorSource = "Authorization") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 403 };
 }
 
 /// <summary>

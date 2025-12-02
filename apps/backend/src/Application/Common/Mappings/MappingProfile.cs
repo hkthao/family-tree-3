@@ -1,6 +1,5 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
-using backend.Application.Events.Queries.GetEvents;
 using backend.Application.ExportImport.Commands; // New using statement
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.Queries;
@@ -51,9 +50,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
 
         //Event
-        CreateMap<Event, EventListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))

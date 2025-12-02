@@ -37,4 +37,12 @@ public class PaginatedList<T>(List<T> items, int count, int page, int itemsPerPa
 
         return new PaginatedList<T>(items, count, page, itemsPerPage);
     }
+    /// <summary>
+    /// Tạo một PaginatedList rỗng.
+    /// </summary>
+    /// <returns>Một PaginatedList rỗng của kiểu T.</returns>
+    public static PaginatedList<T> Empty()
+    {
+        return new PaginatedList<T>(new List<T>(), 0, 1, 10); // Default to page 1, 10 items per page
+    }
 }
