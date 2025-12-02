@@ -8,16 +8,6 @@ export class ApiMemberStoryService implements IMemberStoryService {
 
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<MemberStoryDto[], ApiError>> {
-    // This method is part of ICrudService, but MemberStoriesController doesn't have a direct /member-stories GET endpoint for all member stories.
-    // We'll rely on loadItems or searchMemberStories for listing.
-    // For now, returning an empty list or throwing an error, or just not using this method.
-    // Let's implement this as fetching all member stories (if the backend supports it, which it doesn't directly now)
-    // or simply return an empty list or error if not intended.
-    // Assuming the main listing will be getMemberStoriesByMemberId
-    return this.http.get<MemberStoryDto[]>(this.baseRoute); // This endpoint does not exist in backend
-  }
-
   async getById(id: string): Promise<Result<MemberStoryDto | undefined, ApiError>> {
     const result = await this.http.get<MemberStoryDto>(`${this.baseRoute}/detail/${id}`);
     if (result.ok && result.value) {

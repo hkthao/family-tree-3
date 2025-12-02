@@ -12,11 +12,6 @@ import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store'
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<Family[], ApiError>> {
-    // Renamed from fetchFamilies
-    return this.http.get<Family[]>(`/family`);
-  }
-
   async getById(id: string): Promise<Result<Family, ApiError>> {
     // Renamed from getById
     return this.http.get<Family>(`/family/${id}`);

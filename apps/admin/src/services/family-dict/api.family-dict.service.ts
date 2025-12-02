@@ -11,11 +11,6 @@ import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 export class ApiFamilyDictService implements IFamilyDictService {
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<FamilyDict[], ApiError>> {
-    const result = await this.http.get<FamilyDict[]>(`/family-dict`);
-    return result;
-  }
-
   async getById(id: string): Promise<Result<FamilyDict | undefined, ApiError>> {
     const result = await this.http.get<FamilyDict>(`/family-dict/${id}`);
     return result;

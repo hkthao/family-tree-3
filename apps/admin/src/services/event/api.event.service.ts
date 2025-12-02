@@ -4,9 +4,6 @@ import type { Paginated, Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 export class ApiEventService implements IEventService {
   constructor(private http: ApiClientMethods) { }
-  async fetch(): Promise<Result<Event[], ApiError>> {
-    return this.http.get<Event[]>(`/event`);
-  }
   async getById(id: string): Promise<Result<Event | undefined, ApiError>> {
     return this.http.get<Event>(`/event/${id}`);
   }

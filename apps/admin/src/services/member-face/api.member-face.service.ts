@@ -6,10 +6,6 @@ import { ok } from '@/types';
 export class ApiMemberFaceService implements IMemberFaceService {
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<MemberFace[], ApiError>> {
-    return await this.http.get<MemberFace[]>(`/memberfaces`);
-  }
-
   async getById(id: string): Promise<Result<MemberFace | undefined, ApiError>> {
     const result = await this.http.get<MemberFace>(`/memberfaces/${id}`);
     if (result.ok) {
