@@ -1,5 +1,4 @@
 // apps/admin/src/types/public-relationship.d.ts
-import type { BaseAuditableDto } from './common-dto';
 import type { RelationshipType } from './relationship'; // Reusing RelationshipType from admin relationship types
 
 export interface RelationshipMemberDto {

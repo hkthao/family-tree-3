@@ -5,6 +5,7 @@ import axios, {
 } from 'axios';
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
+import { getApiBaseUrl } from '@/utils/api.util';
 
 // Define a custom error type for API errors
 export interface ApiError {
@@ -48,7 +49,7 @@ const createApiError = (error: AxiosError): ApiError => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: window.runtimeConfig?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-type': 'application/json',
   },
