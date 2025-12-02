@@ -8,6 +8,7 @@ import { useUserProfileStore } from '@/stores';
 import { NovuUI } from '@novu/js/ui';
 import { dark } from '@novu/js/themes'; // Import the dark theme object
 import { useI18n } from 'vue-i18n'; // Import useI18n
+import { getEnvVariable } from '@/utils/api.util';
 
 interface NovuOptions {
   options: {
@@ -22,7 +23,8 @@ const novuInbox = ref<HTMLElement | null>(null);
 let novuInstance: NovuUI | null = null;
 
 // Placeholder for applicationIdentifier - needs to be configured
-const applicationIdentifier = ref(import.meta.env.VITE_NOVU_APPLICATION_IDENTIFIER || '');
+const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');
+
 
 // Get subscriberId from the authenticated user
 

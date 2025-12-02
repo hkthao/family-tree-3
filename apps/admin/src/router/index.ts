@@ -5,6 +5,7 @@ import { canAccessMenu } from '@/utils/menuPermissions';
 import { useAuthStore } from '@/stores';
 import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
+import { getEnvVariable } from '@/utils/api.util'; // Import getEnvVariable
 
 // Import feature routes
 import { familyDictRoutes } from './features/family-dict.routes';
@@ -24,7 +25,7 @@ import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 import { chatRoutes } from './features/chat.routes'; // New
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(getEnvVariable('BASE_URL')),
   routes: [
     {
       path: '/',

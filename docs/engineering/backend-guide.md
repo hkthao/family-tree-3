@@ -16,7 +16,7 @@ Backend được xây dựng trên nền tảng .NET 8, tuân thủ kiến trúc
 *   **Cơ sở dữ liệu:** MySQL
 *   **Xác thực:** JWT Authentication
 
-### Cấu trúc thư mục `src/backend/`
+### Cấu trúc thư mục `apps/backend/`
 
 Dự án backend được tổ chức theo Clean Architecture, với các lớp chính được ánh xạ vào các thư mục tương ứng:
 
@@ -37,14 +37,14 @@ Dự án backend được tổ chức theo Clean Architecture, với các lớp 
 
 1.  **Điều hướng đến thư mục backend:**
     ```bash
-    cd src/backend
+    cd apps/backend
     ```
 2.  **Cập nhật các gói NuGet:**
     ```bash
     dotnet restore
     ```
 3.  **Cấu hình chuỗi kết nối cơ sở dữ liệu:**
-    Mở tệp `src/Web/appsettings.json` và đảm bảo chuỗi kết nối `DefaultConnection` trỏ đến máy chủ MySQL của bạn.
+    Mở tệp `apps/backend/src/Web/appsettings.json` và đảm bảo chuỗi kết nối `DefaultConnection` trỏ đến máy chủ MySQL của bạn.
     ```json
     "ConnectionStrings": {
       "DefaultConnection": "Server=localhost;Port=3306;Database=familytree;Uid=root;Pwd=password;"
@@ -53,11 +53,11 @@ Dự án backend được tổ chức theo Clean Architecture, với các lớp 
     Nếu bạn đang sử dụng Docker Compose, chuỗi kết nối sẽ là `Server=mysql;Port=3306;Database=familytree;Uid=root;Pwd=password;`.
 4.  **Chạy Migrations để tạo cơ sở dữ liệu:**
     ```bash
-    dotnet ef database update --project src/Infrastructure --startup-project src/Web
+    dotnet ef database update --project apps/backend/src/Infrastructure --startup-project apps/backend/src/Web
     ```
 5.  **Chạy ứng dụng:**
     ```bash
-    dotnet run --project src/Web
+    dotnet run --project apps/backend/src/Web
     ```
     API sẽ khả dụng tại `http://localhost:8080` và Swagger UI tại `http://localhost:8080/swagger`.
 
@@ -101,7 +101,7 @@ Dự án backend bao gồm các Unit Tests và Integration Tests để đảm b�
 
 1.  **Điều hướng đến thư mục backend:**
     ```bash
-    cd src/backend
+    cd apps/backend
     ```
 2.  **Chạy tất cả các tests:**
     ```bash
@@ -115,7 +115,7 @@ Dự án backend bao gồm các Unit Tests và Integration Tests để đảm b�
 
 #### Chạy trong CI
 
-Trong môi trường CI (GitHub Actions), các tests được chạy tự động như một phần của job `build-and-test` trong workflow `ci.yml`. Cụ thể, lệnh `dotnet test src/backend/backend.sln --no-build --verbosity normal` sẽ được thực thi để chạy tất cả các tests của backend.
+Trong môi trường CI (GitHub Actions), các tests được chạy tự động như một phần của job `build-and-test` trong workflow `ci.yml`. Cụ thể, lệnh `dotnet test apps/backend/backend.sln --no-build --verbosity normal` sẽ được thực thi để chạy tất cả các tests của backend.
 
 ### 5.3. Hướng dẫn Viết Tests
 
@@ -164,7 +164,7 @@ Workflow `ci.yml` được kích hoạt khi có `push` lên nhánh `main` hoặc
 *   **`docker-build`**:
     *   Job này phụ thuộc vào `build-and-test` (chỉ chạy khi `build-and-test` thành công).
     *   **Xây dựng Docker Image Backend**: Sử dụng `infra/Dockerfile.backend` để xây dựng image Docker cho backend. Image này được gắn thẻ `hkthao/family-tree-backend:latest`.
-    *   **Xây dựng Docker Image Frontend**: Sử dụng `infra/Dockerfile.frontend` để xây dựng image Docker cho frontend. Image này được gắn thẻ `hkthao/family-tree-frontend:latest`.
+    *   **Xây dựng Docker Image Frontend**: Sử dụng `apps/admin/Dockerfile` để xây dựng image Docker cho frontend. Image này được gắn thẻ `hkthao/family-tree-admin:latest`.
     *   Các image Docker sau khi được xây dựng sẽ được tải lên dưới dạng artifact.
 
 ### 5.2. Mô tả Docker Images
@@ -177,7 +177,7 @@ Dự án sử dụng Docker để đóng gói ứng dụng, đảm bảo môi tr
     *   **Giai đoạn runtime**: Sử dụng `mcr.microsoft.com/dotnet/aspnet:8.0` làm base image cuối cùng, chỉ chứa các thư viện cần thiết để chạy ứng dụng, giúp giảm kích thước image.
     *   Ứng dụng backend được publish vào thư mục `/app` trong container.
 
-*   **Frontend (`infra/Dockerfile.frontend`)**:
+*   **Frontend (`apps/admin/Dockerfile`)**:
     *   Sử dụng quy trình build đa tầng.
     *   **Giai đoạn build**: Sử dụng `node:20-alpine` để cài đặt phụ thuộc và xây dựng ứng dụng Vue.js bằng Vite.
     *   **Giai đoạn phục vụ (serve)**: Sử dụng `nginx:alpine` làm base image cuối cùng. Các tệp tĩnh của ứng dụng frontend đã được build sẽ được sao chép vào thư mục phục vụ của Nginx (`/usr/share/nginx/html`), và Nginx sẽ chịu trách nhiệm phục vụ ứng dụng.
@@ -188,23 +188,20 @@ Dự án sử dụng Docker để đóng gói ứng dụng, đảm bảo môi tr
 
 *   **Kiểm tra Backend**:
     ```bash
-    cd src/backend
+    cd apps/backend
     dotnet restore
-    dotnet build
-    dotnet format --verify-no-changes
-    dotnet test
     ```
 *   **Kiểm tra Frontend**:
     ```bash
-    cd src/frontend
+    cd apps/admin
     npm install
     npm run lint
     npm run test:coverage
     ```
 *   **Xây dựng Docker Images cục bộ**:
     ```bash
-    docker build -f infra/Dockerfile.backend -t hkthao/family-tree-backend:latest src/backend
-    docker build -f infra/Dockerfile.frontend -t hkthao/family-tree-frontend:latest src/frontend
+    docker build -f infra/Dockerfile.backend -t hkthao/family-tree-backend:latest apps/backend
+    docker build -f apps/admin/Dockerfile -t hkthao/family-tree-admin:latest apps/admin
     ```
     Các lệnh này sẽ xây dựng các image Docker tương tự như cách CI thực hiện, giúp bạn phát hiện sớm các vấn đề liên quan đến Dockerfile.
 

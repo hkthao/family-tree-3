@@ -18,12 +18,14 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useUserProfileStore } from '@/stores';
 import { Novu } from '@novu/js';
 import NovuInbox from './NovuInbox.vue'
+import { getEnvVariable } from '@/utils/api.util';
 
 const userProfileStore = useUserProfileStore();
 const unseenCount = ref(0);
 let unseen_count_changed: (() => void) | null = null;
 let notification_received: (() => void) | null = null;
-const applicationIdentifier = ref(import.meta.env.VITE_NOVU_APPLICATION_IDENTIFIER || '');
+const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');
+
 
 const updateUnReadCount = async (novu: Novu) => {
   const { data } = await novu.notifications.count({

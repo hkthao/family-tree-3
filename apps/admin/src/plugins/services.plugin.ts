@@ -5,7 +5,7 @@ import {
   type AppServices,
 } from '@/services/service.factory'; // Import the factory
 import i18n from './i18n'; // Import i18n
-import { inject, provide } from 'vue'; // NEW: Import inject and provide
+import { inject } from 'vue'; // NEW: Import inject
 
 // NEW: Define a symbol for the injection key
 export const ServicesInjectionKey = Symbol('AppServices');

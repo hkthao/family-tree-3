@@ -148,6 +148,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios'; // Assuming axios is available for API calls
 import packageJson from '../../../package.json'; // To get frontend version
 import DonateSection from '@/components/common/DonateSection.vue';
+import { getEnvVariable, getApiBaseUrl } from '@/utils/api.util';
 
 const frontendVersion = ref('N/A');
 const backendVersion = ref('N/A');
@@ -161,14 +162,14 @@ onMounted(async () => {
   frontendVersion.value = packageJson.version;
 
   // Get info from environment variables (Vite)
-  buildDate.value = window.runtimeConfig?.VITE_APP_BUILD_DATE || import.meta.env.VITE_APP_BUILD_DATE || 'N/A';
-  environment.value = window.runtimeConfig?.VITE_APP_ENVIRONMENT || import.meta.env.VITE_APP_ENVIRONMENT || 'N/A';
-  apiEndpoint.value = window.runtimeConfig?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'N/A';
-  commitId.value = window.runtimeConfig?.VITE_APP_COMMIT_ID || import.meta.env.VITE_APP_COMMIT_ID || 'N/A';
+  buildDate.value = getEnvVariable('VITE_APP_BUILD_DATE') || 'N/A';
+  environment.value = getEnvVariable('VITE_APP_ENVIRONMENT') || 'N/A';
+  apiEndpoint.value = getApiBaseUrl() || 'N/A';
+  commitId.value = getEnvVariable('VITE_APP_COMMIT_ID') || 'N/A';
 
   // Fetch backend version
   try {
-    const response = await axios.get(`${apiEndpoint.value}/version`); // Assuming an /api/version endpoint
+    const response = await axios.get(`${getApiBaseUrl()}/api/version`); // Assuming an /api/version endpoint
     if (response.status === 200 && response.data && response.data.version) {
       backendVersion.value = response.data.version;
     } else {

@@ -1,4 +1,4 @@
-name: CD Deploy
+name: CD Deploy Admin and Backend
 
 on:
   workflow_dispatch:
@@ -40,13 +40,14 @@ jobs:
           docker compose -f docker-compose.prod.yml up -d --no-deps backend
           echo "Backend deployment completed successfully!"
 
-  deploy-face-service:
+  restart-nginx:
     runs-on: ubuntu-latest
+    needs: [deploy-admin, deploy-backend]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Deploy Face Service to Server via SSH
+    - name: Restart Nginx Service via SSH
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -54,6 +55,5 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          docker compose -f docker-compose.prod.yml pull face-service
-          docker compose -f docker-compose.prod.yml up -d --no-deps face-service
-          echo "Face Service deployment completed successfully!"
+          docker compose -f docker-compose.prod.yml restart nginx
+          echo "Nginx service restarted successfully!"
