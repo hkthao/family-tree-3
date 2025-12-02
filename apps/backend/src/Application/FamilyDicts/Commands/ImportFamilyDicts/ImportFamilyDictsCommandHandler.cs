@@ -1,3 +1,4 @@
+using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
@@ -7,15 +8,22 @@ public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDicts
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IAuthorizationService _authorizationService;
 
-    public ImportFamilyDictsCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public ImportFamilyDictsCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
     {
         _context = context;
         _mapper = mapper;
+        _authorizationService = authorizationService;
     }
 
     public async Task<IEnumerable<Guid>> Handle(ImportFamilyDictsCommand request, CancellationToken cancellationToken)
     {
+        if (!_authorizationService.IsAdmin())
+        {
+            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép nhập FamilyDict.");
+        }
+
         var importedFamilyDictIds = new List<Guid>();
 
         foreach (var importDto in request.FamilyDicts)

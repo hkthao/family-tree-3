@@ -12,21 +12,25 @@ namespace backend.Application.UnitTests.FamilyDicts.Commands.DeleteFamilyDict;
 
 public class DeleteFamilyDictCommandTests : TestBase
 {
-    private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IDateTime> _dateTimeMock;
-
     public DeleteFamilyDictCommandTests()
     {
-        _currentUserMock = new Mock<ICurrentUser>();
-        _dateTimeMock = new Mock<IDateTime>();
+        // Set up authenticated user by default for most tests
+        _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        // Default to admin for these command tests, as most successful tests require admin rights
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
     }
 
     [Fact]
     public async Task Handle_ShouldSoftDeleteFamilyDict()
     {
         // Arrange
-        var userId = Guid.NewGuid();
-        var now = DateTime.UtcNow;
+        // Clear existing data to ensure test isolation
+        _context.FamilyDicts.RemoveRange(_context.FamilyDicts);
+        await _context.SaveChangesAsync();
+
+        var userId = _mockUser.Object.UserId; // Use mocked user ID
+        var now = _mockDateTime.Object.Now; // Use mocked DateTime
 
         var initialFamilyDict = new FamilyDict
         {
@@ -41,10 +45,7 @@ public class DeleteFamilyDictCommandTests : TestBase
         _context.FamilyDicts.Add(initialFamilyDict);
         await _context.SaveChangesAsync();
 
-        _currentUserMock.Setup(x => x.UserId).Returns(userId);
-        _dateTimeMock.Setup(x => x.Now).Returns(now);
-
-        var handler = new DeleteFamilyDictCommandHandler(_context, _currentUserMock.Object, _dateTimeMock.Object);
+        var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
         var command = new DeleteFamilyDictCommand(initialFamilyDict.Id);
 
         // Act
@@ -62,14 +63,29 @@ public class DeleteFamilyDictCommandTests : TestBase
     public async Task Handle_ShouldThrowNotFoundException_WhenFamilyDictDoesNotExist()
     {
         // Arrange
-        _currentUserMock.Setup(x => x.UserId).Returns(Guid.NewGuid());
-        _dateTimeMock.Setup(x => x.Now).Returns(DateTime.UtcNow);
+        // Clear existing data to ensure test isolation
+        _context.FamilyDicts.RemoveRange(_context.FamilyDicts);
+        await _context.SaveChangesAsync();
 
-        var handler = new DeleteFamilyDictCommandHandler(_context, _currentUserMock.Object, _dateTimeMock.Object);
+        var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
         var command = new DeleteFamilyDictCommand(Guid.NewGuid()); // Non-existent ID
 
         // Act & Assert
         await FluentActions.Invoking(() => handler.Handle(command, CancellationToken.None))
             .Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldThrowForbiddenAccessException_WhenUserIsNotAdmin()
+    {
+        // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Simulate non-admin user
+        var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
+        var command = new DeleteFamilyDictCommand(Guid.NewGuid()); // ID does not matter for this test
+
+        // Act & Assert
+        await FluentActions.Awaiting(() => handler.Handle(command, CancellationToken.None))
+            .Should().ThrowAsync<ForbiddenAccessException>()
+            .WithMessage("Chỉ quản trị viên mới được phép xóa FamilyDict.");
     }
 }

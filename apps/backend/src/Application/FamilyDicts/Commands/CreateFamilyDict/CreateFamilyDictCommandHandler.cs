@@ -1,3 +1,4 @@
+using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
@@ -8,16 +9,23 @@ public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCo
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
+    private readonly IAuthorizationService _authorizationService;
 
-    public CreateFamilyDictCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IMapper mapper)
+    public CreateFamilyDictCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IMapper mapper, IAuthorizationService authorizationService)
     {
         _context = context;
         _currentUser = currentUser;
         _mapper = mapper;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Guid> Handle(CreateFamilyDictCommand request, CancellationToken cancellationToken)
     {
+        if (!_authorizationService.IsAdmin())
+        {
+            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép tạo FamilyDict.");
+        }
+
         var entity = new FamilyDict
         {
             Name = request.Name,
