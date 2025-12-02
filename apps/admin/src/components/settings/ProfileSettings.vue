@@ -59,7 +59,6 @@ const formRef = ref<HTMLFormElement | null>(null);
 const loading = ref(false);
 
 const formData = reactive({
-  name: '',
   firstName: '',
   lastName: '',
   email: '',
@@ -79,7 +78,6 @@ const generatedFullName = computed(() => {
 onMounted(async () => {
   await userProfileStore.fetchCurrentUserProfile();
   if (userProfileStore.userProfile) {
-    formData.name = userProfileStore.userProfile.name;
     formData.firstName = userProfileStore.userProfile.firstName || '';
     formData.lastName = userProfileStore.userProfile.lastName || '';
     formData.email = userProfileStore.userProfile.email;
