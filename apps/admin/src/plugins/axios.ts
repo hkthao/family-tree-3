@@ -5,7 +5,7 @@ import axios, {
 } from 'axios';
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
-import { getApiBaseUrl } from '@/utils/api.util';
+import { getApiBaseUrl, getEnvVariable } from '@/utils/api.util';
 
 // Define a custom error type for API errors
 export interface ApiError {
@@ -56,7 +56,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-  const publicApiKey = window.runtimeConfig?.VITE_API_PUBLIC_KEY || import.meta.env.VITE_API_PUBLIC_KEY;
+  const publicApiKey = getEnvVariable('VITE_API_PUBLIC_KEY');
 
   // Check if the request is for a public API endpoint
   if (config.url && config.url.startsWith('/public/')) {

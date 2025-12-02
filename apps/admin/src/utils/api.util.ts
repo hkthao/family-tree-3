@@ -14,7 +14,6 @@ export function getEnvVariable(key: string): string | undefined {
     // @ts-expect-error: window.runtimeConfig is injected by nginx at runtime
     return window.runtimeConfig[key];
   }
-  // @ts-expect-error: import.meta.env is a Vite-specific global object
   return import.meta.env[key];
 }
 
