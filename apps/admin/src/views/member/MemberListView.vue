@@ -27,9 +27,9 @@
     </BaseCrudDrawer>
 
     <!-- Biography Drawer -->
-    <BaseCrudDrawer v-model="biographyDrawer" @close="handleBiographyClosed">
+    <BaseCrudDrawer v-model="biographyDrawer" @close="closeAllMemberDrawers">
       <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
-        @close="handleBiographyClosed" />
+        @close="closeAllMemberDrawers" />
     </BaseCrudDrawer>
 
     <!-- AI Create Member Drawer -->
@@ -51,7 +51,7 @@ import NLEditorView from '@/views/natural-language/NLEditorView.vue';
 import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
@@ -117,7 +117,12 @@ const handleListOptionsUpdate = (options: {
   memberStore.setListOptions(options);
 };
 
-const confirmDelete = async (member: Member) => {
+const confirmDelete = async (memberId: string) => {
+  const member = memberStore.list.items.find(m => m.id === memberId);
+  if (!member) {
+    showSnackbar(t('member.messages.notFound'), 'error');
+    return;
+  }
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
     message: t('member.list.confirmDelete', { fullName: member.fullName || '' }),
@@ -150,16 +155,16 @@ const handleDeleteConfirm = async (member: Member) => {
 };
 
 const handleMemberSaved = () => {
-  closeAllDrawers(); // Close whichever drawer was open
+  closeAllMemberDrawers(); // Close whichever drawer was open
   memberStore._loadItems();
 };
 
 const handleMemberClosed = () => {
-  closeAllDrawers(); // Close whichever drawer was open
+  closeAllMemberDrawers(); // Close whichever drawer was open
 };
 
 const handleDetailClosed = () => {
-  closeAllDrawers(); // Close the detail drawer
+  closeAllMemberDrawers(); // Close the detail drawer
 };
 
 const handleGenerateBiography = (member: Member) => {
@@ -168,14 +173,21 @@ const handleGenerateBiography = (member: Member) => {
   biographyDrawer.value = true;
 };
 
-const handleBiographyClosed = () => {
+const closeAllMemberDrawers = () => {
+  closeAllDrawers();
   biographyDrawer.value = false;
   biographyMemberId.value = null;
+  aiCreateDrawer.value = false;
 };
 
 onMounted(() => {
   memberStore.list.filters = { familyId: props.familyId };
   memberStore._loadItems();
 })
+
+watch(() => props.familyId, async (newFamilyId) => {
+  memberStore.list.filters = { familyId: newFamilyId };
+  await memberStore._loadItems();
+}, { immediate: false });
 
 </script>
