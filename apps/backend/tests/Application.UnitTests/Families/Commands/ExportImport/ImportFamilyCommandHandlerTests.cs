@@ -29,7 +29,8 @@ public class ImportFamilyCommandHandlerTests : TestBase
         var currentUserId = Guid.NewGuid();
         _mockUser.Setup(x => x.UserId).Returns(currentUserId);
 
-        var existingFamily = Family.Create("Existing Family", "EXFAM", "Existing Description", "Existing Address", "ExistingAvatar.jpg", "Public", currentUserId);
+        var existingFamily = Family.Create("Existing Family", "EXFAM", "Existing Description", "Existing Address", "Public", currentUserId);
+        existingFamily.UpdateAvatar("ExistingAvatar.jpg");
         existingFamily.Id = Guid.NewGuid();
         _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync(CancellationToken.None);

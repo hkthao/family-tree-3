@@ -1,5 +1,3 @@
-using backend.Application.MemberFaces.Common; // For BoundingBoxDto
-
 namespace backend.Application.MemberFaces.Common; // Place it in a common location
 
 public class FaceDetectionResultDto

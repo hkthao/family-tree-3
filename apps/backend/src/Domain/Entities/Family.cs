@@ -74,17 +74,22 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
     }
 
-    public void UpdateFamilyDetails(string name, string? description, string? address, string? avatarUrl, string visibility, string code)
+    public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code)
     {
         Name = name;
         Description = description;
         Address = address;
-        AvatarUrl = avatarUrl;
         Visibility = visibility;
         Code = code;
 
         AddDomainEvent(new FamilyUpdatedEvent(this));
         AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
+    }
+
+    public void UpdateAvatar(string? newAvatarUrl)
+    {
+        AvatarUrl = newAvatarUrl;
+        AddDomainEvent(new FamilyUpdatedEvent(this));
     }
 
     public void UpdateFamilyUsers(IEnumerable<FamilyUserUpdateInfo> newFamilyUsers)
@@ -286,7 +291,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// <summary>
     /// Factory method to create a new Family aggregate.
     /// </summary>
-    public static Family Create(string name, string code, string? description, string? address, string? avatarUrl, string visibility, Guid creatorUserId)
+    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId)
     {
         var family = new Family
         {
@@ -294,7 +299,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             Code = code,
             Description = description,
             Address = address,
-            AvatarUrl = avatarUrl,
             Visibility = visibility,
             TotalMembers = 0, // Initial value
             TotalGenerations = 0 // Initial value

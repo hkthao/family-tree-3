@@ -1,6 +1,3 @@
-
-using backend.Application.MemberFaces.Common; // For BoundingBoxDto
-
 namespace backend.Application.MemberFaces.Common;
 public class DetectedFaceDto
 {

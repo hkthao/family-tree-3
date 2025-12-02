@@ -22,10 +22,14 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, ICurren
                     familyDto.Code ?? Guid.NewGuid().ToString()[..5].ToUpper(), // Generate a simple code if not provided
                     familyDto.Description,
                     familyDto.Address,
-                    familyDto.AvatarUrl,
                     familyDto.Visibility ?? "Public",
                     _user.UserId
                 );
+
+                if (!string.IsNullOrEmpty(familyDto.AvatarUrl))
+                {
+                    entity.UpdateAvatar(familyDto.AvatarUrl);
+                }
                 _context.Families.Add(entity);
                 createdFamilyIds.Add(entity.Id);
             }

@@ -8,18 +8,24 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using MediatR; // NEW
+using backend.Application.Files.UploadFile; // NEW
+using backend.Application.AI.DTOs; // NEW
+using backend.Application.Common.Models; // NEW
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandHandlerTests : TestBase
 {
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IMediator> _mediatorMock; // NEW
     private readonly CreateFamilyCommandHandler _handler;
 
     public CreateFamilyCommandHandlerTests()
     {
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new CreateFamilyCommandHandler(_context, _currentUserMock.Object);
+        _mediatorMock = new Mock<IMediator>(); // NEW
+        _handler = new CreateFamilyCommandHandler(_context, _currentUserMock.Object, _mediatorMock.Object); // Pass mediator mock
     }
 
     [Fact]
@@ -29,12 +35,18 @@ public class CreateFamilyCommandHandlerTests : TestBase
         var userId = Guid.NewGuid();
         _currentUserMock.Setup(x => x.UserId).Returns(userId);
 
+        var avatarBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("fake image data")); // Simulate image data
+        var expectedAvatarUrl = "http://uploaded.example.com/avatar.png";
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = expectedAvatarUrl }));
+
         var command = new CreateFamilyCommand
         {
             Name = "Test Family",
             Description = "A family for testing",
             Address = "123 Test St",
-            AvatarUrl = "http://example.com/avatar.png",
+            AvatarBase64 = avatarBase64, // Use AvatarBase64
             Visibility = "Public"
         };
 
@@ -51,7 +63,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily!.Name.Should().Be(command.Name);
         createdFamily.Description.Should().Be(command.Description);
         createdFamily.Address.Should().Be(command.Address);
-        createdFamily.AvatarUrl.Should().Be(command.AvatarUrl);
+        createdFamily.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against expected uploaded URL
         createdFamily.Visibility.Should().Be(command.Visibility);
         createdFamily.Code.Should().StartWith("FAM-");
         createdFamily.FamilyUsers.Should().ContainSingle(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
@@ -59,6 +71,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
             events.Any(e => e is FamilyCreatedEvent) &&
             events.Any(e => e is FamilyStatsUpdatedEvent)
         )), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify upload was called
     }
 
     [Fact]
@@ -67,6 +80,10 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         _currentUserMock.Setup(x => x.UserId).Returns(userId);
+
+        // No AvatarBase64, so mediator should not be called
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
 
         var command = new CreateFamilyCommand
         {
@@ -83,5 +100,6 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.Should().NotBeNull();
         createdFamily!.Code.Should().NotBeNullOrEmpty();
         createdFamily.Code.Should().StartWith("FAM-");
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
     }
 }

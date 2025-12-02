@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace backend.Application.Common.Interfaces;
 
 /// <summary>

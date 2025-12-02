@@ -18,11 +18,9 @@ public record UploadFileCommand : IRequest<Result<ImageUploadResponseDto>>
     /// </summary>
     public string FileName { get; init; } = null!;
 
-
-
     /// <summary>
     /// The folder in the cloud storage to upload to (e.g., "family-tree-memories").
     /// </summary>
-    public string Folder { get; init; } = "family-tree-memories"; // Default folder
+    public string Folder { get; init; } = string.Empty; // Default folder
     public string ContentType { get; init; } = string.Empty;
 }

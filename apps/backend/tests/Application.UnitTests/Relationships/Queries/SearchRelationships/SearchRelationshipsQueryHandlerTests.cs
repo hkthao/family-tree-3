@@ -19,7 +19,7 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         var sourceMemberId2 = Guid.NewGuid();
         var targetMemberId2 = Guid.NewGuid();
 
-        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        var family = Family.Create("Test Family", "TF", null, null, "Public", Guid.NewGuid());
         family.Id = familyId; // Set the ID to match the test's expectation
         var sourceMember1 = family.AddMember(new Member("Source1", "Member1", "SM1", family.Id) { Id = sourceMemberId1 });
         var targetMember1 = family.AddMember(new Member("Target1", "Member1", "TM1", family.Id) { Id = targetMemberId1 });
