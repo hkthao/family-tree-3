@@ -6,7 +6,6 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.Members.Queries.GetMembersByFamilyId; // Added missing using directive
 using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
@@ -47,22 +46,6 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
             return Ok(result.Value);
         }
         return BadRequest(result.Error); // Or other appropriate error handling
-    }
-
-    /// <summary>
-    /// Xử lý GET request để lấy danh sách thành viên theo Family ID.
-    /// </summary>
-    /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
-    /// <returns>Danh sách các thành viên thuộc gia đình.</returns>
-    [HttpGet("by-family/{familyId}")]
-    public async Task<ActionResult<List<MemberListDto>>> GetMembersByFamilyId(Guid familyId)
-    {
-        var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
     }
 
     /// <summary>
