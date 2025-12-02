@@ -160,7 +160,6 @@ onUnmounted(() => {
 
 <style scoped>
 .n8n-chat-window {
-  height: fit-content !important;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -169,7 +168,7 @@ onUnmounted(() => {
 }
 
 .n8n-chat-container {
-  height: 65vh;
+  max-height: 100%;
 }
 
 .btn-close {
