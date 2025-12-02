@@ -1,5 +1,5 @@
-import type { Paginated, RecentActivity, Result, TargetType, UserPreference } from '@/types'; // NEW IMPORTS
-import type { UserProfile } from '@/types';
+import type { Paginated, RecentActivity, Result, TargetType, UserPreference } from '@/types';
+import type { UserProfile, UpdateUserProfileRequestDto } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 
 export interface IUserService {
@@ -15,6 +15,6 @@ export interface IUserService {
   ): Promise<Result<Paginated<RecentActivity>, ApiError>>;
   getUserPreferences(): Promise<Result<UserPreference, ApiError>>; // NEW METHOD
   saveUserPreferences(preferences: UserPreference): Promise<Result<void, ApiError>>; // NEW METHOD
-  updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>>; // NEW METHOD
+  updateUserProfile(profile: UpdateUserProfileRequestDto): Promise<Result<UserProfile, ApiError>>; // NEW METHOD
   getCurrentUserProfile(): Promise<Result<UserProfile, ApiError>>; // NEW METHOD
 }
