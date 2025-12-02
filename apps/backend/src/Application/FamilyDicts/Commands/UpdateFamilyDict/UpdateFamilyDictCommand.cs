@@ -1,6 +1,5 @@
 using backend.Domain.Enums;
 using backend.Application.Common.Models; // Added
-using MediatR; // Added
 
 namespace backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace backend.Application.UnitTests.MemberStories.Queries.GetMemberStoryDetail;
 
-public class GetMemberStoryDetailQueryHandlerTests : TestBase
+    public class GetMemberStoryDetailQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly GetMemberStoryDetailQueryHandler _handler;
@@ -17,9 +17,8 @@ public class GetMemberStoryDetailQueryHandlerTests : TestBase
     public GetMemberStoryDetailQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new GetMemberStoryDetailQueryHandler(_context, _mapper, _authorizationServiceMock.Object);
+        _handler = new GetMemberStoryDetailQueryHandler(_context, _mapper, _authorizationServiceMock.Object, _mockUser.Object);
     }
-
     [Fact]
     public async Task Handle_ShouldReturnMemberStoryDto_WhenAuthorized()
     {

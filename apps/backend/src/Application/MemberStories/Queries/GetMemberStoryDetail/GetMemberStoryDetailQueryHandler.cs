@@ -10,12 +10,14 @@ public class GetMemberStoryDetailQueryHandler : IRequestHandler<GetMemberStoryDe
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUser _currentUser; // Added
 
-    public GetMemberStoryDetailQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
+    public GetMemberStoryDetailQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser) // Modified
     {
         _context = context;
         _mapper = mapper;
         _authorizationService = authorizationService;
+        _currentUser = currentUser; // Added
     }
 
     public async Task<Result<MemberStoryDto>> Handle(GetMemberStoryDetailQuery request, CancellationToken cancellationToken) // Updated
