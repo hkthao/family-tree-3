@@ -28,12 +28,6 @@ public class SearchStoriesQueryHandler : IRequestHandler<SearchStoriesQuery, Res
 
         // Apply MemberStoryAccessSpecification to filter member stories based on user's access
         query = query.WithSpecification(new MemberStoryAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
-        
-        // Remove redundant authorization check
-        // if (!_currentUser.IsAuthenticated || _currentUser.UserId == Guid.Empty)
-        // {
-        //     return Result<PaginatedList<MemberStoryDto>>.Success(PaginatedList<MemberStoryDto>.Empty());
-        // }
 
         if (request.MemberId.HasValue)
         {
