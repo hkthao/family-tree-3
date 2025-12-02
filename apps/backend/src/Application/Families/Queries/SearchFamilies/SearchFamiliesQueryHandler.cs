@@ -6,11 +6,12 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 
-public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser) : IRequestHandler<SearchFamiliesQuery, Result<PaginatedList<FamilyDto>>>
+public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<SearchFamiliesQuery, Result<PaginatedList<FamilyDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchFamiliesQuery request, CancellationToken cancellationToken)
     {
@@ -18,7 +19,7 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
 
         query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
-        query = query.WithSpecification(new FamilyAccessSpecification(_currentUser.UserId, _currentUser));
+        query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
         query = query.WithSpecification(new FamilyVisibilitySpecification(request.Visibility));
 
         var paginatedList = await query

@@ -13,7 +13,11 @@ public class SearchFamiliesQueryHandlerTests : TestBase
 
     public SearchFamiliesQueryHandlerTests()
     {
-        // _authenticatedUserId, _mockUser, _handler sẽ được khởi tạo trong mỗi phương thức kiểm thử.
+        // Set up authenticated user by default for most tests
+        _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        // Default to non-admin for most tests, override in specific admin tests
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
     }
 
     [Fact]
@@ -28,7 +32,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByOther = new Family { Id = Guid.NewGuid(), Name = "Family By Other", Code = "FBO", CreatedBy = otherUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
@@ -65,7 +69,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = authenticatedUserId.ToString() };
@@ -99,7 +103,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Alpha", Description = "Description for Alpha", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Beta", Description = "Description for Beta", Code = "FB", CreatedBy = authenticatedUserId.ToString() };
@@ -130,7 +134,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Public", Visibility = "Public", Code = "FP", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Private", Visibility = "Private", Code = "FPR", CreatedBy = authenticatedUserId.ToString() };
@@ -161,7 +165,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family C", Code = "FC", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
@@ -193,7 +197,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByAuthenticatedUser = new Family { Id = Guid.NewGuid(), Name = "My Created Family", Code = "MYF", CreatedBy = authenticatedUserId.ToString() };
@@ -219,5 +223,38 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         result.Value.Items.Should().Contain(f => f.Name == "Other User's Family");
     }
 
+    [Fact]
+    public async Task Handle_ShouldReturnAllFamilies_WhenUserIsAdmin()
+    {
+        // Arrange
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var adminUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(adminUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Simulate admin user
+
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 1", Code = "ADM1", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Private.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 2", Code = "ADM2", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Public.ToString() };
+        _context.Families.AddRange(family1, family2);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { Page = 1, ItemsPerPage = 10 };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2); // Admin should see all families
+        result.Value.Items.Should().Contain(f => f.Name == "Admin Family 1");
+        result.Value.Items.Should().Contain(f => f.Name == "Admin Family 2");
+    }
 
 }
