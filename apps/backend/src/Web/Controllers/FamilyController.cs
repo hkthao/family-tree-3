@@ -6,7 +6,6 @@ using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
-using backend.Application.Families.Queries.GetFamilyDetails;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields; // Add this using directive
 using Microsoft.AspNetCore.Authorization;
@@ -135,29 +134,5 @@ public class FamilyController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý GET request để lấy thông tin chi tiết đầy đủ của một gia đình (bao gồm thành viên và sự kiện) theo ID.
-    /// </summary>
-    /// <param name="id">ID của gia đình cần lấy chi tiết.</param>
-    /// <returns>Thông tin chi tiết đầy đủ của gia đình.</returns>
-    [HttpGet("{id}/details")]
-    public async Task<ActionResult<FamilyDetailsDto>> GetFamilyDetails(Guid id)
-    {
-        var result = await _mediator.Send(new GetFamilyDetailsQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        if (result.ErrorSource == backend.Application.Common.Constants.ErrorSources.NotFound)
-        {
-            return NotFound(result.Error);
-        }
-        if (result.ErrorSource == backend.Application.Common.Constants.ErrorSources.Forbidden)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, result.Error);
-        }
-        return BadRequest(result.Error);
     }
 }
