@@ -39,7 +39,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                     {
                         ImageData = imageData,
                         FileName = $"Family_Avatar_{Guid.NewGuid().ToString()}.png",
-                        Folder = "family-avatars",
+                        Folder = string.Format(UploadConstants.FamilyAvatarFolder, entity.Id), // Use UploadConstants
                         ContentType = "image/png"
                     };
 

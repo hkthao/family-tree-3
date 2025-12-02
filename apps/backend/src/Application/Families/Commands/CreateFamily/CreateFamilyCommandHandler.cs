@@ -1,10 +1,10 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Files.UploadFile; // Import UploadFileCommand
+using backend.Application.Files.UploadFile;
 using backend.Domain.Entities;
-
-using backend.Application.Common.Utils; // NEW
+using MediatR;
+using backend.Application.Common.Utils; 
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
@@ -12,11 +12,22 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
 {
     private readonly IApplicationDbContext _context = context;
     private readonly ICurrentUser _user = user;
-    private readonly IMediator _mediator = mediator; // Inject IMediator
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
-        string? avatarUrl = null;
+        var entity = Family.Create(
+            request.Name,
+            request.Code ?? GenerateUniqueCode("FAM"),
+            request.Description,
+            request.Address,
+            request.Visibility,
+            _user.UserId
+        );
+
+        _context.Families.Add(entity);
+        await _context.SaveChangesAsync(cancellationToken); // Save to get entity.Id
+
         if (!string.IsNullOrEmpty(request.AvatarBase64))
         {
             try
@@ -25,8 +36,8 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 var uploadCommand = new UploadFileCommand
                 {
                     ImageData = imageData,
-                    FileName = $"Family_Avatar_{Guid.NewGuid().ToString()}.png",
-                    Folder = "family-avatars",
+                    FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
+                    Folder = string.Format(UploadConstants.FamilyAvatarFolder, entity.Id), // Use entity.Id now
                     ContentType = "image/png"
                 };
 
@@ -42,7 +53,8 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                avatarUrl = uploadResult.Value.Url;
+                entity.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
+                await _context.SaveChangesAsync(cancellationToken); // Save avatar URL
             }
             catch (FormatException)
             {
@@ -50,44 +62,15 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
             }
             catch (Exception ex)
             {
-                // Log the exception details here if a logger is available
                 return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
             }
         }
 
-        try
-        {
-            var entity = Family.Create(
-                request.Name,
-                request.Code ?? GenerateUniqueCode("FAM"),
-                request.Description,
-                request.Address,
-                request.Visibility,
-                _user.UserId
-            );
-
-            if (avatarUrl != null)
-            {
-                entity.UpdateAvatar(avatarUrl);
-            }
-
-            _context.Families.Add(entity);
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return Result<Guid>.Success(entity.Id);
-        }
-        catch (Exception ex)
-        {
-            // Log the exception details here if a logger is available
-            return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
-        }
+        return Result<Guid>.Success(entity.Id);
     }
 
     private string GenerateUniqueCode(string prefix)
     {
-        // For simplicity, generate a GUID and take a substring.
-        // In a real application, you'd want to ensure uniqueness against existing codes in the database.
         return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
     }
 }
