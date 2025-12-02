@@ -1,5 +1,5 @@
-
 using AutoMapper;
+using backend.Application.Common.Constants;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -12,47 +12,34 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventById;
 
 public class GetEventByIdQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly GetEventByIdQueryHandler _handler;
-
     public GetEventByIdQueryHandlerTests()
     {
-        _mapperMock = new Mock<IMapper>();
-        _handler = new GetEventByIdQueryHandler(_context, _mapperMock.Object);
+        // TestBase already sets up _mockUser and _mockAuthorizationService
+        // Set default authenticated user for specific scenarios if needed
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Default to admin for these tests to easily access events
     }
 
     [Fact]
     public async Task Handle_ShouldReturnEvent_WhenEventExists()
     {
         // Arrange
-        var eventId = Guid.NewGuid();
-        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, Guid.NewGuid()) { Id = eventId };
+        var familyId = Guid.NewGuid();
+        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = Guid.NewGuid() }; // Ensure Id is set for entity tracking
         _context.Events.Add(testEvent);
         await _context.SaveChangesAsync();
 
-        var eventDetailDto = new EventDetailDto { Id = eventId, Name = "Test Event" };
-
-        var query = new GetEventByIdQuery(eventId);
-
-        // This setup is more complex because ProjectTo is an extension method.
-        // A simpler way for unit tests is to mock the final result of the projection.
-        // However, for this test, we will rely on the in-memory provider's ability to execute the query.
-        // We need a real AutoMapper configuration for ProjectTo to work.
-        var configuration = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Event, EventDetailDto>();
-        });
-        var mapper = configuration.CreateMapper();
-        var handlerWithRealMapper = new GetEventByIdQueryHandler(_context, mapper);
-
+        var query = new GetEventByIdQuery(testEvent.Id);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
 
         // Act
-        var result = await handlerWithRealMapper.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Id.Should().Be(eventId);
+        result.Value!.Id.Should().Be(testEvent.Id);
         result.Value.Name.Should().Be(testEvent.Name);
     }
 
@@ -60,18 +47,70 @@ public class GetEventByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenEventDoesNotExist()
     {
         // Arrange
-        var query = new GetEventByIdQuery(Guid.NewGuid());
-        var configuration = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Event, EventDetailDto>();
-        });
-        var mapper = configuration.CreateMapper();
-        var handlerWithRealMapper = new GetEventByIdQueryHandler(_context, mapper);
+        var nonExistentEventId = Guid.NewGuid();
+        var query = new GetEventByIdQuery(nonExistentEventId);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
 
         // Act
-        var result = await handlerWithRealMapper.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(string.Format(ErrorMessages.EventNotFound, nonExistentEventId)); // Corrected assertion
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+    {
+        // Arrange
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(false);
+        _mockUser.Setup(x => x.UserId).Returns(Guid.Empty);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+
+        var eventId = Guid.NewGuid();
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var query = new GetEventByIdQuery(eventId);
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.Unauthorized); // Corrected assertion
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnNotFound_WhenNonAdminUserHasNoAccess()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var inaccessibleFamilyId = Guid.NewGuid();
+
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Non-admin user
+
+        // Create an accessible family and associate the user with it
+        var accessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Accessible Family", Code = "ACC", Visibility = "Private" };
+        accessibleFamily.AddFamilyUser(userId, FamilyRole.Viewer);
+        _context.Families.Add(accessibleFamily);
+        await _context.SaveChangesAsync();
+
+
+        // Create an event in an inaccessible family
+        var inaccessibleEvent = new Event("Inaccessible Event", "EVT-INACCESSIBLE", EventType.Other, inaccessibleFamilyId) { Id = Guid.NewGuid() };
+        _context.Events.Add(inaccessibleEvent);
+
+        await _context.SaveChangesAsync();
+
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var query = new GetEventByIdQuery(inaccessibleEvent.Id); // Try to get the inaccessible event
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(string.Format(ErrorMessages.EventNotFound, inaccessibleEvent.Id)); // Corrected assertion
     }
 }
