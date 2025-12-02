@@ -10,8 +10,6 @@ export * from './file-upload.store';
 export * from './member-autocomplete.store';
 export * from './member.store';
 export * from './family-data.store';
-
-
 export * from './notification.store';
 export * from './relationship.store';
 export * from './user-activity.store';

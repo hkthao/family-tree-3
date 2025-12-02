@@ -9,6 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
+using MediatR; // NEW
+using backend.Application.Files.UploadFile; // NEW
+using backend.Application.Common.Models; // NEW
+using backend.Application.AI.DTOs; // NEW
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
@@ -17,6 +21,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IStringLocalizer<UpdateMemberCommandHandler>> _localizerMock;
     private readonly Mock<IMemberRelationshipService> _memberRelationshipServiceMock;
+    private readonly Mock<IMediator> _mediatorMock; // NEW
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
@@ -24,7 +29,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _localizerMock = new Mock<IStringLocalizer<UpdateMemberCommandHandler>>();
         _memberRelationshipServiceMock = new Mock<IMemberRelationshipService>();
-        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
+        _mediatorMock = new Mock<IMediator>(); // NEW
+        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object, _mediatorMock.Object); // Pass mediator mock
     }
 
     [Fact]
@@ -42,12 +48,19 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
+        var avatarBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("fake member image data"));
+        var expectedAvatarUrl = "http://uploaded.example.com/member_avatar.png";
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = expectedAvatarUrl }));
+
         var command = new UpdateMemberCommand
         {
             Id = memberId,
             FirstName = "Jane",
             LastName = "Smith",
-            FamilyId = familyId
+            FamilyId = familyId,
+            AvatarBase64 = avatarBase64 // Use AvatarBase64
         };
 
         // Act
@@ -59,9 +72,11 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Should().NotBeNull();
         updatedMember!.FirstName.Should().Be(command.FirstName);
         updatedMember.LastName.Should().Be(command.LastName);
+        updatedMember.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against uploaded URL
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is Domain.Events.Members.MemberUpdatedEvent)
         )), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify upload was called
     }
 
     [Fact]
@@ -87,6 +102,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+
         var command = new UpdateMemberCommand
         {
             Id = memberId,
@@ -105,6 +123,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Should().NotBeNull();
         updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newFatherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Father);
         updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialFatherId);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -130,6 +149,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+
         var command = new UpdateMemberCommand
         {
             Id = memberId,
@@ -148,6 +170,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Should().NotBeNull();
         updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newMotherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Mother);
         updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialMotherId);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -176,6 +199,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+
         var command = new UpdateMemberCommand
         {
             Id = memberId,
@@ -202,6 +228,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Should().NotBeNull();
         updatedMember!.SourceRelationships.Should().ContainSingle(r => r.SourceMemberId == memberId && r.TargetMemberId == newSpouseId && r.Type == backend.Domain.Enums.RelationshipType.Husband); // Changed assertion
         updatedMember.SourceRelationships.Should().NotContain(r => r.SourceMemberId == memberId && r.TargetMemberId == initialSpouseId); // Changed assertion
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -215,6 +242,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -222,6 +252,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Member with ID {command.Id}"));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
 
@@ -234,6 +265,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
 
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -241,5 +275,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

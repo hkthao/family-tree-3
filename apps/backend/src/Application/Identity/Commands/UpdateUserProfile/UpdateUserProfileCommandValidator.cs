@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants; // New using
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>
@@ -19,13 +20,8 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
             .EmailAddress().WithMessage("Email must be a valid email address.")
             .MaximumLength(256).WithMessage("Email must not exceed 256 characters.");
 
-        RuleFor(v => v.Avatar)
-            .MaximumLength(2048).WithMessage("Avatar URL must not exceed 2048 characters.")
-            .Must(BeAValidUrl).When(v => !string.IsNullOrEmpty(v.Avatar)).WithMessage("Avatar URL must be a valid URL.");
-    }
-
-    private bool BeAValidUrl(string? url)
-    {
-        return string.IsNullOrEmpty(url) || Uri.TryCreate(url, UriKind.Absolute, out _);
+        RuleFor(v => v.AvatarBase64)
+            .MaximumLength(ImageConstants.MaxAvatarBase64Length).When(v => !string.IsNullOrEmpty(v.AvatarBase64))
+            .WithMessage($"AvatarBase64 must not exceed {ImageConstants.MaxAvatarBase64Length} characters.");
     }
 }

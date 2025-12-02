@@ -54,10 +54,14 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             request.FamilyData.Name,
             request.FamilyData.Description,
             request.FamilyData.Address,
-            request.FamilyData.AvatarUrl,
             request.FamilyData.Visibility,
             familyToUpdate.Code // Keep existing code
         );
+
+        if (!string.IsNullOrEmpty(request.FamilyData.AvatarUrl))
+        {
+            familyToUpdate.UpdateAvatar(request.FamilyData.AvatarUrl);
+        }
 
 
         // Map old member IDs to new member IDs

@@ -2,6 +2,7 @@ using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using FluentValidation.TestHelper;
 using Xunit;
 
+using backend.Application.Common.Constants; // New using
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandValidatorTests
@@ -102,46 +103,26 @@ public class UpdateUserProfileCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenAvatarExceedsMaxLength()
+    public void ShouldHaveError_WhenAvatarBase64ExceedsMaxLength()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Avatar URL vượt quá 2048 ký tự.
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi AvatarBase64 vượt quá ImageConstants.MaxAvatarBase64Length ký tự.
         var command = new UpdateUserProfileCommand
         {
-
             Name = "Valid Name",
             Email = "valid@example.com",
-            Avatar = new string('a', 2049)
+            AvatarBase64 = new string('a', ImageConstants.MaxAvatarBase64Length + 1)
         };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Avatar)
-              .WithErrorMessage("Avatar URL must not exceed 2048 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.AvatarBase64)
+              .WithErrorMessage($"AvatarBase64 must not exceed {ImageConstants.MaxAvatarBase64Length} characters.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenAvatarIsInvalidUrl()
+    public void ShouldNotHaveError_WhenAvatarBase64IsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Avatar URL không hợp lệ.
-        var command = new UpdateUserProfileCommand { Avatar = "invalid-url" };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarBase64 là null.
+        var command = new UpdateUserProfileCommand { AvatarBase64 = null };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Avatar)
-              .WithErrorMessage("Avatar URL must be a valid URL.");
-    }
-
-    [Fact]
-    public void ShouldNotHaveError_WhenAvatarIsValidUrl()
-    {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Avatar URL hợp lệ.
-        var command = new UpdateUserProfileCommand { Avatar = "http://example.com/avatar.png" };
-        var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Avatar);
-    }
-
-    [Fact]
-    public void ShouldNotHaveError_WhenAvatarIsNull()
-    {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Avatar là null.
-        var command = new UpdateUserProfileCommand { Avatar = null };
-        var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Avatar);
+        result.ShouldNotHaveValidationErrorFor(x => x.AvatarBase64);
     }
 }

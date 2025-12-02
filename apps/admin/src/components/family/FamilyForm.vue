@@ -1,17 +1,19 @@
 <template>
   <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <AvatarInput v-if="!props.readOnly" v-model="formData.avatarUrl" :size="96" />
+    <AvatarInput v-if="!props.readOnly" v-model="formData.avatarBase64" :size="96" :initial-avatar="initialAvatarDisplay" />
     <div v-else class="d-flex justify-center mb-4">
       <AvatarDisplay :src="getFamilyAvatarUrl(formData.avatarUrl)" :size="96" />
     </div>
 
     <v-row>
-      <v-col cols="12" md="6" >
+      <v-col cols="12">
         <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
           @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="6">
+    </v-row>
+    <v-row>
+      <v-col cols="12">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
           required data-testid="family-visibility-select"></v-select>
       </v-col>
@@ -29,11 +31,13 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col cols="12">
         <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
       </v-col>
-      <v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
         <UserAutocomplete v-model="viewers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
       </v-col>
@@ -67,10 +71,16 @@ const formData = reactive<Family | Omit<Family, 'id'>>(
     description: '',
     address: '',
     avatarUrl: '',
+    avatarBase64: null, // NEW FIELD
     visibility: FamilyVisibility.Public,
     familyUsers: [],
   },
 );
+
+// Computed property to pass the initial avatar URL to AvatarInput
+const initialAvatarDisplay = computed(() => {
+  return formData.avatarBase64 || formData.avatarUrl;
+});
 
 watch(
   () => props.initialFamilyData,
@@ -78,6 +88,7 @@ watch(
     if (newVal) {
       Object.assign(formData, newVal);
       familyUsers.value = newVal.familyUsers || [];
+      formData.avatarBase64 = null; // Reset avatarBase64 when initial data changes
     }
   },
   { deep: true }

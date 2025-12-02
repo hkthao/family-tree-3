@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { createServices } from '@/services/service.factory';
 
 export const useFileUploadStore = defineStore('fileUpload', {
   state: () => ({
@@ -14,10 +13,9 @@ export const useFileUploadStore = defineStore('fileUpload', {
       this.error = null;
       this.uploadedUrl = null;
       try {
-        const fileUploadService = createServices('real').fileUpload;
-        const result = await fileUploadService.uploadFile(file);
+        const result = await this.services.fileUpload.uploadFile(file);
         if (result.ok) {
-          this.uploadedUrl = result.value;
+          this.uploadedUrl = result.value.display_url;
           return true;
         } else {
           this.error = result.error?.message || 'File upload failed.';

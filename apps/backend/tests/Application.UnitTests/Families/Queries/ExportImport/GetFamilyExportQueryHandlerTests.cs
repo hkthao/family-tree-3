@@ -28,8 +28,9 @@ public class GetFamilyExportQueryHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var creatorUserId = Guid.NewGuid();
-        var family = Family.Create("Test Family", "TF1", "Description", "Address", "AvatarUrl", "Private", creatorUserId);
+        var family = Family.Create("Test Family", "TF1", "Description", "Address", "Private", creatorUserId);
         family.Id = familyId;
+        family.UpdateAvatar("AvatarUrl");
 
         var member1 = new Member("Doe", "John", "JOHNDOE", familyId, "Johnny", "Male", DateTime.Now.AddYears(-30), null, "Place1", null, null, null, null, "Occupation1", "Avatar1", "Bio1", 1, false);
         member1.SetId(Guid.NewGuid());

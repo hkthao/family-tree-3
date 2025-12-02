@@ -53,7 +53,7 @@ const handleAddItem = async () => {
           t('family.management.messages.addSuccess'),
           'success',
         );
-        emit('saved'); // Emit saved event instead of closing directly
+        emit('close'); // Emit saved event instead of closing directly
       } else {
         showSnackbar(
           familyStore.error || t('family.management.messages.saveError'),

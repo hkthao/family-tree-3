@@ -66,7 +66,7 @@ describe('file-upload.store', () => {
     it('should upload a file successfully', async () => {
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
       const mockUrl = 'http://example.com/test.jpg';
-      mockUploadFile.mockResolvedValue(ok(mockUrl));
+      mockUploadFile.mockResolvedValue(ok({ display_url: mockUrl }));
 
       // Act: Gọi action uploadFile.
       const result = await store.uploadFile(file);

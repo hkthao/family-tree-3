@@ -91,41 +91,57 @@ public class CreateFamilyCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenAvatarUrlExceedsMaxLength()
+    public void ShouldNotHaveError_WhenAvatarBase64IsValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi AvatarUrl vượt quá 2048 ký tự.
-        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarUrl = new string('a', 2049), Visibility = "Public" };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarBase64 hợp lệ.
+        var validBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("some image data"));
+        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarBase64 = validBase64, Visibility = "Public" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.AvatarUrl)
-              .WithErrorMessage("AvatarUrl không được vượt quá 2048 ký tự.");
+        result.ShouldNotHaveValidationErrorFor(x => x.AvatarBase64);
     }
 
     [Fact]
-    public void ShouldHaveError_WhenAvatarUrlIsInvalid()
+    public void ShouldNotHaveError_WhenAvatarBase64IsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi AvatarUrl không phải là URL hợp lệ.
-        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarUrl = "invalid-url", Visibility = "Public" };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarBase64 là null.
+        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarBase64 = null, Visibility = "Public" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.AvatarUrl)
-              .WithErrorMessage("AvatarUrl must be a valid URL.");
+        result.ShouldNotHaveValidationErrorFor(x => x.AvatarBase64);
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenAvatarUrlIsValid()
+    public void ShouldNotHaveError_WhenAvatarBase64IsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarUrl hợp lệ.
-        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarUrl = "http://example.com/avatar.png", Visibility = "Public" };
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarBase64 là chuỗi rỗng.
+        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarBase64 = string.Empty, Visibility = "Public" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.AvatarUrl);
+        result.ShouldNotHaveValidationErrorFor(x => x.AvatarBase64);
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenAvatarUrlIsNull()
+    public void ShouldHaveError_WhenAvatarBase64IsInvalidFormat()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi AvatarUrl là null.
-        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarUrl = null, Visibility = "Public" };
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi AvatarBase64 không phải là định dạng Base64 hợp lệ.
+        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarBase64 = "invalid-base64-!@#", Visibility = "Public" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.AvatarUrl);
+        result.ShouldHaveValidationErrorFor(x => x.AvatarBase64)
+              .WithErrorMessage("AvatarBase64 phải là một chuỗi Base64 hợp lệ hoặc rỗng.");
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenAvatarBase64ExceedsSizeLimit()
+    {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi AvatarBase64 vượt quá giới hạn kích thước.
+        // Khoảng 5MB bytes = 5 * 1024 * 1024 = 5242880 bytes
+        // Kích thước Base64 ~ (kích thước byte * 4 / 3) + padding. 
+        // Để vượt quá 5MB, chúng ta cần một chuỗi Base64 dài hơn một chút.
+        var largeData = new byte[5 * 1024 * 1024 + 1]; // 5MB + 1 byte
+        var largeBase64 = Convert.ToBase64String(largeData);
+
+        var command = new CreateFamilyCommand { Name = "Valid Name", AvatarBase64 = largeBase64, Visibility = "Public" };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.AvatarBase64)
+              .WithErrorMessage("File size exceeds the maximum limit of 5 MB.");
     }
 
     [Fact]

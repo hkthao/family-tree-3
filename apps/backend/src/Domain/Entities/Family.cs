@@ -74,17 +74,18 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
     }
 
-    public void UpdateFamilyDetails(string name, string? description, string? address, string? avatarUrl, string visibility, string code)
+    public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code)
     {
         Name = name;
         Description = description;
         Address = address;
-        AvatarUrl = avatarUrl;
         Visibility = visibility;
         Code = code;
+    }
 
-        AddDomainEvent(new FamilyUpdatedEvent(this));
-        AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
+    public void UpdateAvatar(string? newAvatarUrl)
+    {
+        AvatarUrl = newAvatarUrl;
     }
 
     public void UpdateFamilyUsers(IEnumerable<FamilyUserUpdateInfo> newFamilyUsers)
@@ -142,8 +143,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
 
         _members.Add(newMember);
-        newMember.AddDomainEvent(new MemberCreatedEvent(newMember));
-        AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
         return newMember;
     }
 
@@ -153,8 +152,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         if (member != null)
         {
             _members.Remove(member);
-            member.AddDomainEvent(new MemberDeletedEvent(member));
-            AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
             // Also remove any relationships involving this member
             var relationshipsToRemove = _relationships.Where(r => r.SourceMemberId == memberId || r.TargetMemberId == memberId).ToList();
             foreach (var relationship in relationshipsToRemove)
@@ -177,7 +174,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         // Add validation for duplicate relationships if needed
         var relationship = new Relationship(Id, sourceMemberId, targetMemberId, type, order);
         _relationships.Add(relationship);
-        AddDomainEvent(new RelationshipCreatedEvent(relationship));
         return relationship;
     }
 
@@ -187,7 +183,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         if (relationship != null)
         {
             _relationships.Remove(relationship);
-            AddDomainEvent(new RelationshipDeletedEvent(relationship));
         }
     }
 
@@ -286,7 +281,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// <summary>
     /// Factory method to create a new Family aggregate.
     /// </summary>
-    public static Family Create(string name, string code, string? description, string? address, string? avatarUrl, string visibility, Guid creatorUserId)
+    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId)
     {
         var family = new Family
         {
@@ -294,15 +289,12 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             Code = code,
             Description = description,
             Address = address,
-            AvatarUrl = avatarUrl,
             Visibility = visibility,
             TotalMembers = 0, // Initial value
             TotalGenerations = 0 // Initial value
         };
 
-        family.AddDomainEvent(new FamilyCreatedEvent(family));
         family.AddFamilyUser(creatorUserId, FamilyRole.Manager);
-        family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
 
         return family;
     }

@@ -2,7 +2,8 @@ using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications; // Added for FamilyByIdWithRelationshipsSpecification
+using backend.Application.Families.Specifications;
+using backend.Domain.Events.Relationships; // Added for FamilyByIdWithRelationshipsSpecification
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
@@ -36,6 +37,7 @@ public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAu
         }
 
         family.RemoveRelationship(request.Id);
+        family.AddDomainEvent(new RelationshipDeletedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 

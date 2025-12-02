@@ -19,7 +19,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnSuccess_WhenRequestIsValid()
     {
         // Arrange
-        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        var family = Family.Create("Test Family", "TF", null, null, "Public", Guid.NewGuid());
         var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
         var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
         _context.Families.Add(family);

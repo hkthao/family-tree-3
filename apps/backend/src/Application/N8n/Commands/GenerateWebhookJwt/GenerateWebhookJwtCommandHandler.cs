@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
-using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace backend.Application.N8n.Commands.GenerateWebhookJwt;

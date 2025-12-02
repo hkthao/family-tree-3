@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.N8n.Commands.GenerateWebhookJwt;
 
 public class GenerateWebhookJwtCommandValidator : AbstractValidator<GenerateWebhookJwtCommand>

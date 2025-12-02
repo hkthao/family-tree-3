@@ -1,7 +1,13 @@
+using backend.Application.Common.Constants; // NEW
+using backend.Application.Common.Utils; // NEW
+
 namespace backend.Application.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberCommand>
 {
+    private const int MAX_IMAGE_SIZE_MB = 5; // 5 MB
+    private const int MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
     public UpdateMemberCommandValidator()
     {
         RuleFor(v => v.Id)
@@ -34,6 +40,12 @@ public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberComman
             .Matches(@"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").When(v => !string.IsNullOrEmpty(v.AvatarUrl))
             .WithMessage("Avatar URL must be a valid URL.");
 
+        RuleFor(v => v.AvatarBase64)
+            .Must(BeAValidBase64StringOrEmpty).WithMessage("AvatarBase64 phải là một chuỗi Base64 hợp lệ hoặc rỗng.")
+            .When(v => v.AvatarBase64 != null)
+            .Must(BeWithinImageSizeLimit).WithMessage(string.Format(ErrorMessages.FileSizeExceedsLimit, MAX_IMAGE_SIZE_MB))
+            .When(v => !string.IsNullOrEmpty(v.AvatarBase64));
+
         RuleFor(v => v.Occupation)
             .MaximumLength(100).WithMessage("Occupation must not exceed 100 characters.");
 
@@ -48,6 +60,40 @@ public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberComman
 
         RuleFor(v => v.PlaceOfDeath)
             .MaximumLength(200).WithMessage("Place of Death must not exceed 200 characters.");
+    }
+
+    private bool BeAValidBase64StringOrEmpty(string? base64String)
+    {
+        if (string.IsNullOrEmpty(base64String))
+        {
+            return true;
+        }
+        try
+        {
+            ImageUtils.ConvertBase64ToBytes(base64String);
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+
+    private bool BeWithinImageSizeLimit(string? base64String)
+    {
+        if (string.IsNullOrEmpty(base64String))
+        {
+            return true;
+        }
+        try
+        {
+            var imageData = ImageUtils.ConvertBase64ToBytes(base64String);
+            return imageData.Length <= MAX_IMAGE_SIZE_BYTES;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
     }
 
     private bool BeAValidGender(string? gender)

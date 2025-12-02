@@ -1,5 +1,5 @@
 import type { IUserService } from './user.service.interface';
-import type { UserProfile, Result, Paginated, User, RecentActivity, TargetType, UserPreference } from '@/types'; // NEW IMPORTS
+import type { UserProfile, Result, Paginated, User, RecentActivity, TargetType, UserPreference, UpdateUserProfileRequestDto } from '@/types'; // NEW IMPORTS
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 export class ApiUserService implements IUserService {
@@ -53,7 +53,7 @@ export class ApiUserService implements IUserService {
     return this.http.put<void>(`/user-preference`, preferences);
   }
 
-  public async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>> { // NEW METHOD
+  public async updateUserProfile(profile: UpdateUserProfileRequestDto): Promise<Result<UserProfile, ApiError>> { // NEW METHOD
     return this.http.put<UserProfile>(`/user-profile/${profile.id}`, profile);
   }
 

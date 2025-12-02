@@ -6,6 +6,11 @@
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToFamilyDetail" @delete="confirmDelete"
       @create="openAddDrawer" />
+
+    <!-- Add Family Drawer -->
+    <BaseCrudDrawer v-model="addDrawer" @close="handleFamilyAddClosed">
+      <FamilyAddView v-if="addDrawer" @close="handleFamilyAddClosed" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -14,14 +19,16 @@ import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
-import { FamilySearch, FamilyList } from '@/components/family';
+import { FamilySearch, FamilyList } from '@/components/family'; // Removed FamilyForm
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
 import { useFamilyTour } from '@/composables';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { useCrudDrawer } from '@/composables/useCrudDrawer'; 
 import { useRouter } from 'vue-router';
+import FamilyAddView from './FamilyAddView.vue'; // NEW: Added FamilyAddView
 
 const router = useRouter();
 const { t } = useI18n();
@@ -35,7 +42,9 @@ const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const {
+  addDrawer,
   openAddDrawer,
+  closeAllDrawers,
 } = useCrudDrawer<string>();
 
 const handleFilterUpdate = async (filters: FamilyFilter) => {
@@ -87,6 +96,7 @@ const confirmDelete = async (family: Family) => {
   }
 };
 
-
-
+const handleFamilyAddClosed = () => {
+  closeAllDrawers(); // Close the drawer on cancel
+};
 </script>

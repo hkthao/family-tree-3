@@ -8,7 +8,7 @@
     </v-alert>
     <v-row>
       <v-col cols="12">
-        <AvatarInput v-model="formData.avatar" :size="128" />
+        <AvatarInput v-model="formData.avatarBase64" :size="128" :initial-avatar="initialAvatarDisplay" />
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.firstName" :label="t('userSettings.profile.firstName')"
@@ -46,7 +46,7 @@ import { onMounted, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
 import { useUserProfileStore } from '@/stores';
-import type { UserProfile } from '@/types';
+import type { UserProfile, UpdateUserProfileRequestDto } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
@@ -59,12 +59,12 @@ const formRef = ref<HTMLFormElement | null>(null);
 const loading = ref(false);
 
 const formData = reactive({
-  name: '',
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
-  avatar: null as string | null,
+  avatar: null as string | null, // Stores the URL of the current avatar from API
+  avatarBase64: null as string | null, // Stores the new avatar as a base64 string
   externalId: '',
 });
 
@@ -76,10 +76,14 @@ const generatedFullName = computed(() => {
   return `${formData.firstName} ${formData.lastName}`.trim();
 });
 
+// Computed property to pass the initial avatar URL to AvatarInput
+const initialAvatarDisplay = computed(() => {
+  return formData.avatarBase64 || formData.avatar;
+});
+
 onMounted(async () => {
   await userProfileStore.fetchCurrentUserProfile();
   if (userProfileStore.userProfile) {
-    formData.name = userProfileStore.userProfile.name;
     formData.firstName = userProfileStore.userProfile.firstName || '';
     formData.lastName = userProfileStore.userProfile.lastName || '';
     formData.email = userProfileStore.userProfile.email;
@@ -98,7 +102,7 @@ const saveProfile = async () => {
   
 
     if (result && userProfileStore.userProfile) {
-      const updatedProfile: UserProfile = {
+      const updatedProfile: UpdateUserProfileRequestDto = {
         id: userProfileStore.userProfile.id,
         externalId: userProfileStore.userProfile.externalId,
         email: formData.email,
@@ -106,7 +110,7 @@ const saveProfile = async () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
-        avatar: formData.avatar === null ? undefined : formData.avatar,
+        avatarBase64: formData.avatarBase64,
       };
 
       const success = await userProfileStore.updateUserProfile(updatedProfile);
