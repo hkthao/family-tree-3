@@ -1,10 +1,11 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 
-public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCommand>
+public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCommand, Result>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -17,7 +18,7 @@ public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCo
         _authorizationService = authorizationService;
     }
 
-    public async Task Handle(UpdateFamilyDictCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateFamilyDictCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.IsAdmin())
         {
@@ -49,5 +50,7 @@ public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCo
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

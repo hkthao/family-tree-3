@@ -1,10 +1,11 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 
-public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCommand, Guid>
+public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUser _currentUser;
@@ -19,7 +20,7 @@ public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCo
         _authorizationService = authorizationService;
     }
 
-    public async Task<Guid> Handle(CreateFamilyDictCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateFamilyDictCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.IsAdmin())
         {
@@ -40,6 +41,6 @@ public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCo
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id;
+        return Result<Guid>.Success(entity.Id);
     }
 }

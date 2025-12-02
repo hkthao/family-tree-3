@@ -1,8 +1,10 @@
 using backend.Domain.Enums;
+using backend.Application.Common.Models; // Added
+using MediatR; // Added
 
 namespace backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 
-public record CreateFamilyDictCommand : IRequest<Guid>
+public record CreateFamilyDictCommand : IRequest<Result<Guid>>
 {
     public string Name { get; set; } = null!;
     public FamilyDictType Type { get; set; }

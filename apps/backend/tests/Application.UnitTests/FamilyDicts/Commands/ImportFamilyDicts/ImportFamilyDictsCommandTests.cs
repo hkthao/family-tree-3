@@ -9,6 +9,7 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.UnitTests.FamilyDicts.Commands.ImportFamilyDicts;
 
@@ -58,13 +59,14 @@ public class ImportFamilyDictsCommandTests : TestBase
         };
 
         // Act
-        var ids = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        ids.Should().NotBeNull().And.HaveCount(2);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull().And.HaveCount(2);
         _context.FamilyDicts.Should().HaveCount(2);
 
-        var importedDict1 = _context.FamilyDicts.FirstOrDefault(f => f.Id == ids.First());
+        var importedDict1 = _context.FamilyDicts.FirstOrDefault(f => f.Id == result.Value.First());
         importedDict1.Should().NotBeNull();
         importedDict1?.Name.Should().Be("Imported FamilyDict 1");
     }
