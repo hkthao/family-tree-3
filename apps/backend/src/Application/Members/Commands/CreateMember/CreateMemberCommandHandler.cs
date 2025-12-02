@@ -1,12 +1,12 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
-using Microsoft.Extensions.Localization;
-using backend.Application.Files.UploadFile; // NEW
 using backend.Application.Common.Utils;
+using backend.Application.Files.UploadFile; // NEW
+using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 using backend.Domain.Events.Members; // NEW
+using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -166,7 +166,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
 
         member.AddDomainEvent(new MemberCreatedEvent(member));
-        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId)); 
+        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
         await _context.SaveChangesAsync(cancellationToken);
 
         // Update denormalized relationship fields after all relationships are established

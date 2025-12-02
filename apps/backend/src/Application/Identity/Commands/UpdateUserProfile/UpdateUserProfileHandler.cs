@@ -2,11 +2,9 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
-using backend.Application.Users.Specifications;
-using backend.Application.Files.UploadFile; // New using
 using backend.Application.Common.Utils; // New using
-using MediatR; // New using for IMediator
+using backend.Application.Files.UploadFile; // New using
+using backend.Application.Users.Specifications;
 
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 

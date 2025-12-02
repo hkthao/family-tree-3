@@ -3,8 +3,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Common; // NEW
+using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore; // NEW
 using Moq;

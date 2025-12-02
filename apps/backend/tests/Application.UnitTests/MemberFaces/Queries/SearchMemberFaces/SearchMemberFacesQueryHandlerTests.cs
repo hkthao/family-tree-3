@@ -234,10 +234,10 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
         var family = new Family { Name = "Family A", Code = "FA" };
         var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
-        
+
         var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
         var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
-        
+
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member1);
         await _context.MemberFaces.AddAsync(face1);
@@ -265,10 +265,10 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
         var family = new Family { Name = "Family A", Code = "FA" };
         var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
-        
+
         var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
         var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
-        
+
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member1);
         await _context.MemberFaces.AddAsync(face1);

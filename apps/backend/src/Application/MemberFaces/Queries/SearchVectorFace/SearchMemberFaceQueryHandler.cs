@@ -16,13 +16,13 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
     {
-        
+
         if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))
         {
             return Result<List<FoundFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        
+
         if (request.Vector == null || !request.Vector.Any())
         {
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
@@ -33,11 +33,11 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             Vector = request.Vector.Select(d => (float)d).ToList(),
             Limit = request.Limit,
             Threshold = request.Threshold,
-            Filter = new Dictionary<string, object>(), 
+            Filter = new Dictionary<string, object>(),
             ReturnFields = new List<string> { "localDbId", "memberId", "faceId", "thumbnailUrl", "originalImageUrl", "emotion", "emotionConfidence" }
         };
 
-        
+
         if (request.FamilyId.HasValue)
         {
             searchFaceVectorDto.Filter.Add("familyId", request.FamilyId.Value.ToString());
@@ -64,7 +64,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             {
                 if (searchResult.Payload == null) continue;
 
-                var localDbId = Guid.Parse(searchResult.Id); 
+                var localDbId = Guid.Parse(searchResult.Id);
 
                 if (!searchResult.Payload.TryGetValue("memberId", out var memberIdObj) || !Guid.TryParse(memberIdObj?.ToString(), out var memberId))
                 {
@@ -76,7 +76,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
                 {
                     MemberFaceId = localDbId,
                     MemberId = memberId,
-                    FaceId = searchResult.Id.ToString(), 
+                    FaceId = searchResult.Id.ToString(),
                     Score = searchResult.Score,
                     ThumbnailUrl = searchResult.Payload.TryGetValue("thumbnailUrl", out var thumbnailUrlObj) ? thumbnailUrlObj?.ToString() : null,
                     OriginalImageUrl = searchResult.Payload.TryGetValue("originalImageUrl", out var originalImageUrlObj) ? originalImageUrlObj?.ToString() : null,
@@ -88,7 +88,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             }
         }
 
-        
+
         if (memberIds.Any())
         {
             var members = await _context.Members

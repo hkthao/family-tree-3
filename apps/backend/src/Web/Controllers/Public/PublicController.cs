@@ -1,4 +1,5 @@
 using backend.Application.Common.Models;
+using backend.Application.Dashboard.Queries.GetPublicDashboard; // NEW: For public dashboard
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Events.Queries.GetPublicUpcomingEvents;
@@ -17,7 +18,6 @@ using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.Members.Queries.SearchPublicMembers; // Add this using directive
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
-using backend.Application.Dashboard.Queries.GetPublicDashboard; // NEW: For public dashboard
 using backend.Web.Filters; // Thêm dòng này
 using Microsoft.AspNetCore.Mvc;
 

@@ -2,13 +2,13 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications;
-using backend.Domain.Enums;
-using Microsoft.Extensions.Localization;
-using backend.Application.Files.UploadFile; // NEW
 using backend.Application.Common.Utils;
-using backend.Domain.Events.Members;
+using backend.Application.Families.Specifications;
+using backend.Application.Files.UploadFile; // NEW
+using backend.Domain.Enums;
 using backend.Domain.Events.Families; // NEW
+using backend.Domain.Events.Members;
+using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -246,7 +246,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
 
         member.AddDomainEvent(new MemberUpdatedEvent(member));
-        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId)); 
+        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
 
         await _context.SaveChangesAsync(cancellationToken);
 

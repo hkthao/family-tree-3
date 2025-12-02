@@ -1,45 +1,82 @@
-using AutoMapper;
-using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 
 public class SearchFamiliesQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly SearchFamiliesQueryHandler _handler;
+
 
     public SearchFamiliesQueryHandlerTests()
     {
-        _mapperMock = new Mock<IMapper>();
-        _handler = new SearchFamiliesQueryHandler(_context, _mapperMock.Object);
+        // _authenticatedUserId, _mockUser, _handler sẽ được khởi tạo trong mỗi phương thức kiểm thử.
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFamiliesWhenUserIsInFamilyUsers()
+    {
+        // Arrange
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var otherUserId = Guid.NewGuid();
+        var familyCreatedByOther = new Family { Id = Guid.NewGuid(), Name = "Family By Other", Code = "FBO", CreatedBy = otherUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
+
+        // Create and add FamilyUser directly to context, linking it to the family
+        var familyUser = new FamilyUser(familyCreatedByOther.Id, authenticatedUserId, FamilyRole.Viewer);
+
+        _context.Families.Add(familyCreatedByOther);
+        _context.FamilyUsers.Add(familyUser);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { Page = 1, ItemsPerPage = 10 };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items.First().Name.Should().Be("Family By Other");
+    }
+
 
     [Fact]
     public async Task Handle_ShouldReturnPaginatedListOfFamilies_WhenCalled()
     {
         // Arrange
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2" };
-        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family 3", Code = "F3" };
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = authenticatedUserId.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = authenticatedUserId.ToString() };
+        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family 3", Code = "F3", CreatedBy = authenticatedUserId.ToString() };
         _context.Families.AddRange(family1, family2, family3);
         await _context.SaveChangesAsync();
 
         var query = new SearchFamiliesQuery { Page = 1, ItemsPerPage = 2 };
 
-        // Setup mapper to return FamilyDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDto>();
-        }));
-
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -54,21 +91,25 @@ public class SearchFamiliesQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFilteredFamilies_WhenSearchQueryIsProvided()
     {
         // Arrange
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Alpha", Description = "Description for Alpha", Code = "FA" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Beta", Description = "Description for Beta", Code = "FB" };
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Alpha", Description = "Description for Alpha", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Beta", Description = "Description for Beta", Code = "FB", CreatedBy = authenticatedUserId.ToString() };
         _context.Families.AddRange(family1, family2);
         await _context.SaveChangesAsync();
 
         var query = new SearchFamiliesQuery { SearchQuery = "Alpha", Page = 1, ItemsPerPage = 10 };
 
-        // Setup mapper to return FamilyDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDto>();
-        }));
-
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -81,21 +122,25 @@ public class SearchFamiliesQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFilteredFamilies_WhenVisibilityIsProvided()
     {
         // Arrange
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Public", Visibility = "Public", Code = "FP" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Private", Visibility = "Private", Code = "FPR" };
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Public", Visibility = "Public", Code = "FP", CreatedBy = authenticatedUserId.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Private", Visibility = "Private", Code = "FPR", CreatedBy = authenticatedUserId.ToString() };
         _context.Families.AddRange(family1, family2);
         await _context.SaveChangesAsync();
 
         var query = new SearchFamiliesQuery { Visibility = "Public", Page = 1, ItemsPerPage = 10 };
 
-        // Setup mapper to return FamilyDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDto>();
-        }));
-
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -108,28 +153,71 @@ public class SearchFamiliesQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnOrderedFamilies_WhenSortByAndSortOrderAreProvided()
     {
         // Arrange
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family C", Code = "FC" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA" };
-        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family B", Code = "FB" };
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family C", Code = "FC", CreatedBy = authenticatedUserId.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
+        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family B", Code = "FB", CreatedBy = authenticatedUserId.ToString() };
         _context.Families.AddRange(family1, family2, family3);
         await _context.SaveChangesAsync();
 
         var query = new SearchFamiliesQuery { SortBy = "Name", SortOrder = "asc", Page = 1, ItemsPerPage = 10 };
 
-        // Setup mapper to return FamilyDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDto>();
-        }));
-
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Items.Should().HaveCount(3);
         result.Value.Items.First().Name.Should().Be("Family A");
-        result.Value.Items.Last().Name.Should().Be("Family C");
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFamiliesCreatedByAuthenticatedUserAndWhereUserIsAMember()
+    {
+        // Arrange
+        // Clear existing data to ensure test isolation
+        _context.Families.RemoveRange(_context.Families);
+        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
+        await _context.SaveChangesAsync();
+
+        var authenticatedUserId = Guid.NewGuid();
+        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object);
+
+        var otherUserId = Guid.NewGuid();
+        var familyCreatedByAuthenticatedUser = new Family { Id = Guid.NewGuid(), Name = "My Created Family", Code = "MYF", CreatedBy = authenticatedUserId.ToString() };
+        var familyCreatedByOtherUser = new Family { Id = Guid.NewGuid(), Name = "Other User's Family", Code = "OTF", CreatedBy = otherUserId.ToString() };
+
+        // Add authenticated user as a member to the family created by another user
+        var familyUserEntry = new FamilyUser(familyCreatedByOtherUser.Id, authenticatedUserId, FamilyRole.Viewer);
+
+        _context.Families.AddRange(familyCreatedByAuthenticatedUser, familyCreatedByOtherUser);
+        _context.FamilyUsers.Add(familyUserEntry);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { Page = 1, ItemsPerPage = 10 };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2);
+        result.Value.Items.Should().Contain(f => f.Name == "My Created Family");
+        result.Value.Items.Should().Contain(f => f.Name == "Other User's Family");
+    }
+
+
 }

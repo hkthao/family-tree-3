@@ -2,10 +2,8 @@ using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile; // NEW
-using backend.Application.MemberFaces.Commands;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Common;
-using backend.Application.MemberFaces.Queries;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

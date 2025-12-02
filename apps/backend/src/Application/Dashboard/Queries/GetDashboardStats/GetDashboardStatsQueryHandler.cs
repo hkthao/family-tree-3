@@ -102,7 +102,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 }
             }
         }
-        
+
         var stats = new DashboardStatsDto
         {
             TotalFamilies = totalFamilies,

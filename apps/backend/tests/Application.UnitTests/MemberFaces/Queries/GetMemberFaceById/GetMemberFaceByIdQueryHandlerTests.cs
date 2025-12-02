@@ -5,7 +5,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 

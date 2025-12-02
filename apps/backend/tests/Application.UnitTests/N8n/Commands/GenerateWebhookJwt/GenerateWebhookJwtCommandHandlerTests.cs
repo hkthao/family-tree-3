@@ -1,11 +1,10 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.N8n.Commands.GenerateWebhookJwt;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
-using backend.Application.Common.Models.AppSetting;
-using backend.Application.Common.Models; // Thêm dòng này
 
 namespace backend.Application.UnitTests.N8n.Commands.GenerateWebhookJwt;
 

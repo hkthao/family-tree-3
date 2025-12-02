@@ -3,9 +3,9 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.UnitTests.Common;
+using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Domain.Common; // NEW
 using FluentAssertions;
 using Moq;
 using Xunit;

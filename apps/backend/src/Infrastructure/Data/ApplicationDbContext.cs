@@ -127,7 +127,7 @@ public class ApplicationDbContext(
 
         // Điều phối các sự kiện miền sau khi SaveChanges thành công
         await _domainEventDispatcher.DispatchEvents(entitiesWithDomainEvents);
-        
+
         return result;
     }
     /// <summary>
