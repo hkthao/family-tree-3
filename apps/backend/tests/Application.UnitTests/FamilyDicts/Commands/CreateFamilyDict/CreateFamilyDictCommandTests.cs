@@ -41,7 +41,7 @@ public class CreateFamilyDictCommandTests : TestBase
         var id = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var familyDict = await _context.FamilyDicts.FindAsync(id);
+        var familyDict = await _context.FamilyDicts.FindAsync(id.Value);
 
         familyDict.Should().NotBeNull();
         familyDict?.Name.Should().Be(command.Name);

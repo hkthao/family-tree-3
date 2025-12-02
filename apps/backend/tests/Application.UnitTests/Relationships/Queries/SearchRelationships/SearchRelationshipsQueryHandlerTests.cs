@@ -1,8 +1,10 @@
+using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Queries.SearchRelationships;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Queries.SearchRelationships;
@@ -142,4 +144,34 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value!.Items.Should().HaveCount(1);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnNoRelationships_WhenUserDoesNotHaveAccessAndIsNotAdmin()
+    {
+        // Arrange
+        var familyId1 = Guid.NewGuid();
+        var familyId2 = Guid.NewGuid();
+        var currentUserId = Guid.NewGuid(); // User not associated with either family
+
+        _context.Families.Add(new Family { Id = familyId1, Name = "Test Family 1", Code = "TF1" });
+        _context.Families.Add(new Family { Id = familyId2, Name = "Test Family 2", Code = "TF2" });
+
+        _context.Relationships.AddRange(
+            new Relationship(familyId1, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, 1),
+            new Relationship(familyId2, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Mother, 2)
+        );
+        await _context.SaveChangesAsync();
+
+        var handler = new SearchRelationshipsQueryHandler(_context, _mapper);
+        var query = new SearchRelationshipsQuery { Page = 1, ItemsPerPage = 10 };
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().BeEmpty();
+        result.Value.TotalItems.Should().Be(0);
+    }
+
 }

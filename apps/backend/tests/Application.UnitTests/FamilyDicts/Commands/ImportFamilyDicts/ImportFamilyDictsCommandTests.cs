@@ -66,9 +66,9 @@ public class ImportFamilyDictsCommandTests : TestBase
         result.Value.Should().NotBeNull().And.HaveCount(2);
         _context.FamilyDicts.Should().HaveCount(2);
 
-        var importedDict1 = _context.FamilyDicts.FirstOrDefault(f => f.Id == result.Value.First());
+        var importedDict1 = _context.FamilyDicts.FirstOrDefault(f => f.Id == result.Value!.First());
         importedDict1.Should().NotBeNull();
-        importedDict1?.Name.Should().Be("Imported FamilyDict 1");
+        importedDict1!.Name.Should().Be("Imported FamilyDict 1");
     }
 
     [Fact]
