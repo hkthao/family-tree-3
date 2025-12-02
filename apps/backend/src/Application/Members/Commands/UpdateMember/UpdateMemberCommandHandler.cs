@@ -6,7 +6,9 @@ using backend.Application.Families.Specifications;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Localization;
 using backend.Application.Files.UploadFile; // NEW
-using backend.Application.Common.Utils; // NEW
+using backend.Application.Common.Utils;
+using backend.Domain.Events.Members;
+using backend.Domain.Events.Families; // NEW
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -52,7 +54,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 var uploadCommand = new UploadFileCommand
                 {
                     ImageData = imageData,
-                    FileName = $"Member_Avatar_{Guid.NewGuid().ToString()}.png",
+                    FileName = $"Member_Avatar_{Guid.NewGuid()}.png",
                     Folder = string.Format(UploadConstants.MemberAvatarFolder, member.FamilyId),
                     ContentType = "image/png"
                 };
@@ -242,6 +244,9 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         // Update denormalized relationship fields after all relationships are established
         await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
+
+        member.AddDomainEvent(new MemberUpdatedEvent(member));
+        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId)); 
 
         await _context.SaveChangesAsync(cancellationToken);
 

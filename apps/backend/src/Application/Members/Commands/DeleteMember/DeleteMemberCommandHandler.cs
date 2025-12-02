@@ -2,16 +2,16 @@ using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
+using backend.Application.Families.Specifications;
+using backend.Domain.Events.Families;
+using backend.Domain.Events.Members; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteMemberCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly ICurrentUser _currentUser = currentUser;
-    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
@@ -39,6 +39,9 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
             family.RemoveMember(request.Id);
             _context.Members.Remove(member);
+
+            member.AddDomainEvent(new MemberDeletedEvent(member));
+            member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
 
             await _context.SaveChangesAsync(cancellationToken);
 

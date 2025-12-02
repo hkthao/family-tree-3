@@ -2,7 +2,8 @@ using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
+using backend.Application.Families.Specifications;
+using backend.Domain.Events.Relationships; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
@@ -35,6 +36,8 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
         var relationship = family.AddRelationship(request.SourceMemberId, request.TargetMemberId, request.Type, request.Order);
         _context.Relationships.Add(relationship);
+
+        relationship.AddDomainEvent(new RelationshipCreatedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 

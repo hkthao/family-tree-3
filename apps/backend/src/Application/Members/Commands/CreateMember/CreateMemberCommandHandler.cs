@@ -4,7 +4,9 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Localization;
 using backend.Application.Files.UploadFile; // NEW
-using backend.Application.Common.Utils; // NEW
+using backend.Application.Common.Utils;
+using backend.Domain.Events.Families;
+using backend.Domain.Events.Members; // NEW
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -56,7 +58,6 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         var member = family.AddMember(newMember, request.IsRoot);
         _context.Members.Add(member); // Add member to context before first save
-        await _context.SaveChangesAsync(cancellationToken); // Save to get member.Id
 
         // --- Handle AvatarBase64 upload ---
         if (!string.IsNullOrEmpty(request.AvatarBase64))
@@ -85,7 +86,6 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 }
 
                 member.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
-                await _context.SaveChangesAsync(cancellationToken); // Save avatar URL
             }
             catch (FormatException)
             {
@@ -165,6 +165,8 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             _context.Events.Add(deathEvent);
         }
 
+        member.AddDomainEvent(new MemberCreatedEvent(member));
+        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId)); 
         await _context.SaveChangesAsync(cancellationToken);
 
         // Update denormalized relationship fields after all relationships are established

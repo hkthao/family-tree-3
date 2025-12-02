@@ -6,7 +6,8 @@ using backend.Application.Families.Specifications;
 using backend.Application.Files.UploadFile;
 using backend.Domain.ValueObjects;
 
-using backend.Application.Common.Utils; // NEW
+using backend.Application.Common.Utils;
+using backend.Domain.Events.Families; // NEW
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -70,6 +71,9 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             _context.FamilyUsers.RemoveRange(entity.FamilyUsers);
             var familyUserUpdateInfos = request.FamilyUsers.Select(fu => new FamilyUserUpdateInfo(fu.UserId, fu.Role));
             entity.UpdateFamilyUsers(familyUserUpdateInfos);
+
+            entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
+            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 
             await _context.SaveChangesAsync(cancellationToken);
 

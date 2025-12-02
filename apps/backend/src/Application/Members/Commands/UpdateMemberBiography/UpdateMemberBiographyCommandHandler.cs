@@ -23,6 +23,7 @@ public class UpdateMemberBiographyCommandHandler(
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         member.UpdateBiography(request.BiographyContent);
+        member.AddDomainEvent(new Domain.Events.Members.MemberBiographyUpdatedEvent(member));
 
         await _context.SaveChangesAsync(cancellationToken);
 

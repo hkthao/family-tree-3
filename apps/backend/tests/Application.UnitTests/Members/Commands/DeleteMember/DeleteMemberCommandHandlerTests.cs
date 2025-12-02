@@ -30,7 +30,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldDeleteMemberAndReturnSuccess_WhenAuthorized()
     {
         // Arrange
-        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _dateTimeMock.Object);
+        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object);
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
@@ -62,7 +62,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()
     {
         // Arrange
-        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _dateTimeMock.Object);
+        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object);
         var command = new DeleteMemberCommand(Guid.NewGuid());
 
         // Act
@@ -78,7 +78,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenNotAuthorized()
     {
         // Arrange
-        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _dateTimeMock.Object);
+        var handler = new DeleteMemberCommandHandler(_context, _authorizationServiceMock.Object);
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };

@@ -76,20 +76,18 @@ public class Member : BaseAuditableEntity
         Biography = biography;
         Order = order;
         IsDeceased = isDeceased;
-
-        AddDomainEvent(new MemberUpdatedEvent(this));
     }
 
     public void UpdateBiography(string? biography)
     {
         Biography = biography;
-        AddDomainEvent(new MemberBiographyUpdatedEvent(this));
+
     }
 
     public void UpdateAvatar(string? newAvatarUrl)
     {
         AvatarUrl = newAvatarUrl;
-        AddDomainEvent(new MemberUpdatedEvent(this));
+
     }
 
     public Relationship AddFatherRelationship(Guid fatherId)

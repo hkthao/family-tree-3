@@ -4,6 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
 using backend.Domain.Entities;
 using backend.Application.Common.Utils;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
@@ -53,6 +54,9 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 }
 
                 entity.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
+                entity.AddDomainEvent(new FamilyCreatedEvent(entity));
+                entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
+
                 await _context.SaveChangesAsync(cancellationToken); // Save avatar URL
             }
             catch (FormatException)
