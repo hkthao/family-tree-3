@@ -18,6 +18,7 @@ export interface Member {
   dateOfDeath?: Date; // Renamed from 'deathDate'
   birthDeathYears?: string; // Formatted birth and death years
   avatarUrl?: string;
+  avatarBase64?: string | null;
   nickname?: string; // New
   placeOfBirth?: string; // New (replaces address)
   placeOfDeath?: string; // New (replaces address)

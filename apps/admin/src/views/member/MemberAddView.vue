@@ -37,12 +37,7 @@ const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
-
 const { add } = storeToRefs(memberStore);
-
-onMounted(async () => {
-  // No initialRelationshipData to process
-});
 
 const handleAddMember = async () => {
   if (!memberFormRef.value) return;

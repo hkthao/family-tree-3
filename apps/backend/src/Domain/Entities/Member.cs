@@ -86,6 +86,12 @@ public class Member : BaseAuditableEntity
         AddDomainEvent(new MemberBiographyUpdatedEvent(this));
     }
 
+    public void UpdateAvatar(string? newAvatarUrl)
+    {
+        AvatarUrl = newAvatarUrl;
+        AddDomainEvent(new MemberUpdatedEvent(this));
+    }
+
     public Relationship AddFatherRelationship(Guid fatherId)
     {
         var relationship = new Relationship(FamilyId, fatherId, Id, RelationshipType.Father);

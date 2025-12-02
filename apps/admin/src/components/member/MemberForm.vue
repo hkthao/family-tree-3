@@ -3,7 +3,7 @@
     <!-- Thông tin cơ bản -->
     <v-row>
       <v-col cols="12">
-        <AvatarInput v-if="!isFormReadOnly" v-model="formData.avatarUrl" :size="96" />
+        <AvatarInput v-if="!isFormReadOnly" v-model="formData.avatarBase64" :size="96" :initial-avatar="initialAvatarDisplay" />
         <div v-else class="d-flex justify-center mb-4">
           <AvatarDisplay :src="getAvatarUrl(formData.avatarUrl, formData.gender)" :size="96" />
         </div>
@@ -14,8 +14,8 @@
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
           @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
-          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
-          :multiple="false" :disabled="isFormReadOnly" data-testid="member-family-select" />
+          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" 
+          :multiple="false" :disabled="true" data-testid="member-family-select" />
       </v-col>
     </v-row>
 
@@ -157,6 +157,11 @@ const isFormReadOnly = computed(() => {
   return props.readOnly || !(isAdmin.value || isFamilyManager.value);
 });
 
+// Computed property to pass the initial avatar URL to AvatarInput
+const initialAvatarDisplay = computed(() => {
+  return formData.avatarBase64 || formData.avatarUrl;
+});
+
 const formData = reactive<Omit<Member, 'id'> | Member>(
   props.initialMemberData
     ? {
@@ -187,6 +192,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       phone: undefined,
       email: undefined,
       address: undefined,
+      avatarBase64: null, // NEW FIELD
     },
 );
 
@@ -206,6 +212,7 @@ const state = reactive({
   phone: toRef(formData, 'phone'),
   email: toRef(formData, 'email'),
   address: toRef(formData, 'address'),
+  avatarBase64: toRef(formData, 'avatarBase64'), // Add avatarBase64 to state
 });
 
 const rules = useMemberRules(toRefs(state));

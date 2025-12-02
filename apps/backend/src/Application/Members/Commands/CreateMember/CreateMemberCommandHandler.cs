@@ -3,15 +3,18 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Localization;
+using backend.Application.Files.UploadFile; // NEW
+using backend.Application.Common.Utils; // NEW
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberCommandHandler> localizer, IMemberRelationshipService memberRelationshipService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberCommandHandler> localizer, IMemberRelationshipService memberRelationshipService, IMediator mediator) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IStringLocalizer<CreateMemberCommandHandler> _localizer = localizer;
     private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
+    private readonly IMediator _mediator = mediator; // NEW
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -40,7 +43,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Email,
             request.Address,
             request.Occupation,
-            request.AvatarUrl,
+            request.AvatarUrl, // Keep AvatarUrl in constructor
             request.Biography,
             request.Order,
             request.IsDeceased
@@ -52,8 +55,48 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
 
         var member = family.AddMember(newMember, request.IsRoot);
+        _context.Members.Add(member); // Add member to context before first save
+        await _context.SaveChangesAsync(cancellationToken); // Save to get member.Id
 
-        _context.Members.Add(member);
+        // --- Handle AvatarBase64 upload ---
+        if (!string.IsNullOrEmpty(request.AvatarBase64))
+        {
+            try
+            {
+                var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
+                var uploadCommand = new UploadFileCommand
+                {
+                    ImageData = imageData,
+                    FileName = $"Member_Avatar_{Guid.NewGuid().ToString()}.png",
+                    Folder = string.Format(UploadConstants.MemberAvatarFolder, member.Id),
+                    ContentType = "image/png"
+                };
+
+                var uploadResult = await _mediator.Send(uploadCommand, cancellationToken);
+
+                if (!uploadResult.IsSuccess)
+                {
+                    return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
+                }
+
+                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.Url))
+                {
+                    return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
+                }
+
+                member.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
+                await _context.SaveChangesAsync(cancellationToken); // Save avatar URL
+            }
+            catch (FormatException)
+            {
+                return Result<Guid>.Failure(ErrorMessages.InvalidBase64, ErrorSources.Validation);
+            }
+            catch (Exception ex)
+            {
+                return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
+            }
+        }
+        // --- End Handle AvatarBase64 upload ---
 
         // Handle FatherId
         if (request.FatherId.HasValue)

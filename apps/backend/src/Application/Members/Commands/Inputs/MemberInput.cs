@@ -16,6 +16,7 @@ public record MemberInput
     public string? Address { get; set; }
     public string? Gender { get; set; }
     public string? AvatarUrl { get; set; }
+    public string? AvatarBase64 { get; set; }
     public string? Occupation { get; set; }
     public string? Biography { get; set; }
     public Guid FamilyId { get; set; }
