@@ -2,10 +2,11 @@ import { Auth0Client, createAuth0Client } from '@auth0/auth0-spa-js';
 import type { RedirectLoginOptions, LogoutOptions } from '@auth0/auth0-spa-js';
 import type { AuthService } from './authService';
 import type { AppState, User } from '@/types';
+import { getEnvVariable } from '@/utils/api.util';
 
-const AUTH0_DOMAIN = window.runtimeConfig?.VITE_AUTH0_DOMAIN || import.meta.env.VITE_AUTH0_DOMAIN;
-const AUTH0_CLIENT_ID = window.runtimeConfig?.VITE_AUTH0_CLIENT_ID || import.meta.env.VITE_AUTH0_CLIENT_ID;
-const AUTH0_AUDIENCE = window.runtimeConfig?.VITE_AUTH0_AUDIENCE || import.meta.env.VITE_AUTH0_AUDIENCE;
+const AUTH0_DOMAIN = getEnvVariable('VITE_AUTH0_DOMAIN') || '';
+const AUTH0_CLIENT_ID = getEnvVariable('VITE_AUTH0_CLIENT_ID') || '';
+const AUTH0_AUDIENCE = getEnvVariable('VITE_AUTH0_AUDIENCE') || '';
 
 let auth0: Auth0Client | null = null;
 

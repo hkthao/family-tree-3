@@ -20,6 +20,7 @@ import { useUserSettingsStore } from '@/stores/user-settings.store';
 import { useAuthService } from '@/services/auth/authService';
 import { useServices } from '@/plugins/services.plugin'; // Updated import to use the composable
 import { Language } from '@/types'; // Import Language enum
+import { getEnvVariable } from '@/utils/api.util';
 
 const { t } = useI18n();
 const chatOpen = ref(false);
@@ -57,9 +58,9 @@ const currentChatLanguage = computed(() => {
 
 const initializeChat = async () => { // Changed to async
   if (chatInstance) return; // Prevent re-initialization if already created
-  const WEBHOOK_URL = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL;
+  const WEBHOOK_URL = getEnvVariable('VITE_N8N_CHAT_WEBHOOK_URL');
   if (!WEBHOOK_URL) {
-    console.error('VITE_N8N_WEBHOOK_URL is not defined. N8n chat widget will not function.');
+    console.error('VITE_N8N_CHAT_WEBHOOK_URLK_URL is not defined. N8n chat widget will not function.');
     return;
   }
 
