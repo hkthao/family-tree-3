@@ -10,6 +10,7 @@ export interface Family {
   code?: string;
   description?: string;
   avatarUrl?: string;
+  avatarBase64?: string | null;
   address?: string;
   visibility?: FamilyVisibility;
   familyUsers?: FamilyUser[];
