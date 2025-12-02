@@ -1,4 +1,5 @@
-using backend.Application.Common.Constants; // NEW
+using backend.Application.Common.Constants; 
+using backend.Application.Common.Utils; // NEW
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -42,7 +43,7 @@ public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyComman
         }
         try
         {
-            Convert.FromBase64String(base64String);
+            ImageUtils.ConvertBase64ToBytes(base64String); // Use ImageUtils
             return true;
         }
         catch (FormatException)
@@ -59,7 +60,7 @@ public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyComman
         }
         try
         {
-            var imageData = Convert.FromBase64String(base64String);
+            var imageData = ImageUtils.ConvertBase64ToBytes(base64String); // Use ImageUtils
             return imageData.Length <= MAX_IMAGE_SIZE_BYTES;
         }
         catch (FormatException)
