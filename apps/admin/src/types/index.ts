@@ -18,6 +18,7 @@ export * from './memberStory.d';
 export * from './biography.d'; 
 
 export * from './memberFace.d'; 
+export * from './uploaded-file.d';
 
 // NEWLY ADDED PUBLIC-FACING DTO EXPORTS
 export * from './common-dto.d';
