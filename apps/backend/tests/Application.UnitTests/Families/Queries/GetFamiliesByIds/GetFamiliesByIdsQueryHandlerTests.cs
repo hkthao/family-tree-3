@@ -1,10 +1,7 @@
-using AutoMapper;
-using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 using backend.Domain.Enums;
 

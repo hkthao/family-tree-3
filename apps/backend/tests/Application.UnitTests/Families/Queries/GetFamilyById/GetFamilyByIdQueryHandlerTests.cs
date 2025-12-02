@@ -4,8 +4,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
-using Moq; // Add Moq namespace
-using backend.Domain.Enums; // Add FamilyVisibility enum
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 

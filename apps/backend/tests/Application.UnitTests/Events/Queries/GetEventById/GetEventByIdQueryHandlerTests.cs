@@ -1,11 +1,9 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Events.Queries.GetEventById;

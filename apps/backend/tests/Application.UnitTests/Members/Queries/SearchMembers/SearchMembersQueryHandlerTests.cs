@@ -1,24 +1,17 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.SearchMembers;
 
 public class SearchMembersQueryHandlerTests : TestBase
 {
-    private readonly Mock<IPrivacyService> _privacyServiceMock;
-
     public SearchMembersQueryHandlerTests()
     {
-        _privacyServiceMock = new Mock<IPrivacyService>();
-        // Setup mock to return the original list without filtering for tests
-        _privacyServiceMock.Setup(p => p.ApplyPrivacyFilter(It.IsAny<List<MemberListDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((List<MemberListDto> members, Guid familyId, CancellationToken ct) => members);
+        // No need to initialize _mockAuthorizationService and _mockCurrentUser here, as TestBase does it.
+        // We might want to override their behavior in specific tests if needed.
     }
 
     [Fact]
@@ -42,7 +35,7 @@ public class SearchMembersQueryHandlerTests : TestBase
         );
         await _context.SaveChangesAsync();
 
-        var handler = new SearchMembersQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var handler = new SearchMembersQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
         var query = new SearchMembersQuery { Page = 1, ItemsPerPage = 2, FamilyId = familyId1 };
 
         // Act

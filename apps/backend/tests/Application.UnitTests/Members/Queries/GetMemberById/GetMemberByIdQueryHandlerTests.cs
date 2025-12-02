@@ -1,23 +1,17 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Queries.GetMemberById; // For MemberDetailDto
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 
 public class GetMemberByIdQueryHandlerTests : TestBase
 {
-    private readonly Mock<IPrivacyService> _privacyServiceMock;
-
     public GetMemberByIdQueryHandlerTests()
     {
-        _privacyServiceMock = new Mock<IPrivacyService>();
-        // Setup mock to return the original member without filtering for tests
-        _privacyServiceMock.Setup(p => p.ApplyPrivacyFilter(It.IsAny<MemberDetailDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((MemberDetailDto member, Guid familyId, CancellationToken ct) => member);
+        // No need to initialize _mockAuthorizationService and _mockCurrentUser here, as TestBase does it.
+        // We might want to override their behavior in specific tests if needed.
     }
 
     [Fact]
@@ -32,7 +26,7 @@ public class GetMemberByIdQueryHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        var handler = new GetMemberByIdQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var handler = new GetMemberByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
         var query = new GetMemberByIdQuery(memberId);
 
         // Act
@@ -48,7 +42,7 @@ public class GetMemberByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenMemberDoesNotExist()
     {
         // Arrange
-        var handler = new GetMemberByIdQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var handler = new GetMemberByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
         var query = new GetMemberByIdQuery(Guid.NewGuid());
 
         // Act
