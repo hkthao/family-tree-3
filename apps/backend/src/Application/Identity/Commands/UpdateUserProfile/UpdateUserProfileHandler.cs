@@ -8,7 +8,7 @@ using backend.Application.Files.UploadFile; // New using
 using backend.Application.Common.Utils; // New using
 using MediatR; // New using for IMediator
 
-namespace backend.Application.Identity.Commands.UpdateUserProfile;
+namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMediator mediator, ICurrentUser currentUser) : IRequestHandler<UpdateUserProfileCommand, Result>
 {
