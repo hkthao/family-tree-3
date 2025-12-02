@@ -74,24 +74,22 @@
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-menu>
+        <v-tooltip :text="t('member.list.action.edit')">
           <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" v-bind="props" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
+            <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)"
+              data-testid="edit-member-button" aria-label="Edit">
+              <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <v-list>
-            <v-list-item @click="$emit('ai-biography', item)">
-              <v-list-item-title>{{ t('member.list.action.aiBiography') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="editMember(item)" data-testid="edit-member-button">
-              <v-list-item-title>{{ t('member.list.action.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="confirmDelete(item)" data-testid="delete-member-button">
-              <v-list-item-title>{{ t('member.list.action.delete') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        </v-tooltip>
+        <v-tooltip :text="t('member.list.action.delete')">
+          <template v-slot:activator="{ props }">
+            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)"
+              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
       </div>
     </template>
 
