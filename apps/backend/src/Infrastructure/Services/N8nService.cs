@@ -2,6 +2,7 @@ using System.Net.Http.Headers; // For MediaTypeHeaderValue
 using System.Text; // NEW USING
 using System.Text.Json; // NEW USING
 using backend.Application.AI.DTOs; // UPDATED USING
+using backend.Application.AI.DTOs.Embeddings; // NEW USING
 using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
@@ -31,7 +32,6 @@ public class N8nService : IN8nService
         _jwtHelperFactory = jwtHelperFactory;
     }
 
-    /// <inheritdoc />
     public async Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_n8nSettings.ChatWebhookUrl) || _n8nSettings.ChatWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
@@ -122,7 +122,6 @@ public class N8nService : IN8nService
         }
     }
 
-    /// <inheritdoc />
     public async Task<Result<ImageUploadResponseDto>> CallImageUploadWebhookAsync(ImageUploadWebhookDto dto, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_n8nSettings.Upload.WebHookUrl))
@@ -208,8 +207,6 @@ public class N8nService : IN8nService
         }
     }
 
-
-    /// <inheritdoc />
     public async Task<Result<FaceVectorOperationResultDto>> CallUpsertFaceVectorWebhookAsync(UpsertFaceVectorOperationDto dto, CancellationToken cancellationToken)
     {
         return await CallFaceVectorWebhookInternalAsync(
@@ -220,7 +217,6 @@ public class N8nService : IN8nService
         );
     }
 
-    /// <inheritdoc />
     public async Task<Result<FaceVectorOperationResultDto>> CallSearchFaceVectorWebhookAsync(SearchFaceVectorOperationDto dto, CancellationToken cancellationToken)
     {
         return await CallFaceVectorWebhookInternalAsync(
@@ -231,7 +227,6 @@ public class N8nService : IN8nService
         );
     }
 
-    /// <inheritdoc />
     public async Task<Result<FaceVectorOperationResultDto>> CallDeleteFaceVectorWebhookAsync(DeleteFaceVectorOperationDto dto, CancellationToken cancellationToken)
     {
         return await CallFaceVectorWebhookInternalAsync(
@@ -339,5 +334,71 @@ public class N8nService : IN8nService
         }
     }
 
+    public async Task<Result<string>> CallEmbeddingsWebhookAsync(BaseEmbeddingsDto dto, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(_n8nSettings.Embeddings.WebHookUrl))
+        {
+            _logger.LogWarning("n8n embeddings webhook URL is not configured.");
+            return Result<string>.Failure("n8n embeddings integration is not configured.", "Configuration");
+        }
 
+        // Use a unique ID from the DTO as tokenPayloadId
+        var tokenPayloadId = dto.RecordId ?? Guid.NewGuid().ToString();
+
+        return await CallWebhookInternalAsync(
+            _n8nSettings.Embeddings.WebHookUrl,
+            tokenPayloadId,
+            dto,
+            cancellationToken
+        );
+    }
+
+    private async Task<Result<string>> CallWebhookInternalAsync<T>(string webhookUrl, string tokenPayloadId, T dto, CancellationToken cancellationToken) where T : class
+    {
+        if (string.IsNullOrEmpty(webhookUrl))
+        {
+            _logger.LogWarning("n8n webhook URL is not configured: {WebhookUrl}", webhookUrl);
+            return Result<string>.Failure($"n8n integration for {webhookUrl} is not configured.", "Configuration");
+        }
+
+        var httpClient = _httpClientFactory.CreateClient();
+
+        // Generate JWT Token if JwtSecret is configured
+        if (!string.IsNullOrEmpty(_n8nSettings.JwtSecret))
+        {
+            var jwtHelper = _jwtHelperFactory.Create(_n8nSettings.JwtSecret);
+            var token = jwtHelper.GenerateToken(tokenPayloadId, DateTime.UtcNow.AddMinutes(5)); // Token expires in 5 minutes
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        else
+        {
+            _logger.LogWarning("N8nSettings.JwtSecret is not configured. Skipping JWT token generation for webhook.");
+        }
+
+        var jsonPayload = JsonSerializer.Serialize(dto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        try
+        {
+            _logger.LogInformation("Calling n8n webhook at {Url} with payload: {Payload}", webhookUrl, jsonPayload);
+            var response = await httpClient.PostAsync(webhookUrl, content, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Failed to call n8n webhook. Status: {StatusCode}, Response: {ErrorContent}", response.StatusCode, errorContent);
+                return Result<string>.Failure($"Failed to call n8n webhook. Status: {response.StatusCode}. Error: {errorContent}", "ExternalService");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogInformation("Received successful response from n8n webhook: {ResponseContent}", responseContent);
+
+            return Result<string>.Success(responseContent);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred while calling the n8n webhook.");
+            return Result<string>.Failure($"An error occurred: {ex.Message}", "Exception");
+        }
+    }
 }
