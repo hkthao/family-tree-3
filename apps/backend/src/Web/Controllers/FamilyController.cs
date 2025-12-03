@@ -7,7 +7,8 @@ using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
-using backend.Application.Members.Commands.UpdateDenormalizedFields; // Add this using directive
+using backend.Application.Members.Commands.UpdateDenormalizedFields;
+using backend.Application.UserFamilyAccess.Queries; // Thêm dòng này
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,17 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Lấy danh sách các gia đình mà người dùng hiện tại có quyền truy cập (Manager hoặc Viewer).
+    /// </summary>
+    /// <returns>Danh sách các đối tượng FamilyAccessDto.</returns>
+    [HttpGet("my-access")]
+    public async Task<ActionResult<List<FamilyAccessDto>>> GetUserFamilyAccess()
+    {
+        var result = await _mediator.Send(new GetUserFamilyAccessQuery());
+        return Ok(result);
+    }
 
     /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một gia đình theo ID.

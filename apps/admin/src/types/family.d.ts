@@ -18,6 +18,11 @@ export interface Family {
   totalGenerations?: number;
 }
 
+export interface IFamilyAccess {
+  familyId: string;
+  role: number; // Corresponds to FamilyRole enum in backend
+}
+
 export interface FamilyFilter {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;

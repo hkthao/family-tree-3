@@ -5,6 +5,7 @@ import {
   type Family,
   type FamilyFilter,
   type Paginated,
+  type IFamilyAccess, // Thêm dòng này để import IFamilyAccess
 } from '@/types';
 import type { FamilyExportDto } from '@/types/family'; // NEW IMPORT
 import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store'; // NEW IMPORT
@@ -67,6 +68,10 @@ export class ApiFamilyService implements IFamilyService {
     return this.http.get<Family[]>(
       `/family/by-ids?${params.toString()}`,
     );
+  }
+
+  async getUserFamilyAccess(): Promise<Result<IFamilyAccess[], ApiError>> {
+    return this.http.get<IFamilyAccess[]>(`/family/my-access`);
   }
 
   async exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>> { // NEW METHOD
