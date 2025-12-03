@@ -38,27 +38,27 @@ const menu: MenuSection[] = [
         exact: true,
       },
       {
-        titleKey: 'event.list.title', // New: Title for Event List
-        icon: 'mdi-calendar-month-outline', // New: Icon for Event List
-        to: '/event', // New: Route for Event List
+        titleKey: 'event.list.title', 
+        icon: 'mdi-calendar-month-outline', 
+        to: '/event', 
         exact: true,
       },
       {
         titleKey: 'search.face',
         icon: 'mdi-magnify-expand',
         to: '/face/search',
+        exact: true,
       },
       {
         titleKey: 'memberFace.list.title',
         icon: 'mdi-face-recognition',
         to: '/member/faces',
-        roles: ['Admin'],
         exact: true,
       },
       {
-        titleKey: 'memberStory.list.title', // New: Title for MemberStory List
-        icon: 'mdi-book-open-outline', // New: Icon for MemberStory List
-        to: '/member-story-studio/list', // New: Route for MemberStory List
+        titleKey: 'memberStory.list.title', 
+        icon: 'mdi-book-open-outline', 
+        to: '/member-story-studio/list', 
         exact: true,
       },
     ],
