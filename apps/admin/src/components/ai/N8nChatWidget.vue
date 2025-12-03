@@ -1,12 +1,20 @@
 <template>
   <v-navigation-drawer v-model="chatOpen" location="right" temporary width="400" class="n8n-chat-window">
     <v-card flat class="fill-height d-flex flex-column">
-      <v-card-text class="n8n-chat-container pa-0">
-        <div id="n8n-chat-target" class="fill-height"></div>
-        <v-btn class="btn-close" variant="text" density="compact" icon @click="toggleChat">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-card-text>
+      <v-sheet class="n8n-chat-container pa-0 d-flex flex-column" height="100%">
+        <div class="pa-4 mt-4 pb-0">
+          <FamilyAutocomplete
+            v-model="selectedFamilyId"
+            label="Chọn gia đình để tra cứu"
+            clearable
+            hide-details
+          />
+        </div>
+          <div id="n8n-chat-target" ></div>
+          <v-btn class="btn-close" variant="text" density="compact" icon @click="toggleChat">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+      </v-sheet>
     </v-card>
   </v-navigation-drawer>
 </template>
@@ -18,16 +26,18 @@ import { useI18n } from 'vue-i18n';
 import '@n8n/chat/style.css';
 import { useUserSettingsStore } from '@/stores/user-settings.store';
 import { useAuthService } from '@/services/auth/authService';
-import { useServices } from '@/plugins/services.plugin'; // Updated import to use the composable
-import { Language } from '@/types'; // Import Language enum
+import { useServices } from '@/plugins/services.plugin';
+import { Language } from '@/types';
 import { getEnvVariable } from '@/utils/api.util';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 
 const { t } = useI18n();
 const chatOpen = ref(false);
 let chatInstance: ReturnType<typeof createChat> | null = null;
 const userSettingsStore = useUserSettingsStore();
-const authService = useAuthService(); // NEW
-const services = useServices(); // NEW
+const authService = useAuthService();
+const services = useServices();
+const selectedFamilyId = ref<string | undefined>(undefined); // Declare familyId ref
 
 // Initial fetch of user settings if not already loaded (optional, but good practice)
 if (!userSettingsStore.preferences.language) {
@@ -56,15 +66,18 @@ const currentChatLanguage = computed(() => {
   return userSettingsStore.preferences.language === Language.English ? 'en' : 'vi';
 });
 
-const initializeChat = async () => { // Changed to async
-  if (chatInstance) return; // Prevent re-initialization if already created
+const initializeChat = async () => {
+  if (chatInstance) return;
   const WEBHOOK_URL = getEnvVariable('VITE_N8N_CHAT_WEBHOOK_URL');
+  const COLLECTION_NAME = getEnvVariable('VITE_N8N_CHAT_COLLECTION_NAME');
+  if (!COLLECTION_NAME) {
+    console.error('COLLECTION_NAME is not defined. N8n chat widget will not function.');
+  }
   if (!WEBHOOK_URL) {
     console.error('VITE_N8N_CHAT_WEBHOOK_URLK_URL is not defined. N8n chat widget will not function.');
     return;
   }
 
-  // NEW: Get JWT token
   const user = await authService.getUser();
   if (!user || !user.id) {
     console.error('User not logged in or user ID not available. Cannot get JWT for n8n chat.');
@@ -85,7 +98,7 @@ const initializeChat = async () => { // Changed to async
     webhookConfig: {
       method: 'POST',
       headers: {
-        'authorization': `Bearer ${jwtToken}`, // Use dynamic token
+        'authorization': `Bearer ${jwtToken}`,
       },
     },
     target: '#n8n-chat-target',
@@ -93,17 +106,20 @@ const initializeChat = async () => { // Changed to async
     chatInputKey: 'chatInput',
     chatSessionKey: 'sessionId',
     loadPreviousSession: false,
-    metadata: {},
+    metadata: {
+      familyId: selectedFamilyId.value, 
+      collectionName: COLLECTION_NAME,
+    },
     showWelcomeScreen: false,
-    // @ts-expect-error: The n8n chat widget expects 'vi' and 'en' for languages, not Language enum values.
+     // @ts-expect-error: The n8n chat widget expects 'vi' and 'en' for languages, not Language enum values.
     defaultLanguage: currentChatLanguage.value,
     initialMessages: [
-      t('n8nChat.welcomeMessage'),
+     t('n8nChat.welcomeMessage'),
     ],
     i18n: {
       en: {
         title: 'Gia Phả Việt AI Assistant 👋',
-        subtitle: "Your guide to family history. Ask me anything!",
+        subtitle: "Your guide to family history. Select a family to get specific information.",
         footer: '',
         inputPlaceholder: 'Type your question..',
         getStarted: 'New Conversation',
@@ -111,7 +127,7 @@ const initializeChat = async () => { // Changed to async
       },
       vi: {
         title: 'Trợ lý AI Gia Phả Việt 👋',
-        subtitle: "Người bạn đồng hành trong hành trình tìm hiểu gia phả. Hãy hỏi tôi bất cứ điều gì!",
+        subtitle: "Người bạn đồng hành trong hành trình tìm hiểu gia phả. Chọn một gia đình để tra cứu thông tin cụ thể.",
         footer: '',
         inputPlaceholder: 'Nhập câu hỏi của bạn..',
         getStarted: 'Cuộc trò chuyện mới',
@@ -125,7 +141,6 @@ const initializeChat = async () => { // Changed to async
 onMounted(() => {
   if (!userSettingsStore.preferences.language) {
     userSettingsStore.fetchUserSettings().then(() => {
-      // After fetching, if language is available, initialize chat
       if (userSettingsStore.preferences.language) {
         initializeChat();
       }
@@ -137,15 +152,25 @@ onMounted(() => {
   }
 });
 
-// Watch for changes in user's language preference and re-initialize if necessary
 watch(() => userSettingsStore.preferences.language, (newLang, oldLang) => {
-  if (newLang && newLang !== oldLang && chatInstance) {
-    // If language changes and chat is already initialized, unmount and re-initialize
-    chatInstance.unmount();
-    chatInstance = null; // Reset chatInstance
+  if (newLang && newLang !== oldLang) {
+    if (chatInstance) {
+      chatInstance.unmount();
+      chatInstance = null;
+    }
     initializeChat();
   } else if (newLang && !chatInstance) {
-    // If language becomes available and chat is not initialized
+    initializeChat();
+  }
+});
+
+// Watch for changes in selectedFamilyId and re-initialize if necessary
+watch(selectedFamilyId, (newId, oldId) => {
+  if (newId !== oldId) {
+    if (chatInstance) {
+      chatInstance.unmount();
+      chatInstance = null;
+    }
     initializeChat();
   }
 });
@@ -165,17 +190,18 @@ onUnmounted(() => {
   border-radius: 8px;
   overflow: hidden;
   position: relative;
+
 }
 
-.n8n-chat-container {
-  max-height: 100%;
+#n8n-chat-target {
+  height: calc(100vh - 140px) !important;
 }
 
 .btn-close {
   position: absolute;
   z-index: 10;
-  top: 15px;
-  right: 15px;
+  top: 5px;
+  left: 5px;
   color: rgb(var(--v-theme-primary));
 }
 </style>

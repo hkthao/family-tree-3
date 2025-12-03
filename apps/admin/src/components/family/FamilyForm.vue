@@ -25,8 +25,8 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-textarea v-model="formData.description" :rows="2" :label="$t('family.form.descriptionLabel')"
-          data-testid="family-description-input"></v-textarea>
+        <v-textarea v-model="formData.description" :rows="2" :auto-grow="true"
+          :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
     <v-row>
