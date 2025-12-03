@@ -99,6 +99,10 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             textBuilder.AppendLine($"Ngày sinh: {member.DateOfBirth?.ToShortDateString()}");
             textBuilder.AppendLine($"Ngày mất: {member.DateOfDeath?.ToShortDateString()}");
             textBuilder.AppendLine($"Giới tính: {member.Gender}");
+            if (!string.IsNullOrEmpty(member.Occupation))
+            {
+                textBuilder.AppendLine($"Nghề nghiệp: {member.Occupation}");
+            }
 
             var detailedRelationshipText = new StringBuilder();
             var metadataRelationships = new List<string>();
@@ -196,7 +200,8 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                     DeathDate = member.DateOfDeath?.ToShortDateString() ?? "",
                     Bio = member.Biography ?? "",
                     Relationships = metadataRelationships, // Use the new detailed list
-                    Events = formattedEvents // Populate with detailed event strings
+                    Events = formattedEvents, // Populate with detailed event strings
+                    Occupation = member.Occupation // Populate new Occupation property
                 }
             };
 
