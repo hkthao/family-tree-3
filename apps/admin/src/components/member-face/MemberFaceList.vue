@@ -6,7 +6,7 @@
       <v-toolbar flat>
         <v-toolbar-title>{{ t('memberFace.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="emit('create')"
+        <v-btn v-if="!props.readOnly" color="primary" icon @click="emit('create')"
           data-testid="create-member-face-button">
           <v-tooltip :text="t('common.create')">
             <template v-slot:activator="{ props }">
@@ -48,7 +48,7 @@
       </v-tooltip>
       <v-tooltip :text="t('common.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn v-if="canPerformActions" icon variant="text" size="small" v-bind="props" @click="emit('delete', item)" data-testid="delete-member-face-button">
+          <v-btn icon variant="text" size="small" v-bind="props" @click="emit('delete', item)" data-testid="delete-member-face-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -63,7 +63,6 @@ import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { useAuth } from '@/composables/useAuth';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { DataTableHeader } from 'vuetify'; // NEW
 
@@ -79,7 +78,6 @@ const props = defineProps<MemberFaceListProps>();
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'ai-create', 'update:search']); // NEW emits
 
 const { t } = useI18n();
-const { isAdmin, isFamilyManager } = useAuth(); // NEW
 
 const page = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Use constant
@@ -105,10 +103,6 @@ watch(() => props.search, (newSearch) => { // NEW
   if (newSearch !== searchQuery.value) {
     searchQuery.value = newSearch;
   }
-});
-
-const canPerformActions = computed(() => { // NEW
-  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
 });
 
 const headers = computed<DataTableHeader[]>(() => [
