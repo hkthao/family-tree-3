@@ -1,8 +1,7 @@
 <template>
   <v-card class="mb-4" data-testid="member-face-search">
     <v-card-title class="text-h6 d-flex align-center">
-      <v-icon start>mdi-magnify</v-icon>
-      <span class="font-weight-bold">{{ t('memberFace.search.title') }}</span>
+      <span class="font-weight-bold">{{ t('common.advancedSearch') }}</span>
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="member-face-search-expand-button">
         <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
@@ -69,7 +68,7 @@ const emit = defineEmits(['update:filters']);
 
 const { t } = useI18n();
 
-const expanded = ref(true); // Default to expanded
+const expanded = ref(false); // Default to collapsed
 const internalFilters = ref<MemberFaceFilter>({}); // Initialize directly to empty object
 
 const emotionOptions = computed(() => [
