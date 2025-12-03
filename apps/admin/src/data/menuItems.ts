@@ -25,7 +25,6 @@ const menu: MenuSection[] = [
         titleKey: 'dashboard.overview',
         icon: 'mdi-view-dashboard',
         to: '/dashboard',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
     ],
   },
@@ -36,21 +35,18 @@ const menu: MenuSection[] = [
         titleKey: 'family.manageFamilies',
         icon: 'mdi-home-group',
         to: '/family',
-        roles: ['Admin', 'FamilyManager'],
         exact: true,
       },
       {
         titleKey: 'event.list.title', // New: Title for Event List
         icon: 'mdi-calendar-month-outline', // New: Icon for Event List
         to: '/event', // New: Route for Event List
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], // New: Roles for Event List
         exact: true,
       },
       {
         titleKey: 'search.face',
         icon: 'mdi-magnify-expand',
         to: '/face/search',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
       {
         titleKey: 'memberFace.list.title',
@@ -63,7 +59,6 @@ const menu: MenuSection[] = [
         titleKey: 'memberStory.list.title', // New: Title for MemberStory List
         icon: 'mdi-book-open-outline', // New: Icon for MemberStory List
         to: '/member-story-studio/list', // New: Route for MemberStory List
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], // New: Roles for MemberStory List
         exact: true,
       },
     ],
