@@ -46,7 +46,7 @@ import { onMounted, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
 import { useUserProfileStore } from '@/stores';
-import type { UserProfile, UpdateUserProfileRequestDto } from '@/types';
+import type { UpdateUserProfileRequestDto } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
