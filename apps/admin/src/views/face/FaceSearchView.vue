@@ -1,12 +1,16 @@
 <template>
   <v-card elevation="2">
     <v-card-text>
-      <FamilyAutocomplete
-        v-model="selectedFamilyId"
-        :label="t('face.family')"
-        class="mb-4"
-        data-testid="family-autocomplete"
-      />
+      <v-row>
+        <v-col cols="4">
+          <FamilyAutocomplete
+            v-model="selectedFamilyId"
+            :label="t('face.family')"
+            class="mb-4"
+            data-testid="family-autocomplete"
+          />
+        </v-col>
+      </v-row>
       <div v-if="selectedFamilyId">
         <FaceUploadInput id="tour-face-upload" @file-uploaded="handleFileUpload" />
         <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
