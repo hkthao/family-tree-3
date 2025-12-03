@@ -1,30 +1,11 @@
 import type { IRelationshipService } from './relationship.service.interface';
 import type { Relationship, RelationshipFilter } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok, type Paginated, type Result } from '@/types';
+import { type Paginated, type Result } from '@/types';
 
 export class ApiRelationshipService implements IRelationshipService {
-  private mapListDtoToRelationship(dto: Relationship): Relationship {
-    return {
-      id: dto.id,
-      sourceMemberId: dto.sourceMemberId,
-      targetMemberId: dto.targetMemberId,
-      type: dto.type,
-      order: dto.order,
-      sourceMember: dto.sourceMember,
-      targetMember: dto.targetMember,
-    };
-  }
 
   constructor(private http: ApiClientMethods) {}
-
-  async fetch(): Promise<Result<Relationship[], ApiError>> {
-    const result = await this.http.get<Relationship[]>(`/relationship`);
-    if (result.ok) {
-      return ok(result.value.map(this.mapListDtoToRelationship));
-    }
-    return result;
-  }
 
   async getById(
     id: string,

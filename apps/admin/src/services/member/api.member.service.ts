@@ -35,15 +35,6 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
 export class ApiMemberService implements IMemberService {
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<Member[], ApiError>> {
-    // Renamed from fetchMembers
-    const result = await this.http.get<Member[]>(`/member`);
-    if (result.ok) {
-      return ok(result.value.map((m) => transformMemberDates(m)));
-    }
-    return result;
-  }
-
   async fetchMembersByFamilyId(
     familyId: string,
   ): Promise<Result<Member[], ApiError>> {

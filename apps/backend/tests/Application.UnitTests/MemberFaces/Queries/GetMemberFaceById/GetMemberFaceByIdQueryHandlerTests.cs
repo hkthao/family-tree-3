@@ -1,11 +1,9 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,17 +11,16 @@ namespace backend.Application.UnitTests.MemberFaces.Queries.GetMemberFaceById;
 
 public class GetMemberFaceByIdQueryHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
 
     public GetMemberFaceByIdQueryHandlerTests()
     {
-        _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private GetMemberFaceByIdQueryHandler CreateGetByIdHandler()
     {
-        return new GetMemberFaceByIdQueryHandler(_context, _authorizationServiceMock.Object);
+        return new GetMemberFaceByIdQueryHandler(_context, _mockUser.Object, _mockAuthorizationService.Object); // Updated
     }
 
     [Fact]
@@ -83,17 +80,15 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
     [Fact]
     public async Task GetMemberFaceById_ShouldReturnFailure_WhenUnauthorized()
     {
-        // Arrange
-        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // Unauthorized
-
-        var family = new Family { Name = "Test Family", Code = "TF" };
+       
+        var family = new Family { Name = "Test Family", Code = "TF", CreatedBy = Guid.NewGuid().ToString() }; // Family not created by unauthorizedUser
         var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var memberFace = new MemberFace
         {
             MemberId = member.Id,
             FaceId = "face123",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
-            Confidence = 0.99,
+            Confidence = 0.99f,
             ThumbnailUrl = "http://thumbnail.url",
             OriginalImageUrl = "http://original.url",
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
@@ -106,6 +101,11 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
         await _context.MemberFaces.AddAsync(memberFace);
         await _context.SaveChangesAsync();
 
+        // Arrange
+        var unauthorizedUserId = Guid.NewGuid(); // A user ID that does not have access
+        _mockUser.Setup(x => x.UserId).Returns(unauthorizedUserId); // Unauthorized user
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Ensure not admin
+
         var query = new GetMemberFaceByIdQuery { Id = memberFace.Id };
         var handler = CreateGetByIdHandler();
 
@@ -114,6 +114,6 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        result.ErrorSource.Should().Be(ErrorSources.NotFound); // Should be NotFound because the specification filters it out
     }
 }

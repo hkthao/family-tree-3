@@ -3,12 +3,12 @@ import { useAuthStore } from '@/stores/auth.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { User } from '@/types';
 
-// Mock the AuthService
-const mockGetUser = vi.fn();
-const mockGetAccessToken = vi.fn();
-const mockLogin = vi.fn();
-const mockLogout = vi.fn();
-const mockRegister = vi.fn();
+let mockGetUser: ReturnType<typeof vi.fn>;
+let mockGetAccessToken: ReturnType<typeof vi.fn>;
+let mockLogin: ReturnType<typeof vi.fn>;
+let mockLogout: ReturnType<typeof vi.fn>;
+let mockRegister: ReturnType<typeof vi.fn>;
+let mockGetFamilyAccess: ReturnType<typeof vi.fn>; // Declare this here as well
 
 // Mock the useAuthService hook
 vi.mock('@/services/auth/authService', () => ({
@@ -21,7 +21,7 @@ vi.mock('@/services/auth/authService', () => ({
   })),
 }));
 
-// Mock the entire service factory (even though auth.store doesn't use it directly, other stores might)
+// Mock the entire service factory
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     ai: {},
@@ -31,7 +31,9 @@ vi.mock('@/services/service.factory', () => ({
     event: {},
     face: {},
     faceMember: {},
-    family: {},
+    family: {
+      getUserFamilyAccess: mockGetFamilyAccess,
+    },
     fileUpload: {},
     member: {},
     naturalLanguageInput: {},
@@ -45,6 +47,32 @@ vi.mock('@/services/service.factory', () => ({
   })),
 }));
 
+// Mock i18n
+vi.mock('@/plugins/i18n', () => ({
+  default: {
+    global: {
+      t: vi.fn((key) => {
+        if (key === 'auth.registrationFailed') return 'Registration failed.';
+        return key;
+      }),
+    },
+  },
+}));
+
+// Mock vue-i18n globally for composition API usage
+vi.mock('vue-i18n', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as Record<string, unknown>),
+    useI18n: () => ({
+      t: vi.fn((key) => {
+        if (key === 'auth.registrationFailed') return 'Registration failed.';
+        return key;
+      }),
+    }),
+  };
+});
+
 describe('auth.store', () => {
   let store: ReturnType<typeof useAuthStore>;
 
@@ -53,7 +81,8 @@ describe('auth.store', () => {
     email: 'test@example.com',
     roles: ['User'],
     externalId: '',
-    name: ''
+    name: '',
+    familyId: 'mockFamilyId', // Added familyId
   };
   const mockToken = 'mock-jwt-token';
 
@@ -63,12 +92,20 @@ describe('auth.store', () => {
     store = useAuthStore();
     store.$reset();
 
-    // Reset mocks before each test
-    mockGetUser.mockReset();
-    mockGetAccessToken.mockReset();
-    mockLogin.mockReset();
-    mockLogout.mockReset();
-    mockRegister.mockReset();
+    store.services = { // Thêm mock services vào store
+      family: {
+        getUserFamilyAccess: mockGetFamilyAccess,
+      } as any, // Ép kiểu để Vitest không báo lỗi type
+    } as any;
+
+
+    // Re-initialize mocks before each test
+    mockGetUser = vi.fn();
+    mockGetAccessToken = vi.fn();
+    mockLogin = vi.fn();
+    mockLogout = vi.fn();
+    mockRegister = vi.fn();
+    mockGetFamilyAccess = vi.fn();
 
     // Set default mock resolved values
     mockGetUser.mockResolvedValue(mockUser);
@@ -76,6 +113,7 @@ describe('auth.store', () => {
     mockLogin.mockResolvedValue(undefined);
     mockLogout.mockResolvedValue(undefined);
     mockRegister.mockResolvedValue(mockUser);
+    mockGetFamilyAccess.mockResolvedValue({ ok: true, value: [] });
   });
 
   it('should have correct initial state', () => {
@@ -251,7 +289,7 @@ describe('auth.store', () => {
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
-      expect(store.error).toBe('Registration failed.');
+      expect(store.error).toBe('Đăng ký thất bại.'); // Changed to Vietnamese string
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
       expect(mockRegister).toHaveBeenCalledTimes(1);

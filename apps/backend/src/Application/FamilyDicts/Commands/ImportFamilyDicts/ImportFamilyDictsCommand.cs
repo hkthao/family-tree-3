@@ -1,8 +1,9 @@
 using backend.Domain.Enums;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 
-public record ImportFamilyDictsCommand : IRequest<IEnumerable<Guid>>
+public record ImportFamilyDictsCommand : IRequest<Result<IEnumerable<Guid>>>
 {
     public IEnumerable<FamilyDictImportDto> FamilyDicts { get; init; } = new List<FamilyDictImportDto>();
 }

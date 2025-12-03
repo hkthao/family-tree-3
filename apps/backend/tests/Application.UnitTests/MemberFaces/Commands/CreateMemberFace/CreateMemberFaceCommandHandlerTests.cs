@@ -5,9 +5,9 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
+using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces;
-using backend.Domain.Common; // NEW
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;

@@ -1,11 +1,9 @@
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -14,20 +12,17 @@ namespace backend.Application.UnitTests.MemberFaces.Queries.SearchMemberFaces;
 public class SearchMemberFacesQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<ILogger<SearchMemberFacesQueryHandler>> _searchLoggerMock;
 
     public SearchMemberFacesQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _searchLoggerMock = new Mock<ILogger<SearchMemberFacesQueryHandler>>();
-
-        // Default authorization setup for tests
+        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private SearchMemberFacesQueryHandler CreateSearchHandler()
     {
-        return new SearchMemberFacesQueryHandler(_context, _authorizationServiceMock.Object);
+        return new SearchMemberFacesQueryHandler(_context, _mockUser.Object, _authorizationServiceMock.Object); // Updated
     }
 
     private async Task SeedData(Family family, Member member, List<MemberFace> memberFaces)
@@ -158,22 +153,26 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
     public async Task SearchMemberFaces_ShouldReturnFailure_WhenUnauthorizedForFamilyFilter()
     {
         // Arrange
-        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // Unauthorized
+       
 
-        var family = new Family { Name = "Family A", Code = "FA" };
+        var family = new Family { Name = "Family A", Code = "FA", CreatedBy = Guid.NewGuid().ToString() }; // Family not created by unauthorizedUser
         var member = new Member(Guid.NewGuid(), "Member One", "MO", "MO", family.Id, family);
         var memberFace = new MemberFace { Id = Guid.NewGuid(), MemberId = member.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 } };
         await SeedData(family, member, new List<MemberFace> { memberFace });
 
+        var unauthorizedUserId = Guid.NewGuid(); // A user ID that does not have access
+        _mockUser.Setup(x => x.UserId).Returns(unauthorizedUserId); // Unauthorized user
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Ensure not admin
         var query = new SearchMemberFacesQuery { FamilyId = family.Id };
         var handler = CreateSearchHandler();
-
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        result.IsSuccess.Should().BeTrue(); // The specification will return an empty list, not a failure
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().BeEmpty();
+        result.Value.TotalItems.Should().Be(0);
     }
 
     [Fact]
@@ -234,10 +233,10 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
         var family = new Family { Name = "Family A", Code = "FA" };
         var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
-        
+
         var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
         var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
-        
+
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member1);
         await _context.MemberFaces.AddAsync(face1);
@@ -265,10 +264,10 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
         var family = new Family { Name = "Family A", Code = "FA" };
         var member1 = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var face1 = new MemberFace { Id = Guid.NewGuid(), MemberId = member1.Id, FaceId = "face1", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.1 }, Emotion = "neutral" };
-        
+
         var member2 = new Member(Guid.NewGuid(), "Jane", "Doe", "JANE", family.Id, family);
         var face2 = new MemberFace { Id = Guid.NewGuid(), MemberId = member2.Id, FaceId = "face2", BoundingBox = new BoundingBox { X = 1, Y = 1, Width = 1, Height = 1 }, Embedding = new List<double> { 0.2 }, Emotion = "happy" };
-        
+
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member1);
         await _context.MemberFaces.AddAsync(face1);

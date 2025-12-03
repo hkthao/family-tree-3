@@ -1,5 +1,5 @@
 <template>
-  <v-card data-testid="family-add-view">
+  <v-card :elevation="0" data-testid="family-add-view">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{
         t('family.form.addTitle')

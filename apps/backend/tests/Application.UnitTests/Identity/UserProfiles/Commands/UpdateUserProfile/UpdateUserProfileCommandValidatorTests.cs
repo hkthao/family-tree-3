@@ -1,8 +1,7 @@
+using backend.Application.Common.Constants; // New using
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using FluentValidation.TestHelper;
 using Xunit;
-
-using backend.Application.Common.Constants; // New using
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandValidatorTests

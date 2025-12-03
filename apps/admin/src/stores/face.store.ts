@@ -40,11 +40,11 @@ export const useFaceStore = defineStore('face', {
 
   actions: {
 
-    async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
+    async detectFaces(imageFile: File, familyId: string, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.memberFace.detect(imageFile, resizeImageForAnalysis);
+        const result = await this.services.memberFace.detect(imageFile, familyId, resizeImageForAnalysis);
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
           this.uploadedImageId = result.value.imageId;

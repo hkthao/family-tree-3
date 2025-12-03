@@ -124,7 +124,8 @@ describe('face.store', () => {
   describe('detectFaces', () => {
     it('should detect faces successfully', async () => {
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
-      const result = await store.detectFaces(file, false);
+      const familyId = 'testFamily123';
+      const result = await store.detectFaces(file, familyId, false);
 
       expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
@@ -136,15 +137,16 @@ describe('face.store', () => {
       expect(store.detectedFaces[0].originalMemberId).toBeNull(); // New assertion
       expect(store.detectedFaces[0].status).toBe('unrecognized'); // New assertion
       expect(mockDetect).toHaveBeenCalledTimes(1);
-      expect(mockDetect).toHaveBeenCalledWith(file, false);
+      expect(mockDetect).toHaveBeenCalledWith(file, familyId, false);
     });
 
     it('should handle detect faces failure', async () => {
       const errorMessage = 'Detection failed.';
       mockDetect.mockResolvedValue(err({ message: errorMessage } as ApiError));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      const familyId = 'testFamily123';
 
-      const result = await store.detectFaces(file, false);
+      const result = await store.detectFaces(file, familyId, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
@@ -158,8 +160,9 @@ describe('face.store', () => {
       const errorMessage = 'Network error.';
       mockDetect.mockRejectedValue(new Error(errorMessage));
       const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
+      const familyId = 'testFamily123';
 
-      const result = await store.detectFaces(file, false);
+      const result = await store.detectFaces(file, familyId, false);
 
       expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);

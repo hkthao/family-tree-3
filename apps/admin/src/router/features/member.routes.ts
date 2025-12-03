@@ -43,9 +43,7 @@ export const memberRoutes: RouteRecordRaw[] = [
         name: 'MemberFaces',
         component: () => import('@/views/member-face/MemberFaceListView.vue'),
         meta: {
-          requiresAuth: true,
-          roles: ['Admin', 'Manager'], // Assuming these roles can manage member faces
-          title: 'Member Faces',
+          breadcrumb: 'memberFace.list.title',
         },
       },
     ],

@@ -1,30 +1,29 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
-using backend.Application.Events.Queries.GetEvents;
 using backend.Application.ExportImport.Commands; // New using statement
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.Queries;
-using backend.Application.Families.Queries.GetFamilies;
+// Removed: using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
-using backend.Application.Families.Queries.GetFamilyDetails;
+// Removed: using backend.Application.Families.Queries.GetFamilyDetails;
 using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict; // New using statement
 using backend.Application.Identity.UserProfiles.Queries;
+using backend.Application.MemberFaces.Common; // NEW
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.MemberStories.DTOs; // NEW
 using backend.Application.MemberStories.Commands.CreateMemberStory; // NEW
 using backend.Application.MemberStories.Commands.UpdateMemberStory; // NEW
+using backend.Application.MemberStories.DTOs; // NEW
 using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
 using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
-using backend.Application.MemberFaces.Common; // NEW
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Mappings;
@@ -42,7 +41,7 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyDto>();
         CreateMap<Family, FamilyDetailDto>()
             .ForMember(dest => dest.FamilyUsers, opt => opt.MapFrom(src => src.FamilyUsers)); // Modified mapping
-        CreateMap<Family, FamilyListDto>();
+        // Removed: CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
@@ -51,9 +50,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
 
         //Event
-        CreateMap<Event, EventListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
@@ -94,13 +90,6 @@ public class MappingProfile : Profile
         CreateMap<Relationship, RelationshipExportDto>();
         CreateMap<Event, EventExportDto>()
             .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
-
-        // FamilyDetails DTOs
-        CreateMap<Member, MemberDetailsDto>()
-            .ForMember(d => d.DateOfBirth, opt => opt.MapFrom(s => s.DateOfBirth.HasValue ? s.DateOfBirth.Value.ToShortDateString() : (string?)null))
-            .ForMember(d => d.EventMembersCount, opt => opt.MapFrom(s => s.EventMembers != null ? s.EventMembers.Count : 0));
-        CreateMap<Family, FamilyDetailsDto>()
-            .ForMember(d => d.Members, opt => opt.MapFrom(s => s.Members != null ? s.Members.Select(m => m).ToList() : new List<Member>()));
 
         // PdfTemplate DTO
         CreateMap<PdfTemplate, PdfTemplateDto>();

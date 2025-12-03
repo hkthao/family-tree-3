@@ -1,8 +1,9 @@
 using backend.Domain.Enums;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 
-public record UpdateFamilyDictCommand : IRequest
+public record UpdateFamilyDictCommand : IRequest<Result>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

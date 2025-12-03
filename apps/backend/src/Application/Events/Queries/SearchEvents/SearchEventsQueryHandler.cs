@@ -6,14 +6,25 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.SearchEvents;
 
-public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
+public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUserService) : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ICurrentUser _currentUserService = currentUserService;
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Events.AsQueryable();
+
+        // Apply access control specification first
+        var isAdmin = _authorizationService.IsAdmin();
+        var currentUserId = _currentUserService.UserId;
+        if (!_currentUserService.IsAuthenticated || currentUserId == Guid.Empty)
+        {
+            return Result<PaginatedList<EventDto>>.Success(PaginatedList<EventDto>.Empty());
+        }
+        query = query.WithSpecification(new EventAccessSpecification(isAdmin, currentUserId));
 
         // Apply individual specifications
         query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));

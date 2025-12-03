@@ -1,19 +1,18 @@
+using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // NEW
 using backend.Application.Families.Commands.UpdateFamily;
+using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
+using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.Families;
-using backend.Domain.Common; // NEW
 using FluentAssertions;
+using MediatR; // NEW
 using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
 using Xunit;
-using System.Diagnostics; // NEW
-using MediatR; // NEW
-using backend.Application.Files.UploadFile; // NEW
-using backend.Application.AI.DTOs; // NEW
-using backend.Application.Common.Models; // NEW
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 

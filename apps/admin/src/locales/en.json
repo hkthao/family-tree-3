@@ -488,6 +488,7 @@
   "common.subtitle": "Description",
   "common.today": "Today",
   "common.search": "Search",
+  "common.advancedSearch": "Advanced Search",
   "event.calendar.viewMode": "View Mode",
   "event.calendar.viewMode.month": "Month",
   "event.calendar.viewMode.week": "Week",

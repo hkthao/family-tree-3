@@ -21,18 +21,23 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
     public async Task Handle(MemberFaceCreatedEvent notification, CancellationToken cancellationToken)
     {
         var memberFace = notification.MemberFace;
-
-        // Ensure thumbnail is available for payload, if not, try to fetch from ThumbnailUrl
+        var member = await _context.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Id == memberFace.MemberId, cancellationToken);
+        if (member == null)
+        {
+            _logger.LogWarning("Member not found for MemberFaceId {MemberFaceId}. Cannot sync familyId to vector DB.", memberFace.Id);
+            return; // Exit if member is not found
+        }
+        
         string? effectiveThumbnailUrl = memberFace.ThumbnailUrl;
-
         var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
         {
             Id = Guid.TryParse(memberFace.VectorDbId, out var vectorDbId) ? vectorDbId : Guid.NewGuid(),
             Vector = [.. memberFace.Embedding.Select(d => (float)d)], // Convert double to float
             Payload = new Dictionary<string, object>
             {
-                { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity
+                { "localDbId", memberFace.Id.ToString() }, 
                 { "memberId", memberFace.MemberId.ToString() },
+                { "familyId", member.FamilyId.ToString() }, // Add FamilyId to payload
                 { "faceId", memberFace.FaceId },
                 { "thumbnailUrl", effectiveThumbnailUrl ?? "" },
                 { "originalImageUrl", memberFace.OriginalImageUrl ?? "" },
@@ -43,7 +48,6 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
         };
 
         var n8nUpsertResult = await _n8nService.CallUpsertFaceVectorWebhookAsync(upsertFaceVectorDto, cancellationToken);
-
         if (!n8nUpsertResult.IsSuccess || n8nUpsertResult.Value == null || !n8nUpsertResult.Value.Success)
         {
             _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n (event handler): {Error}", memberFace.Id, n8nUpsertResult.Error ?? n8nUpsertResult.Value?.Message);

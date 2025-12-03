@@ -3,10 +3,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Common; // NEW
-using backend.Domain.Events.Members; // NEW
-using backend.Domain.Events.Families; // NEW
+using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Xunit;

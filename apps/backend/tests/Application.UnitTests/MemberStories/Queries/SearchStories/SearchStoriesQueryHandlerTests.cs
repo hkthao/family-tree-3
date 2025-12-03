@@ -13,7 +13,7 @@ public class SearchStoriesQueryHandlerTests : TestBase
 
     public SearchStoriesQueryHandlerTests()
     {
-        _handler = new SearchStoriesQueryHandler(_context, _mapper);
+        _handler = new SearchStoriesQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
     }
 
     [Fact]

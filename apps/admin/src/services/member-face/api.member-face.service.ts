@@ -6,10 +6,6 @@ import { ok } from '@/types';
 export class ApiMemberFaceService implements IMemberFaceService {
   constructor(private http: ApiClientMethods) {}
 
-  async fetch(): Promise<Result<MemberFace[], ApiError>> {
-    return await this.http.get<MemberFace[]>(`/memberfaces`);
-  }
-
   async getById(id: string): Promise<Result<MemberFace | undefined, ApiError>> {
     const result = await this.http.get<MemberFace>(`/memberfaces/${id}`);
     if (result.ok) {
@@ -63,19 +59,23 @@ export class ApiMemberFaceService implements IMemberFaceService {
 
   async detect(
     file: File,
+    familyId: string,
     resizeImageForAnalysis?: boolean,
     returnCrop?: boolean,
   ): Promise<Result<FaceDetectionRessult, ApiError>> {
     const formData = new FormData();
     formData.append('file', file);
+
+    const params = new URLSearchParams();
+    params.append('familyId', familyId);
     if (resizeImageForAnalysis !== undefined) {
-      formData.append('resizeImageForAnalysis', resizeImageForAnalysis.toString());
+      params.append('resizeImageForAnalysis', resizeImageForAnalysis.toString());
     }
     if (returnCrop !== undefined) {
-      formData.append('returnCrop', returnCrop.toString());
+      params.append('returnCrop', returnCrop.toString());
     }
 
-    return await this.http.post<FaceDetectionRessult>(`/memberfaces/detect`, formData, {
+    return await this.http.post<FaceDetectionRessult>(`/memberfaces/detect?${params.toString()}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

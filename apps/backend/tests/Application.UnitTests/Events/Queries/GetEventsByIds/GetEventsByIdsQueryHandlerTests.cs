@@ -11,6 +11,11 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
     {
         public GetEventsByIdsQueryHandlerTests()
         {
+            // TestBase already sets up _mockUser and _mockAuthorizationService
+            // Set default authenticated user for specific scenarios if needed
+            _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+            _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
+            _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Default to admin for these tests to easily access events
         }
 
         [Fact]
@@ -24,7 +29,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
             _context.Events.AddRange(event1, event2, event3);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
             var query = new GetEventsByIdsQuery(new List<Guid> { event1.Id, event3.Id });
 
             // Act
@@ -45,7 +50,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
         public async Task Handle_ShouldReturnEmptyList_WhenGivenNoIds()
         {
             // Arrange
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
             var query = new GetEventsByIdsQuery(new List<Guid>());
 
             // Act
@@ -61,7 +66,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
         public async Task Handle_ShouldReturnEmptyList_WhenGivenNonExistentIds()
         {
             // Arrange
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
             var query = new GetEventsByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
 
             // Act
@@ -71,6 +76,30 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
             result.Value.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Handle_ShouldReturnEmptyList_WhenUserIsNotAuthenticated()
+        {
+            // Arrange
+            _mockUser.Setup(x => x.IsAuthenticated).Returns(false); // Simulate unauthenticated user
+            _mockUser.Setup(x => x.UserId).Returns(Guid.Empty); // Ensure UserId is empty for unauthenticated
+            _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Not admin, but it won't be checked
+
+            var familyId = Guid.NewGuid();
+            var event1 = new Event("Event 1", "EVT1", EventType.Birth, familyId);
+            _context.Events.Add(event1);
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var query = new GetEventsByIdsQuery(new List<Guid> { event1.Id });
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull().And.BeEmpty();
         }
     }
 }

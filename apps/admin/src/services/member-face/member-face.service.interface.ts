@@ -13,6 +13,7 @@ export interface IMemberFaceService extends ICrudService<MemberFace> {
 
   detect(
     imageFile: File,
+    familyId: string,
     resizeImageForAnalysis: boolean,
   ): Promise<Result<FaceDetectionRessult, ApiError>>;
 

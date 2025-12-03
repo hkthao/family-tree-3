@@ -5,7 +5,6 @@ using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.Events.Queries.GetEventById;
-using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.SearchEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,18 +24,6 @@ public class EventController(IMediator mediator) : ControllerBase
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
-
-    /// <summary>
-    /// Xử lý GET request để lấy danh sách các sự kiện.
-    /// </summary>
-    /// <param name="query">Đối tượng truy vấn chứa các tiêu chí lọc và phân trang.</param>
-    /// <returns>Danh sách các sự kiện.</returns>
-    [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<EventDto>>> GetEvents([FromQuery] GetEventsQuery query)
-    {
-        var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<IReadOnlyList<EventDto>>)Ok(result.Value) : (ActionResult<IReadOnlyList<EventDto>>)BadRequest(result.Error);
-    }
 
     /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một sự kiện theo ID.

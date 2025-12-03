@@ -96,14 +96,15 @@
         <v-checkbox v-model="formData.isDeceased" :label="t('member.form.isDeceased')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-is-deceased-checkbox"></v-checkbox>
       </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
-      </v-col>
+     
     </v-row>
 
      <!-- Thông tin Cha Mẹ -->
     <v-row>
+       <v-col cols="12" md="12">
+        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
+      </v-col>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :disabled="isFormReadOnly"
           :family-id="formData.familyId" data-testid="member-father-autocomplete" />

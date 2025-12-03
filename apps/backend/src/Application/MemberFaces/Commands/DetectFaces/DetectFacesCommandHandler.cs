@@ -5,19 +5,29 @@ using backend.Application.Files.UploadFile;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using Microsoft.Extensions.Logging;
+using backend.Application.Members.Specifications; 
+using Ardalis.Specification; 
+using Ardalis.Specification.EntityFrameworkCore; 
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IMediator mediator) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IMediator mediator, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
+    private readonly ICurrentUser _currentUser = currentUser; 
+    private readonly IAuthorizationService _authorizationService = authorizationService; 
+
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
         try
         {
+            var currentUserId = _currentUser.UserId;
+            var isAdmin = _authorizationService.IsAdmin();
+            var memberAccessSpec = new MemberAccessSpecification(isAdmin, currentUserId);
+
             string effectiveFileName = string.IsNullOrWhiteSpace(request.FileName)
                 ? $"uploaded_image_{Guid.NewGuid()}{Path.GetExtension(request.ContentType)}"
                 : request.FileName;
@@ -106,12 +116,13 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 };
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
-                    var searchFaceQuery = new SearchMemberFaceQuery
+                    var searchFaceQuery = new SearchMemberFaceQuery(request.FamilyId)
                     {
                         Vector = detectedFaceDto.Embedding,
                         Limit = 1,
                         Threshold = 0.7f
                     };
+
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
                     if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
                     {
@@ -134,10 +145,16 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             }
             if (memberIdsToFetch.Any())
             {
+                
                 var members = await _context.Members
+                    .WithSpecification(memberAccessSpec) 
                     .Where(m => memberIdsToFetch.Contains(m.Id))
                     .Include(m => m.Family)
                     .ToListAsync(cancellationToken);
+                
+                
+                detectedFaceDtos = detectedFaceDtos.Where(df => !df.MemberId.HasValue || members.Any(m => m.Id == df.MemberId.Value)).ToList();
+
                 foreach (var faceDto in detectedFaceDtos)
                 {
                     if (faceDto.MemberId.HasValue)

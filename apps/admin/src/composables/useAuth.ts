@@ -1,5 +1,6 @@
 import { computed } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
+import { FamilyRole } from '@/types/enums';
 
 export function useAuth() {
   const authStore = useAuthStore();
@@ -16,17 +17,21 @@ export function useAuth() {
   };
 
   const isAdmin = computed(() => hasRole('Admin'));
-  const isFamilyManager = computed(() => hasRole('FamilyManager'));
 
-  // You can add more specific permission checks here if needed
-  // For example, if you have a 'permissions' array in your user object:
-  // const can = (permission: string | string[]): boolean => {
-  //   if (!authStore.isAuthenticated) {
-  //     return false;
-  //   }
-  //   const permissionsToCheck = Array.isArray(permission) ? permission : [permission];
-  //   return permissionsToCheck.some(p => authStore.user?.permissions?.includes(p));
-  // };
+  
+  const hasFamilyRole = (familyId: string, role: FamilyRole): boolean => {
+    if (!authStore.isAuthenticated) {
+      return false;
+    }
+    return authStore.userFamilyAccess.some(
+      access => access.familyId === familyId && access.role === role
+    );
+  };
+
+  
+  const isFamilyManager = computed(() => (familyId: string): boolean => {
+    return hasFamilyRole(familyId, FamilyRole.Manager);
+  });
 
   return {
     isLoggedIn,
@@ -34,6 +39,7 @@ export function useAuth() {
     hasRole,
     isAdmin,
     isFamilyManager,
-    // can, // Uncomment if you implement a 'can' function
+    hasFamilyRole, 
   };
 }
+

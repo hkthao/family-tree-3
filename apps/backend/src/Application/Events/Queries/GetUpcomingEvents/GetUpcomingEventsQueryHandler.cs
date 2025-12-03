@@ -1,8 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Dashboard.Specifications;
-using backend.Application.Events.Specifications;
+using backend.Application.Events.Specifications; // Ensure this is present
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 
@@ -17,28 +16,15 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
     {
         IQueryable<Domain.Entities.Event> eventsQuery = _context.Events;
 
-        if (!_authorizationService.IsAdmin())
+        // Handle unauthenticated user first, return empty list
+        if (!_user.IsAuthenticated || _user.UserId == Guid.Empty)
         {
-            // Filter events by user access if not admin
-            if (_user.UserId == Guid.Empty)
-            {
-                return Result<List<EventDto>>.Success([]); // No user ID, no accessible families
-            }
-
-            var familyUsersSpec = new FamilyUsersByUserIdSpec(_user.UserId);
-            var accessibleFamilyIds = await _context.FamilyUsers
-                .WithSpecification(familyUsersSpec)
-                .Select(fu => fu.FamilyId)
-                .ToListAsync(cancellationToken);
-
-            // If no accessible families, return empty list
-            if (!accessibleFamilyIds.Any())
-            {
-                return Result<List<EventDto>>.Success([]);
-            }
-
-            eventsQuery = eventsQuery.WithSpecification(new EventsByFamilyIdsSpec(accessibleFamilyIds));
+            return Result<List<EventDto>>.Success(new List<EventDto>());
         }
+
+        // Apply EventAccessSpecification to filter events based on user's access
+        eventsQuery = eventsQuery.WithSpecification(new EventAccessSpecification(_authorizationService.IsAdmin(), _user.UserId));
+
 
         if (request.FamilyId.HasValue)
         {

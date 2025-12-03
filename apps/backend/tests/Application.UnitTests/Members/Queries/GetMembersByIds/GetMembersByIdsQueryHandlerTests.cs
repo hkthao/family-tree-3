@@ -1,24 +1,17 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMembersByIds;
 
 public class GetMembersByIdsQueryHandlerTests : TestBase
 {
-    private readonly Mock<IPrivacyService> _privacyServiceMock;
-
     public GetMembersByIdsQueryHandlerTests()
     {
-        _privacyServiceMock = new Mock<IPrivacyService>();
-        // Setup mock to return the original list without filtering for tests
-        _privacyServiceMock.Setup(p => p.ApplyPrivacyFilter(It.IsAny<List<MemberListDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((List<MemberListDto> members, Guid familyId, CancellationToken ct) => members);
+        // No need to initialize _mockAuthorizationService and _mockCurrentUser here, as TestBase does it.
+        // We might want to override their behavior in specific tests if needed.
     }
 
     [Fact]
@@ -41,7 +34,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync();
 
-        var handler = new GetMembersByIdsQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var handler = new GetMembersByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
         var query = new GetMembersByIdsQuery(new List<Guid> { member1.Id, member2.Id });
 
         // Act
@@ -56,7 +49,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnEmptyList_WhenGivenNoIds()
     {
         // Arrange
-        var handler = new GetMembersByIdsQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var handler = new GetMembersByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
         var query = new GetMembersByIdsQuery(new List<Guid>());
 
         // Act

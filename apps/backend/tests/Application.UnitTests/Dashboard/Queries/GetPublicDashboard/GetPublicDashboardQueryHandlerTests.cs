@@ -18,7 +18,7 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
     {
         _dateTimeMock = new Mock<IDateTime>();
         _handler = new GetPublicDashboardQueryHandler(_context, _dateTimeMock.Object);
-        
+
         // Mock current date for age calculation
         _dateTimeMock.Setup(dt => dt.Now).Returns(new DateTime(2024, 1, 1));
     }
@@ -42,32 +42,32 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         var memberPF1_Female_Living_Young = new Member("Doe", "Jane", "JFD1", publicFamilyId1, null, Gender.Female.ToString(), new DateTime(2000, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
         var memberPF1_Male_Deceased = new Member("Doe", "Jim", "JMD2", publicFamilyId1, null, Gender.Male.ToString(), new DateTime(1970, 1, 1), new DateTime(2020, 1, 1), null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true };
         var memberPF1_Female_Deleted = new Member("Doe", "Julia", "JFD2", publicFamilyId1, null, Gender.Female.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid(), IsDeleted = true };
-        
+
         var memberPF2_Male_Living = new Member("Smith", "Peter", "SP1", publicFamilyId2, null, Gender.Male.ToString(), new DateTime(1990, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
 
-                _context.Members.AddRange(
+        _context.Members.AddRange(
 
-                    memberPF1_Male_Living_Old,
+            memberPF1_Male_Living_Old,
 
-                    memberPF1_Female_Living_Young,
+            memberPF1_Female_Living_Young,
 
-                    memberPF1_Male_Deceased,
+            memberPF1_Male_Deceased,
 
-                    memberPF1_Female_Deleted,
+            memberPF1_Female_Deleted,
 
-                    memberPF2_Male_Living,
+            memberPF2_Male_Living,
 
-                    new Member("Member", "Private", "PM1", privateFamilyId1, null, Gender.Female.ToString(), new DateTime(1960, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }
+            new Member("Member", "Private", "PM1", privateFamilyId1, null, Gender.Female.ToString(), new DateTime(1960, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }
 
-                );
+        );
 
-        
 
-                _context.Relationships.Add(new Relationship(publicFamilyId1, memberPF1_Male_Living_Old.Id, memberPF1_Female_Living_Young.Id, RelationshipType.Father));
 
-                
+        _context.Relationships.Add(new Relationship(publicFamilyId1, memberPF1_Male_Living_Old.Id, memberPF1_Female_Living_Young.Id, RelationshipType.Father));
 
-                // Events for Public Family 1
+
+
+        // Events for Public Family 1
         var eventPF1_Public = new Event("Public Event", "PE1", EventType.Other, publicFamilyId1) { Id = Guid.NewGuid() };
         var eventPF1_Deleted = new Event("Deleted Event", "DE1", EventType.Other, publicFamilyId1) { Id = Guid.NewGuid(), IsDeleted = true };
         _context.Events.AddRange(eventPF1_Public, eventPF1_Deleted);
@@ -207,7 +207,7 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         var deletedRelationship = new Relationship(publicFamilyId, activeMember.Id, deletedMember.Id, RelationshipType.Husband) { Id = Guid.NewGuid(), IsDeleted = true }; // Using Husband as a valid type
         var activeRelationship = new Relationship(publicFamilyId, activeMember.Id, activeMember.Id, RelationshipType.Father) { Id = Guid.NewGuid() }; // Using Father as a valid type
         _context.Relationships.AddRange(deletedRelationship, activeRelationship);
-        
+
         var deletedEvent = new Event("Del Event", "DE1", EventType.Other, publicFamilyId) { Id = Guid.NewGuid(), IsDeleted = true };
         var activeEvent = new Event("Act Event", "AE1", EventType.Other, publicFamilyId) { Id = Guid.NewGuid() };
         _context.Events.AddRange(deletedEvent, activeEvent);

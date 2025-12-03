@@ -7,9 +7,9 @@ interface ConfirmDialogOptions {
   confirmText?: string;
   cancelText?: string;
   color?: string;
-  width?: string; // New
-  cancelColor?: string; // New
-  confirmColor?: string; // New
+  width?: string; 
+  cancelColor?: string; 
+  confirmColor?: string; 
 }
 
 const isDialogOpen = ref(false);
@@ -28,7 +28,7 @@ export function useConfirmDialog() {
   const showConfirmDialog = (options: ConfirmDialogOptions): Promise<boolean> => {
     dialogOptions.value = {
       title: options.title,
-      message: String(options.message), // Explicitly cast to string
+      message: String(options.message), 
       confirmText: options.confirmText || t('common.confirm'),
       cancelText: options.cancelText || t('common.cancel'),
       color: options.color || 'primary',

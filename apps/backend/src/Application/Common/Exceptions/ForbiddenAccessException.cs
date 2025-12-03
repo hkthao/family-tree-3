@@ -9,4 +9,10 @@ public class ForbiddenAccessException : Exception
     /// Khởi tạo một phiên bản mới của lớp ForbiddenAccessException.
     /// </summary>
     public ForbiddenAccessException() : base() { }
+
+    /// <summary>
+    /// Khởi tạo một phiên bản mới của lớp ForbiddenAccessException với một thông báo lỗi cụ thể.
+    /// </summary>
+    /// <param name="message">Thông báo mô tả lỗi.</param>
+    public ForbiddenAccessException(string message) : base(message) { }
 }

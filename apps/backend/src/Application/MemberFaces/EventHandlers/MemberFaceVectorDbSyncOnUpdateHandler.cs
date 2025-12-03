@@ -22,6 +22,21 @@ public class MemberFaceVectorDbSyncOnUpdateHandler : INotificationHandler<Member
     {
         var memberFace = notification.MemberFace;
 
+        // Load the Member navigation property explicitly if not already loaded
+        // This is crucial to access memberFace.Member.FamilyId
+        if (memberFace.Member == null)
+        {
+            memberFace = await _context.MemberFaces
+                .Include(mf => mf.Member)
+                .FirstOrDefaultAsync(mf => mf.Id == memberFace.Id, cancellationToken);
+
+            if (memberFace == null)
+            {
+                _logger.LogWarning("MemberFace with ID {MemberFaceId} not found when trying to load Member. Skipping vector DB sync.", notification.MemberFace.Id);
+                return;
+            }
+        }
+        
         // Ensure thumbnail is available for payload, if not, try to fetch from ThumbnailUrl
         string? effectiveThumbnailUrl = memberFace.ThumbnailUrl; // Assuming ThumbnailUrl is updated in the MemberFace entity
 
@@ -33,6 +48,7 @@ public class MemberFaceVectorDbSyncOnUpdateHandler : INotificationHandler<Member
             {
                 { "localDbId", memberFace.Id.ToString() }, // ID of the local MemberFace entity
                 { "memberId", memberFace.MemberId.ToString() },
+                { "familyId", memberFace.Member.FamilyId.ToString() }, // Thêm FamilyId
                 { "faceId", memberFace.FaceId },
                 { "thumbnailUrl", effectiveThumbnailUrl ?? "" },
                 { "originalImageUrl", memberFace.OriginalImageUrl ?? "" },

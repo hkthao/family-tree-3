@@ -1,6 +1,6 @@
 using backend.Application.Members.Queries;
-using backend.Application.Members.Queries.GetMemberById; // For MemberDetailDto
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto
+using backend.Application.Members.Queries.GetMemberById;
+using backend.Application.Members.Queries.GetMembers; // For MemberDetailDto
 
 namespace backend.Application.Common.Interfaces;
 

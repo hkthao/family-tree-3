@@ -1,6 +1,6 @@
 using backend.Application.Common.Dtos;
 
-namespace backend.Application.Families.Queries.GetFamilies;
+namespace backend.Application.Families.Queries.SearchPublicFamilies;
 
 public class FamilyListDto : BaseAuditableDto
 {

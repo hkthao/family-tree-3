@@ -1,7 +1,7 @@
 using backend.Application.N8n.Commands.GenerateWebhookJwt;
-using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Microsoft.AspNetCore.Authorization; // Added
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 
