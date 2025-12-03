@@ -46,4 +46,31 @@ public class UserController(IMediator mediator) : ControllerBase
         var result = await _mediator.Send(new GetUsersByIdsQuery(guids));
         return result.IsSuccess ? (ActionResult<List<UserDto>>)Ok(result.Value) : (ActionResult<List<UserDto>>)BadRequest(result.Error);
     }
+
+    /// <summary>
+    /// Checks if the current user is an admin.
+    /// </summary>
+    /// <returns>True if the user is an admin, otherwise false.</returns>
+    [HttpGet("IsAdmin")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> IsAdmin() // Change to async Task<IActionResult>
+    {
+        var result = await _mediator.Send(new IsAdminQuery());
+        return result.IsSuccess ? (ActionResult)Ok(result.Value) : (ActionResult)BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Checks if the current user has manager privileges for a specific family.
+    /// </summary>
+    /// <param name="familyId">The ID of the family to check.</param>
+    /// <returns>True if the user can manage the family, otherwise false.</returns>
+    [HttpGet("IsFamilyManager/{familyId}")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> IsFamilyManager(Guid familyId) // Change to async Task<IActionResult>
+    {
+        var result = await _mediator.Send(new IsFamilyManagerQuery(familyId));
+        return result.IsSuccess ? (ActionResult)Ok(result.Value) : (ActionResult)BadRequest(result.Error);
+    }
 }
+

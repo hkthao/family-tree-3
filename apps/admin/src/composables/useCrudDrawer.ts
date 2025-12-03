@@ -5,7 +5,7 @@ export function useCrudDrawer<T = string>() {
   const editDrawer = ref(false);
   const detailDrawer = ref(false);
   const selectedItemId = ref<T | null>(null);
-  const initialData = ref<any | null>(null); // For passing initial data to add/edit forms
+  const initialData = ref<any | null>(null); 
 
   const openAddDrawer = (data: any = null) => {
     initialData.value = data;
@@ -41,7 +41,7 @@ export function useCrudDrawer<T = string>() {
     initialData.value = null;
   };
 
-  // Generic close function for any drawer
+  
   const closeAllDrawers = () => {
     addDrawer.value = false;
     editDrawer.value = false;

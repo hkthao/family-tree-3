@@ -18,7 +18,6 @@ import type { IFileUploadService } from './file-upload/file-upload.service.inter
 import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
-
 import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface'; 
@@ -29,8 +28,8 @@ import type { IAiService } from './ai/ai.service.interface';
 import { ApiAiService } from './ai/api.ai.service'; 
 import type { IMemberFaceService } from './member-face/member-face.service.interface';
 import { ApiMemberFaceService } from './member-face/api.member-face.service'; 
-import type { IN8nService } from './n8n/n8n.service.interface'; // NEW IMPORT
-import { ApiN8nService } from './n8n/api.n8n.service'; // NEW IMPORT
+import type { IN8nService } from './n8n/n8n.service.interface'; 
+import { ApiN8nService } from './n8n/api.n8n.service'; 
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -44,13 +43,12 @@ export interface AppServices {
   dashboard: IDashboardService;
   fileUpload: IFileUploadService;
   chat: IChatService;
-
   user: IUserService;
   familyDict: IFamilyDictService; 
   memberStory: IMemberStoryService; 
   ai: IAiService; 
   memberFace: IMemberFaceService; 
-  n8n: IN8nService; // NEW SERVICE
+  n8n: IN8nService; 
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -116,7 +114,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiMemberFaceService(apiClient)
         : testServices?.memberFace || new ApiMemberFaceService(apiClient),
-    n8n: // NEW SERVICE INITIALIZATION
+    n8n: 
       mode === 'real'
         ? new ApiN8nService(apiClient)
         : testServices?.n8n || new ApiN8nService(apiClient),

@@ -1,19 +1,18 @@
 <template>
   <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <AvatarInput v-if="!props.readOnly" v-model="formData.avatarBase64" :size="96" :initial-avatar="initialAvatarDisplay" />
+    <AvatarInput v-if="!props.readOnly" v-model="formData.avatarBase64" :size="96"
+      :initial-avatar="initialAvatarDisplay" />
     <div v-else class="d-flex justify-center mb-4">
       <AvatarDisplay :src="getFamilyAvatarUrl(formData.avatarUrl)" :size="96" />
     </div>
 
     <v-row>
-      <v-col cols="12">
+      <v-col cols="6">
         <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
           @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
+      <v-col cols="6">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
           required data-testid="family-visibility-select"></v-select>
       </v-col>
@@ -26,18 +25,16 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')"
+        <v-textarea v-model="formData.description" :rows="2" :label="$t('family.form.descriptionLabel')"
           data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="6">
         <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
+      <v-col cols="6">
         <UserAutocomplete v-model="viewers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
       </v-col>
