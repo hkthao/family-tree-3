@@ -978,6 +978,7 @@
   "memberFace.messages.noFacesToSave": "Không có khuôn mặt nào được gán cho thành viên để lưu.",
   "memberFace.messages.saveErrorForFace": "Lỗi khi lưu khuôn mặt {faceId}: {error}",
   "memberFace.messages.partialSaveError": "Một số khuôn mặt không thể lưu.",
+  "memberFace.messages.noFamilySelected": "Vui lòng chọn một gia đình trước khi lưu các khuôn mặt.",
   "memberFace.detail.title": "Chi tiết Khuôn mặt Thành viên",
   "memberFace.detail.notFound": "Không tìm thấy Khuôn mặt Thành viên.",
   "memberFace.filters.member": "Thành viên",
