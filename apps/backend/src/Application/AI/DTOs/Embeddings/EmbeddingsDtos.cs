@@ -19,6 +19,7 @@ namespace backend.Application.AI.DTOs.Embeddings
         public string Bio { get; set; } = null!;
         public List<string> Relationships { get; set; } = new();
         public List<string> Events { get; set; } = new();
+        public string? Occupation { get; set; }
     }
 
     public class MemberEmbeddingsDto : BaseEmbeddingsDto
