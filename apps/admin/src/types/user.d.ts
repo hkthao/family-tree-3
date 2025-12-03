@@ -13,6 +13,7 @@ export interface User {
   roles?: string[];
   avatar?: string;
   online?: boolean;
+  familyId?: string;
 }
 
 export interface UserMenuItem {

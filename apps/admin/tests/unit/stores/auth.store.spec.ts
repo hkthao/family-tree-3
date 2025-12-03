@@ -63,7 +63,7 @@ vi.mock('@/plugins/i18n', () => ({
 vi.mock('vue-i18n', async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    ...actual,
+    ...(actual as Record<string, unknown>),
     useI18n: () => ({
       t: vi.fn((key) => {
         if (key === 'auth.registrationFailed') return 'Registration failed.';

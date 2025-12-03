@@ -1,11 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import { createTestingPinia } from '@pinia/testing';
+import { setActivePinia } from 'pinia';
 import { useFaceStore } from '@/stores/face.store';
 import { useMemberFaceStore } from '@/stores/member-face.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { DetectedFace } from '@/types';
+
+import type { DetectedFace } from '@/types';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 
 const mockShowSnackbar = vi.fn(); // Define it here
@@ -66,7 +67,7 @@ describe('MemberFaceAddView.vue', () => {
     faceStore = useFaceStore();
     memberFaceStore = useMemberFaceStore();
     // Ensure addItem mock always returns a Result object
-    memberFaceStore.addItem.mockResolvedValue({ ok: true, value: {} });
+    (memberFaceStore.addItem as Mock).mockResolvedValue({ ok: true, value: {} });
 
     mockShowSnackbar.mockClear(); // Clear the mock before each test
 
@@ -163,7 +164,7 @@ describe('MemberFaceAddView.vue', () => {
     const wrapper = createWrapper({ familyId: 'testFamily123' });
     faceStore.detectedFaces = [{ id: 'face1', memberId: 'member1', status: 'labeled', boundingBox: {}, confidence: 1 }] as DetectedFace[];
     faceStore.originalImageUrl = 'originalUrl';
-    memberFaceStore.addItem.mockResolvedValue({ ok: true, value: {} });
+    (memberFaceStore.addItem as Mock).mockResolvedValue({ ok: true, value: {} });
 
     await wrapper.vm.saveAllLabeledFaces();
 

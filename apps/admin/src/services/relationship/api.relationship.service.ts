@@ -1,7 +1,7 @@
 import type { IRelationshipService } from './relationship.service.interface';
 import type { Relationship, RelationshipFilter } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok, type Paginated, type Result } from '@/types';
+import { type Paginated, type Result } from '@/types';
 
 export class ApiRelationshipService implements IRelationshipService {
 

@@ -189,4 +189,10 @@ const closeForm = () => {
   faceStore.resetState(); // Clear face detection state on close
   emit('close');
 };
+
+defineExpose({
+  handleFileUpload,
+  saveAllLabeledFaces,
+  canSaveLabels,
+});
 </script>
