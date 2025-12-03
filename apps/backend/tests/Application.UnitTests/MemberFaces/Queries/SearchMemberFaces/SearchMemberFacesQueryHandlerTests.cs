@@ -5,7 +5,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -14,20 +13,18 @@ namespace backend.Application.UnitTests.MemberFaces.Queries.SearchMemberFaces;
 public class SearchMemberFacesQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<ILogger<SearchMemberFacesQueryHandler>> _searchLoggerMock;
 
     public SearchMemberFacesQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _searchLoggerMock = new Mock<ILogger<SearchMemberFacesQueryHandler>>();
 
-        // Default authorization setup for tests
+        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private SearchMemberFacesQueryHandler CreateSearchHandler()
     {
-        return new SearchMemberFacesQueryHandler(_context, _authorizationServiceMock.Object);
+        return new SearchMemberFacesQueryHandler(_context, _mockUser.Object, _authorizationServiceMock.Object); // Updated
     }
 
     private async Task SeedData(Family family, Member member, List<MemberFace> memberFaces)

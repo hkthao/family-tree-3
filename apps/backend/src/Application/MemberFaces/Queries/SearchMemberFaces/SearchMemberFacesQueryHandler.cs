@@ -1,24 +1,35 @@
 using System.Linq.Expressions;
-using backend.Application.Common.Constants;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore; // Add this import
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common; // For MemberFaceDto and BoundingBoxDto
 using backend.Domain.Entities;
+using backend.Application.MemberFaces.Specifications; // Import the new specification
+
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;
 public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQuery, Result<PaginatedList<MemberFaceDto>>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    public SearchMemberFacesQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
+    private readonly ICurrentUser _currentUser; // Inject ICurrentUser
+    private readonly IAuthorizationService _authorizationService; // Inject IAuthorizationService
+
+    public SearchMemberFacesQueryHandler(IApplicationDbContext context, ICurrentUser currentUser, IAuthorizationService authorizationService) // Modify constructor
     {
         _context = context;
+        _currentUser = currentUser;
         _authorizationService = authorizationService;
     }
     public async Task<Result<PaginatedList<MemberFaceDto>>> Handle(SearchMemberFacesQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<MemberFace> query = _context.MemberFaces
-            .Include(mf => mf.Member) // Include Member to get FamilyId
-            .ThenInclude(m => m!.Family); // Then include Family to get FamilyName
+        var currentUserId = _currentUser.UserId;
+        var isAdmin = _authorizationService.IsAdmin(); // Use IAuthorizationService.IsAdmin()
+
+        // Apply authorization specification
+        var spec = new MemberFaceAccessSpecification(isAdmin, currentUserId);
+        IQueryable<MemberFace> query = _context.MemberFaces.WithSpecification(spec);
+
+        // Existing filters (apply after authorization spec)
         // Filter by FamilyId
         if (request.FamilyId.HasValue)
         {
@@ -39,18 +50,15 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
         {
             query = query.Where(mf => (mf.Member != null && (mf.Member.FirstName.ToLower().Contains(request.SearchQuery.ToLower()) || mf.Member.LastName.ToLower().Contains(request.SearchQuery.ToLower()))) || (mf.Emotion != null && mf.Emotion.ToLower().Contains(request.SearchQuery.ToLower())));
         }
-        // TODO: Implement proper authorization for listing multiple faces.
-        // For now, if a FamilyId is provided, authorize access to that family.
-        if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))
-        {
-            return Result<PaginatedList<MemberFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-        }
-        // If no FamilyId is provided, we would need to filter by all families the user can access.
-        // As GetAccessibleFamilyIds is not available, this is left as a TODO for now.
-        if (!await query.AnyAsync(cancellationToken)) // Use AnyAsync here
+
+        // Remove old explicit authorization check
+        // The authorization is now handled by MemberFaceAccessSpecification
+        // If the query results in no accessible items, the PaginatedList will be empty.
+        if (!await query.AnyAsync(cancellationToken))
         {
             return Result<PaginatedList<MemberFaceDto>>.Success(new PaginatedList<MemberFaceDto>(new List<MemberFaceDto>(), 0, request.Page, request.ItemsPerPage));
         }
+
         // Sorting
         if (!string.IsNullOrWhiteSpace(request.SortBy))
         {
@@ -104,6 +112,7 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
             // Default sorting if no SortBy is specified
             query = query.OrderByDescending(mf => mf.Created);
         }
+
         var paginatedList = await PaginatedList<MemberFaceDto>.CreateAsync(
             query.Select(mf => new MemberFaceDto
             {
@@ -125,12 +134,12 @@ public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQu
                 EmotionConfidence = mf.EmotionConfidence,
                 IsVectorDbSynced = mf.IsVectorDbSynced,
                 VectorDbId = mf.VectorDbId,
-                MemberName = mf.Member!.LastName + " " + mf.Member.FirstName,
-                MemberGender = mf.Member!.Gender, // NEW
-                MemberAvatarUrl = mf.Member!.AvatarUrl, // NEW
-                FamilyId = mf.Member!.FamilyId,
-                FamilyName = mf.Member!.Family!.Name,
-                FamilyAvatarUrl = mf.Member!.Family!.AvatarUrl
+                MemberName = mf.Member != null ? (mf.Member.LastName + " " + mf.Member.FirstName).Trim() : null, // Fix CS8072
+                MemberGender = mf.Member != null ? mf.Member.Gender : null, // Fix CS8602 (Gender is already string?)
+                MemberAvatarUrl = mf.Member != null ? mf.Member.AvatarUrl : null, // Fix CS8072
+                FamilyId = mf.Member != null ? mf.Member.FamilyId : (Guid?)null, // Fix CS8072
+                FamilyName = mf.Member != null && mf.Member.Family != null ? mf.Member.Family.Name : null, // Fix CS8072
+                FamilyAvatarUrl = mf.Member != null && mf.Member.Family != null ? mf.Member.Family.AvatarUrl : null // Fix CS8072
             }).AsNoTracking(),
             request.Page,
             request.ItemsPerPage

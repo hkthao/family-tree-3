@@ -17,12 +17,13 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
     public GetMemberFaceByIdQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
+        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private GetMemberFaceByIdQueryHandler CreateGetByIdHandler()
     {
-        return new GetMemberFaceByIdQueryHandler(_context, _authorizationServiceMock.Object);
+        return new GetMemberFaceByIdQueryHandler(_context, _mockUser.Object, _authorizationServiceMock.Object); // Updated
     }
 
     [Fact]
