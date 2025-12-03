@@ -78,10 +78,8 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             var familyGuid = Guid.Parse(familyId);
 
             var member = await _context.Members
-                                       .Include(m => m.SourceRelationships).ThenInclude(r => r.TargetMember)
-                                       .Include(m => m.SourceRelationships).ThenInclude(r => r.SourceMember) // Ensure SourceMember is also loaded
-                                       .Include(m => m.TargetRelationships).ThenInclude(r => r.SourceMember)
-                                       .Include(m => m.TargetRelationships).ThenInclude(r => r.TargetMember) // Ensure TargetMember is also loaded
+                                       .Include(m => m.SourceRelationships).ThenInclude(r => r.TargetMember) // Correct: Load the 'other' member in source relationships
+                                       .Include(m => m.TargetRelationships).ThenInclude(r => r.SourceMember) // Correct: Load the 'other' member in target relationships
                                        .Where(m => m.Id == memberGuid && m.FamilyId == familyGuid)
                                        .AsNoTracking()
                                        .FirstOrDefaultAsync(cancellationToken);
