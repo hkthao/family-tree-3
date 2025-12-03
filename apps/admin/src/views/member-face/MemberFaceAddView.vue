@@ -3,29 +3,36 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('memberFace.form.addTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="faceStore.loading || memberFaceStore.add.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
+    <v-progress-linear v-if="faceStore.loading || memberFaceStore.add.loading" indeterminate color="primary"
+      class="my-4"></v-progress-linear>
     <v-card-text>
-      <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
-      
-      <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
-        <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
-          @face-selected="openSelectMemberDialog" class="mb-4" /> <!-- Added mb-4 for spacing -->
-        <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog"
-          @remove-face="handleRemoveFace" />
+      <FamilyAutocomplete v-model="selectedFamilyId" :label="t('memberFace.form.family')" class="mb-4"
+        :disabled="!!props.familyId" />
+      <div v-if="selectedFamilyId">
+        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
+
+        <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
+          <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
+            @face-selected="openSelectMemberDialog" class="mb-4" /> <!-- Added mb-4 for spacing -->
+          <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog"
+            @remove-face="handleRemoveFace" />
+        </div>
+        <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+          t('face.recognition.uploadPrompt') }}</v-alert>
+        <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+          type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
+
       </div>
-      <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
-        t('face.recognition.uploadPrompt') }}</v-alert>
-      <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
-        type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces" :loading="memberFaceStore.add.loading">
+      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces"
+        :loading="memberFaceStore.add.loading">
         {{ t('face.recognition.saveAllLabeledFacesButton') }}
       </v-btn>
     </v-card-actions>
     <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
-      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId" />
+      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="selectedFamilyId" />
   </v-card>
 </template>
 
@@ -37,6 +44,7 @@ import { useFaceStore } from '@/stores/face.store'; // NEW
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face'; // NEW
 import type { DetectedFace, MemberFace } from '@/types'; // NEW
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // NEW
 
 interface MemberFaceAddViewProps {
   memberId?: string; // Optional, might be pre-selected if adding from a member detail page
@@ -54,6 +62,11 @@ const { showSnackbar } = useGlobalSnackbar();
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
+const selectedFamilyId = ref<string | undefined>(props.familyId); // NEW
+
+watch(() => props.familyId, (newFamilyId) => {
+  selectedFamilyId.value = newFamilyId;
+});
 
 // Watch for faceStore errors
 watch(() => faceStore.error, (newError) => {
@@ -64,9 +77,9 @@ watch(() => faceStore.error, (newError) => {
 
 const handleFileUpload = async (file: File | File[] | null) => {
   if (file instanceof File) {
-    await faceStore.detectFaces(file, false); // Assuming false means no resize for analysis here
+    await faceStore.detectFaces(file, selectedFamilyId.value!, false); // Assuming false means no resize for analysis here
   } else if (Array.isArray(file) && file.length > 0) {
-    await faceStore.detectFaces(file[0], false);
+    await faceStore.detectFaces(file[0], selectedFamilyId.value!, false);
   } else {
     faceStore.resetState();
   }
@@ -96,6 +109,9 @@ const handleRemoveFace = (faceId: string) => {
 };
 
 const canSaveLabels = computed(() => {
+  if (!selectedFamilyId.value) { // NEW: Cannot save if no family is selected
+    return false;
+  }
   const hasFacesToSave = faceStore.detectedFaces.some(face =>
     (face.status === 'labeled') || // User explicitly labeled this face
     (face.status === 'unrecognized' && face.memberId !== null) || // User labeled a previously unrecognized face
@@ -110,6 +126,10 @@ const canSaveLabels = computed(() => {
 });
 
 const saveAllLabeledFaces = async () => {
+  if (!selectedFamilyId.value) {
+    showSnackbar(t('memberFace.messages.noFamilySelected'), 'warning');
+    return;
+  }
   // Filter out unlabeled faces and transform DetectedFace to MemberFace for creation
   const facesToSave = faceStore.detectedFaces
     .filter(face => face.memberId)
@@ -128,6 +148,7 @@ const saveAllLabeledFaces = async () => {
         emotionConfidence: face.emotionConfidence,
         isVectorDbSynced: false, // Will be updated by backend after n8n sync
         vectorDbId: undefined, // Will be set by backend
+        familyId: selectedFamilyId.value!, // NEW: Add familyId from selectedFamilyId
       };
       return memberFace;
     });

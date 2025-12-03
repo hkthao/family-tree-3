@@ -59,7 +59,7 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     /// <returns>Đối tượng chứa thông tin về các khuôn mặt đã phát hiện.</returns>
     [HttpPost("detect")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromForm] IFormFile file, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
+    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromForm] IFormFile file, Guid familyId, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
     {
         if (file == null || file.Length == 0)
         {
@@ -75,6 +75,7 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
             ImageBytes = imageBytes,
             ContentType = file.ContentType,
             ReturnCrop = returnCrop,
+            FamilyId = familyId,
             ResizeImageForAnalysis = resizeImageForAnalysis
         };
 

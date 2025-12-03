@@ -130,7 +130,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       // Update photo for display to temporary URL
       updateModelValue({ photo: URL.createObjectURL(uploadedFile) });
 
-      await memberStoryStore.detectFaces(uploadedFile, true);
+      await memberStoryStore.detectFaces(uploadedFile, options.familyId!, true);
       try {
         const img = await loadImage(uploadedFile);
         updateModelValue({

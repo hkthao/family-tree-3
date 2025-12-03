@@ -214,9 +214,7 @@ public class N8nService : IN8nService
     {
         return await CallFaceVectorWebhookInternalAsync(
             _n8nSettings.Face.UpsertWebhookUrl,
-            dto.Payload != null && dto.Payload.TryGetValue("localDbId", out var idValue) && idValue != null
-                ? idValue.ToString() ?? Guid.NewGuid().ToString()
-                : Guid.NewGuid().ToString(),
+            Guid.NewGuid().ToString(),
             dto,
             cancellationToken
         );
@@ -227,9 +225,7 @@ public class N8nService : IN8nService
     {
         return await CallFaceVectorWebhookInternalAsync(
             _n8nSettings.Face.SearchWebhookUrl,
-            dto.Filter != null && dto.Filter.TryGetValue("memberId", out var idValue) && idValue != null
-                ? idValue.ToString() ?? Guid.NewGuid().ToString()
-                : Guid.NewGuid().ToString(),
+            Guid.NewGuid().ToString(),
             dto,
             cancellationToken
         );
@@ -248,7 +244,7 @@ public class N8nService : IN8nService
 
     private async Task<Result<FaceVectorOperationResultDto>> CallFaceVectorWebhookInternalAsync(string webhookUrl, string tokenPayloadId, object dto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(webhookUrl) || webhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        if (string.IsNullOrEmpty(webhookUrl) )
         {
             _logger.LogWarning("n8n face vector webhook URL is not configured: {WebhookUrl}", webhookUrl);
             return Result<FaceVectorOperationResultDto>.Failure($"n8n face vector integration for {webhookUrl} is not configured.", "Configuration");
@@ -271,7 +267,7 @@ public class N8nService : IN8nService
         // Include CollectionName in the payload that is sent to n8n
         var payloadWithCollection = new
         {
-            CollectionName = _n8nSettings.Face.CollectionName,
+            _n8nSettings.Face.CollectionName,
             RequestData = dto // The specific DTO for the operation
         };
 

@@ -228,11 +228,12 @@ export const useMemberStoryStore = defineStore('memberStory', {
     },
 
 
-    async detectFaces(imageFile: File, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
+    async detectFaces(imageFile: File, familyId: string, resizeImageForAnalysis: boolean): Promise<Result<void, ApiError>> {
       this.faceRecognition.loading = true;
       this.faceRecognition.error = null;
       try {
-        const result = await this.services.memberFace.detect(imageFile, resizeImageForAnalysis);
+        // TODO: Ensure familyId is correctly passed from the context where detectFaces is called.
+        const result = await this.services.memberFace.detect(imageFile, familyId, resizeImageForAnalysis);
         if (result.ok) {
           this.faceRecognition.uploadedImage = URL.createObjectURL(imageFile);
           this.faceRecognition.detectedFaces = result.value.detectedFaces.map((face) => ({

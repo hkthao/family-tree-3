@@ -5,9 +5,9 @@ using backend.Application.Files.UploadFile;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using Microsoft.Extensions.Logging;
-using backend.Application.Members.Specifications; // Add this using directive
-using Ardalis.Specification; // Add this using directive
-using Ardalis.Specification.EntityFrameworkCore; // Add this using directive
+using backend.Application.Members.Specifications; 
+using Ardalis.Specification; 
+using Ardalis.Specification.EntityFrameworkCore; 
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
@@ -17,8 +17,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly ICurrentUser _currentUser = currentUser; // Inject ICurrentUser
-    private readonly IAuthorizationService _authorizationService = authorizationService; // Inject IAuthorizationService
+    private readonly ICurrentUser _currentUser = currentUser; 
+    private readonly IAuthorizationService _authorizationService = authorizationService; 
 
     public async Task<Result<FaceDetectionResponseDto>> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {
@@ -116,16 +116,13 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 };
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
-                    var searchFaceQuery = new SearchMemberFaceQuery
+                    var searchFaceQuery = new SearchMemberFaceQuery(request.FamilyId)
                     {
                         Vector = detectedFaceDto.Embedding,
                         Limit = 1,
-                        Threshold = 0.7f,
-                        // Pass authorization context to the search query
-                        // The SearchMemberFaceQueryHandler will need to be updated to use this.
-                        // For now, we'll assume SearchMemberFaceQueryHandler applies authorization.
-                        // Or, we can filter found faces here. Let's filter here for now.
+                        Threshold = 0.7f
                     };
+
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
                     if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
                     {
@@ -148,14 +145,14 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             }
             if (memberIdsToFetch.Any())
             {
-                // Filter members based on user access
+                
                 var members = await _context.Members
-                    .WithSpecification(memberAccessSpec) // Apply authorization specification
+                    .WithSpecification(memberAccessSpec) 
                     .Where(m => memberIdsToFetch.Contains(m.Id))
                     .Include(m => m.Family)
                     .ToListAsync(cancellationToken);
                 
-                // Filter detectedFaceDtos to only include faces where the associated member is accessible
+                
                 detectedFaceDtos = detectedFaceDtos.Where(df => !df.MemberId.HasValue || members.Any(m => m.Id == df.MemberId.Value)).ToList();
 
                 foreach (var faceDto in detectedFaceDtos)

@@ -17,7 +17,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
     private readonly IThumbnailUploadService _thumbnailUploadService = thumbnailUploadService;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
         if (member == null)
         {
             return Result<Guid>.Failure($"Member with ID {request.MemberId} not found.", ErrorSources.NotFound);
@@ -39,7 +39,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 _logger.LogWarning("Failed to upload face thumbnail using ThumbnailUploadService for FaceId {FaceId}: {Error}", request.FaceId, uploadResult.Error);
             }
         }
-        var searchMemberFaceQuery = new SearchMemberFaceQuery
+        var searchMemberFaceQuery = new SearchMemberFaceQuery(member.FamilyId)
         {
             Vector = request.Embedding.ToList(),
             Limit = 1,
