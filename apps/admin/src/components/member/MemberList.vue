@@ -217,7 +217,8 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.actions'),
       key: 'actions',
       sortable: false,
-      align: 'end',
+      align: 'center',
+      width: '140px',
     });
   }
   return baseHeaders;

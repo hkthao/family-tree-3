@@ -100,37 +100,88 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             textBuilder.AppendLine($"Ngày mất: {member.DateOfDeath?.ToShortDateString()}");
             textBuilder.AppendLine($"Giới tính: {member.Gender}");
 
-            var relationshipText = new StringBuilder();
-            foreach (var rel in relationships)
+            var detailedRelationshipText = new StringBuilder();
+            var metadataRelationships = new List<string>();
+
+            if (!string.IsNullOrEmpty(member.FatherFullName))
             {
-                if (rel.SourceMemberId == member.Id)
+                detailedRelationshipText.AppendLine($"Cha: {member.FatherFullName}.");
+                metadataRelationships.Add($"Cha: {member.FatherFullName}");
+            }
+            if (!string.IsNullOrEmpty(member.MotherFullName))
+            {
+                detailedRelationshipText.AppendLine($"Mẹ: {member.MotherFullName}.");
+                metadataRelationships.Add($"Mẹ: {member.MotherFullName}");
+            }
+
+            // Handle spouse based on gender
+            if (member.Gender == "Nam" && !string.IsNullOrEmpty(member.WifeFullName)) // Assuming "Nam" is male
+            {
+                detailedRelationshipText.AppendLine($"Vợ: {member.WifeFullName}.");
+                metadataRelationships.Add($"Vợ: {member.WifeFullName}");
+            }
+            else if (member.Gender == "Nữ" && !string.IsNullOrEmpty(member.HusbandFullName)) // Assuming "Nữ" is female
+            {
+                detailedRelationshipText.AppendLine($"Chồng: {member.HusbandFullName}.");
+                metadataRelationships.Add($"Chồng: {member.HusbandFullName}");
+            }
+            // If the member has other types of spouse relationships not covered by HusbandFullName/WifeFullName,
+            // they would not be explicitly listed here with "Vợ:" or "Chồng:".
+            // For children, query members where this member is their FatherId or MotherId
+            var childrenData = await _context.Members
+                                              .Where(m => m.FamilyId == familyGuid && (m.FatherId == memberGuid || m.MotherId == memberGuid))
+                                              .Select(m => new { m.FullName, m.Order }) // Select FullName and Order
+                                              .OrderBy(m => m.Order) // Sort by Order
+                                              .AsNoTracking()
+                                              .ToListAsync(cancellationToken);
+
+            var childrenDescriptions = new List<string>();
+            foreach (var child in childrenData)
+            {
+                if (child.Order.HasValue)
                 {
-                    if (rel.TargetMember != null)
-                    {
-                        relationshipText.Append($"{GetVietnameseRelationshipType(rel.Type)} của {rel.TargetMember.FullName}; ");
-                    }
-                    else
-                    {
-                        relationshipText.Append($"{GetVietnameseRelationshipType(rel.Type)} của Unknown; ");
-                    }
+                    childrenDescriptions.Add($"Con thứ {child.Order}: {child.FullName}");
                 }
-                else if (rel.TargetMemberId == member.Id)
+                else
                 {
-                    if (rel.SourceMember != null)
-                    {
-                        relationshipText.Append($"{GetVietnameseRelationshipType(rel.Type)} với {rel.SourceMember.FullName}; ");
-                    }
-                    else
-                    {
-                        relationshipText.Append($"{GetVietnameseRelationshipType(rel.Type)} với Unknown; ");
-                    }
+                    childrenDescriptions.Add(child.FullName); // Fallback if Order is not set
                 }
             }
-            textBuilder.AppendLine($"Quan hệ: {relationshipText.ToString().TrimEnd(' ', ';')}");
+
+            if (childrenDescriptions.Any())
+            {
+                detailedRelationshipText.AppendLine($"Con cái: {string.Join(", ", childrenDescriptions)}.");
+                metadataRelationships.Add($"Con cái: {string.Join(", ", childrenDescriptions)}");
+            }
+
+            textBuilder.AppendLine($"Quan hệ: {detailedRelationshipText.ToString().Trim()}");
             textBuilder.AppendLine($"Tiểu sử tóm tắt: {member.Biography}");
-            // Placeholder for "Sự kiện quan trọng" and "Câu chuyện nổi bật" - requires fetching event/story data
-            textBuilder.AppendLine("Sự kiện quan trọng: []"); // TODO: Implement fetching significant events
-            textBuilder.AppendLine("Câu chuyện nổi bật: []"); // TODO: Implement fetching notable stories
+
+            // Fetch significant events for the member
+            var memberEvents = await _context.Events
+                                             .Include(e => e.EventMembers)
+                                             .Where(e => e.FamilyId == familyGuid && e.EventMembers.Any(em => em.MemberId == memberGuid))
+                                             .AsNoTracking()
+                                             .ToListAsync(cancellationToken);
+
+            var formattedEvents = new List<string>();
+            foreach (var evt in memberEvents)
+            {
+                var eventDetails = new StringBuilder();
+                eventDetails.Append($"Tên sự kiện: {evt.Name}");
+                eventDetails.Append($", Thời gian: {evt.StartDate?.ToShortDateString()}");
+                if (evt.EndDate.HasValue)
+                {
+                    eventDetails.Append($" - {evt.EndDate.Value.ToShortDateString()}");
+                }
+                if (!string.IsNullOrEmpty(evt.Description))
+                {
+                    eventDetails.Append($", Mô tả: {evt.Description}");
+                }
+                formattedEvents.Add(eventDetails.ToString());
+            }
+
+            textBuilder.AppendLine($"Sự kiện quan trọng: {string.Join("; ", formattedEvents)}");
 
             return new MemberEmbeddingsDto
             {
@@ -140,25 +191,15 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 Metadata = new MemberMetadataDto
                 {
                     FullName = member.FullName,
-                    Gender = member.Gender??string.Empty,
+                    Gender = member.Gender ?? string.Empty,
                     BirthDate = member.DateOfBirth?.ToShortDateString() ?? "",
                     DeathDate = member.DateOfDeath?.ToShortDateString() ?? "",
                     Bio = member.Biography ?? "",
-                    Relationships = relationships.Select(r =>
-                    {
-                        string relatedName = "Unknown";
-                        if (r.SourceMemberId == member.Id && r.TargetMember != null)
-                        {
-                            relatedName = r.TargetMember.FullName;
-                        }
-                        else if (r.TargetMemberId == member.Id && r.SourceMember != null)
-                        {
-                            relatedName = r.SourceMember.FullName;
-                        }
-                        return $"{GetVietnameseRelationshipType(r.Type)} - {relatedName}";
-                    }).ToList()
+                    Relationships = metadataRelationships, // Use the new detailed list
+                    Events = formattedEvents // Populate with detailed event strings
                 }
             };
+
         }
 
         private async Task<FamilyEmbeddingsDto?> GenerateFamilyEmbeddingsDto(string familyId, string recordId, CancellationToken cancellationToken)

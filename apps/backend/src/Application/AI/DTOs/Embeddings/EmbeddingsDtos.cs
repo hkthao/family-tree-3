@@ -18,6 +18,7 @@ namespace backend.Application.AI.DTOs.Embeddings
         public string DeathDate { get; set; } = null!; // Consider DateTime? if applicable
         public string Bio { get; set; } = null!;
         public List<string> Relationships { get; set; } = new();
+        public List<string> Events { get; set; } = new();
     }
 
     public class MemberEmbeddingsDto : BaseEmbeddingsDto
