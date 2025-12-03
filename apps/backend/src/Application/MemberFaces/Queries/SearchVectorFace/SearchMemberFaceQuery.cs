@@ -7,4 +7,5 @@ public record SearchMemberFaceQuery : IRequest<Result<List<FoundFaceDto>>>
     public List<double> Vector { get; init; } = new List<double>(); // Face embedding to search with
     public int Limit { get; init; } = 5; // Max number of results
     public float Threshold { get; init; } = 0.7f; // Similarity threshold
+    public List<Guid>? AccessibleFamilyIds { get; init; } // New: Optional list of family IDs the user can access
 }

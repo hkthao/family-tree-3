@@ -16,12 +16,30 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
     {
-
-        if (request.FamilyId.HasValue && !_authorizationService.CanAccessFamily(request.FamilyId.Value))
+        // If AccessibleFamilyIds are provided, it means authorization has already been applied upstream.
+        // If FamilyId is explicitly provided, ensure it's in the accessible list or user is authorized.
+        if (request.FamilyId.HasValue)
         {
-            return Result<List<FoundFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+            if (request.AccessibleFamilyIds != null && request.AccessibleFamilyIds.Any() && !request.AccessibleFamilyIds.Contains(request.FamilyId.Value))
+            {
+                return Result<List<FoundFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+            }
+            else if (request.AccessibleFamilyIds == null || !request.AccessibleFamilyIds.Any()) // No AccessibleFamilyIds provided, so check with IAuthorizationService
+            {
+                 if (!_authorizationService.CanAccessFamily(request.FamilyId.Value))
+                 {
+                    return Result<List<FoundFaceDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+                 }
+            }
         }
-
+        else if (request.AccessibleFamilyIds == null || !request.AccessibleFamilyIds.Any())
+        {
+            // If no FamilyId or AccessibleFamilyIds are provided, it implies the user should not see any results
+            // from unauthorized families. This scenario should ideally be handled upstream by passing AccessibleFamilyIds.
+            // For now, if no family context is given, we assume no access.
+            // This is a safety net. In real-world, we'd fetch accessible family IDs here if not passed.
+            return Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>());
+        }
 
         if (request.Vector == null || !request.Vector.Any())
         {
@@ -37,11 +55,17 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             ReturnFields = new List<string> { "localDbId", "memberId", "faceId", "thumbnailUrl", "originalImageUrl", "emotion", "emotionConfidence" }
         };
 
-
+        // Apply FamilyId filter from request
         if (request.FamilyId.HasValue)
         {
             searchFaceVectorDto.Filter.Add("familyId", request.FamilyId.Value.ToString());
         }
+        // Apply AccessibleFamilyIds filter if provided
+        else if (request.AccessibleFamilyIds != null && request.AccessibleFamilyIds.Any())
+        {
+            searchFaceVectorDto.Filter.Add("familyId", request.AccessibleFamilyIds.Select(id => id.ToString()).ToList());
+        }
+
         if (request.MemberId.HasValue)
         {
             searchFaceVectorDto.Filter.Add("memberId", request.MemberId.Value.ToString());
@@ -88,14 +112,23 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             }
         }
 
-
         if (memberIds.Any())
         {
-            var members = await _context.Members
-                .Where(m => memberIds.Contains(m.Id))
-                .Include(m => m.Family) // Include Family to get its AvatarUrl
-                .Select(m => new { m.Id, m.FirstName, m.LastName, m.Family }) // Select the Family object
+            var membersQuery = _context.Members
+                .Where(m => memberIds.Contains(m.Id)); // Start with basic filter
+            
+            // If AccessibleFamilyIds were provided, filter by them
+            if (request.AccessibleFamilyIds != null && request.AccessibleFamilyIds.Any())
+            {
+                membersQuery = membersQuery.Where(m => request.AccessibleFamilyIds.Contains(m.FamilyId));
+            }
+
+            // Now, apply the Include and then select/tolist
+            var members = await membersQuery
+                .Include(m => m.Family) // Apply Include here, after all Where clauses
+                .Select(m => new { m.Id, m.FirstName, m.LastName, m.Family, m.FamilyId })
                 .ToListAsync(cancellationToken);
+
 
             foreach (var foundFace in foundFaces)
             {

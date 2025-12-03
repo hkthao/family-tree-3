@@ -18,14 +18,12 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
     public class DetectFacesCommandHandlerTests : TestBase
     {
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
-
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
         private readonly Mock<IMediator> _mediatorMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
-
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
             _mediatorMock = new Mock<IMediator>();
 
@@ -43,6 +41,8 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _mediatorMock.Setup(m => m.Send(It.IsAny<SearchMemberFaceQuery>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(emptyFoundFacesResult));
 
+            // Default mock for IAuthorizationService
+            _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
         }
 
         [Fact]
@@ -92,7 +92,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _mockUser.Object, // Pass ICurrentUser mock
+                _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -130,7 +132,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _mockUser.Object, // Pass ICurrentUser mock
+                _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -157,7 +161,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _mockUser.Object, // Pass ICurrentUser mock
+                _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -196,7 +202,9 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _mockUser.Object, // Pass ICurrentUser mock
+                _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
