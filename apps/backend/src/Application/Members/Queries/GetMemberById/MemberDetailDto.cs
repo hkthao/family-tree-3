@@ -26,6 +26,7 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Biography { get; set; }
     public bool IsDeceased { get; set; }
     public bool IsRoot { get; set; }
+    public int? Order { get; set; }
     public string? BirthDeathYears =>
         (DateOfBirth.HasValue ? DateOfBirth.Value.Year.ToString() : "") +
         (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +

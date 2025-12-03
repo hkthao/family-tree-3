@@ -1,3 +1,4 @@
+using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
@@ -31,5 +32,6 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member update
+        await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
     }
 }

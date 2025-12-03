@@ -8,7 +8,7 @@ using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
-using backend.Application.UserFamilyAccess.Queries; // Thêm dòng này
+using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

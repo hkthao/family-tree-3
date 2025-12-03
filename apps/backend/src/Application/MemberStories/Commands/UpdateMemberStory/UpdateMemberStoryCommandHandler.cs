@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Commands.GenerateFamilyKb; // Added
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
@@ -10,12 +11,14 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly IStringLocalizer<UpdateMemberStoryCommandHandler> _localizer; // Updated
+    private readonly IMediator _mediator; // Added
 
-    public UpdateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberStoryCommandHandler> localizer) // Updated
+    public UpdateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberStoryCommandHandler> localizer, IMediator mediator) // Updated
     {
         _context = context;
         _authorizationService = authorizationService;
         _localizer = localizer;
+        _mediator = mediator; // Added
     }
 
     public async Task<Result> Handle(UpdateMemberStoryCommand request, CancellationToken cancellationToken) // Updated
@@ -26,7 +29,7 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        var memberStory = await _context.MemberStories.FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken); // Updated
+        var memberStory = await _context.MemberStories.Include(ms => ms.Member).FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken); // Updated
 
         if (memberStory == null)
         {
@@ -36,6 +39,9 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
         memberStory.Update(request.Title, request.Story, request.StoryStyle, request.Perspective); // Use domain entity's update method
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Publish notification for story update
+        await _mediator.Send(new GenerateFamilyKbCommand(memberStory.Member.FamilyId.ToString(), memberStory.Id.ToString(), KbRecordType.Story), cancellationToken);
 
         return Result.Success();
     }

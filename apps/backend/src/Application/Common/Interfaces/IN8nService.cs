@@ -1,4 +1,5 @@
 using backend.Application.AI.DTOs; // UPDATED USING
+using backend.Application.AI.DTOs.Embeddings; // NEW USING for Embeddings DTOs
 using backend.Application.AI.Models; // NEW USING
 using backend.Application.Common.Models;
 
@@ -40,4 +41,12 @@ public interface IN8nService
     /// Gọi webhook xử lý vector khuôn mặt của n8n để delete.
     /// </summary>
     Task<Result<FaceVectorOperationResultDto>> CallDeleteFaceVectorWebhookAsync(DeleteFaceVectorOperationDto dto, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gọi webhook embeddings của n8n để tạo hoặc cập nhật embeddings từ dữ liệu family (thành viên, sự kiện, câu chuyện, tổng quan gia đình).
+    /// </summary>
+    /// <param name="dto">Đối tượng chứa dữ liệu để tạo embeddings.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả của lời gọi webhook.</returns>
+    Task<Result<string>> CallEmbeddingsWebhookAsync(BaseEmbeddingsDto dto, CancellationToken cancellationToken);
 }

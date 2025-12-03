@@ -5,6 +5,7 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using MediatR;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
@@ -17,11 +18,14 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
     private readonly Mock<IStringLocalizer<UpdateMemberStoryCommandHandler>> _localizerMock;
     private readonly UpdateMemberStoryCommandHandler _handler;
 
+    private readonly Mock<IMediator> _mediatorMock;
+
     public UpdateMemberStoryCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _localizerMock = new Mock<IStringLocalizer<UpdateMemberStoryCommandHandler>>();
-        _handler = new UpdateMemberStoryCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        _mediatorMock = new Mock<IMediator>();
+        _handler = new UpdateMemberStoryCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _mediatorMock.Object);
     }
 
     [Fact]
