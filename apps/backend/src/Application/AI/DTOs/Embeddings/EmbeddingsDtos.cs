@@ -73,10 +73,15 @@ namespace backend.Application.AI.DTOs.Embeddings
     {
         public string FamilyName { get; set; } = null!;
         public string Origin { get; set; } = null!;
-        public List<string> NotableMembers { get; set; } = new();
         public int MemberCount { get; set; }
-        public int EventCount { get; set; }
-        public int StoryCount { get; set; }
+        public int TotalGenerations { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string ManagerName { get; set; } = string.Empty;
+        public double AverageAge { get; set; }
+        public int TotalMales { get; set; }
+        public int TotalFemales { get; set; }
+        public int LivingMembersCount { get; set; }
+        public int DeceasedMembersCount { get; set; }
     }
 
     public class FamilyEmbeddingsDto : BaseEmbeddingsDto

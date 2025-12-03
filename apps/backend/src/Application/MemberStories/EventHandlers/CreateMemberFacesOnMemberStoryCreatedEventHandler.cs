@@ -40,6 +40,6 @@ public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHa
         }
 
         // Publish notification for story creation
-        await _mediator.Send(new GenerateFamilyKbCommand(memberStory.Member.FamilyId.ToString(), memberStory.Id.ToString(), KbRecordType.Story), cancellationToken);
+       // await _mediator.Send(new GenerateFamilyKbCommand(memberStory.Member.FamilyId.ToString(), memberStory.Id.ToString(), KbRecordType.Story), cancellationToken);
     }
 }

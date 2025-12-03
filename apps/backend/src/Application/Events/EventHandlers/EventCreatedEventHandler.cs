@@ -32,6 +32,6 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event creation
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
+       // await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
     }
 }

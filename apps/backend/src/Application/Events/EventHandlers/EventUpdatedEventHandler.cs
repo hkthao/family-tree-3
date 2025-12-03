@@ -38,6 +38,6 @@ public class EventUpdatedEventHandler(ILogger<EventUpdatedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event update
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
+        // await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
     }
 }

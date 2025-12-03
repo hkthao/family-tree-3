@@ -233,17 +233,48 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                                         .AsNoTracking()
                                         .ToListAsync(cancellationToken);
 
+            // Fetch Manager Name
+            var managerName = "Không rõ";
+            var managerProfile = await _context.FamilyUsers
+                                               .Where(fu => fu.FamilyId == familyGuid && fu.Role == FamilyRole.Manager)
+                                               .Join(_context.UserProfiles, // Join with UserProfiles
+                                                     fu => fu.UserId,
+                                                     up => up.UserId,
+                                                     (fu, up) => up.Name) // Select the Name from UserProfile
+                                               .FirstOrDefaultAsync(cancellationToken);
+            if (managerProfile != null)
+            {
+                managerName = managerProfile;
+            }
+
+            // Calculate Statistics for Members
+            var totalMembers = members.Count;
+            var totalMales = members.Count(m => m.Gender == "Nam");
+            var totalFemales = members.Count(m => m.Gender == "Nữ");
+            var livingMembersCount = members.Count(m => !m.IsDeceased);
+            var deceasedMembersCount = members.Count(m => m.IsDeceased);
+
+            // Calculate Average Age
+            double averageAge = 0;
+            var membersWithBirthDate = members.Where(m => m.DateOfBirth.HasValue && !m.IsDeceased).ToList();
+            if (membersWithBirthDate.Any())
+            {
+                averageAge = membersWithBirthDate.Average(m => (DateTime.Now.Year - m.DateOfBirth!.Value.Year) - (DateTime.Now.DayOfYear < m.DateOfBirth.Value.DayOfYear ? 1 : 0));
+            }
+
 
             var textBuilder = new StringBuilder();
             textBuilder.AppendLine($"Tên gia đình: {family.Name}");
-            textBuilder.AppendLine($"Tên các thành viên: {string.Join(", ", members.Select(m => m.FullName))}");
-            // Sơ đồ quan hệ chính: requires more complex logic to extract key relationships
-            textBuilder.AppendLine("Sơ đồ quan hệ chính: [TODO: Thêm logic để tóm tắt quan hệ chính]");
-            textBuilder.AppendLine($"Sự kiện quan trọng của gia đình: {string.Join(", ", events.Select(e => e.Name))}");
-            // Điểm nổi bật lịch sử: requires analysis
-            textBuilder.AppendLine("Điểm nổi bật lịch sử: [TODO: Thêm logic để tóm tắt điểm nổi bật lịch]");
-            textBuilder.AppendLine($"Câu chuyện truyền thống: {string.Join(", ", stories.Select(s => s.Title))}"); // Using story titles as a proxy
-
+            textBuilder.AppendLine($"Mô tả chung: {family.Description ?? "Không có mô tả."}");
+            textBuilder.AppendLine($"Tổng số thành viên: {totalMembers}");
+            textBuilder.AppendLine($"Tổng số thế hệ: {family.TotalGenerations}");
+            textBuilder.AppendLine($"Người quản lý: {managerName}");
+            textBuilder.AppendLine($"Tuổi trung bình thành viên còn sống: {averageAge:F1}");
+            textBuilder.AppendLine($"Số lượng thành viên nam: {totalMales}");
+            textBuilder.AppendLine($"Số lượng thành viên nữ: {totalFemales}");
+            textBuilder.AppendLine($"Số người còn sống: {livingMembersCount}");
+            textBuilder.AppendLine($"Số người đã mất: {deceasedMembersCount}");
+            
             return new FamilyEmbeddingsDto
             {
                 FamilyId = familyId,
@@ -253,10 +284,15 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 {
                     FamilyName = family.Name,
                     Origin = family.Address ?? "", // Assuming Address can be a proxy for origin
-                    NotableMembers = members.OrderByDescending(m => m.DateOfBirth).Take(5).Select(m => m.FullName).ToList(), // Example: 5 oldest members
-                    MemberCount = members.Count(),
-                    EventCount = events.Count(),
-                    StoryCount = stories.Count()
+                    MemberCount = totalMembers, // Updated
+                    TotalGenerations = family.TotalGenerations, // Updated
+                    Description = family.Description ?? string.Empty, // Updated
+                    ManagerName = managerName, // Updated
+                    AverageAge = averageAge, // Updated
+                    TotalMales = totalMales, // Updated
+                    TotalFemales = totalFemales, // Updated
+                    LivingMembersCount = livingMembersCount, // Updated
+                    DeceasedMembersCount = deceasedMembersCount // Updated
                 }
             };
         }
