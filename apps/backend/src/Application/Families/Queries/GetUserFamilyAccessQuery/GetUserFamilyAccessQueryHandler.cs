@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums; 
 
-namespace backend.Application.UserFamilyAccess.Queries;
+namespace backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 
 public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAccessQuery, List<FamilyAccessDto>>
 {

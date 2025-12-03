@@ -3,6 +3,7 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 using Microsoft.Extensions.Logging;
+using backend.Application.Families.Commands.GenerateFamilyKb;
 
 namespace backend.Application.Families.EventHandlers;
 
@@ -33,6 +34,7 @@ public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger
             }, cancellationToken);
 
             // Publish notification for family update
+            await _mediator.Send(new GenerateFamilyKbCommand(notification.Family.Id.ToString(), notification.Family.Id.ToString(), KbRecordType.Family), cancellationToken);
         }
     }
 }

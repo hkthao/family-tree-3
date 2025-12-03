@@ -29,4 +29,5 @@ public class FaceSettings
 public class EmbeddingsSettings // NEW
 {
     public string WebHookUrl { get; set; } = string.Empty;
+    public string CollectionName { get; set; } = string.Empty;
 }

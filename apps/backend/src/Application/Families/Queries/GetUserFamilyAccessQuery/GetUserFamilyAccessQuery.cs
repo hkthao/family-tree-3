@@ -1,7 +1,6 @@
-using MediatR;
 using backend.Application.Common.Models;
 
-namespace backend.Application.UserFamilyAccess.Queries;
+namespace backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 
 /// <summary>
 /// Truy vấn để lấy tất cả các gia đình mà người dùng hiện tại có quyền truy cập (Manager hoặc Viewer).
