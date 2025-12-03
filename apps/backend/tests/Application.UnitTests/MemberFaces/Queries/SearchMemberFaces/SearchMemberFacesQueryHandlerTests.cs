@@ -16,7 +16,6 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
     public SearchMemberFacesQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
