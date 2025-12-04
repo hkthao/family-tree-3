@@ -91,3 +91,9 @@ export interface FamilyExportDto {
   relationships: RelationshipExportDto[];
   events: EventExportDto[];
 }
+
+export interface GenerateFamilyDataCommand {
+  content: string;
+  sessionId: string;
+  familyId: string;
+}

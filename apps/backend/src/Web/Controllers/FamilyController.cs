@@ -9,6 +9,8 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
+using backend.Application.Families.Commands.GenerateFamilyData;
+using backend.Application.Families.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -146,5 +148,17 @@ public class FamilyController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Tạo dữ liệu gia đình có cấu trúc bằng AI từ văn bản ngôn ngữ tự nhiên.
+    /// </summary>
+    /// <param name="command">Lệnh chứa văn bản cần phân tích và ID phiên làm việc.</param>
+    /// <returns>Kết quả phân tích văn bản.</returns>
+    [HttpPost("generate-data")]
+    public async Task<ActionResult<AnalyzedResultDto>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
     }
 }

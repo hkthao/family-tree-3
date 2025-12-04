@@ -35,7 +35,12 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
       const sessionId = uuidv4(); // Generate sessionId here
 
-      const result = await this.services.ai.analyzeContent(this.input, sessionId, this.familyId); // Use services.ai, pass familyId
+      const command = {
+      content: this.input,
+      sessionId: sessionId,
+      familyId: this.familyId,
+    };
+    const result = await this.services.family.generateFamilyData(command);
 
       if (result.ok) {
         this.parsedData = result.value; // Directly assign the object

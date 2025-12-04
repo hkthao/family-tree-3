@@ -31,7 +31,7 @@ export class ApiAiService implements IAiService {
   }
 
   async analyzeContent(content: string, sessionId: string, familyId: string): Promise<Result<AnalyzedDataDto, ApiError>> { // UPDATED METHOD SIGNATURE
-    return this.apiClient.post<AnalyzedDataDto>(`${AI_BASE_URL}/analyze-natural-language`, { content, sessionId, familyId }); // UPDATED
+    return this.apiClient.post<AnalyzedDataDto>(`${AI_BASE_URL}/generate-family-data`, { content, sessionId, familyId }); // UPDATED
   }
 
   async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {
