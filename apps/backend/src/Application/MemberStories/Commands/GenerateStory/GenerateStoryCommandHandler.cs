@@ -1,23 +1,22 @@
-using System.Text.Json;
-using backend.Application.AI.Prompts;
-using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.AI.DTOs; // For GenerateRequest
+using backend.Application.Common.Interfaces; // For IAiGenerateService
 using backend.Application.Common.Models;
-using backend.Application.MemberStories.DTOs; // PhotoAnalysisResultDto, GenerateStoryResponseDto // Updated
+using backend.Application.Common.Constants; // For PromptConstants
+using backend.Application.MemberStories.DTOs; // For GenerateStoryResponseDto
 
-namespace backend.Application.MemberStories.Commands.GenerateStory; // Updated
+namespace backend.Application.MemberStories.Commands.GenerateStory;
 
 public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand, Result<GenerateStoryResponseDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IN8nService _n8nService; // NEW
+    private readonly IAiGenerateService _aiGenerateService; // NEW
 
-    public GenerateStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService)
+    public GenerateStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IAiGenerateService aiGenerateService)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _n8nService = n8nService;
+        _aiGenerateService = aiGenerateService;
     }
 
     public async Task<Result<GenerateStoryResponseDto>> Handle(GenerateStoryCommand request, CancellationToken cancellationToken)
@@ -38,41 +37,59 @@ public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand,
             return Result<GenerateStoryResponseDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // Build the user message for the AI Agent
-        var sessionId = Guid.NewGuid().ToString(); // Generate a new session ID for this generation
-        var userMessage = PromptBuilder.BuildStoryGenerationPrompt(request, member, member.Family);
-
-        // Call n8n Chat Webhook for story generation
-        var n8nChatResult = await _n8nService.CallChatWebhookAsync(sessionId, userMessage, cancellationToken);
-
-        if (!n8nChatResult.IsSuccess)
+        // Prepare request for AI Generate Service
+        var generateRequest = new GenerateRequest
         {
-            return Result<GenerateStoryResponseDto>.Failure(n8nChatResult.Error ?? "Lỗi khi gọi webhook n8n để tạo câu chuyện.", ErrorSources.ExternalServiceError);
-        }
-
-        GenerateStoryResponseDto? storyResponseDto;
-        try
-        {
-            if (string.IsNullOrEmpty(n8nChatResult.Value))
+            SessionId = Guid.NewGuid().ToString(), // Generate a new session ID for this generation
+            ChatInput = request.RawText, // Use raw text as chat input
+            SystemPrompt = await BuildSystemPrompt(request.MemberId), // Build SystemPrompt
+            Metadata = new Dictionary<string, object>
             {
-                return Result<GenerateStoryResponseDto>.Failure("Tạo câu chuyện từ n8n trả về phản hồi rỗng.", ErrorSources.ExternalServiceError);
+                { "memberId", request.MemberId.ToString() },
+                { "memberName", request.MemberName ?? member.FullName },
+                { "style", request.Style },
+                { "maxWords", request.MaxWords },
+                { "perspective", request.Perspective ?? "" },
+                { "resizedImageUrl", request.ResizedImageUrl ?? "" },
+                { "photoPersons", request.PhotoPersons != null ? System.Text.Json.JsonSerializer.Serialize(request.PhotoPersons) : "" }
             }
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            storyResponseDto = System.Text.Json.JsonSerializer.Deserialize<GenerateStoryResponseDto>(n8nChatResult.Value, options);
-        }
-        catch (JsonException ex)
+        };
+
+        // Call AI Generate Service for story generation
+        var generateResult = await _aiGenerateService.GenerateDataAsync<GenerateStoryResponseDto>(generateRequest, cancellationToken);
+
+        if (!generateResult.IsSuccess)
         {
-            return Result<GenerateStoryResponseDto>.Failure($"Tạo câu chuyện từ n8n trả về phản hồi không hợp lệ: {ex.Message}", ErrorSources.ExternalServiceError);
+            // If the AI service call fails, return a failure result with the error message
+            return Result<GenerateStoryResponseDto>.Failure(generateResult.Error ?? "Lỗi không xác định khi tạo câu chuyện bằng AI.", ErrorSources.ExternalServiceError);
         }
+
+        var storyResponseDto = generateResult.Value;
 
         if (storyResponseDto == null)
         {
-            return Result<GenerateStoryResponseDto>.Failure("Tạo câu chuyện từ n8n trả về phản hồi rỗng hoặc không hợp lệ.");
+            return Result<GenerateStoryResponseDto>.Failure("Tạo câu chuyện từ AI trả về phản hồi rỗng hoặc không hợp lệ.");
         }
 
         return Result<GenerateStoryResponseDto>.Success(storyResponseDto);
     }
+
+    private async Task<string> BuildSystemPrompt(Guid memberId)
+    {
+        var promptCode = PromptConstants.StoryGenerationPromptCode;
+
+        var systemPrompt = await _context.Prompts
+                                         .AsNoTracking()
+                                         .FirstOrDefaultAsync(p => p.Code == promptCode);
+
+        if (systemPrompt == null)
+        {
+            throw new InvalidOperationException($"System prompt with code '{promptCode}' not found in the database.");
+        }
+
+        // We can inject member-specific details into the prompt content if needed.
+        // For example: systemPrompt.Content.Replace("{memberName}", memberName);
+        return systemPrompt.Content;
+    }
 }
+
