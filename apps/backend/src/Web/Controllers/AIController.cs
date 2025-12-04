@@ -1,7 +1,6 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
 using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
-using backend.Application.AI.Commands.AnalyzePhoto; // UPDATED IMPORT
 using backend.Application.AI.DTOs; // UPDATED IMPORT
 using backend.Application.AI.Models; // NEW IMPORT
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
@@ -48,18 +47,6 @@ public class AIController : ControllerBase
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
-    }
-
-    /// <summary>
-    /// Phân tích một bức ảnh bằng AI để trích xuất thông tin bối cảnh và cảm xúc.
-    /// </summary>
-    /// <param name="command">Lệnh chứa dữ liệu ảnh và các tham số phân tích.</param>
-    /// <returns>Kết quả phân tích ảnh.</returns>
-    [HttpPost("analyze-photo")]
-    public async Task<ActionResult<PhotoAnalysisResultDto>> AnalyzePhoto([FromBody] AnalyzePhotoCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
     }
 
     /// <summary>
