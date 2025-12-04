@@ -2,7 +2,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter } from '@/types';
 import type { MemberStoryDto } from '@/types/memberStory';
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
+import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 import type { CreateMemberStory } from '@/types/memberStory';
@@ -75,7 +75,7 @@ export const useMemberStoryStore = defineStore('memberStory', {
     aiAnalysis: {
       loading: false,
       error: null as string | null,
-      result: null as PhotoAnalysisResultDto | null,
+      result: null,
     },
   }),
 
@@ -191,24 +191,7 @@ export const useMemberStoryStore = defineStore('memberStory', {
       this.list.filters = { ...this.list.filters, ...filters };
     },
 
-    async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> {
-      this.aiAnalysis.loading = true;
-      this.aiAnalysis.error = null;
-      try {
-        const result = await this.services.ai.analyzePhoto(command);
-        if (result.ok) {
-          this.aiAnalysis.result = result.value;
-        } else {
-          this.aiAnalysis.error = result.error?.message || i18n.global.t('memberStory.errors.aiAnalysisFailed');
-        }
-        return result;
-      } catch (error: any) {
-        this.aiAnalysis.error = error.message || i18n.global.t('memberStory.errors.unexpectedError');
-        return { ok: false, error: { message: this.aiAnalysis.error } as ApiError };
-      } finally {
-        this.aiAnalysis.loading = false;
-      }
-    },
+
 
     async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {
       this.aiAnalysis.loading = true;

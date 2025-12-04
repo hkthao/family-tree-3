@@ -2,12 +2,11 @@
 
 import type { Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
+import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/ai'; // NEW IMPORT
 
 export interface IAiService {
-  analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>>; // UPDATED
   generateBiography(
     memberId: string,
     style: BiographyStyle,

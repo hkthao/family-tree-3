@@ -3,7 +3,7 @@
 import type { IAiService } from './ai.service.interface';
 import type { ApiClientMethods, ApiError } from '@/plugins/axios';
 import type { Result } from '@/types'; // Still need Result type
-import type { AiPhotoAnalysisInputDto, PhotoAnalysisResultDto, GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
+import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 import type { AnalyzedDataDto } from '@/types/ai'; // NEW IMPORT
 
@@ -12,10 +12,6 @@ const AI_BASE_URL = '/ai'; // Corrected Base URL for AI-related endpoints (witho
 
 export class ApiAiService implements IAiService {
   constructor(private apiClient: ApiClientMethods) {}
-
-  async analyzePhoto(command: { Input: AiPhotoAnalysisInputDto }): Promise<Result<PhotoAnalysisResultDto, ApiError>> { // UPDATED
-    return this.apiClient.post<PhotoAnalysisResultDto>(`${AI_BASE_URL}/analyze-photo`, command); // UPDATED
-  }
 
   async generateBiography(
     memberId: string,
