@@ -26,7 +26,6 @@ import { useI18n } from 'vue-i18n';
 import '@n8n/chat/style.css';
 import { useUserSettingsStore } from '@/stores/user-settings.store';
 import { useAuthService } from '@/services/auth/authService';
-import { useServices } from '@/plugins/services.plugin';
 import { Language } from '@/types';
 import { getEnvVariable } from '@/utils/api.util';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
@@ -36,7 +35,6 @@ const chatOpen = ref(false);
 let chatInstance: ReturnType<typeof createChat> | null = null;
 const userSettingsStore = useUserSettingsStore();
 const authService = useAuthService();
-const services = useServices();
 const selectedFamilyId = ref<string | undefined>(undefined); // Declare familyId ref
 
 // Initial fetch of user settings if not already loaded (optional, but good practice)
@@ -78,27 +76,14 @@ const initializeChat = async () => {
     return;
   }
 
-  const user = await authService.getUser();
-  if (!user || !user.id) {
-    console.error('User not logged in or user ID not available. Cannot get JWT for n8n chat.');
-    return;
-  }
-
-  const jwtResult = await services.n8n.getWebhookJwt(user.id);
-
-  if (!jwtResult.ok) {
-    console.error('Failed to get n8n webhook JWT:', jwtResult.error?.message);
-    return;
-  }
-
-  const jwtToken = jwtResult.value;
+  const accessToken = await authService.getAccessToken();
 
   chatInstance = createChat({
     webhookUrl: WEBHOOK_URL,
     webhookConfig: {
       method: 'POST',
       headers: {
-        'authorization': `Bearer ${jwtToken}`,
+        'authorization': `Bearer ${accessToken}`,
       },
     },
     target: '#n8n-chat-target',

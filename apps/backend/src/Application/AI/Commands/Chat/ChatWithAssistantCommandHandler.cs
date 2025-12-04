@@ -1,22 +1,30 @@
+using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using MediatR; // Ensure MediatR is imported
 
 namespace backend.Application.AI.Chat;
 
 /// <summary>
 /// Handler cho lệnh <see cref="ChatWithAssistantCommand"/>.
 /// </summary>
-public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistantCommand, Result<string>>
+public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistantCommand, Result<ChatResponse>>
 {
-    private readonly IN8nService _n8nService;
+    private readonly IChatAiService _chatAiService;
 
-    public ChatWithAssistantCommandHandler(IN8nService n8nService)
+    public ChatWithAssistantCommandHandler(IChatAiService chatAiService)
     {
-        _n8nService = n8nService;
+        _chatAiService = chatAiService;
     }
 
-    public async Task<Result<string>> Handle(ChatWithAssistantCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ChatResponse>> Handle(ChatWithAssistantCommand request, CancellationToken cancellationToken)
     {
-        return await _n8nService.CallChatWebhookAsync(request.SessionId, request.Message, cancellationToken);
+        var chatRequest = new CallChatWebhookRequest
+        {
+            SessionId = request.SessionId,
+            ChatInput = request.ChatInput, // Corrected to ChatInput, keeping request.Message as source for now
+            Metadata = request.Metadata // Pass the metadata from the request
+        };
+        return await _chatAiService.CallChatWebhookAsync(chatRequest, cancellationToken);
     }
 }

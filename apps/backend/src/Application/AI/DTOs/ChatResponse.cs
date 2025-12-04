@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Models.AI;
+namespace backend.Application.AI.DTOs;
 
 public class ChatResponse
 {

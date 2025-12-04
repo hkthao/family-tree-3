@@ -34,7 +34,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> ChatWithAssistant([FromBody] ChatWithAssistantCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result) : BadRequest(result);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>

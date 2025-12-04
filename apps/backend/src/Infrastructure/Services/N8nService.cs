@@ -6,7 +6,6 @@ using backend.Application.AI.DTOs.Embeddings; // NEW USING
 using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces; // NEW USING
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AI;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Logging;
@@ -41,7 +40,7 @@ public class N8nService : IN8nService
             }
         };
         return await CallN8nWebhookAsync<object, string>(
-            _n8nSettings.ChatWebhookUrl,
+            _n8nSettings.Chat.WebhookUrl,
             sessionId,
             payload,
             cancellationToken,
