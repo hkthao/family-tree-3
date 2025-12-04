@@ -251,17 +251,58 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
 
     private string BuildSystemPrompt(Guid familyId)
     {
-        // Đây là nơi bạn sẽ xây dựng system prompt chi tiết cho AI
-        // Prompt này hướng dẫn AI cách trích xuất và cấu trúc dữ liệu từ ChatInput
-        // Ví dụ: "Bạn là một AI chuyên phân tích văn bản gia phả. Hãy trích xuất thông tin thành viên, sự kiện, mối quan hệ
-        // và trả về dưới dạng JSON tuân thủ schema AnalyzedDataDto. FamilyId hiện tại là {familyId}."
-        var promptBuilder = new StringBuilder();
-        promptBuilder.AppendLine("Bạn là một AI chuyên phân tích văn bản về gia phả. Nhiệm vụ của bạn là trích xuất thông tin từ đoạn văn bản người dùng cung cấp và cấu trúc nó theo định dạng JSON đã định.");
-        promptBuilder.AppendLine("Định dạng JSON đầu ra phải tuân thủ schema AnalyzedDataDto. Hãy cung cấp tất cả các trường dữ liệu có thể trích xuất được.");
-        promptBuilder.AppendLine("Đối với các thành viên hoặc sự kiện được đề cập, nếu không có ID cụ thể, hãy coi đó là thành viên/sự kiện mới và AI sẽ gán một ID tạm thời. FamilyId hiện tại là: " + familyId.ToString());
-        promptBuilder.AppendLine("Nếu có bất kỳ thông tin nào không rõ ràng hoặc không thể trích xuất, hãy để trống hoặc cung cấp feedback trong trường 'Feedback'.");
-        promptBuilder.AppendLine("Bạn phải trả về một đối tượng JSON hợp lệ.");
+        return @$"Bạn là một bộ phân tích dữ liệu gia phả. Nhiệm vụ của bạn là **luôn trả về một đối tượng JSON duy nhất** theo schema dưới đây. 
+**Tuyệt đối không thêm chữ, giải thích hay văn bản nào khác.**
 
-        return promptBuilder.ToString();
+QUAN TRỌNG:
+- Suy luận giới tính từ các từ 'ông', 'bà', 'anh', 'chị', 'chú', 'cô', 'cậu', 'dì'.
+- Nếu giới tính có thể suy luận, gán: ""Male"" hoặc ""Female"". Nếu không thể suy luận, gán ""Other"".
+- Họ (lastName) là từ đầu tiên của tên tiếng Việt, tên còn lại là firstName.
+- Gán ID tạm thời duy nhất cho mỗi thành viên: ""temp_A"", ""temp_B"", v.v. Nếu thành viên đã được đề cập trước đó, dùng lại ID đó.
+- Chỉ tạo events đầy đủ (có ""type"", ""description"", ""date"").
+- **Relationships chỉ được phép sử dụng giá trị sau cho type**: ""Father"", ""Mother"", ""Husband"", ""Wife"".
+- Không tạo event trống hoặc relationship không hợp lệ.
+- Trả đúng cấu trúc JSON, tuân theo schema dưới đây.
+
+Schema JSON:
+
+{{
+  ""members"": [
+    {{
+      ""id"": ""string (temporary unique identifier) | null"",
+      ""code"": ""string | null"",
+      ""lastName"": ""string"",
+      ""firstName"": ""string"",
+      ""dateOfBirth"": ""string | null"",
+      ""dateOfDeath"": ""string | null"",
+      ""gender"": ""Male"" | ""Female"" | ""Other"",
+      ""order"": ""number | null""
+    }}
+  ],
+  ""events"": [
+    {{
+      ""type"": ""string"",
+      ""description"": ""string"",
+      ""date"": ""string | null"",
+      ""location"": ""string | null"",
+      ""relatedMemberIds"": [""string""]
+    }}
+  ],
+  ""relationships"": [
+    {{
+      ""sourceMemberId"": ""string"",
+      ""targetMemberId"": ""string"",
+      ""type"": ""Father"" | ""Mother"" | ""Husband"" | ""Wife"",
+      ""order"": ""number | null""
+    }}
+  ],
+  ""feedback"": ""string | null""
+}}
+
+**BẮT BUỘC:**
+- Trả **chỉ JSON hợp lệ**, không text nào khác, không xuống dòng thừa.
+- Gender phải là **Male**, **Female**, hoặc **Other**.
+- Event phải đầy đủ ""type"", ""description"", ""date"".
+- Relationship type chỉ được phép là ""Father"", ""Mother"", ""Husband"", hoặc ""Wife"".";
     }
 }
