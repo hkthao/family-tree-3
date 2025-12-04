@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed, nextTick, reactive } from 'vue';
 import { createChat } from '@n8n/chat';
 import { useI18n } from 'vue-i18n';
 import '@n8n/chat/style.css';
@@ -36,6 +36,14 @@ let chatInstance: ReturnType<typeof createChat> | null = null;
 const userSettingsStore = useUserSettingsStore();
 const authService = useAuthService();
 const selectedFamilyId = ref<string | undefined>(undefined); // Declare familyId ref
+const chatMetadata = reactive({
+  familyId: selectedFamilyId.value,
+});
+
+// Watch for changes in selectedFamilyId and update the reactive metadata
+watch(selectedFamilyId, (newId) => {
+  chatMetadata.familyId = newId;
+});
 
 // Initial fetch of user settings if not already loaded (optional, but good practice)
 if (!userSettingsStore.preferences.language) {
@@ -67,10 +75,6 @@ const currentChatLanguage = computed(() => {
 const initializeChat = async () => {
   if (chatInstance) return;
   const WEBHOOK_URL = getEnvVariable('VITE_N8N_CHAT_WEBHOOK_URL');
-  const COLLECTION_NAME = getEnvVariable('VITE_N8N_CHAT_COLLECTION_NAME');
-  if (!COLLECTION_NAME) {
-    console.error('COLLECTION_NAME is not defined. N8n chat widget will not function.');
-  }
   if (!WEBHOOK_URL) {
     console.error('VITE_N8N_CHAT_WEBHOOK_URLK_URL is not defined. N8n chat widget will not function.');
     return;
@@ -91,10 +95,7 @@ const initializeChat = async () => {
     chatInputKey: 'chatInput',
     chatSessionKey: 'sessionId',
     loadPreviousSession: false,
-    metadata: {
-      familyId: selectedFamilyId.value, 
-      collectionName: COLLECTION_NAME,
-    },
+    metadata: chatMetadata, // Pass the reactive metadata object
     showWelcomeScreen: false,
      // @ts-expect-error: The n8n chat widget expects 'vi' and 'en' for languages, not Language enum values.
     defaultLanguage: currentChatLanguage.value,
@@ -149,16 +150,8 @@ watch(() => userSettingsStore.preferences.language, (newLang, oldLang) => {
   }
 });
 
-// Watch for changes in selectedFamilyId and re-initialize if necessary
-watch(selectedFamilyId, (newId, oldId) => {
-  if (newId !== oldId) {
-    if (chatInstance) {
-      chatInstance.unmount();
-      chatInstance = null;
-    }
-    initializeChat();
-  }
-});
+// The metadata property is now a reactive object, so it will dynamically get the latest selectedFamilyId.value
+// No need to explicitly watch selectedFamilyId here to re-initialize chat.
 
 onUnmounted(() => {
   if (chatInstance) {
