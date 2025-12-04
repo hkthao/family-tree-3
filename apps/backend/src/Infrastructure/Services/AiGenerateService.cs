@@ -93,18 +93,28 @@ public class AiGenerateService : IAiGenerateService
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             try
             {
-                var deserializedResponse = JsonSerializer.Deserialize<T>(responseContent, options);
-                if (deserializedResponse == null)
+                // Deserialize the initial response into ChatResponse
+                var chatResponse = JsonSerializer.Deserialize<ChatResponse>(responseContent, options);
+
+                if (chatResponse == null || string.IsNullOrWhiteSpace(chatResponse.Output))
                 {
-                    _logger.LogWarning("Received empty or invalid structured data response from n8n. Raw: {RawResponse}", responseContent);
-                    return Result<T>.Failure("Invalid response format from n8n: Empty or invalid structured data response.", "ExternalService");
+                    _logger.LogWarning("Received empty or invalid ChatResponse or its Output from n8n. Raw: {RawResponse}", responseContent);
+                    return Result<T>.Failure("Invalid response format from n8n: Empty or invalid ChatResponse or its Output.", "ExternalService");
                 }
-                return Result<T>.Success(deserializedResponse);
+
+                // Now deserialize the Output property into the target type T
+                var deserializedOutput = JsonSerializer.Deserialize<T>(chatResponse.Output, options);
+                if (deserializedOutput == null)
+                {
+                    _logger.LogWarning("Received empty or invalid structured data from ChatResponse.Output. Raw: {RawOutput}", chatResponse.Output);
+                    return Result<T>.Failure("Invalid response format from n8n: Empty or invalid structured data from ChatResponse.Output.", "ExternalService");
+                }
+                return Result<T>.Success(deserializedOutput);
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Failed to deserialize n8n structured data webhook response as {Type}. Raw response: {RawResponse}", typeof(T).Name, responseContent);
-                return Result<T>.Failure($"Invalid response format from n8n: Failed to deserialize structured data response as {typeof(T).Name}. Raw response: {responseContent}", "ExternalService");
+                _logger.LogError(ex, "Failed to deserialize n8n structured data webhook response. Raw response: {RawResponse}", responseContent);
+                return Result<T>.Failure($"Invalid response format from n8n: Failed to deserialize response. Raw response: {responseContent}", "ExternalService");
             }
         }
         catch (Exception ex)
