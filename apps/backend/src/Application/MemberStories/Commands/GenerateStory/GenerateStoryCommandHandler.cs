@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces; // For IAiGenerateService
 using backend.Application.Common.Models;
 using backend.Application.Common.Constants; // For PromptConstants
 using backend.Application.MemberStories.DTOs; // For GenerateStoryResponseDto
+using backend.Application.AI.Prompts;
 
 namespace backend.Application.MemberStories.Commands.GenerateStory;
 
@@ -41,7 +42,7 @@ public class GenerateStoryCommandHandler : IRequestHandler<GenerateStoryCommand,
         var generateRequest = new GenerateRequest
         {
             SessionId = Guid.NewGuid().ToString(), // Generate a new session ID for this generation
-            ChatInput = request.RawText, // Use raw text as chat input
+            ChatInput = PromptBuilder.BuildStoryGenerationPrompt(request, member, member.Family), // Use PromptBuilder
             SystemPrompt = await BuildSystemPrompt(request.MemberId), // Build SystemPrompt
             Metadata = new Dictionary<string, object>
             {
