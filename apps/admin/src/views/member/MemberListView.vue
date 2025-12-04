@@ -40,7 +40,7 @@ import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberBiographyView from '@/views/member/MemberBiographyView.vue';
-import NLEditorView from '@/views/natural-language/NLEditorView.vue';
+import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';

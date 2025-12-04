@@ -31,7 +31,7 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
 import FamilyEditView from '@/views/family/FamilyEditView.vue';
-import NLEditorView from '@/views/natural-language/NLEditorView.vue';
+import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { Family } from '@/types';
 import { useAuth } from '@/composables/useAuth';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import

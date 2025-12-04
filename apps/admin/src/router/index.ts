@@ -17,7 +17,6 @@ import { donateRoutes } from './features/donate.routes';
 import { eventRoutes } from './features/event.routes';
 import { dashboardRoutes } from './features/dashboard.routes'; // New
 
-import { nlEditorRoutes } from './features/nl-editor.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
@@ -42,7 +41,6 @@ const router = createRouter({
         ...settingRoutes,
         ...donateRoutes,
         ...eventRoutes,
-        ...nlEditorRoutes, // Replaced
         ...infoPagesRoutes, // Replaced
         ...chatRoutes, // New
       ],
