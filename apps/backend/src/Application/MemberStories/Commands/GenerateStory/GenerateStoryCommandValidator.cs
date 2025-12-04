@@ -22,6 +22,10 @@ public class GenerateStoryCommandValidator : AbstractValidator<GenerateStoryComm
 
     private bool BeAValidStyle(string style)
     {
+        if (style == null)
+        {
+            return false;
+        }
         // Define your valid styles here
         var validStyles = new[] { "nostalgic", "warm", "formal", "folk" };
         return validStyles.Contains(style.ToLower());
