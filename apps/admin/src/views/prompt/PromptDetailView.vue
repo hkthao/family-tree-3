@@ -77,7 +77,7 @@ const handleClose = () => {
 
 const handleEdit = () => {
   if (prompt.value) {
-    emit('edit-prompt', prompt.value);
+    emit('edit-prompt', prompt.value.id);
   }
 };
 

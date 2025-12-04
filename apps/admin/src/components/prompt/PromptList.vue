@@ -156,13 +156,6 @@ const headers = computed<DataTableHeader[]>(() => {
       align: 'start',
     },
     {
-      title: t('prompt.list.headers.content'),
-      key: 'content',
-      width: 'auto',
-      align: 'start',
-      sortable: false, // Content can be long, not typically sorted by
-    },
-    {
       title: t('prompt.list.headers.description'),
       key: 'description',
       width: 'auto',
@@ -192,11 +185,11 @@ const loadPrompts = (options: {
 };
 
 const viewPrompt = (prompt: Prompt) => {
-  emit('view', prompt);
+  emit('view', prompt.id);
 };
 
 const editPrompt = (prompt: Prompt) => {
-  emit('edit', prompt);
+  emit('edit', prompt.id);
 };
 
 const confirmDeletePrompt = (prompt: Prompt) => {

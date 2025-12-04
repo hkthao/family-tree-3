@@ -11,7 +11,7 @@ import type { Paginated, Result } from '@/types';
  * @brief Triển khai IPromptService sử dụng các phương thức API thực tế.
  */
 export class ApiPromptService implements IPromptService {
-  private readonly BASE_URL = '/api/prompts';
+  private readonly BASE_URL = '/prompts';
 
   constructor(private readonly apiClient: ApiClientMethods) {}
 

@@ -7,7 +7,7 @@
 
     <!-- Edit Prompt Drawer -->
     <BaseCrudDrawer v-model="editDrawer" :title="t('prompt.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-      <PromptEditView v-if="selectedItemId && editDrawer" :prompt-id="selectedItemId as string" @close="closeEditDrawer"
+      <PromptEditView v-if="selectedItemId && editDrawer" :prompt-id="selectedItemId" @close="closeEditDrawer"
         @saved="handlePromptSaved" />
     </BaseCrudDrawer>
 
@@ -19,8 +19,8 @@
     <!-- Detail Prompt Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" :title="t('prompt.detail.title')" icon="mdi-information-outline"
       @close="closeDetailDrawer">
-      <PromptDetailView v-if="selectedItemId && detailDrawer" :prompt-id="selectedItemId as string"
-        @close="closeDetailDrawer" @edit-prompt="openEditDrawer" />
+      <PromptDetailView v-if="selectedItemId && detailDrawer" :prompt-id="selectedItemId" @close="closeDetailDrawer"
+        @edit-prompt="openEditDrawer" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -32,13 +32,13 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import PromptEditView from '@/views/prompt/PromptEditView.vue';
 import PromptAddView from '@/views/prompt/PromptAddView.vue';
 import PromptDetailView from '@/views/prompt/PromptDetailView.vue';
-import type { PromptFilter, Prompt } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer';
+import type { Prompt } from '@/types';
 
 const { t } = useI18n();
 const promptStore = usePromptStore();
@@ -61,11 +61,6 @@ const {
 
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-
-const handleFilterUpdate = async (filters: PromptFilter) => {
-  promptStore.list.filters = { ...filters, searchQuery: searchQuery.value };
-  await promptStore._loadItems()
-};
 
 const handleSearchUpdate = async (search: string) => {
   searchQuery.value = search;

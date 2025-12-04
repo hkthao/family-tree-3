@@ -37,5 +37,8 @@ public class EventDataDtoValidator : AbstractValidator<EventDataDto>
 
         RuleFor(e => e.Description)
             .NotEmpty().WithMessage("Mô tả sự kiện không được để trống.");
+
+        RuleFor(e => e.RelatedMemberIds)
+            .Must(ids => ids != null && ids.Any()).WithMessage("Sự kiện phải có ít nhất một thành viên được liên kết.");
     }
 }

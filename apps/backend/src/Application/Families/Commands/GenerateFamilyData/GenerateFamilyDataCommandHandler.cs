@@ -5,10 +5,7 @@ using backend.Application.Common.Models; // For Result
 using backend.Application.Families.Commands.GenerateFamilyData; // For GenerateFamilyDataCommand
 using backend.Application.Families.DTOs; // For AnalyzedDataDto, MemberResultDto, EventResultDto, RelationshipResultDto, MemberDataDtoValidator, EventDataDtoValidator
 using backend.Domain.Enums; // For EventType, RelationshipType
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.IO; // Added for File operations
+using backend.Application.Common.Constants; // For PromptConstants
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 
@@ -252,29 +249,21 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
 
     private async Task<string> BuildSystemPrompt(Guid familyId)
     {
-        var promptFilePath = Path.Combine(AppContext.BaseDirectory, "AI", "Prompts", "family_data_generation.vi.md");
-        // Ensure the path is correct for different environments (e.g., development vs. deployment)
-        // In development, files might be in the project directory, in deployment they are in output directory.
-        // AppContext.BaseDirectory usually points to the directory where the app assembly is located.
+        // Lấy SystemPrompt từ cơ sở dữ liệu
+        // Cần có một prompt được cấu hình sẵn trong DB với một mã code cụ thể
+        var promptCode = PromptConstants.FamilyDataGenerationPromptCode;
 
-        if (!File.Exists(promptFilePath))
+        var systemPrompt = await _context.Prompts
+                                         .AsNoTracking()
+                                         .FirstOrDefaultAsync(p => p.Code == promptCode);
+
+        if (systemPrompt == null)
         {
-            // Fallback for development environment if running from project root
-            promptFilePath = Path.Combine(Directory.GetCurrentDirectory(), "apps", "backend", "src", "Application", "AI", "Prompts", "family_data_generation.vi.md");
-        }
-        
-        if (!File.Exists(promptFilePath))
-        {
-            throw new FileNotFoundException($"Prompt file not found at {promptFilePath}");
+            throw new InvalidOperationException($"System prompt with code '{promptCode}' not found in the database.");
         }
 
-        var promptContent = await File.ReadAllTextAsync(promptFilePath);
-
-        // You might want to inject familyId into the prompt content if needed,
-        // but the current prompt doesn't seem to use it directly in the text.
-        // If it were, you could do:
-        // promptContent = promptContent.Replace("{familyId}", familyId.ToString());
-
-        return promptContent;
+        // Có thể inject familyId vào nội dung prompt nếu cần,
+        // ví dụ: systemPrompt.Content.Replace("{familyId}", familyId.ToString());
+        return systemPrompt.Content;
     }
 }
