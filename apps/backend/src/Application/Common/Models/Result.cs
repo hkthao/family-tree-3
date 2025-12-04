@@ -53,6 +53,16 @@ public class Result<T>
     public static Result<T> Forbidden(string error = "Forbidden", string errorSource = "Authorization") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 403 };
+
+    /// <summary>
+    /// Tạo một kết quả không tìm thấy (Not Found) với thông báo lỗi và mã trạng thái 404.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
+    /// <returns>Một thể hiện của Result<T> biểu thị không tìm thấy.</returns>
+    public static Result<T> NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
 }
 
 /// <summary>
@@ -92,4 +102,15 @@ public class Result
     {
         throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// Tạo một kết quả không tìm thấy (Not Found) với thông báo lỗi và mã trạng thái 404.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
+    /// <returns>Một thể hiện của Result biểu thị không tìm thấy.</returns>
+    public static Result NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource };
 }
+

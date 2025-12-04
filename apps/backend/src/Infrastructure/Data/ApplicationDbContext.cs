@@ -86,6 +86,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.
+    /// </summary>
+    public DbSet<Prompt> Prompts { get; set; } = null!;
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
