@@ -8,6 +8,7 @@ using backend.Domain.Enums; // For EventType, RelationshipType
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.IO; // Added for File operations
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 
@@ -32,7 +33,7 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
         {
             SessionId = request.SessionId,
             ChatInput = request.Content,
-            SystemPrompt = BuildSystemPrompt(request.FamilyId), // Xây dựng SystemPrompt
+            SystemPrompt = await BuildSystemPrompt(request.FamilyId), // Xây dựng SystemPrompt
             Metadata = new Dictionary<string, object>
             {
                 { "familyId", request.FamilyId.ToString() }
@@ -249,60 +250,31 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
         return Result<AnalyzedResultDto>.Success(analyzedResult);
     }
 
-    private string BuildSystemPrompt(Guid familyId)
+    private async Task<string> BuildSystemPrompt(Guid familyId)
     {
-        return @$"Bạn là một bộ phân tích dữ liệu gia phả. Nhiệm vụ của bạn là **luôn trả về một đối tượng JSON duy nhất** theo schema dưới đây. 
-**Tuyệt đối không thêm chữ, giải thích hay văn bản nào khác.**
+        var promptFilePath = Path.Combine(AppContext.BaseDirectory, "AI", "Prompts", "family_data_generation.vi.md");
+        // Ensure the path is correct for different environments (e.g., development vs. deployment)
+        // In development, files might be in the project directory, in deployment they are in output directory.
+        // AppContext.BaseDirectory usually points to the directory where the app assembly is located.
 
-QUAN TRỌNG:
-- Suy luận giới tính từ các từ 'ông', 'bà', 'anh', 'chị', 'chú', 'cô', 'cậu', 'dì'.
-- Nếu giới tính có thể suy luận, gán: ""Male"" hoặc ""Female"". Nếu không thể suy luận, gán ""Other"".
-- Họ (lastName) là từ đầu tiên của tên tiếng Việt, tên còn lại là firstName.
-- Gán ID tạm thời duy nhất cho mỗi thành viên: ""temp_A"", ""temp_B"", v.v. Nếu thành viên đã được đề cập trước đó, dùng lại ID đó.
-- Chỉ tạo events đầy đủ (có ""type"", ""description"", ""date"").
-- **Relationships chỉ được phép sử dụng giá trị sau cho type**: ""Father"", ""Mother"", ""Husband"", ""Wife"".
-- Không tạo event trống hoặc relationship không hợp lệ.
-- Trả đúng cấu trúc JSON, tuân theo schema dưới đây.
+        if (!File.Exists(promptFilePath))
+        {
+            // Fallback for development environment if running from project root
+            promptFilePath = Path.Combine(Directory.GetCurrentDirectory(), "apps", "backend", "src", "Application", "AI", "Prompts", "family_data_generation.vi.md");
+        }
+        
+        if (!File.Exists(promptFilePath))
+        {
+            throw new FileNotFoundException($"Prompt file not found at {promptFilePath}");
+        }
 
-Schema JSON:
+        var promptContent = await File.ReadAllTextAsync(promptFilePath);
 
-{{
-  ""members"": [
-    {{
-      ""id"": ""string (temporary unique identifier) | null"",
-      ""code"": ""string | null"",
-      ""lastName"": ""string"",
-      ""firstName"": ""string"",
-      ""dateOfBirth"": ""string | null"",
-      ""dateOfDeath"": ""string | null"",
-      ""gender"": ""Male"" | ""Female"" | ""Other"",
-      ""order"": ""number | null""
-    }}
-  ],
-  ""events"": [
-    {{
-      ""type"": ""string"",
-      ""description"": ""string"",
-      ""date"": ""string | null"",
-      ""location"": ""string | null"",
-      ""relatedMemberIds"": [""string""]
-    }}
-  ],
-  ""relationships"": [
-    {{
-      ""sourceMemberId"": ""string"",
-      ""targetMemberId"": ""string"",
-      ""type"": ""Father"" | ""Mother"" | ""Husband"" | ""Wife"",
-      ""order"": ""number | null""
-    }}
-  ],
-  ""feedback"": ""string | null""
-}}
+        // You might want to inject familyId into the prompt content if needed,
+        // but the current prompt doesn't seem to use it directly in the text.
+        // If it were, you could do:
+        // promptContent = promptContent.Replace("{familyId}", familyId.ToString());
 
-**BẮT BUỘC:**
-- Trả **chỉ JSON hợp lệ**, không text nào khác, không xuống dòng thừa.
-- Gender phải là **Male**, **Female**, hoặc **Other**.
-- Event phải đầy đủ ""type"", ""description"", ""date"".
-- Relationship type chỉ được phép là ""Father"", ""Mother"", ""Husband"", hoặc ""Wife"".";
+        return promptContent;
     }
 }
