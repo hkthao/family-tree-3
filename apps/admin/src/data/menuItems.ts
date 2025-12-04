@@ -75,41 +75,28 @@ const menu: MenuSection[] = [
     ],
   },
   {
+    titleKey: 'menu.admin',
+    items: [
+      {
+        titleKey: 'menu.prompts',
+        icon: 'mdi-text-box-multiple-outline',
+        to: '/prompts',
+        roles: ['Admin'],
+      },
+    ],
+  },
+  {
     titleKey: 'menu.supportAndInfo',
     items: [
       {
         titleKey: 'menu.applicationInfo',
         icon: 'mdi-information-outline',
         to: '/application-info',
-        children: [
-          {
-            titleKey: 'about.title',
-            icon: 'mdi-information-outline',
-          },
-          {
-            titleKey: 'version.title',
-            icon: 'mdi-tag-outline',
-          },
-        ],
       },
       {
         titleKey: 'menu.supportAndLegal',
         icon: 'mdi-lifebuoy',
         to: '/support-legal',
-        children: [
-          {
-            titleKey: 'help.title',
-            icon: 'mdi-help-circle-outline',
-          },
-          {
-            titleKey: 'terms.title',
-            icon: 'mdi-file-document-outline',
-          },
-          {
-            titleKey: 'privacy.title',
-            icon: 'mdi-shield-lock-outline',
-          },
-        ],
       },
       {
         titleKey: 'menu.donate',

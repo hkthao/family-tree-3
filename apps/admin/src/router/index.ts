@@ -22,6 +22,7 @@ import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
 import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 import { chatRoutes } from './features/chat.routes'; // New
+import { promptRoutes } from './features/prompt.routes'; // New
 
 const router = createRouter({
   history: createWebHistory(getEnvVariable('BASE_URL')),
@@ -43,6 +44,7 @@ const router = createRouter({
         ...eventRoutes,
         ...infoPagesRoutes, // Replaced
         ...chatRoutes, // New
+        ...promptRoutes, // New
       ],
     },
     ...publicRoutes, // Replaced

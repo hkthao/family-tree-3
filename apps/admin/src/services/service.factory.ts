@@ -30,6 +30,8 @@ import type { IMemberFaceService } from './member-face/member-face.service.inter
 import { ApiMemberFaceService } from './member-face/api.member-face.service'; 
 import type { IN8nService } from './n8n/n8n.service.interface'; 
 import { ApiN8nService } from './n8n/api.n8n.service'; 
+import type { IPromptService } from './prompt/prompt.service.interface';
+import { ApiPromptService } from './prompt/api.prompt.service'; 
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -49,6 +51,7 @@ export interface AppServices {
   ai: IAiService; 
   memberFace: IMemberFaceService; 
   n8n: IN8nService; 
+  prompt: IPromptService; 
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -118,6 +121,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiN8nService(apiClient)
         : testServices?.n8n || new ApiN8nService(apiClient),
+    prompt:
+      mode === 'real'
+        ? new ApiPromptService(apiClient)
+        : testServices?.prompt || new ApiPromptService(apiClient),
   };
 }
 
