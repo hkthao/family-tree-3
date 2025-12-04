@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import { createTestingPinia } from '@pinia/testing';
-import { setActivePinia } from 'pinia';
 import { useFaceStore } from '@/stores/face.store';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 
