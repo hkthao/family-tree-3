@@ -1,6 +1,6 @@
 namespace backend.Application.AI.DTOs;
 
-public class CallChatWebhookRequest
+public class ChatRequest
 {
     public string SessionId { get; set; } = string.Empty;
     public string ChatInput { get; set; } = string.Empty;

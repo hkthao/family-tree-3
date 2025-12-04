@@ -2,7 +2,6 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Domain.Events.MemberStories;
 using Microsoft.Extensions.Logging;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 namespace backend.Application.MemberStories.EventHandlers;
 public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHandler<MemberStoryCreatedWithFacesEvent>
 {

@@ -40,7 +40,7 @@ public class N8nService : IN8nService
             }
         };
         return await CallN8nWebhookAsync<object, string>(
-            _n8nSettings.Chat.WebhookUrl,
+            _n8nSettings.Chat.ChatWebhookUrl,
             sessionId,
             payload,
             cancellationToken,

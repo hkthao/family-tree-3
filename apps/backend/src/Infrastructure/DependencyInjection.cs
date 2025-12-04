@@ -86,7 +86,8 @@ public static class DependencyInjection
 
         // Register n8n Service
                     services.AddScoped<IN8nService, N8nService>();
-                    services.AddScoped<IChatAiService, ChatAiService>();
+                    services.AddScoped<IAiChatService, AiChatService>();
+            services.AddScoped<IAiGenerateService, AiGenerateService>();
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 

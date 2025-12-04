@@ -3,7 +3,6 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Events;
 using Microsoft.Extensions.Logging;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 
 namespace backend.Application.Events.EventHandlers;
 

@@ -4,7 +4,7 @@ public class N8nSettings
 {
     public const string SectionName = "N8nSettings";
     public string BaseUrl { get; set; } = string.Empty;
-    public ChatSettings Chat { get; set; } = new ChatSettings(); // NEW
+    public ChatSettings Chat { get; set; } = new ChatSettings();
     public UploadSettings Upload { get; set; } = new UploadSettings();
     public FaceSettings Face { get; set; } = new FaceSettings();
     public EmbeddingsSettings Embeddings { get; set; } = new EmbeddingsSettings();
@@ -13,7 +13,8 @@ public class N8nSettings
 
 public class ChatSettings
 {
-    public string WebhookUrl { get; set; } = string.Empty;
+     public string ChatWebhookUrl { get; set; } = string.Empty;
+    public string GenerateWebhookUrl { get; set; } = string.Empty;
     public string CollectionName { get; set; } = string.Empty;
 }
 

@@ -1,7 +1,6 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR; // Ensure MediatR is imported
 
 namespace backend.Application.AI.Chat;
 
@@ -10,16 +9,16 @@ namespace backend.Application.AI.Chat;
 /// </summary>
 public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistantCommand, Result<ChatResponse>>
 {
-    private readonly IChatAiService _chatAiService;
+    private readonly IAiChatService _chatAiService;
 
-    public ChatWithAssistantCommandHandler(IChatAiService chatAiService)
+    public ChatWithAssistantCommandHandler(IAiChatService chatAiService)
     {
         _chatAiService = chatAiService;
     }
 
     public async Task<Result<ChatResponse>> Handle(ChatWithAssistantCommand request, CancellationToken cancellationToken)
     {
-        var chatRequest = new CallChatWebhookRequest
+        var chatRequest = new ChatRequest
         {
             SessionId = request.SessionId,
             ChatInput = request.ChatInput, // Corrected to ChatInput, keeping request.Message as source for now

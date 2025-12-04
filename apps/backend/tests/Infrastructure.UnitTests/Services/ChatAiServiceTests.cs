@@ -13,20 +13,20 @@ using Xunit;
 
 namespace backend.Infrastructure.UnitTests.Services;
 
-public class ChatAiServiceTests
+public class AiChatServiceTests
 {
     private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
     private readonly Mock<IOptions<N8nSettings>> _n8nSettingsMock;
-    private readonly Mock<ILogger<ChatAiService>> _loggerMock;
+    private readonly Mock<ILogger<AiChatService>> _loggerMock;
     private readonly Mock<IJwtHelperFactory> _jwtHelperFactoryMock;
     private readonly Mock<IJwtHelper> _jwtHelperMock;
-    private readonly ChatAiService _chatAiService;
+    private readonly AiChatService _chatAiService;
 
-    public ChatAiServiceTests()
+    public AiChatServiceTests()
     {
         _httpClientFactoryMock = new Mock<IHttpClientFactory>();
         _n8nSettingsMock = new Mock<IOptions<N8nSettings>>();
-        _loggerMock = new Mock<ILogger<ChatAiService>>();
+        _loggerMock = new Mock<ILogger<AiChatService>>();
         _jwtHelperFactoryMock = new Mock<IJwtHelperFactory>();
         _jwtHelperMock = new Mock<IJwtHelper>();
 
@@ -40,7 +40,7 @@ public class ChatAiServiceTests
         _jwtHelperFactoryMock.Setup(x => x.Create(It.IsAny<string>())).Returns(_jwtHelperMock.Object);
         _jwtHelperMock.Setup(x => x.GenerateToken(It.IsAny<string>(), It.IsAny<DateTime>())).Returns("mocked_jwt_token");
 
-        _chatAiService = new ChatAiService(
+        _chatAiService = new AiChatService(
             _httpClientFactoryMock.Object,
             _n8nSettingsMock.Object,
             _loggerMock.Object,
@@ -72,7 +72,7 @@ public class ChatAiServiceTests
             JwtSecret = "supersecretkey"
         });
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -99,7 +99,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -120,7 +120,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -141,7 +141,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -161,7 +161,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -181,7 +181,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);
@@ -209,7 +209,7 @@ public class ChatAiServiceTests
         };
         _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(CreateMockHttpClient(httpResponse));
 
-        var request = new CallChatWebhookRequest { SessionId = "s1", ChatInput = "hello" };
+        var request = new ChatRequest { SessionId = "s1", ChatInput = "hello" };
 
         // Act
         var result = await _chatAiService.CallChatWebhookAsync(request, CancellationToken.None);

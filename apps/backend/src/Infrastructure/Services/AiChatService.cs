@@ -14,17 +14,17 @@ namespace backend.Infrastructure.Services;
 /// <summary>
 /// Dịch vụ để gọi webhook chat AI của n8n.
 /// </summary>
-public class ChatAiService : IChatAiService
+public class AiChatService : IAiChatService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly N8nSettings _n8nSettings;
-    private readonly ILogger<ChatAiService> _logger;
+    private readonly ILogger<AiChatService> _logger;
     private readonly IJwtHelperFactory _jwtHelperFactory;
 
-    public ChatAiService(
+    public AiChatService(
         IHttpClientFactory httpClientFactory,
         IOptions<N8nSettings> n8nSettings,
-        ILogger<ChatAiService> logger,
+        ILogger<AiChatService> logger,
         IJwtHelperFactory jwtHelperFactory)
     {
         _httpClientFactory = httpClientFactory;
@@ -40,9 +40,9 @@ public class ChatAiService : IChatAiService
     /// <param name="message">Tin nhắn từ người dùng.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả chứa phản hồi từ AI.</returns>
-    public async Task<Result<ChatResponse>> CallChatWebhookAsync(CallChatWebhookRequest request, CancellationToken cancellationToken)
+    public async Task<Result<ChatResponse>> CallChatWebhookAsync(ChatRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_n8nSettings.Chat.WebhookUrl))
+        if (string.IsNullOrEmpty(_n8nSettings.Chat.ChatWebhookUrl))
         {
             _logger.LogWarning("n8n chat webhook URL is not configured.");
             return Result<ChatResponse>.Failure("n8n chat integration is not configured.", "Configuration");
@@ -76,9 +76,9 @@ public class ChatAiService : IChatAiService
 
         try
         {
-            _logger.LogInformation("Calling n8n chat webhook at {Url} with payload: {Payload}", _n8nSettings.Chat.WebhookUrl, jsonPayload);
+            _logger.LogInformation("Calling n8n chat webhook at {Url} with payload: {Payload}", _n8nSettings.Chat.ChatWebhookUrl, jsonPayload);
 
-            var response = await httpClient.PostAsync(_n8nSettings.Chat.WebhookUrl, content, cancellationToken);
+            var response = await httpClient.PostAsync(_n8nSettings.Chat.ChatWebhookUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -114,7 +114,7 @@ public class ChatAiService : IChatAiService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred while calling the n8n chat webhook at {Url}.", _n8nSettings.Chat.WebhookUrl);
+            _logger.LogError(ex, "An exception occurred while calling the n8n chat webhook at {Url}.", _n8nSettings.Chat.ChatWebhookUrl);
             return Result<ChatResponse>.Failure($"An error occurred: {ex.Message}", "Exception");
         }
     }
