@@ -1078,6 +1078,7 @@
   "nlEditor.placeholder": "Ví dụ: 'Ông nội tôi tên là Nguyễn Văn A, sinh năm 1950 tại Hà Nội, mất năm 2020. Ông là cha của Nguyễn Thị B và Nguyễn Văn C.  Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D.  Họ có một người con tên là Trần Thị E.  Nguyễn Văn C sinh năm 1980, chưa kết hôn.'",
   "nlEditor.characterCount": "Số ký tự",
   "naturalLanguage.editor.parseButton": "Phân tích",
+  "naturalLanguage.editor.parsedResultTitle": "Dữ liệu đã phân tích",
   "naturalLanguage.recommendations.missingGender": "Thiếu giới tính",
   "naturalLanguage.recommendations.missingDate": "Thiếu ngày sự kiện",
   "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm",

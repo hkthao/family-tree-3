@@ -1047,6 +1047,7 @@
     "nlEditor.subtitle": "This feature supports adding new members based on a text description. If a member already exists, please edit manually for highest accuracy.",
     "nlEditor.placeholder": "Example: 'My grandfather's name is Nguyen Van A, born in 1950 in Hanoi, passed away in 2020. He is the father of Nguyen Thi B and Nguyen Van C. Nguyen Thi B born in 1975, married to Tran Van D. They have a child named Tran Thi E. Nguyen Van C born in 1980, not yet married.'",
     "nlEditor.characterCount": "Character Count",
-    "naturalLanguage.editor.parseButton": "Parse"
+    "naturalLanguage.editor.parseButton": "Parse",
+    "naturalLanguage.editor.parsedResultTitle": "Parsed Data"
   }
   
