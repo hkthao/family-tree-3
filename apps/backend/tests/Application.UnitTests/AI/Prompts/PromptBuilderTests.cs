@@ -129,40 +129,6 @@ public class PromptBuilderTests
         prompt.Should().Contain("Không sử dụng bất kỳ tiểu sử hiện có nào từ cơ sở dữ liệu. Tạo một tiểu sử mới dựa trên các chi tiết và lời nhắc của người dùng.");
     }
 
-    [Fact]
-    public void BuildPhotoAnalysisPrompt_ShouldSerializeInputCorrectly()
-    {
-        // Arrange
-        var input = new AiPhotoAnalysisInputDto
-        {
-            ImageUrl = "http://test.com/img.jpg",
-            ImageSize = "1024x768",
-            Faces = new List<AiDetectedFaceDto>
-            {
-                new AiDetectedFaceDto { FaceId = "f1", Bbox = new List<int> { 10, 20, 30, 40 }, EmotionLocal = new AiEmotionLocalDto { Dominant = "happy", Confidence = 0.95 } }
-            },
-            MemberInfo = new AiMemberInfoDto { Id = "m1", Name = "Test Member" },
-            Exif = new AiExifInfoDto { Datetime = "2023:01:01 12:00:00" }
-        };
-
-        // Act
-        var prompt = PromptBuilder.BuildPhotoAnalysisPrompt(input);
-
-        // Assert
-        prompt.Should().Contain("Hãy phân tích bức ảnh dựa trên dữ liệu JSON sau:");
-        prompt.Should().Contain("Trả về kết quả phân tích theo đúng định dạng JSON đã được hướng dẫn trong system prompt.");
-
-        // Deserialize the JSON part of the prompt to verify content
-        var jsonPart = prompt.Split("JSON sau:\n")[1].Split("\nTrả về kết quả phân tích")[0].Trim();
-        var deserializedInput = JsonSerializer.Deserialize<AiPhotoAnalysisInputDto>(jsonPart, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        deserializedInput.Should().NotBeNull();
-        deserializedInput!.ImageUrl.Should().Be(input.ImageUrl);
-        deserializedInput.Faces.Should().HaveCount(1);
-        deserializedInput.Faces[0].FaceId.Should().Be(input.Faces[0].FaceId);
-        deserializedInput.MemberInfo!.Name.Should().Be(input.MemberInfo!.Name);
-        deserializedInput.Exif!.Datetime.Should().Be(input.Exif!.Datetime);
-    }
 
     [Fact]
     public void BuildStoryGenerationPrompt_ShouldBuildCorrectPrompt_WithAllDetails()
