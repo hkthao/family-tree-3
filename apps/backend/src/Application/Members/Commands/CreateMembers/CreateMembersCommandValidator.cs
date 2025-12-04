@@ -22,9 +22,6 @@ public class CreateMembersCommandValidator : AbstractValidator<CreateMembersComm
 
             member.RuleFor(x => x.DateOfBirth)
                 .NotNull().WithMessage("Date of birth is required.");
-
-            member.RuleFor(x => x.FamilyName)
-                .NotEmpty().WithMessage("Family name is required.");
         });
     }
 }
