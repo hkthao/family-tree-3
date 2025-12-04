@@ -1074,7 +1074,7 @@
   "naturalLanguage.errors.relatedMembersNotFoundInDb": "Các thành viên liên quan ({members}) không tồn tại trong hệ thống. Vui lòng đảm bảo các thành viên này đã được lưu vào cơ sở dữ liệu.",
   "naturalLanguage.editor.characterCount": "Số ký tự",
   "nlEditor.title": "Tạo dữ liệu thành viên từ mô tả",
-  "nlEditor.subtitle": "Chức năng này hỗ trợ việc thêm mới thành viên dựa trên mô tả văn bản. Nếu thành viên đã tồn tại, vui lòng chỉnh sửa thủ công để đảm bảo độ chính xác. Để tham chiếu thành viên đã tồn tại, bạn có thể sử dụng định dạng '@[Tên thành viên](mã thành viên)'.",
+  "nlEditor.subtitle": "Chức năng này hỗ trợ việc thêm mới thành viên dựa trên mô tả văn bản. Nếu thành viên đã tồn tại, vui lòng chỉnh sửa thủ công để đảm bảo độ chính xác.",
   "nlEditor.placeholder": "Ví dụ: 'Ông nội tôi tên là Nguyễn Văn A, sinh năm 1950 tại Hà Nội, mất năm 2020. Ông là cha của Nguyễn Thị B và Nguyễn Văn C.  Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D.  Họ có một người con tên là Trần Thị E.  Nguyễn Văn C sinh năm 1980, chưa kết hôn.'",
   "nlEditor.characterCount": "Số ký tự",
   "naturalLanguage.editor.parseButton": "Phân tích",
