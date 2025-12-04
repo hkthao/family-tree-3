@@ -1082,6 +1082,7 @@
   "naturalLanguage.recommendations.missingGender": "Thiếu giới tính",
   "naturalLanguage.recommendations.missingDate": "Thiếu ngày sự kiện",
   "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm",
+  "naturalLanguage.recommendations.missingDateOfBirth": "Thiếu ngày sinh",
   "menu.utilitiesAndAI": "Tiện ích & AI",
   "menu.aiMemorialStudio": "Phòng Ký Ức",
   "aiMemorialStudio.selection.title": "Chọn Thành viên AI Memorial Studio",
