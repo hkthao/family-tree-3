@@ -1,6 +1,7 @@
-using backend.Application.AI.Models;
+using backend.Application.Families.DTOs;
+using FluentValidation;
 
-namespace backend.Application.AI.Commands.AnalyzeNaturalLanguage;
+namespace backend.Application.Families.DTOs;
 
 public class AnalyzedDataDtoValidator : AbstractValidator<AnalyzedDataDto>
 {

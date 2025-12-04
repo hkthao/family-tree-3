@@ -1,6 +1,7 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
-using backend.Application.AI.Commands.AnalyzeNaturalLanguage; // NEW IMPORT
+using backend.Application.Families.Commands.GenerateFamilyData; // Updated import
+using backend.Application.Families.DTOs; // New import for AnalyzedResultDto
 using backend.Application.AI.DTOs; // UPDATED IMPORT
 using backend.Application.AI.Models; // NEW IMPORT
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
@@ -50,12 +51,12 @@ public class AIController : ControllerBase
     }
 
     /// <summary>
-    /// Phân tích văn bản ngôn ngữ tự nhiên bằng AI để trích xuất thông tin về thành viên, sự kiện, mối quan hệ.
+    /// Tạo dữ liệu gia đình có cấu trúc bằng AI từ văn bản ngôn ngữ tự nhiên.
     /// </summary>
     /// <param name="command">Lệnh chứa văn bản cần phân tích và ID phiên làm việc.</param>
     /// <returns>Kết quả phân tích văn bản.</returns>
-    [HttpPost("analyze-natural-language")]
-    public async Task<ActionResult<AnalyzedResultDto>> AnalyzeNaturalLanguage([FromBody] AnalyzeNaturalLanguageCommand command)
+    [HttpPost("generate-family-data")]
+    public async Task<ActionResult<AnalyzedResultDto>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result);

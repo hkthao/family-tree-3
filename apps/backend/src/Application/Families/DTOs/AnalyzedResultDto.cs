@@ -1,6 +1,6 @@
 using backend.Domain.Enums; // Add this using directive
 
-namespace backend.Application.AI.Models;
+namespace backend.Application.Families.DTOs;
 
 /// <summary>
 /// Đại diện cho dữ liệu đã được phân tích và chuyển đổi sang định dạng cuối cùng với Guid IDs.
