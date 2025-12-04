@@ -8,8 +8,6 @@ public class GenerateStoryCommandValidator : AbstractValidator<GenerateStoryComm
             .NotEmpty().WithMessage("Member ID is required.");
 
         RuleFor(v => v.RawText)
-            .NotEmpty().WithMessage("Raw text is required if no photo analysis is provided.")
-            .MinimumLength(10).WithMessage("Raw text must be at least 10 characters long if no photo analysis is provided.")
             .MaximumLength(2000).WithMessage("Raw text must not exceed 2000 characters."); // Arbitrary max length
 
         RuleFor(v => v.Style)

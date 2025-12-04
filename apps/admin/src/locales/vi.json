@@ -1008,6 +1008,7 @@
   "memberStory.list.confirmDelete": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",
   "memberStory.list.action.create": "Tạo Ký ức",
   "memberStory.form.memberIdLabel": "Thành viên",
+  "memberStory.form.familyIdLabel": "Gia đình",
   "memberStory.form.rules.memberIdRequired": "ID thành viên là bắt buộc.",
   "memberStory.form.rules.rawInputMinLength": "Tối thiểu {length} ký tự là bắt buộc.",
   "memberStory.create.title": "Tạo Ký ức Mới",

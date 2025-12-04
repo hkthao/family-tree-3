@@ -57,7 +57,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     const hasMinRawInput = modelValue.value.rawInput && modelValue.value.rawInput.length >= 10;
     const hasDetectedFaces = modelValue.value.detectedFaces && modelValue.value.detectedFaces.length > 0; // Check detectedFaces
     const hasMemberSelected = modelValue.value.memberId;
-    return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected;
+    return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected && modelValue.value.storyStyle && modelValue.value.perspective;
   });
 
   const generateStory = async () => {
@@ -130,7 +130,7 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       // Update photo for display to temporary URL
       updateModelValue({ photo: URL.createObjectURL(uploadedFile) });
 
-      await memberStoryStore.detectFaces(uploadedFile, options.familyId!, true);
+      await memberStoryStore.detectFaces(uploadedFile, modelValue.value.familyId!, true);
       try {
         const img = await loadImage(uploadedFile);
         updateModelValue({

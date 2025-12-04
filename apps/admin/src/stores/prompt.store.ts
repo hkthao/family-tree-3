@@ -3,7 +3,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { Prompt, PromptFilter } from '@/types/prompt';
-import type { Result, Paginated } from '@/types';
+import type { Result } from '@/types';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 

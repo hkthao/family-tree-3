@@ -10,6 +10,7 @@ export interface SearchStoriesFilter {
 
 export interface MemberStoryDto {
   id?: string;
+  familyId?: string; // NEWLY ADDED
   memberId: string; 
   memberName?: string | null; 
   title?: string | null;
@@ -32,6 +33,7 @@ export interface MemberStoryDto {
 
 // Matches backend.Application.MemberStories.Commands.CreateMemberStory.CreateMemberStoryCommand
 export interface CreateMemberStory {
+  familyId?: string; // NEWLY ADDED
   memberId: string;
   title?: string | null;
   story?: string | null;

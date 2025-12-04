@@ -1,6 +1,3 @@
-// apps/admin/src/types/prompt.d.ts
-
-import type { PaginatedFilter } from './pagination.d';
 
 /**
  * @interface Prompt
@@ -23,7 +20,6 @@ export interface Prompt {
 /**
  * @interface PromptFilter
  * @brief Định nghĩa các tiêu chí lọc và phân trang cho danh sách Prompts.
- * Kế thừa từ PaginatedFilter để bao gồm thông tin phân trang.
  *
  * @property {string} [searchQuery] - Chuỗi tìm kiếm toàn văn trong các trường của Prompt.
  */
