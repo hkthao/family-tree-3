@@ -55,24 +55,22 @@
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-menu>
+        <v-tooltip :text="t('common.edit')">
           <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" v-bind="props" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
+            <v-btn icon size="small" variant="text" v-bind="props" @click="editPrompt(item)"
+              data-testid="edit-prompt-button" aria-label="Edit">
+              <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <v-list>
-            <v-list-item @click="viewPrompt(item)" data-testid="view-prompt-button">
-              <v-list-item-title>{{ t('common.viewDetails') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="editPrompt(item)" data-testid="edit-prompt-button">
-              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="confirmDeletePrompt(item)" data-testid="delete-prompt-button">
-              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        </v-tooltip>
+        <v-tooltip :text="t('common.delete')">
+          <template v-slot:activator="{ props }">
+            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDeletePrompt(item)"
+              data-testid="delete-prompt-button" :data-prompt-code="item.code" aria-label="Delete">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
       </div>
     </template>
 
@@ -170,7 +168,7 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'actions',
       sortable: false,
       align: 'end',
-      width: '100px',
+      width: '150px',
     });
   }
   return baseHeaders;
