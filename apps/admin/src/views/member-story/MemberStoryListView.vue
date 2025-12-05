@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div>
     <MemberStoryList
       :items="memberStoryStore.list.items"
       :total-items="memberStoryStore.list.totalItems"
@@ -29,7 +29,7 @@
       <MemberStoryDetailView v-if="selectedItemId && detailDrawer" :member-story-id="selectedItemId"
         @close="handleMemberStoryClosed" @edit-item="openEditDrawer" />
     </BaseCrudDrawer>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">

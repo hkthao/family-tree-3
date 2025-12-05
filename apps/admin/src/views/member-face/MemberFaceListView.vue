@@ -1,6 +1,6 @@
 <template>
   <div data-testid="member-face-list-view">
-    <MemberFaceSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
+    <MemberFaceSearch @update:filters="handleFilterUpdate" />
 
     <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
       :loading="list.loading" :search="searchQuery" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
@@ -36,7 +36,6 @@ import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue'; //
 interface MemberFaceListViewProps {
   memberId?: string;
   familyId?: string;
-  hideSearch?: boolean; // NEW
 }
 const props = defineProps<MemberFaceListViewProps>();
 const { t } = useI18n();
