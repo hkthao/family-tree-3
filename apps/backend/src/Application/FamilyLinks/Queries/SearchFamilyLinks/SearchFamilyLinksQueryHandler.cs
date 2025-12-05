@@ -1,13 +1,9 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLinks.Specifications; // New import
 using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper.QueryableExtensions;
-using AutoMapper;
-using Ardalis.Specification; // New import
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore; // New import
 
 namespace backend.Application.FamilyLinks.Queries.SearchFamilyLinks;
 
@@ -37,24 +33,24 @@ public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQu
         }
 
         // 2. Build Query using Specifications
-        var query = _context.FamilyLinks.AsQueryable(); // Start with IQueryable
+        var query = _context.FamilyLinks.AsQueryable().AsNoTracking(); // Start with IQueryable
 
         // Apply FamilyLinkByFamilyIdSpecification
         var familyIdSpecification = new FamilyLinkByFamilyIdSpecification(request.FamilyId);
-        query = _specificationEvaluator.GetQuery(query, familyIdSpecification);
+        query = query.WithSpecification(familyIdSpecification);
         
         // Conditionally apply FamilyLinkBySearchQuerySpecification
         if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
             var searchQuerySpecification = new FamilyLinkBySearchQuerySpecification(request.SearchQuery);
-            query = _specificationEvaluator.GetQuery(query, searchQuerySpecification);
+            query = query.WithSpecification(searchQuerySpecification);
         }
 
         // Conditionally apply FamilyLinkByOtherFamilyIdSpecification
         if (request.OtherFamilyId.HasValue)
         {
             var otherFamilyIdSpecification = new FamilyLinkByOtherFamilyIdSpecification(request.OtherFamilyId.Value);
-            query = _specificationEvaluator.GetQuery(query, otherFamilyIdSpecification);
+            query = query.WithSpecification(otherFamilyIdSpecification);
         }
 
         // 3. Apply Sorting

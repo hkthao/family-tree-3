@@ -1,72 +1,21 @@
 <template>
   <div data-testid="family-link-requests-list-view">
-    <v-card :elevation="0" class="mb-4">
-      <v-card-title class="text-h6 d-flex align-center">
-        {{ t('familyLinkRequest.list.title') }}
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          @click="openAddDrawer()"
-          :disabled="!familyId"
-        >
-          {{ t('familyLinkRequest.list.action.create') }}
-        </v-btn>
-      </v-card-title>
-    </v-card>
-
-    <v-data-table-server
-      :headers="headers"
+    <!-- Removed v-card toolbar, it's now inside FamilyLinkRequestList -->
+    <FamilyLinkRequestList
       :items="familyLinkRequestStore.list.items"
-      :items-length="familyLinkRequestStore.list.totalItems"
+      :total-items="familyLinkRequestStore.list.totalItems"
       :loading="familyLinkRequestStore.list.loading"
-      item-value="id"
-      class="elevation-0"
+      :read-only="readOnly"
+      :search="searchQuery"
       @update:options="handleListOptionsUpdate"
-    >
-      <template #item.requestingFamilyName="{ item }">
-        {{ item.requestingFamilyName }}
-      </template>
-      <template #item.targetFamilyName="{ item }">
-        {{ item.targetFamilyName }}
-      </template>
-      <template #item.status="{ item }">
-        <v-chip :color="getStatusColor(item.status)">
-          {{ t(`familyLinkRequest.status.${item.status.toLowerCase()}`) }}
-        </v-chip>
-      </template>
-      <template #item.requestDate="{ item }">
-        {{ formatDate(item.requestDate) }}
-      </template>
-      <template #item.responseDate="{ item }">
-        {{ item.responseDate ? formatDate(item.responseDate) : t('common.na') }}
-      </template>
-      <template #item.actions="{ item }">
-        <v-btn
-          icon
-          size="small"
-          variant="text"
-          @click="openDetailDrawer(item.id)"
-        >
-          <v-icon>mdi-eye</v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          size="small"
-          variant="text"
-          @click="openEditDrawer(item.id)"
-        >
-          <v-icon>mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          size="small"
-          variant="text"
-          @click="confirmDelete(item.id)"
-        >
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </template>
-    </v-data-table-server>
+      @update:search="handleSearchUpdate"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
+      @delete="confirmDelete"
+      @create="openAddDrawer"
+      @approve="confirmApprove"
+      @reject="confirmReject"
+    />
 
     <!-- Add Request Drawer -->
     <BaseCrudDrawer v-model="addDrawer" :title="t('familyLinkRequest.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
@@ -104,6 +53,7 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New impo
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
 // New imports for the views
+import { FamilyLinkRequestList } from '@/components/family-link-requests'; // NEW IMPORT
 import FamilyLinkRequestAddView from '@/views/family-link-requests/FamilyLinkRequestAddView.vue';
 import FamilyLinkRequestEditView from '@/views/family-link-requests/FamilyLinkRequestEditView.vue';
 import FamilyLinkRequestDetailView from '@/views/family-link-requests/FamilyLinkRequestDetailView.vue';
@@ -117,6 +67,7 @@ const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
 const familyId = computed(() => route.params.familyId as string);
+const searchQuery = ref(''); // NEW: Local search query state
 
 const {
   addDrawer,
@@ -131,6 +82,8 @@ const {
   closeDetailDrawer,
   closeAllDrawers, // To close all drawers after save/delete
 } = useCrudDrawer<string>(); 
+
+const readOnly = ref(false); // Can be made reactive if needed
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('familyLinkRequest.list.headers.requestingFamily'), key: 'requestingFamilyName' },
@@ -152,6 +105,7 @@ const getStatusColor = (status: LinkStatus) => {
 
 const loadRequests = async () => {
   if (familyId.value) {
+    familyLinkRequestStore.list.filters.searchQuery = searchQuery.value; // Apply search query
     await familyLinkRequestStore._loadItems(familyId.value);
   }
 };
@@ -165,6 +119,13 @@ const handleListOptionsUpdate = async (options: {
     await nextTick(); // Ensure DOM is updated before store changes for data-table
     familyLinkRequestStore.setListOptions(familyId.value, options);
   }
+};
+
+const handleSearchUpdate = async (search: string) => { // NEW: Handle search emit
+  const processedSearch = search.trim(); // No diacritics removal for now
+  searchQuery.value = processedSearch;
+  familyLinkRequestStore.list.filters.searchQuery = processedSearch;
+  await familyLinkRequestStore._loadItems(familyId.value);
 };
 
 const confirmDelete = async (id: string) => {
@@ -186,9 +147,47 @@ const confirmDelete = async (id: string) => {
   }
 };
 
+const confirmApprove = async (id: string) => { // NEW: Handle approve emit
+  const confirmed = await showConfirmDialog({
+    title: t('familyLinkRequest.list.confirmApprove.title'),
+    message: t('familyLinkRequest.list.confirmApprove.message'),
+    confirmText: t('familyLinkRequest.list.action.approve'),
+    confirmColor: 'success',
+  });
+
+  if (confirmed && familyId.value) {
+    const result = await familyLinkRequestStore.approveRequest(id, familyId.value);
+    if (result.ok) {
+      showSnackbar(t('familyLinkRequest.requests.messages.approveSuccess'), 'success');
+      loadRequests();
+    } else {
+      showSnackbar(result.error?.message || t('familyLinkRequest.requests.messages.approveError'), 'error');
+    }
+  }
+};
+
+const confirmReject = async (id: string) => { // NEW: Handle reject emit
+  const confirmed = await showConfirmDialog({
+    title: t('familyLinkRequest.list.confirmReject.title'),
+    message: t('familyLinkRequest.list.confirmReject.message'),
+    confirmText: t('familyLinkRequest.list.action.reject'),
+    confirmColor: 'error',
+  });
+
+  if (confirmed && familyId.value) {
+    const result = await familyLinkRequestStore.rejectRequest(id, familyId.value);
+    if (result.ok) {
+      showSnackbar(t('familyLinkRequest.requests.messages.rejectSuccess'), 'success');
+      loadRequests();
+    } else {
+      showSnackbar(result.error?.message || t('familyLinkRequest.requests.messages.rejectError'), 'error');
+    }
+  }
+};
+
 const handleRequestSaved = () => {
-  closeAllDrawers(); // Close whichever drawer was open
-  loadRequests(); // Reload list after save
+  closeAllDrawers();
+  loadRequests();
 };
 
 onMounted(() => {

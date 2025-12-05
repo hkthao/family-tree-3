@@ -10,7 +10,7 @@
 
     <!-- Edit FamilyDict Drawer -->
     <BaseCrudDrawer v-model="editDrawer" :title="t('familyDict.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-      <FamilyDictEditView v-if="selectedItemId && editDrawer" :family-dict-id="selectedItemId as string"
+      <FamilyDictEditView v-if="selectedItemId && editDrawer" :family-dict-id="selectedItemId"
         @close="closeEditDrawer" @saved="handleFamilyDictSaved" />
     </BaseCrudDrawer>
 
@@ -21,7 +21,7 @@
 
     <!-- Detail FamilyDict Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" :title="t('familyDict.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
-      <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId as string"
+      <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId"
         @close="closeDetailDrawer" @edit-family-dict="openEditDrawer" />
     </BaseCrudDrawer>
 

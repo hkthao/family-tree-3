@@ -1,0 +1,188 @@
+<template>
+  <v-data-table-server
+    :headers="headers"
+    :items="items"
+    :items-length="totalItems"
+    :loading="loading"
+    item-value="id"
+    @update:options="loadItems"
+    elevation="0"
+    fixed-header
+  >
+    <template #top>
+      <v-toolbar flat>
+        <v-toolbar-title class="text-h6">
+          {{ t('familyLinkRequest.list.title') }}
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          icon
+          @click="$emit('create')"
+          :disabled="readOnly"
+          data-testid="add-new-family-link-request-button"
+        >
+          <v-tooltip :text="t('familyLinkRequest.list.action.create')">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <v-icon v-bind="tooltipProps">mdi-plus</v-icon>
+            </template>
+          </v-tooltip>
+        </v-btn>
+        <v-text-field
+          v-model="debouncedSearch"
+          :label="t('common.search')"
+          append-inner-icon="mdi-magnify"
+          single-line
+          hide-details
+          clearable
+          class="mr-2"
+          data-test-id="family-link-request-list-search-input"
+        ></v-text-field>
+      </v-toolbar>
+    </template>
+
+    <template #item.requestingFamilyName="{ item }">
+      {{ item.requestingFamilyName }}
+    </template>
+    <template #item.targetFamilyName="{ item }">
+      {{ item.targetFamilyName }}
+    </template>
+    <template #item.status="{ item }">
+      <v-chip :color="getStatusColor(item.status)">
+        {{ t(`familyLinkRequest.status.${item.status.toLowerCase()}`) }}
+      </v-chip>
+    </template>
+    <template #item.requestDate="{ item }">
+      {{ formatDate(item.requestDate) }}
+    </template>
+    <template #item.responseDate="{ item }">
+      {{ item.responseDate ? formatDate(item.responseDate) : t('common.na') }}
+    </template>
+    <template #item.actions="{ item }">
+      <div v-if="!readOnly">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn icon variant="text" v-bind="props" size="small">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="$emit('view', item.id)" data-testid="view-family-link-request-button">
+              <v-list-item-title>{{ t('common.viewDetails') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="$emit('edit', item.id)" data-testid="edit-family-link-request-button">
+              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="$emit('delete', item.id)" data-testid="delete-family-link-request-button">
+              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
+            </v-list-item>
+            <template v-if="item.status === LinkStatus.Pending">
+              <v-list-item @click="$emit('approve', item.id)" data-testid="approve-family-link-request-button">
+                <v-list-item-title>{{ t('familyLinkRequest.list.action.approve') }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="$emit('reject', item.id)" data-testid="reject-family-link-request-button">
+                <v-list-item-title>{{ t('familyLinkRequest.list.action.reject') }}</v-list-item-title>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-menu>
+      </div>
+      <div v-else>
+        <v-tooltip :text="t('common.viewDetails')">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="$emit('view', item.id)">
+              <v-icon>mdi-eye</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </div>
+    </template>
+  </v-data-table-server>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { FamilyLinkRequestDto } from '@/types';
+import { LinkStatus } from '@/types';
+import type { DataTableHeader } from 'vuetify';
+import { formatDate } from '@/utils/dateUtils';
+
+interface FamilyLinkRequestListProps {
+  items: FamilyLinkRequestDto[];
+  totalItems: number;
+  loading: boolean;
+  search?: string; // New prop for search
+  readOnly?: boolean;
+}
+
+const props = defineProps<FamilyLinkRequestListProps>();
+
+const emit = defineEmits([
+  'update:options',
+  'view',
+  'edit',
+  'delete',
+  'create',
+  'approve',
+  'reject',
+  'update:search', // New emit for search
+]);
+
+const { t } = useI18n();
+
+const searchQuery = ref(props.search); // Use ref for search input
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+// Watch prop.search to update local searchQuery if prop changes
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
+
+const headers = computed<DataTableHeader[]>(() => {
+  const baseHeaders: DataTableHeader[] = [
+    { title: t('familyLinkRequest.list.headers.requestingFamily'), key: 'requestingFamilyName', sortable: false },
+    { title: t('familyLinkRequest.list.headers.targetFamily'), key: 'targetFamilyName', sortable: false },
+    { title: t('familyLinkRequest.list.headers.status'), key: 'status', sortable: false },
+    { title: t('familyLinkRequest.list.headers.requestDate'), key: 'requestDate', sortable: true },
+    { title: t('familyLinkRequest.list.headers.responseDate'), key: 'responseDate', sortable: true },
+  ];
+
+  if (!props.readOnly) { // Only show actions if not readOnly
+    baseHeaders.push({ title: t('common.actions'), key: 'actions', sortable: false });
+  }
+  return baseHeaders;
+});
+
+const getStatusColor = (status: LinkStatus) => {
+  switch (status) {
+    case LinkStatus.Pending: return 'warning';
+    case LinkStatus.Approved: return 'success';
+    case LinkStatus.Rejected: return 'error';
+    default: return 'info';
+  }
+};
+
+const loadItems = (options: {
+  page: number;
+  itemsPerPage: number;
+  sortBy: { key: string; order: string }[];
+}) => {
+  emit('update:options', options);
+};
+</script>

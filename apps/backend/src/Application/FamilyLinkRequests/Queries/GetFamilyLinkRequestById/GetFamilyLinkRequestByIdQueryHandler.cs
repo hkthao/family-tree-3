@@ -1,10 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.FamilyLinks.Queries; // New using directive
 
 namespace backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequestById;

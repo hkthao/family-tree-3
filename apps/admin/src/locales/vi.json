@@ -690,6 +690,7 @@
   "familyLink.links.messages.deleteError": "Lỗi khi xóa liên kết.",
   "familyLinkRequest.list.title": "Yêu cầu liên kết",
   "familyLinkRequest.list.action.create": "Tạo Yêu cầu",
+  "familyLinkRequest.form.addTitle": "Thêm Yêu cầu Liên kết Gia đình mới",
   "familyLinkRequest.list.headers.requestingFamily": "Gia đình yêu cầu",
   "familyLinkRequest.list.headers.targetFamily": "Gia đình đích",
   "familyLinkRequest.list.headers.status": "Trạng thái",
