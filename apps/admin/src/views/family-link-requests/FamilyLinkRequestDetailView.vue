@@ -5,23 +5,14 @@
     </v-card-title>
     <v-progress-linear v-if="detail.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLinkRequestForm v-if="familyLinkRequest" :initial-family-link-request-data="familyLinkRequest" :read-only="true" />
-      <v-list v-if="familyLinkRequest" density="compact" class="mt-4">
-        <v-list-item v-if="familyLinkRequest.requestMessage">
-          <v-list-item-title class="font-weight-bold">{{ t('familyLinkRequest.form.requestMessage') }}:</v-list-item-title>
-          <v-list-item-subtitle>{{ familyLinkRequest.requestMessage }}</v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item v-if="familyLinkRequest.responseMessage">
-          <v-list-item-title class="font-weight-bold">{{ t('familyLinkRequest.form.responseMessage') }}:</v-list-item-title>
-          <v-list-item-subtitle>{{ familyLinkRequest.responseMessage }}</v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
+      <FamilyLinkRequestForm v-if="familyLinkRequest" :initial-family-link-request-data="familyLinkRequest"
+        :read-only="true" />
       <v-alert v-else type="info" class="mt-4">{{ t('familyLinkRequest.detail.notFound') }}</v-alert>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!familyLinkRequest || detail.loading" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!familyLinkRequest || detail.loading" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!familyLinkRequest || detail.loading"
+        v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -57,9 +48,9 @@ const familyLinkRequest = ref<FamilyLinkRequestDto | undefined>(undefined);
 
 const canEditOrDelete = computed(() => {
   // User must be admin of requesting or target family to edit/delete
-  return (isAdmin.value || isFamilyManager.value(props.familyId)) && 
-         (familyLinkRequest.value?.requestingFamilyId === props.familyId || 
-          familyLinkRequest.value?.targetFamilyId === props.familyId);
+  return isAdmin.value &&
+    (familyLinkRequest.value?.requestingFamilyId === props.familyId ||
+      familyLinkRequest.value?.targetFamilyId === props.familyId);
 });
 
 const loadFamilyLinkRequest = async (id: string) => {

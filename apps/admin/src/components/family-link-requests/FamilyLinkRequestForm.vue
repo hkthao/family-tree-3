@@ -5,7 +5,7 @@
         <FamilyAutocomplete
           v-model="formData.requestingFamilyId"
           :label="t('familyLinkRequest.form.requestingFamily')"
-          :readonly="true"
+          :disabled="readOnly"
           :rules="[required('requestingFamilyId')]"
           data-testid="requesting-family-field"
         />
@@ -15,6 +15,7 @@
           v-model="formData.targetFamilyId"
           :label="t('familyLinkRequest.form.targetFamily')"
           :rules="[required('targetFamilyId'), targetFamilyCannotBeRequestingFamily]"
+          :disabled="readOnly"
           data-testid="target-family-field"
         />
       </v-col>
@@ -26,7 +27,7 @@
           clearable
           counter
           maxlength="500"
-          :readonly="readOnly"
+          :disabled="readOnly"
           :rules="[required('requestMessage')]"
           data-testid="request-message-field"
         ></v-textarea>
@@ -36,15 +37,27 @@
           v-model="formData.status"
           :items="linkStatusOptions"
           :label="t('familyLinkRequest.form.status')"
-          :readonly="true"
+          :disabled="true"
           data-testid="status-field"
         ></v-select>
+      </v-col>
+      <v-col cols="12" v-if="formData.responseMessage">
+        <v-textarea
+          v-model="formData.responseMessage"
+          :label="t('familyLinkRequest.form.responseMessage')"
+          rows="3"
+          clearable
+          counter
+          maxlength="500"
+          :disabled="true"
+          data-testid="response-message-field"
+        ></v-textarea>
       </v-col>
       <v-col cols="12" md="6">
         <VDateInput
           v-model="formData.requestDate"
           :label="t('familyLinkRequest.form.requestDate')"
-          :readonly="true"
+          :disabled="true"
           data-testid="request-date-field"
         ></VDateInput>
       </v-col>
@@ -52,7 +65,7 @@
         <VDateInput
           v-model="formData.responseDate"
           :label="t('familyLinkRequest.form.responseDate')"
-          :readonly="true"
+          :disabled="true"
           data-testid="response-date-field"
         ></VDateInput>
       </v-col>
@@ -90,9 +103,9 @@ const formData = reactive<Partial<FamilyLinkRequestDto>>({
 });
 
 const linkStatusOptions = computed(() => [
-  { title: t('familyLinkRequest.status.pending'), value: LinkStatus.Pending },
-  { title: t('familyLinkRequest.status.approved'), value: LinkStatus.Approved },
-  { title: t('familyLinkRequest.status.rejected'), value: LinkStatus.Rejected },
+  { title: t('familyLinkRequest.status.pending'), value: 0 },
+  { title: t('familyLinkRequest.status.approved'), value: 1 },
+  { title: t('familyLinkRequest.status.rejected'), value: 2 },
 ]);
 
 const required = (propertyType: string) => (value: string | null | undefined) =>

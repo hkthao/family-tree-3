@@ -1,55 +1,38 @@
 <template>
-  <v-data-table-server
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :loading="loading"
-    item-value="id"
-    @update:options="loadItems"
-    elevation="0"
-    fixed-header
-  >
+  <v-data-table-server :headers="headers" :items="items" :items-length="totalItems" :loading="loading" item-value="id"
+    @update:options="loadItems" elevation="0" fixed-header>
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title class="text-h6">
           {{ t('familyLinkRequest.list.title') }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          icon
-          @click="$emit('create')"
-          :disabled="readOnly"
-          data-testid="add-new-family-link-request-button"
-        >
+        <v-btn color="primary" icon @click="$emit('create')" :disabled="readOnly"
+          data-testid="add-new-family-link-request-button">
           <v-tooltip :text="t('familyLinkRequest.list.action.create')">
             <template v-slot:activator="{ props: tooltipProps }">
               <v-icon v-bind="tooltipProps">mdi-plus</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field
-          v-model="debouncedSearch"
-          :label="t('common.search')"
-          append-inner-icon="mdi-magnify"
-          single-line
-          hide-details
-          clearable
-          class="mr-2"
-          data-test-id="family-link-request-list-search-input"
-        ></v-text-field>
+        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+          hide-details clearable class="mr-2" data-test-id="family-link-request-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
 
     <template #item.requestingFamilyName="{ item }">
-      {{ item.requestingFamilyName }}
+      <a @click="$emit('view', item.id)"
+        class="text-primary font-weight-bold text-decoration-underline cursor-pointer" aria-label="View Family Link Request">
+        {{ item.requestingFamilyName }}
+      </a>
     </template>
+
     <template #item.targetFamilyName="{ item }">
       {{ item.targetFamilyName }}
     </template>
     <template #item.status="{ item }">
       <v-chip :color="getStatusColor(item.status)">
-        {{ t(`familyLinkRequest.status.${item.status.toLowerCase()}`) }}
+        {{ t(`familyLinkRequest.status.${getDisplayStatus(item.status).toLowerCase()}`) }}
       </v-chip>
     </template>
     <template #item.requestDate="{ item }">
@@ -59,42 +42,35 @@
       {{ item.responseDate ? formatDate(item.responseDate) : t('common.na') }}
     </template>
     <template #item.actions="{ item }">
-      <div v-if="!readOnly">
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" v-bind="props" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="$emit('view', item.id)" data-testid="view-family-link-request-button">
-              <v-list-item-title>{{ t('common.viewDetails') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="$emit('edit', item.id)" data-testid="edit-family-link-request-button">
-              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="$emit('delete', item.id)" data-testid="delete-family-link-request-button">
-              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
-            </v-list-item>
-            <template v-if="item.status === LinkStatus.Pending">
-              <v-list-item @click="$emit('approve', item.id)" data-testid="approve-family-link-request-button">
-                <v-list-item-title>{{ t('familyLinkRequest.list.action.approve') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="$emit('reject', item.id)" data-testid="reject-family-link-request-button">
-                <v-list-item-title>{{ t('familyLinkRequest.list.action.reject') }}</v-list-item-title>
-              </v-list-item>
+      <div v-if="!readOnly" class="d-flex justify-center">
+        <template v-if="isAdmin">
+          <v-tooltip :text="t('common.delete')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item.id)"
+                data-testid="delete-family-link-request-button">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
             </template>
-          </v-list>
-        </v-menu>
-      </div>
-      <div v-else>
-        <v-tooltip :text="t('common.viewDetails')">
-          <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="$emit('view', item.id)">
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+          </v-tooltip>
+        </template>
+        <template v-if="item.status === LinkStatus.Pending">
+          <v-tooltip :text="t('familyLinkRequest.list.action.approve')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('approve', item.id)"
+                data-testid="approve-family-link-request-button">
+                <v-icon>mdi-check</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('familyLinkRequest.list.action.reject')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('reject', item.id)"
+                data-testid="reject-family-link-request-button">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </template>
       </div>
     </template>
   </v-data-table-server>
@@ -107,6 +83,7 @@ import type { FamilyLinkRequestDto } from '@/types';
 import { LinkStatus } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
+import { useAuth } from '@/composables/useAuth'; // Import useAuth composable
 
 interface FamilyLinkRequestListProps {
   items: FamilyLinkRequestDto[];
@@ -121,15 +98,15 @@ const props = defineProps<FamilyLinkRequestListProps>();
 const emit = defineEmits([
   'update:options',
   'view',
-  'edit',
   'delete',
   'create',
   'approve',
   'reject',
-  'update:search', // New emit for search
+  'update:search',
 ]);
 
 const { t } = useI18n();
+const { isAdmin } = useAuth(); // Destructure isAdmin from useAuth()
 
 const searchQuery = ref(props.search); // Use ref for search input
 let debounceTimer: ReturnType<typeof setTimeout>;
@@ -159,15 +136,24 @@ const headers = computed<DataTableHeader[]>(() => {
     { title: t('familyLinkRequest.list.headers.requestingFamily'), key: 'requestingFamilyName', sortable: false },
     { title: t('familyLinkRequest.list.headers.targetFamily'), key: 'targetFamilyName', sortable: false },
     { title: t('familyLinkRequest.list.headers.status'), key: 'status', sortable: false },
-    { title: t('familyLinkRequest.list.headers.requestDate'), key: 'requestDate', sortable: true },
-    { title: t('familyLinkRequest.list.headers.responseDate'), key: 'responseDate', sortable: true },
+    { title: t('familyLinkRequest.list.headers.requestDate'), key: 'requestDate', sortable: true, align: 'center' },
+    { title: t('familyLinkRequest.list.headers.responseDate'), key: 'responseDate', sortable: true, align: 'center' },
   ];
 
   if (!props.readOnly) { // Only show actions if not readOnly
-    baseHeaders.push({ title: t('common.actions'), key: 'actions', sortable: false });
+    baseHeaders.push({ title: t('common.actions'), key: 'actions', sortable: false, align: 'center' });
   }
   return baseHeaders;
 });
+
+const getDisplayStatus = (status: LinkStatus | number): LinkStatus => {
+  if (typeof status === 'number') {
+    // For string enums, Object.values returns the string values in order.
+    // We can use the number as an index to get the corresponding string.
+    return Object.values(LinkStatus)[status];
+  }
+  return status;
+};
 
 const getStatusColor = (status: LinkStatus) => {
   switch (status) {

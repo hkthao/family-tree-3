@@ -10,8 +10,8 @@ export class ApiFamilyLinkService implements IFamilyLinkService {
     try {
       const params = new URLSearchParams();
       params.append('familyId', familyId); // Add familyId to query params
-      params.append('pageNumber', page.toString());
-      params.append('pageSize', itemsPerPage.toString());
+      params.append('page', page.toString());
+      params.append('itemsPerPage', itemsPerPage.toString());
       if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
       if (filters.otherFamilyId) params.append('otherFamilyId', filters.otherFamilyId);
       if (filters.sortBy) params.append('sortBy', filters.sortBy);

@@ -79,8 +79,8 @@ export class ApiMemberStoryService implements IMemberStoryService {
     itemsPerPage: number,
   ): Promise<Result<Paginated<MemberStoryDto>, ApiError>> {
     const params = new URLSearchParams();
-    params.append('pageNumber', page.toString());
-    params.append('pageSize', itemsPerPage.toString());
+    params.append('page', page.toString());
+    params.append('itemsPerPage', itemsPerPage.toString());
 
     if (filters.memberId) {
       params.append('memberId', filters.memberId);
