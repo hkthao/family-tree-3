@@ -3,12 +3,11 @@ using backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.DeleteFamilyLinkRequest; // New import
 using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequestById; // New import
-using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequests; // Updated import for FamilyLinkRequests namespace
+using backend.Application.FamilyLinkRequests.Queries.SearchFamilyLinkRequests;
 using backend.Application.FamilyLinks.Queries; // Keep this for FamilyLinkRequestDto
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Common.Models; // For Result<T> and StatusCodes
+using backend.Application.Common.Models;
 
 namespace backend.Web.Controllers;
 
@@ -96,16 +95,15 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     }
 
     /// <summary>
-    /// Lấy tất cả các yêu cầu liên kết liên quan đến một gia đình (gửi đi và nhận về).
+    /// Lấy tất cả các yêu cầu liên kết liên quan đến một gia đình (gửi đi và nhận về), có hỗ trợ phân trang, lọc và sắp xếp.
     /// </summary>
-    /// <param name="familyId">ID của gia đình.</param>
-    /// <returns>Danh sách các yêu cầu liên kết gia đình.</returns>
-    [HttpGet("family/{familyId}")] // Changed route to be more RESTful
-    [ProducesResponseType(typeof(List<FamilyLinkRequestDto>), StatusCodes.Status200OK)]
+    /// <returns>Danh sách phân trang các yêu cầu liên kết gia đình.</returns>
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(PaginatedList<FamilyLinkRequestDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<FamilyLinkRequestDto>>> GetFamilyLinkRequests(Guid familyId)
+    public async Task<ActionResult<PaginatedList<FamilyLinkRequestDto>>> GetFamilyLinkRequests([FromQuery]SearchFamilyLinkRequestsQuery query)
     {
-        var result = await _mediator.Send(new GetFamilyLinkRequestsQuery(familyId));
+        var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

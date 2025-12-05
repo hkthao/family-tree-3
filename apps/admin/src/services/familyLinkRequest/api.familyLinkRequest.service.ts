@@ -18,7 +18,7 @@ export class ApiFamilyLinkRequestService implements IFamilyLinkRequestService {
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-      const response = await this.apiClient.get<Paginated<FamilyLinkRequestDto>>(`/family-link-requests/family/${familyId}`, { params });
+      const response = await this.apiClient.get<Paginated<FamilyLinkRequestDto>>(`/family-link-requests/search`, { params });
       return response;
     } catch (error: any) {
       return { ok: false, error: error };
