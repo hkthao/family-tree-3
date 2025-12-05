@@ -13,7 +13,7 @@
     </BaseCrudDrawer>
     <!-- Add Member Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
-      <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId"
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId"
         @close="handleMemberClosed" @saved="handleMemberSaved" />
     </BaseCrudDrawer>
     <!-- Detail Member Drawer -->
@@ -28,7 +28,7 @@
     </BaseCrudDrawer>
     <!-- AI Create Member Drawer -->
     <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId || ''" @close="aiCreateDrawer = false" />
+      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -50,7 +50,7 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; 
 import { removeDiacritics } from '@/utils/string.utils'; 
 interface MemberListViewProps {
-  familyId?: string;
+  familyId: string;
   readOnly?: boolean;
 }
 const props = defineProps<MemberListViewProps>();
