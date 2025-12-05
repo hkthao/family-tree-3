@@ -170,7 +170,7 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.avatar'),
       key: 'avatarUrl',
       sortable: false,
-      width: '100px',
+      minWidth: '110px',
       align: 'center',
     },
     {
@@ -203,7 +203,7 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('member.list.headers.birthDeathYears'),
       key: 'birthDeathYears',
-      width: '120px',
+      minWidth: '120px',
       align: 'center',
       sortable: false,
     },
@@ -221,7 +221,8 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'actions',
       sortable: false,
       align: 'center',
-      width: '140px',
+      minWidth: '120px',
+      fixed: "end"
     });
   }
   return baseHeaders;

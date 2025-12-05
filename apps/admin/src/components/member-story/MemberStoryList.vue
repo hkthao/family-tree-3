@@ -35,21 +35,24 @@
         {{ getPerspectiveText(item.perspective as MemberStoryPerspective) }}
       </template>
       <template #item.actions="{ item: rowItem }">
-        <v-menu>
-          <template v-slot:activator="{ props: menuProps }">
-            <v-btn icon variant="text" v-bind="menuProps" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="() => editItem(rowItem.id)">
-              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item v-if="canPerformActions" @click="() => deleteItem(rowItem)">
-              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        <div v-if="canPerformActions">
+          <v-tooltip :text="t('common.edit')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon size="small" variant="text" v-bind="props" @click="editItem(rowItem.id)"
+                data-testid="edit-member-story-button" aria-label="Edit">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('common.delete')">
+            <template v-slot:activator="{ props }">
+              <v-btn icon size="small" variant="text" v-bind="props" @click="deleteItem(rowItem)"
+                data-testid="delete-member-story-button" aria-label="Delete">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </div>
       </template>
     </v-data-table-server>
   </div>
@@ -108,7 +111,7 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('memberStory.list.headers.memberFullName'), key: 'memberFullName' },
   { title: t('memberStory.list.headers.storyStyle'), key: 'storyStyle' },
   { title: t('memberStory.list.headers.perspective'), key: 'perspective' },
-  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end', minWidth: '120px' },
 ]);
 
 
