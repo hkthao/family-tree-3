@@ -709,6 +709,7 @@
   "familyLinkRequest.list.confirmDelete.message": "Bạn có chắc muốn xoá yêu cầu liên kết này không?",
   "familyLinkRequest.list.messages.deleteSuccess": "Xóa yêu cầu thành công!",
   "familyLinkRequest.list.messages.deleteError": "Lỗi khi xóa yêu cầu.",
+  "familyLinkRequest.detail.title": "Chi tiết Yêu cầu Liên kết Gia đình",
   "familyLinkRequest.requests.messages.sendError": "Lỗi khi gửi yêu cầu.",
   "familyLinkRequest.requests.messages.updateError": "Lỗi khi cập nhật yêu cầu.",
   "familyLinkRequest.requests.messages.approveError": "Lỗi khi phê duyệt yêu cầu.",
