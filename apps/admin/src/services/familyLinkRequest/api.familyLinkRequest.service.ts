@@ -13,7 +13,7 @@ export class ApiFamilyLinkRequestService implements IFamilyLinkRequestService {
       params.append('page', page.toString());
       params.append('itemsPerPage', itemsPerPage.toString());
       if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
-      if (filters.status) params.append('status', filters.status);
+      if (filters.status) params.append('status', filters.status?.toString());
       if (filters.otherFamilyId) params.append('otherFamilyId', filters.otherFamilyId);
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);

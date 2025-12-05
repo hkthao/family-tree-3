@@ -1,7 +1,7 @@
 export enum LinkStatus {
-  Pending = 'Pending',
-  Approved = 'Approved',
-  Rejected = 'Rejected'
+  Pending = 0,
+  Approved = 1,
+  Rejected = 2
 }
 
 export interface FamilyLinkRequestDto  {

@@ -53,24 +53,7 @@
             </template>
           </v-tooltip>
         </template>
-        <template v-if="item.status === LinkStatus.Pending">
-          <v-tooltip :text="t('familyLinkRequest.list.action.approve')">
-            <template v-slot:activator="{ props }">
-              <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('approve', item.id)"
-                data-testid="approve-family-link-request-button">
-                <v-icon>mdi-check</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('familyLinkRequest.list.action.reject')">
-            <template v-slot:activator="{ props }">
-              <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('reject', item.id)"
-                data-testid="reject-family-link-request-button">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
-        </template>
+
       </div>
     </template>
   </v-data-table-server>
@@ -100,8 +83,6 @@ const emit = defineEmits([
   'view',
   'delete',
   'create',
-  'approve',
-  'reject',
   'update:search',
 ]);
 
@@ -146,11 +127,9 @@ const headers = computed<DataTableHeader[]>(() => {
   return baseHeaders;
 });
 
-const getDisplayStatus = (status: LinkStatus | number): LinkStatus => {
+const getDisplayStatus = (status: LinkStatus | number): string => {
   if (typeof status === 'number') {
-    // For string enums, Object.values returns the string values in order.
-    // We can use the number as an index to get the corresponding string.
-    return Object.values(LinkStatus)[status];
+    return Object.values(LinkStatus)[status] as string;
   }
   return status;
 };
