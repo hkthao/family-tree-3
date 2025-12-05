@@ -3,7 +3,8 @@ import { useNLEditorStore } from '@/stores/nlEditor.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Member } from '@/types';
 import { ok, err, Gender } from '@/types';
-import type { ApiError, Paginated } from '@/types';
+import type { Paginated } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IMemberService

@@ -10,6 +10,7 @@ using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict; // New using statement
+using backend.Application.FamilyLinks.Queries;
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.MemberFaces.Common; // NEW
 using backend.Application.Members.Queries;
@@ -109,5 +110,13 @@ public class MappingProfile : Profile
         CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()
             .ForMember(dest => dest.PublicMemberProperties,
                        opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()));
+
+        CreateMap<FamilyLinkRequest, FamilyLinkRequestDto>()
+            .ForMember(dest => dest.RequestingFamilyName, opt => opt.MapFrom(src => src.RequestingFamily.Name))
+            .ForMember(dest => dest.TargetFamilyName, opt => opt.MapFrom(src => src.TargetFamily.Name));
+
+        CreateMap<FamilyLink, FamilyLinkDto>()
+            .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
+            .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
     }
 }

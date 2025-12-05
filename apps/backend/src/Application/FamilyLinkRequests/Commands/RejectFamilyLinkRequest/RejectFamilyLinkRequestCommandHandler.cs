@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
-namespace backend.Application.FamilyLinks.Commands.RejectFamilyLinkRequest;
+namespace backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
 
 public class RejectFamilyLinkRequestCommandHandler : IRequestHandler<RejectFamilyLinkRequestCommand, Result<Unit>>
 {

@@ -1,7 +1,13 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using backend.Application.FamilyLinks.Queries; // New using directive
 
-namespace backend.Application.FamilyLinks.Queries.GetFamilyLinkRequests;
+namespace backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequests;
 
 public class GetFamilyLinkRequestsQueryHandler : IRequestHandler<GetFamilyLinkRequestsQuery, Result<List<FamilyLinkRequestDto>>>
 {
@@ -20,16 +26,16 @@ public class GetFamilyLinkRequestsQueryHandler : IRequestHandler<GetFamilyLinkRe
 
     public async Task<Result<List<FamilyLinkRequestDto>>> Handle(GetFamilyLinkRequestsQuery request, CancellationToken cancellationToken)
     {
-        // 1. Authorization: Only admin of the family can view its link requests
-        if (!_authorizationService.CanManageFamily(request.FamilyId))
+        // 1. Authorization: User must be a member of the family to view its links
+        if (!_authorizationService.CanAccessFamily(request.FamilyId))
         {
             return Result<List<FamilyLinkRequestDto>>.Forbidden("Bạn không có quyền xem các yêu cầu liên kết của gia đình này.");
         }
 
         var requests = await _context.FamilyLinkRequests
-            .Include(lr => lr.RequestingFamily)
-            .Include(lr => lr.TargetFamily)
-            .Where(lr => lr.RequestingFamilyId == request.FamilyId || lr.TargetFamilyId == request.FamilyId)
+            .Include(flr => flr.RequestingFamily)
+            .Include(flr => flr.TargetFamily)
+            .Where(flr => flr.RequestingFamilyId == request.FamilyId || flr.TargetFamilyId == request.FamilyId)
             .ProjectTo<FamilyLinkRequestDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

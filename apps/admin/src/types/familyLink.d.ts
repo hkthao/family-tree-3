@@ -31,3 +31,17 @@ export interface FamilyLinkFilter {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface FamilyLinkRequestFilter {
+  familyId?: string;
+  searchQuery?: string;
+  status?: LinkStatus; // Re-introduce status for FamilyLinkRequest filtering
+  otherFamilyId?: string | null;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface UpdateFamilyLinkRequestCommand {
+  id: string;
+  status: LinkStatus;
+}

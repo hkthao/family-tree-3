@@ -1,16 +1,21 @@
-using backend.Application.FamilyLinks.Commands.ApproveFamilyLinkRequest;
-using backend.Application.FamilyLinks.Commands.CreateFamilyLinkRequest;
-using backend.Application.FamilyLinks.Commands.RejectFamilyLinkRequest;
-using backend.Application.FamilyLinks.Queries;
-using backend.Application.FamilyLinks.Queries.GetFamilyLinkRequests;
+using backend.Application.FamilyLinkRequests.Commands.ApproveFamilyLinkRequest;
+using backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
+using backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
+using backend.Application.FamilyLinkRequests.Commands.UpdateFamilyLinkRequest; // New import
+using backend.Application.FamilyLinkRequests.Commands.DeleteFamilyLinkRequest; // New import
+using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequestById; // New import
+using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequests; // Updated import for FamilyLinkRequests namespace
+using backend.Application.FamilyLinks.Queries; // Keep this for FamilyLinkRequestDto
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.Common.Models; // For Result<T> and StatusCodes
 
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/family-link-requests")] // New route for requests
+[Route("api/family-link-requests")]
 public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLinkRequestsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
@@ -21,11 +26,62 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// </summary>
     /// <param name="command">Lệnh chứa ID gia đình gửi yêu cầu và ID gia đình nhận yêu cầu.</param>
     /// <returns>ID của yêu cầu liên kết đã tạo.</returns>
-    [HttpPost] // Route will be api/family-link-requests
+    [HttpPost]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Guid>> CreateFamilyLinkRequest([FromBody] CreateFamilyLinkRequestCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Lấy một yêu cầu liên kết gia đình theo ID.
+    /// </summary>
+    /// <param name="id">ID của yêu cầu liên kết.</param>
+    /// <returns>Yêu cầu liên kết gia đình.</returns>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(FamilyLinkRequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<FamilyLinkRequestDto>> GetFamilyLinkRequestById(Guid id)
+    {
+        var result = await _mediator.Send(new GetFamilyLinkRequestByIdQuery(id));
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+    }
+
+    /// <summary>
+    /// Cập nhật một yêu cầu liên kết gia đình hiện có.
+    /// </summary>
+    /// <param name="id">ID của yêu cầu liên kết cần cập nhật.</param>
+    /// <param name="command">Lệnh chứa thông tin cập nhật cho yêu cầu liên kết.</param>
+    /// <returns>NoContent nếu cập nhật thành công.</returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> UpdateFamilyLinkRequest(Guid id, [FromBody] UpdateFamilyLinkRequestCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest(Result<Unit>.Failure("ID trong URL không khớp với ID trong nội dung yêu cầu."));
+        }
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Xóa một yêu cầu liên kết gia đình hiện có.
+    /// </summary>
+    /// <param name="id">ID của yêu cầu liên kết cần xóa.</param>
+    /// <returns>NoContent nếu xóa thành công.</returns>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteFamilyLinkRequest(Guid id)
+    {
+        var result = await _mediator.Send(new DeleteFamilyLinkRequestCommand(id));
+        return result.IsSuccess ? NoContent() : NotFound(result.Error);
     }
 
     /// <summary>
@@ -34,6 +90,9 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// <param name="requestId">ID của yêu cầu liên kết cần phê duyệt.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPost("{requestId}/approve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> ApproveFamilyLinkRequest(Guid requestId)
     {
         var result = await _mediator.Send(new ApproveFamilyLinkRequestCommand(requestId));
@@ -46,6 +105,9 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// <param name="requestId">ID của yêu cầu liên kết cần từ chối.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPost("{requestId}/reject")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RejectFamilyLinkRequest(Guid requestId)
     {
         var result = await _mediator.Send(new RejectFamilyLinkRequestCommand(requestId));
@@ -57,7 +119,9 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// </summary>
     /// <param name="familyId">ID của gia đình.</param>
     /// <returns>Danh sách các yêu cầu liên kết gia đình.</returns>
-    [HttpGet("{familyId}")] // Route will be api/family-link-requests/{familyId}
+    [HttpGet("family/{familyId}")] // Changed route to be more RESTful
+    [ProducesResponseType(typeof(List<FamilyLinkRequestDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<FamilyLinkRequestDto>>> GetFamilyLinkRequests(Guid familyId)
     {
         var result = await _mediator.Send(new GetFamilyLinkRequestsQuery(familyId));

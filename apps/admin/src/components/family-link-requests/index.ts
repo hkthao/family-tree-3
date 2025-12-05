@@ -1,0 +1,1 @@
+export { default as FamilyLinkRequestForm } from './FamilyLinkRequestForm.vue';

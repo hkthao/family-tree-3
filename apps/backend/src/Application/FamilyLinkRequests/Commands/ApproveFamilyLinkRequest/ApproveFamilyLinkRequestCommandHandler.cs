@@ -3,7 +3,7 @@ using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
-namespace backend.Application.FamilyLinks.Commands.ApproveFamilyLinkRequest;
+namespace backend.Application.FamilyLinkRequests.Commands.ApproveFamilyLinkRequest;
 
 public class ApproveFamilyLinkRequestCommandHandler : IRequestHandler<ApproveFamilyLinkRequestCommand, Result<Unit>>
 {

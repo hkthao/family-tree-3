@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
-namespace backend.Application.FamilyLinks.Commands.CreateFamilyLinkRequest;
+namespace backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
 
 public class CreateFamilyLinkRequestCommandHandler : IRequestHandler<CreateFamilyLinkRequestCommand, Result<Guid>>
 {

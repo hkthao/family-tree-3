@@ -29,6 +29,14 @@ public class FamilyLinkRequest : BaseAuditableEntity
         Status = LinkStatus.Pending;
     }
 
+    public void UpdateStatus(LinkStatus newStatus)
+    {
+        // Add any validation logic here if needed, e.g.,
+        // if (Status == LinkStatus.Approved && newStatus == LinkStatus.Rejected) { ... }
+        Status = newStatus;
+        ResponseDate = DateTime.UtcNow; // Update response date on any status change
+    }
+
     public void Approve()
     {
         if (Status != LinkStatus.Pending)

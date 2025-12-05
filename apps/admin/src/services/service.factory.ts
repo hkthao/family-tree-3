@@ -30,6 +30,8 @@ import type { IPromptService } from './prompt/prompt.service.interface';
 import { ApiPromptService } from './prompt/api.prompt.service';
 import type { IFamilyLinkService } from './familyLink/familyLink.service.interface';
 import { ApiFamilyLinkService } from './familyLink/api.familyLink.service';
+import type { IFamilyLinkRequestService } from './familyLinkRequest/familyLinkRequest.service.interface'; // New import
+import { ApiFamilyLinkRequestService } from './familyLinkRequest/api.familyLinkRequest.service'; // New import
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -49,6 +51,7 @@ export interface AppServices {
   memberFace: IMemberFaceService;
   prompt: IPromptService;
   familyLink: IFamilyLinkService;
+  familyLinkRequest: IFamilyLinkRequestService; // New service
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -118,5 +121,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyLinkService(apiClient)
         : testServices?.familyLink || new ApiFamilyLinkService(apiClient),
+    familyLinkRequest: // New service assignment
+      mode === 'real'
+        ? new ApiFamilyLinkRequestService(apiClient)
+        : testServices?.familyLinkRequest || new ApiFamilyLinkRequestService(apiClient),
   };
 }
