@@ -15,12 +15,10 @@
       <v-btn color="error" @click="handleDelete" :disabled="!familyLinkRequest || detail.loading"
         v-if="canEditOrDelete" data-testid="delete-button">{{ t('common.delete') }}</v-btn>
       <v-btn color="primary" @click="handleApprove"
-        :disabled="!familyLinkRequest || detail.loading || familyLinkRequest.status !== LinkStatus.Pending"
         v-if="canApproveOrReject" data-testid="approve-button">
         {{ t('familyLinkRequest.list.action.approve') }}
       </v-btn>
       <v-btn color="warning" @click="handleReject"
-        :disabled="!familyLinkRequest || detail.loading || familyLinkRequest.status !== LinkStatus.Pending"
         v-if="canApproveOrReject" data-testid="reject-button">
         {{ t('familyLinkRequest.list.action.reject') }}
       </v-btn>
@@ -65,12 +63,9 @@ const canEditOrDelete = computed(() => {
 });
 
 const canApproveOrReject = computed(() => {
-  const isManagerFn = isFamilyManager.value;
-  return (
-    familyLinkRequest.value?.targetFamilyId === props.familyId &&
-    typeof isManagerFn === 'function' &&
-    isManagerFn(props.familyId)
-  ) || isAdmin.value;
+  return familyLinkRequest.value && familyLinkRequest.value.status === LinkStatus.Pending && (
+    (familyLinkRequest.value.targetFamilyId === props.familyId &&
+    isFamilyManager.value(props.familyId)) || isAdmin.value);
 });
 
 const loadFamilyLinkRequest = async (id: string) => {
