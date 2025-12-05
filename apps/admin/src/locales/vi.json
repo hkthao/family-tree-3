@@ -724,6 +724,8 @@
   "familyLinkRequest.form.responseMessage": "Tin nhắn phản hồi",
   "familyLinkRequest.form.rules.requestingFamilyRequired": "Gia đình yêu cầu là bắt buộc.",
   "familyLinkRequest.form.rules.targetFamilyRequired": "Gia đình đích là bắt buộc.",
+  "familyLinkRequest.form.rules.requestMessageRequired": "Tin nhắn yêu cầu là bắt buộc.",
+  "familyLinkRequest.form.rules.targetCannotBeRequesting": "Gia đình đích không được trùng với gia đình yêu cầu.",
   "familyLinkRequest.form.rules.allFieldsRequired": "Vui lòng điền đầy đủ các trường bắt buộc.",
   "familyLinkRequest.requests.messages.sendSuccess": "Yêu cầu đã được gửi thành công!",
   "event.errors.load": "Không thể tải danh sách sự kiện.",
