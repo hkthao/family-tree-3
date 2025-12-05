@@ -1,6 +1,6 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
@@ -22,7 +22,7 @@ public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCo
     {
         if (!_authorizationService.IsAdmin())
         {
-            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép cập nhật FamilyDict.");
+            return Result.Forbidden("Chỉ quản trị viên mới được phép cập nhật FamilyDict.");
         }
 
         var entity = await _context.FamilyDicts
@@ -30,7 +30,7 @@ public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCo
 
         if (entity == null)
         {
-            throw new NotFoundException(nameof(FamilyDict), request.Id.ToString());
+            return Result.NotFound($"FamilyDict with ID {request.Id} not found.");
         }
 
         entity.Name = request.Name;

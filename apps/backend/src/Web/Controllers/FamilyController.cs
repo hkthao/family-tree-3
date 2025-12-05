@@ -2,15 +2,14 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
-using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
-using backend.Application.Families.Commands.GenerateFamilyData;
-using backend.Application.Families.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -128,14 +127,14 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="ids">Chuỗi chứa các ID gia đình, phân tách bằng dấu phẩy.</param>
     /// <returns>Danh sách các đối tượng FamilyDto.</returns>
     [HttpGet("by-ids")]
-    public async Task<ActionResult<List<FamilyDto>>> GetFamiliesByIds([FromQuery] string ids)
+    public async Task<IActionResult> GetFamiliesByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
             return Ok(Result<List<FamilyDto>>.Success([]).Value);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
-        return result.IsSuccess ? (ActionResult<List<FamilyDto>>)Ok(result.Value) : (ActionResult<List<FamilyDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -156,7 +155,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh chứa văn bản cần phân tích và ID phiên làm việc.</param>
     /// <returns>Kết quả phân tích văn bản.</returns>
     [HttpPost("generate-data")]
-    public async Task<ActionResult<AnalyzedResultDto>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
+    public async Task<IActionResult> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result);

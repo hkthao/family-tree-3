@@ -1,5 +1,5 @@
-using backend.Domain.Entities;
 using Ardalis.Specification;
+using backend.Domain.Entities;
 
 namespace backend.Application.Members.Specifications;
 

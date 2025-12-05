@@ -25,11 +25,11 @@ public class DashboardController(IMediator mediator) : ControllerBase
     /// <param name="familyId">Tùy chọn: Lọc số liệu thống kê theo ID gia đình.</param>
     /// <returns>Các số liệu thống kê của bảng điều khiển.</returns>
     [HttpGet("stats")]
-    public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats([FromQuery] Guid? familyId = null)
+    public async Task<IActionResult> GetDashboardStats([FromQuery] Guid? familyId = null)
     {
         var query = new GetDashboardStatsQuery { FamilyId = familyId };
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? (ActionResult<DashboardStatsDto>)Ok(result.Value) : (ActionResult<DashboardStatsDto>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

@@ -21,18 +21,18 @@ public class GetMemberFaceByIdQueryHandler : IRequestHandler<GetMemberFaceByIdQu
     {
         var currentUserId = _currentUser.UserId;
         var isAdmin = _authorizationService.IsAdmin(); // Use IAuthorizationService.IsAdmin()
-        
+
         var spec = new MemberFaceAccessSpecification(isAdmin, currentUserId);
 
         var memberFace = await _context.MemberFaces
             .WithSpecification(spec) // Apply the specification
             .FirstOrDefaultAsync(mf => mf.Id == request.Id, cancellationToken);
-        
+
         if (memberFace == null)
         {
             return Result<MemberFaceDto>.Failure($"MemberFace with ID {request.Id} not found.", ErrorSources.NotFound);
         }
-        
+
         // Authorization check is now handled by the specification
         // The previous explicit check `_authorizationService.CanAccessFamily` is no longer needed here.
 
@@ -57,8 +57,8 @@ public class GetMemberFaceByIdQueryHandler : IRequestHandler<GetMemberFaceByIdQu
             IsVectorDbSynced = memberFace.IsVectorDbSynced,
             VectorDbId = memberFace.VectorDbId,
             MemberName = memberFace.Member?.FullName,
-            MemberGender = memberFace.Member?.Gender, 
-            MemberAvatarUrl = memberFace.Member?.AvatarUrl, 
+            MemberGender = memberFace.Member?.Gender,
+            MemberAvatarUrl = memberFace.Member?.AvatarUrl,
             FamilyId = memberFace.Member?.FamilyId,
             FamilyName = memberFace.Member?.Family?.Name,
             FamilyAvatarUrl = memberFace.Member?.Family?.AvatarUrl

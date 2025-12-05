@@ -1,5 +1,5 @@
-using backend.Application.Prompts.DTOs;
 using backend.Application.Common.Models;
+using backend.Application.Prompts.DTOs;
 
 namespace backend.Application.Prompts.Queries.GetPromptById;
 

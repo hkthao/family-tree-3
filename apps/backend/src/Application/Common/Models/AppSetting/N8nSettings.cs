@@ -13,7 +13,7 @@ public class N8nSettings
 
 public class ChatSettings
 {
-     public string ChatWebhookUrl { get; set; } = string.Empty;
+    public string ChatWebhookUrl { get; set; } = string.Empty;
     public string GenerateWebhookUrl { get; set; } = string.Empty;
     public string CollectionName { get; set; } = string.Empty;
 }

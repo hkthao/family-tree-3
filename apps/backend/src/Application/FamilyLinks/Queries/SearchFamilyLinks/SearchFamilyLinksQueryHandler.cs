@@ -1,9 +1,9 @@
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore; // New import
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLinks.Specifications; // New import
 using backend.Domain.Entities;
-using Ardalis.Specification;
-using Ardalis.Specification.EntityFrameworkCore; // New import
 
 namespace backend.Application.FamilyLinks.Queries.SearchFamilyLinks;
 
@@ -13,15 +13,13 @@ public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQu
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
     private readonly ICurrentUser _currentUser;
-    private readonly ISpecificationEvaluator _specificationEvaluator; // New field
 
-    public SearchFamilyLinksQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, ISpecificationEvaluator specificationEvaluator)
+    public SearchFamilyLinksQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser)
     {
         _context = context;
         _mapper = mapper;
         _authorizationService = authorizationService;
         _currentUser = currentUser;
-        _specificationEvaluator = specificationEvaluator; // Initialize new field
     }
 
     public async Task<Result<PaginatedList<FamilyLinkDto>>> Handle(SearchFamilyLinksQuery request, CancellationToken cancellationToken)
@@ -38,7 +36,7 @@ public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQu
         // Apply FamilyLinkByFamilyIdSpecification
         var familyIdSpecification = new FamilyLinkByFamilyIdSpecification(request.FamilyId);
         query = query.WithSpecification(familyIdSpecification);
-        
+
         // Conditionally apply FamilyLinkBySearchQuerySpecification
         if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
@@ -69,8 +67,8 @@ public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQu
         // 4. Project to DTO and Paginate
         var paginatedList = await PaginatedList<FamilyLinkDto>.CreateAsync(
             query.ProjectTo<FamilyLinkDto>(_mapper.ConfigurationProvider).AsNoTracking(),
-            request.PageNumber,
-            request.PageSize
+            request.Page,
+            request.ItemsPerPage
         );
 
         return Result<PaginatedList<FamilyLinkDto>>.Success(paginatedList);

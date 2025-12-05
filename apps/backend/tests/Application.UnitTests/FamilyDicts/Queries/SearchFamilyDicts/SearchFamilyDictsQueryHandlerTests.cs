@@ -50,8 +50,9 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().HaveCount(1);
-        result.Items.First().Name.Should().Be("Ông nội");
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items.First().Name.Should().Be("Ông nội");
     }
 
     [Fact]
@@ -87,8 +88,9 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().HaveCount(1);
-        result.Items.First().Name.Should().Be("Ông nội");
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items.First().Name.Should().Be("Ông nội");
     }
 
     [Fact]
@@ -115,7 +117,8 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().BeEmpty();
-        result.TotalItems.Should().Be(0); // Changed from TotalCount to TotalItems
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().BeEmpty();
+        result.Value.TotalItems.Should().Be(0); // Changed from TotalCount to TotalItems
     }
 }

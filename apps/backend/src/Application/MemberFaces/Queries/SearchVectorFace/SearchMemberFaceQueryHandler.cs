@@ -83,7 +83,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
         {
             var membersQuery = _context.Members
                 .Where(m => memberIds.Contains(m.Id)); // Start with basic filter
-            
+
             // Now, apply the Include and then select/tolist
             var members = await membersQuery
                 .Include(m => m.Family) // Apply Include here, after all Where clauses

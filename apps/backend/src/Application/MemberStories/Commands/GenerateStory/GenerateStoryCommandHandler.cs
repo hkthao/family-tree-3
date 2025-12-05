@@ -1,9 +1,9 @@
 using backend.Application.AI.DTOs; // For GenerateRequest
+using backend.Application.AI.Prompts;
+using backend.Application.Common.Constants; // For PromptConstants
 using backend.Application.Common.Interfaces; // For IAiGenerateService
 using backend.Application.Common.Models;
-using backend.Application.Common.Constants; // For PromptConstants
 using backend.Application.MemberStories.DTOs; // For GenerateStoryResponseDto
-using backend.Application.AI.Prompts;
 
 namespace backend.Application.MemberStories.Commands.GenerateStory;
 

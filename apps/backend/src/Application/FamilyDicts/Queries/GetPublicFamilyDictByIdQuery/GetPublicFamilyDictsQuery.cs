@@ -5,7 +5,7 @@ using backend.Domain.Enums; // For FamilyDictLineage
 
 namespace backend.Application.FamilyDicts.Queries.Public;
 
-public record GetPublicFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
+public record GetPublicFamilyDictsQuery : IRequest<Result<PaginatedList<FamilyDictDto>>>
 {
     public int Page { get; init; } = 1;
     public int ItemsPerPage { get; init; } = 10;
@@ -16,7 +16,7 @@ public record GetPublicFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
     public string? SortOrder { get; init; } // "asc" or "desc"
 }
 
-public class GetPublicFamilyDictsQueryHandler : IRequestHandler<GetPublicFamilyDictsQuery, PaginatedList<FamilyDictDto>>
+public class GetPublicFamilyDictsQueryHandler : IRequestHandler<GetPublicFamilyDictsQuery, Result<PaginatedList<FamilyDictDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -27,7 +27,7 @@ public class GetPublicFamilyDictsQueryHandler : IRequestHandler<GetPublicFamilyD
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<FamilyDictDto>> Handle(GetPublicFamilyDictsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<FamilyDictDto>>> Handle(GetPublicFamilyDictsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.FamilyDicts.AsQueryable();
 
@@ -60,8 +60,10 @@ public class GetPublicFamilyDictsQueryHandler : IRequestHandler<GetPublicFamilyD
             query = query.OrderBy(f => f.Name);
         }
 
-        return await query
+        var paginatedList = await query
             .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<FamilyDictDto>>.Success(paginatedList);
     }
 }

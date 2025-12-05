@@ -1,13 +1,13 @@
+using backend.Application.Common.Models;
 using backend.Application.FamilyLinkRequests.Commands.ApproveFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
-using backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.DeleteFamilyLinkRequest; // New import
+using backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequestById; // New import
 using backend.Application.FamilyLinkRequests.Queries.SearchFamilyLinkRequests;
 using backend.Application.FamilyLinks.Queries; // Keep this for FamilyLinkRequestDto
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Common.Models;
 
 namespace backend.Web.Controllers;
 
@@ -46,7 +46,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
         var result = await _mediator.Send(new GetFamilyLinkRequestByIdQuery(id));
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
-    
+
     /// <summary>
     /// Xóa một yêu cầu liên kết gia đình hiện có.
     /// </summary>
@@ -101,7 +101,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     [HttpGet("search")]
     [ProducesResponseType(typeof(PaginatedList<FamilyLinkRequestDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedList<FamilyLinkRequestDto>>> GetFamilyLinkRequests([FromQuery]SearchFamilyLinkRequestsQuery query)
+    public async Task<ActionResult<PaginatedList<FamilyLinkRequestDto>>> GetFamilyLinkRequests([FromQuery] SearchFamilyLinkRequestsQuery query)
     {
         var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);

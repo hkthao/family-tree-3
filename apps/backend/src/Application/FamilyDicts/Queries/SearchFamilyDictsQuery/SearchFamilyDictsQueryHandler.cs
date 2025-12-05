@@ -1,20 +1,10 @@
-using backend.Application.Common.Extensions; // New using statement
+using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 
 namespace backend.Application.FamilyDicts.Queries;
 
-public record SearchFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
-{
-    public string? Q { get; init; }
-    public FamilyDictLineage? Lineage { get; init; }
-    public string? Region { get; init; } // "north", "central", "south"
-    public int Page { get; init; } = 1;
-    public int ItemsPerPage { get; init; } = 10;
-}
-
-public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQuery, PaginatedList<FamilyDictDto>>
+public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQuery, Result<PaginatedList<FamilyDictDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -25,7 +15,7 @@ public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQu
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<FamilyDictDto>> Handle(SearchFamilyDictsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<FamilyDictDto>>> Handle(SearchFamilyDictsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.FamilyDicts.AsQueryable();
 
@@ -43,8 +33,10 @@ public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQu
         // This will require custom JSON querying or a different approach if NamesByRegion is complex.
         // For now, it's not implemented.
 
-        return await query
+        var paginatedList = await query
             .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<FamilyDictDto>>.Success(paginatedList);
     }
 }

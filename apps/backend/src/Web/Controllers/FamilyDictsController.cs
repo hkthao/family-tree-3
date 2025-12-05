@@ -1,9 +1,9 @@
 using backend.Application.Common.Models;
-using backend.Application.Common.Security; // New using statement
+using backend.Application.Common.Security;
 using backend.Application.FamilyDicts;
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.DeleteFamilyDict;
-using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
+using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyDicts.Queries;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +17,6 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    /// <summary>
-    /// Lấy tất cả các FamilyDict.
-    /// </summary>
-    /// <param name="query">Đối tượng truy vấn chứa thông tin phân trang.</param>
-    /// <returns>Danh sách các FamilyDict được phân trang.</returns>
-    [HttpGet]
-    [ProducesResponseType(typeof(PaginatedList<FamilyDictDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<FamilyDictDto>>> GetFamilyDicts([FromQuery] GetFamilyDictsQuery query)
-    {
-        return await _mediator.Send(query);
-    }
 
     /// <summary>
     /// Lấy chi tiết một FamilyDict theo ID.
@@ -37,10 +26,14 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(FamilyDictDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FamilyDictDto>> GetFamilyDictById(Guid id)
+    public async Task<IActionResult> GetFamilyDictById(Guid id)
     {
-        var familyDict = await _mediator.Send(new GetFamilyDictByIdQuery(id));
-        return familyDict == null ? NotFound() : Ok(familyDict);
+        var result = await _mediator.Send(new GetFamilyDictByIdQuery(id));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error);
     }
 
     /// <summary>
@@ -50,21 +43,10 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     /// <returns>Danh sách các FamilyDict phù hợp được phân trang.</returns>
     [HttpGet("search")]
     [ProducesResponseType(typeof(PaginatedList<FamilyDictDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<FamilyDictDto>>> SearchFamilyDicts([FromQuery] SearchFamilyDictsQuery query)
+    public async Task<IActionResult> SearchFamilyDicts([FromQuery] SearchFamilyDictsQuery query)
     {
-        return await _mediator.Send(query);
-    }
-
-    /// <summary>
-    /// Lấy danh sách các FamilyDict đặc biệt.
-    /// </summary>
-    /// <param name="query">Đối tượng truy vấn chứa thông tin phân trang.</param>
-    /// <returns>Danh sách các FamilyDict đặc biệt được phân trang.</returns>
-    [HttpGet("special")]
-    [ProducesResponseType(typeof(PaginatedList<FamilyDictDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<FamilyDictDto>>> GetSpecialFamilyDicts([FromQuery] GetSpecialFamilyDictsQuery query)
-    {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -75,10 +57,10 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Guid>> CreateFamilyDict([FromBody] CreateFamilyDictCommand command)
+    public async Task<IActionResult> CreateFamilyDict([FromBody] CreateFamilyDictCommand command)
     {
-        var familyDictId = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetFamilyDictById), new { id = familyDictId }, familyDictId);
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(new { id = result.Value }) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -89,10 +71,10 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [HttpPost("import")]
     [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IEnumerable<Guid>>> ImportFamilyDicts([FromBody] ImportFamilyDictsCommand command)
+    public async Task<IActionResult> ImportFamilyDicts([FromBody] ImportFamilyDictsCommand command)
     {
-        var importedIds = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetFamilyDicts), importedIds);
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -105,15 +87,14 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateFamilyDict(Guid id, [FromBody] UpdateFamilyDictCommand command)
+    public async Task<IActionResult> UpdateFamilyDict(Guid id, [FromBody] UpdateFamilyDictCommand command)
     {
         if (id != command.Id)
         {
             return BadRequest();
         }
-
-        await _mediator.Send(command);
-        return NoContent();
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -124,9 +105,9 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteFamilyDict(Guid id)
+    public async Task<IActionResult> DeleteFamilyDict(Guid id)
     {
-        await _mediator.Send(new DeleteFamilyDictCommand(id));
-        return NoContent();
+        var result = await _mediator.Send(new DeleteFamilyDictCommand(id));
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }

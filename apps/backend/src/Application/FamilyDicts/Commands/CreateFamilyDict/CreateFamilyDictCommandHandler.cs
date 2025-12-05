@@ -24,7 +24,7 @@ public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCo
     {
         if (!_authorizationService.IsAdmin())
         {
-            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép tạo FamilyDict.");
+            return Result<Guid>.Forbidden("Chỉ quản trị viên mới được phép tạo FamilyDict.");
         }
 
         var entity = new FamilyDict

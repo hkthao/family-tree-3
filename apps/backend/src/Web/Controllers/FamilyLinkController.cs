@@ -1,10 +1,10 @@
+using backend.Application.Common.Models; // New import for PaginatedList
+using backend.Application.FamilyLinks.Commands.DeleteLinkFamily;
 using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
 using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
-using backend.Application.Common.Models; // New import for PaginatedList
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.FamilyLinks.Commands.DeleteLinkFamily;
 
 namespace backend.Web.Controllers;
 
@@ -15,7 +15,7 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
 {
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<FamilyLinkController> _logger = logger;
-    
+
     /// <summary>
     /// Hủy liên kết giữa hai gia đình.
     /// </summary>

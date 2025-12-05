@@ -15,8 +15,6 @@ public class DeleteFamilyDictCommandTests : TestBase
         // Set up authenticated user by default for most tests
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        // Default to admin for these command tests, as most successful tests require admin rights
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
     }
 
     [Fact]
@@ -43,6 +41,7 @@ public class DeleteFamilyDictCommandTests : TestBase
         _context.FamilyDicts.Add(initialFamilyDict);
         await _context.SaveChangesAsync();
 
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
         var command = new DeleteFamilyDictCommand(initialFamilyDict.Id);
 
@@ -65,12 +64,16 @@ public class DeleteFamilyDictCommandTests : TestBase
         _context.FamilyDicts.RemoveRange(_context.FamilyDicts);
         await _context.SaveChangesAsync();
 
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
         var command = new DeleteFamilyDictCommand(Guid.NewGuid()); // Non-existent ID
 
-        // Act & Assert
-        await FluentActions.Invoking(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<NotFoundException>();
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -81,9 +84,11 @@ public class DeleteFamilyDictCommandTests : TestBase
         var handler = new DeleteFamilyDictCommandHandler(_context, _mockUser.Object, _mockDateTime.Object, _mockAuthorizationService.Object);
         var command = new DeleteFamilyDictCommand(Guid.NewGuid()); // ID does not matter for this test
 
-        // Act & Assert
-        await FluentActions.Awaiting(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<ForbiddenAccessException>()
-            .WithMessage("Chỉ quản trị viên mới được phép xóa FamilyDict.");
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNullOrEmpty();
     }
 }

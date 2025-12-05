@@ -93,15 +93,20 @@ public class PublicController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(PaginatedList<FamilyDictDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<FamilyDictDto>>> GetFamilyDicts([FromQuery] GetPublicFamilyDictsQuery query)
     {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? (ActionResult<PaginatedList<FamilyDictDto>>)Ok(result.Value) : (ActionResult<PaginatedList<FamilyDictDto>>)BadRequest(result.Error);
     }
     [HttpGet("family-dict/{id}")]
     [ProducesResponseType(typeof(FamilyDictDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FamilyDictDto>> GetFamilyDictById(Guid id)
     {
-        var familyDict = await _mediator.Send(new GetPublicFamilyDictByIdQuery(id));
-        return familyDict == null ? NotFound() : Ok(familyDict);
+        var result = await _mediator.Send(new GetPublicFamilyDictByIdQuery(id));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error);
     }
     [HttpGet("dashboard")]
     [ProducesResponseType(typeof(PublicDashboardDto), StatusCodes.Status200OK)]

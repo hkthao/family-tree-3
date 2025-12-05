@@ -1,5 +1,5 @@
-using backend.Application.Families.DTOs;
 using backend.Application.Common.Models;
+using backend.Application.Families.DTOs;
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 

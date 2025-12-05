@@ -85,9 +85,9 @@ public static class DependencyInjection
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         // Register n8n Service
-                    services.AddScoped<IN8nService, N8nService>();
-                    services.AddScoped<IAiChatService, AiChatService>();
-            services.AddScoped<IAiGenerateService, AiGenerateService>();
+        services.AddScoped<IN8nService, N8nService>();
+        services.AddScoped<IAiChatService, AiChatService>();
+        services.AddScoped<IAiGenerateService, AiGenerateService>();
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 

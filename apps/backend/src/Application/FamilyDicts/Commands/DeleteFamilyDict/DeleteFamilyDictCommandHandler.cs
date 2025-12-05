@@ -1,6 +1,6 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.DeleteFamilyDict;
@@ -16,7 +16,7 @@ public class DeleteFamilyDictCommandHandler(IApplicationDbContext context, ICurr
     {
         if (!_authorizationService.IsAdmin())
         {
-            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép xóa FamilyDict.");
+            return Result.Forbidden("Chỉ quản trị viên mới được phép xóa FamilyDict.");
         }
 
         var entity = await _context.FamilyDicts
@@ -25,7 +25,7 @@ public class DeleteFamilyDictCommandHandler(IApplicationDbContext context, ICurr
 
         if (entity == null)
         {
-            throw new NotFoundException(nameof(FamilyDict), request.Id.ToString());
+            return Result.NotFound($"FamilyDict with ID {request.Id} not found.");
         }
 
         entity.IsDeleted = true;

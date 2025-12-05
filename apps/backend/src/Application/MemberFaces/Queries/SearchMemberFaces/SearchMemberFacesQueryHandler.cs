@@ -4,8 +4,8 @@ using Ardalis.Specification.EntityFrameworkCore; // Add this import
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common; // For MemberFaceDto and BoundingBoxDto
-using backend.Domain.Entities;
 using backend.Application.MemberFaces.Specifications; // Import the new specification
+using backend.Domain.Entities;
 
 namespace backend.Application.MemberFaces.Queries.SearchMemberFaces;
 public class SearchMemberFacesQueryHandler : IRequestHandler<SearchMemberFacesQuery, Result<PaginatedList<MemberFaceDto>>>

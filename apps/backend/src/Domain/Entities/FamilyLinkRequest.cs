@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using System;
+using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 

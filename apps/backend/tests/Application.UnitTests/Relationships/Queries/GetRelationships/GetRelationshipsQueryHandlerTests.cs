@@ -293,9 +293,9 @@ public class GetRelationshipsQueryHandlerTests : TestBase
     {
         // Arrange
         var authenticatedUserId = Guid.NewGuid();
-      
+
         var accessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Accessible Family", Code = "AF" };
-        var inaccessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Inaccessible Family", Code = "IF"};
+        var inaccessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Inaccessible Family", Code = "IF" };
         _context.Families.AddRange(accessibleFamily, inaccessibleFamily);
         _context.FamilyUsers.Add(new FamilyUser(accessibleFamily.Id, authenticatedUserId, FamilyRole.Viewer));
 
@@ -315,7 +315,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetRelationshipsQuery();
-        
+
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Simulate non-admin user

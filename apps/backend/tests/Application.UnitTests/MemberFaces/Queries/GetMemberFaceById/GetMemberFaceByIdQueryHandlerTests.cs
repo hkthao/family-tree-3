@@ -80,7 +80,7 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
     [Fact]
     public async Task GetMemberFaceById_ShouldReturnFailure_WhenUnauthorized()
     {
-       
+
         var family = new Family { Name = "Test Family", Code = "TF", CreatedBy = Guid.NewGuid().ToString() }; // Family not created by unauthorizedUser
         var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
         var memberFace = new MemberFace

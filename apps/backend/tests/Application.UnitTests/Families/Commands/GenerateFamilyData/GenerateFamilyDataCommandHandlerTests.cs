@@ -9,9 +9,9 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore; // Needed for .AsNoTracking() and .FirstOrDefaultAsync()
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore; // Needed for .AsNoTracking() and .FirstOrDefaultAsync()
 
 namespace backend.Application.UnitTests.Families.Commands.GenerateFamilyData;
 

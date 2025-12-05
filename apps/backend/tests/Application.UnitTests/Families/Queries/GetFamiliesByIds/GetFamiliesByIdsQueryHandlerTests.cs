@@ -1,9 +1,9 @@
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamiliesByIds;
 
