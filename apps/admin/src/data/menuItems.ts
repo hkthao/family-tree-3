@@ -37,30 +37,6 @@ const menu: MenuSection[] = [
         to: '/family',
         exact: true,
       },
-      {
-        titleKey: 'event.list.title', 
-        icon: 'mdi-calendar-month-outline', 
-        to: '/event', 
-        exact: true,
-      },
-      {
-        titleKey: 'search.face',
-        icon: 'mdi-magnify-expand',
-        to: '/face/search',
-        exact: true,
-      },
-      {
-        titleKey: 'memberFace.list.title',
-        icon: 'mdi-face-recognition',
-        to: '/member/faces',
-        exact: true,
-      },
-      {
-        titleKey: 'memberStory.list.title', 
-        icon: 'mdi-book-open-outline', 
-        to: '/member-story-studio/list', 
-        exact: true,
-      },
     ],
   },
   {

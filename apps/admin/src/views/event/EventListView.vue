@@ -39,6 +39,11 @@ import EventAddView from '@/views/event/EventAddView.vue'; // New import
 import EventEditView from '@/views/event/EventEditView.vue'; // New import
 import EventDetailView from '@/views/event/EventDetailView.vue'; // New import
 
+const props = defineProps<{
+  familyId: string;
+  readOnly?: boolean;
+}>();
+
 const { t } = useI18n();
 const eventStore = useEventStore();
 const { showConfirmDialog } = useConfirmDialog();
@@ -109,5 +114,7 @@ const handleEventSaved = () => {
 };
 
 onMounted(() => {
+  currentFilters.value.familyId = props.familyId;
+  eventStore._loadItems();
 });
 </script>

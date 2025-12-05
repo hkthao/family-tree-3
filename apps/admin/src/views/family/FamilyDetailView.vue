@@ -7,8 +7,10 @@
         <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
         <v-tab v-if="canViewFaceDataTab" value="face-recognition" data-testid="tab-face-recognition">{{
           t('face.face_data') }}</v-tab>
-        <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
+        <v-tab value="member-stories" data-testid="tab-member-stories">{{ t('memberStory.list.title') }}</v-tab>
+        <v-tab value="events" data-testid="tab-events">{{ t('event.list.title') }}</v-tab>
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
+        <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
         <v-tab v-if="canManageFamily" value="family-settings" data-testid="tab-family-settings">{{
           t('family.settings.title') }}</v-tab>
       </v-tabs>
@@ -24,6 +26,14 @@
 
         <v-window-item value="calendar">
           <EventCalendar :family-id="familyId" />
+        </v-window-item>
+
+        <v-window-item value="events">
+          <EventListView :family-id="familyId" :read-only="readOnly" />
+        </v-window-item>
+
+        <v-window-item value="member-stories">
+          <MemberStoryListView :family-id="familyId" :read-only="readOnly" />
         </v-window-item>
 
         <v-window-item value="family-tree">
@@ -54,6 +64,8 @@ import { TreeChart, FamilyDetail, FamilySettingsTab } from '@/components/family'
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
+import EventListView from '@/views/event/EventListView.vue';
+import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { t } = useI18n();

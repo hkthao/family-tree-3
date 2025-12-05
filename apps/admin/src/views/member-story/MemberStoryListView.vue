@@ -50,6 +50,8 @@ import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
 
 interface MemberStoryListViewProps {
   memberId?: string;
+  familyId?: string;
+  readOnly?: boolean;
 }
 
 const props = defineProps<MemberStoryListViewProps>();
@@ -137,10 +139,14 @@ const handleSearchUpdate = async (search: string) => {
 };
 
 // Watch for changes in memberId prop to update filters and reload items
-watch(() => props.memberId, (newMemberId) => {
-  memberStoryStore.setFilters({ memberId: newMemberId || undefined, searchQuery: searchQuery.value });
+watch(() => [props.memberId, props.familyId], ([newMemberId, newFamilyId]) => {
+  memberStoryStore.setFilters({
+    memberId: newMemberId || undefined,
+    familyId: newFamilyId || undefined,
+    searchQuery: searchQuery.value
+  });
   memberStoryStore._loadItems();
-}, { immediate: true }); // Immediate to load on initial mount
+}, { immediate: true });
 
 
 
