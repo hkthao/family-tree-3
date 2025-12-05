@@ -31,27 +31,30 @@ import { ApiMemberFaceService } from './member-face/api.member-face.service';
 import type { IN8nService } from './n8n/n8n.service.interface'; 
 import { ApiN8nService } from './n8n/api.n8n.service'; 
 import type { IPromptService } from './prompt/prompt.service.interface';
-import { ApiPromptService } from './prompt/api.prompt.service'; 
+import { ApiPromptService } from './prompt/api.prompt.service';
+import type { IFamilyLinkService } from './familyLink/familyLink.service.interface';
+import { ApiFamilyLinkService } from './familyLink/api.familyLink.service';
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
-  publicFamily: IPublicFamilyService; 
-  member: IMemberService; 
-  publicMember: IPublicMemberService; 
+  publicFamily: IPublicFamilyService;
+  member: IMemberService;
+  publicMember: IPublicMemberService;
   event: IEventService;
   relationship: IRelationshipService;
-  publicRelationship: IPublicRelationshipService; 
+  publicRelationship: IPublicRelationshipService;
   dashboard: IDashboardService;
   fileUpload: IFileUploadService;
   chat: IChatService;
   user: IUserService;
-  familyDict: IFamilyDictService; 
-  memberStory: IMemberStoryService; 
-  ai: IAiService; 
-  memberFace: IMemberFaceService; 
-  n8n: IN8nService; 
-  prompt: IPromptService; 
+  familyDict: IFamilyDictService;
+  memberStory: IMemberStoryService;
+  ai: IAiService;
+  memberFace: IMemberFaceService;
+  n8n: IN8nService;
+  prompt: IPromptService;
+  familyLink: IFamilyLinkService;
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -59,28 +62,28 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
     family:
       mode === 'real'
         ? new ApiFamilyService(apiClient)
-        : testServices?.family || new ApiFamilyService(apiClient), 
-    publicFamily: 
+        : testServices?.family || new ApiFamilyService(apiClient),
+    publicFamily:
       mode === 'real'
         ? new PublicApiFamilyService(apiClient)
         : testServices?.publicFamily || new PublicApiFamilyService(apiClient),
     member:
       mode === 'real'
         ? new ApiMemberService(apiClient)
-        : testServices?.member || new ApiMemberService(apiClient), 
-    publicMember: 
+        : testServices?.member || new ApiMemberService(apiClient),
+    publicMember:
       mode === 'real'
         ? new PublicApiMemberService(apiClient)
         : testServices?.publicMember || new PublicApiMemberService(apiClient),
     event:
       mode === 'real'
         ? new ApiEventService(apiClient)
-        : testServices?.event || new ApiEventService(apiClient), 
+        : testServices?.event || new ApiEventService(apiClient),
     relationship:
       mode === 'real'
         ? new ApiRelationshipService(apiClient)
         : testServices?.relationship || new ApiRelationshipService(apiClient),
-    publicRelationship: 
+    publicRelationship:
       mode === 'real'
         ? new PublicApiRelationshipService(apiClient)
         : testServices?.publicRelationship || new PublicApiRelationshipService(apiClient),
@@ -101,23 +104,23 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiUserService(apiClient)
         : testServices?.user || new ApiUserService(apiClient),
-    familyDict: 
+    familyDict:
       mode === 'real'
         ? new ApiFamilyDictService(apiClient)
         : testServices?.familyDict || new ApiFamilyDictService(apiClient),
-    memberStory: 
+    memberStory:
       mode === 'real'
         ? new ApiMemberStoryService(apiClient)
         : testServices?.memberStory || new ApiMemberStoryService(apiClient),
-    ai: 
+    ai:
       mode === 'real'
         ? new ApiAiService(apiClient)
         : testServices?.ai || new ApiAiService(apiClient),
-    memberFace: 
+    memberFace:
       mode === 'real'
         ? new ApiMemberFaceService(apiClient)
         : testServices?.memberFace || new ApiMemberFaceService(apiClient),
-    n8n: 
+    n8n:
       mode === 'real'
         ? new ApiN8nService(apiClient)
         : testServices?.n8n || new ApiN8nService(apiClient),
@@ -125,6 +128,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiPromptService(apiClient)
         : testServices?.prompt || new ApiPromptService(apiClient),
+    familyLink:
+      mode === 'real'
+        ? new ApiFamilyLinkService(apiClient)
+        : testServices?.familyLink || new ApiFamilyLinkService(apiClient),
   };
 }
-

@@ -39,6 +39,16 @@
       <v-col cols="12">
         <PrivacySettings :family-id="familyId" />
       </v-col>
+      <v-col cols="12">
+        <v-card flat class="mb-4">
+          <v-card-title class="d-flex align-center pe-2">
+            <v-icon icon="mdi-link-variant"></v-icon> &nbsp;{{ t('familyLink.title') }}
+          </v-card-title>
+          <v-card-text>
+            <p>{{ t('familyLink.description') }}</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
 </template>
 

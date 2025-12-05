@@ -51,5 +51,8 @@ export { default as FamilyDictDetailView } from './family-dict/FamilyDictDetailV
 export { default as FamilyDictEditView } from './family-dict/FamilyDictEditView.vue';
 export { default as FamilyDictListView } from './family-dict/FamilyDictListView.vue';
 
+// Export pages from family-link
+export { default as FamilyLinkListView } from './family-link/FamilyLinkListView.vue';
+
 // Export MainRouterView (if it's intended to be used as a view component)
 export { default as MainRouterView } from './MainRouterView.vue';

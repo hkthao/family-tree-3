@@ -1,0 +1,91 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.FamilyLinks.Queries;
+using backend.Application.FamilyLinks.Specifications; // New import
+using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper.QueryableExtensions;
+using AutoMapper;
+using Ardalis.Specification; // New import
+
+namespace backend.Application.FamilyLinks.Queries.SearchFamilyLinks;
+
+public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQuery, Result<PaginatedList<FamilyLinkDto>>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUser _currentUser;
+    private readonly ISpecificationEvaluator _specificationEvaluator; // New field
+
+    public SearchFamilyLinksQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, ISpecificationEvaluator specificationEvaluator)
+    {
+        _context = context;
+        _mapper = mapper;
+        _authorizationService = authorizationService;
+        _currentUser = currentUser;
+        _specificationEvaluator = specificationEvaluator; // Initialize new field
+    }
+
+    public async Task<Result<PaginatedList<FamilyLinkDto>>> Handle(SearchFamilyLinksQuery request, CancellationToken cancellationToken)
+    {
+        // 1. Authorization: User must be a member of the family to view its links
+        if (!_authorizationService.CanAccessFamily(request.FamilyId))
+        {
+            return Result<PaginatedList<FamilyLinkDto>>.Forbidden("Bạn không có quyền xem các liên kết của gia đình này.");
+        }
+
+        // 2. Build Query using Specifications
+        var query = _context.FamilyLinks.AsQueryable(); // Start with IQueryable
+
+        // Apply FamilyLinkByFamilyIdSpecification
+        var familyIdSpecification = new FamilyLinkByFamilyIdSpecification(request.FamilyId);
+        query = _specificationEvaluator.GetQuery(query, familyIdSpecification);
+        
+        // Conditionally apply FamilyLinkBySearchQuerySpecification
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
+        {
+            var searchQuerySpecification = new FamilyLinkBySearchQuerySpecification(request.SearchQuery);
+            query = _specificationEvaluator.GetQuery(query, searchQuerySpecification);
+        }
+
+        // Conditionally apply FamilyLinkByOtherFamilyIdSpecification
+        if (request.OtherFamilyId.HasValue)
+        {
+            var otherFamilyIdSpecification = new FamilyLinkByOtherFamilyIdSpecification(request.OtherFamilyId.Value);
+            query = _specificationEvaluator.GetQuery(query, otherFamilyIdSpecification);
+        }
+
+        // 3. Apply Sorting
+        if (!string.IsNullOrWhiteSpace(request.SortBy))
+        {
+            query = request.SortOrder?.ToLower() == "desc"
+                ? query.OrderByDescending(GetSortProperty(request.SortBy))
+                : query.OrderBy(GetSortProperty(request.SortBy));
+        }
+        else
+        {
+            // Default sort if none specified
+            query = query.OrderBy(fl => fl.LinkDate);
+        }
+
+        // 4. Project to DTO and Paginate
+        var paginatedList = await PaginatedList<FamilyLinkDto>.CreateAsync(
+            query.ProjectTo<FamilyLinkDto>(_mapper.ConfigurationProvider).AsNoTracking(),
+            request.PageNumber,
+            request.PageSize
+        );
+
+        return Result<PaginatedList<FamilyLinkDto>>.Success(paginatedList);
+    }
+
+    private System.Linq.Expressions.Expression<Func<FamilyLink, object>> GetSortProperty(string sortBy)
+    {
+        return sortBy.ToLowerInvariant() switch
+        {
+            "linkdate" => familyLink => familyLink.LinkDate,
+            _ => familyLink => familyLink.LinkDate, // Default sort
+        };
+    }
+}

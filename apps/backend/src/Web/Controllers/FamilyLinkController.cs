@@ -1,14 +1,10 @@
-using backend.Application.FamilyLinks.Commands.ApproveFamilyLinkRequest;
-using backend.Application.FamilyLinks.Commands.CreateFamilyLinkRequest;
-using backend.Application.FamilyLinks.Commands.RejectFamilyLinkRequest;
-using backend.Application.FamilyLinks.Commands.UnlinkFamilies;
 using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
-using backend.Application.FamilyLinks.Queries.GetFamilyLinkRequests;
-using backend.Application.FamilyLinks.Queries.GetFamilyLinks;
-using MediatR;
+using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
+using backend.Application.Common.Models; // New import for PaginatedList
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.FamilyLinks.Commands.DeleteLinkFamily;
 
 namespace backend.Web.Controllers;
 
@@ -19,78 +15,30 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
 {
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<FamilyLinkController> _logger = logger;
-
-    /// <summary>
-    /// Gửi yêu cầu liên kết từ một gia đình đến một gia đình khác.
-    /// </summary>
-    /// <param name="command">Lệnh chứa ID gia đình gửi yêu cầu và ID gia đình nhận yêu cầu.</param>
-    /// <returns>ID của yêu cầu liên kết đã tạo.</returns>
-    [HttpPost("request")]
-    public async Task<ActionResult<Guid>> CreateFamilyLinkRequest([FromBody] CreateFamilyLinkRequestCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Phê duyệt một yêu cầu liên kết gia đình.
-    /// </summary>
-    /// <param name="requestId">ID của yêu cầu liên kết cần phê duyệt.</param>
-    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpPost("request/{requestId}/approve")]
-    public async Task<ActionResult> ApproveFamilyLinkRequest(Guid requestId)
-    {
-        var result = await _mediator.Send(new ApproveFamilyLinkRequestCommand(requestId));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Từ chối một yêu cầu liên kết gia đình.
-    /// </summary>
-    /// <param name="requestId">ID của yêu cầu liên kết cần từ chối.</param>
-    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpPost("request/{requestId}/reject")]
-    public async Task<ActionResult> RejectFamilyLinkRequest(Guid requestId)
-    {
-        var result = await _mediator.Send(new RejectFamilyLinkRequestCommand(requestId));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
-    }
-
+    
     /// <summary>
     /// Hủy liên kết giữa hai gia đình.
     /// </summary>
     /// <param name="family1Id">ID của gia đình thứ nhất.</param>
     /// <param name="family2Id">ID của gia đình thứ hai.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpDelete("unlink/{family1Id}/{family2Id}")]
-    public async Task<ActionResult> UnlinkFamilies(Guid family1Id, Guid family2Id)
+    [HttpDelete("delete/{familyLinkId}")] // Changed route
+    public async Task<ActionResult> DeleteFamilyLink(Guid familyLinkId) // Changed signature
     {
-        var result = await _mediator.Send(new UnlinkFamiliesCommand(family1Id, family2Id));
+        var result = await _mediator.Send(new DeleteLinkFamilyCommand(familyLinkId)); // Updated command
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     /// <summary>
-    /// Lấy tất cả các yêu cầu liên kết liên quan đến một gia đình (gửi đi và nhận về).
+    /// Tìm kiếm và phân trang các liên kết gia đình đang hoạt động cho một gia đình cụ thể.
     /// </summary>
-    /// <param name="familyId">ID của gia đình.</param>
-    /// <returns>Danh sách các yêu cầu liên kết gia đình.</returns>
-    [HttpGet("requests/{familyId}")]
-    public async Task<ActionResult<List<FamilyLinkRequestDto>>> GetFamilyLinkRequests(Guid familyId)
+    /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
+    /// <returns>Một PaginatedList chứa danh sách các liên kết gia đình tìm được.</returns>
+    [HttpGet("search")] // Renamed from 'links/{familyId}' to 'search'
+    public async Task<ActionResult<PaginatedList<FamilyLinkDto>>> Search([FromQuery] SearchFamilyLinksQuery query) // Renamed and changed signature
     {
-        var result = await _mediator.Send(new GetFamilyLinkRequestsQuery(familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Lấy tất cả các liên kết gia đình đang hoạt động cho một gia đình cụ thể.
-    /// </summary>
-    /// <param name="familyId">ID của gia đình.</param>
-    /// <returns>Danh sách các liên kết gia đình.</returns>
-    [HttpGet("links/{familyId}")]
-    public async Task<ActionResult<List<FamilyLinkDto>>> GetFamilyLinks(Guid familyId)
-    {
-        var result = await _mediator.Send(new GetFamilyLinksQuery(familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? (ActionResult<PaginatedList<FamilyLinkDto>>)Ok(result.Value) : (ActionResult<PaginatedList<FamilyLinkDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

@@ -18,3 +18,4 @@ export * from './user-profile.store';
 export * from './user-settings.store';
 export * from './user-autocomplete.store';
 export * from './memberStory.store';
+export * from './familyLink.store';

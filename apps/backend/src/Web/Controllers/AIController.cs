@@ -1,7 +1,5 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
-using backend.Application.AI.DTOs; // UPDATED IMPORT
-using backend.Application.AI.Models; // NEW IMPORT
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using backend.Application.MemberStories.DTOs; // Updated
 using Microsoft.AspNetCore.Authorization;
