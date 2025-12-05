@@ -728,6 +728,7 @@
   "familyLinkRequest.form.rules.targetFamilyIdRequired": "Gia đình đích là bắt buộc.",
   "familyLinkRequest.form.rules.requestMessageRequired": "Tin nhắn yêu cầu là bắt buộc.",
   "familyLinkRequest.requests.messages.sendSuccess": "Yêu cầu đã được gửi thành công!",
+  "familyLinkRequest.requests.messages.approveSuccess": "Yêu cầu đã được phê duyệt thành công!",
   "event.errors.load": "Không thể tải danh sách sự kiện.",
   "event.errors.add": "Không thể thêm sự kiện.",
   "event.errors.notFound": "Không tìm thấy sự kiện để cập nhật trong kho.",
