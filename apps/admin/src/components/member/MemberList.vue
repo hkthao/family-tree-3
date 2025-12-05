@@ -32,12 +32,15 @@
 
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
-      <a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+      <div class="member-full-name-column">
+<a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
       <div class="text-caption text-medium-emphasis">
         {{ item.code }}
       </div>
+      </div>
+      
     </template>
 
     <!-- Father column -->
@@ -173,7 +176,7 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('member.list.headers.fullName'),
       key: 'fullName',
-      width: '250px',
+      minWidth: '250px',
       align: 'start',
     },
     {

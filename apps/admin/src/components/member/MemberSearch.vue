@@ -20,8 +20,36 @@
                 data-testid="member-gender-filter" />
             </v-col>
             <v-col cols="12" md="6">
-              <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable
-                data-testid="member-family-filter" />
+              <MemberAutocomplete
+                v-model="filters.fatherId"
+                :label="t('member.search.father')"
+                clearable
+                data-testid="member-father-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.motherId"
+                :label="t('member.search.mother')"
+                clearable
+                data-testid="member-mother-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.husbandId"
+                :label="t('member.search.husband')"
+                clearable
+                data-testid="member-husband-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.wifeId"
+                :label="t('member.search.wife')"
+                clearable
+                data-testid="member-wife-filter"
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -42,12 +70,16 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
 import { GenderSelect } from '@/components/common';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 const emit = defineEmits(['update:filters']);
 const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 const filters = ref<MemberFilter>({
   gender: undefined,
-  familyId: null,
+  fatherId: null,
+  motherId: null,
+  husbandId: null,
+  wifeId: null,
 });
 
 watch(
@@ -66,7 +98,10 @@ const applyFilters = () => {
 const resetFilters = () => {
   filters.value = {
     gender: undefined,
-    familyId: null,
+    fatherId: null,
+    motherId: null,
+    husbandId: null,
+    wifeId: null,
   };
   emit('update:filters', filters.value);
 };

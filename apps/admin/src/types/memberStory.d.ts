@@ -1,13 +1,13 @@
 import type { DetectedFace } from './memberFace.d';
 import { MemberStoryPerspective, MemberStoryStyle } from './enums';
 
-export interface SearchStoriesFilter { 
-  memberId?: string; 
-  searchQuery?: string; 
-  sortBy?: string; 
-  sortOrder?: 'asc' | 'desc'; 
+export interface SearchStoriesFilter {
+  memberId?: string;
+  familyId?: string;
+  searchQuery?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
-
 export interface MemberStoryDto {
   id?: string;
   familyId?: string; // NEWLY ADDED

@@ -31,6 +31,10 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
         query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchQuery));
         query = query.WithSpecification(new MemberByGenderSpecification(request.Gender));
         query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
+        query = query.WithSpecification(new MemberByFatherIdSpecification(request.FatherId));
+        query = query.WithSpecification(new MemberByMotherIdSpecification(request.MotherId));
+        query = query.WithSpecification(new MemberByHusbandIdSpecification(request.HusbandId));
+        query = query.WithSpecification(new MemberByWifeIdSpecification(request.WifeId));
         query = query.WithSpecification(new MemberOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedList = await query
