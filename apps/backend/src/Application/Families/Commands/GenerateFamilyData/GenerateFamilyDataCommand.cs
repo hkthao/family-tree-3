@@ -1,6 +1,5 @@
 using backend.Application.Families.DTOs;
 using backend.Application.Common.Models;
-using MediatR;
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 

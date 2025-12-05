@@ -1,8 +1,6 @@
-using System.Text.Json;
 using backend.Application.AI.DTOs; // For GenerateRequest
 using backend.Application.Common.Interfaces; // For IAiGenerateService, IApplicationDbContext
 using backend.Application.Common.Models; // For Result
-using backend.Application.Families.Commands.GenerateFamilyData; // For GenerateFamilyDataCommand
 using backend.Application.Families.DTOs; // For AnalyzedDataDto, MemberResultDto, EventResultDto, RelationshipResultDto, MemberDataDtoValidator, EventDataDtoValidator
 using backend.Domain.Enums; // For EventType, RelationshipType
 using backend.Application.Common.Constants; // For PromptConstants

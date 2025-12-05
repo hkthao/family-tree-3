@@ -63,6 +63,16 @@ public class Result<T>
     public static Result<T> NotFound(string error = "Not Found", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
+
+    /// <summary>
+    /// Tạo một kết quả xung đột (Conflict) với thông báo lỗi và mã trạng thái 409.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Conflict".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "Conflict".</param>
+    /// <returns>Một thể hiện của Result<T> biểu thị xung đột.</returns>
+    public static Result<T> Conflict(string error = "Conflict", string errorSource = "Conflict") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 409 };
 }
 
 /// <summary>
@@ -104,6 +114,16 @@ public class Result
     }
 
     /// <summary>
+    /// Tạo một kết quả cấm truy cập (Forbidden) với thông báo lỗi.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Forbidden".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "Authorization".</param>
+    /// <returns>Một thể hiện của Result biểu thị bị cấm truy cập.</returns>
+    public static Result Forbidden(string error = "Forbidden", string errorSource = "Authorization") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource };
+
+    /// <summary>
     /// Tạo một kết quả không tìm thấy (Not Found) với thông báo lỗi và mã trạng thái 404.
     /// </summary>
     /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
@@ -112,5 +132,14 @@ public class Result
     public static Result NotFound(string error = "Not Found", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource };
-}
 
+    /// <summary>
+    /// Tạo một kết quả xung đột (Conflict) với thông báo lỗi.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Conflict".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "Conflict".</param>
+    /// <returns>Một thể hiện của Result biểu thị xung đột.</returns>
+    public static Result Conflict(string error = "Conflict", string errorSource = "Conflict") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource };
+}

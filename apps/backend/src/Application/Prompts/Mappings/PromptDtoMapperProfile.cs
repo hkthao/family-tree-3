@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.Prompts.DTOs;
 using backend.Domain.Entities;
 

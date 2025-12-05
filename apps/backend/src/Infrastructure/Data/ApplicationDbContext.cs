@@ -91,6 +91,16 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.
     /// </summary>
     public DbSet<Prompt> Prompts { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
+    /// </summary>
+    public DbSet<FamilyLinkRequest> FamilyLinkRequests => Set<FamilyLinkRequest>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
+    /// </summary>
+    public DbSet<FamilyLink> FamilyLinks => Set<FamilyLink>();
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
@@ -166,6 +176,33 @@ public class ApplicationDbContext(
             }
         }
         builder.ApplySnakeCaseNamingConvention();
+        builder.Entity<FamilyLinkRequest>(mb =>
+        {
+            mb.HasOne(flr => flr.RequestingFamily)
+                .WithMany()
+                .HasForeignKey(flr => flr.RequestingFamilyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            mb.HasOne(flr => flr.TargetFamily)
+                .WithMany()
+                .HasForeignKey(flr => flr.TargetFamilyId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<FamilyLink>(mb =>
+        {
+            mb.HasOne(fl => fl.Family1)
+                .WithMany()
+                .HasForeignKey(fl => fl.Family1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            mb.HasOne(fl => fl.Family2)
+                .WithMany()
+                .HasForeignKey(fl => fl.Family2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            mb.HasIndex(fl => new { fl.Family1Id, fl.Family2Id }).IsUnique();
+        });
         builder.Entity<MemberFace>(mb =>
         {
             mb.OwnsOne(mf => mf.BoundingBox);

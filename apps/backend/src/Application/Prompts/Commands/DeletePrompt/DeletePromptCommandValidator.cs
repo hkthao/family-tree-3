@@ -1,6 +1,4 @@
-using FluentValidation;
 using backend.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Prompts.Commands.DeletePrompt;
 

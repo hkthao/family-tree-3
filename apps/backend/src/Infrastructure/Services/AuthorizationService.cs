@@ -34,4 +34,16 @@ public class AuthorizationService(ICurrentUser user, IApplicationDbContext conte
 
         return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege
     }
+
+    public bool IsFamilyAdmin(Guid familyId)
+    {
+        if (IsAdmin()) return true;
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId && fu.Role == FamilyRole.Manager);
+    }
+
+    public bool IsFamilyMember(Guid familyId)
+    {
+        if (IsAdmin()) return true;
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId);
+    }
 }

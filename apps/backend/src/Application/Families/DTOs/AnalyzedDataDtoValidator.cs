@@ -1,6 +1,3 @@
-using backend.Application.Families.DTOs;
-using FluentValidation;
-
 namespace backend.Application.Families.DTOs;
 
 public class AnalyzedDataDtoValidator : AbstractValidator<AnalyzedDataDto>

@@ -1,5 +1,3 @@
-using FluentValidation;
-using backend.Application.Members.Commands.CreateMembers; // Assuming AIMemberDto is in this namespace
 using backend.Application.Members.Queries; // Assuming AIMemberDto is in this namespace
 
 namespace backend.Application.Members.Commands.CreateMembers;
