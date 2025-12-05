@@ -1,6 +1,5 @@
 <template>
   <div data-testid="family-link-list-view">
-    <FamilyLinkSearch @update:filters="handleFilterUpdate" />
     <FamilyLinkList
       :items="familyLinkStore.list.items"
       :total-items="familyLinkStore.list.totalItems"
@@ -19,10 +18,8 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { nextTick, onMounted, ref, watch } from 'vue';
-
-import FamilyLinkSearch from '@/components/family-link/FamilyLinkSearch.vue';
 import FamilyLinkList from '@/components/family-link/FamilyLinkList.vue';
-import type { FamilyLinkFilter, FamilyLinkDto } from '@/types'; // Assuming these types exist
+import type { FamilyLinkDto } from '@/types'; // Assuming these types exist
 
 interface FamilyLinkListViewProps {
   familyId: string;
@@ -42,13 +39,6 @@ const loadFamilyLinks = async () => {
   familyLinkStore.list.filters.familyId = props.familyId;
   await familyLinkStore._loadItems();
 };
-
-const handleFilterUpdate = async (filters: FamilyLinkFilter) => {
-  familyLinkStore.list.filters = { ...filters, familyId: props.familyId, searchQuery: searchQuery.value };
-  await familyLinkStore._loadItems();
-};
-
-
 
 const handleListOptionsUpdate = async (options: {
   page: number;

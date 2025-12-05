@@ -39,7 +39,6 @@ defineProps<{
 
 const emit = defineEmits([
   'update:options',
-  'update:search',
   'create',
   'unlink',
 ]);
@@ -50,7 +49,7 @@ const linkHeaders = computed<DataTableHeader[]>(() => [
   { title: t('familyLink.links.headers.family1'), key: 'family1Name', sortable: false },
   { title: t('familyLink.links.headers.family2'), key: 'family2Name', sortable: false },
   { title: t('familyLink.links.headers.linkDate'), key: 'linkDate' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
+  { title: t('common.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
 const loadItems = (options: {

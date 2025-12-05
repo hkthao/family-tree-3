@@ -677,6 +677,7 @@
   "family.errors.import": "Không thể nhập dữ liệu gia đình.",
   "familyLink.list.title": "Đã liên kết",
   "familyLink.links.action.delete": "Xóa liên kết",
+  "familyLink.links.action.unlink": "Hủy liên kết",
   "familyLink.links.headers.family1": "Gia đình 1",
   "familyLink.links.headers.family2": "Gia đình 2",
   "familyLink.links.headers.linkDate": "Ngày liên kết",
