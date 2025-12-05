@@ -4,6 +4,7 @@ using backend.Application.Members.Commands.CreateMembers;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
+using backend.Application.Members.Queries.GetMembersByFamilyId;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByIds;
@@ -87,10 +88,21 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     }
 
     /// <summary>
-    /// Xử lý POST request để tạo một thành viên mới.
+    /// Xử lý GET request để lấy danh sách thành viên theo ID gia đình.
     /// </summary>
-    /// <param name="command">Lệnh tạo thành viên với thông tin chi tiết.</param>
-    /// <returns>ID của thành viên vừa được tạo.</returns>
+    /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
+    /// <returns>Danh sách các thành viên thuộc gia đình.</returns>
+    [HttpGet("by-family/{familyId}")]
+    public async Task<ActionResult<List<MemberListDto>>> GetMembersByFamilyId(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Guid>> CreateMember([FromBody] CreateMemberCommand command)
     {

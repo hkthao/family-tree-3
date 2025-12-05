@@ -15,11 +15,11 @@
     </v-row>
 
     <!-- Bottom Section: Family Tree Overview -->
-    <v-row id="genealogy-chart">
+    <!-- <v-row id="genealogy-chart">
       <v-col cols="12">
         <FamilyTreeOverview :family-id="selectedFamilyId" />
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- Middle Section: Recent Activity -->
     <v-row>

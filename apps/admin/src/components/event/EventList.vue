@@ -13,13 +13,7 @@
       <v-toolbar flat>
         <v-toolbar-title data-testid="event-list-title">{{ t('event.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn color="primary" icon @click="$emit('ai-create')" data-testid="ai-create-event-button">
-          <v-tooltip :text="t('event.list.action.aiCreate')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
+
         <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-event-button">
           <v-tooltip :text="t('event.list.action.create')">
             <template v-slot:activator="{ props }">
@@ -124,7 +118,7 @@ const emit = defineEmits([
   'edit',
   'delete',
   'create',
-  'ai-create',
+
   'update:search',
 ]);
 
