@@ -11,6 +11,7 @@
         <v-tab value="events" data-testid="tab-events">{{ t('event.list.title') }}</v-tab>
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
         <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
+        <v-tab v-if="canManageFamily" value="family-link-requests" data-testid="tab-family-link-requests">{{ t('familyLinkRequest.list.title') }}</v-tab>
         <v-tab v-if="canManageFamily" value="family-linking" data-testid="tab-family-linking">{{ t('familyLink.list.title') }}</v-tab>
         <v-tab v-if="canManageFamily" value="family-settings" data-testid="tab-family-settings">{{
           t('family.settings.title') }}</v-tab>
@@ -49,6 +50,10 @@
           <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
 
+        <v-window-item v-if="canManageFamily" value="family-link-requests">
+          <FamilyLinkRequestsListView :family-id="familyId" />
+        </v-window-item>
+
         <v-window-item v-if="canManageFamily" value="family-linking">
           <FamilyLinkListView :family-id="familyId" :read-only="readOnly" />
         </v-window-item>
@@ -72,6 +77,7 @@ import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 import FamilyLinkListView from '@/views/family-link/FamilyLinkListView.vue';
+import FamilyLinkRequestsListView from '@/views/family-link-requests/FamilyLinkRequestsListView.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { t } = useI18n();
