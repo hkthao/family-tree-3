@@ -6,7 +6,7 @@ export * from './event.store';
 export * from './face.store';
 export * from './family-autocomplete.store';
 export * from './family.store';
-export * from './file-upload.store';
+
 export * from './member-autocomplete.store';
 export * from './member.store';
 export * from './family-data.store';

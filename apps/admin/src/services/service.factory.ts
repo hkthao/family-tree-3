@@ -14,8 +14,6 @@ import type { IPublicRelationshipService } from './relationship/public.service.i
 import { PublicApiRelationshipService } from './relationship/publicApi.relationship.service'; 
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
-import type { IFileUploadService } from './file-upload/file-upload.service.interface';
-import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
 import type { IUserService } from './user/user.service.interface';
@@ -43,7 +41,6 @@ export interface AppServices {
   relationship: IRelationshipService;
   publicRelationship: IPublicRelationshipService;
   dashboard: IDashboardService;
-  fileUpload: IFileUploadService;
   chat: IChatService;
   user: IUserService;
   familyDict: IFamilyDictService;
@@ -88,10 +85,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiDashboardService(apiClient)
         : testServices?.dashboard || new ApiDashboardService(apiClient),
-    fileUpload:
-      mode === 'real'
-        ? new FileUploadApiService(apiClient)
-        : testServices?.fileUpload || new FileUploadApiService(apiClient),
     chat:
       mode === 'real'
         ? new ApiChatService(apiClient)
