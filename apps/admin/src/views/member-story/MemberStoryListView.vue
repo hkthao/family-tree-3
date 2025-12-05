@@ -50,7 +50,7 @@ import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
 
 interface MemberStoryListViewProps {
   memberId?: string;
-  familyId?: string;
+  familyId: string;
   readOnly?: boolean;
 }
 
@@ -142,7 +142,7 @@ const handleSearchUpdate = async (search: string) => {
 watch(() => [props.memberId, props.familyId], ([newMemberId, newFamilyId]) => {
   memberStoryStore.setFilters({
     memberId: newMemberId || undefined,
-    familyId: newFamilyId || undefined,
+    familyId: newFamilyId,
     searchQuery: searchQuery.value
   });
   memberStoryStore._loadItems();

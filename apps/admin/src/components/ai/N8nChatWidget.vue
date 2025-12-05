@@ -2,7 +2,7 @@
   <v-navigation-drawer v-model="chatOpen" location="right" temporary width="400" class="n8n-chat-window">
     <v-card flat class="fill-height d-flex flex-column">
       <v-sheet class="n8n-chat-container pa-0 d-flex flex-column" height="100%">
-        <div class="pa-4 mt-4 pb-0">
+        <div class="mt-8 mb-1 pa-1 pb-0">
           <FamilyAutocomplete
             v-model="selectedFamilyId"
             label="Chọn gia đình để tra cứu"
