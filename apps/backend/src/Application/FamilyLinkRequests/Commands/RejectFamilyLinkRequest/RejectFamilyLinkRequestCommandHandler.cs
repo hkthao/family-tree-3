@@ -40,7 +40,7 @@ public class RejectFamilyLinkRequestCommandHandler : IRequestHandler<RejectFamil
         }
 
         // 3. Reject the request
-        linkRequest.Reject();
+        linkRequest.Reject(request.ResponseMessage);
 
         await _context.SaveChangesAsync(cancellationToken);
 

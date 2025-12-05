@@ -9,20 +9,18 @@
       <v-form ref="formRef">
         <v-row>
           <v-col cols="12" md="6">
-            <FamilyAutocomplete
-              v-model="requestingFamilyId"
-              :label="t('familyLinkRequest.form.requestingFamily')"
+            <FamilyAutocomplete v-model="requestingFamilyId" :label="t('familyLinkRequest.form.requestingFamily')"
               :rules="[(v: string | null | undefined) => !!v || t('familyLinkRequest.form.rules.requestingFamilyRequired')]"
-              data-testid="requesting-family-field"
-            />
+              data-testid="requesting-family-field" />
           </v-col>
           <v-col cols="12" md="6">
-            <FamilyAutocomplete
-              v-model="targetFamilyId"
-              :label="t('familyLinkRequest.form.targetFamily')"
+            <FamilyAutocomplete v-model="targetFamilyId" :label="t('familyLinkRequest.form.targetFamily')"
               :rules="[(v: string | null | undefined) => !!v || t('familyLinkRequest.form.rules.targetFamilyRequired')]"
-              data-testid="target-family-field"
-            />
+              data-testid="target-family-field" />
+          </v-col>
+          <v-col cols="12">
+            <v-textarea v-model="requestMessage" :label="t('familyLinkRequest.form.requestMessage')" rows="3" clearable
+              counter maxlength="500" data-testid="request-message-field"></v-textarea>
           </v-col>
         </v-row>
       </v-form>
@@ -30,8 +28,9 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleAddFamilyLinkRequest" data-testid="save-family-link-request-button" :loading="add.loading">{{
-        t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="handleAddFamilyLinkRequest" data-testid="save-family-link-request-button"
+        :loading="add.loading">{{
+          t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -49,6 +48,7 @@ const emit = defineEmits(['close', 'saved']);
 const formRef = ref<HTMLFormElement | null>(null);
 const requestingFamilyId = ref<string | null>(null);
 const targetFamilyId = ref<string | null>(null);
+const requestMessage = ref<string | null>(null);
 
 const { t } = useI18n();
 const familyLinkRequestStore = useFamilyLinkRequestStore();
@@ -74,7 +74,7 @@ const handleAddFamilyLinkRequest = async () => {
   }
 
   try {
-    const result = await familyLinkRequestStore.createRequest(requestingFamilyId.value, targetFamilyId.value);
+    const result = await familyLinkRequestStore.createRequest(requestingFamilyId.value, targetFamilyId.value, requestMessage.value || undefined);
     if (result.ok) {
       showSnackbar(t('familyLinkRequest.requests.messages.sendSuccess'), 'success');
       emit('saved');

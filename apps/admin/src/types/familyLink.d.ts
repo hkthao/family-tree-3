@@ -13,6 +13,8 @@ export interface FamilyLinkRequestDto  {
   status: LinkStatus;
   requestDate: string;
   responseDate?: string;
+  requestMessage?: string;
+  responseMessage?: string;
 }
 
 export interface FamilyLinkDto {
@@ -39,9 +41,4 @@ export interface FamilyLinkRequestFilter {
   otherFamilyId?: string | null;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-}
-
-export interface UpdateFamilyLinkRequestCommand {
-  id: string;
-  status: LinkStatus;
 }

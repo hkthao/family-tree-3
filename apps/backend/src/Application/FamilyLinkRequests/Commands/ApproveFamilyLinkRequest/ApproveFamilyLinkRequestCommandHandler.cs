@@ -51,13 +51,13 @@ public class ApproveFamilyLinkRequestCommandHandler : IRequestHandler<ApproveFam
         if (existingActiveLink)
         {
             // Update the request to Approved even if a link already exists to reflect the admin's intent
-            linkRequest.Approve();
+            linkRequest.Approve(request.ResponseMessage);
             await _context.SaveChangesAsync(cancellationToken);
             return Result<Unit>.Conflict("Hai gia đình này đã được liên kết.");
         }
 
         // 4. Approve the request
-        linkRequest.Approve();
+        linkRequest.Approve(request.ResponseMessage);
 
         // 5. Create a new FamilyLink
         var familyLink = new FamilyLink(linkRequest.RequestingFamilyId, linkRequest.TargetFamilyId);

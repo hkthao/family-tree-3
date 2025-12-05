@@ -1,39 +1,31 @@
 <template>
   <div data-testid="family-link-requests-list-view">
     <!-- Removed v-card toolbar, it's now inside FamilyLinkRequestList -->
-    <FamilyLinkRequestList
-      :items="familyLinkRequestStore.list.items"
-      :total-items="familyLinkRequestStore.list.totalItems"
-      :loading="familyLinkRequestStore.list.loading"
-      :read-only="readOnly"
-      :search="searchQuery"
-      @update:options="handleListOptionsUpdate"
-      @update:search="handleSearchUpdate"
-      @view="openDetailDrawer"
-      @edit="openEditDrawer"
-      @delete="confirmDelete"
-      @create="openAddDrawer"
-      @approve="confirmApprove"
-      @reject="confirmReject"
-    />
+    <FamilyLinkRequestList :items="familyLinkRequestStore.list.items"
+      :total-items="familyLinkRequestStore.list.totalItems" :loading="familyLinkRequestStore.list.loading"
+      :read-only="readOnly" :search="searchQuery" @update:options="handleListOptionsUpdate"
+      @update:search="handleSearchUpdate" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
+      @create="openAddDrawer" @approve="confirmApprove" @reject="confirmReject" />
 
     <!-- Add Request Drawer -->
-    <BaseCrudDrawer v-model="addDrawer" :title="t('familyLinkRequest.form.addTitle')" icon="mdi-plus" @close="closeAddDrawer">
-      <FamilyLinkRequestAddView v-if="addDrawer" :family-id="familyId"
-        @close="closeAddDrawer" @saved="handleRequestSaved" />
+    <BaseCrudDrawer v-model="addDrawer" :title="t('familyLinkRequest.form.addTitle')" icon="mdi-plus"
+      @close="closeAddDrawer">
+      <FamilyLinkRequestAddView v-if="addDrawer" :family-id="familyId" @close="closeAddDrawer"
+        @saved="handleRequestSaved" />
     </BaseCrudDrawer>
 
-    <!-- Edit Request Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" :title="t('familyLinkRequest.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-      <FamilyLinkRequestEditView v-if="selectedItemId && editDrawer" :family-link-request-id="selectedItemId" :family-id="familyId"
-        @close="closeEditDrawer" @saved="handleRequestSaved" />
-    </BaseCrudDrawer>
+
 
     <!-- Detail Request Drawer -->
-    <BaseCrudDrawer v-model="detailDrawer" :title="t('familyLinkRequest.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
-      <FamilyLinkRequestDetailView v-if="selectedItemId && detailDrawer" :family-link-request-id="selectedItemId" :family-id="familyId"
-        @close="closeDetailDrawer" @edit-family-link-request="openEditDrawer" />
+    <BaseCrudDrawer v-model="detailDrawer" :title="t('familyLinkRequest.detail.title')" icon="mdi-information-outline"
+      @close="closeDetailDrawer">
+      <FamilyLinkRequestDetailView v-if="selectedItemId && detailDrawer" :family-link-request-id="selectedItemId"
+        :family-id="familyId" @close="closeDetailDrawer" @edit-family-link-request="openEditDrawer" />
     </BaseCrudDrawer>
+
+    <!-- Approve/Reject Dialog -->
+    <ApproveRejectFamilyLinkRequestDialog :show="approveRejectDialog" :action-type="dialogActionType"
+      @update:show="approveRejectDialog = $event" @confirm="handleApproveRejectConfirm" />
   </div>
 </template>
 
@@ -45,17 +37,16 @@ import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { storeToRefs } from 'pinia';
-import { formatDate } from '@/utils/dateUtils';
-import type { FamilyLinkRequestDto } from '@/types';
+import type { Result } from '@/types';
 import { LinkStatus } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
 // New imports for the views
-import { FamilyLinkRequestList } from '@/components/family-link-requests'; // NEW IMPORT
+import { FamilyLinkRequestList, ApproveRejectFamilyLinkRequestDialog } from '@/components/family-link-requests'; // NEW IMPORT
 import FamilyLinkRequestAddView from '@/views/family-link-requests/FamilyLinkRequestAddView.vue';
-import FamilyLinkRequestEditView from '@/views/family-link-requests/FamilyLinkRequestEditView.vue';
+
 import FamilyLinkRequestDetailView from '@/views/family-link-requests/FamilyLinkRequestDetailView.vue';
 
 const { t } = useI18n();
@@ -81,9 +72,13 @@ const {
   closeEditDrawer,
   closeDetailDrawer,
   closeAllDrawers, // To close all drawers after save/delete
-} = useCrudDrawer<string>(); 
+} = useCrudDrawer<string>();
 
 const readOnly = ref(false); // Can be made reactive if needed
+
+const approveRejectDialog = ref(false);
+const dialogActionType = ref<'approve' | 'reject'>('approve');
+const requestIdForDialog = ref<string | null>(null);
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('familyLinkRequest.list.headers.requestingFamily'), key: 'requestingFamilyName' },
@@ -147,42 +142,42 @@ const confirmDelete = async (id: string) => {
   }
 };
 
-const confirmApprove = async (id: string) => { // NEW: Handle approve emit
-  const confirmed = await showConfirmDialog({
-    title: t('familyLinkRequest.list.confirmApprove.title'),
-    message: t('familyLinkRequest.list.confirmApprove.message'),
-    confirmText: t('familyLinkRequest.list.action.approve'),
-    confirmColor: 'success',
-  });
+const confirmApprove = async (id: string) => {
+  requestIdForDialog.value = id;
+  dialogActionType.value = 'approve';
+  approveRejectDialog.value = true;
+};
 
-  if (confirmed && familyId.value) {
-    const result = await familyLinkRequestStore.approveRequest(id, familyId.value);
+const confirmReject = async (id: string) => {
+  requestIdForDialog.value = id;
+  dialogActionType.value = 'reject';
+  approveRejectDialog.value = true;
+};
+
+const handleApproveRejectConfirm = async (responseMessage: string | null) => {
+  if (!requestIdForDialog.value || !familyId.value) return;
+
+  const id = requestIdForDialog.value;
+  let result: Result<void>;
+
+  if (dialogActionType.value === 'approve') {
+    result = await familyLinkRequestStore.approveRequest(id, familyId.value, responseMessage || undefined);
     if (result.ok) {
       showSnackbar(t('familyLinkRequest.requests.messages.approveSuccess'), 'success');
-      loadRequests();
     } else {
       showSnackbar(result.error?.message || t('familyLinkRequest.requests.messages.approveError'), 'error');
     }
-  }
-};
-
-const confirmReject = async (id: string) => { // NEW: Handle reject emit
-  const confirmed = await showConfirmDialog({
-    title: t('familyLinkRequest.list.confirmReject.title'),
-    message: t('familyLinkRequest.list.confirmReject.message'),
-    confirmText: t('familyLinkRequest.list.action.reject'),
-    confirmColor: 'error',
-  });
-
-  if (confirmed && familyId.value) {
-    const result = await familyLinkRequestStore.rejectRequest(id, familyId.value);
+  } else { // reject
+    result = await familyLinkRequestStore.rejectRequest(id, familyId.value, responseMessage || undefined);
     if (result.ok) {
       showSnackbar(t('familyLinkRequest.requests.messages.rejectSuccess'), 'success');
-      loadRequests();
     } else {
       showSnackbar(result.error?.message || t('familyLinkRequest.requests.messages.rejectError'), 'error');
     }
   }
+  loadRequests();
+  approveRejectDialog.value = false;
+  requestIdForDialog.value = null;
 };
 
 const handleRequestSaved = () => {

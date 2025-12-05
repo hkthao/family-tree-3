@@ -1,7 +1,7 @@
 import type { IFamilyLinkRequestService } from './familyLinkRequest.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { ApiError } from '@/plugins/axios';
-import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result, UpdateFamilyLinkRequestCommand } from '@/types';
+import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result } from '@/types';
 
 export class ApiFamilyLinkRequestService implements IFamilyLinkRequestService {
   constructor(private apiClient: ApiClientMethods) { }
@@ -34,41 +34,32 @@ export class ApiFamilyLinkRequestService implements IFamilyLinkRequestService {
     }
   }
 
-  async createFamilyLinkRequest(requestingFamilyId: string, targetFamilyId: string): Promise<Result<string, ApiError>> {
-    const response = await this.apiClient.post<string>('/family-link-requests', { requestingFamilyId, targetFamilyId });
+  async createFamilyLinkRequest(requestingFamilyId: string, targetFamilyId: string, requestMessage?: string): Promise<Result<string, ApiError>> {
+    const response = await this.apiClient.post<string>('/family-link-requests', { requestingFamilyId, targetFamilyId, requestMessage });
     return response;
   }
 
-  async updateFamilyLinkRequest(command: UpdateFamilyLinkRequestCommand): Promise<Result<void, ApiError>> {
+  async approveFamilyLinkRequest(requestId: string, responseMessage?: string): Promise<Result<void, ApiError>> {
     try {
-      const response = await this.apiClient.put<void>(`/family-link-requests/${command.id}`, command);
+      const response = await this.apiClient.post<void>(`/family-link-requests/${requestId}/approve`, { responseMessage });
       return response;
     } catch (error: any) {
-      return { ok: false, error: error };
+        return { ok: false, error: error };
+    }
+  }
+
+  async rejectFamilyLinkRequest(requestId: string, responseMessage?: string): Promise<Result<void, ApiError>> {
+    try {
+      const response = await this.apiClient.post<void>(`/family-link-requests/${requestId}/reject`, { responseMessage });
+      return response;
+    } catch (error: any) {
+        return { ok: false, error: error };
     }
   }
 
   async deleteFamilyLinkRequest(id: string): Promise<Result<void, ApiError>> {
     try {
       const response = await this.apiClient.delete<void>(`/family-link-requests/${id}`);
-      return response;
-    } catch (error: any) {
-      return { ok: false, error: error };
-    }
-  }
-
-  async approveFamilyLinkRequest(requestId: string): Promise<Result<void, ApiError>> {
-    try {
-      const response = await this.apiClient.post<void>(`/family-link-requests/${requestId}/approve`);
-      return response;
-    } catch (error: any) {
-      return { ok: false, error: error };
-    }
-  }
-
-  async rejectFamilyLinkRequest(requestId: string): Promise<Result<void, ApiError>> {
-    try {
-      const response = await this.apiClient.post<void>(`/family-link-requests/${requestId}/reject`);
       return response;
     } catch (error: any) {
       return { ok: false, error: error };

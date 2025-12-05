@@ -6,6 +6,16 @@
     <v-progress-linear v-if="detail.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <FamilyLinkRequestForm v-if="familyLinkRequest" :initial-family-link-request-data="familyLinkRequest" :read-only="true" />
+      <v-list v-if="familyLinkRequest" density="compact" class="mt-4">
+        <v-list-item v-if="familyLinkRequest.requestMessage">
+          <v-list-item-title class="font-weight-bold">{{ t('familyLinkRequest.form.requestMessage') }}:</v-list-item-title>
+          <v-list-item-subtitle>{{ familyLinkRequest.requestMessage }}</v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item v-if="familyLinkRequest.responseMessage">
+          <v-list-item-title class="font-weight-bold">{{ t('familyLinkRequest.form.responseMessage') }}:</v-list-item-title>
+          <v-list-item-subtitle>{{ familyLinkRequest.responseMessage }}</v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
       <v-alert v-else type="info" class="mt-4">{{ t('familyLinkRequest.detail.notFound') }}</v-alert>
     </v-card-text>
     <v-card-actions class="justify-end">

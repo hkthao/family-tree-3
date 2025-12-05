@@ -1,7 +1,6 @@
 using backend.Application.FamilyLinkRequests.Commands.ApproveFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.RejectFamilyLinkRequest;
-using backend.Application.FamilyLinkRequests.Commands.UpdateFamilyLinkRequest; // New import
 using backend.Application.FamilyLinkRequests.Commands.DeleteFamilyLinkRequest; // New import
 using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequestById; // New import
 using backend.Application.FamilyLinkRequests.Queries.GetFamilyLinkRequests; // Updated import for FamilyLinkRequests namespace
@@ -48,27 +47,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
         var result = await _mediator.Send(new GetFamilyLinkRequestByIdQuery(id));
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
-
-    /// <summary>
-    /// Cập nhật một yêu cầu liên kết gia đình hiện có.
-    /// </summary>
-    /// <param name="id">ID của yêu cầu liên kết cần cập nhật.</param>
-    /// <param name="command">Lệnh chứa thông tin cập nhật cho yêu cầu liên kết.</param>
-    /// <returns>NoContent nếu cập nhật thành công.</returns>
-    [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateFamilyLinkRequest(Guid id, [FromBody] UpdateFamilyLinkRequestCommand command)
-    {
-        if (id != command.Id)
-        {
-            return BadRequest(Result<Unit>.Failure("ID trong URL không khớp với ID trong nội dung yêu cầu."));
-        }
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
-    }
-
+    
     /// <summary>
     /// Xóa một yêu cầu liên kết gia đình hiện có.
     /// </summary>
@@ -88,14 +67,15 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// Phê duyệt một yêu cầu liên kết gia đình.
     /// </summary>
     /// <param name="requestId">ID của yêu cầu liên kết cần phê duyệt.</param>
+    /// <param name="responseMessage">Tin nhắn phản hồi khi phê duyệt.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPost("{requestId}/approve")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> ApproveFamilyLinkRequest(Guid requestId)
+    public async Task<ActionResult> ApproveFamilyLinkRequest(Guid requestId, [FromBody] string? responseMessage = null)
     {
-        var result = await _mediator.Send(new ApproveFamilyLinkRequestCommand(requestId));
+        var result = await _mediator.Send(new ApproveFamilyLinkRequestCommand(requestId, responseMessage));
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
@@ -103,14 +83,15 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     /// Từ chối một yêu cầu liên kết gia đình.
     /// </summary>
     /// <param name="requestId">ID của yêu cầu liên kết cần từ chối.</param>
+    /// <param name="responseMessage">Tin nhắn phản hồi khi từ chối.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPost("{requestId}/reject")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> RejectFamilyLinkRequest(Guid requestId)
+    public async Task<ActionResult> RejectFamilyLinkRequest(Guid requestId, [FromBody] string? responseMessage = null)
     {
-        var result = await _mediator.Send(new RejectFamilyLinkRequestCommand(requestId));
+        var result = await _mediator.Send(new RejectFamilyLinkRequestCommand(requestId, responseMessage));
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 

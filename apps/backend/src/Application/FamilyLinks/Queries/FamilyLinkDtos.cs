@@ -13,6 +13,8 @@ public class FamilyLinkRequestDto : BaseAuditableDto
     public LinkStatus Status { get; set; }
     public DateTime RequestDate { get; set; }
     public DateTime? ResponseDate { get; set; }
+    public string? RequestMessage { get; set; }
+    public string? ResponseMessage { get; set; }
 }
 
 public class FamilyLinkDto : BaseAuditableDto

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { ApiError } from '@/plugins/axios';
-import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result, UpdateFamilyLinkRequestCommand } from '@/types';
+import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result } from '@/types';
 import { LinkStatus } from '@/types';
 
 export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
@@ -28,9 +28,6 @@ export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
       loading: false,
     },
     add: {
-      loading: false,
-    },
-    update: {
       loading: false,
     },
     _delete: {
@@ -113,10 +110,10 @@ export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
       return undefined;
     },
 
-    async createRequest(requestingFamilyId: string, targetFamilyId: string): Promise<Result<string>> {
+    async createRequest(requestingFamilyId: string, targetFamilyId: string, requestMessage?: string): Promise<Result<string>> {
         this.add.loading = true;
         this.error = null;
-        const result = await this.services.familyLinkRequest.createFamilyLinkRequest(requestingFamilyId, targetFamilyId);
+        const result = await this.services.familyLinkRequest.createFamilyLinkRequest(requestingFamilyId, targetFamilyId, requestMessage);
         if (result.ok) {
             await this._loadItems(requestingFamilyId); // Reload requesting family's requests
         } else {
@@ -124,20 +121,6 @@ export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
             console.error(result.error);
         }
         this.add.loading = false;
-        return result;
-    },
-
-    async updateRequest(command: UpdateFamilyLinkRequestCommand, familyId: string): Promise<Result<void>> {
-        this.update.loading = true;
-        this.error = null;
-        const result = await this.services.familyLinkRequest.updateFamilyLinkRequest(command);
-        if (result.ok) {
-            await this._loadItems(familyId);
-        } else {
-            this.error = result.error?.message || i18n.global.t('familyLink.requests.messages.updateError');
-            console.error(result.error);
-        }
-        this.update.loading = false;
         return result;
     },
 
@@ -155,31 +138,33 @@ export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
         return result;
     },
 
-    async approveRequest(requestId: string, familyId: string): Promise<Result<void>> {
-        this.update.loading = true;
+    async approveRequest(requestId: string, familyId: string, responseMessage?: string): Promise<Result<void>> {
+        // Use add.loading as a general action loading indicator
+        this.add.loading = true;
         this.error = null;
-        const result = await this.services.familyLinkRequest.approveFamilyLinkRequest(requestId);
+        const result = await this.services.familyLinkRequest.approveFamilyLinkRequest(requestId, responseMessage);
         if (result.ok) {
             await this._loadItems(familyId);
         } else {
             this.error = result.error?.message || i18n.global.t('familyLink.requests.messages.approveError');
             console.error(result.error);
         }
-        this.update.loading = false;
+        this.add.loading = false;
         return result;
     },
 
-    async rejectRequest(requestId: string, familyId: string): Promise<Result<void>> {
-        this.update.loading = true;
+    async rejectRequest(requestId: string, familyId: string, responseMessage?: string): Promise<Result<void>> {
+        // Use add.loading as a general action loading indicator
+        this.add.loading = true;
         this.error = null;
-        const result = await this.services.familyLinkRequest.rejectFamilyLinkRequest(requestId);
+        const result = await this.services.familyLinkRequest.rejectFamilyLinkRequest(requestId, responseMessage);
         if (result.ok) {
             await this._loadItems(familyId);
         } else {
             this.error = result.error?.message || i18n.global.t('familyLink.requests.messages.rejectError');
             console.error(result.error);
         }
-        this.update.loading = false;
+        this.add.loading = false;
         return result;
     },
   },

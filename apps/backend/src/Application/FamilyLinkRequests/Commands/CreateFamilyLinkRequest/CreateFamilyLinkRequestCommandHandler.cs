@@ -76,7 +76,7 @@ public class CreateFamilyLinkRequestCommandHandler : IRequestHandler<CreateFamil
 
 
         // 5. Create new request
-        var familyLinkRequest = new FamilyLinkRequest(request.RequestingFamilyId, request.TargetFamilyId);
+        var familyLinkRequest = new FamilyLinkRequest(request.RequestingFamilyId, request.TargetFamilyId, request.RequestMessage);
         _context.FamilyLinkRequests.Add(familyLinkRequest);
 
         await _context.SaveChangesAsync(cancellationToken);

@@ -17,27 +17,22 @@ public class FamilyLinkRequest : BaseAuditableEntity
     public LinkStatus Status { get; private set; } = LinkStatus.Pending;
     public DateTime RequestDate { get; private set; }
     public DateTime? ResponseDate { get; private set; } // When the request was approved or rejected
+    public string? RequestMessage { get; private set; }
+    public string? ResponseMessage { get; private set; }
 
     // Private constructor for EF Core and internal use
     private FamilyLinkRequest() { }
 
-    public FamilyLinkRequest(Guid requestingFamilyId, Guid targetFamilyId)
+    public FamilyLinkRequest(Guid requestingFamilyId, Guid targetFamilyId, string? requestMessage)
     {
         RequestingFamilyId = requestingFamilyId;
         TargetFamilyId = targetFamilyId;
         RequestDate = DateTime.UtcNow;
         Status = LinkStatus.Pending;
+        RequestMessage = requestMessage;
     }
 
-    public void UpdateStatus(LinkStatus newStatus)
-    {
-        // Add any validation logic here if needed, e.g.,
-        // if (Status == LinkStatus.Approved && newStatus == LinkStatus.Rejected) { ... }
-        Status = newStatus;
-        ResponseDate = DateTime.UtcNow; // Update response date on any status change
-    }
-
-    public void Approve()
+    public void Approve(string? responseMessage)
     {
         if (Status != LinkStatus.Pending)
         {
@@ -45,9 +40,10 @@ public class FamilyLinkRequest : BaseAuditableEntity
         }
         Status = LinkStatus.Approved;
         ResponseDate = DateTime.UtcNow;
+        ResponseMessage = responseMessage;
     }
 
-    public void Reject()
+    public void Reject(string? responseMessage)
     {
         if (Status != LinkStatus.Pending)
         {
@@ -55,11 +51,13 @@ public class FamilyLinkRequest : BaseAuditableEntity
         }
         Status = LinkStatus.Rejected;
         ResponseDate = DateTime.UtcNow;
+        ResponseMessage = responseMessage;
     }
 
     public void MarkAsPending()
     {
         Status = LinkStatus.Pending;
         ResponseDate = null;
+        ResponseMessage = null; // Clear response message when marking as pending
     }
 }
