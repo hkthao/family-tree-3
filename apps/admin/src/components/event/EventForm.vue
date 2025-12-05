@@ -4,7 +4,7 @@
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
           @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
-          :read-only="props.readOnly" :multiple="false" :disabled="props.readOnly || !props.allowFamilyEdit" data-testid="event-family-autocomplete" />
+          :read-only="props.readOnly" :multiple="false" :disabled="true" data-testid="event-family-autocomplete" />
       </v-col>
     </v-row>
 
@@ -85,8 +85,7 @@ import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 interface EventFormProps {
   readOnly?: boolean;
   initialEventData?: Event;
-  familyId?: string; // New prop
-  allowFamilyEdit?: boolean; // New prop
+  familyId?: string;
 }
 
 const props = defineProps<EventFormProps>();

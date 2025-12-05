@@ -1,6 +1,6 @@
 <template>
   <div data-testid="member-list-view">
-    <MemberSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
+    <MemberSearch @update:filters="handleFilterUpdate" />
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
@@ -52,7 +52,6 @@ import { removeDiacritics } from '@/utils/string.utils';
 interface MemberListViewProps {
   familyId?: string;
   readOnly?: boolean;
-  hideSearch?: boolean;
 }
 const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();

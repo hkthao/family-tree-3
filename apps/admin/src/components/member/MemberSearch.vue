@@ -1,6 +1,6 @@
 <template>
-  <v-card class="mb-4" data-testid="member-search">
-    <v-card-title class="text-h6 d-flex align-center">
+  <v-card :elevation="0" class="mb-4" data-testid="member-search">
+    <v-card-title class="text-h6 d-flex align-center pa-0">
       {{ t('member.search.title') }}
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="member-search-expand-button">
@@ -13,7 +13,7 @@
     </v-card-title>
     <v-expand-transition>
       <div v-show="expanded">
-        <v-card-text>
+        <v-card-text class="pa-0">
           <v-row>
             <v-col cols="12" md="6">
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable
