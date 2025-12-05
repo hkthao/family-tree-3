@@ -6,6 +6,7 @@
           v-model="formData.requestingFamilyId"
           :label="t('familyLinkRequest.form.requestingFamily')"
           :readonly="true"
+          :rules="[required('requestingFamilyId')]"
           data-testid="requesting-family-field"
         />
       </v-col>
@@ -13,6 +14,7 @@
         <FamilyAutocomplete
           v-model="formData.targetFamilyId"
           :label="t('familyLinkRequest.form.targetFamily')"
+          :rules="[required('targetFamilyId'), targetFamilyCannotBeRequestingFamily]"
           data-testid="target-family-field"
         />
       </v-col>
@@ -25,6 +27,7 @@
           counter
           maxlength="500"
           :readonly="readOnly"
+          :rules="[required('requestMessage')]"
           data-testid="request-message-field"
         ></v-textarea>
       </v-col>
@@ -92,7 +95,11 @@ const linkStatusOptions = computed(() => [
   { title: t('familyLinkRequest.status.rejected'), value: LinkStatus.Rejected },
 ]);
 
+const required = (propertyType: string) => (value: string | null | undefined) =>
+  !!value || t(`familyLinkRequest.form.rules.${propertyType}Required`);
 
+const targetFamilyCannotBeRequestingFamily = (value: string | null | undefined) =>
+  value !== formData.requestingFamilyId || t('familyLinkRequest.form.rules.targetCannotBeRequesting');
 
 onMounted(() => {
   if (props.initialFamilyLinkRequestData) {
@@ -123,4 +130,5 @@ defineExpose({
   getFormData,
   validate,
 });
+
 </script>
