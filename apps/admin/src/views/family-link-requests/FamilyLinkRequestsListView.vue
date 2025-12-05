@@ -10,7 +10,7 @@
     <!-- Add Request Drawer -->
     <BaseCrudDrawer v-model="addDrawer" :title="t('familyLinkRequest.form.addTitle')" icon="mdi-plus"
       @close="closeAddDrawer">
-      <FamilyLinkRequestAddView v-if="addDrawer" :family-id="familyId" @close="closeAddDrawer"
+      <FamilyLinkRequestAddView v-if="addDrawer && familyId" :family-id="familyId" @close="closeAddDrawer"
         @saved="handleRequestSaved" />
     </BaseCrudDrawer>
 
@@ -30,7 +30,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
@@ -44,13 +43,18 @@ import FamilyLinkRequestAddView from '@/views/family-link-requests/FamilyLinkReq
 
 import FamilyLinkRequestDetailView from '@/views/family-link-requests/FamilyLinkRequestDetailView.vue';
 
+interface FamilyLinkRequestsListViewProps {
+  familyId: string;
+}
+
+const props = defineProps<FamilyLinkRequestsListViewProps>();
+
 const { t } = useI18n();
-const route = useRoute();
 const familyLinkRequestStore = useFamilyLinkRequestStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-const familyId = computed(() => route.params.familyId as string);
+const familyId = computed(() => props.familyId);
 const searchQuery = ref(''); // NEW: Local search query state
 
 const {

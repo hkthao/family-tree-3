@@ -5,14 +5,21 @@
     </v-card-title>
     <v-progress-linear v-if="add.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLinkRequestForm ref="familyLinkRequestFormRef" :read-only="false" />
+      <FamilyLinkRequestForm
+        ref="familyLinkRequestFormRef"
+        :read-only="false"
+        :initial-family-link-request-data="{ requestingFamilyId: familyId } as Partial<FamilyLinkRequestDto>"
+      />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleAddFamilyLinkRequest" data-testid="save-family-link-request-button"
-        :loading="add.loading">{{
-          t('common.save') }}</v-btn>
+      <v-btn
+        color="primary"
+        @click="handleAddFamilyLinkRequest"
+        data-testid="save-family-link-request-button"
+        :loading="add.loading"
+      >{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -24,8 +31,13 @@ import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { storeToRefs } from 'pinia';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import FamilyLinkRequestForm from '@/components/family-link-requests/FamilyLinkRequestForm.vue';
+import type { FamilyLinkRequestDto } from '@/types';
 
 const emit = defineEmits(['close', 'saved']);
+
+const { familyId } = defineProps<{
+  familyId: string;
+}>();
 
 const familyLinkRequestFormRef = ref<InstanceType<typeof FamilyLinkRequestForm> | null>(null);
 

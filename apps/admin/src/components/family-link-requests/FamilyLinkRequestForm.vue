@@ -13,18 +13,8 @@
         <FamilyAutocomplete
           v-model="formData.targetFamilyId"
           :label="t('familyLinkRequest.form.targetFamily')"
-          :readonly="true"
           data-testid="target-family-field"
         />
-      </v-col>
-      <v-col cols="12" >
-        <v-select
-          v-model="formData.status"
-          :items="linkStatusOptions"
-          :label="t('familyLinkRequest.form.status')"
-          :readonly="true"
-          data-testid="status-field"
-        ></v-select>
       </v-col>
       <v-col cols="12" >
         <v-textarea
@@ -37,6 +27,15 @@
           :readonly="readOnly"
           data-testid="request-message-field"
         ></v-textarea>
+      </v-col>
+      <v-col cols="12" >
+        <v-select
+          v-model="formData.status"
+          :items="linkStatusOptions"
+          :label="t('familyLinkRequest.form.status')"
+          :readonly="true"
+          data-testid="status-field"
+        ></v-select>
       </v-col>
       <v-col cols="12" md="6">
         <VDateInput
@@ -68,7 +67,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput';
 import { format } from 'date-fns';
 
 interface FamilyLinkRequestFormProps {
-  initialFamilyLinkRequestData?: FamilyLinkRequestDto;
+  initialFamilyLinkRequestData?: Partial<FamilyLinkRequestDto>;
   readOnly?: boolean;
 }
 
