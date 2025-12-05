@@ -19,7 +19,7 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { nextTick, onMounted, ref, watch } from 'vue';
-import { removeDiacritics } from '@/utils/string.utils';
+
 import FamilyLinkSearch from '@/components/family-link/FamilyLinkSearch.vue';
 import FamilyLinkList from '@/components/family-link/FamilyLinkList.vue';
 import type { FamilyLinkFilter, FamilyLinkDto } from '@/types'; // Assuming these types exist
@@ -48,12 +48,7 @@ const handleFilterUpdate = async (filters: FamilyLinkFilter) => {
   await familyLinkStore._loadItems();
 };
 
-const handleSearchUpdate = async (search: string) => {
-  const processedSearch = removeDiacritics(search);
-  searchQuery.value = search;
-  familyLinkStore.list.filters.searchQuery = processedSearch;
-  await familyLinkStore._loadItems();
-};
+
 
 const handleListOptionsUpdate = async (options: {
   page: number;

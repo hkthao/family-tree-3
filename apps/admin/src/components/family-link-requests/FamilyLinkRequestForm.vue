@@ -59,7 +59,6 @@ interface FamilyLinkRequestFormProps {
 }
 
 const props = defineProps<FamilyLinkRequestFormProps>();
-const emit = defineEmits(['update:modelValue']); // Not using modelValue directly for complex object
 
 const { t } = useI18n();
 const formRef = ref<HTMLFormElement | null>(null);

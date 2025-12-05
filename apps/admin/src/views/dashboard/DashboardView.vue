@@ -40,7 +40,6 @@ import { useI18n } from 'vue-i18n';
 import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
-import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables/useOnboardingTour';
 

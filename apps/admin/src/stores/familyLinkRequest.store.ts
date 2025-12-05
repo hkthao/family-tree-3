@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { ApiError } from '@/plugins/axios';
-import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result } from '@/types';
-import { LinkStatus } from '@/types';
+import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Result } from '@/types';
 
 export const useFamilyLinkRequestStore = defineStore('familyLinkRequest', {
   state: () => ({

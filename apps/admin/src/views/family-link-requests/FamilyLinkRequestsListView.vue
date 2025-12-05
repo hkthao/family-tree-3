@@ -14,8 +14,6 @@
         @saved="handleRequestSaved" />
     </BaseCrudDrawer>
 
-
-
     <!-- Detail Request Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" :title="t('familyLinkRequest.detail.title')" icon="mdi-information-outline"
       @close="closeDetailDrawer">
@@ -32,14 +30,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { storeToRefs } from 'pinia';
 import type { Result } from '@/types';
-import { LinkStatus } from '@/types';
-import type { DataTableHeader } from 'vuetify';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
 import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
 
@@ -51,9 +46,7 @@ import FamilyLinkRequestDetailView from '@/views/family-link-requests/FamilyLink
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const familyLinkRequestStore = useFamilyLinkRequestStore();
-const { list } = storeToRefs(familyLinkRequestStore);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
@@ -62,14 +55,12 @@ const searchQuery = ref(''); // NEW: Local search query state
 
 const {
   addDrawer,
-  editDrawer,
   detailDrawer,
   selectedItemId,
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
   closeAddDrawer,
-  closeEditDrawer,
   closeDetailDrawer,
   closeAllDrawers, // To close all drawers after save/delete
 } = useCrudDrawer<string>();
@@ -79,24 +70,6 @@ const readOnly = ref(false); // Can be made reactive if needed
 const approveRejectDialog = ref(false);
 const dialogActionType = ref<'approve' | 'reject'>('approve');
 const requestIdForDialog = ref<string | null>(null);
-
-const headers = computed<DataTableHeader[]>(() => [
-  { title: t('familyLinkRequest.list.headers.requestingFamily'), key: 'requestingFamilyName' },
-  { title: t('familyLinkRequest.list.headers.targetFamily'), key: 'targetFamilyName' },
-  { title: t('familyLinkRequest.list.headers.status'), key: 'status' },
-  { title: t('familyLinkRequest.list.headers.requestDate'), key: 'requestDate' },
-  { title: t('familyLinkRequest.list.headers.responseDate'), key: 'responseDate' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
-]);
-
-const getStatusColor = (status: LinkStatus) => {
-  switch (status) {
-    case LinkStatus.Pending: return 'warning';
-    case LinkStatus.Approved: return 'success';
-    case LinkStatus.Rejected: return 'error';
-    default: return 'info';
-  }
-};
 
 const loadRequests = async () => {
   if (familyId.value) {
