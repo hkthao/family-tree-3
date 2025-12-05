@@ -295,7 +295,7 @@
   "common.clearAll": "Clear All",
   "common.loading": "Loading...",
   "family.form.rules.nameRequired": "Name is required.",
-  "familyLinkRequest.form.rules.requestingFamilyRequired": "Requesting Family is required.",
+  "familyLinkRequest.form.rules.requestingFamilyIdRequired": "Requesting Family is required.",
   "familyLinkRequest.form.rules.targetFamilyIdRequired": "Target Family is required.",
   "familyLinkRequest.form.rules.requestMessageRequired": "Request Message is required.",
   "family.permissions.managers": "Managers",

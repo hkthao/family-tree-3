@@ -724,7 +724,7 @@
   "familyLinkRequest.form.responseDate": "Ngày phản hồi",
   "familyLinkRequest.form.requestMessage": "Tin nhắn yêu cầu",
   "familyLinkRequest.form.responseMessage": "Tin nhắn phản hồi",
-  "familyLinkRequest.form.rules.requestingFamilyRequired": "Gia đình yêu cầu là bắt buộc.",
+  "familyLinkRequest.form.rules.requestingFamilyIdRequired": "Gia đình yêu cầu là bắt buộc.",
   "familyLinkRequest.form.rules.targetFamilyIdRequired": "Gia đình đích là bắt buộc.",
   "familyLinkRequest.form.rules.requestMessageRequired": "Tin nhắn yêu cầu là bắt buộc.",
   "familyLinkRequest.requests.messages.sendSuccess": "Yêu cầu đã được gửi thành công!",
