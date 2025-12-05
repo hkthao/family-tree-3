@@ -28,8 +28,6 @@ import type { IAiService } from './ai/ai.service.interface';
 import { ApiAiService } from './ai/api.ai.service'; 
 import type { IMemberFaceService } from './member-face/member-face.service.interface';
 import { ApiMemberFaceService } from './member-face/api.member-face.service'; 
-import type { IN8nService } from './n8n/n8n.service.interface'; 
-import { ApiN8nService } from './n8n/api.n8n.service'; 
 import type { IPromptService } from './prompt/prompt.service.interface';
 import { ApiPromptService } from './prompt/api.prompt.service';
 import type { IFamilyLinkService } from './familyLink/familyLink.service.interface';
@@ -52,7 +50,6 @@ export interface AppServices {
   memberStory: IMemberStoryService;
   ai: IAiService;
   memberFace: IMemberFaceService;
-  n8n: IN8nService;
   prompt: IPromptService;
   familyLink: IFamilyLinkService;
 }
@@ -120,10 +117,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiMemberFaceService(apiClient)
         : testServices?.memberFace || new ApiMemberFaceService(apiClient),
-    n8n:
-      mode === 'real'
-        ? new ApiN8nService(apiClient)
-        : testServices?.n8n || new ApiN8nService(apiClient),
     prompt:
       mode === 'real'
         ? new ApiPromptService(apiClient)
