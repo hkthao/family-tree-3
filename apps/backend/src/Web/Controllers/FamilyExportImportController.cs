@@ -19,7 +19,7 @@ public class FamilyExportImportController : ControllerBase
     [ProducesResponseType(typeof(FamilyExportDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FamilyExportDto>> ExportFamily(Guid familyId)
+    public async Task<IActionResult> ExportFamily(Guid familyId)
     {
         var result = await _mediator.Send(new GetFamilyExportQuery(familyId));
         if (result.IsSuccess)
@@ -33,7 +33,7 @@ public class FamilyExportImportController : ControllerBase
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<Guid>> ImportFamily(Guid familyId, [FromBody] FamilyExportDto familyData, [FromQuery] bool clearExistingData = true)
+    public async Task<IActionResult> ImportFamily(Guid familyId, [FromBody] FamilyExportDto familyData, [FromQuery] bool clearExistingData = true)
     {
         var command = new ImportFamilyCommand
         {

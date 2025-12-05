@@ -25,10 +25,10 @@ public class UserController(IMediator mediator) : ControllerBase
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách người dùng tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<UserDto>>> Search([FromQuery] SearchUsersQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchUsersQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<UserDto>>)Ok(result.Value) : (ActionResult<PaginatedList<UserDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -37,14 +37,14 @@ public class UserController(IMediator mediator) : ControllerBase
     /// <param name="ids">Chuỗi chứa các ID người dùng, phân tách bằng dấu phẩy.</param>
     /// <returns>Danh sách các đối tượng UserDto.</returns>
     [HttpGet("by-ids")]
-    public async Task<ActionResult<List<UserDto>>> GetUsersByIds([FromQuery] string ids)
+    public async Task<IActionResult> GetUsersByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
             return Ok(Result<List<UserDto>>.Success([]).Value);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetUsersByIdsQuery(guids));
-        return result.IsSuccess ? (ActionResult<List<UserDto>>)Ok(result.Value) : (ActionResult<List<UserDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> IsAdmin() // Change to async Task<IActionResult>
     {
         var result = await _mediator.Send(new IsAdminQuery());
-        return result.IsSuccess ? (ActionResult)Ok(result.Value) : (ActionResult)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -70,7 +70,6 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> IsFamilyManager(Guid familyId) // Change to async Task<IActionResult>
     {
         var result = await _mediator.Send(new IsFamilyManagerQuery(familyId));
-        return result.IsSuccess ? (ActionResult)Ok(result.Value) : (ActionResult)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }
-

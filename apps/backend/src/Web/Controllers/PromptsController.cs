@@ -1,8 +1,6 @@
-using backend.Application.Common.Models;
 using backend.Application.Prompts.Commands.CreatePrompt;
 using backend.Application.Prompts.Commands.DeletePrompt;
 using backend.Application.Prompts.Commands.UpdatePrompt;
-using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.Prompts.Queries.SearchPrompts;
 using Microsoft.AspNetCore.Authorization;
@@ -31,10 +29,10 @@ public class PromptsController(IMediator mediator) : ControllerBase
     /// <param name="code">Mã của lời nhắc cần lấy (tùy chọn).</param>
     /// <returns>Thông tin chi tiết của lời nhắc.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<PromptDto>> GetPromptById([FromRoute] Guid id)
+    public async Task<IActionResult> GetPromptById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Id = id });
-        return result.IsSuccess ? (ActionResult<PromptDto>)Ok(result.Value) : (ActionResult<PromptDto>)NotFound(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
     /// <summary>
@@ -43,10 +41,10 @@ public class PromptsController(IMediator mediator) : ControllerBase
     /// <param name="code">Mã của lời nhắc cần lấy.</param>
     /// <returns>Thông tin chi tiết của lời nhắc.</returns>
     [HttpGet("by-code/{code}")]
-    public async Task<ActionResult<PromptDto>> GetPromptByCode([FromRoute] string code)
+    public async Task<IActionResult> GetPromptByCode([FromRoute] string code)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Code = code });
-        return result.IsSuccess ? (ActionResult<PromptDto>)Ok(result.Value) : (ActionResult<PromptDto>)NotFound(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
     /// <summary>
@@ -55,10 +53,10 @@ public class PromptsController(IMediator mediator) : ControllerBase
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các lời nhắc tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<PromptDto>>> SearchPrompts([FromQuery] SearchPromptsQuery query)
+    public async Task<IActionResult> SearchPrompts([FromQuery] SearchPromptsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<PromptDto>>)Ok(result.Value) : (ActionResult<PaginatedList<PromptDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -67,10 +65,10 @@ public class PromptsController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo lời nhắc với thông tin chi tiết.</param>
     /// <returns>ID của lời nhắc vừa được tạo.</returns>
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreatePrompt([FromBody] CreatePromptCommand command)
+    public async Task<IActionResult> CreatePrompt([FromBody] CreatePromptCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetPromptById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.IsSuccess ? CreatedAtAction(nameof(GetPromptById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>

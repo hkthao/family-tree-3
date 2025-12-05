@@ -1,6 +1,4 @@
-using backend.Application.Common.Models;
 using backend.Application.UserPreferences.Commands.SaveUserPreferences;
-using backend.Application.UserPreferences.Queries;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,10 +24,10 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     /// </summary>
     /// <returns>Tùy chọn của người dùng.</returns>
     [HttpGet]
-    public async Task<ActionResult<UserPreferenceDto>> GetUserPreferences()
+    public async Task<IActionResult> GetUserPreferences()
     {
         var result = await _mediator.Send(new GetUserPreferencesQuery());
-        return result.IsSuccess ? (ActionResult<UserPreferenceDto>)Ok(result.Value) : (ActionResult<UserPreferenceDto>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -38,9 +36,9 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh chứa dữ liệu tùy chọn người dùng.</param>
     /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     [HttpPut]
-    public async Task<ActionResult<Result>> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
+    public async Task<IActionResult> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Result>)Ok(result) : (ActionResult<Result>)BadRequest(result);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
     }
 }

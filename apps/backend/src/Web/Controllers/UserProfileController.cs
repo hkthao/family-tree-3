@@ -1,6 +1,4 @@
-using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
-using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +25,10 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     /// </summary>
     /// <returns>Hồ sơ của người dùng hiện tại.</returns>
     [HttpGet("me")]
-    public async Task<ActionResult<UserProfileDto>> GetCurrentUserProfile()
+    public async Task<IActionResult> GetCurrentUserProfile()
     {
         var result = await _mediator.Send(new GetCurrentUserProfileQuery());
-        return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
     /// <summary>
@@ -40,10 +38,10 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh chứa dữ liệu hồ sơ người dùng đã cập nhật.</param>
     /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result>> UpdateUserProfile([FromRoute] Guid id, [FromBody] UpdateUserProfileCommand command)
+    public async Task<IActionResult> UpdateUserProfile([FromRoute] Guid id, [FromBody] UpdateUserProfileCommand command)
     {
         command.SetId(id);
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Result>)Ok(result) : (ActionResult<Result>)BadRequest(result);
+        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
     }
 }

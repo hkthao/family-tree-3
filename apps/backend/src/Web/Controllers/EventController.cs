@@ -1,5 +1,3 @@
-using backend.Application.Common.Models;
-using backend.Application.Events;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
@@ -31,7 +29,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của sự kiện cần lấy.</param>
     /// <returns>Thông tin chi tiết của sự kiện.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<EventDto>> GetEventById([FromRoute] Guid id)
+    public async Task<IActionResult> GetEventById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
         if (result.IsSuccess)
@@ -47,14 +45,14 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo sự kiện với thông tin chi tiết.</param>
     /// <returns>ID của sự kiện vừa được tạo.</returns>
     [HttpPost]
-    public async Task<ActionResult<Guid>> Create([FromBody] CreateEventCommand command)
+    public async Task<IActionResult> Create([FromBody] CreateEventCommand command)
     {
         if (command == null)
         {
             return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.IsSuccess ? CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -64,7 +62,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh cập nhật sự kiện với thông tin mới.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update([FromRoute] Guid id, [FromBody] UpdateEventCommand command)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateEventCommand command)
     {
         if (id != command.Id)
         {
@@ -81,7 +79,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của sự kiện cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete([FromRoute] Guid id)
+    public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteEventCommand(id));
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
@@ -93,10 +91,10 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các sự kiện tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<EventDto>>> Search([FromQuery] SearchEventsQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchEventsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<EventDto>>)Ok(result.Value) : (ActionResult<PaginatedList<EventDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -105,7 +103,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="familyId">Tùy chọn: Lọc sự kiện theo ID gia đình.</param>
     /// <returns>Danh sách các sự kiện sắp tới.</returns>
     [HttpGet("upcoming")]
-    public async Task<ActionResult<List<EventDto>>> GetUpcomingEvents([FromQuery] Guid? familyId = null)
+    public async Task<IActionResult> GetUpcomingEvents([FromQuery] Guid? familyId = null)
     {
         var query = new backend.Application.Events.Queries.GetUpcomingEvents.GetUpcomingEventsQuery
         {
@@ -114,7 +112,7 @@ public class EventController(IMediator mediator) : ControllerBase
             EndDate = DateTime.UtcNow.Date.AddDays(30)
         };
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<List<EventDto>>)Ok(result.Value) : (ActionResult<List<EventDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -123,9 +121,9 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo nhiều sự kiện với danh sách thông tin chi tiết.</param>
     /// <returns>Danh sách ID của các sự kiện vừa được tạo.</returns>
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<List<Guid>>> CreateEvents([FromBody] CreateEventsCommand command)
+    public async Task<IActionResult> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

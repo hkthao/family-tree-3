@@ -1,5 +1,3 @@
-using backend.Application.Common.Models;
-using backend.Application.UserActivities.Queries;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +28,7 @@ public class UserActivityController(IMediator mediator) : ControllerBase
     /// <param name="groupId">Tùy chọn: Lọc hoạt động theo ID nhóm (FamilyId).</param>
     /// <returns>Danh sách các hoạt động gần đây của người dùng.</returns>
     [HttpGet("recent")]
-    public async Task<ActionResult<PaginatedList<UserActivityDto>>> GetRecentActivities(
+    public async Task<IActionResult> GetRecentActivities(
         [FromQuery] int page,
         [FromQuery] int itemsPerPage = 10,
         [FromQuery] TargetType? targetType = null,
@@ -48,6 +46,6 @@ public class UserActivityController(IMediator mediator) : ControllerBase
 
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? (ActionResult<PaginatedList<UserActivityDto>>)Ok(result.Value) : (ActionResult<PaginatedList<UserActivityDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

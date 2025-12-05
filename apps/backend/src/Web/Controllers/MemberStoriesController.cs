@@ -31,7 +31,7 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpPost("generate")]
     [ProducesResponseType(typeof(GenerateStoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<GenerateStoryResponseDto>> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
         if (result.IsSuccess)
@@ -47,7 +47,7 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Guid>> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(command, cancellationToken);
         if (result.IsSuccess)
@@ -64,14 +64,14 @@ public class MemberStoriesController : ControllerBase // Updated
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateMemberStory(Guid memberStoryId, [FromBody] UpdateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> UpdateMemberStory(Guid memberStoryId, [FromBody] UpdateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         if (memberStoryId != command.Id)
         {
             return BadRequest("MemberStory ID in URL does not match body."); // Updated
         }
-        await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        var result = await _mediator.Send(command, cancellationToken);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -80,10 +80,10 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpDelete("{memberStoryId}")] // Updated
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
-        await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
-        return NoContent();
+        var result = await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpGet("search")] // Route sẽ là api/member-stories/search
     [ProducesResponseType(typeof(PaginatedList<MemberStoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> SearchMemberStories(
+    public async Task<IActionResult> SearchMemberStories(
         [FromQuery] SearchStoriesQuery query,
         CancellationToken cancellationToken)
     {
@@ -110,7 +110,7 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpGet("detail/{memberStoryId}")] // Updated
     [ProducesResponseType(typeof(MemberStoryDto), StatusCodes.Status200OK)] // Updated
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<MemberStoryDto>> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new GetMemberStoryDetailQuery(memberStoryId), cancellationToken); // Updated
         if (result.IsSuccess)

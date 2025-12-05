@@ -39,7 +39,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các thành viên tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] SearchMembersQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchMembersQuery query)
     {
         var result = await _mediator.Send(query);
         if (result.IsSuccess)
@@ -55,7 +55,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="id">ID của thành viên cần lấy.</param>
     /// <returns>Thông tin chi tiết của thành viên.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<MemberDetailDto>> GetMemberById(Guid id)
+    public async Task<IActionResult> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
         if (result.IsSuccess)
@@ -71,7 +71,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="ids">Chuỗi chứa các ID thành viên, phân tách bằng dấu phẩy.</param>
     /// <returns>Danh sách các thành viên.</returns>
     [HttpGet("by-ids")]
-    public async Task<ActionResult<List<MemberListDto>>> GetMembersByIds([FromQuery] string ids)
+    public async Task<IActionResult> GetMembersByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
         {
@@ -93,7 +93,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
     /// <returns>Danh sách các thành viên thuộc gia đình.</returns>
     [HttpGet("by-family/{familyId}")]
-    public async Task<ActionResult<List<MemberListDto>>> GetMembersByFamilyId(Guid familyId)
+    public async Task<IActionResult> GetMembersByFamilyId(Guid familyId)
     {
         var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
         if (result.IsSuccess)
@@ -104,10 +104,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     }
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateMember([FromBody] CreateMemberCommand command)
+    public async Task<IActionResult> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.IsSuccess ? CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -116,10 +116,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="command">Lệnh tạo nhiều thành viên với danh sách thông tin chi tiết.</param>
     /// <returns>Danh sách ID của các thành viên vừa được tạo.</returns>
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<List<Guid>>> CreateMembers([FromBody] CreateMembersCommand command)
+    public async Task<IActionResult> CreateMembers([FromBody] CreateMembersCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>

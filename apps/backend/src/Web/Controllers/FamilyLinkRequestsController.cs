@@ -27,7 +27,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Guid>> CreateFamilyLinkRequest([FromBody] CreateFamilyLinkRequestCommand command)
+    public async Task<IActionResult> CreateFamilyLinkRequest([FromBody] CreateFamilyLinkRequestCommand command)
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
@@ -41,7 +41,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(FamilyLinkRequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FamilyLinkRequestDto>> GetFamilyLinkRequestById(Guid id)
+    public async Task<IActionResult> GetFamilyLinkRequestById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyLinkRequestByIdQuery(id));
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
@@ -101,7 +101,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     [HttpGet("search")]
     [ProducesResponseType(typeof(PaginatedList<FamilyLinkRequestDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedList<FamilyLinkRequestDto>>> GetFamilyLinkRequests([FromQuery] SearchFamilyLinkRequestsQuery query)
+    public async Task<IActionResult> GetFamilyLinkRequests([FromQuery] SearchFamilyLinkRequestsQuery query)
     {
         var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);

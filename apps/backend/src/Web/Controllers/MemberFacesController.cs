@@ -4,7 +4,6 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
-using backend.Application.MemberFaces.Common; // For MemberFaceDto
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,37 +17,42 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<MemberFaceDto>>>> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
+    public async Task<IActionResult> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
     {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Result<MemberFaceDto>>> GetMemberFaceById(Guid id)
+    public async Task<IActionResult> GetMemberFaceById(Guid id)
     {
-        return await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
+        var result = await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
+        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<Guid>>> CreateMemberFace(CreateMemberFaceCommand command)
+    public async Task<IActionResult> CreateMemberFace(CreateMemberFaceCommand command)
     {
-        return await _mediator.Send(command);
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result<Unit>>> UpdateMemberFace(Guid id, UpdateMemberFaceCommand command)
+    public async Task<IActionResult> UpdateMemberFace(Guid id, UpdateMemberFaceCommand command)
     {
         if (id != command.Id)
         {
-            return BadRequest(Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation));
+            return BadRequest(Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).Error);
         }
-        return await _mediator.Send(command);
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result<Unit>>> DeleteMemberFace(Guid id)
+    public async Task<IActionResult> DeleteMemberFace(Guid id)
     {
-        return await _mediator.Send(new DeleteMemberFaceCommand { Id = id });
+        var result = await _mediator.Send(new DeleteMemberFaceCommand { Id = id });
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -59,7 +63,7 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     /// <returns>Đối tượng chứa thông tin về các khuôn mặt đã phát hiện.</returns>
     [HttpPost("detect")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromForm] IFormFile file, Guid familyId, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
+    public async Task<IActionResult> DetectFaces([FromForm] IFormFile file, Guid familyId, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
     {
         if (file == null || file.Length == 0)
         {

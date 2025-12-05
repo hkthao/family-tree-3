@@ -10,6 +10,8 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
+using backend.Application.PrivacyConfigurations.Commands; // New using
+using backend.Application.PrivacyConfigurations.Queries; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,10 +36,10 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// </summary>
     /// <returns>Danh sách các đối tượng FamilyAccessDto.</returns>
     [HttpGet("my-access")]
-    public async Task<ActionResult<List<FamilyAccessDto>>> GetUserFamilyAccess()
+    public async Task<IActionResult> GetUserFamilyAccess()
     {
         var result = await _mediator.Send(new GetUserFamilyAccessQuery());
-        return Ok(result);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -46,7 +48,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của gia đình cần lấy.</param>
     /// <returns>Thông tin chi tiết của gia đình.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<FamilyDto>> GetFamilyById(Guid id)
+    public async Task<IActionResult> GetFamilyById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyByIdQuery(id));
         if (result.IsSuccess)
@@ -62,10 +64,10 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các gia đình tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] SearchFamiliesQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchFamiliesQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<FamilyDto>>)Ok(result.Value) : (ActionResult<PaginatedList<FamilyDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -74,10 +76,10 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo gia đình với thông tin chi tiết.</param>
     /// <returns>ID của gia đình vừa được tạo.</returns>
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateFamily([FromBody] CreateFamilyCommand command)
+    public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.IsSuccess ? CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -86,10 +88,10 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo nhiều gia đình với danh sách thông tin chi tiết.</param>
     /// <returns>Danh sách ID của các gia đình vừa được tạo.</returns>
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<List<Guid>>> CreateFamilies([FromBody] CreateFamiliesCommand command)
+    public async Task<IActionResult> CreateFamilies([FromBody] CreateFamiliesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -143,7 +145,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="familyId">ID của gia đình cần cập nhật.</param>
     /// <returns>Kết quả của hoạt động cập nhật.</returns>
     [HttpPost("{familyId}/update-denormalized-fields")]
-    public async Task<ActionResult> UpdateDenormalizedFields([FromRoute] Guid familyId)
+    public async Task<IActionResult> UpdateDenormalizedFields([FromRoute] Guid familyId)
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);
@@ -158,6 +160,35 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Lấy cấu hình riêng tư cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Cấu hình riêng tư của gia đình.</returns>
+    [HttpGet("{familyId}/privacy-configuration")]
+    public async Task<IActionResult> GetPrivacyConfiguration(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetPrivacyConfigurationQuery(familyId));
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Cập nhật cấu hình riêng tư cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="command">Lệnh chứa dữ liệu cấu hình riêng tư đã cập nhật.</param>
+    /// <returns>Kết quả của hoạt động cập nhật.</returns>
+    [HttpPut("{familyId}/privacy-configuration")]
+    public async Task<IActionResult> UpdatePrivacyConfiguration(Guid familyId, [FromBody] UpdatePrivacyConfigurationCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            return BadRequest("FamilyId in URL does not match command body.");
+        }
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }

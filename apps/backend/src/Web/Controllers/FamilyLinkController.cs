@@ -1,6 +1,4 @@
-using backend.Application.Common.Models; // New import for PaginatedList
 using backend.Application.FamilyLinks.Commands.DeleteLinkFamily;
-using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
 using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
 using Microsoft.AspNetCore.Authorization;
@@ -35,10 +33,10 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các liên kết gia đình tìm được.</returns>
     [HttpGet("search")] // Renamed from 'links/{familyId}' to 'search'
-    public async Task<ActionResult<PaginatedList<FamilyLinkDto>>> Search([FromQuery] SearchFamilyLinksQuery query) // Renamed and changed signature
+    public async Task<IActionResult> Search([FromQuery] SearchFamilyLinksQuery query) // Renamed and changed signature
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<FamilyLinkDto>>)Ok(result.Value) : (ActionResult<PaginatedList<FamilyLinkDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -47,7 +45,7 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     /// <param name="familyLinkId">ID của liên kết gia đình.</param>
     /// <returns>Thông tin chi tiết của liên kết gia đình.</returns>
     [HttpGet("links/by-id/{familyLinkId}")]
-    public async Task<ActionResult<FamilyLinkDto>> GetFamilyLinkById(Guid familyLinkId)
+    public async Task<IActionResult> GetFamilyLinkById(Guid familyLinkId)
     {
         var result = await _mediator.Send(new GetFamilyLinkByIdQuery(familyLinkId));
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);

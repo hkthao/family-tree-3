@@ -1,7 +1,6 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
-using backend.Application.MemberStories.DTOs; // Updated
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +42,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result) : BadRequest(result);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     /// <summary>
@@ -52,9 +51,9 @@ public class AIController : ControllerBase
     /// <param name="command">Lệnh chứa thông tin cần thiết để tạo câu chuyện.</param>
     /// <returns>Câu chuyện đã tạo.</returns>
     [HttpPost("generate-story")]
-    public async Task<ActionResult<GenerateStoryResponseDto>> GenerateStory([FromBody] GenerateStoryCommand command)
+    public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

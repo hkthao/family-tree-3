@@ -74,7 +74,7 @@ export class ApiFamilyService implements IFamilyService {
     return this.http.post<Blob>(`/family-data/${familyId}/export-pdf`, htmlContent, { headers: { 'Content-Type': 'text/html' }, responseType: 'blob' });
   }
   async getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>> {
-    const result = await this.http.get<PrivacyConfiguration>(`/PrivacyConfiguration/${familyId}`);
+    const result = await this.http.get<PrivacyConfiguration>(`/family/${familyId}/privacy-configuration`);
     if (result.ok) {
       result.value.publicMemberProperties = result.value.publicMemberProperties || [];
     }
@@ -82,7 +82,7 @@ export class ApiFamilyService implements IFamilyService {
   }
   async updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>> {
     const payload = { familyId, publicMemberProperties };
-    return this.http.put<void>(`/PrivacyConfiguration/${familyId}`, payload);
+    return this.http.put<void>(`/family/${familyId}/privacy-configuration`, payload);
   }
   async generateFamilyData(command: GenerateFamilyDataCommand): Promise<Result<AnalyzedDataDto, ApiError>> {
     return this.http.post<AnalyzedDataDto>(`/family/generate-data`, command);

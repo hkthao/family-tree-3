@@ -1,4 +1,3 @@
-using backend.Application.Dashboard.Queries;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
