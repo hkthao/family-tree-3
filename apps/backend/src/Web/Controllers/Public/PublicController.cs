@@ -105,9 +105,9 @@ public class PublicController(IMediator mediator) : ControllerBase
     }
     [HttpGet("dashboard")]
     [ProducesResponseType(typeof(PublicDashboardDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetPublicDashboard()
+    public async Task<IActionResult> GetPublicDashboard([FromQuery] Guid familyId)
     {
-        var result = await _mediator.Send(new GetPublicDashboardQuery());
+        var result = await _mediator.Send(new GetPublicDashboardQuery(familyId));
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }
