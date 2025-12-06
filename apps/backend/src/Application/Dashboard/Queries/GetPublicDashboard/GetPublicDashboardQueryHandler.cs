@@ -19,7 +19,7 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
     public async Task<Result<PublicDashboardDto>> Handle(GetPublicDashboardQuery request, CancellationToken cancellationToken)
     {
         var allPublicFamilies = await _context.Families
-            .Where(f => f.Visibility == "Public" && !f.IsDeleted)
+            .Where(f => f.Id == request.FamilyId && f.Visibility == "Public" && !f.IsDeleted)
             .Include(f => f.Members.Where(m => !m.IsDeleted))
             .Include(f => f.Relationships.Where(r => !r.IsDeleted))
             .Include(f => f.Events.Where(e => !e.IsDeleted))
@@ -114,48 +114,57 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
         var graph = new Dictionary<Guid, List<Guid>>(); // child -> parents
         var childrenGraph = new Dictionary<Guid, List<Guid>>(); // parent -> children
 
-        foreach (var member in members)
-        {
-            graph[member.Id] = new List<Guid>();
-            childrenGraph[member.Id] = new List<Guid>();
-        }
+        // Only add entries to graph and childrenGraph if there's a relevant relationship
+        var relevantRelationships = relationships
+            .Where(r => !r.IsDeleted &&
+                        members.Any(m => m.Id == r.SourceMemberId) &&
+                        members.Any(m => m.Id == r.TargetMemberId) &&
+                        (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother))
+            .ToList();
 
-        foreach (var rel in relationships.Where(r => !r.IsDeleted))
+        foreach (var rel in relevantRelationships)
         {
-            // Relationship type Father or Mother means SourceMember is a parent of TargetMember
-            if (rel.Type == RelationshipType.Father || rel.Type == RelationshipType.Mother)
+            // Ensure target (child) has an entry in graph
+            if (!graph.ContainsKey(rel.TargetMemberId))
             {
-                if (graph.ContainsKey(rel.TargetMemberId) && members.Any(m => m.Id == rel.SourceMemberId))
-                {
-                    graph[rel.TargetMemberId].Add(rel.SourceMemberId);
-                }
-                if (childrenGraph.ContainsKey(rel.SourceMemberId) && members.Any(m => m.Id == rel.TargetMemberId))
-                {
-                    childrenGraph[rel.SourceMemberId].Add(rel.TargetMemberId);
-                }
+                graph[rel.TargetMemberId] = new List<Guid>();
+            }
+            if (!graph[rel.TargetMemberId].Contains(rel.SourceMemberId))
+            {
+                graph[rel.TargetMemberId].Add(rel.SourceMemberId);
+            }
+
+            // Ensure source (parent) has an entry in childrenGraph
+            if (!childrenGraph.ContainsKey(rel.SourceMemberId))
+            {
+                childrenGraph[rel.SourceMemberId] = new List<Guid>();
+            }
+            if (!childrenGraph[rel.SourceMemberId].Contains(rel.TargetMemberId))
+            {
+                childrenGraph[rel.SourceMemberId].Add(rel.TargetMemberId);
             }
         }
 
-        // Identify root members (those with no known parents within this family)
-        var rootMembers = members.Where(m => !graph.ContainsKey(m.Id) || !graph[m.Id].Any()).ToList();
+        // Identify potential root members: those in 'members' that are not children (TargetMemberId)
+        // in any of the relevant relationships.
+        var allChildrenInRelevantRelationships = relevantRelationships.Select(r => r.TargetMemberId).ToHashSet();
+        var rootMembers = members.Where(m => !allChildrenInRelevantRelationships.Contains(m.Id)).ToList();
 
-        // If there are no explicit roots, or all members seem to have parents,
-        // it implies a disconnected graph or a single-generation family.
-        // In such cases, assign generation 1 to all, or handle as appropriate for your definition of 'generation'.
+        // Handle cases where there are no relationships defined, or all members are isolated.
+        // In such scenarios, all members are considered generation 1.
         if (!rootMembers.Any() && members.Any())
         {
             foreach (var member in members)
             {
-                memberGenerations[member.Id] = 1; // Assume all are generation 1 if no clear roots
+                memberGenerations[member.Id] = 1;
             }
         }
         else
         {
-            // Use a queue for BFS to determine generations
             var queue = new Queue<Guid>();
             foreach (var root in rootMembers)
             {
-                memberGenerations[root.Id] = 1; // Roots are generation 1
+                memberGenerations[root.Id] = 1;
                 queue.Enqueue(root.Id);
             }
 
@@ -164,19 +173,31 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
                 var currentMemberId = queue.Dequeue();
                 var currentGeneration = memberGenerations[currentMemberId];
 
-                // Find children of current member
                 if (childrenGraph.TryGetValue(currentMemberId, out var children))
                 {
                     foreach (var childId in children)
                     {
-                        // If child's generation hasn't been set or can be set to a higher generation
-                        if (!memberGenerations.ContainsKey(childId) || memberGenerations[childId] < currentGeneration + 1)
+                        if (members.Any(m => m.Id == childId)) // Ensure child is part of the current family members collection
                         {
-                            memberGenerations[childId] = currentGeneration + 1;
-                            queue.Enqueue(childId);
+                            if (!memberGenerations.ContainsKey(childId) || memberGenerations[childId] < currentGeneration + 1)
+                            {
+                                memberGenerations[childId] = currentGeneration + 1;
+                                queue.Enqueue(childId);
+                            }
                         }
                     }
                 }
+            }
+        }
+        
+        // Handle any members that were not reached by the BFS (e.g., truly isolated members, or members
+        // whose parents are outside the 'members' collection and thus not included in 'relevantRelationships').
+        // These should also be considered Generation 1 as they effectively start new branches.
+        foreach (var member in members)
+        {
+            if (!memberGenerations.ContainsKey(member.Id))
+            {
+                memberGenerations[member.Id] = 1;
             }
         }
 

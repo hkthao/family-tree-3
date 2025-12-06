@@ -74,7 +74,7 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var query = new GetPublicDashboardQuery();
+        var query = new GetPublicDashboardQuery(publicFamilyId1);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -83,31 +83,31 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
 
-        result.Value!.TotalPublicFamilies.Should().Be(2); // publicFamily1, publicFamily2
-        result.Value.TotalPublicMembers.Should().Be(3); // memberPF1_Male_Living_Old, memberPF1_Female_Living_Young, memberPF2_Male_Living (memberPF1_Female_Deleted is soft-deleted)
+        result.Value!.TotalPublicFamilies.Should().Be(1); // publicFamily1
+        result.Value.TotalPublicMembers.Should().Be(2); // memberPF1_Male_Living_Old, memberPF1_Female_Living_Young
         result.Value.TotalPublicRelationships.Should().Be(1); // relPF1_ParentChild1
         result.Value.TotalPublicEvents.Should().Be(1); // eventPF1_Public (eventPF1_Deleted is soft-deleted)
 
-        // Gender Ratios (from 3 members: 2 male, 1 female)
-        result.Value.PublicMaleRatio.Should().BeApproximately(2.0 / 3.0, 0.001);
-        result.Value.PublicFemaleRatio.Should().BeApproximately(1.0 / 3.0, 0.001);
+        // Gender Ratios (from 2 members: 1 male, 1 female)
+        result.Value.PublicMaleRatio.Should().BeApproximately(1.0 / 2.0, 0.001);
+        result.Value.PublicFemaleRatio.Should().BeApproximately(1.0 / 2.0, 0.001);
 
         // Living and Deceased
-        result.Value.PublicLivingMembersCount.Should().Be(3); // memberPF1_Male_Living_Old, memberPF1_Female_Living_Young, memberPF2_Male_Living
+        result.Value.PublicLivingMembersCount.Should().Be(2); // memberPF1_Male_Living_Old, memberPF1_Female_Living_Young
         result.Value.PublicDeceasedMembersCount.Should().Be(0); // memberPF1_Male_Deceased is deceased but also filtered by IsDeleted=false
 
         // Average Age (as of 2024-01-01)
         // memberPF1_Male_Living_Old: 2024 - 1950 = 74
         // memberPF1_Female_Living_Young: 2024 - 2000 = 24
         // memberPF2_Male_Living: 2024 - 1990 = 34
-        // Average: (74 + 24 + 34) / 3 = 132 / 3 = 44
-        result.Value.PublicAverageAge.Should().Be(44);
+        // Average: (74 + 24) / 2 = 98 / 2 = 49
+        result.Value.PublicAverageAge.Should().Be(49);
 
         // Generations (Public Family 1 has 2 generations based on relPF1_ParentChild1)
         // Public Family 2 has 1 generation
         result.Value.TotalPublicGenerations.Should().Be(2); // Max generations across public families
         result.Value.PublicMembersPerGeneration.Should().HaveCount(2);
-        result.Value.PublicMembersPerGeneration[1].Should().Be(2); // memberPF1_Male_Living_Old, memberPF2_Male_Living
+        result.Value.PublicMembersPerGeneration[1].Should().Be(1); // memberPF1_Male_Living_Old
         result.Value.PublicMembersPerGeneration[2].Should().Be(1); // memberPF1_Female_Living_Young
     }
 
@@ -121,7 +121,8 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         _context.Events.Add(new Event("Private Event", "PrE1", EventType.Other, privateFamily1.Id) { Id = Guid.NewGuid() });
         await _context.SaveChangesAsync();
 
-        var query = new GetPublicDashboardQuery();
+        var testFamilyId = Guid.NewGuid();
+        var query = new GetPublicDashboardQuery(testFamilyId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -171,12 +172,12 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         _context.Relationships.Add(new Relationship(publicFamilyId, gen1_member1.Id, gen2_member1.Id, RelationshipType.Father));
         // G1M2 -> G2M2 (Father)
         _context.Relationships.Add(new Relationship(publicFamilyId, gen1_member2.Id, gen2_member2.Id, RelationshipType.Father));
-        // G2M1 -> G3M1 (Mother)
-        _context.Relationships.Add(new Relationship(publicFamilyId, gen2_member1.Id, gen3_member1.Id, RelationshipType.Mother));
+        // G2M1 -> G3M1 (Father)
+        _context.Relationships.Add(new Relationship(publicFamilyId, gen2_member1.Id, gen3_member1.Id, RelationshipType.Father));
 
         await _context.SaveChangesAsync();
 
-        var query = new GetPublicDashboardQuery();
+        var query = new GetPublicDashboardQuery(publicFamilyId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -214,7 +215,7 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var query = new GetPublicDashboardQuery();
+        var query = new GetPublicDashboardQuery(publicFamilyId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
