@@ -180,8 +180,8 @@ export default function EventDetailsScreen() {
                 <Chip icon="map-marker" compact={true} style={styles.chip}>{event.location}</Chip>
               )}
 
-              {event.relatedMembers?.map((memberId: string, index: number) => (
-                <Chip key={index} compact={true} icon="account-outline">{memberId}</Chip>
+              {event.relatedMembers?.map((member, index: number) => (
+                <Chip key={index} compact={true} icon="account-outline">{member.fullName}</Chip>
               ))}
             </View>
           </Card.Content>

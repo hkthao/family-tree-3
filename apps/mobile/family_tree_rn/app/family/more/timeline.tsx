@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, Alert } from 'react-native';
-import Timeline from 'react-native-timeline-flatlist';
+import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, Alert, FlatList } from 'react-native';
 import { useTheme, Searchbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useIsFocused } from '@react-navigation/native';
@@ -11,6 +10,7 @@ import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import type { EventDto, SearchPublicEventsQuery } from '@/types';
 import TimelineEventDetail from '@/components/event/TimelineEventDetail';
+import TimelineListItem from '@/components/event/TimelineListItem';
 
 
 interface TimelineData {
@@ -40,7 +40,6 @@ const TimelineScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(''); // Corrected line 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isFetchingMoreData, setIsFetchingMoreData] = useState(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -52,37 +51,23 @@ const TimelineScreen: React.FC = () => {
     };
   }, [searchQuery]);
 
-  const mapEventToTimelineData = useCallback((event: EventDto): TimelineData => {
-    return {
-      time: event.startDate ? format(new Date(event.startDate), 'dd/MM/yyyy') : '',
-      title: event.name || t('common.noTitle'),
-      description: event.description || t('common.noDescription'),
-      originalEvent: event,
-      // You can add logic here to set lineColor or circleColor based on event properties
-    };
-  }, [t]);
-
-  const timelineData = useMemo(() => events.map(mapEventToTimelineData), [events, mapEventToTimelineData]);
-
   const loadEvents = useCallback(async (isLoadMore: boolean) => {
     if (!currentFamilyId) {
       Alert.alert(t('common.error'), t('timeline.familyIdNotFound'));
       return;
     }
 
-    const { loading: currentLoading, hasMore: currentHasMore } = usePublicEventStore.getState();
+    const { hasMore: currentHasMore } = usePublicEventStore.getState();
 
-    if (currentLoading || isFetchingMoreData) return; // Prevent multiple fetches
-
-    // Prevent loading more if there are no more pages
     if (isLoadMore && !currentHasMore) return;
 
+    if (!isLoadMore) {
+      setIsRefreshing(true);
+      // Reset store for fresh fetch
+      usePublicEventStore.getState().reset();
+    }
+
     try {
-      if (!isLoadMore) {
-        setIsRefreshing(true);
-      } else {
-        setIsFetchingMoreData(true); // Set fetching more data state
-      }
       const query: SearchPublicEventsQuery = {
         searchTerm: debouncedSearchQuery,
         familyId: currentFamilyId,
@@ -92,38 +77,31 @@ const TimelineScreen: React.FC = () => {
     } catch (err: any) {
       Alert.alert(t('common.error'), err.message || t('timeline.failedToLoadEvents'));
     } finally {
-      setIsRefreshing(false);
-      setIsFetchingMoreData(false); // Clear fetching more data state
+      if (!isLoadMore) {
+        setIsRefreshing(false);
+      }
     }
-  }, [currentFamilyId, isFetchingMoreData, debouncedSearchQuery, fetchEvents, t]);
+  }, [currentFamilyId, debouncedSearchQuery, fetchEvents, t]);
 
   useEffect(() => {
-    if (isFocused) {
-      // Fetch initial events when component mounts or screen is focused
+    if (isFocused && currentFamilyId) {
       loadEvents(false);
     }
-
-    return () => {
-      if (!isFocused) {
-        reset(); // Reset store when screen loses focus
-      }
-    };
-  }, [isFocused, debouncedSearchQuery, loadEvents, reset, currentFamilyId]);
+  }, [isFocused, debouncedSearchQuery, currentFamilyId, loadEvents]);
 
   const onRefresh = useCallback(() => {
-    const { loading: currentLoading } = usePublicEventStore.getState();
-    if (!currentLoading) {
-      loadEvents(false); // Fetch first page again
-    }
+    console.log('Refreshing timeline');
+
+    loadEvents(false); // Fetch first page again
   }, [loadEvents]);
 
   const onEndReached = useCallback(() => {
     console.log('End reached');
     const { loading: currentLoading, hasMore: currentHasMore } = usePublicEventStore.getState();
-    if (!currentLoading && !isFetchingMoreData && currentHasMore) { // Use isFetchingMoreData
+    if (!currentLoading && currentHasMore) {
       loadEvents(true);
     }
-  }, [isFetchingMoreData, loadEvents]);
+  }, [loadEvents]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -166,7 +144,7 @@ const TimelineScreen: React.FC = () => {
   }), [theme]);
 
   const renderFooter = useCallback(() => {
-    if (isFetchingMoreData) {
+    if (loading) { // Use store's loading state
       return (
         <View style={styles.footer}>
           <ActivityIndicator />
@@ -177,28 +155,17 @@ const TimelineScreen: React.FC = () => {
       return <Text style={styles.footerText}>{t('timeline.noMoreEvents')}</Text>;
     }
     return <View style={styles.footer} />;
-  }, [isFetchingMoreData, hasMore, events.length, styles.footer, styles.footerText, t]);
+  }, [loading, hasMore, events.length, styles.footer, styles.footerText, t]);
 
-  const memoizedRefreshControl = useMemo(() => (
-    <RefreshControl
-      refreshing={isRefreshing}
-      onRefresh={onRefresh}
-      tintColor={theme.colors.primary}
+  const renderItem = useCallback(({ item, index }: { item: EventDto, index: number }) => (
+    <TimelineListItem
+      item={item}
+      index={index}
+      isFirst={index === 0}
+      isLast={index === events.length - 1}
     />
-  ), [isRefreshing, onRefresh, theme.colors.primary]);
+  ), [events.length]);
 
-  const timelineOptions = useMemo(() => ({
-    data: timelineData,
-    style: {
-      paddingTop: 5,
-    },
-    refreshControl: memoizedRefreshControl,
-    showVerticalScrollIndicator: false,
-    onEndReached: onEndReached,
-    renderFooter: renderFooter,
-    onEndReachedThreshold: 0.5, // Increased threshold
-    onEndReachedCalledDuringMomentum: true, // Add this prop
-  }), [timelineData, memoizedRefreshControl, onEndReached, renderFooter]);
 
   if (error) {
     return (
@@ -228,23 +195,21 @@ const TimelineScreen: React.FC = () => {
           onClearIconPress={() => setSearchQuery('')}
         />
       </View>
-      <Timeline
-        {...timelineOptions}
-        listViewContainerStyle={styles.list}
-        circleSize={20}
-        circleColor={theme.colors.primary}
-        lineColor={theme.colors.primary}
-        timeContainerStyle={{ minWidth: 86, marginTop: -5 }}
-        timeStyle={{ textAlign: 'center',  color: theme.colors.onBackground, padding: 5 }}
-        titleStyle={{ color: theme.colors.onSurface, marginTop: -15 }}
-        descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-        innerCircle={'dot'}
-        isUsingFlatlist={true}
-        renderDetail={(rowData: TimelineData) => (
-          <TimelineEventDetail
-            event={rowData.originalEvent}
+      <FlatList
+        data={events}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
           />
-        )}
+        }
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
       />
     </View>
   );

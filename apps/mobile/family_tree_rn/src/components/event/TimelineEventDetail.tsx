@@ -34,8 +34,6 @@ const TimelineEventDetail: React.FC<TimelineEventDetailProps> = ({ event }) => {
     container: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.roundness,
-      marginTop: -15,
-      paddingVertical: SPACING_SMALL, // Add padding to container
       position: 'relative', // Needed for absolute positioning of icon
     },
     title: {
