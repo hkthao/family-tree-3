@@ -26,10 +26,10 @@ export default function FamilyDetailLayout() {
         return t('familyDetail.tab.members');
       case 'tree':
         return t('familyDetail.tab.tree');
-      case 'events':
-        return t('familyDetail.tab.events');
       case 'face-search':
         return t('familyDetail.tab.faceSearch');
+      case 'more':
+        return t('familyDetail.tab.more');
       default:
         return t('familyDetail.title'); // Fallback title
     }
@@ -116,25 +116,27 @@ export default function FamilyDetailLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="events"
-        options={{
-          title: t('familyDetail.tab.events'),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="calendar-month-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="face-search"
-        options={{
-          title: t('familyDetail.tab.faceSearch'),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="face-recognition" color={color} size={size} />
-          ),
-        }}
-      />
-      </Tabs>
-    </View>
-  );
-}
+
+
+            <Tabs.Screen
+              name="face-search"
+              options={{
+                title: t('familyDetail.tab.faceSearch'),
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons name="face-recognition" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="more"
+              options={{
+                title: t('familyDetail.tab.more'),
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons name="dots-horizontal" color={color} size={size} />
+                ),
+              }}
+            />
+          </Tabs>
+        </View>
+      );
+      }

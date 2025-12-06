@@ -241,5 +241,16 @@
   "familyDashboard.tab.dashboard": "Dashboard",
   "common.male": "Male",
   "common.female": "Female",
-  "common.other": "Other"
+  "common.other": "Other",
+  "familyDetail.tab.more": "More",
+  "more.events": "Events",
+  "more.faceData": "Face Data",
+  "more.memories": "Memories",
+  "more.timeline": "Timeline",
+  "more.privacy": "Privacy",
+  "more.eventsPlaceholder": "More detailed events screen (under development)",
+  "more.faceDataPlaceholder": "More detailed face data screen (under development)",
+  "more.memoriesPlaceholder": "More detailed memories screen (under development)",
+  "more.timelinePlaceholder": "More detailed timeline screen (under development)",
+  "more.privacyPlaceholder": "More detailed privacy settings screen (under development)"
 }

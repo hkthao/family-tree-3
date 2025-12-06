@@ -243,5 +243,16 @@
   "familyDashboard.tab.dashboard": "Bảng điều khiển",
   "common.male": "Nam",
   "common.female": "Nữ",
-  "common.other": "Khác"
+  "common.other": "Khác",
+  "familyDetail.tab.more": "Thêm nữa",
+  "more.events": "Sự kiện",
+  "more.faceData": "Dữ liệu khuôn mặt",
+  "more.memories": "Ký ức",
+  "more.timeline": "Dòng thời gian",
+  "more.privacy": "Riêng tư",
+  "more.eventsPlaceholder": "Màn hình sự kiện chi tiết hơn (đang phát triển)",
+  "more.faceDataPlaceholder": "Màn hình dữ liệu khuôn mặt chi tiết hơn (đang phát triển)",
+  "more.memoriesPlaceholder": "Màn hình ký ức chi tiết hơn (đang phát triển)",
+  "more.timelinePlaceholder": "Màn hình dòng thời gian chi tiết hơn (đang phát triển)",
+  "more.privacyPlaceholder": "Màn hình cài đặt riêng tư chi tiết hơn (đang phát triển)"
 }
