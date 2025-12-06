@@ -1,8 +1,7 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Appbar, useTheme } from 'react-native-paper';
 import { View } from 'react-native';
-import { router } from 'expo-router';
 
 export default function MoreLayout() {
   const { t } = useTranslation();

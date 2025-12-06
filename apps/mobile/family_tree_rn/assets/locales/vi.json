@@ -257,5 +257,12 @@
   "more.faceDataPlaceholder": "Màn hình dữ liệu khuôn mặt chi tiết hơn (đang phát triển)",
   "more.memoriesPlaceholder": "Màn hình ký ức chi tiết hơn (đang phát triển)",
   "more.timelinePlaceholder": "Màn hình dòng thời gian chi tiết hơn (đang phát triển)",
-  "more.privacyPlaceholder": "Màn hình cài đặt riêng tư chi tiết hơn (đang phát triển)"
+  "more.privacyPlaceholder": "Màn hình cài đặt riêng tư chi tiết hơn (đang phát triển)",
+  "timeline.familyIdNotFound": "Không tìm thấy ID gia đình.",
+  "timeline.failedToLoadEvents": "Không thể tải sự kiện.",
+  "timeline.searchPlaceholder": "Tìm kiếm sự kiện",
+  "timeline.noMoreEvents": "Không còn sự kiện nào.",
+  "timeline.noEventsFound": "Không tìm thấy sự kiện nào.",
+  "common.noTitle": "Không có tiêu đề",
+  "common.noDescription": "Không có mô tả"
 }

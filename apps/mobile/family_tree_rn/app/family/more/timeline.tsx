@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, RefreshControl } from 'react-native'; // Added ActivityIndicator, Text for renderFooter
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, Alert } from 'react-native';
 import Timeline from 'react-native-timeline-flatlist';
-import { useTheme, Searchbar } from 'react-native-paper'; // Import useTheme, Searchbar
+import { useTheme, Searchbar } from 'react-native-paper';
+import { useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useIsFocused } from '@react-navigation/native';
+import { format } from 'date-fns';
 
 import { SPACING_MEDIUM } from '@/constants/dimensions';
+import { usePublicEventStore } from '@/stores/usePublicEventStore';
+import type { EventDto, SearchPublicEventsQuery } from '@/types';
+
 
 interface TimelineData {
   time: string;
@@ -13,73 +20,97 @@ interface TimelineData {
   circleColor?: string;
 }
 
-const DUMMY_DATA: TimelineData[] = [
-  { time: '09:00', title: 'Archery Training', description: 'The Beginner Archery and Beginner Crossbow course does not require you to bring any equipment, since everything you need will be provided for the course. ' },
-  { time: '10:45', title: 'Play Badminton', description: 'Badminton is a racquet sport played using racquets to hit a shuttlecock across a net.' },
-  { time: '12:00', title: 'Lunch', description: 'Lunch time' }, // Removed icon, added description to fit TimelineData
-  { time: '14:00', title: 'Watch Soccer', description: 'Team sport played between two teams of eleven players with a spherical ball. ' },
-  { time: '16:30', title: 'Go to Fitness center', description: 'Look out for the Best Gym & Fitness Centers around me :)' },
-];
-
 const TimelineScreen: React.FC = () => {
-  const theme = useTheme(); // Get theme from react-native-paper
-  const [data, setData] = useState<TimelineData[]>(DUMMY_DATA);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [waiting, setWaiting] = useState(false);
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const isFocused = useIsFocused();
+  const { familyId } = useLocalSearchParams<{ familyId: string }>();
 
-  // Search state and debounce logic
+  const {
+    events,
+    loading,
+    error,
+    hasMore,
+    fetchEvents,
+    reset,
+  } = usePublicEventStore();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 400); // 400ms debounce
+    }, 400);
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchQuery]);
 
-  // Filter data based on search query
-  const filteredData = useMemo(() => {
-    if (!debouncedSearchQuery) {
-      return data;
+  const mapEventToTimelineData = useCallback((event: EventDto): TimelineData => {
+    return {
+      time: event.startDate ? format(new Date(event.startDate), 'HH:mm') : '',
+      title: event.name || t('common.noTitle'),
+      description: event.description || t('common.noDescription'),
+      // You can add logic here to set lineColor or circleColor based on event properties
+    };
+  }, [t]);
+
+  const timelineData = useMemo(() => events.map(mapEventToTimelineData), [events, mapEventToTimelineData]);
+
+  const loadEvents = useCallback(async (isLoadMore: boolean) => {
+    if (!familyId) {
+      Alert.alert(t('common.error'), t('timeline.familyIdNotFound'));
+      return;
     }
-    const lowercasedQuery = debouncedSearchQuery.toLowerCase();
-    return data.filter(item =>
-      item.title.toLowerCase().includes(lowercasedQuery) ||
-      item.description.toLowerCase().includes(lowercasedQuery)
-    );
-  }, [data, debouncedSearchQuery]);
 
+    if (loading) return;
 
-  const onRefresh = () => {
-    setIsRefreshing(true);
-    // Simulate fetching new data
-    setTimeout(() => {
-      setData(DUMMY_DATA); // Reset to initial data
+    // Prevent loading more if there are no more pages
+    if (isLoadMore && !hasMore) return;
+
+    try {
+      if (!isLoadMore) {
+        setIsRefreshing(true);
+      }
+      const query: SearchPublicEventsQuery = {
+        searchTerm: debouncedSearchQuery,
+        // Add other query parameters if needed
+      };
+      await fetchEvents(familyId, query, isLoadMore);
+    } catch (err: any) {
+      Alert.alert(t('common.error'), err.message || t('timeline.failedToLoadEvents'));
+    } finally {
       setIsRefreshing(false);
-    }, 2000);
-  };
-
-  const onEndReached = () => {
-    if (!waiting) {
-      setWaiting(true);
-      // Simulate loading more data
-      setTimeout(() => {
-        const newData: TimelineData[] = [
-          { time: '18:00', title: 'Load more data', description: 'append event at bottom of timeline' },
-          { time: '18:00', title: 'Load more data', description: 'append event at bottom of timeline' },
-          { time: '18:00', title: 'Load more data', description: 'append event at bottom of timeline' },
-          { time: '18:00', title: 'Load more data', description: 'append event at bottom of timeline' },
-          { time: '18:00', title: 'Load more data', description: 'append event at bottom of timeline' }
-        ];
-        setData([...data, ...newData]);
-        setWaiting(false);
-      }, 2000);
     }
-  };
+  }, [familyId, loading, hasMore, debouncedSearchQuery, fetchEvents, t]);
+
+  useEffect(() => {
+    if (isFocused) {
+      // Fetch initial events when component mounts or screen is focused
+      loadEvents(false);
+    }
+
+    return () => {
+      if (!isFocused) {
+        reset(); // Reset store when screen loses focus
+      }
+    };
+  }, [isFocused, debouncedSearchQuery, loadEvents, reset]);
+
+  const onRefresh = useCallback(() => {
+    if (!loading) {
+      loadEvents(false); // Fetch first page again
+    }
+  }, [loading, loadEvents]);
+
+  const onEndReached = useCallback(() => {
+    if (!loading && hasMore) {
+      loadEvents(true);
+    }
+  }, [loading, hasMore, loadEvents]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -90,42 +121,90 @@ const TimelineScreen: React.FC = () => {
     searchFilterContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.colors.surfaceVariant, // Set background color for the container
-      borderRadius: theme.roundness, // Match Searchbar's border radius
+      backgroundColor: theme.colors.surfaceVariant,
+      borderRadius: theme.roundness,
     },
     searchbar: {
       flex: 1,
       borderRadius: theme.roundness,
-      backgroundColor: 'transparent', // Make Searchbar background transparent
+      backgroundColor: 'transparent',
     },
     list: {
       flex: 1,
-      marginTop: SPACING_MEDIUM, // Add some top margin after searchbar
+      marginTop: SPACING_MEDIUM,
     },
     footer: {
-      marginTop: 10,
-      marginBottom: 20,
+      marginTop: SPACING_MEDIUM,
+      marginBottom: SPACING_MEDIUM,
     },
     footerText: {
       textAlign: 'center',
       color: theme.colors.onSurfaceVariant,
+    },
+    errorText: {
+      color: theme.colors.error,
+      textAlign: 'center',
+      marginTop: SPACING_MEDIUM,
+    },
+    emptyListText: {
+      color: theme.colors.onBackground,
+      textAlign: 'center',
+      marginTop: SPACING_MEDIUM,
     }
   }), [theme]);
 
   const renderFooter = () => {
-    if (!waiting) return <Text style={styles.footerText}>~</Text>;
+    if (loading && events.length > 0) { // Only show activity indicator if loading more, not initial load
+      return (
+        <View style={styles.footer}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+    if (!hasMore && events.length > 0) {
+      return <Text style={styles.footerText}>{t('timeline.noMoreEvents')}</Text>;
+    }
+    return <View style={styles.footer} />;
+  };
+
+  if (error) {
     return (
-      <View style={styles.footer}>
-        <ActivityIndicator />
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
-  };
+  }
+
+  if (loading && events.length === 0) { // Show loading indicator for initial load
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />
+      </View>
+    );
+  }
+
+  if (timelineData.length === 0 && !loading) {
+    return (
+      <View style={styles.container}>
+        <Searchbar
+          placeholder={t('timeline.searchPlaceholder')}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchbar}
+          clearIcon={searchQuery.length > 0 ? 'close-circle' : undefined}
+          onClearIconPress={() => setSearchQuery('')}
+        />
+        <Text style={styles.emptyListText}>{t('timeline.noEventsFound')}</Text>
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.searchFilterContainer}>
         <Searchbar
-          placeholder="Tìm kiếm sự kiện" // Placeholder text
+          placeholder={t('timeline.searchPlaceholder')}
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchbar}
@@ -135,26 +214,28 @@ const TimelineScreen: React.FC = () => {
       </View>
       <Timeline
         style={styles.list}
-        data={filteredData} // Use filtered data
+        data={timelineData}
         circleSize={20}
         circleColor={theme.colors.primary}
         lineColor={theme.colors.primary}
-        timeContainerStyle={{ minWidth: 52, marginTop: -5 }} // Changed to -5
+        timeContainerStyle={{ minWidth: 52, marginTop: -5 }}
         timeStyle={{ textAlign: 'center', backgroundColor: theme.colors.error, color: theme.colors.onError, padding: 5, borderRadius: theme.roundness }}
-        titleStyle={{ color: theme.colors.onSurface }} // Removed marginTop
+        titleStyle={{ color: theme.colors.onSurface }}
         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
         options={
           {
-            data: filteredData, // Use filtered data for options too
+            data: timelineData,
             style: { paddingTop: 5 },
             refreshControl: (
               <RefreshControl
                 refreshing={isRefreshing}
                 onRefresh={onRefresh}
+                tintColor={theme.colors.primary}
               />
             ),
             onEndReached: onEndReached,
             renderFooter: renderFooter,
+            onEndReachedThreshold: 0.1, // Load more when 10% from the end
           } as any
         }
         innerCircle={'dot'}

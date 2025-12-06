@@ -9,11 +9,13 @@ interface EventState {
   upcomingEvents: EventDto[];
   loading: boolean;
   error: string | null;
+  currentPage: number;
+  hasMore: boolean;
 }
 
 interface EventActions {
   getEventById: (id: string) => Promise<void>;
-  fetchEvents: (query: SearchPublicEventsQuery) => Promise<PaginatedList<EventDto> | null>; // Renamed and type changed
+  fetchEvents: (familyId: string, query: SearchPublicEventsQuery, isLoadMore: boolean) => Promise<PaginatedList<EventDto> | null>; // Renamed and type changed
   fetchUpcomingEvents: (query: GetPublicUpcomingEventsQuery) => Promise<void>; // Renamed
   reset: () => void;
   setError: (error: string | null) => void;
@@ -21,14 +23,18 @@ interface EventActions {
 
 type EventStore = EventState & EventActions;
 
-export const usePublicEventStore = create<EventStore>((set) => ({
+const PAGE_SIZE = 10; // Define page size for pagination
+
+export const usePublicEventStore = create<EventStore>((set, get) => ({
   event: null,
   events: [],
   paginatedEvents: null,
   upcomingEvents: [],
   loading: false,
   error: null,
-
+  currentPage: 1, // Initialize current page
+  hasMore: true, // Initialize hasMore
+  
     getEventById: async (id: string) => {
       set({ loading: true, error: null });
       try {
@@ -41,12 +47,27 @@ export const usePublicEventStore = create<EventStore>((set) => ({
       }
     },
   
-    fetchEvents: async (query: SearchPublicEventsQuery): Promise<PaginatedList<EventDto> | null> => { // Renamed from searchEvents
+    fetchEvents: async (familyId: string, query: SearchPublicEventsQuery, isLoadMore: boolean): Promise<PaginatedList<EventDto> | null> => {
       set({ loading: true, error: null });
       try {
-        const paginatedEvents: PaginatedList<EventDto> = await searchPublicEvents(query);
-        set({ paginatedEvents });
-        return paginatedEvents; // Return the fetched events
+        const pageNumber = isLoadMore ? get().currentPage + 1 : 1;
+        const response = await searchPublicEvents({
+          ...query,
+          familyId: familyId,
+          page: pageNumber,
+          itemsPerPage: PAGE_SIZE,
+        });
+
+        if (response) {
+          const newEvents = response.items;
+          set((state) => ({
+            events: isLoadMore ? [...state.events, ...newEvents] : newEvents,
+            paginatedEvents: response,
+            currentPage: pageNumber,
+            hasMore: response.page < response.totalPages,
+          }));
+        }
+        return response;
       } catch (err: any) {
         set({ error: err.message || 'Failed to search events' });
         return null;
@@ -67,6 +88,6 @@ export const usePublicEventStore = create<EventStore>((set) => ({
       }
     },
   
-    reset: () => set({ event: null, paginatedEvents: null, upcomingEvents: [], error: null }), // Removed 'events'
+    reset: () => set({ event: null, events: [], paginatedEvents: null, upcomingEvents: [], error: null, currentPage: 1, hasMore: true }), // Removed 'events'
   setError: (error: string | null) => set({ error }),
 }));
