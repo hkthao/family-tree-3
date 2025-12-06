@@ -30,7 +30,7 @@ export default function MoreLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: t('more.title') }} />
-        <Stack.Screen name="events" options={{ title: t('more.events') }} />
+        <Stack.Screen name="calendar" options={{ title: t('more.calendar') }} />
         <Stack.Screen name="face-data" options={{ title: t('more.faceData') }} />
         <Stack.Screen name="memories" options={{ title: t('more.memories') }} />
         <Stack.Screen name="timeline" options={{ title: t('more.timeline') }} />

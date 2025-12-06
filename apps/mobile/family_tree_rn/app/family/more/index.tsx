@@ -13,21 +13,20 @@ export default function MoreOptionsScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
       padding: SPACING_MEDIUM,
     },
     listSection: {
-      backgroundColor: theme.colors.surface,
-      marginVertical: SPACING_MEDIUM,
-      paddingHorizontal: SPACING_MEDIUM,
-      borderRadius: theme.roundness,
+      marginBottom: SPACING_MEDIUM,
+      backgroundColor: theme.colors.surface, // Use theme surface color
+      borderRadius: theme.roundness, // Use global roundness from theme
+      elevation: 2,
     },
     listItem: {
-      paddingLeft: 0,
-      paddingRight: 0,
+      paddingRight: 0, 
+      paddingStart: SPACING_MEDIUM,
+      borderRadius: theme.roundness,
     },
     listIcon: {
-      marginRight: SPACING_MEDIUM,
     }
   });
 
@@ -39,10 +38,10 @@ export default function MoreOptionsScreen() {
     <ScrollView style={styles.container}>
       <List.Section style={styles.listSection}>
         <List.Item
-          title={t('more.events')}
+          title={t('more.calendar')}
           left={() => <MaterialCommunityIcons name="calendar-month-outline" size={24} color={theme.colors.onSurfaceVariant} style={styles.listIcon} />}
           right={() => <List.Icon icon="chevron-right" />}
-          onPress={() => navigateTo('/family/more/events')}
+          onPress={() => navigateTo('/family/more/calendar')}
           style={styles.listItem}
         />
         <Divider />

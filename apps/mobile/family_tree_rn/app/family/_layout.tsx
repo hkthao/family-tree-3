@@ -69,7 +69,7 @@ export default function FamilyDetailLayout() {
     }
   }, [familyDetailUrl, t]);
 
-  const moreTabs = ['more', 'events', 'face-data', 'memories', 'timeline', 'privacy'];
+  const moreTabs = ['more', 'calendar', 'face-data', 'memories', 'timeline', 'privacy'];
   const isMoreTab = moreTabs.includes(currentTab)
 
   return (
@@ -97,7 +97,7 @@ export default function FamilyDetailLayout() {
         <Tabs.Screen
           name="dashboard"
           options={{
-            title: t('familyDashboard.tab.dashboard'),
+            title: t('familyDashboard.tab.overview'),
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
             ),
@@ -115,7 +115,7 @@ export default function FamilyDetailLayout() {
         <Tabs.Screen
           name="tree"
           options={{
-            title: t('familyDetail.tab.tree'),
+            title: t('familyDetail.tab.familyTreeShort'),
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="sitemap-outline" color={color} size={size} />
             ),
@@ -126,7 +126,7 @@ export default function FamilyDetailLayout() {
         <Tabs.Screen
           name="face-search"
           options={{
-            title: t('familyDetail.tab.faceSearch'),
+            title: t('familyDetail.tab.faceSearchShort'),
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="face-recognition" color={color} size={size} />
             ),
