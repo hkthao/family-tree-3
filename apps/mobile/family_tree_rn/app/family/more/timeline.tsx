@@ -25,7 +25,6 @@ const TimelineScreen: React.FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isFocused = useIsFocused();
-  // const { familyId } = useLocalSearchParams<{ familyId: string }>(); // Remove this line
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
 
   const {
@@ -40,6 +39,7 @@ const TimelineScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFetchingMoreData, setIsFetchingMoreData] = useState(false); // New state for fetching more data
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -63,12 +63,12 @@ const TimelineScreen: React.FC = () => {
   const timelineData = useMemo(() => events.map(mapEventToTimelineData), [events, mapEventToTimelineData]);
 
   const loadEvents = useCallback(async (isLoadMore: boolean) => {
-    if (!currentFamilyId) { // Use currentFamilyId
+    if (!currentFamilyId) {
       Alert.alert(t('common.error'), t('timeline.familyIdNotFound'));
       return;
     }
 
-    if (loading) return;
+    if (loading || isFetchingMoreData) return; // Prevent multiple fetches
 
     // Prevent loading more if there are no more pages
     if (isLoadMore && !hasMore) return;
@@ -76,18 +76,21 @@ const TimelineScreen: React.FC = () => {
     try {
       if (!isLoadMore) {
         setIsRefreshing(true);
+      } else {
+        setIsFetchingMoreData(true); // Set fetching more data state
       }
       const query: SearchPublicEventsQuery = {
         searchTerm: debouncedSearchQuery,
         // Add other query parameters if needed
       };
-      await fetchEvents(currentFamilyId, query, isLoadMore); // Use currentFamilyId
+      await fetchEvents(currentFamilyId, query, isLoadMore);
     } catch (err: any) {
       Alert.alert(t('common.error'), err.message || t('timeline.failedToLoadEvents'));
     } finally {
       setIsRefreshing(false);
+      setIsFetchingMoreData(false); // Clear fetching more data state
     }
-  }, [currentFamilyId, loading, hasMore, debouncedSearchQuery, fetchEvents, t]); // Update dependencies
+  }, [currentFamilyId, loading, isFetchingMoreData, hasMore, debouncedSearchQuery, fetchEvents, t]); // Update dependencies
 
   useEffect(() => {
     if (isFocused) {
@@ -100,7 +103,7 @@ const TimelineScreen: React.FC = () => {
         reset(); // Reset store when screen loses focus
       }
     };
-  }, [isFocused, debouncedSearchQuery, loadEvents, reset, currentFamilyId]); // Update dependencies
+  }, [isFocused, debouncedSearchQuery, loadEvents, reset, currentFamilyId]);
 
   const onRefresh = useCallback(() => {
     if (!loading) {
@@ -109,10 +112,10 @@ const TimelineScreen: React.FC = () => {
   }, [loading, loadEvents]);
 
   const onEndReached = useCallback(() => {
-    if (!loading && hasMore) {
+    if (!loading && !isFetchingMoreData && hasMore) { // Use isFetchingMoreData
       loadEvents(true);
     }
-  }, [loading, hasMore, loadEvents]);
+  }, [loading, isFetchingMoreData, hasMore, loadEvents]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -156,7 +159,7 @@ const TimelineScreen: React.FC = () => {
   }), [theme]);
 
   const renderFooter = () => {
-    if (loading && events.length > 0) { // Only show activity indicator if loading more, not initial load
+    if (isFetchingMoreData) { // Use isFetchingMoreData here
       return (
         <View style={styles.footer}>
           <ActivityIndicator />
@@ -177,7 +180,7 @@ const TimelineScreen: React.FC = () => {
     );
   }
 
-  if (loading && events.length === 0) { // Show loading indicator for initial load
+  if (loading && events.length === 0) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />
@@ -197,7 +200,7 @@ const TimelineScreen: React.FC = () => {
           onClearIconPress={() => setSearchQuery('')}
         />
         <Text style={styles.emptyListText}>{t('timeline.noEventsFound')}</Text>
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={isRefreshing} onOnRefresh={onRefresh} />
       </View>
     );
   }
@@ -237,7 +240,8 @@ const TimelineScreen: React.FC = () => {
             ),
             onEndReached: onEndReached,
             renderFooter: renderFooter,
-            onEndReachedThreshold: 0.1, // Load more when 10% from the end
+            onEndReachedThreshold: 0.5, // Increased threshold
+            onEndReachedCalledDuringMomentum: true, // Add this prop
           } as any
         }
         innerCircle={'dot'}
