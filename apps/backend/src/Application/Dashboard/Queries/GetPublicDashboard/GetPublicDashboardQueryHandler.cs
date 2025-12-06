@@ -45,8 +45,8 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
 
         if (totalGenderedMembers > 0)
         {
-            dashboardDto.PublicMaleRatio = (int)Math.Round((double)maleMembers / totalGenderedMembers * 100);
-            dashboardDto.PublicFemaleRatio = (int)Math.Round((double)femaleMembers / totalGenderedMembers * 100);
+            dashboardDto.PublicMaleRatio = Math.Round((double)maleMembers / totalGenderedMembers, 2);
+            dashboardDto.PublicFemaleRatio = Math.Round((double)femaleMembers / totalGenderedMembers, 2);
         }
 
         // Living and Deceased Members
@@ -61,7 +61,7 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
         if (livingMembersWithBirthDate.Any())
         {
             var totalAgeInYears = livingMembersWithBirthDate
-                .Sum(m => (_dateTime.Now.Year - m.DateOfBirth!.Value.Year) - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
+                .Sum(m => _dateTime.Now.Year - m.DateOfBirth!.Value.Year - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
             dashboardDto.PublicAverageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
         }
 
