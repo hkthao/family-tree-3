@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
 import type { EventDto, SearchPublicEventsQuery } from '@/types';
 
 
@@ -24,7 +25,8 @@ const TimelineScreen: React.FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isFocused = useIsFocused();
-  const { familyId } = useLocalSearchParams<{ familyId: string }>();
+  // const { familyId } = useLocalSearchParams<{ familyId: string }>(); // Remove this line
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
 
   const {
     events,
@@ -61,7 +63,7 @@ const TimelineScreen: React.FC = () => {
   const timelineData = useMemo(() => events.map(mapEventToTimelineData), [events, mapEventToTimelineData]);
 
   const loadEvents = useCallback(async (isLoadMore: boolean) => {
-    if (!familyId) {
+    if (!currentFamilyId) { // Use currentFamilyId
       Alert.alert(t('common.error'), t('timeline.familyIdNotFound'));
       return;
     }
@@ -79,13 +81,13 @@ const TimelineScreen: React.FC = () => {
         searchTerm: debouncedSearchQuery,
         // Add other query parameters if needed
       };
-      await fetchEvents(familyId, query, isLoadMore);
+      await fetchEvents(currentFamilyId, query, isLoadMore); // Use currentFamilyId
     } catch (err: any) {
       Alert.alert(t('common.error'), err.message || t('timeline.failedToLoadEvents'));
     } finally {
       setIsRefreshing(false);
     }
-  }, [familyId, loading, hasMore, debouncedSearchQuery, fetchEvents, t]);
+  }, [currentFamilyId, loading, hasMore, debouncedSearchQuery, fetchEvents, t]); // Update dependencies
 
   useEffect(() => {
     if (isFocused) {
@@ -98,7 +100,7 @@ const TimelineScreen: React.FC = () => {
         reset(); // Reset store when screen loses focus
       }
     };
-  }, [isFocused, debouncedSearchQuery, loadEvents, reset]);
+  }, [isFocused, debouncedSearchQuery, loadEvents, reset, currentFamilyId]); // Update dependencies
 
   const onRefresh = useCallback(() => {
     if (!loading) {
