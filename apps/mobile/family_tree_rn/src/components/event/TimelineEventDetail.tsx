@@ -1,11 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import MaterialCommunityIcons
 import { EventDto, EventType } from '@/types'; // Ensure EventType is imported
-import { SPACING_SMALL } from '@/constants/dimensions';
+import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import MemberAvatarChip from '@/components/common/MemberAvatarChip';
 import { useMemo, } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet } from 'react-native';
-import { useTheme, Text } from 'react-native-paper';
+import { useTheme, Text, Card } from 'react-native-paper';
 
 interface TimelineEventDetailProps {
   event: EventDto;
@@ -32,10 +32,12 @@ const TimelineEventDetail: React.FC<TimelineEventDetailProps> = ({ event }) => {
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
-      backgroundColor: theme.colors.surface,
       borderRadius: theme.roundness,
-      position: 'relative', // Needed for absolute positioning of icon
-    },
+      position: 'relative', 
+      minHeight: 100,
+      padding: SPACING_MEDIUM,
+      marginBottom: SPACING_SMALL,
+      },
     title: {
       color: theme.colors.onSurface,
       fontSize: 16,
@@ -66,8 +68,8 @@ const TimelineEventDetail: React.FC<TimelineEventDetailProps> = ({ event }) => {
     },
     eventTypeIcon: { // Style for the icon container
       position: 'absolute',
-      top: SPACING_SMALL,
-      right: SPACING_SMALL,
+      top: 0,
+      right: 0,
       backgroundColor: theme.colors.primary,
       borderRadius: 15, // Half of size for circle
       width: 30,
@@ -84,7 +86,7 @@ const TimelineEventDetail: React.FC<TimelineEventDetailProps> = ({ event }) => {
   const eventTypeIconName = getIconForEventType(event.type);
 
   return (
-    <View style={styles.container}>
+    <Card style={styles.container}>
       <View style={styles.eventTypeIcon}>
         <MaterialCommunityIcons name={eventTypeIconName as any} size={18} color={theme.colors.onPrimary} />
       </View>
@@ -108,7 +110,7 @@ const TimelineEventDetail: React.FC<TimelineEventDetailProps> = ({ event }) => {
           ))}
         </View>
       )}
-    </View>
+    </Card>
   );
 };
 

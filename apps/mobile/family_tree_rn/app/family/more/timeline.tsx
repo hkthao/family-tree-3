@@ -1,28 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, Alert, FlatList } from 'react-native';
-import { useTheme, Searchbar } from 'react-native-paper';
+import { View, StyleSheet, RefreshControl, Alert, FlatList } from 'react-native';
+import { useTheme, Searchbar, ActivityIndicator, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useIsFocused } from '@react-navigation/native';
-import { format } from 'date-fns';
-
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import type { EventDto, SearchPublicEventsQuery } from '@/types';
-import TimelineEventDetail from '@/components/event/TimelineEventDetail';
 import TimelineListItem from '@/components/event/TimelineListItem';
 
-
-interface TimelineData {
-  time: string;
-  title: string;
-  description: string;
-  lineColor?: string;
-  circleColor?: string;
-  originalEvent: EventDto;
-}
-
-const TimelineScreen: React.FC = () => {
+const TimelineScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isFocused = useIsFocused();
@@ -200,6 +187,7 @@ const TimelineScreen: React.FC = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
