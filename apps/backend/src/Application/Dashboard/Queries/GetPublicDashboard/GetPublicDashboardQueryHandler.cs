@@ -45,8 +45,8 @@ public class GetPublicDashboardQueryHandler : IRequestHandler<GetPublicDashboard
 
         if (totalGenderedMembers > 0)
         {
-            dashboardDto.PublicMaleRatio = (double)maleMembers / totalGenderedMembers;
-            dashboardDto.PublicFemaleRatio = (double)femaleMembers / totalGenderedMembers;
+            dashboardDto.PublicMaleRatio = (int)Math.Round((double)maleMembers / totalGenderedMembers * 100);
+            dashboardDto.PublicFemaleRatio = (int)Math.Round((double)femaleMembers / totalGenderedMembers * 100);
         }
 
         // Living and Deceased Members

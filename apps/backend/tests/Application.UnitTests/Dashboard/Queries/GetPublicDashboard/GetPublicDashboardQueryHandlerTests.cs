@@ -89,8 +89,8 @@ public class GetPublicDashboardQueryHandlerTests : TestBase
         result.Value.TotalPublicEvents.Should().Be(1); // eventPF1_Public (eventPF1_Deleted is soft-deleted)
 
         // Gender Ratios (from 2 members: 1 male, 1 female)
-        result.Value.PublicMaleRatio.Should().BeApproximately(1.0 / 2.0, 0.001);
-        result.Value.PublicFemaleRatio.Should().BeApproximately(1.0 / 2.0, 0.001);
+        result.Value.PublicMaleRatio.Should().Be(50);
+        result.Value.PublicFemaleRatio.Should().Be(50);
 
         // Living and Deceased
         result.Value.PublicLivingMembersCount.Should().Be(2); // memberPF1_Male_Living_Old, memberPF1_Female_Living_Young
