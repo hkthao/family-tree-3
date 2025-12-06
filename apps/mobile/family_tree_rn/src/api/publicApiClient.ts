@@ -69,8 +69,12 @@ const getGenderColor = (gender: string): string => {
   }
 };
 
-export const getPublicDashboardData = async (): Promise<DashboardMetrics> => {
-  const { data } = await publicApiClient.get<PublicDashboardDto>(`/dashboard`);
+export const getPublicDashboardData = async (familyId: string): Promise<DashboardMetrics> => {
+  const { data } = await publicApiClient.get<PublicDashboardDto>(`/dashboard`, {
+    params: {
+      familyId: familyId,
+    },
+  });
 
   return {
     totalMembers: data.totalPublicMembers,
@@ -82,14 +86,14 @@ export const getPublicDashboardData = async (): Promise<DashboardMetrics> => {
     genderDistribution: [
       {
         name: 'Male',
-        population: data.publicMaleRatio * 100, // Convert ratio to percentage for display
+        population: Number((data.publicMaleRatio * 100).toFixed(2)), // Convert ratio to percentage and round for display
         color: getGenderColor('male'),
         legendFontColor: '#7F7F7F',
         legendFontSize: 15,
       },
       {
         name: 'Female',
-        population: data.publicFemaleRatio * 100, // Convert ratio to percentage for display
+        population: Number((data.publicFemaleRatio * 100).toFixed(2)), // Convert ratio to percentage and round for display
         color: getGenderColor('female'),
         legendFontColor: '#7F7F7F',
         legendFontSize: 15,

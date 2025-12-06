@@ -18,18 +18,7 @@ export default function FamilyDashboardScreen() {
   const { family, loading, error, getFamilyById } = usePublicFamilyStore();
   // Fetch dashboard metrics
   const { dashboardData, loading: loadingDashboard, error: errorDashboard, getDashboardData } = useDashboardStore();
-  useEffect(() => {
-    const loadData = async () => {
-      if (!currentFamilyId) {
-        return;
-      }
-      // Fetch family details for cards
-      await getFamilyById(currentFamilyId);
-      // Fetch dashboard metrics
-      await getDashboardData();
-    };
-    loadData();
-  }, [currentFamilyId, getFamilyById, getDashboardData]); // Keep currentFamilyId for getFamilyById
+
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
@@ -102,6 +91,19 @@ export default function FamilyDashboardScreen() {
       color: theme.colors.onSurface, // Make labels visible
     },
   }), [theme]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!currentFamilyId) {
+        return;
+      }
+      // Fetch family details for cards
+      await getFamilyById(currentFamilyId);
+      // Fetch dashboard metrics
+      await getDashboardData(currentFamilyId); // <-- Pass currentFamilyId here
+    };
+    loadData();
+  }, [currentFamilyId, getFamilyById, getDashboardData, theme]); // Keep currentFamilyId for getFamilyById
   // Combined loading and error handling
   const isLoading = loading || loadingDashboard;
   const hasError = error || errorDashboard;
@@ -137,7 +139,7 @@ export default function FamilyDashboardScreen() {
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
     fillShadowGradient: theme.colors.primary,
-    fillShadowGradientOpacity: 0.5,
+    fillShadowGradientOpacity: 0.5
   };
   // Transform publicMembersPerGeneration for BarChart
   const generationsData = Object.keys(dashboardData.membersPerGeneration)
@@ -152,7 +154,7 @@ export default function FamilyDashboardScreen() {
     }
     return dashboardData.genderDistribution.map(item => ({
       ...item,
-      name: item.name === 'Male' ? t('common.male') : (item.name === 'Female' ? t('common.female') : item.name),
+      name: item.name === 'Male' ? t('common.male') : (item.name === 'Female' ? t('common.female') : item.name)
     }));
   }, [dashboardData, t]);
 
@@ -211,8 +213,7 @@ export default function FamilyDashboardScreen() {
                 accessor="population"
                 backgroundColor="transparent"
                 paddingLeft="15"
-                // Removed center prop
-                absolute
+                hasLegend={true}
               />
             </View>
           </Card.Content>
