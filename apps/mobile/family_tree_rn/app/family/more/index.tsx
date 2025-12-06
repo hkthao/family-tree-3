@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { List, useTheme, Text, Divider } from 'react-native-paper';
+import { StyleSheet, ScrollView } from 'react-native';
+import { List, useTheme, Divider } from 'react-native-paper'; // Import Appbar
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -32,7 +32,7 @@ export default function MoreOptionsScreen() {
   });
 
   const navigateTo = (path: string) => {
-    router.push(path as any);
+    router.navigate(path as any);
   };
 
   return (

@@ -35,6 +35,7 @@ export default function FamilyDetailLayout() {
     }
   };
 
+
   const familyDetailUrl = useMemo(() => {
     const baseUrl = process.env.EXPO_PUBLIC_APP_BASE_URL;
     if (!baseUrl) {
@@ -68,16 +69,20 @@ export default function FamilyDetailLayout() {
     }
   }, [familyDetailUrl, t]);
 
+  const moreTabs = ['more', 'events', 'face-data', 'memories', 'timeline', 'privacy'];
+  const isMoreTab = moreTabs.includes(currentTab)
 
   return (
     <View style={{ flex: 1 }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={getTabTitle(currentTab)} />
-        {currentTab === 'tree' && currentFamilyId && (
-          <Appbar.Action icon="share-variant" onPress={onShare} color={theme.colors.onSurface} />
-        )}
-      </Appbar.Header>
+      {!isMoreTab && (
+        <Appbar.Header>
+          <Appbar.BackAction onPress={() => navigation.goBack()} />
+          <Appbar.Content title={getTabTitle(currentTab)} />
+          {currentTab === 'tree' && currentFamilyId && (
+            <Appbar.Action icon="share-variant" onPress={onShare} color={theme.colors.onSurface} />
+          )}
+        </Appbar.Header>
+      )}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: theme.colors.primary,
@@ -89,54 +94,55 @@ export default function FamilyDetailLayout() {
           headerShown: false, // Hide header for tabs, as we have a custom Appbar
         }}
       >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: t('familyDashboard.tab.dashboard'),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="members"
-        options={{
-          title: t('familyDetail.tab.members'),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-group-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tree"
-        options={{
-          title: t('familyDetail.tab.tree'),
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="sitemap-outline" color={color} size={size} />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: t('familyDashboard.tab.dashboard'),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="members"
+          options={{
+            title: t('familyDetail.tab.members'),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="account-group-outline" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="tree"
+          options={{
+            title: t('familyDetail.tab.tree'),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="sitemap-outline" color={color} size={size} />
+            ),
+          }}
+        />
 
 
-            <Tabs.Screen
-              name="face-search"
-              options={{
-                title: t('familyDetail.tab.faceSearch'),
-                tabBarIcon: ({ color, size }) => (
-                  <MaterialCommunityIcons name="face-recognition" color={color} size={size} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="more"
-              options={{
-                title: t('familyDetail.tab.more'),
-                tabBarIcon: ({ color, size }) => (
-                  <MaterialCommunityIcons name="dots-horizontal" color={color} size={size} />
-                ),
-              }}
-            />
-          </Tabs>
-        </View>
-      );
-      }
+        <Tabs.Screen
+          name="face-search"
+          options={{
+            title: t('familyDetail.tab.faceSearch'),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="face-recognition" color={color} size={size} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="more"
+          options={{
+            title: t('familyDetail.tab.more'),
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="dots-horizontal" color={color} size={size} />
+            ),
+          }}
+        />
+      </Tabs>
+    </View>
+  );
+}
