@@ -309,6 +309,7 @@
   "confirmDelete.title": "Confirm Deletion",
   "confirmDelete.message": "Are you sure you want to delete {name}?",
   "common.delete": "Delete",
+  "common.more": "More",
   "userMenu.profile": "Profile",
   "userMenu.settings": "Settings",
   "userMenu.pricing": "Pricing",
