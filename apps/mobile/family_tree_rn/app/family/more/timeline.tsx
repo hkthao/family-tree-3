@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, Alert } from 'react-native';
 import Timeline from 'react-native-timeline-flatlist';
 import { useTheme, Searchbar } from 'react-native-paper';
-import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useIsFocused } from '@react-navigation/native';
 import { format } from 'date-fns';
@@ -37,7 +36,7 @@ const TimelineScreen: React.FC = () => {
   } = usePublicEventStore();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(''); // Corrected line 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFetchingMoreData, setIsFetchingMoreData] = useState(false); // New state for fetching more data
 
@@ -68,10 +67,12 @@ const TimelineScreen: React.FC = () => {
       return;
     }
 
-    if (loading || isFetchingMoreData) return; // Prevent multiple fetches
+    const { loading: currentLoading, hasMore: currentHasMore } = usePublicEventStore.getState();
+
+    if (currentLoading || isFetchingMoreData) return; // Prevent multiple fetches
 
     // Prevent loading more if there are no more pages
-    if (isLoadMore && !hasMore) return;
+    if (isLoadMore && !currentHasMore) return;
 
     try {
       if (!isLoadMore) {
@@ -81,6 +82,7 @@ const TimelineScreen: React.FC = () => {
       }
       const query: SearchPublicEventsQuery = {
         searchTerm: debouncedSearchQuery,
+        familyId: currentFamilyId,
         // Add other query parameters if needed
       };
       await fetchEvents(currentFamilyId, query, isLoadMore);
@@ -90,7 +92,7 @@ const TimelineScreen: React.FC = () => {
       setIsRefreshing(false);
       setIsFetchingMoreData(false); // Clear fetching more data state
     }
-  }, [currentFamilyId, loading, isFetchingMoreData, hasMore, debouncedSearchQuery, fetchEvents, t]); // Update dependencies
+  }, [currentFamilyId, isFetchingMoreData, debouncedSearchQuery, fetchEvents, t]);
 
   useEffect(() => {
     if (isFocused) {
@@ -106,16 +108,19 @@ const TimelineScreen: React.FC = () => {
   }, [isFocused, debouncedSearchQuery, loadEvents, reset, currentFamilyId]);
 
   const onRefresh = useCallback(() => {
-    if (!loading) {
+    const { loading: currentLoading } = usePublicEventStore.getState();
+    if (!currentLoading) {
       loadEvents(false); // Fetch first page again
     }
-  }, [loading, loadEvents]);
+  }, [loadEvents]);
 
   const onEndReached = useCallback(() => {
-    if (!loading && !isFetchingMoreData && hasMore) { // Use isFetchingMoreData
+    console.log('End reached');
+    const { loading: currentLoading, hasMore: currentHasMore } = usePublicEventStore.getState();
+    if (!currentLoading && !isFetchingMoreData && currentHasMore) { // Use isFetchingMoreData
       loadEvents(true);
     }
-  }, [loading, isFetchingMoreData, hasMore, loadEvents]);
+  }, [isFetchingMoreData, loadEvents]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -135,7 +140,6 @@ const TimelineScreen: React.FC = () => {
       backgroundColor: 'transparent',
     },
     list: {
-      flex: 1,
       marginTop: SPACING_MEDIUM,
     },
     footer: {
@@ -158,8 +162,8 @@ const TimelineScreen: React.FC = () => {
     }
   }), [theme]);
 
-  const renderFooter = () => {
-    if (isFetchingMoreData) { // Use isFetchingMoreData here
+  const renderFooter = useCallback(() => {
+    if (isFetchingMoreData) {
       return (
         <View style={styles.footer}>
           <ActivityIndicator />
@@ -170,7 +174,28 @@ const TimelineScreen: React.FC = () => {
       return <Text style={styles.footerText}>{t('timeline.noMoreEvents')}</Text>;
     }
     return <View style={styles.footer} />;
-  };
+  }, [isFetchingMoreData, hasMore, events.length, styles.footer, styles.footerText, t]);
+
+  const memoizedRefreshControl = useMemo(() => (
+    <RefreshControl
+      refreshing={isRefreshing}
+      onRefresh={onRefresh}
+      tintColor={theme.colors.primary}
+    />
+  ), [isRefreshing, onRefresh, theme.colors.primary]);
+
+  const timelineOptions = useMemo(() => ({
+    data: timelineData,
+    style: {
+      paddingTop: 5,
+    },
+    refreshControl: memoizedRefreshControl,
+    showVerticalScrollIndicator: false,
+    onEndReached: onEndReached,
+    renderFooter: renderFooter,
+    onEndReachedThreshold: 0.5, // Increased threshold
+    onEndReachedCalledDuringMomentum: true, // Add this prop
+  }), [timelineData, memoizedRefreshControl, onEndReached, renderFooter]);
 
   if (error) {
     return (
@@ -188,23 +213,6 @@ const TimelineScreen: React.FC = () => {
     );
   }
 
-  if (timelineData.length === 0 && !loading) {
-    return (
-      <View style={styles.container}>
-        <Searchbar
-          placeholder={t('timeline.searchPlaceholder')}
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-          clearIcon={searchQuery.length > 0 ? 'close-circle' : undefined}
-          onClearIconPress={() => setSearchQuery('')}
-        />
-        <Text style={styles.emptyListText}>{t('timeline.noEventsFound')}</Text>
-        <RefreshControl refreshing={isRefreshing} onOnRefresh={onRefresh} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.searchFilterContainer}>
@@ -218,32 +226,15 @@ const TimelineScreen: React.FC = () => {
         />
       </View>
       <Timeline
-        style={styles.list}
-        data={timelineData}
+        {...timelineOptions}
+        listViewContainerStyle={styles.list}
         circleSize={20}
         circleColor={theme.colors.primary}
         lineColor={theme.colors.primary}
         timeContainerStyle={{ minWidth: 52, marginTop: -5 }}
         timeStyle={{ textAlign: 'center', backgroundColor: theme.colors.error, color: theme.colors.onError, padding: 5, borderRadius: theme.roundness }}
-        titleStyle={{ color: theme.colors.onSurface }}
+        titleStyle={{ color: theme.colors.onSurface, marginTop: -15 }}
         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-        options={
-          {
-            data: timelineData,
-            style: { paddingTop: 5 },
-            refreshControl: (
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={onRefresh}
-                tintColor={theme.colors.primary}
-              />
-            ),
-            onEndReached: onEndReached,
-            renderFooter: renderFooter,
-            onEndReachedThreshold: 0.5, // Increased threshold
-            onEndReachedCalledDuringMomentum: true, // Add this prop
-          } as any
-        }
         innerCircle={'dot'}
       />
     </View>
