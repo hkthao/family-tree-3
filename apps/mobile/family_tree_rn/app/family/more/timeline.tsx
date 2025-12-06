@@ -239,6 +239,7 @@ const TimelineScreen: React.FC = () => {
         titleStyle={{ color: theme.colors.onSurface, marginTop: -15 }}
         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
         innerCircle={'dot'}
+        isUsingFlatlist={true}
         renderDetail={(rowData: TimelineData) => (
           <TimelineEventDetail
             event={rowData.originalEvent}
