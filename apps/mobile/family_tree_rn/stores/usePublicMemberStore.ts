@@ -17,7 +17,7 @@ interface PublicMemberState {
 }
 
 interface PublicMemberActions {
-  getMemberById: (id: string, familyId: string) => Promise<void>; // Added for member details
+  getMemberById: (id: string, familyId: string) => Promise<MemberDetailDto | null>; // Added for member details
   fetchMembers: (query: SearchPublicMembersQuery, isRefreshing?: boolean) => Promise<void>;
   reset: () => void;
   setError: (error: string | null) => void;
@@ -40,8 +40,10 @@ export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
     try {
       const member = await getPublicMemberById(id, familyId);
       set({ member });
+      return member;
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch member' });
+      return null;
     } finally {
       set({ loading: false });
     }

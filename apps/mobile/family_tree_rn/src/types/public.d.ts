@@ -212,7 +212,7 @@ export interface EventDto extends BaseAuditableDto {
   endDate?: string; // DateTime in C# maps to string in TypeScript
   location?: string;
   type: EventType;
-  relatedMembers: string[]; // Guid in C# maps to string in TypeScript
+  relatedMembers: MemberListDto[]; // Guid in C# maps to string in TypeScript
 }
 
 export interface GetEventsQuery {

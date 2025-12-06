@@ -263,6 +263,7 @@
   "timeline.searchPlaceholder": "Tìm kiếm sự kiện",
   "timeline.noMoreEvents": "Không còn sự kiện nào.",
   "timeline.noEventsFound": "Không tìm thấy sự kiện nào.",
+  "timeline.relatedMembers": "Thành viên liên quan",
   "common.noTitle": "Không có tiêu đề",
   "common.noDescription": "Không có mô tả"
 }

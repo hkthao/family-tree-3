@@ -8,8 +8,9 @@ import { format } from 'date-fns';
 
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
-import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore';
 import type { EventDto, SearchPublicEventsQuery } from '@/types';
+import TimelineEventDetail from '@/components/event/TimelineEventDetail';
 
 
 interface TimelineData {
@@ -18,6 +19,7 @@ interface TimelineData {
   description: string;
   lineColor?: string;
   circleColor?: string;
+  originalEvent: EventDto;
 }
 
 const TimelineScreen: React.FC = () => {
@@ -38,7 +40,7 @@ const TimelineScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(''); // Corrected line 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isFetchingMoreData, setIsFetchingMoreData] = useState(false); // New state for fetching more data
+  const [isFetchingMoreData, setIsFetchingMoreData] = useState(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -55,6 +57,7 @@ const TimelineScreen: React.FC = () => {
       time: event.startDate ? format(new Date(event.startDate), 'HH:mm') : '',
       title: event.name || t('common.noTitle'),
       description: event.description || t('common.noDescription'),
+      originalEvent: event,
       // You can add logic here to set lineColor or circleColor based on event properties
     };
   }, [t]);
@@ -231,11 +234,16 @@ const TimelineScreen: React.FC = () => {
         circleSize={20}
         circleColor={theme.colors.primary}
         lineColor={theme.colors.primary}
-        timeContainerStyle={{ minWidth: 52, marginTop: -5 }}
+        timeContainerStyle={{ minWidth: 80, marginTop: -5 }}
         timeStyle={{ textAlign: 'center', backgroundColor: theme.colors.error, color: theme.colors.onError, padding: 5, borderRadius: theme.roundness }}
         titleStyle={{ color: theme.colors.onSurface, marginTop: -15 }}
         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
         innerCircle={'dot'}
+        renderDetail={(rowData: TimelineData) => (
+          <TimelineEventDetail
+            event={rowData.originalEvent}
+          />
+        )}
       />
     </View>
   );

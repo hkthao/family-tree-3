@@ -255,5 +255,7 @@
   "more.faceDataPlaceholder": "More detailed face data screen (under development)",
   "more.memoriesPlaceholder": "More detailed memories screen (under development)",
   "more.timelinePlaceholder": "More detailed timeline screen (under development)",
-  "more.privacyPlaceholder": "More detailed privacy settings screen (under development)"
+  "more.privacyPlaceholder": "More detailed privacy settings screen (under development)",
+  "timeline.relatedMembers": "Related Members",
+  "common.noDate": "No Date"
 }

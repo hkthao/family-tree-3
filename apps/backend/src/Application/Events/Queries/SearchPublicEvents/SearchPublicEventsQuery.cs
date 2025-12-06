@@ -4,6 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
 using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Events.Queries.SearchPublicEvents;
 
@@ -60,6 +61,7 @@ public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapp
 
         var totalItems = await query.CountAsync(cancellationToken);
         var events = await query
+            .Include(e => e.EventMembers).ThenInclude(em => em.Member) // Include related members
             .Skip((request.Page - 1) * request.ItemsPerPage)
             .Take(request.ItemsPerPage)
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
