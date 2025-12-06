@@ -54,7 +54,7 @@ const TimelineScreen: React.FC = () => {
 
   const mapEventToTimelineData = useCallback((event: EventDto): TimelineData => {
     return {
-      time: event.startDate ? format(new Date(event.startDate), 'HH:mm') : '',
+      time: event.startDate ? format(new Date(event.startDate), 'dd/MM/yyyy') : '',
       title: event.name || t('common.noTitle'),
       description: event.description || t('common.noDescription'),
       originalEvent: event,
@@ -234,8 +234,8 @@ const TimelineScreen: React.FC = () => {
         circleSize={20}
         circleColor={theme.colors.primary}
         lineColor={theme.colors.primary}
-        timeContainerStyle={{ minWidth: 80, marginTop: -5 }}
-        timeStyle={{ textAlign: 'center', backgroundColor: theme.colors.error, color: theme.colors.onError, padding: 5, borderRadius: theme.roundness }}
+        timeContainerStyle={{ minWidth: 86, marginTop: -5 }}
+        timeStyle={{ textAlign: 'center',  color: theme.colors.onBackground, padding: 5 }}
         titleStyle={{ color: theme.colors.onSurface, marginTop: -15 }}
         descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
         innerCircle={'dot'}
