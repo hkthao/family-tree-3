@@ -6,9 +6,7 @@ import { usePaginatedSearch, PaginatedSearchOptions, PaginatedSearchResult } fro
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 
 interface PaginatedSearchListProps<T, Q extends { searchTerm?: string }> {
-  // Options for the usePaginatedSearch hook
   searchOptions: Omit<PaginatedSearchOptions<T, Q>, 'useStore'>;
-  // Specific Zustand store hook for this list
   useStore: PaginatedSearchOptions<T, Q>['useStore'];
 
   renderItem: ({ item, index }: { item: T; index: number }) => React.ReactElement;
@@ -80,7 +78,6 @@ export function PaginatedSearchList<T, Q extends { searchTerm?: string }>(
     },
     container: {
       flex: 1,
-      paddingHorizontal: SPACING_MEDIUM,
     },
     searchFilterContainer: {
       flexDirection: 'row',

@@ -62,8 +62,9 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
 
       if (result.isSuccess && result.value) {
         const paginatedList: PaginatedList<FamilyListDto> = result.value;
+        
         set((state) => ({
-          families: isRefreshing ? paginatedList.items : [...state.families, ...paginatedList.items],
+          families: isRefreshing ? paginatedList.items : [...(state.families || []), ...paginatedList.items],
           totalItems: paginatedList.totalItems,
           page: paginatedList.page,
           totalPages: paginatedList.totalPages,
@@ -71,10 +72,12 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
         }));
         return paginatedList;
       } else {
+        console.error('Error fetching families:', result.error);
         set({ error: result.error?.message || 'Failed to fetch family' });
         return null;
       }
     } catch (err: any) {
+      console.error('Error fetching families:', err);
       set({ error: err.message || 'Failed to fetch family' });
       return null;
     } finally {

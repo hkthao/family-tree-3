@@ -159,7 +159,7 @@ export default function MemberSearchScreen() {
     },
     container: {
       flex: 1,
-      paddingHorizontal: SPACING_MEDIUM, // Apply padding to PaginatedSearchList's containerStyle
+      paddingHorizontal: SPACING_SMALL, // Apply padding to PaginatedSearchList's containerStyle
     },
     memberCard: {
       marginBottom: SPACING_MEDIUM,
@@ -189,9 +189,6 @@ export default function MemberSearchScreen() {
 
   return (
     <View style={styles.safeArea}>
-      <Appbar.Header>
-        <Appbar.Content title={t('familyDetail.tab.members')} />
-      </Appbar.Header>
       <PaginatedSearchList<MemberListDto, SearchPublicMembersQuery>
         useStore={useStore}
         searchOptions={{

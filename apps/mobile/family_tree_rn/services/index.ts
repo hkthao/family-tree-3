@@ -20,10 +20,10 @@ import { IUserProfileService } from '@/services/userProfile/userProfile.service.
 
 // Initialize services
 export const userProfileService: IUserProfileService = new ApiUserProfileService(apiClientWithAuth);
-export const familyService: IFamilyService = new ApiFamilyService(publicApiClient);
-export const memberService: IMemberService = new ApiMemberService(publicApiClient);
-export const eventService: IEventService = new ApiEventService(publicApiClient);
-export const relationshipService: IRelationshipService = new ApiRelationshipService(publicApiClient);
-export const faceService: IFaceService = new ApiFaceService(publicApiClient);
-export const familyDictService: IFamilyDictService = new ApiFamilyDictService(publicApiClient);
-export const dashboardService: IDashboardService = new ApiDashboardService(publicApiClient);
+export const familyService: IFamilyService = new ApiFamilyService(apiClientWithAuth);
+export const memberService: IMemberService = new ApiMemberService(apiClientWithAuth);
+export const eventService: IEventService = new ApiEventService(apiClientWithAuth);
+export const relationshipService: IRelationshipService = new ApiRelationshipService(apiClientWithAuth);
+export const faceService: IFaceService = new ApiFaceService(apiClientWithAuth);
+export const familyDictService: IFamilyDictService = new ApiFamilyDictService(apiClientWithAuth);
+export const dashboardService: IDashboardService = new ApiDashboardService(apiClientWithAuth);

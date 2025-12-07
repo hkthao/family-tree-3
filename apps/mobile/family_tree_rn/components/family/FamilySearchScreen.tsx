@@ -8,9 +8,8 @@ import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore';
-import { FamilyListDto, PaginatedList, SearchPublicFamiliesQuery } from '@/types';
+import { FamilyListDto, SearchPublicFamiliesQuery } from '@/types';
 import { PaginatedSearchList } from '@/components/common';
-import { ZustandPaginatedStore } from '@/hooks/usePaginatedSearch'; // Import ZustandPaginatedStore
 
 
 export default function FamilySearchScreen() {
@@ -22,7 +21,7 @@ export default function FamilySearchScreen() {
   // Define useStore function for usePaginatedSearch
   const useStore = useCallback(() => {
     const { families, loading, error, hasMore, page: currentPage, fetchFamilies, reset, setError } = usePublicFamilyStore();
-    return {
+    return useMemo(() => ({
       items: families,
       loading,
       error,
@@ -33,7 +32,7 @@ export default function FamilySearchScreen() {
       },
       reset,
       setError,
-    } as ZustandPaginatedStore<FamilyListDto, SearchPublicFamiliesQuery>;
+    }), [families, loading, error, hasMore, currentPage, fetchFamilies, reset, setError]);
   }, []);
 
   const renderFamilyItem = useCallback(({ item }: { item: FamilyListDto }) => (
@@ -68,7 +67,7 @@ export default function FamilySearchScreen() {
     },
     container: {
       flex: 1,
-      paddingHorizontal: SPACING_MEDIUM, // Apply padding to PaginatedSearchList's containerStyle
+      paddingHorizontal: SPACING_SMALL, // Apply padding to PaginatedSearchList's containerStyle
     },
     familyCard: {
       marginBottom: SPACING_SMALL,
@@ -113,7 +112,7 @@ export default function FamilySearchScreen() {
         keyExtractor={(item) => item.id}
         searchPlaceholder={t('search.placeholder')}
         containerStyle={styles.container}
-        // Additional props can be passed here as needed
+      // Additional props can be passed here as needed
       />
     </View>
   );
