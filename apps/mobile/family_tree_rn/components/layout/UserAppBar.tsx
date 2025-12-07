@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Avatar, Appbar, useTheme } from 'react-native-paper';
-import FamilyAvatar from '../../assets/images/familyAvatar.png'; // Import the default avatar image
+import FamilyAvatar from '@/assets/images/familyAvatar.png'; // Import the default avatar image
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useFonts } from 'expo-font';
 import { useAuth } from '@/hooks/useAuth'; // Import the real useAuth hook
-import { useUserProfileStore } from '../../stores/useUserProfileStore'; // Import user profile store
+import { useUserProfileStore } from '@/stores/useUserProfileStore'; // Import user profile store
 
 export default function UserAppBar() {
   const router = useRouter();

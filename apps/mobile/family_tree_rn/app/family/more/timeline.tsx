@@ -7,7 +7,7 @@ import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import type { EventDto, SearchPublicEventsQuery } from '@/types';
-import TimelineListItem from '@/components/event/TimelineListItem';
+import { TimelineListItem } from '@/components/event';
 
 const TimelineScreen = () => {
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ const TimelineScreen = () => {
     if (!isLoadMore) {
       setIsRefreshing(true);
       // Reset store for fresh fetch
-      usePublicEventStore.getState().reset();
+      reset();
     }
 
     try {
@@ -68,7 +68,7 @@ const TimelineScreen = () => {
         setIsRefreshing(false);
       }
     }
-  }, [currentFamilyId, debouncedSearchQuery, fetchEvents, t]);
+  }, [currentFamilyId, debouncedSearchQuery, fetchEvents, t, reset]);
 
   useEffect(() => {
     if (isFocused && currentFamilyId) {

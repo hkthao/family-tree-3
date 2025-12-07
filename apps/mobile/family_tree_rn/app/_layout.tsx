@@ -7,7 +7,7 @@ import { ThemeProvider, useThemeContext } from '@/context/ThemeContext';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import OnboardingScreen from './onboarding';
+import OnboardingScreen from '@/app/onboarding';
 import { useAuth } from '@/hooks/useAuth'; // Import useAuth
 import { StatusBar } from 'expo-status-bar'; // Import StatusBar
 

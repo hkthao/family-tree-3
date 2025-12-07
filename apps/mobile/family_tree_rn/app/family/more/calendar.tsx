@@ -5,7 +5,7 @@ import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-cale
 import { Divider, useTheme, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
-import AgendaItem from '@/components/events/AgendaItem';
+import { AgendaItem } from '@/components/events';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import type { EventDto, EventType } from '@/types';
 import { debounce } from '@/utils/debounce';

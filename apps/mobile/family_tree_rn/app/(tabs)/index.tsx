@@ -1,14 +1,9 @@
 import { ScrollView, StyleSheet, View } from 'react-native'; // Import View
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { router } from 'expo-router'; // Import router
-import '@/i18n'; // Import i18n configuration
-import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
-import { Banner } from '@/components/home/Banner'; // Import Banner component
-import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import FeaturesSection component
-import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Import HowItWorksSection component
-import { MediaPreviewSection } from '@/components/home/MediaPreviewSection'; // Import MediaPreviewSection component
-import { SecondaryCtaSection } from '@/components/home/SecondaryCtaSection'; // Import SecondaryCtaSection component
-import { PrivacySecuritySection } from '@/components/home/PrivacySecuritySection'; // Import PrivacySecuritySection component
+import '@/118n'; // Import i18n configuration
+import { UserAppBar } from '@/components/layout'; // Import UserAppBar
+import { Banner, FeaturesSection, HowItWorksSection, MediaPreviewSection, SecondaryCtaSection, PrivacySecuritySection } from '@/components/home'; // Import Home components
 import { useTheme } from 'react-native-paper'; // Import useTheme
 
 export default function HomeScreen() {

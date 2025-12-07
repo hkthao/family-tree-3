@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { UserProfileDto } from '@/types'; // Import from central types index
-import { userProfileService } from '../services'; // Import the userProfileService
+import { userProfileService } from '@/services'; // Import the userProfileService
 
 interface UserProfileState {
   userProfile: UserProfileDto | null;

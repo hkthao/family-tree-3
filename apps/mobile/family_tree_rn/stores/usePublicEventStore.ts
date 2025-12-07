@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getPublicEventById, searchPublicEvents, getPublicUpcomingEvents } from '@/api/publicApiClient';
+import { eventService } from '@/services'; // Import the new eventService
 import type { EventDto, PaginatedList, SearchPublicEventsQuery, GetPublicUpcomingEventsQuery } from '@/types';
 
 interface EventState {
@@ -38,8 +38,12 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
     getEventById: async (id: string) => {
       set({ loading: true, error: null });
       try {
-        const event = await getPublicEventById(id);
-        set({ event });
+        const result = await eventService.getEventById(id);
+        if (result.isSuccess && result.value) {
+          set({ event: result.value });
+        } else {
+          set({ error: result.error?.message || 'Failed to fetch event' });
+        }
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch event' });
       } finally {
@@ -51,14 +55,15 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
       set({ loading: true, error: null });
       try {
         const pageNumber = isLoadMore ? get().currentPage + 1 : 1;
-        const response = await searchPublicEvents({
+        const result = await eventService.searchEvents({
           ...query,
           familyId: familyId,
           page: pageNumber,
           itemsPerPage: PAGE_SIZE,
         });
 
-        if (response) {
+        if (result.isSuccess && result.value) {
+          const response = result.value;
           const newEvents = response.items;
           set((state) => ({
             events: isLoadMore ? [...state.events, ...newEvents] : newEvents,
@@ -66,8 +71,11 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
             currentPage: pageNumber,
             hasMore: response.page < response.totalPages,
           }));
+          return response;
+        } else {
+          set({ error: result.error?.message || 'Failed to search events' });
+          return null;
         }
-        return response;
       } catch (err: any) {
         set({ error: err.message || 'Failed to search events' });
         return null;
@@ -79,12 +87,14 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
     fetchUpcomingEvents: async (query: GetPublicUpcomingEventsQuery) => { // Renamed from fetchUpcomingEvents
       set({ loading: true, error: null });
       try {
-        const upcomingEvents = await getPublicUpcomingEvents(query);
-        set({ upcomingEvents });
+        const result = await eventService.getUpcomingEvents(query);
+        if (result.isSuccess && result.value) {
+          set({ upcomingEvents: result.value });
+        } else {
+          set({ error: result.error?.message || 'Failed to fetch upcoming events' });
+        }
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch upcoming events' });
-      } finally {
-        set({ loading: false });
       }
     },
   

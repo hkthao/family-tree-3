@@ -1,11 +1,8 @@
 // apps/mobile/family_tree_rn/stores/usePublicFamilyStore.ts
 
 import { create } from 'zustand';
-import {
-  getPublicFamilyById,
-  searchPublicFamilies,
-} from '@/api/publicApiClient';
-import type { FamilyDetailDto, FamilyListDto, PaginatedList } from '@/types'; // Updated import, added Paginated
+import { familyService } from '@/services'; // Import the new familyService
+import type { FamilyDetailDto, FamilyListDto, PaginatedList } from '@/types';
 
 const PAGE_SIZE = 10; // Define PAGE_SIZE here
 
@@ -43,8 +40,12 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
   getFamilyById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const family = await getPublicFamilyById(id);
-      set({ family, loading: false });
+      const result = await familyService.getFamilyById(id);
+      if (result.isSuccess && result.value) {
+        set({ family: result.value, loading: false });
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch family', loading: false });
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family', loading: false });
     }
@@ -53,18 +54,24 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
   fetchFamilies: async (query: { page: number; search?: string }, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const paginatedList: PaginatedList<FamilyListDto> = await searchPublicFamilies({ // Updated type
+      const result = await familyService.searchFamilies({ // Updated type
         page: query.page,
         itemsPerPage: PAGE_SIZE, // Use PAGE_SIZE from FamilySearchScreen
         searchTerm: query.search,
       });
-      set((state) => ({
-        families: isRefreshing ? paginatedList.items : [...state.families, ...paginatedList.items],
-        totalItems: paginatedList.totalItems,
-        page: paginatedList.page,
-        totalPages: paginatedList.totalPages,
-        hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
-      }));
+
+      if (result.isSuccess && result.value) {
+        const paginatedList: PaginatedList<FamilyListDto> = result.value;
+        set((state) => ({
+          families: isRefreshing ? paginatedList.items : [...state.families, ...paginatedList.items],
+          totalItems: paginatedList.totalItems,
+          page: paginatedList.page,
+          totalPages: paginatedList.totalPages,
+          hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
+        }));
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch family' });
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family' });
     } finally {

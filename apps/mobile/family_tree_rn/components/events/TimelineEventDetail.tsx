@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import MaterialCommunityIcons
 import { EventDto, EventType } from '@/types'; // Ensure EventType is imported
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
-import MemberAvatarChip from '@/components/common/MemberAvatarChip';
+import { MemberAvatarChip } from '@/components/common';
 import { useMemo, } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet } from 'react-native';

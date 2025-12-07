@@ -6,9 +6,9 @@ import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore';
 import { PieChart, BarChart } from 'react-native-chart-kit';
-import ProfileCard from '@/components/family/ProfileCard'; // Import ProfileCard
-import DetailedInfoCard from '@/components/family/DetailedInfoCard'; // Import DetailedInfoCard
-import MetricCard from '@/components/common/MetricCard'; // Import MetricCard
+import { ProfileCard } from '@/components/family'; // Import ProfileCard
+import { DetailedInfoCard } from '@/components/family'; // Import DetailedInfoCard
+import { MetricCard } from '@/components/common'; // Import MetricCard
 import { useDashboardStore } from '@/stores/useDashboardStore'; // Import useDashboardStore
 export default function FamilyDashboardScreen() {
   const { t } = useTranslation();
@@ -92,6 +92,42 @@ export default function FamilyDashboardScreen() {
     },
   }), [theme]);
 
+  const screenWidth = Dimensions.get('window').width;
+  const chartConfig = {
+    backgroundGradientFrom: theme.colors.background,
+    backgroundGradientTo: theme.colors.background,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Use a neutral color for lines/text
+    labelColor: (_ = 1) => theme.colors.onSurface, // Changed to use theme.colors.onSurface
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false,
+    fillShadowGradient: theme.colors.primary,
+    fillShadowGradientOpacity: 0.5
+  };
+
+  const generationsData = useMemo(() => {
+    if (!dashboardData?.membersPerGeneration) {
+      return [];
+    }
+    return Object.keys(dashboardData.membersPerGeneration)
+      .sort((a, b) => parseInt(a) - parseInt(b)) // Sort by generation number
+      .map(generation => ({
+        generation: parseInt(generation),
+        members: dashboardData.membersPerGeneration[parseInt(generation)],
+      }));
+  }, [dashboardData]);
+
+
+  const translatedGenderDistribution = useMemo(() => {
+    if (!dashboardData?.genderDistribution) {
+      return [];
+    }
+    return dashboardData.genderDistribution.map(item => ({
+      ...item,
+      name: item.name === 'Male' ? t('common.male') : (item.name === 'Female' ? t('common.female') : item.name)
+    }));
+  }, [dashboardData, t]);
+
   useEffect(() => {
     const loadData = async () => {
       if (!currentFamilyId) {
@@ -128,35 +164,6 @@ export default function FamilyDashboardScreen() {
       </View>
     );
   }
-
-  const screenWidth = Dimensions.get('window').width;
-  const chartConfig = {
-    backgroundGradientFrom: theme.colors.background,
-    backgroundGradientTo: theme.colors.background,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Use a neutral color for lines/text
-    labelColor: (_ = 1) => theme.colors.onSurface, // Changed to use theme.colors.onSurface
-    strokeWidth: 2,
-    barPercentage: 0.5,
-    useShadowColorFromDataset: false,
-    fillShadowGradient: theme.colors.primary,
-    fillShadowGradientOpacity: 0.5
-  };
-  // Transform publicMembersPerGeneration for BarChart
-  const generationsData = Object.keys(dashboardData.membersPerGeneration)
-    .sort((a, b) => parseInt(a) - parseInt(b)) // Sort by generation number
-    .map(generation => ({
-      generation: parseInt(generation),
-      members: dashboardData.membersPerGeneration[parseInt(generation)],
-    }));
-  const translatedGenderDistribution = useMemo(() => {
-    if (!dashboardData?.genderDistribution) {
-      return [];
-    }
-    return dashboardData.genderDistribution.map(item => ({
-      ...item,
-      name: item.name === 'Male' ? t('common.male') : (item.name === 'Female' ? t('common.female') : item.name)
-    }));
-  }, [dashboardData, t]);
 
   return (
     <View style={styles.container}>

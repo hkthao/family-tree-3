@@ -1,9 +1,7 @@
 // apps/mobile/family_tree_rn/services/userProfile/api.userProfile.service.ts
 
-import { ApiClientMethods } from '@/types/apiClient';
-import { UserProfileDto } from '@/types/userProfile';
-import { Result, ApiError } from '@/types/api';
-import { IUserProfileService } from './userProfile.service.interface';
+import { ApiClientMethods, UserProfileDto, Result, ApiError } from '@/types';
+import { IUserProfileService } from '@/services/userProfile/userProfile.service.interface';
 
 export class ApiUserProfileService implements IUserProfileService {
   constructor(private api: ApiClientMethods) {}

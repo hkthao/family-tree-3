@@ -3,7 +3,7 @@ import { View, StyleSheet, FlatList, Dimensions, Animated, ViewToken } from 'rea
 import { Button, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import OnboardingSlide from '@/components/onboarding/OnboardingSlide';
+import { OnboardingSlide } from '@/components/onboarding';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

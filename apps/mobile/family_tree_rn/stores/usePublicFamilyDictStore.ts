@@ -1,9 +1,6 @@
 import { create } from 'zustand';
-import {
-  getPublicFamilyDictById,
-  getPublicFamilyDicts,
-} from '@/src/api/publicApiClient';
-import type { FamilyDictDto, PaginatedList, FamilyDictFilter } from '@/types'; // Updated import
+import { familyDictService } from '@/services'; // Import the new familyDictService
+import type { FamilyDictDto, PaginatedList, FamilyDictFilter } from '@/types';
 
 const PAGE_SIZE = 10;
 
@@ -41,8 +38,12 @@ export const usePublicFamilyDictStore = create<PublicFamilyDictStore>((set, get)
   getFamilyDictById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const familyDict = await getPublicFamilyDictById(id);
-      set({ familyDict, loading: false });
+      const result = await familyDictService.getFamilyDictById(id);
+      if (result.isSuccess && result.value) {
+        set({ familyDict: result.value, loading: false });
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch family dictionary entry', loading: false });
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family dictionary entry', loading: false });
     }
@@ -51,15 +52,20 @@ export const usePublicFamilyDictStore = create<PublicFamilyDictStore>((set, get)
   fetchFamilyDicts: async (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const paginatedList: PaginatedList<FamilyDictDto> = await getPublicFamilyDicts(filter, page, itemsPerPage); // Updated type
+      const result = await familyDictService.getFamilyDicts(filter, page, itemsPerPage);
+      if (result.isSuccess && result.value) {
+        const paginatedList: PaginatedList<FamilyDictDto> = result.value; // Updated type
 
-      set((state) => ({
-        familyDicts: isRefreshing ? paginatedList.items : [...state.familyDicts, ...paginatedList.items],
-        totalItems: paginatedList.totalItems,
-        page: paginatedList.page,
-        totalPages: paginatedList.totalPages,
-        hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
-      }));
+        set((state) => ({
+          familyDicts: isRefreshing ? paginatedList.items : [...state.familyDicts, ...paginatedList.items],
+          totalItems: paginatedList.totalItems,
+          page: paginatedList.page,
+          totalPages: paginatedList.totalPages,
+          hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
+        }));
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch family dictionary entries' });
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family dictionary entries' });
     } finally {

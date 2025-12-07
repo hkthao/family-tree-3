@@ -3,7 +3,7 @@ import { Text, Card, Button, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
-import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
+import { UserAppBar } from '@/components/layout'; // Import UserAppBar
 import * as Clipboard from 'expo-clipboard'; // Import Clipboard from expo-clipboard
 import { useMemo } from 'react';
 

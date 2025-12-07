@@ -5,7 +5,7 @@ import { Svg, Rect, Text as SvgText, G } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useCameraPermissions } from 'expo-camera';
-import { detectFaces } from '@/api/publicApiClient';
+import { faceService } from '@/services'; // Import the new faceService
 import type { DetectedFaceDto } from '@/types';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useRouter } from 'expo-router';
@@ -48,14 +48,16 @@ export default function FamilyFaceSearchScreen() {
       setDetectedFaces([]); // Clear previous detections
       try {
         if (selectedImage.base64) {
-          const response = await detectFaces({
+          const result = await faceService.detectFaces({
             imageBytes: selectedImage.base64,
             contentType: selectedImage.mimeType || 'image/jpeg',
             returnCrop: false,
           });
-          console.log(response);
-          if (response && response.detectedFaces) {
-            setDetectedFaces(response.detectedFaces);
+          console.log(result);
+          if (result.isSuccess && result.value && result.value.detectedFaces) {
+            setDetectedFaces(result.value.detectedFaces);
+          } else {
+            Alert.alert(t('common.error'), result.error?.message || t('faceSearch.detectionFailed'));
           }
         } else {
           Alert.alert(t('common.error'), t('faceSearch.base64Error'));
@@ -87,13 +89,15 @@ export default function FamilyFaceSearchScreen() {
       setDetectedFaces([]); // Clear previous detections
       try {
         if (selectedImage.base64) {
-          const response = await detectFaces({
+          const result = await faceService.detectFaces({
             imageBytes: selectedImage.base64,
             contentType: selectedImage.mimeType || 'image/jpeg',
             returnCrop: false,
           });
-          if (response && response.detectedFaces) {
-            setDetectedFaces(response.detectedFaces);
+          if (result.isSuccess && result.value && result.value.detectedFaces) {
+            setDetectedFaces(result.value.detectedFaces);
+          } else {
+            Alert.alert(t('common.error'), result.error?.message || t('faceSearch.detectionFailed'));
           }
         } else {
           Alert.alert(t('common.error'), t('faceSearch.base64Error'));

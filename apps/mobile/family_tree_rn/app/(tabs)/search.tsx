@@ -1,4 +1,4 @@
-import FamilySearchScreen from '@/components/family/FamilySearchScreen';
+import { FamilySearchScreen } from '@/components/family';
 
 export default function SearchScreen() {
   return <FamilySearchScreen />;

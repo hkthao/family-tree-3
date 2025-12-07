@@ -1,8 +1,8 @@
 // apps/mobile/family_tree_rn/stores/usePublicMemberStore.ts
 
 import { create } from 'zustand';
-import { searchPublicMembers, getPublicMemberById } from '@/api/publicApiClient';
-import type { MemberListDto, SearchPublicMembersQuery, MemberDetailDto } from '@/types';
+import { memberService } from '@/services'; // Import the new memberService
+import type { MemberListDto, SearchPublicMembersQuery, MemberDetailDto, PaginatedList } from '@/types';
 
 
 interface PublicMemberState {
@@ -38,9 +38,14 @@ export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
   getMemberById: async (id: string, familyId: string) => {
     set({ loading: true, error: null });
     try {
-      const member = await getPublicMemberById(id, familyId);
-      set({ member });
-      return member;
+      const result = await memberService.getMemberById(id, familyId);
+      if (result.isSuccess && result.value) {
+        set({ member: result.value });
+        return result.value;
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch member' });
+        return null;
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch member' });
       return null;
@@ -52,14 +57,19 @@ export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
   fetchMembers: async (query: SearchPublicMembersQuery, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const paginatedList = await searchPublicMembers(query);
-      set((state) => ({
-        members: isRefreshing ? paginatedList.items : [...state.members, ...paginatedList.items],
-        totalItems: paginatedList.totalItems,
-        page: paginatedList.page,
-        totalPages: paginatedList.totalPages,
-        hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
-      }));
+      const result = await memberService.searchMembers(query);
+      if (result.isSuccess && result.value) {
+        const paginatedList: PaginatedList<MemberListDto> = result.value;
+        set((state) => ({
+          members: isRefreshing ? paginatedList.items : [...state.members, ...paginatedList.items],
+          totalItems: paginatedList.totalItems,
+          page: paginatedList.page,
+          totalPages: paginatedList.totalPages,
+          hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
+        }));
+      } else {
+        set({ error: result.error?.message || 'Failed to fetch members' });
+      }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch members' });
     } finally {
