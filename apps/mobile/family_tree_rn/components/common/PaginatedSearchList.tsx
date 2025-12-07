@@ -77,7 +77,6 @@ export function PaginatedSearchList<T, Q extends { searchTerm?: string }>(
       backgroundColor: theme.colors.background,
     },
     container: {
-      flex: 1,
     },
     searchFilterContainer: {
       flexDirection: 'row',

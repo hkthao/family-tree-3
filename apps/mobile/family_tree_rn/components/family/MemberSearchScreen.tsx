@@ -155,7 +155,7 @@ export default function MemberSearchScreen() {
 
   const styles = useMemo(() => StyleSheet.create({
     safeArea: {
-      flex: 1,
+      flex: 1
     },
     container: {
       flex: 1,

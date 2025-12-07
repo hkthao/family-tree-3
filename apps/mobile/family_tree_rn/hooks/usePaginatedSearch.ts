@@ -96,6 +96,7 @@ export function usePaginatedSearch<T, Q extends { searchTerm?: string; page?: nu
   const [filters, setFiltersState] = useState<Q>({ ...initialQuery, searchTerm: initialQuery.searchTerm || '' } as Q);
   const [refreshing, setRefreshing] = useState(false);
   const isFetchingMoreRef = useRef(false);
+  const forceFetchRef = useRef(false); // New ref to force fetch on refresh
 
   // Memoize the current query object to use as a dependency for the effect
   const currentQuery = useMemo(() => ({
@@ -129,7 +130,8 @@ export function usePaginatedSearch<T, Q extends { searchTerm?: string; page?: nu
   // Effect to trigger initial fetch and subsequent fetches on query/filter/dependency changes
   useEffect(() => {
     // Only fetch if the query content has actually changed OR it's the very first fetch (previousFetchedQueryRef.current is null)
-    if (previousFetchedQueryRef.current && shallowEqual(previousFetchedQueryRef.current, currentQuery)) {
+    // AND it's not a forced fetch (i.e., refresh operation)
+    if (previousFetchedQueryRef.current && shallowEqual(previousFetchedQueryRef.current, currentQuery) && !forceFetchRef.current) {
       console.log('Current query is shallowly equal to previous, skipping fetch.');
       return;
     }
@@ -142,33 +144,49 @@ export function usePaginatedSearch<T, Q extends { searchTerm?: string; page?: nu
     fetch(currentQuery as Q, false);
 
     previousFetchedQueryRef.current = currentQuery;
-  }, [currentQuery, fetch, setError, ...externalDependencies]);
+    forceFetchRef.current = false; // Reset force fetch flag after fetching
+  }, [currentQuery, fetch, setError, ...externalDependencies, forceFetchRef]); // Added forceFetchRef to dependencies
 
   const handleRefresh = useCallback(async () => {
     if (loading) return;
     setRefreshing(true);
+    forceFetchRef.current = true; // Force the next fetch in useEffect
     try {
+      // Reset local search query and filters state
+      setSearchQueryState(initialQuery.searchTerm || '');
+      setFiltersState({ ...initialQuery, searchTerm: initialQuery.searchTerm || '' } as Q); // This will reset page to initialQuery.page (e.g., 1)
+      
+      // Reset store's internal state (items, page, hasMore, etc.)
       reset();
-      await fetch(currentQuery as Q, false);
+      
+      // The useEffect listening to currentQuery changes will trigger the fetch automatically
+      // No need to explicitly call fetch here.
     } catch (e: any) {
       setError(e.message || 'Error refreshing data');
     } finally {
       setRefreshing(false);
     }
-  }, [loading, reset, fetch, currentQuery, setError]);
+  }, [loading, reset, setSearchQueryState, setFiltersState, initialQuery, setError, forceFetchRef]);
 
   const handleLoadMore = useCallback(async () => {
     if (loading || isFetchingMoreRef.current || !hasMore || items.length === 0) return;
 
     isFetchingMoreRef.current = true;
     try {
-      await fetch(currentQuery as Q, true);
+      // Increment the page number for the next fetch
+      setFiltersState((prevFilters) => {
+        const nextPage = (prevFilters.page || 0) + 1;
+        return { ...prevFilters, page: nextPage } as Q;
+      });
+
+      // The fetch will be triggered by the useEffect due to filters.page changing.
+      // No explicit fetch call needed here.
     } catch (e: any) {
       setError(e.message || 'Error loading more data');
     } finally {
       isFetchingMoreRef.current = false;
     }
-  }, [loading, hasMore, items.length, fetch, currentQuery, setError]);
+  }, [loading, hasMore, items.length, setError, setFiltersState, filters?.page]);
 
   const setSearchQuery = useCallback((query: string) => {
     setSearchQueryState(query);
