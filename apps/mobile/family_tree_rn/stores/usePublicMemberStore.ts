@@ -18,7 +18,7 @@ interface PublicMemberState {
 
 interface PublicMemberActions {
   getMemberById: (id: string, familyId: string) => Promise<MemberDetailDto | null>; // Added for member details
-  fetchMembers: (query: SearchPublicMembersQuery, isRefreshing?: boolean) => Promise<void>;
+  fetchMembers: (query: SearchPublicMembersQuery, isRefreshing?: boolean) => Promise<PaginatedList<MemberListDto> | null>;
   reset: () => void;
   setError: (error: string | null) => void;
 }
@@ -54,7 +54,7 @@ export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
     }
   },
 
-  fetchMembers: async (query: SearchPublicMembersQuery, isRefreshing: boolean = false) => {
+  fetchMembers: async (query: SearchPublicMembersQuery, isRefreshing: boolean = false): Promise<PaginatedList<MemberListDto> | null> => {
     set({ loading: true, error: null });
     try {
       const result = await memberService.searchMembers(query);
@@ -67,11 +67,14 @@ export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
           totalPages: paginatedList.totalPages,
           hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
         }));
+        return paginatedList;
       } else {
         set({ error: result.error?.message || 'Failed to fetch members' });
+        return null;
       }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch members' });
+      return null;
     } finally {
       set({ loading: false });
     }

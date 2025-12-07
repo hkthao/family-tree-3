@@ -277,7 +277,7 @@ export interface FamilyDictDto {
 }
 
 export interface FamilyDictFilter {
-  searchQuery?: string;
+  searchTerm?: string;
   lineage?: FamilyDictLineage;
   region?: string;
   sortBy?: string;

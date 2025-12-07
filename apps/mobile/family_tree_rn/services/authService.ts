@@ -1,7 +1,6 @@
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { jwtDecode } from 'jwt-decode';
-import { Platform } from 'react-native';
 import { nanoid } from 'nanoid';
 import * as Crypto from 'expo-crypto'; // Import expo-crypto
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Add AsyncStorage import

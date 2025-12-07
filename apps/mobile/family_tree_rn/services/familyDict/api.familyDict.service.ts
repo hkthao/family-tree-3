@@ -13,7 +13,7 @@ export class ApiFamilyDictService implements IFamilyDictService {
         params: {
           page: page,
           itemsPerPage: itemsPerPage,
-          searchQuery: filter.searchQuery,
+          searchTerm: filter.searchTerm,
           lineage: filter.lineage,
           region: filter.region,
           sortBy: filter.sortBy,

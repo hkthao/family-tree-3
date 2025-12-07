@@ -19,9 +19,9 @@ interface PublicFamilyState {
 
 interface PublicFamilyActions {
   getFamilyById: (id: string) => Promise<void>;
-  fetchFamilies: (query: { page: number; search?: string }, isRefreshing?: boolean) => Promise<void>;
+  fetchFamilies: (query: { page: number; search?: string }, isRefreshing?: boolean) => Promise<PaginatedList<FamilyListDto> | null>;
   clearFamily: () => void;
-  reset: () => void; // Renamed clearFamilies to reset
+  reset: () => void;
   setError: (error: string | null) => void;
 }
 
@@ -51,7 +51,7 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
     }
   },
 
-  fetchFamilies: async (query: { page: number; search?: string }, isRefreshing: boolean = false) => {
+  fetchFamilies: async (query: { page: number; search?: string }, isRefreshing: boolean = false): Promise<PaginatedList<FamilyListDto> | null> => {
     set({ loading: true, error: null });
     try {
       const result = await familyService.searchFamilies({ // Updated type
@@ -69,11 +69,14 @@ export const usePublicFamilyStore = create<PublicFamilyStore>((set, get) => ({ /
           totalPages: paginatedList.totalPages,
           hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
         }));
+        return paginatedList;
       } else {
         set({ error: result.error?.message || 'Failed to fetch family' });
+        return null;
       }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family' });
+      return null;
     } finally {
       set({ loading: false }); // Ensure loading is always set to false
     }

@@ -9,14 +9,14 @@ interface EventState {
   upcomingEvents: EventDto[];
   loading: boolean;
   error: string | null;
-  currentPage: number;
+  page: number; // Renamed from currentPage
   hasMore: boolean;
 }
 
 interface EventActions {
   getEventById: (id: string) => Promise<void>;
-  fetchEvents: (familyId: string, query: SearchPublicEventsQuery, isLoadMore: boolean) => Promise<PaginatedList<EventDto> | null>; // Renamed and type changed
-  fetchUpcomingEvents: (query: GetPublicUpcomingEventsQuery) => Promise<void>; // Renamed
+  fetchEvents: (familyId: string, query: SearchPublicEventsQuery, isLoadMore: boolean) => Promise<PaginatedList<EventDto> | null>;
+  fetchUpcomingEvents: (query: GetPublicUpcomingEventsQuery) => Promise<EventDto[] | null>; // Changed return type
   reset: () => void;
   setError: (error: string | null) => void;
 }
@@ -32,7 +32,7 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
   upcomingEvents: [],
   loading: false,
   error: null,
-  currentPage: 1, // Initialize current page
+  page: 1, // Initialize page
   hasMore: true, // Initialize hasMore
   
     getEventById: async (id: string) => {
@@ -54,7 +54,7 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
     fetchEvents: async (familyId: string, query: SearchPublicEventsQuery, isLoadMore: boolean): Promise<PaginatedList<EventDto> | null> => {
       set({ loading: true, error: null });
       try {
-        const pageNumber = isLoadMore ? get().currentPage + 1 : 1;
+        const pageNumber = isLoadMore ? get().page + 1 : 1; // Use get().page
         const result = await eventService.searchEvents({
           ...query,
           familyId: familyId,
@@ -68,7 +68,7 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
           set((state) => ({
             events: isLoadMore ? [...state.events, ...newEvents] : newEvents,
             paginatedEvents: response,
-            currentPage: pageNumber,
+            page: pageNumber, // Update page here
             hasMore: response.page < response.totalPages,
           }));
           return response;
@@ -84,20 +84,23 @@ export const usePublicEventStore = create<EventStore>((set, get) => ({
       }
     },
   
-    fetchUpcomingEvents: async (query: GetPublicUpcomingEventsQuery) => { // Renamed from fetchUpcomingEvents
+    fetchUpcomingEvents: async (query: GetPublicUpcomingEventsQuery): Promise<EventDto[] | null> => { // Changed return type
       set({ loading: true, error: null });
       try {
         const result = await eventService.getUpcomingEvents(query);
         if (result.isSuccess && result.value) {
           set({ upcomingEvents: result.value });
+          return result.value;
         } else {
           set({ error: result.error?.message || 'Failed to fetch upcoming events' });
+          return null;
         }
       } catch (err: any) {
         set({ error: err.message || 'Failed to fetch upcoming events' });
+        return null;
       }
     },
   
-    reset: () => set({ event: null, events: [], paginatedEvents: null, upcomingEvents: [], error: null, currentPage: 1, hasMore: true }), // Removed 'events'
+    reset: () => set({ event: null, events: [], paginatedEvents: null, upcomingEvents: [], error: null, page: 1, hasMore: true }),
   setError: (error: string | null) => set({ error }),
 }));

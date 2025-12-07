@@ -17,7 +17,7 @@ interface PublicFamilyDictState {
 
 interface PublicFamilyDictActions {
   getFamilyDictById: (id: string) => Promise<void>;
-  fetchFamilyDicts: (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing?: boolean) => Promise<void>;
+  fetchFamilyDicts: (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing?: boolean) => Promise<PaginatedList<FamilyDictDto> | null>;
   clearFamilyDict: () => void;
   reset: () => void;
   setError: (error: string | null) => void;
@@ -49,12 +49,12 @@ export const usePublicFamilyDictStore = create<PublicFamilyDictStore>((set, get)
     }
   },
 
-  fetchFamilyDicts: async (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing: boolean = false) => {
+  fetchFamilyDicts: async (filter: FamilyDictFilter, page: number, itemsPerPage: number, isRefreshing: boolean = false): Promise<PaginatedList<FamilyDictDto> | null> => {
     set({ loading: true, error: null });
     try {
       const result = await familyDictService.getFamilyDicts(filter, page, itemsPerPage);
       if (result.isSuccess && result.value) {
-        const paginatedList: PaginatedList<FamilyDictDto> = result.value; // Updated type
+        const paginatedList: PaginatedList<FamilyDictDto> = result.value;
 
         set((state) => ({
           familyDicts: isRefreshing ? paginatedList.items : [...state.familyDicts, ...paginatedList.items],
@@ -63,11 +63,14 @@ export const usePublicFamilyDictStore = create<PublicFamilyDictStore>((set, get)
           totalPages: paginatedList.totalPages,
           hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
         }));
+        return paginatedList;
       } else {
         set({ error: result.error?.message || 'Failed to fetch family dictionary entries' });
+        return null;
       }
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch family dictionary entries' });
+      return null;
     } finally {
       set({ loading: false });
     }
