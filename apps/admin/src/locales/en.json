@@ -1058,5 +1058,22 @@
   "naturalLanguage.editor.parseButton": "Parse",
   "naturalLanguage.editor.parsedResultTitle": "Parsed Data",
   "naturalLanguage.recommendations.missingLocation": "Missing location",
-  "naturalLanguage.recommendations.missingDateOfBirth": "Missing date of birth"
+  "naturalLanguage.recommendations.missingDateOfBirth": "Missing date of birth",
+  "relationshipDetection.title": "Genealogical Relationship Detection",
+  "relationshipDetection.familyLabel": "Select Family",
+  "relationshipDetection.familyRequired": "Family is required",
+  "relationshipDetection.memberALabel": "Select Member A",
+  "relationshipDetection.memberARequired": "Member A is required",
+  "relationshipDetection.memberBLabel": "Select Member B",
+  "relationshipDetection.memberBRequired": "Member B is required",
+  "relationshipDetection.detectButton": "Detect Relationship",
+  "relationshipDetection.resultTitle": "Relationship Result",
+  "relationshipDetection.fromAToB": "From A to B",
+  "relationshipDetection.fromBToA": "From B to A",
+  "relationshipDetection.path": "Path (IDs)",
+  "relationshipDetection.edges": "Edges (Types)",
+  "relationshipDetection.selectMembersPrompt": "Please select a family and two members to detect their relationship.",
+  "relationshipDetection.selectFamilyAndMembersError": "Please select both Family and two Members.",
+  "relationshipDetection.noRelationshipFound": "No relationship found between the two members.",
+  "relationshipDetection.genericError": "An error occurred while detecting the relationship."
 }

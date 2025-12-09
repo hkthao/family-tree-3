@@ -1206,5 +1206,21 @@
   "prompt.detail.title": "Chi tiết Lời nhắc",
   "prompt.detail.notFound": "Không tìm thấy lời nhắc.",
   "menu.prompts": "Lời nhắc",
-  "relationshipDetection.title": "Xác định Quan hệ"
+  "relationshipDetection.title": "Xác định Quan hệ Gia phả",
+  "relationshipDetection.familyLabel": "Chọn Gia đình",
+  "relationshipDetection.familyRequired": "Gia đình là bắt buộc",
+  "relationshipDetection.memberALabel": "Chọn Thành viên A",
+  "relationshipDetection.memberARequired": "Thành viên A là bắt buộc",
+  "relationshipDetection.memberBLabel": "Chọn Thành viên B",
+  "relationshipDetection.memberBRequired": "Thành viên B là bắt buộc",
+  "relationshipDetection.detectButton": "Xác định Quan hệ",
+  "relationshipDetection.resultTitle": "Kết quả Quan hệ",
+  "relationshipDetection.fromAToB": "Từ A đến B",
+  "relationshipDetection.fromBToA": "Từ B đến A",
+  "relationshipDetection.path": "Đường đi (IDs)",
+  "relationshipDetection.edges": "Các cạnh (kiểu)",
+  "relationshipDetection.selectMembersPrompt": "Vui lòng chọn gia đình và hai thành viên để xác định quan hệ.",
+  "relationshipDetection.selectFamilyAndMembersError": "Vui lòng chọn đầy đủ Gia đình và 2 Thành viên.",
+  "relationshipDetection.noRelationshipFound": "Không tìm thấy quan hệ giữa hai thành viên.",
+  "relationshipDetection.genericError": "Đã xảy ra lỗi khi xác định quan hệ."
 }
