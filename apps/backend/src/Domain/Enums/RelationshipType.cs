@@ -5,5 +5,6 @@ public enum RelationshipType
     Father,
     Mother,
     Husband,
-    Wife
+    Wife,
+    Child
 }

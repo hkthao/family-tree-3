@@ -87,7 +87,11 @@ public class Member : BaseAuditableEntity
     public void UpdateAvatar(string? newAvatarUrl)
     {
         AvatarUrl = newAvatarUrl;
+    }
 
+     public void UpdateGender(string? gender)
+    {
+        Gender = gender;
     }
 
     public Relationship AddFatherRelationship(Guid fatherId)

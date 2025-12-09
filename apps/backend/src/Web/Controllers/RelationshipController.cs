@@ -61,6 +61,20 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
+    /// Xử lý GET request để phát hiện mối quan hệ giữa hai thành viên.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình mà các thành viên thuộc về.</param>
+    /// <param name="memberAId">ID của thành viên A.</param>
+    /// <param name="memberBId">ID của thành viên B.</param>
+    /// <returns>Kết quả phát hiện mối quan hệ.</returns>
+    [HttpGet("detect-relationship")]
+    public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
+    {
+        var result = await _mediator.Send(new Application.Relationships.Queries.GetRelationshipQuery(familyId, memberAId, memberBId));
+        return result.FromAToB != "unknown" || result.FromBToA != "unknown" ? Ok(result) : NotFound(result);
+    }
+
+    /// <summary>
     /// Xử lý POST request để tạo một mối quan hệ mới.
     /// </summary>
     /// <param name="command">Lệnh tạo mối quan hệ với thông tin chi tiết.</param>

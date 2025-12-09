@@ -20,6 +20,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
+        services.AddScoped<Services.IRelationshipDetectionService, Services.RelationshipDetectionService>();
 
         return services;
     }
