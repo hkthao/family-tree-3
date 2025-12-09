@@ -2,7 +2,7 @@ namespace backend.Application.Services;
 
 public interface IRelationshipDetectionService
 {
-    Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId);
+    Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId, CancellationToken cancellationToken);
 }
 
 public class RelationshipDetectionResult

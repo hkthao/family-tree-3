@@ -13,6 +13,6 @@ public class GetRelationshipQueryHandler : IRequestHandler<GetRelationshipQuery,
 
     public async Task<RelationshipDetectionResult> Handle(GetRelationshipQuery request, CancellationToken cancellationToken)
     {
-        return await _relationshipDetectionService.DetectRelationshipAsync(request.FamilyId, request.MemberAId, request.MemberBId);
+        return await _relationshipDetectionService.DetectRelationshipAsync(request.FamilyId, request.MemberAId, request.MemberBId, cancellationToken);
     }
 }

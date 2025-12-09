@@ -1,7 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using backend.Application.AI; // Added
+using backend.Application.AI.DTOs; // Added
+using backend.Application.Common.Models; // Added
+using backend.Application.Common.Interfaces; // Added
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -17,19 +22,19 @@ namespace backend.Application.UnitTests.Services;
 /// <summary>
 /// 🎯 Mục tiêu: Kiểm thử hành vi của RelationshipDetectionService.
 /// ⚙️ Các bước: Arrange - Act - Assert.
-/// 💡 Giải thích: Đảm bảo service có thể phát hiện và suy luận các mối quan hệ một cách chính xác dựa trên đồ thị và các quy tắc.
+/// 💡 Giải thích: Đảm bảo service có thể phát hiện và suy luận các mối quan hệ một cách chính xác dựa trên đồ thị và AI.
 /// </summary>
 public class RelationshipDetectionServiceTests : TestBase
 {
     private readonly RelationshipDetectionService _service;
     private readonly Mock<IRelationshipGraph> _mockRelationshipGraph;
-    private readonly Mock<IRelationshipRuleEngine> _mockRelationshipRuleEngine;
+    private readonly Mock<IAiGenerateService> _mockAiGenerateService; // Changed from IRelationshipRuleEngine
 
     public RelationshipDetectionServiceTests()
     {
         _mockRelationshipGraph = new Mock<IRelationshipGraph>();
-        _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>();
-        _service = new RelationshipDetectionService(_context, _mockRelationshipGraph.Object, _mockRelationshipRuleEngine.Object);
+        _mockAiGenerateService = new Mock<IAiGenerateService>(); // Initialized
+        _service = new RelationshipDetectionService(_context, _mockRelationshipGraph.Object, _mockAiGenerateService.Object); // Updated constructor
     }
 
     /// <summary>
@@ -66,12 +71,15 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(child.Id, father.Id)).Returns(pathToFather);
 
-        // Mock rule engine behavior
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToChild, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("cha");
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToFather, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("con");
+        // Mock AI service behavior
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "cha", FromBToA = "con" }));
+
 
         // Act
-        var result = await _service.DetectRelationshipAsync(familyId, father.Id, child.Id);
+        var result = await _service.DetectRelationshipAsync(familyId, father.Id, child.Id, CancellationToken.None); // Added CancellationToken.None
 
         // Assert
         result.Should().NotBeNull();
@@ -134,12 +142,14 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandfather.Id, grandchild.Id)).Returns(pathToGrandchild);
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandchild.Id, grandfather.Id)).Returns(pathToGrandfather);
 
-        // Mock rule engine behavior
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToGrandchild, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("ông nội");
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToGrandfather, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("cháu nội");
+        // Mock AI service behavior
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "ông nội", FromBToA = "cháu nội" }));
 
         // Act
-        var result = await _service.DetectRelationshipAsync(familyId, grandfather.Id, grandchild.Id);
+        var result = await _service.DetectRelationshipAsync(familyId, grandfather.Id, grandchild.Id, CancellationToken.None); // Added CancellationToken.None
 
         // Assert
         result.Should().NotBeNull();
@@ -181,11 +191,14 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberA.Id, memberB.Id)).Returns(new RelationshipPath());
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberB.Id, memberA.Id)).Returns(new RelationshipPath());
 
-        // Mock rule engine behavior for unknown
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+        // Mock AI service behavior for unknown
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "unknown", FromBToA = "unknown" }));
 
         // Act
-        var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id);
+        var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None); // Added CancellationToken.None
 
         // Assert
         result.Should().NotBeNull();

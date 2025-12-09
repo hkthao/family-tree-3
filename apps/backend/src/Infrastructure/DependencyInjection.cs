@@ -67,7 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
         services.AddScoped<Domain.Interfaces.IRelationshipGraph, Infrastructure.Services.RelationshipGraph>();
-        services.AddScoped<Domain.Interfaces.IRelationshipRuleEngine, Infrastructure.Services.RelationshipRuleEngine>();
+
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>

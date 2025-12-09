@@ -47,7 +47,7 @@ public class GetRelationshipQueryHandlerTests : TestBase
             Edges = new System.Collections.Generic.List<string> { "Father" }
         };
 
-        _mockRelationshipDetectionService.Setup(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId))
+        _mockRelationshipDetectionService.Setup(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
 
         var query = new GetRelationshipQuery(familyId, memberAId, memberBId); // Corrected constructor call
@@ -58,6 +58,6 @@ public class GetRelationshipQueryHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.Should().Be(expectedResult);
-        _mockRelationshipDetectionService.Verify(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId), Times.Once);
+        _mockRelationshipDetectionService.Verify(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId, CancellationToken.None), Times.Once);
     }
 }

@@ -1,5 +1,12 @@
-using backend.Application.Common.Interfaces; // Correct namespace for IApplicationDbContext
+using backend.Application.Common.Interfaces;
 using backend.Domain.Interfaces;
+using System.Text;
+using backend.Application.AI.DTOs;
+using backend.Application.AI;
+using backend.Application.Common.Models;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Services;
 
@@ -7,58 +14,126 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 {
     private readonly IApplicationDbContext _context;
     private readonly IRelationshipGraph _relationshipGraph;
-    private readonly IRelationshipRuleEngine _ruleEngine;
+    private readonly IAiGenerateService _aiGenerateService;
 
-    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IRelationshipRuleEngine ruleEngine)
+    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService)
     {
         _context = context;
         _relationshipGraph = relationshipGraph;
-        _ruleEngine = ruleEngine;
+        _aiGenerateService = aiGenerateService;
     }
 
-    public async Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId)
+    public async Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId, CancellationToken cancellationToken)
     {
-        // 1. Fetch all Members and Relationships for the given FamilyId
         var members = await _context.Members
                                     .Where(m => m.FamilyId == familyId)
-                                    .ToListAsync();
+                                    .ToListAsync(cancellationToken);
 
         var relationships = await _context.Relationships
                                         .Where(r => r.FamilyId == familyId)
-                                        .ToListAsync();
+                                        .ToListAsync(cancellationToken);
 
-        // Create a dictionary for quick member lookup
         var allMembers = members.ToDictionary(m => m.Id);
 
-        // 2. Build the graph
         _relationshipGraph.BuildGraph(members, relationships);
 
-        // 3. Find shortest path from A to B
         var pathToB = _relationshipGraph.FindShortestPath(memberAId, memberBId);
-
-        // 4. Infer relationship from A to B
-        string fromAToB = "unknown";
-        if (pathToB.NodeIds.Any())
-        {
-            fromAToB = _ruleEngine.InferRelationship(pathToB, allMembers);
-        }
-
-        // 5. Find shortest path from B to A
-        // Note: For bidirectional relationships, we might consider finding the path directly from B to A
-        // or reversing the A to B path and inferring. For now, let's find it directly.
         var pathToA = _relationshipGraph.FindShortestPath(memberBId, memberAId);
 
-        // 6. Infer relationship from B to A
+        string fromAToB = "unknown";
         string fromBToA = "unknown";
-        if (pathToA.NodeIds.Any())
+
+        var combinedPromptBuilder = new StringBuilder();
+
+        // Prompt for A to B
+        if (pathToB.NodeIds.Any())
         {
-            fromBToA = _ruleEngine.InferRelationship(pathToA, allMembers);
+            var memberA = allMembers.GetValueOrDefault(memberAId);
+            var memberB = allMembers.GetValueOrDefault(memberBId);
+
+            if (memberA != null && memberB != null)
+            {
+                combinedPromptBuilder.AppendLine($"Dựa trên cây gia phả, Thành viên A (ID: {memberAId}, Tên: {memberA.FullName}) được kết nối với Thành viên B (ID: {memberBId}, Tên: {memberB.FullName}) thông qua đường dẫn quan hệ sau:");
+
+                for (int i = 0; i < pathToB.NodeIds.Count; i++)
+                {
+                    var nodeId = pathToB.NodeIds[i];
+                    var member = allMembers.GetValueOrDefault(nodeId);
+                    combinedPromptBuilder.Append(member?.FullName ?? $"Thành viên không rõ ({{nodeId}})");
+
+                    if (i < pathToB.Edges.Count)
+                    {
+                        combinedPromptBuilder.Append($" --({{pathToB.Edges[i].Type}})--> ");
+                    }
+                }
+                combinedPromptBuilder.AppendLine();
+                combinedPromptBuilder.AppendLine("Suy luận mối quan hệ trực tiếp trong gia đình từ Thành viên A đến Thành viên B.");
+            }
+        }
+        else
+        {
+            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên A (ID: {memberAId}) đến Thành viên B (ID: {memberBId}).");
         }
 
-        // 7. Map GraphEdge Type enum to string for output
+        combinedPromptBuilder.AppendLine("\n---"); // Separator for clarity in AI prompt
+
+        // Prompt for B to A
+        if (pathToA.NodeIds.Any())
+        {
+            var memberA = allMembers.GetValueOrDefault(memberAId);
+            var memberB = allMembers.GetValueOrDefault(memberBId);
+
+            if (memberA != null && memberB != null)
+            {
+                combinedPromptBuilder.AppendLine($"Dựa trên cây gia phả, Thành viên B (ID: {memberBId}, Tên: {memberB.FullName}) được kết nối với Thành viên A (ID: {memberAId}, Tên: {memberA.FullName}) thông qua đường dẫn quan hệ sau:");
+                
+                for (int i = 0; i < pathToA.NodeIds.Count; i++)
+                {
+                    var nodeId = pathToA.NodeIds[i];
+                    var member = allMembers.GetValueOrDefault(nodeId);
+                    combinedPromptBuilder.Append(member?.FullName ?? $"Thành viên không rõ ({{nodeId}})");
+
+                    if (i < pathToA.Edges.Count)
+                    {
+                        combinedPromptBuilder.Append($" --({{pathToA.Edges[i].Type}})--> ");
+                    }
+                }
+                combinedPromptBuilder.AppendLine();
+                combinedPromptBuilder.AppendLine("Suy luận mối quan hệ trực tiếp trong gia đình từ Thành viên B đến Thành viên A.");
+            }
+        }
+        else
+        {
+            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên B (ID: {memberBId}) đến Thành viên A (ID: {memberAId}).");
+        }
+
+        // Single AI call
+        if (pathToB.NodeIds.Any() || pathToA.NodeIds.Any())
+        {
+            var aiRequest = new GenerateRequest
+            {
+                SystemPrompt = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp và suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên. Kết quả phải là một đối tượng JSON có hai trường: 'FromAToB' và 'FromBToA', mỗi trường chứa một chuỗi mối quan hệ suy luận. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' cho trường đó. Ví dụ: { \"FromAToB\": \"cha\", \"FromBToA\": \"con\" }",
+                ChatInput = combinedPromptBuilder.ToString(),
+                SessionId = Guid.NewGuid().ToString(),
+                Metadata = new Dictionary<string, object>
+                {
+                    { "familyId", familyId },
+                    { "memberAId", memberAId },
+                    { "memberBId", memberBId }
+                }
+            };
+
+            var aiResponseResult = await _aiGenerateService.GenerateDataAsync<RelationshipInferenceResultDto>(aiRequest, cancellationToken);
+
+            if (aiResponseResult.IsSuccess && aiResponseResult.Value != null)
+            {
+                fromAToB = aiResponseResult.Value.FromAToB;
+                fromBToA = aiResponseResult.Value.FromBToA;
+            }
+        }
+
         var edgesToString = pathToB.Edges.Select(e => e.Type.ToString()).ToList();
 
-        // Return the result
         return new RelationshipDetectionResult
         {
             FromAToB = fromAToB,

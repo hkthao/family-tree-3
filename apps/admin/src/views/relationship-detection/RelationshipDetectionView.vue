@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card class="pa-4">
+    <v-card>
       <v-card-title class="text-h5">{{ t('relationshipDetection.title') }}</v-card-title>
       <v-card-text>
         <v-form @submit.prevent="detectRelationship">
