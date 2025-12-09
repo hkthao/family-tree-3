@@ -45,7 +45,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return await this.http.get<Paginated<MemberFace>>(
-      `/member-faces?${params.toString()}`,
+      `/member-faces/search?${params.toString()}`,
     );
   }
 

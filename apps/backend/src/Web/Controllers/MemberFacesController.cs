@@ -16,7 +16,7 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpGet]
+    [HttpGet("search")]
     public async Task<IActionResult> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
     {
         var result = await _mediator.Send(query);
