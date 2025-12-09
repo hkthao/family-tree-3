@@ -1,4 +1,3 @@
-using backend.Application.Relationships.Queries;
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
@@ -7,6 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
 
 namespace backend.Application.UnitTests.Relationships.Queries;
 
@@ -50,7 +50,7 @@ public class GetRelationshipQueryHandlerTests : TestBase
         _mockRelationshipDetectionService.Setup(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId))
             .ReturnsAsync(expectedResult);
 
-        var query = new GetRelationshipQuery(familyId, memberAId, memberBId);
+        var query = new GetRelationshipQuery(familyId, memberAId, memberBId); // Corrected constructor call
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

@@ -5,6 +5,7 @@ using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
+using backend.Application.Relationships.Queries.GetRelationship; // Added for new GetRelationshipQuery location
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,7 +71,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     [HttpGet("detect-relationship")]
     public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
     {
-        var result = await _mediator.Send(new Application.Relationships.Queries.GetRelationshipQuery(familyId, memberAId, memberBId));
+        var result = await _mediator.Send(new Application.Relationships.Queries.GetRelationship.GetRelationshipQuery(familyId, memberAId, memberBId));
         return result.FromAToB != "unknown" || result.FromBToA != "unknown" ? Ok(result) : NotFound(result);
     }
 
