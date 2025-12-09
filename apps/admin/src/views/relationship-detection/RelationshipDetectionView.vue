@@ -40,8 +40,7 @@
         <div v-if="result">
           <v-card-title class="text-h6">{{ t('relationshipDetection.resultTitle') }}</v-card-title>
           <v-card-text>
-            <p><strong>{{ t('relationshipDetection.fromAToB') }}:</strong> {{ result.fromAToB }}</p>
-            <p><strong>{{ t('relationshipDetection.fromBToA') }}:</strong> {{ result.fromBToA }}</p>
+            <p><strong>{{ t('relationshipDetection.descriptionLabel') }}:</strong> {{ result.description }}</p>
             <p><strong>{{ t('relationshipDetection.path') }}:</strong> {{ result.path.join(' -> ') }}</p>
             <p><strong>{{ t('relationshipDetection.edges') }}:</strong> {{ result.edges.join(' -> ') }}</p>
           </v-card-text>
@@ -61,17 +60,24 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n'; // Added
+import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useRelationshipDetectionStore } from '@/stores/relationshipDetection.store'; // Will create this later
+import { useRelationshipDetectionStore } from '@/stores/relationshipDetection.store';
 
-const { t } = useI18n(); // Added
+// Define the expected structure of RelationshipDetectionResult from the backend
+interface RelationshipDetectionResult {
+  description: string;
+  path: string[]; // Assuming GUIDs are converted to strings for display
+  edges: string[];
+}
+
+const { t } = useI18n();
 const relationshipDetectionStore = useRelationshipDetectionStore();
 const selectedFamilyId = ref<string | undefined>(undefined);
 const selectedMemberAId = ref<string | undefined>(undefined);
 const selectedMemberBId = ref<string | undefined>(undefined);
-const result = ref<any | null>(null); // Use a more specific type later
+const result = ref<RelationshipDetectionResult | null>(null); // Use the defined interface
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -85,7 +91,7 @@ watch(selectedFamilyId, () => {
 
 const detectRelationship = async () => {
   if (!selectedFamilyId.value || !selectedMemberAId.value || !selectedMemberBId.value) {
-    error.value = t('relationshipDetection.selectFamilyAndMembersError'); // Used i18n key
+    error.value = t('relationshipDetection.selectFamilyAndMembersError');
     return;
   }
 
@@ -94,7 +100,6 @@ const detectRelationship = async () => {
   result.value = null;
 
   try {
-    // Call the store action to detect relationship
     const detectionResult = await relationshipDetectionStore.detectRelationship(
       selectedFamilyId.value,
       selectedMemberAId.value,
@@ -102,15 +107,16 @@ const detectRelationship = async () => {
     );
     if (detectionResult) {
       result.value = detectionResult;
-      if (result.value.fromAToB === 'unknown' && result.value.fromBToA === 'unknown') {
-        error.value = t('relationshipDetection.noRelationshipFound'); // Used i18n key
+      // Update the condition to check the single 'description' property
+      if (result.value.description === 'unknown' || result.value.description === t('relationshipDetection.noRelationshipFound')) {
+        error.value = t('relationshipDetection.noRelationshipFound');
         result.value = null; // Clear result if unknown
       }
     } else {
-      error.value = t('relationshipDetection.noRelationshipFound'); // Used i18n key
+      error.value = t('relationshipDetection.noRelationshipFound');
     }
   } catch (err: any) {
-    error.value = err.message || t('relationshipDetection.genericError'); // Used i18n key
+    error.value = err.message || t('relationshipDetection.genericError');
   } finally {
     loading.value = false;
   }

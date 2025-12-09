@@ -72,7 +72,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
     {
         var result = await _mediator.Send(new GetRelationshipQuery(familyId, memberAId, memberBId));
-        return result.FromAToB != "unknown" || result.FromBToA != "unknown" ? Ok(result) : NotFound(result);
+        return result.Description != "unknown" ? Ok(result) : NotFound(result);
     }
 
     /// <summary>

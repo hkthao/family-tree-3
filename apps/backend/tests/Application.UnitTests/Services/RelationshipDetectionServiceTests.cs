@@ -75,7 +75,7 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
             It.IsAny<GenerateRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "cha", FromBToA = "con" }));
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "cha (từ A đến B) và con (từ B đến A)" }));
 
 
         // Act
@@ -83,8 +83,8 @@ public class RelationshipDetectionServiceTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.FromAToB.Should().Be("cha");
-        result.FromBToA.Should().Be("con");
+        result.Description.Should().Contain("cha (từ A đến B)");
+        result.Description.Should().Contain("con (từ B đến A)");
         result.Path.Should().HaveCount(2);
         result.Edges.Should().HaveCount(1);
         result.Path.First().Should().Be(father.Id);
@@ -146,15 +146,15 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
             It.IsAny<GenerateRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "ông nội", FromBToA = "cháu nội" }));
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "ông nội (từ A đến B) và cháu nội (từ B đến A)" }));
 
         // Act
         var result = await _service.DetectRelationshipAsync(familyId, grandfather.Id, grandchild.Id, CancellationToken.None); // Added CancellationToken.None
 
         // Assert
         result.Should().NotBeNull();
-        result.FromAToB.Should().Be("ông nội");
-        result.FromBToA.Should().Be("cháu nội");
+        result.Description.Should().Contain("ông nội (từ A đến B)");
+        result.Description.Should().Contain("cháu nội (từ B đến A)");
         result.Path.Should().HaveCount(3);
         result.Edges.Should().HaveCount(2);
         result.Path.First().Should().Be(grandfather.Id);
@@ -195,15 +195,14 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
             It.IsAny<GenerateRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { FromAToB = "unknown", FromBToA = "unknown" }));
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "unknown" }));
 
         // Act
         var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None); // Added CancellationToken.None
 
         // Assert
         result.Should().NotBeNull();
-        result.FromAToB.Should().Be("unknown");
-        result.FromBToA.Should().Be("unknown");
+        result.Description.Should().Be("Không tìm thấy đường dẫn quan hệ.");
         result.Path.Should().BeEmpty();
         result.Edges.Should().BeEmpty();
     }

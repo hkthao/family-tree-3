@@ -7,8 +7,7 @@ public interface IRelationshipDetectionService
 
 public class RelationshipDetectionResult
 {
-    public string FromAToB { get; set; } = "unknown";
-    public string FromBToA { get; set; } = "unknown";
+    public string Description { get; set; } = "unknown"; // Single descriptive string
     public List<Guid> Path { get; set; } = new List<Guid>();
     public List<string> Edges { get; set; } = new List<string>();
 }

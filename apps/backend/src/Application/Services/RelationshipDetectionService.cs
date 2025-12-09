@@ -2,11 +2,9 @@ using backend.Application.Common.Interfaces;
 using backend.Domain.Interfaces;
 using System.Text;
 using backend.Application.AI.DTOs;
-using backend.Application.AI;
-using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
+using backend.Domain.ValueObjects;
 
 namespace backend.Application.Services;
 
@@ -40,79 +38,53 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         var pathToB = _relationshipGraph.FindShortestPath(memberAId, memberBId);
         var pathToA = _relationshipGraph.FindShortestPath(memberBId, memberAId);
 
-        string fromAToB = "unknown";
-        string fromBToA = "unknown";
+        string inferredDescription = "unknown"; // Use a single string for the AI inferred description
 
         var combinedPromptBuilder = new StringBuilder();
+        var memberA = allMembers.GetValueOrDefault(memberAId);
+        var memberB = allMembers.GetValueOrDefault(memberBId);
 
-        // Prompt for A to B
+        if (memberA == null || memberB == null)
+        {
+            return new RelationshipDetectionResult
+            {
+                Description = "unknown",
+                Path = new List<Guid>(),
+                Edges = new List<string>()
+            };
+        }
+
+        combinedPromptBuilder.AppendLine($"Xác định mối quan hệ gia đình giữa Thành viên '{memberA.FullName}' (ID: {memberAId}) và Thành viên '{memberB.FullName}' (ID: {memberBId}) trong một cây gia phả. Cung cấp một mô tả toàn diện về mối quan hệ của A với B và B với A.");
+        combinedPromptBuilder.AppendLine("Nếu có đường dẫn, mô tả đường dẫn quan hệ bằng ngôn ngữ tự nhiên. Nếu không có đường dẫn, chỉ định rằng không tìm thấy mối quan hệ.");
+        combinedPromptBuilder.AppendLine("Ví dụ mô tả đường dẫn: 'A là con của B, B là con của C, C và D cùng là con của E.'");
+        combinedPromptBuilder.AppendLine("Kết quả mong đợi là một đối tượng JSON với trường 'InferredRelationship' chứa mô tả chuỗi.");
+
+        combinedPromptBuilder.AppendLine("\n--- Đường dẫn từ A đến B ---");
         if (pathToB.NodeIds.Any())
         {
-            var memberA = allMembers.GetValueOrDefault(memberAId);
-            var memberB = allMembers.GetValueOrDefault(memberBId);
-
-            if (memberA != null && memberB != null)
-            {
-                combinedPromptBuilder.AppendLine($"Dựa trên cây gia phả, Thành viên A (ID: {memberAId}, Tên: {memberA.FullName}) được kết nối với Thành viên B (ID: {memberBId}, Tên: {memberB.FullName}) thông qua đường dẫn quan hệ sau:");
-
-                for (int i = 0; i < pathToB.NodeIds.Count; i++)
-                {
-                    var nodeId = pathToB.NodeIds[i];
-                    var member = allMembers.GetValueOrDefault(nodeId);
-                    combinedPromptBuilder.Append(member?.FullName ?? $"Thành viên không rõ ({{nodeId}})");
-
-                    if (i < pathToB.Edges.Count)
-                    {
-                        combinedPromptBuilder.Append($" --({{pathToB.Edges[i].Type}})--> ");
-                    }
-                }
-                combinedPromptBuilder.AppendLine();
-                combinedPromptBuilder.AppendLine("Suy luận mối quan hệ trực tiếp trong gia đình từ Thành viên A đến Thành viên B.");
-            }
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToB, allMembers)); // Removed fromMemberId, toMemberId
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên A (ID: {memberAId}) đến Thành viên B (ID: {memberBId}).");
+            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên '{memberA.FullName}' đến Thành viên '{memberB.FullName}'.");
         }
 
-        combinedPromptBuilder.AppendLine("\n---"); // Separator for clarity in AI prompt
-
-        // Prompt for B to A
+        combinedPromptBuilder.AppendLine("\n--- Đường dẫn từ B đến A ---");
         if (pathToA.NodeIds.Any())
         {
-            var memberA = allMembers.GetValueOrDefault(memberAId);
-            var memberB = allMembers.GetValueOrDefault(memberBId);
-
-            if (memberA != null && memberB != null)
-            {
-                combinedPromptBuilder.AppendLine($"Dựa trên cây gia phả, Thành viên B (ID: {memberBId}, Tên: {memberB.FullName}) được kết nối với Thành viên A (ID: {memberAId}, Tên: {memberA.FullName}) thông qua đường dẫn quan hệ sau:");
-                
-                for (int i = 0; i < pathToA.NodeIds.Count; i++)
-                {
-                    var nodeId = pathToA.NodeIds[i];
-                    var member = allMembers.GetValueOrDefault(nodeId);
-                    combinedPromptBuilder.Append(member?.FullName ?? $"Thành viên không rõ ({{nodeId}})");
-
-                    if (i < pathToA.Edges.Count)
-                    {
-                        combinedPromptBuilder.Append($" --({{pathToA.Edges[i].Type}})--> ");
-                    }
-                }
-                combinedPromptBuilder.AppendLine();
-                combinedPromptBuilder.AppendLine("Suy luận mối quan hệ trực tiếp trong gia đình từ Thành viên B đến Thành viên A.");
-            }
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToA, allMembers)); // Removed fromMemberId, toMemberId
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên B (ID: {memberBId}) đến Thành viên A (ID: {memberAId}).");
+            combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên '{memberB.FullName}' đến Thành viên '{memberA.FullName}'.");
         }
 
         // Single AI call
-        if (pathToB.NodeIds.Any() || pathToA.NodeIds.Any())
+        if (pathToB.NodeIds.Count != 0 || pathToA.NodeIds.Count != 0)
         {
             var aiRequest = new GenerateRequest
             {
-                SystemPrompt = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp và suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên. Kết quả phải là một đối tượng JSON có hai trường: 'FromAToB' và 'FromBToA', mỗi trường chứa một chuỗi mối quan hệ suy luận. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' cho trường đó. Ví dụ: { \"FromAToB\": \"cha\", \"FromBToA\": \"con\" }",
+                SystemPrompt = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp và suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên. Kết quả phải là một đối tượng JSON có một trường: 'InferredRelationship', chứa một chuỗi mô tả toàn diện về mối quan hệ của A với B và B với A bằng ngôn ngữ tự nhiên. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' trong chuỗi. Ví dụ JSON: { \"InferredRelationship\": \"A là cha của B và B là con của A.\" }",
                 ChatInput = combinedPromptBuilder.ToString(),
                 SessionId = Guid.NewGuid().ToString(),
                 Metadata = new Dictionary<string, object>
@@ -127,19 +99,71 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
             if (aiResponseResult.IsSuccess && aiResponseResult.Value != null)
             {
-                fromAToB = aiResponseResult.Value.FromAToB;
-                fromBToA = aiResponseResult.Value.FromBToA;
+                inferredDescription = aiResponseResult.Value.InferredRelationship;
             }
         }
+        else
+        {
+            inferredDescription = "Không tìm thấy đường dẫn quan hệ.";
+        }
+
 
         var edgesToString = pathToB.Edges.Select(e => e.Type.ToString()).ToList();
 
         return new RelationshipDetectionResult
         {
-            FromAToB = fromAToB,
-            FromBToA = fromBToA,
+            Description = inferredDescription, // Assign the single inferred description
             Path = pathToB.NodeIds,
             Edges = edgesToString
+        };
+    }
+
+    private string _DescribePathInNaturalLanguage(RelationshipPath path, IReadOnlyDictionary<Guid, Member> allMembers) // Removed fromMemberId, toMemberId
+    {
+        if (!path.NodeIds.Any() || path.NodeIds.Count != path.Edges.Count + 1)
+        {
+            return "Đường dẫn không hợp lệ hoặc không có thành viên nào.";
+        }
+
+        var descriptionBuilder = new StringBuilder();
+        var currentMember = allMembers.GetValueOrDefault(path.NodeIds.First());
+        var targetMember = allMembers.GetValueOrDefault(path.NodeIds.Last());
+
+        if (currentMember == null || targetMember == null)
+        {
+            return "Thành viên trong đường dẫn không tìm thấy.";
+        }
+
+        descriptionBuilder.Append($"{currentMember.FullName}");
+
+        for (int i = 0; i < path.Edges.Count; i++)
+        {
+            var edge = path.Edges[i];
+            var nextMember = allMembers.GetValueOrDefault(path.NodeIds[i + 1]);
+
+            if (nextMember == null)
+            {
+                descriptionBuilder.Append($" --({edge.Type})--> Thành viên không rõ ({path.NodeIds[i + 1]})"); // Changed "Unknown Member" to Vietnamese
+                continue;
+            }
+
+            descriptionBuilder.Append($" là {GetVietnameseRelationshipTerm(edge.Type)} của {nextMember.FullName}");
+        }
+
+        return descriptionBuilder.ToString() + ".";
+    }
+
+    private string GetVietnameseRelationshipTerm(RelationshipType type)
+    {
+        return type switch
+        {
+            RelationshipType.Father => "cha",
+            RelationshipType.Mother => "mẹ",
+            RelationshipType.Child => "con",
+            RelationshipType.Husband => "chồng",
+            RelationshipType.Wife => "vợ",
+            // Add more specific Vietnamese terms for other types if needed
+            _ => type.ToString()
         };
     }
 }

@@ -41,8 +41,7 @@ public class GetRelationshipQueryHandlerTests : TestBase
         var memberBId = Guid.NewGuid();
         var expectedResult = new RelationshipDetectionResult
         {
-            FromAToB = "cha",
-            FromBToA = "con",
+            Description = "cha (từ A đến B) và con (từ B đến A)", // Combined description
             Path = new System.Collections.Generic.List<Guid> { memberAId, memberBId },
             Edges = new System.Collections.Generic.List<string> { "Father" }
         };
