@@ -1,4 +1,4 @@
-namespace backend.Application.Services;
+namespace backend.Application.Common.Interfaces;
 
 public interface IRelationshipDetectionService
 {

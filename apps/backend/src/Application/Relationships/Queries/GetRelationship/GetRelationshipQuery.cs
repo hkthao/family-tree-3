@@ -1,4 +1,4 @@
-using backend.Application.Services;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.Relationships.Queries.GetRelationship;
 

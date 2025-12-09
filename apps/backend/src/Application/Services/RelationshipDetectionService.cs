@@ -92,24 +92,25 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         
         // Simpler, more direct prompt for AI
         combinedPromptBuilder.AppendLine($"Xác định mối quan hệ gia đình giữa Thành viên '{memberA.FullName}' (ID: {memberAId}) và Thành viên '{memberB.FullName}' (ID: {memberBId}) trong một cây gia phả.");
-        combinedPromptBuilder.AppendLine("Đường dẫn từ A đến B:");
+        
+        combinedPromptBuilder.AppendLine("\n--- Chi tiết đường dẫn từ A đến B ---");
         if (pathToB.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine("  " + _DescribePathInNaturalLanguageConcise(pathToB, allMembers)); // Use concise description
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguageConcise(pathToB, allMembers)); // Use concise description
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"  Không có đường dẫn trực tiếp từ Thành viên '{memberA.FullName}' đến Thành viên '{memberB.FullName}'.");
+            combinedPromptBuilder.AppendLine($"Không có đường dẫn trực tiếp từ Thành viên '{memberA.FullName}' đến Thành viên '{memberB.FullName}'.");
         }
 
-        combinedPromptBuilder.AppendLine("\nĐường dẫn từ B đến A:");
+        combinedPromptBuilder.AppendLine("\n--- Chi tiết đường dẫn từ B đến A ---");
         if (pathToA.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine("  " + _DescribePathInNaturalLanguageConcise(pathToA, allMembers)); // Use concise description
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguageConcise(pathToA, allMembers)); // Use concise description
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"  Không có đường dẫn trực tiếp từ Thành viên '{memberB.FullName}' đến Thành viên '{memberA.FullName}'.");
+            combinedPromptBuilder.AppendLine($"Không có đường dẫn trực tiếp từ Thành viên '{memberB.FullName}' đến Thành viên '{memberA.FullName}'.");
         }
         combinedPromptBuilder.AppendLine("Dựa vào thông tin trên, hãy suy luận mối quan hệ trực tiếp trong gia đình giữa hai thành viên và mô tả một cách NGẮN GỌN, SÚC TÍCH bằng tiếng Việt. Tránh liệt kê lại chi tiết đường dẫn.");
         combinedPromptBuilder.AppendLine("Ví dụ: 'A là cha của B và B là con của A.'");
@@ -169,25 +170,13 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             var sourceMember = allMembers.GetValueOrDefault(path.Edges[i].SourceMemberId);
             var targetMember = allMembers.GetValueOrDefault(path.Edges[i].TargetMemberId);
 
-            if (sourceMember != null && targetMember != null)
+            string sourceName = sourceMember?.FullName ?? $"Thành viên không rõ ({path.Edges[i].SourceMemberId})";
+            string targetName = targetMember?.FullName ?? $"Thành viên không rõ ({path.Edges[i].TargetMemberId})";
+
+            descriptionBuilder.Append($"{sourceName} là {GetVietnameseRelationshipTerm(path.Edges[i].Type)} của {targetName}");
+            if (i < path.Edges.Count - 1)
             {
-                descriptionBuilder.Append($"{sourceMember.FullName} ({sourceMember.Id}) là {GetVietnameseRelationshipTerm(path.Edges[i].Type)} của {targetMember.FullName} ({targetMember.Id})");
-                if (i < path.Edges.Count - 1)
-                {
-                    descriptionBuilder.Append(", ");
-                }
-            } else if (sourceMember != null) {
-                descriptionBuilder.Append($"{sourceMember.FullName} ({sourceMember.Id}) là {GetVietnameseRelationshipTerm(path.Edges[i].Type)} của Thành viên không rõ ({path.Edges[i].TargetMemberId})");
-                if (i < path.Edges.Count - 1)
-                {
-                    descriptionBuilder.Append(", ");
-                }
-            } else if (targetMember != null) {
-                descriptionBuilder.Append($"Thành viên không rõ ({path.Edges[i].SourceMemberId}) là {GetVietnameseRelationshipTerm(path.Edges[i].Type)} của {targetMember.FullName} ({targetMember.Id})");
-                if (i < path.Edges.Count - 1)
-                {
-                    descriptionBuilder.Append(", ");
-                }
+                descriptionBuilder.Append(", ");
             }
         }
 
