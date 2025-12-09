@@ -47,8 +47,8 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         var totalMembersForGender = data.Members.Count(m => !string.IsNullOrEmpty(m.Gender));
         var maleCount = data.Members.Count(m => m.Gender == Gender.Male.ToString());
         var femaleCount = data.Members.Count(m => m.Gender == Gender.Female.ToString());
-        stats.MaleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
-        stats.FemaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
+        stats.MaleRatio = totalMembersForGender > 0 ? Math.Round((double)maleCount / totalMembersForGender, 1) : 0.0;
+        stats.FemaleRatio = totalMembersForGender > 0 ? Math.Round((double)femaleCount / totalMembersForGender, 1) : 0.0;
 
         // Calculate Average Age
         var livingMembersWithBirthDate = data.Members
