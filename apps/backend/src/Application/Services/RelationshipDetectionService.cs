@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using backend.Application.Common.Interfaces; // Correct namespace for IApplicationDbContext
-using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Interfaces;
-using backend.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Services;
 

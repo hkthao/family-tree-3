@@ -17,10 +17,90 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
     private readonly ICurrentUser _user = user;
     private readonly IDateTime _dateTime = dateTime;
 
+    // Định nghĩa một record lồng để chứa dữ liệu đã lọc
+    private record FilteredDashboardData(
+        IQueryable<Family> FilteredFamiliesQuery,
+        IEnumerable<Member> Members,
+        IEnumerable<Relationship> Relationships,
+        IEnumerable<Event> Events,
+        IEnumerable<Family> FamiliesInScope
+    );
+
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
         var stats = new DashboardStatsDto();
 
+        // Trích xuất logic lọc và lấy dữ liệu vào phương thức riêng tư
+        var data = await _GetFilteredDashboardData(request, cancellationToken);
+
+        // Sử dụng dữ liệu đã lọc để tính toán thống kê
+        stats.TotalFamilies = await data.FilteredFamiliesQuery.CountAsync(cancellationToken);
+        stats.TotalMembers = data.Members.Count();
+        stats.TotalRelationships = data.Relationships.Count();
+        stats.TotalEvents = data.Events.Count();
+
+        // Calculate Living/Deceased Members
+        stats.LivingMembersCount = data.Members.Count(m => !m.IsDeceased);
+        stats.DeceasedMembersCount = data.Members.Count(m => m.IsDeceased);
+
+        // Calculate Gender Ratio
+        var totalMembersForGender = data.Members.Count(m => !string.IsNullOrEmpty(m.Gender));
+        var maleCount = data.Members.Count(m => m.Gender == Gender.Male.ToString());
+        var femaleCount = data.Members.Count(m => m.Gender == Gender.Female.ToString());
+        stats.MaleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
+        stats.FemaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
+
+        // Calculate Average Age
+        var livingMembersWithBirthDate = data.Members
+            .Where(m => !m.IsDeceased && m.DateOfBirth.HasValue)
+            .ToList();
+
+        if (livingMembersWithBirthDate.Any())
+        {
+            var totalAgeInYears = livingMembersWithBirthDate
+                .Sum(m => (_dateTime.Now.Year - m.DateOfBirth!.Value.Year) - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
+            stats.AverageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
+        }
+
+        // Generations and Members Per Generation
+        int maxGlobalGenerations = 0;
+        var globalMembersPerGeneration = new Dictionary<int, int>();
+
+        foreach (var family in data.FamiliesInScope) // Sử dụng FamiliesInScope từ dữ liệu đã lọc
+        {
+            var filteredFamilyMembers = data.Members.Where(m => m.FamilyId == family.Id).ToList();
+            var filteredFamilyRelationships = data.Relationships.Where(r => r.FamilyId == family.Id).ToList();
+
+            if (!filteredFamilyMembers.Any()) continue;
+
+            var (familyMaxGenerations, familyMembersPerGeneration) = CalculateGenerations(filteredFamilyMembers, filteredFamilyRelationships);
+
+            if (familyMaxGenerations > maxGlobalGenerations)
+            {
+                maxGlobalGenerations = familyMaxGenerations;
+            }
+
+            foreach (var entry in familyMembersPerGeneration)
+            {
+                if (globalMembersPerGeneration.ContainsKey(entry.Key))
+                {
+                    globalMembersPerGeneration[entry.Key] += entry.Value;
+                }
+                else
+                {
+                    globalMembersPerGeneration[entry.Key] = entry.Value;
+                }
+            }
+        }
+        stats.TotalGenerations = maxGlobalGenerations;
+        stats.MembersPerGeneration = globalMembersPerGeneration;
+
+        return Result<DashboardStatsDto>.Success(stats);
+    }
+
+    // Phương thức riêng tư để lọc và lấy dữ liệu
+    private async Task<FilteredDashboardData> _GetFilteredDashboardData(GetDashboardStatsQuery request, CancellationToken cancellationToken)
+    {
         IEnumerable<Guid>? accessibleFamilyIds = null;
         if (!_authorizationService.IsAdmin())
         {
@@ -49,72 +129,12 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
             .Where(e => filteredFamiliesQuery.Any(f => f.Id == e.FamilyId))
             .Where(e => !e.IsDeleted)
             .ToListAsync(cancellationToken);
-        
-        stats.TotalFamilies = await filteredFamiliesQuery.CountAsync(cancellationToken);
-        stats.TotalMembers = members.Count();
-        stats.TotalRelationships = relationships.Count();
-        stats.TotalEvents = events.Count();
 
-        // Calculate Living/Deceased Members
-        stats.LivingMembersCount = members.Count(m => !m.IsDeceased);
-        stats.DeceasedMembersCount = members.Count(m => m.IsDeceased);
+        var familiesInScope = await filteredFamiliesQuery.ToListAsync(cancellationToken);
 
-        // Calculate Gender Ratio
-        var totalMembersForGender = members.Count(m => !string.IsNullOrEmpty(m.Gender));
-        var maleCount = members.Count(m => m.Gender == Gender.Male.ToString());
-        var femaleCount = members.Count(m => m.Gender == Gender.Female.ToString());
-        stats.MaleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
-        stats.FemaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
-
-        // Calculate Average Age
-        var livingMembersWithBirthDate = members
-            .Where(m => !m.IsDeceased && m.DateOfBirth.HasValue)
-            .ToList();
-
-        if (livingMembersWithBirthDate.Any())
-        {
-            var totalAgeInYears = livingMembersWithBirthDate
-                .Sum(m => (_dateTime.Now.Year - m.DateOfBirth!.Value.Year) - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
-            stats.AverageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
-        }
-
-        // Generations and Members Per Generation
-        int maxGlobalGenerations = 0;
-        var globalMembersPerGeneration = new Dictionary<int, int>();
-
-        var familiesInScope = await filteredFamiliesQuery.ToListAsync(cancellationToken); 
-
-        foreach (var family in familiesInScope)
-        {
-            var filteredFamilyMembers = members.Where(m => m.FamilyId == family.Id).ToList();
-            var filteredFamilyRelationships = relationships.Where(r => r.FamilyId == family.Id).ToList();
-
-            if (!filteredFamilyMembers.Any()) continue;
-
-            var (familyMaxGenerations, familyMembersPerGeneration) = CalculateGenerations(filteredFamilyMembers, filteredFamilyRelationships);
-
-            if (familyMaxGenerations > maxGlobalGenerations)
-            {
-                maxGlobalGenerations = familyMaxGenerations;
-            }
-
-            foreach (var entry in familyMembersPerGeneration)
-            {
-                if (globalMembersPerGeneration.ContainsKey(entry.Key))
-                {
-                    globalMembersPerGeneration[entry.Key] += entry.Value;
-                }
-                else
-                {
-                    globalMembersPerGeneration[entry.Key] = entry.Value;
-                }
-            }
-        }
-        stats.TotalGenerations = maxGlobalGenerations;
-        stats.MembersPerGeneration = globalMembersPerGeneration;
-
-        return Result<DashboardStatsDto>.Success(stats);
+        return new FilteredDashboardData(filteredFamiliesQuery, members, relationships, events, familiesInScope);
     }
+
 
     private (int maxGenerations, Dictionary<int, int> membersPerGeneration) CalculateGenerations(
         ICollection<Member> members,
