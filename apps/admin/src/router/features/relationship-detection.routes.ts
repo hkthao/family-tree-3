@@ -8,7 +8,7 @@ export const relationshipDetectionRoutes = [
     meta: {
       requiresAuth: true,
       roles: ['Admin', 'Manager'], // Adjust roles as needed
-      breadcrumb: 'Xác định Quan hệ',
+      breadcrumb: 'relationshipDetection.title',
     },
   },
 ];
