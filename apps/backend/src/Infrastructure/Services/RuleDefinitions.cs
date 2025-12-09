@@ -177,7 +177,7 @@ public static class RuleDefinitions
                 return grandParent != null && uncleAunt != null &&
                        grandParent.Gender == Gender.Male.ToString() && uncleAunt.Gender == Gender.Male.ToString(); // Paternal Uncle (Bác/Chú)
             },
-            "bác/chú (bên nội)"
+            "bác/chú"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
@@ -187,7 +187,7 @@ public static class RuleDefinitions
                 return grandParent != null && uncleAunt != null &&
                        grandParent.Gender == Gender.Male.ToString() && uncleAunt.Gender == Gender.Female.ToString(); // Paternal Aunt (Cô)
             },
-            "cô (bên nội)"
+            "cô"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
@@ -197,7 +197,7 @@ public static class RuleDefinitions
                 return grandParent != null && uncleAunt != null &&
                        grandParent.Gender == Gender.Female.ToString() && uncleAunt.Gender == Gender.Male.ToString(); // Maternal Uncle (Cậu)
             },
-            "cậu (bên ngoại)"
+            "cậu"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
@@ -207,7 +207,17 @@ public static class RuleDefinitions
                 return grandParent != null && uncleAunt != null &&
                        grandParent.Gender == Gender.Female.ToString() && uncleAunt.Gender == Gender.Female.ToString(); // Maternal Aunt (Dì)
             },
-            "dì (bên ngoại)"
+            "dì"
+        ));
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
+            (path, membersDict) => {
+                var grandParent = getMember(membersDict, path.NodeIds[2]);
+                var uncleAunt = getMember(membersDict, path.NodeIds[3]);
+                return grandParent != null && uncleAunt != null &&
+                       grandParent.Gender == Gender.Female.ToString() && uncleAunt.Gender == Gender.Male.ToString(); // Maternal Uncle (Cậu)
+            },
+            "cậu" // Nephew/Niece to Maternal Uncle
         ));
 
 
@@ -231,7 +241,7 @@ public static class RuleDefinitions
                 return grandParent != null && nephewNiece != null &&
                        grandParent.Gender == Gender.Male.ToString(); // A is Male, and B is his nephew/niece from Male sibling
             },
-            "cháu (con anh/em trai)"
+            "cháu"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother, RelationshipType.Child }),
@@ -241,7 +251,7 @@ public static class RuleDefinitions
                 return grandParent != null && nephewNiece != null &&
                        grandParent.Gender == Gender.Female.ToString(); // A is Male, and B is his nephew/niece from Female sibling
             },
-            "cháu (con chị/em gái)"
+            "cháu"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father, RelationshipType.Child }),
@@ -251,7 +261,7 @@ public static class RuleDefinitions
                 return grandParent != null && nephewNiece != null &&
                        grandParent.Gender == Gender.Male.ToString(); // A is Female, and B is her nephew/niece from Male sibling
             },
-            "cháu (con anh/em trai)"
+            "cháu"
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
@@ -261,7 +271,7 @@ public static class RuleDefinitions
                 return grandParent != null && nephewNiece != null &&
                        grandParent.Gender == Gender.Female.ToString(); // A is Female, and B is her nephew/niece from Female sibling
             },
-            "cháu (con chị/em gái)"
+            "cháu"
         ));
 
 
@@ -316,7 +326,7 @@ public static class RuleDefinitions
             (path, membersDict) => {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var sonInLaw = getMember(membersDict, path.NodeIds[2]);
-                return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // Father of a Daughter, who is wife of B
+                return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // B is husband of A's daughter
             },
             "con rể"
         ));
@@ -325,7 +335,7 @@ public static class RuleDefinitions
             (path, membersDict) => {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var sonInLaw = getMember(membersDict, path.NodeIds[2]);
-                return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // Mother of a Daughter, who is wife of B
+                return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // B is husband of A's daughter
             },
             "con rể"
         ));
@@ -334,7 +344,7 @@ public static class RuleDefinitions
             (path, membersDict) => {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var daughterInLaw = getMember(membersDict, path.NodeIds[2]);
-                return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // Father of a Son, who is husband of B
+                return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // B is wife of A's son
             },
             "con dâu"
         ));
@@ -343,18 +353,177 @@ public static class RuleDefinitions
             (path, membersDict) => {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var daughterInLaw = getMember(membersDict, path.NodeIds[2]);
-                return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // Mother of a Son, who is husband of B
+                return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // B is wife of A's son
             },
             "con dâu"
         ));
 
-        // Siblings-in-law (A to B) - requires 3 edges [Spouse, Child, Father/Mother] or [Child, Spouse, Father/Mother]
-        // This makes it more than 3 edges for many cases. Let's aim for 30 unique rules for now.
-        // We have 23 + 4 + 4 = 31 rules now. This meets the "tối thiểu 30 rule" requirement.
+        // 7. Cousins (Anh họ / Em họ) - Path A -> B where A and B are cousins
+        // Path A -> ParentA (Child), ParentA -> Grandparent (Child), Grandparent -> ParentB (Father/Mother), ParentB -> B (Child)
+        // A (NodeIds[0]), ParentA (NodeIds[1]), Grandparent (NodeIds[2]), ParentB (NodeIds[3]), B (NodeIds[4])
 
-        // Reorder rules for priority (e.g., shorter paths first, or more common relationships)
-        // No strong need for reordering yet, as InferRelationship returns first match.
-        // For simplicity, direct relationships first, then 2-gen, then 3-gen.
+        // Paternal Cousin (Anh họ/Em họ)
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Father, RelationshipType.Child }), // A->PA->GP->PB->B
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]);
+                var ParentA = getMember(membersDict, path.NodeIds[1]);
+                var Grandparent = getMember(membersDict, path.NodeIds[2]);
+                var ParentB = getMember(membersDict, path.NodeIds[3]);
+                var B = getMember(membersDict, path.NodeIds[4]);
+
+                return A != null && ParentA != null && Grandparent != null && ParentB != null && B != null &&
+                       Grandparent.Gender == Gender.Male.ToString(); // Common paternal grandparent
+            },
+            "anh/chị/em họ (bên nội)" // General paternal cousin
+        ));
+
+        // Maternal Cousin (Anh họ/Em họ)
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother, RelationshipType.Child }), // A->PA->GP->PB->B
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]);
+                var ParentA = getMember(membersDict, path.NodeIds[1]);
+                var Grandparent = getMember(membersDict, path.NodeIds[2]);
+                var ParentB = getMember(membersDict, path.NodeIds[3]);
+                var B = getMember(membersDict, path.NodeIds[4]);
+
+                return A != null && ParentA != null && Grandparent != null && ParentB != null && B != null &&
+                       Grandparent.Gender == Gender.Female.ToString(); // Common maternal grandparent
+            },
+            "anh/chị/em họ (bên ngoại)" // General maternal cousin
+        ));
+
+        // Great-Uncles/Aunts (Ông bác/Ông chú/Bà cô/Bà dì) from Great-Nephew/Niece to Great-Uncle/Aunt
+        // Path: A (Great-Nephew/Niece) -> Parent -> Grandparent -> Great-Grandparent -> Great-Uncle/Aunt
+        // Pattern: [Child, Child, Child, Father] or [Child, Child, Child, Mother]
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
+                var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[4]); // B
+
+                return A != null && greatGrandparent != null && greatUncleAunt != null &&
+                       greatGrandparent.Gender == Gender.Male.ToString() && greatUncleAunt.Gender == Gender.Male.ToString();
+            },
+            "cố/ông bác/ông chú" // Great-Nephew/Niece to Paternal Great-Uncle
+        ));
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
+                var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[4]); // B
+
+                return A != null && greatGrandparent != null && greatUncleAunt != null &&
+                       greatGrandparent.Gender == Gender.Male.ToString() && greatUncleAunt.Gender == Gender.Female.ToString();
+            },
+            "cố/bà cô" // Great-Nephew/Niece to Paternal Great-Aunt
+        ));
+
+        // Add rules for maternal great-uncle/aunt if needed
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
+                var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[4]); // B
+
+                return A != null && greatGrandparent != null && greatUncleAunt != null &&
+                       greatGrandparent.Gender == Gender.Female.ToString() && greatUncleAunt.Gender == Gender.Male.ToString();
+            },
+            "cố/ông cậu" // Great-Nephew/Niece to Maternal Great-Uncle
+        ));
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
+                var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[4]); // B
+
+                return A != null && greatGrandparent != null && greatUncleAunt != null &&
+                       greatGrandparent.Gender == Gender.Female.ToString() && greatUncleAunt.Gender == Gender.Female.ToString();
+            },
+            "cố/bà dì" // Great-Nephew/Niece to Maternal Great-Aunt
+        ));
+
+        // Great-Nephew/Niece (Chắt) from Great-Uncle/Aunt to Great-Nephew/Niece
+        // Path: B (Great-Uncle/Aunt) -> Parent -> Grandparent -> Great-Grandparent -> A (Great-Nephew/Niece)
+        // Pattern: [Father, Father, Father, Child] or similar (4 edges)
+
+        // B is Cố/Ông bác/Ông chú (Paternal Great-Uncle) of A
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Father, RelationshipType.Father, RelationshipType.Child }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
+                var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
+                var grandparent = getMember(membersDict, path.NodeIds[2]); // Y's parent
+                var parent = getMember(membersDict, path.NodeIds[3]); // X's parent
+                var greatNephewNiece = getMember(membersDict, path.NodeIds[4]); // A
+
+                return greatUncleAunt != null && greatGrandparent != null && grandparent != null && parent != null && greatNephewNiece != null &&
+                       greatUncleAunt.Gender == Gender.Male.ToString() && // B is male
+                       greatGrandparent.Gender == Gender.Male.ToString(); // Through paternal male line
+            },
+            "chắt" // Great-nephew/niece of paternal great-uncle
+        ));
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father, RelationshipType.Father, RelationshipType.Child }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
+                var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
+                var grandparent = getMember(membersDict, path.NodeIds[2]); // Y's parent
+                var parent = getMember(membersDict, path.NodeIds[3]); // X's parent
+                var greatNephewNiece = getMember(membersDict, path.NodeIds[4]); // A
+
+                return greatUncleAunt != null && greatGrandparent != null && grandparent != null && parent != null && greatNephewNiece != null &&
+                       greatUncleAunt.Gender == Gender.Female.ToString() && // B is female
+                       greatGrandparent.Gender == Gender.Male.ToString(); // Through paternal male line
+            },
+            "chắt" // Great-nephew/niece of paternal great-aunt
+        ));
+        // Add similar rules for maternal great-uncles/aunts
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
+                var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
+                var grandparent = getMember(membersDict, path.NodeIds[2]); // Y's parent
+                var parent = getMember(membersDict, path.NodeIds[3]); // X's parent
+                var greatNephewNiece = getMember(membersDict, path.NodeIds[4]); // A
+
+                return greatUncleAunt != null && greatGrandparent != null && grandparent != null && parent != null && greatNephewNiece != null &&
+                       greatUncleAunt.Gender == Gender.Male.ToString() && // B is male
+                       greatGrandparent.Gender == Gender.Female.ToString(); // Through maternal female line
+            },
+            "chắt" // Great-nephew/niece of maternal great-uncle
+        ));
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
+            (path, membersDict) => {
+                if (path.NodeIds.Count != 5) return false;
+                var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
+                var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
+                var grandparent = getMember(membersDict, path.NodeIds[2]); // Y's parent
+                var parent = getMember(membersDict, path.NodeIds[3]); // X's parent
+                var greatNephewNiece = getMember(membersDict, path.NodeIds[4]); // A
+
+                return greatUncleAunt != null && greatGrandparent != null && grandparent != null && parent != null && greatNephewNiece != null &&
+                       greatUncleAunt.Gender == Gender.Female.ToString() && // B is female
+                       greatGrandparent.Gender == Gender.Female.ToString(); // Through maternal female line
+            },
+            "chắt" // Great-nephew/niece of maternal great-aunt
+        ));
 
         return rules;
     }

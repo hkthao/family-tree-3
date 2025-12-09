@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Web.Controllers;
 
 [ApiController]
-[Route("api/memberfaces")]
+[Route("api/member-faces")]
 public class MemberFacesController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

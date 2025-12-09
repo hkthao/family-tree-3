@@ -7,7 +7,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
   constructor(private http: ApiClientMethods) {}
 
   async getById(id: string): Promise<Result<MemberFace | undefined, ApiError>> {
-    const result = await this.http.get<MemberFace>(`/memberfaces/${id}`);
+    const result = await this.http.get<MemberFace>(`/member-faces/${id}`);
     if (result.ok) {
         return ok(result.value || undefined);
     }
@@ -15,15 +15,15 @@ export class ApiMemberFaceService implements IMemberFaceService {
   }
 
   async add(newItem: Omit<MemberFace, 'id'>): Promise<Result<MemberFace, ApiError>> {
-    return await this.http.post<MemberFace>(`/memberfaces`, newItem);
+    return await this.http.post<MemberFace>(`/member-faces`, newItem);
   }
 
   async update(updatedItem: MemberFace): Promise<Result<MemberFace, ApiError>> {
-    return await this.http.put<MemberFace>(`/memberfaces/${updatedItem.id}`, updatedItem);
+    return await this.http.put<MemberFace>(`/member-faces/${updatedItem.id}`, updatedItem);
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    return await this.http.delete<void>(`/memberfaces/${id}`);
+    return await this.http.delete<void>(`/member-faces/${id}`);
   }
 
   async loadItems(
@@ -45,7 +45,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return await this.http.get<Paginated<MemberFace>>(
-      `/memberfaces?${params.toString()}`,
+      `/member-faces?${params.toString()}`,
     );
   }
 
@@ -53,7 +53,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
     return await this.http.get<MemberFace[]>(
-      `/memberfaces/by-ids?${params.toString()}`,
+      `/member-faces/by-ids?${params.toString()}`,
     );
   }
 
@@ -75,7 +75,7 @@ export class ApiMemberFaceService implements IMemberFaceService {
       params.append('returnCrop', returnCrop.toString());
     }
 
-    return await this.http.post<FaceDetectionRessult>(`/memberfaces/detect?${params.toString()}`, formData, {
+    return await this.http.post<FaceDetectionRessult>(`/member-faces/detect?${params.toString()}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
