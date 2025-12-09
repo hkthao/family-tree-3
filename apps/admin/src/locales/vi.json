@@ -1205,5 +1205,6 @@
   "prompt.errors.delete": "Không thể xóa lời nhắc.",
   "prompt.detail.title": "Chi tiết Lời nhắc",
   "prompt.detail.notFound": "Không tìm thấy lời nhắc.",
-  "menu.prompts": "Lời nhắc"
+  "menu.prompts": "Lời nhắc",
+  "relationshipDetection.title": "Xác định Quan hệ"
 }

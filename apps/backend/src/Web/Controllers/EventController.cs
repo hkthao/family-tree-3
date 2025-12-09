@@ -105,7 +105,7 @@ public class EventController(IMediator mediator) : ControllerBase
     [HttpGet("upcoming")]
     public async Task<IActionResult> GetUpcomingEvents([FromQuery] Guid? familyId = null)
     {
-        var query = new backend.Application.Events.Queries.GetUpcomingEvents.GetUpcomingEventsQuery
+        var query = new Application.Events.Queries.GetUpcomingEvents.GetUpcomingEventsQuery
         {
             FamilyId = familyId,
             StartDate = DateTime.UtcNow.Date,

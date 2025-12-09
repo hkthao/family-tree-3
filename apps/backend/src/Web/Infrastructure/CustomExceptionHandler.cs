@@ -47,7 +47,7 @@ public class CustomExceptionHandler : IExceptionHandler
 
     private async Task HandleNotFoundException(HttpContext httpContext, Exception ex)
     {
-        var exception = (backend.Application.Common.Exceptions.NotFoundException)ex;
+        var exception = (NotFoundException)ex;
 
         httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
 

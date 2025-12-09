@@ -71,7 +71,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     [HttpGet("detect-relationship")]
     public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
     {
-        var result = await _mediator.Send(new Application.Relationships.Queries.GetRelationship.GetRelationshipQuery(familyId, memberAId, memberBId));
+        var result = await _mediator.Send(new GetRelationshipQuery(familyId, memberAId, memberBId));
         return result.FromAToB != "unknown" || result.FromBToA != "unknown" ? Ok(result) : NotFound(result);
     }
 

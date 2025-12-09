@@ -37,6 +37,12 @@ const menu: MenuSection[] = [
         to: '/family',
         exact: true,
       },
+      {
+        titleKey: 'relationshipDetection.title', // NEW
+        icon: 'mdi-graph-outline',
+        to: '/relationship-detection',
+        roles: ['Admin', 'Manager'],
+      },
     ],
   },
   {

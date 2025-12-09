@@ -1,5 +1,5 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import type { Relationship, RelationshipFilter } from '@/types';
+import type { Relationship, RelationshipFilter, RelationshipDetectionResult } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import { type Paginated, type Result } from '@/types';
 
@@ -66,5 +66,29 @@ export class ApiRelationshipService implements IRelationshipService {
   async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> {
     const payload = { relationships: newItems };
     return this.http.post<string[]>(`/relationship/bulk-create`, payload);
+  }
+
+  async detectRelationship(familyId: string, memberAId: string, memberBId: string): Promise<RelationshipDetectionResult | null> {
+    try {
+      const response = await this.http.get<RelationshipDetectionResult>(
+        `/relationship/detect-relationship`,
+        {
+          params: {
+            familyId,
+            memberAId,
+            memberBId,
+          },
+        },
+      );
+      if (response.ok) {
+        return response.value;
+      } else {
+        console.error('Lỗi khi gọi API phát hiện quan hệ:', response.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Lỗi khi gọi API phát hiện quan hệ:', error);
+      return null;
+    }
   }
 }
