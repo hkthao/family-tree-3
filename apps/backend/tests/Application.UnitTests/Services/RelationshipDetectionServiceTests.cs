@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -6,10 +10,6 @@ using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.Services;
@@ -44,9 +44,9 @@ public class RelationshipDetectionServiceTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
-        father.UpdateGender(Gender.Male .ToString());
+        father.UpdateGender(Gender.Male.ToString());
         var child = new Member("Child", "Test", "C1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
-        child.UpdateGender(Gender.Male .ToString());
+        child.UpdateGender(Gender.Male.ToString());
 
         _context.Members.Add(father);
         _context.Members.Add(child);
@@ -95,14 +95,14 @@ public class RelationshipDetectionServiceTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        var grandfather = new Member("Grandfather", "Test", "GF1", familyId, isDeceased: false) { Id = Guid.NewGuid()};
-        grandfather.UpdateGender(Gender.Male .ToString());
+        var grandfather = new Member("Grandfather", "Test", "GF1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        grandfather.UpdateGender(Gender.Male.ToString());
 
-        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid()};
-        father.UpdateGender(Gender.Male .ToString());
+        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        father.UpdateGender(Gender.Male.ToString());
 
-        var grandchild = new Member("Grandchild", "Test", "GC1", familyId, isDeceased: false) { Id = Guid.NewGuid()};
-        grandchild.UpdateGender(Gender.Male .ToString());
+        var grandchild = new Member("Grandchild", "Test", "GC1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        grandchild.UpdateGender(Gender.Male.ToString());
 
         _context.Members.Add(grandfather);
         _context.Members.Add(father);

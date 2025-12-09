@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Domain.Enums;
 
 namespace backend.Application.Events;
 

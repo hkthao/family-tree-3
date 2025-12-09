@@ -17,7 +17,7 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, watch } from 'vue';
 import FamilyLinkList from '@/components/family-link/FamilyLinkList.vue';
 import type { FamilyLinkDto } from '@/types'; // Assuming these types exist
 
@@ -30,7 +30,7 @@ const props = defineProps<FamilyLinkListViewProps>();
 const { t } = useI18n();
 const familyLinkStore = useFamilyLinkStore();
 const { list } = storeToRefs(familyLinkStore);
-const searchQuery = ref('');
+
 
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();

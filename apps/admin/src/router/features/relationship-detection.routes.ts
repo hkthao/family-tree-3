@@ -1,5 +1,4 @@
 import RelationshipDetectionView from '@/views/relationship-detection/RelationshipDetectionView.vue';
-import { defineAsyncComponent } from 'vue';
 
 export const relationshipDetectionRoutes = [
   {

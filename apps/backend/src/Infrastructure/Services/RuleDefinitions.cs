@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Domain.Entities; // Added
+using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 
 namespace backend.Infrastructure.Services;
@@ -47,7 +47,8 @@ public static class RuleDefinitions
         // Path: A (NodeIds[0]) -> Intermediate Parent (NodeIds[1]) -> B (NodeIds[2])
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds.Last()); // B
                 var parent = getMember(membersDict, path.NodeIds[path.NodeIds.Count - 2]); // Intermediate Parent
                 return grandParent != null && parent != null &&
@@ -57,7 +58,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds.Last());
                 var parent = getMember(membersDict, path.NodeIds[path.NodeIds.Count - 2]);
                 return grandParent != null && parent != null &&
@@ -67,7 +69,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds.Last());
                 var parent = getMember(membersDict, path.NodeIds[path.NodeIds.Count - 2]);
                 return grandParent != null && parent != null &&
@@ -77,7 +80,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds.Last());
                 var parent = getMember(membersDict, path.NodeIds[path.NodeIds.Count - 2]);
                 return grandParent != null && parent != null &&
@@ -94,7 +98,8 @@ public static class RuleDefinitions
         // A (Grandparent) -> B (Grandchild) through a male child (Paternal side)
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Father }), // A is father of P, P is father of B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandparent = getMember(membersDict, path.NodeIds.First()); // A
                 var parent = getMember(membersDict, path.NodeIds[1]); // P
                 var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
@@ -105,7 +110,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father }), // A is mother of P, P is father of B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandparent = getMember(membersDict, path.NodeIds.First()); // A
                 var parent = getMember(membersDict, path.NodeIds[1]); // P
                 var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
@@ -118,7 +124,8 @@ public static class RuleDefinitions
         // A (Grandparent) -> B (Grandchild) through a female child (Maternal side)
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother }), // A is father of P, P is mother of B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandparent = getMember(membersDict, path.NodeIds.First()); // A
                 var parent = getMember(membersDict, path.NodeIds[1]); // P
                 var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
@@ -129,7 +136,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother }), // A is mother of P, P is mother of B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandparent = getMember(membersDict, path.NodeIds.First()); // A
                 var parent = getMember(membersDict, path.NodeIds[1]); // P
                 var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
@@ -145,7 +153,8 @@ public static class RuleDefinitions
         // A (NodeIds[0]) -> Common Parent (NodeIds[1]) -> B (NodeIds[2])
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Father }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var commonParent = getMember(membersDict, path.NodeIds[1]);
                 var B = getMember(membersDict, path.NodeIds[2]);
                 return commonParent != null && B != null && commonParent.Id == path.Edges[0].TargetMemberId && path.Edges[1].SourceMemberId == commonParent.Id;
@@ -154,7 +163,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var commonParent = getMember(membersDict, path.NodeIds[1]);
                 var B = getMember(membersDict, path.NodeIds[2]);
                 return commonParent != null && B != null && commonParent.Id == path.Edges[0].TargetMemberId && path.Edges[1].SourceMemberId == commonParent.Id;
@@ -171,7 +181,8 @@ public static class RuleDefinitions
         // A (NodeIds[0]) -> Parent (NodeIds[1]) -> Grandparent (NodeIds[2]) -> B (NodeIds[3])
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[2]);
                 var uncleAunt = getMember(membersDict, path.NodeIds[3]);
                 return grandParent != null && uncleAunt != null &&
@@ -181,7 +192,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[2]);
                 var uncleAunt = getMember(membersDict, path.NodeIds[3]);
                 return grandParent != null && uncleAunt != null &&
@@ -191,7 +203,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[2]);
                 var uncleAunt = getMember(membersDict, path.NodeIds[3]);
                 return grandParent != null && uncleAunt != null &&
@@ -201,7 +214,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[2]);
                 var uncleAunt = getMember(membersDict, path.NodeIds[3]);
                 return grandParent != null && uncleAunt != null &&
@@ -211,7 +225,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[2]);
                 var uncleAunt = getMember(membersDict, path.NodeIds[3]);
                 return grandParent != null && uncleAunt != null &&
@@ -235,7 +250,8 @@ public static class RuleDefinitions
         // Path: A (NodeIds[0]) -> Sibling (NodeIds[1]) -> B (NodeIds[2])
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Father, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[1]);
                 var nephewNiece = getMember(membersDict, path.NodeIds.Last());
                 return grandParent != null && nephewNiece != null &&
@@ -245,7 +261,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[1]);
                 var nephewNiece = getMember(membersDict, path.NodeIds.Last());
                 return grandParent != null && nephewNiece != null &&
@@ -255,7 +272,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[1]);
                 var nephewNiece = getMember(membersDict, path.NodeIds.Last());
                 return grandParent != null && nephewNiece != null &&
@@ -265,7 +283,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var grandParent = getMember(membersDict, path.NodeIds[1]);
                 var nephewNiece = getMember(membersDict, path.NodeIds.Last());
                 return grandParent != null && nephewNiece != null &&
@@ -283,7 +302,8 @@ public static class RuleDefinitions
         // Pattern: [Husband/Wife, Child]
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Husband, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var spouse = getMember(membersDict, path.NodeIds[1]);
                 var parentInLaw = getMember(membersDict, path.NodeIds[2]);
                 return spouse != null && parentInLaw != null && parentInLaw.Gender == Gender.Male.ToString();
@@ -292,7 +312,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Husband, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var spouse = getMember(membersDict, path.NodeIds[1]);
                 var parentInLaw = getMember(membersDict, path.NodeIds[2]);
                 return spouse != null && parentInLaw != null && parentInLaw.Gender == Gender.Female.ToString();
@@ -301,7 +322,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Wife, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var spouse = getMember(membersDict, path.NodeIds[1]);
                 var parentInLaw = getMember(membersDict, path.NodeIds[2]);
                 return spouse != null && parentInLaw != null && parentInLaw.Gender == Gender.Male.ToString();
@@ -310,7 +332,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Wife, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var spouse = getMember(membersDict, path.NodeIds[1]);
                 var parentInLaw = getMember(membersDict, path.NodeIds[2]);
                 return spouse != null && parentInLaw != null && parentInLaw.Gender == Gender.Female.ToString();
@@ -323,7 +346,8 @@ public static class RuleDefinitions
         // Pattern: [Father/Mother, Husband/Wife]
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Husband }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var sonInLaw = getMember(membersDict, path.NodeIds[2]);
                 return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // B is husband of A's daughter
@@ -332,7 +356,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Husband }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var sonInLaw = getMember(membersDict, path.NodeIds[2]);
                 return child != null && sonInLaw != null && child.Gender == Gender.Female.ToString(); // B is husband of A's daughter
@@ -341,7 +366,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Wife }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var daughterInLaw = getMember(membersDict, path.NodeIds[2]);
                 return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // B is wife of A's son
@@ -350,7 +376,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Wife }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 var child = getMember(membersDict, path.NodeIds[1]);
                 var daughterInLaw = getMember(membersDict, path.NodeIds[2]);
                 return child != null && daughterInLaw != null && child.Gender == Gender.Male.ToString(); // B is wife of A's son
@@ -365,7 +392,8 @@ public static class RuleDefinitions
         // Paternal Cousin (Anh họ/Em họ)
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Father, RelationshipType.Child }), // A->PA->GP->PB->B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]);
                 var ParentA = getMember(membersDict, path.NodeIds[1]);
@@ -382,7 +410,8 @@ public static class RuleDefinitions
         // Maternal Cousin (Anh họ/Em họ)
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother, RelationshipType.Child }), // A->PA->GP->PB->B
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]);
                 var ParentA = getMember(membersDict, path.NodeIds[1]);
@@ -401,7 +430,8 @@ public static class RuleDefinitions
         // Pattern: [Child, Child, Child, Father] or [Child, Child, Child, Mother]
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
                 var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
@@ -414,7 +444,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
                 var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
@@ -429,7 +460,8 @@ public static class RuleDefinitions
         // Add rules for maternal great-uncle/aunt if needed
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Father }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
                 var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
@@ -442,7 +474,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Child, RelationshipType.Child, RelationshipType.Child, RelationshipType.Mother }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var A = getMember(membersDict, path.NodeIds[0]); // Great-Nephew/Niece
                 var greatGrandparent = getMember(membersDict, path.NodeIds[3]); // Z
@@ -461,7 +494,8 @@ public static class RuleDefinitions
         // B is Cố/Ông bác/Ông chú (Paternal Great-Uncle) of A
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Father, RelationshipType.Father, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
                 var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
@@ -477,7 +511,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father, RelationshipType.Father, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
                 var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
@@ -494,7 +529,8 @@ public static class RuleDefinitions
         // Add similar rules for maternal great-uncles/aunts
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
                 var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent
@@ -510,7 +546,8 @@ public static class RuleDefinitions
         ));
         rules.Add(new RelationshipRule(
             new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Mother, RelationshipType.Child }),
-            (path, membersDict) => {
+            (path, membersDict) =>
+            {
                 if (path.NodeIds.Count != 5) return false;
                 var greatUncleAunt = getMember(membersDict, path.NodeIds[0]); // B
                 var greatGrandparent = getMember(membersDict, path.NodeIds[1]); // Z's parent

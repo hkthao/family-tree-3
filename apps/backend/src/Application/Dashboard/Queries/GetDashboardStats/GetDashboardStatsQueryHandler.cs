@@ -3,8 +3,10 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Dashboard.Specifications;
+using backend.Application.Dashboard;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
@@ -17,11 +19,11 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
 
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
+        var stats = new DashboardStatsDto();
 
         IEnumerable<Guid>? accessibleFamilyIds = null;
         if (!_authorizationService.IsAdmin())
         {
-            // Lọc các gia đình mà người dùng có quyền truy cập nếu không phải là admin
             var familyUsersSpec = new FamilyUsersByUserIdSpec(_user.UserId);
             accessibleFamilyIds = await _context.FamilyUsers
                 .WithSpecification(familyUsersSpec)
@@ -29,54 +31,60 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 .ToListAsync(cancellationToken);
         }
 
-        // Áp dụng Specification để lọc các gia đình
         var familiesSpec = new FamiliesCountSpec(accessibleFamilyIds, request.FamilyId);
         var filteredFamiliesQuery = _context.Families.WithSpecification(familiesSpec);
 
-        var totalFamilies = await filteredFamiliesQuery.CountAsync(cancellationToken);
+        // Fetch members, relationships, and events based on the filtered families query
+        var members = await _context.Members
+            .Where(m => filteredFamiliesQuery.Any(f => f.Id == m.FamilyId))
+            .Where(m => !m.IsDeleted)
+            .ToListAsync(cancellationToken);
 
-        // Áp dụng Specification để lọc thành viên trong các gia đình đã lọc
-        var membersInFamiliesSpec = new MembersInFamiliesSpec(filteredFamiliesQuery);
-        var members = await _context.Members.WithSpecification(membersInFamiliesSpec).ToListAsync(cancellationToken);
-        var totalMembers = members.Count;
-
-
-        // Áp dụng Specification để lọc mối quan hệ trong các gia đình đã lọc
-        var relationshipsInFamiliesSpec = new RelationshipsInFamiliesSpec(filteredFamiliesQuery);
-        var relationships = await _context.Relationships.WithSpecification(relationshipsInFamiliesSpec).ToListAsync(cancellationToken);
-        var totalRelationships = relationships.Count;
+        var relationships = await _context.Relationships
+            .Where(r => filteredFamiliesQuery.Any(f => f.Id == r.FamilyId))
+            .Where(r => !r.IsDeleted)
+            .ToListAsync(cancellationToken);
+        
+        var events = await _context.Events
+            .Where(e => filteredFamiliesQuery.Any(f => f.Id == e.FamilyId))
+            .Where(e => !e.IsDeleted)
+            .ToListAsync(cancellationToken);
+        
+        stats.TotalFamilies = await filteredFamiliesQuery.CountAsync(cancellationToken);
+        stats.TotalMembers = members.Count();
+        stats.TotalRelationships = relationships.Count();
+        stats.TotalEvents = events.Count();
 
         // Calculate Living/Deceased Members
-        var livingMembersCount = members.Count(m => !m.IsDeceased);
-        var deceasedMembersCount = members.Count(m => m.IsDeceased);
+        stats.LivingMembersCount = members.Count(m => !m.IsDeceased);
+        stats.DeceasedMembersCount = members.Count(m => m.IsDeceased);
 
         // Calculate Gender Ratio
         var totalMembersForGender = members.Count(m => !string.IsNullOrEmpty(m.Gender));
-        var maleCount = members.Count(m => m.Gender == backend.Domain.Enums.Gender.Male.ToString());
-        var femaleCount = members.Count(m => m.Gender == backend.Domain.Enums.Gender.Female.ToString());
-        var maleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
-        var femaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
+        var maleCount = members.Count(m => m.Gender == Gender.Male.ToString());
+        var femaleCount = members.Count(m => m.Gender == Gender.Female.ToString());
+        stats.MaleRatio = totalMembersForGender > 0 ? (double)maleCount / totalMembersForGender : 0.0;
+        stats.FemaleRatio = totalMembersForGender > 0 ? (double)femaleCount / totalMembersForGender : 0.0;
 
         // Calculate Average Age
         var livingMembersWithBirthDate = members
             .Where(m => !m.IsDeceased && m.DateOfBirth.HasValue)
             .ToList();
-        int averageAge = 0;
 
         if (livingMembersWithBirthDate.Any())
         {
             var totalAgeInYears = livingMembersWithBirthDate
                 .Sum(m => (_dateTime.Now.Year - m.DateOfBirth!.Value.Year) - (m.DateOfBirth.Value.Date > _dateTime.Now.AddYears(-(_dateTime.Now.Year - m.DateOfBirth.Value.Year)).Date ? 1 : 0));
-            averageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
+            stats.AverageAge = (int)Math.Round((double)totalAgeInYears / livingMembersWithBirthDate.Count);
         }
 
         // Generations and Members Per Generation
         int maxGlobalGenerations = 0;
         var globalMembersPerGeneration = new Dictionary<int, int>();
 
-        var families = await filteredFamiliesQuery.ToListAsync(cancellationToken); // Re-fetch families to iterate
+        var familiesInScope = await filteredFamiliesQuery.ToListAsync(cancellationToken); 
 
-        foreach (var family in families)
+        foreach (var family in familiesInScope)
         {
             var filteredFamilyMembers = members.Where(m => m.FamilyId == family.Id).ToList();
             var filteredFamilyRelationships = relationships.Where(r => r.FamilyId == family.Id).ToList();
@@ -102,20 +110,8 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 }
             }
         }
-
-        var stats = new DashboardStatsDto
-        {
-            TotalFamilies = totalFamilies,
-            TotalMembers = totalMembers,
-            TotalRelationships = totalRelationships,
-
-            MaleRatio = maleRatio,
-            FemaleRatio = femaleRatio,
-            LivingMembersCount = livingMembersCount,
-            DeceasedMembersCount = deceasedMembersCount,
-            AverageAge = averageAge,
-            MembersPerGeneration = globalMembersPerGeneration
-        };
+        stats.TotalGenerations = maxGlobalGenerations;
+        stats.MembersPerGeneration = globalMembersPerGeneration;
 
         return Result<DashboardStatsDto>.Success(stats);
     }
@@ -133,48 +129,57 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         var graph = new Dictionary<Guid, List<Guid>>(); // child -> parents
         var childrenGraph = new Dictionary<Guid, List<Guid>>(); // parent -> children
 
-        foreach (var member in members)
-        {
-            graph[member.Id] = new List<Guid>();
-            childrenGraph[member.Id] = new List<Guid>();
-        }
+        // Only add entries to graph and childrenGraph if there's a relevant relationship
+        var relevantRelationships = relationships
+            .Where(r => !r.IsDeleted &&
+                        members.Any(m => m.Id == r.SourceMemberId) &&
+                        members.Any(m => m.Id == r.TargetMemberId) &&
+                        (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother))
+            .ToList();
 
-        foreach (var rel in relationships.Where(r => !r.IsDeleted))
+        foreach (var rel in relevantRelationships)
         {
-            // Relationship type Father or Mother means SourceMember is a parent of TargetMember
-            if (rel.Type == RelationshipType.Father || rel.Type == RelationshipType.Mother)
+            // Ensure target (child) has an entry in graph
+            if (!graph.ContainsKey(rel.TargetMemberId))
             {
-                if (graph.ContainsKey(rel.TargetMemberId) && members.Any(m => m.Id == rel.SourceMemberId))
-                {
-                    graph[rel.TargetMemberId].Add(rel.SourceMemberId);
-                }
-                if (childrenGraph.ContainsKey(rel.SourceMemberId) && members.Any(m => m.Id == rel.TargetMemberId))
-                {
-                    childrenGraph[rel.SourceMemberId].Add(rel.TargetMemberId);
-                }
+                graph[rel.TargetMemberId] = new List<Guid>();
+            }
+            if (!graph[rel.TargetMemberId].Contains(rel.SourceMemberId))
+            {
+                graph[rel.TargetMemberId].Add(rel.SourceMemberId);
+            }
+
+            // Ensure source (parent) has an entry in childrenGraph
+            if (!childrenGraph.ContainsKey(rel.SourceMemberId))
+            {
+                childrenGraph[rel.SourceMemberId] = new List<Guid>();
+            }
+            if (!childrenGraph[rel.SourceMemberId].Contains(rel.TargetMemberId))
+            {
+                childrenGraph[rel.SourceMemberId].Add(rel.TargetMemberId);
             }
         }
 
-        // Identify root members (those with no known parents within this family)
-        var rootMembers = members.Where(m => !graph.ContainsKey(m.Id) || !graph[m.Id].Any()).ToList();
+        // Identify potential root members: those in 'members' that are not children (TargetMemberId)
+        // in any of the relevant relationships.
+        var allChildrenInRelevantRelationships = relevantRelationships.Select(r => r.TargetMemberId).ToHashSet();
+        var rootMembers = members.Where(m => !allChildrenInRelevantRelationships.Contains(m.Id)).ToList();
 
-        // If there are no explicit roots, or all members seem to have parents,
-        // it implies a disconnected graph or a single-generation family.
-        // In such cases, assign generation 1 to all, or handle as appropriate for your definition of 'generation'.
+        // Handle cases where there are no relationships defined, or all members are isolated.
+        // In such scenarios, all members are considered generation 1.
         if (!rootMembers.Any() && members.Any())
         {
             foreach (var member in members)
             {
-                memberGenerations[member.Id] = 1; // Assume all are generation 1 if no clear roots
+                memberGenerations[member.Id] = 1;
             }
         }
         else
         {
-            // Use a queue for BFS to determine generations
             var queue = new Queue<Guid>();
             foreach (var root in rootMembers)
             {
-                memberGenerations[root.Id] = 1; // Roots are generation 1
+                memberGenerations[root.Id] = 1;
                 queue.Enqueue(root.Id);
             }
 
@@ -183,19 +188,31 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 var currentMemberId = queue.Dequeue();
                 var currentGeneration = memberGenerations[currentMemberId];
 
-                // Find children of current member
                 if (childrenGraph.TryGetValue(currentMemberId, out var children))
                 {
                     foreach (var childId in children)
                     {
-                        // If child's generation hasn't been set or can be set to a higher generation
-                        if (!memberGenerations.ContainsKey(childId) || memberGenerations[childId] < currentGeneration + 1)
+                        if (members.Any(m => m.Id == childId)) // Ensure child is part of the current family members collection
                         {
-                            memberGenerations[childId] = currentGeneration + 1;
-                            queue.Enqueue(childId);
+                            if (!memberGenerations.ContainsKey(childId) || memberGenerations[childId] < currentGeneration + 1)
+                            {
+                                memberGenerations[childId] = currentGeneration + 1;
+                                queue.Enqueue(childId);
+                            }
                         }
                     }
                 }
+            }
+        }
+        
+        // Handle any members that were not reached by the BFS (e.g., truly isolated members, or members
+        // whose parents are outside the 'members' collection and thus not included in 'relevantRelationships').
+        // These should also be considered Generation 1 as they effectively start new branches.
+        foreach (var member in members)
+        {
+            if (!memberGenerations.ContainsKey(member.Id))
+            {
+                memberGenerations[member.Id] = 1;
             }
         }
 
@@ -208,4 +225,3 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         return (maxGen, membersPerGen);
     }
 }
-

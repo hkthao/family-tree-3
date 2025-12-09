@@ -1,8 +1,8 @@
-using MediatR;
-using backend.Application.Services;
 using System.Threading;
 using System.Threading.Tasks;
 using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
+using backend.Application.Services;
+using MediatR;
 
 namespace backend.Application.Relationships.Queries.GetRelationship; // Updated namespace
 

@@ -89,7 +89,7 @@ public class Member : BaseAuditableEntity
         AvatarUrl = newAvatarUrl;
     }
 
-     public void UpdateGender(string? gender)
+    public void UpdateGender(string? gender)
     {
         Gender = gender;
     }

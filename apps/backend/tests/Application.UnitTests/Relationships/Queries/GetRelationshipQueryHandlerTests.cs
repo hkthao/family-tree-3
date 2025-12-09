@@ -1,12 +1,12 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
-using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
 
 namespace backend.Application.UnitTests.Relationships.Queries;
 

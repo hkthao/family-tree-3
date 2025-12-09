@@ -1,10 +1,12 @@
-namespace backend.Application.Dashboard.Queries;
+namespace backend.Application.Dashboard;
 
 public class DashboardStatsDto
 {
     public int TotalFamilies { get; set; }
     public int TotalMembers { get; set; }
     public int TotalRelationships { get; set; }
+    public int TotalEvents { get; set; } // From PublicDashboardDto
+    public int TotalGenerations { get; set; } // From PublicDashboardDto
 
     public double MaleRatio { get; set; }
     public double FemaleRatio { get; set; }

@@ -2,10 +2,10 @@ using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.Relationships.Commands.UpdateRelationship;
+using backend.Application.Relationships.Queries.GetRelationship; // Added for new GetRelationshipQuery location
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
-using backend.Application.Relationships.Queries.GetRelationship; // Added for new GetRelationshipQuery location
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
