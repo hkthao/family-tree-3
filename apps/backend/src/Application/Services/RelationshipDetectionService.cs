@@ -2,9 +2,13 @@ using backend.Application.Common.Interfaces;
 using backend.Domain.Interfaces;
 using System.Text;
 using backend.Application.AI.DTOs;
+using backend.Application.AI;
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
+using System.Linq; // For String.Join
 
 namespace backend.Application.Services;
 
@@ -13,12 +17,14 @@ public class RelationshipDetectionService : IRelationshipDetectionService
     private readonly IApplicationDbContext _context;
     private readonly IRelationshipGraph _relationshipGraph;
     private readonly IAiGenerateService _aiGenerateService;
+    private readonly IRelationshipRuleEngine _ruleEngine; // Reintroduce IRelationshipRuleEngine
 
-    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService)
+    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IRelationshipRuleEngine ruleEngine) // Update constructor
     {
         _context = context;
         _relationshipGraph = relationshipGraph;
         _aiGenerateService = aiGenerateService;
+        _ruleEngine = ruleEngine; // Initialize ruleEngine
     }
 
     public async Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId, CancellationToken cancellationToken)
@@ -38,9 +44,8 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         var pathToB = _relationshipGraph.FindShortestPath(memberAId, memberBId);
         var pathToA = _relationshipGraph.FindShortestPath(memberBId, memberAId);
 
-        string inferredDescription = "unknown"; // Use a single string for the AI inferred description
+        string inferredDescription = "unknown";
 
-        var combinedPromptBuilder = new StringBuilder();
         var memberA = allMembers.GetValueOrDefault(memberAId);
         var memberB = allMembers.GetValueOrDefault(memberBId);
 
@@ -54,6 +59,37 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             };
         }
 
+        // --- Step 1: Try to infer relationships using local rules first ---
+        string localFromAToB = "unknown";
+        string localFromBToA = "unknown";
+
+        if (pathToB.NodeIds.Any())
+        {
+            localFromAToB = _ruleEngine.InferRelationship(pathToB, allMembers);
+        }
+        if (pathToA.NodeIds.Any())
+        {
+            localFromBToA = _ruleEngine.InferRelationship(pathToA, allMembers);
+        }
+        
+        // If both relationships are found by local rules and are not "unknown", return immediately
+        if (localFromAToB != "unknown" && localFromBToA != "unknown")
+        {
+            // Construct a descriptive string from local results
+            inferredDescription = $"{memberA.FullName} là {localFromAToB} của {memberB.FullName} và {memberB.FullName} là {localFromBToA} của {memberA.FullName}.";
+            
+            return new RelationshipDetectionResult
+            {
+                Description = inferredDescription,
+                Path = pathToB.NodeIds,
+                Edges = pathToB.Edges.Select(e => e.Type.ToString()).ToList()
+            };
+        }
+        // --- End of local inference ---
+
+
+        var combinedPromptBuilder = new StringBuilder();
+        
         combinedPromptBuilder.AppendLine($"Xác định mối quan hệ gia đình giữa Thành viên '{memberA.FullName}' (ID: {memberAId}) và Thành viên '{memberB.FullName}' (ID: {memberBId}) trong một cây gia phả. Cung cấp một mô tả toàn diện về mối quan hệ của A với B và B với A.");
         combinedPromptBuilder.AppendLine("Nếu có đường dẫn, mô tả đường dẫn quan hệ bằng ngôn ngữ tự nhiên. Nếu không có đường dẫn, chỉ định rằng không tìm thấy mối quan hệ.");
         combinedPromptBuilder.AppendLine("Ví dụ mô tả đường dẫn: 'A là con của B, B là con của C, C và D cùng là con của E.'");
@@ -62,7 +98,7 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         combinedPromptBuilder.AppendLine("\n--- Đường dẫn từ A đến B ---");
         if (pathToB.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToB, allMembers)); // Removed fromMemberId, toMemberId
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToB, allMembers));
         }
         else
         {
@@ -72,15 +108,15 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         combinedPromptBuilder.AppendLine("\n--- Đường dẫn từ B đến A ---");
         if (pathToA.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToA, allMembers)); // Removed fromMemberId, toMemberId
+            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguage(pathToA, allMembers));
         }
         else
         {
             combinedPromptBuilder.AppendLine($"Không tìm thấy đường dẫn từ Thành viên '{memberB.FullName}' đến Thành viên '{memberA.FullName}'.");
         }
 
-        // Single AI call
-        if (pathToB.NodeIds.Count != 0 || pathToA.NodeIds.Count != 0)
+        // Fallback to AI call if local rules couldn't determine both relationships
+        if (pathToB.NodeIds.Any() || pathToA.NodeIds.Any())
         {
             var aiRequest = new GenerateRequest
             {
@@ -112,13 +148,13 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
         return new RelationshipDetectionResult
         {
-            Description = inferredDescription, // Assign the single inferred description
+            Description = inferredDescription,
             Path = pathToB.NodeIds,
             Edges = edgesToString
         };
     }
 
-    private string _DescribePathInNaturalLanguage(RelationshipPath path, IReadOnlyDictionary<Guid, Member> allMembers) // Removed fromMemberId, toMemberId
+    private string _DescribePathInNaturalLanguage(RelationshipPath path, IReadOnlyDictionary<Guid, Member> allMembers)
     {
         if (!path.NodeIds.Any() || path.NodeIds.Count != path.Edges.Count + 1)
         {
@@ -143,7 +179,7 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
             if (nextMember == null)
             {
-                descriptionBuilder.Append($" --({edge.Type})--> Thành viên không rõ ({path.NodeIds[i + 1]})"); // Changed "Unknown Member" to Vietnamese
+                descriptionBuilder.Append($" --({edge.Type})--> Thành viên không rõ ({path.NodeIds[i + 1]})");
                 continue;
             }
 
@@ -162,7 +198,6 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             RelationshipType.Child => "con",
             RelationshipType.Husband => "chồng",
             RelationshipType.Wife => "vợ",
-            // Add more specific Vietnamese terms for other types if needed
             _ => type.ToString()
         };
     }
