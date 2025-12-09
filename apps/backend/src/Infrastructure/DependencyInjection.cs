@@ -2,7 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
-using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;

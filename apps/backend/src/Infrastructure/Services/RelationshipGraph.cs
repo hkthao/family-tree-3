@@ -2,15 +2,12 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace backend.Infrastructure.Services;
 
 public class RelationshipGraph : IRelationshipGraph
 {
-    private Dictionary<Guid, List<GraphEdge>> _adjacencyList = new();
+    private readonly Dictionary<Guid, List<GraphEdge>> _adjacencyList = new();
 
     public void BuildGraph(IEnumerable<Member> members, IEnumerable<Relationship> relationships)
     {

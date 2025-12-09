@@ -110,6 +110,10 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             {
                 var fatherChildRelationship = member.AddFatherRelationship(father.Id);
                 _context.Relationships.Add(fatherChildRelationship);
+
+                // Automatically add the reverse Child relationship
+                var childParentRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, father.Id, RelationshipType.Child);
+                _context.Relationships.Add(childParentRelationship);
             }
         }
 
@@ -125,6 +129,10 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             {
                 var motherChildRelationship = member.AddMotherRelationship(mother.Id);
                 _context.Relationships.Add(motherChildRelationship);
+
+                // Automatically add the reverse Child relationship
+                var childParentRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, mother.Id, RelationshipType.Child);
+                _context.Relationships.Add(childParentRelationship);
             }
         }
 

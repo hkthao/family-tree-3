@@ -140,6 +140,15 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     member.TargetRelationships.Remove(oldFatherRelationship); // Explicitly remove from navigation property
                     _context.Relationships.Remove(oldFatherRelationship);
                 }
+
+                // Remove corresponding child-to-parent relationship
+                var oldChildToFatherRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingFatherId.Value && r.Type == RelationshipType.Child);
+                if (oldChildToFatherRelationship != null)
+                {
+                    member.SourceRelationships.Remove(oldChildToFatherRelationship);
+                    _context.Relationships.Remove(oldChildToFatherRelationship);
+                }
             }
             // Add new father relationship
             if (request.FatherId.HasValue)
@@ -153,6 +162,10 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 {
                     var newFatherRelationship = member.AddFatherRelationship(request.FatherId.Value);
                     _context.Relationships.Add(newFatherRelationship);
+
+                    // Add corresponding child-to-parent relationship
+                    var newChildToFatherRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, request.FatherId.Value, RelationshipType.Child);
+                    _context.Relationships.Add(newChildToFatherRelationship);
                 }
             }
         }
@@ -170,6 +183,15 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     member.TargetRelationships.Remove(oldMotherRelationship); // Explicitly remove from navigation property
                     _context.Relationships.Remove(oldMotherRelationship);
                 }
+
+                // Remove corresponding child-to-parent relationship
+                var oldChildToMotherRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingMotherId.Value && r.Type == RelationshipType.Child);
+                if (oldChildToMotherRelationship != null)
+                {
+                    member.SourceRelationships.Remove(oldChildToMotherRelationship);
+                    _context.Relationships.Remove(oldChildToMotherRelationship);
+                }
             }
             // Add new mother relationship
             if (request.MotherId.HasValue)
@@ -183,6 +205,10 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 {
                     var newMotherRelationship = member.AddMotherRelationship(request.MotherId.Value);
                     _context.Relationships.Add(newMotherRelationship);
+
+                    // Add corresponding child-to-parent relationship
+                    var newChildToMotherRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, request.MotherId.Value, RelationshipType.Child);
+                    _context.Relationships.Add(newChildToMotherRelationship);
                 }
             }
         }

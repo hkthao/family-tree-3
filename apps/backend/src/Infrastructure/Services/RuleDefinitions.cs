@@ -1,9 +1,6 @@
 using backend.Domain.Enums;
 using backend.Domain.Entities; // Added
 using backend.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace backend.Infrastructure.Services;
 
@@ -89,47 +86,57 @@ public static class RuleDefinitions
             "bà ngoại"
         ));
 
-        // 3. Grandchildren (4 rules for A to B, where B is grandchild)
-        // Pattern: A -> Child (Father/Mother), Child -> Grandchild (Child) => [Father, Child] or [Mother, Child]
+        // 3. Grandchildren (4 rules for A to B, where A is grandparent and B is grandchild)
+        // Path: Grandparent (A) -> Parent (P) -> Grandchild (B)
+        // Pattern: [Father, Father], [Father, Mother], [Mother, Father], [Mother, Mother]
+        // The edge types now reflect the direct relationship from source to target.
+
+        // A (Grandparent) -> B (Grandchild) through a male child (Paternal side)
         rules.Add(new RelationshipRule(
-            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Child }),
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Father }), // A is father of P, P is father of B
             (path, membersDict) => {
-                var grandChild = getMember(membersDict, path.NodeIds.Last()); // B
-                var child = getMember(membersDict, path.NodeIds[1]); // Intermediate child
-                return grandChild != null && child != null &&
-                       child.Gender == Gender.Male.ToString(); // A is Father of a Male Child, who is parent of B
+                var grandparent = getMember(membersDict, path.NodeIds.First()); // A
+                var parent = getMember(membersDict, path.NodeIds[1]); // P
+                var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
+                return grandparent != null && parent != null && grandchild != null &&
+                       grandparent.Gender == Gender.Male.ToString(); // Grandfather via male child
             },
-            "cháu nội"
+            "cháu nội" // Grandchild of paternal grandfather
         ));
         rules.Add(new RelationshipRule(
-            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Child }),
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Father }), // A is mother of P, P is father of B
             (path, membersDict) => {
-                var grandChild = getMember(membersDict, path.NodeIds.Last());
-                var child = getMember(membersDict, path.NodeIds[1]);
-                return grandChild != null && child != null &&
-                       child.Gender == Gender.Female.ToString(); // A is Father of a Female Child, who is parent of B
+                var grandparent = getMember(membersDict, path.NodeIds.First()); // A
+                var parent = getMember(membersDict, path.NodeIds[1]); // P
+                var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
+                return grandparent != null && parent != null && grandchild != null &&
+                       grandparent.Gender == Gender.Female.ToString(); // Grandmother via male child
             },
-            "cháu ngoại"
+            "cháu nội" // Grandchild of paternal grandmother
+        ));
+
+        // A (Grandparent) -> B (Grandchild) through a female child (Maternal side)
+        rules.Add(new RelationshipRule(
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Father, RelationshipType.Mother }), // A is father of P, P is mother of B
+            (path, membersDict) => {
+                var grandparent = getMember(membersDict, path.NodeIds.First()); // A
+                var parent = getMember(membersDict, path.NodeIds[1]); // P
+                var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
+                return grandparent != null && parent != null && grandchild != null &&
+                       grandparent.Gender == Gender.Male.ToString(); // Grandfather via female child
+            },
+            "cháu ngoại" // Grandchild of maternal grandfather
         ));
         rules.Add(new RelationshipRule(
-            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Child }),
+            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Mother }), // A is mother of P, P is mother of B
             (path, membersDict) => {
-                var grandChild = getMember(membersDict, path.NodeIds.Last());
-                var child = getMember(membersDict, path.NodeIds[1]);
-                return grandChild != null && child != null &&
-                       child.Gender == Gender.Male.ToString(); // A is Mother of a Male Child, who is parent of B
+                var grandparent = getMember(membersDict, path.NodeIds.First()); // A
+                var parent = getMember(membersDict, path.NodeIds[1]); // P
+                var grandchild = getMember(membersDict, path.NodeIds.Last()); // B
+                return grandparent != null && parent != null && grandchild != null &&
+                       grandparent.Gender == Gender.Female.ToString(); // Grandmother via female child
             },
-            "cháu nội"
-        ));
-        rules.Add(new RelationshipRule(
-            new RelationshipPattern(new List<RelationshipType> { RelationshipType.Mother, RelationshipType.Child }),
-            (path, membersDict) => {
-                var grandChild = getMember(membersDict, path.NodeIds.Last());
-                var child = getMember(membersDict, path.NodeIds[1]);
-                return grandChild != null && child != null &&
-                       child.Gender == Gender.Female.ToString(); // A is Mother of a Female Child, who is parent of B
-            },
-            "cháu ngoại"
+            "cháu ngoại" // Grandchild of maternal grandmother
         ));
 
         // 4. Siblings (4 rules for A to B, where B is sibling)
