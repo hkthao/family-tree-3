@@ -1,5 +1,5 @@
 import type { DetectedFace } from './memberFace.d';
-import { LifeStage, CertaintyLevel } from './enums'; // Updated import for new enums
+import { LifeStage } from './enums';
 
 export interface SearchStoriesFilter {
   memberId?: string;
