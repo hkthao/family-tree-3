@@ -24,7 +24,7 @@
         <!-- New Fields Display -->
         <v-list density="compact">
           <v-list-item v-if="memberStory.year">
-            <v-list-item-title>{{ t('memberStory.form.yearLabel') }}: {{ memberStory.year }} <span v-if="memberStory.isYearEstimated">({{ t('common.estimated') }})</span></v-list-item-title>
+            <v-list-item-title>{{ t('memberStory.form.yearLabel') }}: {{ memberStory.year }}</v-list-item-title>
           </v-list-item>
           <v-list-item v-if="memberStory.timeRangeDescription">
             <v-list-item-title>{{ t('memberStory.form.timeRangeDescriptionLabel') }}: {{ memberStory.timeRangeDescription }}</v-list-item-title>
@@ -37,9 +37,6 @@
           </v-list-item>
           <v-list-item v-if="memberStory.storytellerId">
             <v-list-item-title>{{ t('memberStory.form.storytellerLabel') }}: {{ memberStory.storytellerId }}</v-list-item-title> <!-- Needs to display name, not ID -->
-          </v-list-item>
-          <v-list-item v-if="memberStory.certaintyLevel">
-            <v-list-item-title>{{ t('memberStory.form.certaintyLevelLabel') }}: {{ t(`certaintyLevel.${CertaintyLevel[memberStory.certaintyLevel!]}`) }}</v-list-item-title>
           </v-list-item>
         </v-list>
 
@@ -82,7 +79,7 @@ import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { getAvatarUrl } from '@/utils/avatar.utils';
-import { CertaintyLevel, LifeStage } from '@/types/enums';
+import { LifeStage } from '@/types/enums';
 
 const props = defineProps<{
   memberStoryId: string;

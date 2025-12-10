@@ -25,7 +25,7 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { CreateMemberStory } from '@/types/memberStory';
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
-import { LifeStage, CertaintyLevel } from '@/types/enums';
+import { LifeStage } from '@/types/enums';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -44,11 +44,9 @@ const editedMemberStory = ref<MemberStoryDto>({
   story: '',
   year: null,
   timeRangeDescription: null,
-  isYearEstimated: false,
   lifeStage: LifeStage.Childhood, // Default value
   location: null,
   storytellerId: null,
-  certaintyLevel: CertaintyLevel.Sure, // Default value
   detectedFaces: [],
   memberStoryImages: [],
 });
@@ -67,11 +65,9 @@ const handleSave = async () => {
       story: editedMemberStory.value.story,
       year: editedMemberStory.value.year,
       timeRangeDescription: editedMemberStory.value.timeRangeDescription,
-      isYearEstimated: editedMemberStory.value.isYearEstimated,
       lifeStage: editedMemberStory.value.lifeStage,
       location: editedMemberStory.value.location,
       storytellerId: editedMemberStory.value.storytellerId,
-      certaintyLevel: editedMemberStory.value.certaintyLevel,
       detectedFaces: editedMemberStory.value.detectedFaces || [],
       temporaryOriginalImageUrl: editedMemberStory.value.temporaryOriginalImageUrl,
       temporaryResizedImageUrl: editedMemberStory.value.temporaryResizedImageUrl,
@@ -91,6 +87,7 @@ const handleSave = async () => {
     isSaving.value = false;
   }
 };
+
 
 const handleClose = () => {
   emit('close');

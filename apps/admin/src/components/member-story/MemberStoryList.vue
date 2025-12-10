@@ -29,16 +29,13 @@
         <MemberName :full-name="item.memberFullName ?? undefined" :avatar-url="item.memberAvatarUrl ?? undefined" :gender="item.memberGender ?? undefined" />
       </template>
       <template #item.year="{ item }">
-        {{ item.year }} <span v-if="item.isYearEstimated">({{ t('common.estimated') }})</span>
+        {{ item.year }}
       </template>
       <template #item.lifeStage="{ item }">
         {{ t(`lifeStage.${LifeStage[item.lifeStage!]}`) }}
       </template>
       <template #item.location="{ item }">
         {{ item.location }}
-      </template>
-      <template #item.certaintyLevel="{ item }">
-        {{ t(`certaintyLevel.${CertaintyLevel[item.certaintyLevel!]}`) }}
       </template>
       <template #item.actions="{ item: rowItem }">
         <div v-if="canPerformActions">
@@ -69,7 +66,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { DataTableHeader } from 'vuetify';
 import { MemberName } from '@/components/member';
-import { CertaintyLevel, LifeStage } from '@/types/enums';
+import { LifeStage } from '@/types/enums';
 import { computed } from 'vue'; 
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; 
 import { useAuth } from '@/composables/useAuth'; 
@@ -118,7 +115,6 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('memberStory.list.headers.year'), key: 'year' },
   { title: t('memberStory.list.headers.lifeStage'), key: 'lifeStage' },
   { title: t('memberStory.list.headers.location'), key: 'location' },
-  { title: t('memberStory.list.headers.certaintyLevel'), key: 'certaintyLevel' },
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end', minWidth: '120px' },
 ]);
 

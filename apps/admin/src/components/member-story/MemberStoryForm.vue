@@ -126,7 +126,7 @@ import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMembe
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
-import { CertaintyLevel, LifeStage } from '@/types/enums'; // Import enums
+import { LifeStage } from '@/types/enums'; // Import enums
 
 const props = defineProps<{
   modelValue: MemberStoryDto;
