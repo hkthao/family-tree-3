@@ -36,7 +36,17 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
             return Result.Failure(string.Format(ErrorMessages.NotFound, $"MemberStory with ID {request.Id}"), ErrorSources.NotFound); // Updated
         }
 
-        memberStory.Update(request.Title, request.Story, request.StoryStyle, request.Perspective); // Use domain entity's update method
+        memberStory.Update(
+            request.Title,
+            request.Story,
+            request.Year,
+            request.TimeRangeDescription,
+            request.IsYearEstimated,
+            request.LifeStage,
+            request.Location,
+            request.StorytellerId,
+            request.CertaintyLevel
+        );
 
         await _context.SaveChangesAsync(cancellationToken);
 

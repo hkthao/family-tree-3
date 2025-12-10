@@ -18,13 +18,20 @@ public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHa
         var facesData = notification.FacesData;
         foreach (var faceData in facesData)
         {
+            var imageUrl = memberStory.MemberStoryImages.FirstOrDefault()?.ImageUrl;
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                _logger.LogWarning("Cannot create face for MemberStory {MemberStoryId} because no image URL was found.", memberStory.Id);
+                continue;
+            }
+
             var createFaceCommand = new CreateMemberFaceCommand
             {
                 MemberId = faceData.MemberId,
                 FaceId = faceData.Id,
                 BoundingBox = new BoundingBoxDto { X = (int)faceData.BoundingBox.X, Y = (int)faceData.BoundingBox.Y, Width = (int)faceData.BoundingBox.Width, Height = (int)faceData.BoundingBox.Height },
                 Confidence = (float)faceData.Confidence,
-                OriginalImageUrl = memberStory.OriginalImageUrl,
+                OriginalImageUrl = imageUrl,
                 Embedding = faceData.Embedding.ToList(),
                 Thumbnail = faceData.Thumbnail,
                 Emotion = faceData.Emotion,
