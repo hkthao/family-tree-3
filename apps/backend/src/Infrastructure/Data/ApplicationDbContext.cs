@@ -186,59 +186,5 @@ public class ApplicationDbContext(
             }
         }
         builder.ApplySnakeCaseNamingConvention();
-        builder.Entity<FamilyLinkRequest>(mb =>
-        {
-            mb.HasOne(flr => flr.RequestingFamily)
-                .WithMany()
-                .HasForeignKey(flr => flr.RequestingFamilyId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            mb.HasOne(flr => flr.TargetFamily)
-                .WithMany()
-                .HasForeignKey(flr => flr.TargetFamilyId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        builder.Entity<FamilyLink>(mb =>
-        {
-            mb.HasOne(fl => fl.Family1)
-                .WithMany()
-                .HasForeignKey(fl => fl.Family1Id)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            mb.HasOne(fl => fl.Family2)
-                .WithMany()
-                .HasForeignKey(fl => fl.Family2Id)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            mb.HasIndex(fl => new { fl.Family1Id, fl.Family2Id }).IsUnique();
-        });
-        builder.Entity<MemberFace>(mb =>
-        {
-            mb.OwnsOne(mf => mf.BoundingBox);
-            // Configure Embedding to be stored as JSON
-            mb.Property(mf => mf.Embedding)
-              .HasConversion(
-                  v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                  v => JsonSerializer.Deserialize<List<double>>(v, (JsonSerializerOptions?)null) ?? new List<double>()
-              );
-        });
-
-        // Configure relationships for FamilyMedia and MediaLink
-        builder.Entity<FamilyMedia>(mb =>
-        {
-            mb.HasOne(fm => fm.Family)
-                .WithMany()
-                .HasForeignKey(fm => fm.FamilyId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Family if media exists
-        });
-
-        builder.Entity<MediaLink>(mb =>
-        {
-            mb.HasOne(ml => ml.FamilyMedia)
-                .WithMany(fm => fm.MediaLinks)
-                .HasForeignKey(ml => ml.FamilyMediaId)
-                .OnDelete(DeleteBehavior.Cascade); // Delete MediaLink if FamilyMedia is deleted
-        });
     }
 }
