@@ -1,4 +1,4 @@
-import RelationshipDetectionView from '@/views/relationship-detection/RelationshipDetectionView.vue';
+import RelationshipDetectionView from '@/views/relationship/RelationshipDetectionView.vue';
 
 export const relationshipDetectionRoutes = [
   {
