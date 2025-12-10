@@ -101,6 +101,16 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
     /// </summary>
     public DbSet<FamilyLink> FamilyLinks => Set<FamilyLink>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyMedia.
+    /// </summary>
+    public DbSet<FamilyMedia> FamilyMedia { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
+    /// </summary>
+    public DbSet<MediaLink> MediaLinks { get; set; } = null!;
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
@@ -212,6 +222,23 @@ public class ApplicationDbContext(
                   v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                   v => JsonSerializer.Deserialize<List<double>>(v, (JsonSerializerOptions?)null) ?? new List<double>()
               );
+        });
+
+        // Configure relationships for FamilyMedia and MediaLink
+        builder.Entity<FamilyMedia>(mb =>
+        {
+            mb.HasOne(fm => fm.Family)
+                .WithMany()
+                .HasForeignKey(fm => fm.FamilyId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Family if media exists
+        });
+
+        builder.Entity<MediaLink>(mb =>
+        {
+            mb.HasOne(ml => ml.FamilyMedia)
+                .WithMany(fm => fm.MediaLinks)
+                .HasForeignKey(ml => ml.FamilyMediaId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete MediaLink if FamilyMedia is deleted
         });
     }
 }
