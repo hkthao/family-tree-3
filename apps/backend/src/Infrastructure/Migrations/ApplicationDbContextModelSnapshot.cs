@@ -340,7 +340,8 @@ namespace backend.Infrastructure.Migrations
                         .HasDatabaseName("ix_family_links_family2_id");
 
                     b.HasIndex("Family1Id", "Family2Id")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_family_links_family1_id_family2_id");
 
                     b.ToTable("family_links");
                 });
@@ -892,6 +893,11 @@ namespace backend.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
+
+                    b.Property<string>("BoundingBox")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("bounding_box");
 
                     b.Property<double>("Confidence")
                         .HasColumnType("double")
@@ -1813,38 +1819,6 @@ namespace backend.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_member_faces_members_member_id");
-
-                    b.OwnsOne("backend.Domain.ValueObjects.BoundingBox", "BoundingBox", b1 =>
-                        {
-                            b1.Property<Guid>("MemberFaceId")
-                                .HasColumnType("char(36)");
-
-                            b1.Property<double>("Height")
-                                .HasColumnType("double")
-                                .HasColumnName("height");
-
-                            b1.Property<double>("Width")
-                                .HasColumnType("double")
-                                .HasColumnName("width");
-
-                            b1.Property<double>("X")
-                                .HasColumnType("double")
-                                .HasColumnName("x");
-
-                            b1.Property<double>("Y")
-                                .HasColumnType("double")
-                                .HasColumnName("y");
-
-                            b1.HasKey("MemberFaceId");
-
-                            b1.ToTable("bounding_box");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MemberFaceId");
-                        });
-
-                    b.Navigation("BoundingBox")
-                        .IsRequired();
 
                     b.Navigation("Member");
                 });
