@@ -1,16 +1,15 @@
-export enum MemberStoryStyle {
-  Nostalgic = 'nostalgic',
-  Warm = 'warm',
-  Formal = 'formal',
-  Folk = 'folk',
+export enum LifeStage {
+  Childhood = 1,
+  Adulthood = 2,
+  StartingAFamily = 3,
+  SignificantEvents = 4,
+  OldAge = 5,
+  Deceased = 6,
 }
 
-export enum MemberStoryPerspective {
-  FirstPerson = 'firstPerson',
-  ThirdPerson = 'thirdPerson',
-  FamilyMember = 'familyMember',
-  NeutralPersonal = 'neutralPersonal', // Added from useMemberStoryForm suggestions
-  FullyNeutral = 'fullyNeutral',     // Added from useMemberStoryForm suggestions
+export enum CertaintyLevel {
+  Sure = 1,
+  Estimated = 2,
 }
 
 export enum FamilyRole {

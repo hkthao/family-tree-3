@@ -22,13 +22,18 @@
     <!-- Photo Upload Input -->
     <v-row v-if="modelValue.memberId">
       <v-col cols="12">
+        <v-carousel v-if="modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0" cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
+          <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
+            <v-img :src="image.imageUrl" cover class="fill-height"></v-img>
+          </v-carousel-item>
+        </v-carousel>
         <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
       </v-col>
       <!-- Face Detection and Selection -->
       <v-col cols="12">
-        <div v-if="hasUploadedImage">
+        <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
           <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
-            <FaceBoundingBoxViewer :image-src="modelValue.originalImageUrl!" :faces="modelValue.detectedFaces"
+            <FaceBoundingBoxViewer :image-src="modelValue.originalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''" :faces="modelValue.detectedFaces"
               selectable @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
@@ -40,67 +45,91 @@
       </v-col>
     </v-row>
 
-    <!-- Raw Input & Story Style -->
-    <v-row v-if="hasUploadedImage">
-      <v-col cols="12">
-        <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
-        <v-chip-group :model-value="modelValue.storyStyle"
-          @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory
-          column :disabled="readonly">
-          <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
-            {{ style.text }}
-          </v-chip>
-        </v-chip-group>
+    <!-- New fields for Life Story -->
+    <v-row>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          :model-value="modelValue.year"
+          @update:model-value="(newValue) => { updateModelValue({ year: parseInt(newValue) || null }); }"
+          :label="t('memberStory.form.yearLabel')"
+          type="number"
+          :readonly="readonly"
+          :rules="[rules.year.valid]"
+        ></v-text-field>
       </v-col>
-    </v-row>
-
-    <!-- Perspective -->
-    <v-row v-if="hasUploadedImage">
-      <v-col cols="12">
-        <h4>{{ t('memberStory.create.perspective.question') }}</h4>
-        <v-chip-group :model-value="modelValue.perspective"
-          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory
-          column :disabled="readonly">
-          <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[0].text }}
-          </v-chip>
-          <v-chip :value="aiPerspectiveSuggestions[1].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[1].text }}
-          </v-chip>
-          <v-chip :value="aiPerspectiveSuggestions[2].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[2].text }}
-          </v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-row>
-
-    <v-row v-if="hasUploadedImage">
-      <v-col cols="12">
-        <v-textarea :model-value="modelValue.rawInput" :rows="2"
-          @update:model-value="(newValue) => { updateModelValue({ rawInput: newValue }); }"
-          :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow />
+      <v-col cols="12" sm="6">
+        <v-checkbox
+          :model-value="modelValue.isYearEstimated"
+          @update:model-value="(newValue) => { updateModelValue({ isYearEstimated: newValue }); }"
+          :label="t('memberStory.form.isYearEstimatedLabel')"
+          :readonly="readonly"
+          class="mt-0 pt-0"
+        ></v-checkbox>
       </v-col>
       <v-col cols="12">
-        <v-btn color="primary" :disabled="readonly || generatingStory || isLoading || !canGenerateStory"
-          :loading="generatingStory" @click="generateStory">
-          {{ t('memberStory.create.generateStoryButton') }}
-        </v-btn>
-        <v-alert type="info" class="mt-4">
-          {{ t('memberStory.create.aiConsentInfo') }}
-        </v-alert>
+        <v-text-field
+          :model-value="modelValue.timeRangeDescription"
+          @update:model-value="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
+          :label="t('memberStory.form.timeRangeDescriptionLabel')"
+          :readonly="readonly"
+          :rules="[rules.timeRangeDescription.maxLength]"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-select
+          :model-value="modelValue.lifeStage"
+          @update:model-value="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
+          :label="t('memberStory.form.lifeStageLabel')"
+          :items="lifeStageOptions"
+          item-title="text"
+          item-value="value"
+          :readonly="readonly"
+          :rules="[rules.lifeStage.required]"
+        ></v-select>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-select
+          :model-value="modelValue.certaintyLevel"
+          @update:model-value="(newValue) => { updateModelValue({ certaintyLevel: newValue }); }"
+          :label="t('memberStory.form.certaintyLevelLabel')"
+          :items="certaintyLevelOptions"
+          item-title="text"
+          item-value="value"
+          :readonly="readonly"
+          :rules="[rules.certaintyLevel.required]"
+        ></v-select>
+      </v-col>
+      <v-col cols="12">
+        <v-text-field
+          :model-value="modelValue.location"
+          @update:model-value="(newValue) => { updateModelValue({ location: newValue }); }"
+          :label="t('memberStory.form.locationLabel')"
+          :readonly="readonly"
+          :rules="[rules.location.maxLength]"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <MemberAutocomplete
+          :model-value="modelValue.storytellerId"
+          @update:modelValue="(newValue: string | null) => { updateModelValue({ storytellerId: newValue || null }); }"
+          :readonly="readonly"
+          :family-id="modelValue.familyId"
+          :label="t('memberStory.form.storytellerLabel')"
+        />
       </v-col>
     </v-row>
 
     <!-- Title and Story -->
-    <v-row v-if="hasUploadedImage">
-
+    <v-row>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.title"
           @update:model-value="(newValue) => { updateModelValue({ title: newValue }); }"
-          :label="t('memberStory.storyEditor.title')" outlined class="mb-4" :rules="[rules.title.required]" />
+          :label="t('memberStory.storyEditor.title')" outlined class="mb-4" :rules="[rules.title.required]"
+          :readonly="readonly" />
         <v-textarea :model-value="modelValue.story"
           @update:model-value="(newValue) => { updateModelValue({ story: newValue }); }"
-          :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow :rules="[rules.story.required]" />
+          :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow :rules="[rules.story.required]"
+          :readonly="readonly" />
       </v-col>
     </v-row>
 
@@ -118,22 +147,40 @@ import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMembe
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
+import { CertaintyLevel, LifeStage } from '@/types/enums'; // Import enums
 
 const props = defineProps<{
   modelValue: MemberStoryDto;
   readonly?: boolean;
 }>();
-const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
+const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 const { t } = useI18n();
 
+// Options for v-select
+const lifeStageOptions = computed(() => [
+  { value: LifeStage.Childhood, text: t('lifeStage.childhood') },
+  { value: LifeStage.Adulthood, text: t('lifeStage.adulthood') },
+  { value: LifeStage.StartingAFamily, text: t('lifeStage.startingAFamily') },
+  { value: LifeStage.SignificantEvents, text: t('lifeStage.significantEvents') },
+  { value: LifeStage.OldAge, text: t('lifeStage.oldAge') },
+  { value: LifeStage.Deceased, text: t('lifeStage.deceased') },
+]);
+
+const certaintyLevelOptions = computed(() => [
+  { value: CertaintyLevel.Sure, text: t('certaintyLevel.sure') },
+  { value: CertaintyLevel.Estimated, text: t('certaintyLevel.estimated') },
+]);
+
 // Validation refs
-const familyIdValid = ref(false); // Thêm validation ref cho familyId
+const familyIdValid = ref(false);
 const memberIdValid = ref(false);
 const titleValid = ref(false);
 const storyValid = ref(false);
+const lifeStageValid = ref(false);
+const certaintyLevelValid = ref(false);
 
 const rules = {
-  familyId: { // Thêm rule cho familyId
+  familyId: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
   memberId: {
@@ -145,13 +192,27 @@ const rules = {
   story: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
+  year: {
+    valid: (value: number | null) => !value || (value >= 1000 && value <= new Date().getFullYear() + 1) || t('memberStory.form.yearRangeValidation'),
+  },
+  timeRangeDescription: {
+    maxLength: (value: string | null) => !value || value.length <= 100 || t('common.validations.maxLength', { length: 100 }),
+  },
+  lifeStage: {
+    required: (value: LifeStage | null) => value !== null || t('common.validations.required'),
+  },
+  location: {
+    maxLength: (value: string | null) => !value || value.length <= 200 || t('common.validations.maxLength', { length: 200 }),
+  },
+  certaintyLevel: {
+    required: (value: CertaintyLevel | null) => value !== null || t('common.validations.required'),
+  },
 };
 
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   const newModelValue = { ...props.modelValue, ...payload };
   emit('update:modelValue', newModelValue);
 
-  // Cập nhật trạng thái valid cho từng trường dựa trên payload
   if (payload.familyId !== undefined) {
     familyIdValid.value = !!rules.familyId.required(newModelValue.familyId ?? null);
   }
@@ -164,27 +225,23 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   if (payload.story !== undefined) {
     storyValid.value = !!rules.story.required(newModelValue.story ?? null);
   }
-};
-const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
-  emit('story-generated', payload);
+  if (payload.lifeStage !== undefined) {
+    lifeStageValid.value = !!rules.lifeStage.required(newModelValue.lifeStage ?? null);
+  }
+  if (payload.certaintyLevel !== undefined) {
+    certaintyLevelValid.value = !!rules.certaintyLevel.required(newModelValue.certaintyLevel ?? null);
+  }
 };
 
 const formValid = computed(() => {
-  return familyIdValid.value && memberIdValid.value && titleValid.value && storyValid.value;
+  return familyIdValid.value && memberIdValid.value && titleValid.value && storyValid.value && lifeStageValid.value && certaintyLevelValid.value;
 });
 
 const {
   showSelectMemberDialog,
   faceToLabel,
-  aiPerspectiveSuggestions,
-  storyStyles,
-  generatedTitle,
-  generatingStory,
-  storyEditorValid,
   hasUploadedImage,
   isLoading,
-  canGenerateStory,
-  generateStory,
   handleFileUpload,
   openSelectMemberDialog,
   handleLabelFaceAndCloseDialog,
@@ -196,15 +253,11 @@ const {
   memberId: props.modelValue.memberId,
   familyId: props.modelValue.familyId,
   updateModelValue,
-  onStoryGenerated,
 });
 
 defineExpose({
   isValid: computed(() => formValid.value),
   memoryFaceStore: memberStoryStoreFaceRecognition,
-  generateStory,
-  generatedTitle,
-  storyEditorValid,
 });
 </script>
 

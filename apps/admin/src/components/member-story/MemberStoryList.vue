@@ -17,8 +17,8 @@
     <v-data-table-server :items-per-page="itemsPerPage" @update:items-per-page="updateItemsPerPage" :headers="headers"
       :items="items" :items-length="totalItems" :loading="loading" @update:options="updateOptions" item-value="id"
       class="elevation-0">
-      <template #item.originalImageUrl="{ item }">
-        <v-img :src="item.resizedImageUrl ?? item.originalImageUrl ?? getFamilyAvatarUrl(null)" max-height="50" max-width="50" cover class="my-1 rounded"></v-img>
+      <template #item.coverPhoto="{ item }">
+        <v-img :src="item.memberStoryImages?.[0]?.resizedImageUrl ?? getFamilyAvatarUrl(null)" max-height="50" max-width="50" cover class="my-1 rounded"></v-img>
       </template>
       <template #item.title="{ item }">
         <a @click="viewItem(item.id)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
@@ -28,11 +28,17 @@
       <template #item.memberFullName="{ item }">
         <MemberName :full-name="item.memberFullName ?? undefined" :avatar-url="item.memberAvatarUrl ?? undefined" :gender="item.memberGender ?? undefined" />
       </template>
-      <template #item.storyStyle="{ item }">
-        {{ getStoryStyleText(item.storyStyle as MemberStoryStyle) }}
+      <template #item.year="{ item }">
+        {{ item.year }} <span v-if="item.isYearEstimated">({{ t('common.estimated') }})</span>
       </template>
-      <template #item.perspective="{ item }">
-        {{ getPerspectiveText(item.perspective as MemberStoryPerspective) }}
+      <template #item.lifeStage="{ item }">
+        {{ t(`lifeStage.${LifeStage[item.lifeStage!]}`) }}
+      </template>
+      <template #item.location="{ item }">
+        {{ item.location }}
+      </template>
+      <template #item.certaintyLevel="{ item }">
+        {{ t(`certaintyLevel.${CertaintyLevel[item.certaintyLevel!]}`) }}
       </template>
       <template #item.actions="{ item: rowItem }">
         <div v-if="canPerformActions">
@@ -63,7 +69,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { DataTableHeader } from 'vuetify';
 import { MemberName } from '@/components/member';
-import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; 
+import { CertaintyLevel, LifeStage } from '@/types/enums';
 import { computed } from 'vue'; 
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; 
 import { useAuth } from '@/composables/useAuth'; 
@@ -106,36 +112,15 @@ const canPerformActions = computed(() => {
 });
 
 const headers = computed<DataTableHeader[]>(() => [
-  { title: t('memberStory.list.headers.coverPhoto'), key: 'originalImageUrl', sortable: false },
+  { title: t('memberStory.list.headers.coverPhoto'), key: 'coverPhoto', sortable: false },
   { title: t('memberStory.list.headers.title'), key: 'title' },
   { title: t('memberStory.list.headers.memberFullName'), key: 'memberFullName' },
-  { title: t('memberStory.list.headers.storyStyle'), key: 'storyStyle' },
-  { title: t('memberStory.list.headers.perspective'), key: 'perspective' },
+  { title: t('memberStory.list.headers.year'), key: 'year' },
+  { title: t('memberStory.list.headers.lifeStage'), key: 'lifeStage' },
+  { title: t('memberStory.list.headers.location'), key: 'location' },
+  { title: t('memberStory.list.headers.certaintyLevel'), key: 'certaintyLevel' },
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end', minWidth: '120px' },
 ]);
-
-
-const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string => {
-  switch (style) {
-    case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
-    case MemberStoryStyle.Warm: return t('memberStory.style.warm');
-    case MemberStoryStyle.Formal: return t('memberStory.style.formal');
-    case MemberStoryStyle.Folk: return t('memberStory.style.folk');
-    default: return '';
-  }
-};
-
-
-const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefined): string => {
-  switch (perspective) {
-    case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
-    case MemberStoryPerspective.ThirdPerson: return t('memberStory.create.perspective.thirdPerson');
-    case MemberStoryPerspective.FamilyMember: return t('memberStory.create.perspective.familyMember');
-    case MemberStoryPerspective.NeutralPersonal: return t('memberStory.create.perspective.neutralPersonal');
-    case MemberStoryPerspective.FullyNeutral: return t('memberStory.create.perspective.fullyNeutral');
-    default: return '';
-  }
-};
 
 const viewItem = (id: string | undefined) => {
   if (id) emit('view', id);
