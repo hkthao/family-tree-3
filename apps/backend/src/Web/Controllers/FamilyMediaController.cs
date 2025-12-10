@@ -54,33 +54,9 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// <summary>
     /// Lấy danh sách các file media cho một gia đình.
     /// </summary>
-    /// <param name="familyId">ID của gia đình.</param>
-    /// <param name="filters">Bộ lọc file media.</param>
-    /// <param name="pageNumber">Số trang.</param>
-    /// <param name="pageSize">Kích thước trang.</param>
-    /// <param name="orderBy">Sắp xếp theo trường.</param>
-    /// <returns>Danh sách phân trang các file media.</returns>
-    [HttpGet]
-    public async Task<IActionResult> GetFamilyMediaList(
-        Guid familyId,
-        [FromQuery] string? searchQuery,
-        [FromQuery] Guid? refId,
-        [FromQuery] RefType? refType,
-        [FromQuery] MediaType? mediaType,
-        [FromQuery] int page = 1,
-        [FromQuery] int itemsPerPage = 10,
-        [FromQuery] string? sortBy = null)
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchFamilyMedia([FromQuery] SearchFamilyMediaQuery query)
     {
-        var query = new SearchFamilyMediaQuery(familyId)
-        {
-            SearchQuery = searchQuery,
-            RefId = refId,
-            RefType = refType,
-            MediaType = mediaType,
-            Page = page,
-            ItemsPerPage = itemsPerPage,
-            SortBy = sortBy
-        };
         var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
