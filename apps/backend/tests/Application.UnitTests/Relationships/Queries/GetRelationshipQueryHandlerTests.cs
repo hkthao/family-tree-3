@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
 using backend.Application.Common.Interfaces;
+using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;

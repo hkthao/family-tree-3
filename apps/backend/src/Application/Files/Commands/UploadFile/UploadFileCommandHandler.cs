@@ -1,49 +1,46 @@
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGELOADWEBHOOKDTO
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs; // Moved DTOs
 namespace backend.Application.Files.UploadFile;
 
 public class UploadFileCommandHandler(
-    IN8nService n8nService
+    IFileStorageService fileStorageService
 ) : IRequestHandler<UploadFileCommand, Result<ImageUploadResponseDto>>
 {
-    private readonly IN8nService _n8nService = n8nService; // ADD NEW SERVICE FIELD
+    private readonly IFileStorageService _fileStorageService = fileStorageService;
 
     public async Task<Result<ImageUploadResponseDto>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        // For image uploads, we use the n8n webhook directly.
-        // File type and size validations are now handled by n8n webhook or client-side.
+        using var fileStream = new MemoryStream(request.ImageData);
+        var uploadResult = await _fileStorageService.UploadFileAsync(
+            fileStream,
+            request.FileName,
+            request.Folder,
+            cancellationToken
+        );
 
-        // 1. Construct ImageUploadWebhookDto
-        var imageUploadDto = new ImageUploadWebhookDto
+        if (!uploadResult.IsSuccess)
         {
-            ImageData = request.ImageData,
-            FileName = request.FileName,
-            Folder = request.Folder,
-            ContentType = request.ContentType // Pass content type
+            return Result<ImageUploadResponseDto>.Failure(uploadResult.Error ?? ErrorMessages.FileUploadFailed, uploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+        }
+
+        if (string.IsNullOrEmpty(uploadResult.Value))
+        {
+            return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
+        }
+
+        // The IFileStorageService returns the URL directly.
+        // We construct a response similar to the original n8n webhook response.
+        var responseDto = new ImageUploadResponseDto
+        {
+            Url = uploadResult.Value,
+            DisplayUrl = uploadResult.Value, // Assuming display URL is the same for direct access
+            Filename = request.FileName, // Use Filename property
+            ContentType = request.ContentType,
+            Extension = Path.GetExtension(request.FileName)
         };
 
-        var n8nUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
-        if (!n8nUploadResult.IsSuccess)
-        {
-            return Result<ImageUploadResponseDto>.Failure(n8nUploadResult.Error ?? ErrorMessages.FileUploadFailed, n8nUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
-        }
-
-        if (n8nUploadResult.Value == null)
-        {
-            return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
-        }
-
-        var uploadedImageUrl = n8nUploadResult.Value.Url; // Now this is safe
-
-        if (string.IsNullOrEmpty(uploadedImageUrl))
-        {
-            return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
-        }
-
-        return Result<ImageUploadResponseDto>.Success(n8nUploadResult.Value);
+        return Result<ImageUploadResponseDto>.Success(responseDto);
     }
-
-    // Removed the SanitizeFileName method as it's no longer used.
 }

@@ -1,25 +1,22 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
-using backend.Application.ExportImport.Commands; // New using statement
-using backend.Application.Families.Dtos; // New using statement
+using backend.Application.ExportImport.Commands;
+using backend.Application.Families.Dtos;
 using backend.Application.Families.Queries;
-// Removed: using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
-// Removed: using backend.Application.Families.Queries.GetFamilyDetails;
-using backend.Application.FamilyDicts; // New using statement
-using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
-using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
-using backend.Application.FamilyDicts.Commands.UpdateFamilyDict; // New using statement
+using backend.Application.FamilyDicts;
+using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
+using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
+using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyLinks.Queries;
+using backend.Application.FamilyMedia.DTOs;
 using backend.Application.Identity.UserProfiles.Queries;
-using backend.Application.MemberFaces.Common; // NEW
+using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.MemberStories.Commands.CreateMemberStory; // NEW
-using backend.Application.MemberStories.Commands.UpdateMemberStory; // NEW
-using backend.Application.MemberStories.DTOs; // NEW
-using backend.Application.PdfTemplates.Dtos; // Added for PdfTemplateDto
+using backend.Application.MemberStories.DTOs;
+using backend.Application.PdfTemplates.Dtos;
 using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
@@ -41,8 +38,7 @@ public class MappingProfile : Profile
     {
         CreateMap<Family, FamilyDto>();
         CreateMap<Family, FamilyDetailDto>()
-            .ForMember(dest => dest.FamilyUsers, opt => opt.MapFrom(src => src.FamilyUsers)); // Modified mapping
-        // Removed: CreateMap<Family, FamilyListDto>();
+            .ForMember(dest => dest.FamilyUsers, opt => opt.MapFrom(src => src.FamilyUsers));
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
@@ -99,8 +95,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
             .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
             .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created));
-        CreateMap<CreateMemberStoryCommand, MemberStory>();
-        CreateMap<UpdateMemberStoryCommand, MemberStory>();
 
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.Name : null))
@@ -118,5 +112,13 @@ public class MappingProfile : Profile
         CreateMap<FamilyLink, FamilyLinkDto>()
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
+
+        // FamilyMedia mappings
+        CreateMap<Domain.Entities.FamilyMedia, FamilyMediaDto>()
+            .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.ToString() : null)) // Placeholder, will need a resolver for actual user name
+            .ForMember(dest => dest.MediaLinks, opt => opt.MapFrom(src => src.MediaLinks));
+
+        CreateMap<MediaLink, MediaLinkDto>()
+            .ForMember(dest => dest.RefName, opt => opt.Ignore()); // Placeholder, will need a resolver to get name from Member/MemberStory
     }
 }

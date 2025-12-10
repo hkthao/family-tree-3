@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace backend.Application.AI.DTOs;
+namespace backend.Application.Files.DTOs; // Updated namespace
 
 /// <summary>
 /// DTO cho payload webhook tải ảnh lên.

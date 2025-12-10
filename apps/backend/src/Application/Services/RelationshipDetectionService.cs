@@ -1,14 +1,10 @@
-using backend.Application.Common.Interfaces;
-using backend.Domain.Interfaces;
 using System.Text;
 using backend.Application.AI.DTOs;
-using backend.Application.AI;
-using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
-using System.Linq; // For String.Join
 
 namespace backend.Application.Services;
 
@@ -71,13 +67,13 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         {
             localFromBToA = _ruleEngine.InferRelationship(pathToA, allMembers);
         }
-        
+
         // If both relationships are found by local rules and are not "unknown", return immediately
         if (localFromAToB != "unknown" && localFromBToA != "unknown")
         {
             // Construct a descriptive string from local results
             inferredDescription = $"{memberA.FullName} là {localFromAToB} của {memberB.FullName} và {memberB.FullName} là {localFromBToA} của {memberA.FullName}.";
-            
+
             return new RelationshipDetectionResult
             {
                 Description = inferredDescription,
@@ -89,10 +85,10 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
 
         var combinedPromptBuilder = new StringBuilder();
-        
+
         // Simpler, more direct prompt for AI
         combinedPromptBuilder.AppendLine($"Xác định mối quan hệ gia đình giữa Thành viên '{memberA.FullName}' (ID: {memberAId}) và Thành viên '{memberB.FullName}' (ID: {memberBId}) trong một cây gia phả.");
-        
+
         combinedPromptBuilder.AppendLine("\n--- Chi tiết đường dẫn từ A đến B ---");
         if (pathToB.NodeIds.Any())
         {

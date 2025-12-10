@@ -1,9 +1,9 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // NEW: For Result<T>
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
+using backend.Application.Files.DTOs; // Moved DTOs
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberStories;
@@ -85,7 +85,9 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                     return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
                 }
                 originalImageUrl = originalUploadResult.Value?.Url ?? string.Empty;
-            } else if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl)) {
+            }
+            else if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl))
+            {
                 originalImageUrl = request.TemporaryOriginalImageUrl;
             }
 
@@ -102,10 +104,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
                     return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
                 }
                 resizedImageUrl = resizedUploadResult.Value?.Url ?? string.Empty;
-            } else if (!string.IsNullOrEmpty(request.TemporaryResizedImageUrl)) {
+            }
+            else if (!string.IsNullOrEmpty(request.TemporaryResizedImageUrl))
+            {
                 resizedImageUrl = request.TemporaryResizedImageUrl;
             }
-            
+
             if (!string.IsNullOrEmpty(originalImageUrl) || !string.IsNullOrEmpty(resizedImageUrl))
             {
                 primaryImage = new MemberStoryImage

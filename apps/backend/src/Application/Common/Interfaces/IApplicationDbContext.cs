@@ -98,6 +98,16 @@ public interface IApplicationDbContext
     DbSet<FamilyLink> FamilyLinks { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyMedia.
+    /// </summary>
+    DbSet<backend.Domain.Entities.FamilyMedia> FamilyMedia { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
+    /// </summary>
+    DbSet<MediaLink> MediaLinks { get; }
+
+    /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.
     /// </summary>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>

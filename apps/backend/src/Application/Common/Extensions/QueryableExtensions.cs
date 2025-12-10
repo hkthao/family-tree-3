@@ -30,4 +30,17 @@ public static class QueryableExtensions
 
         return source.Provider.CreateQuery<T>(resultExpression);
     }
+    public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> source, string? orderBy)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy))
+        {
+            return source;
+        }
+
+        var parts = orderBy.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string propertyName = parts[0];
+        bool descending = parts.Length > 1 && parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+        return source.OrderByPropertyName(propertyName, descending);
+    }
 }

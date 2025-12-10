@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using backend.Application.AI; // Added
 using backend.Application.AI.DTOs; // Added
-using backend.Application.Common.Models; // Added
 using backend.Application.Common.Interfaces; // Added
+using backend.Application.Common.Models; // Added
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -95,7 +95,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Path.First().Should().Be(father.Id);
         result.Path.Last().Should().Be(child.Id);
         result.Edges.First().Should().Be(nameof(RelationshipType.Father));
-        
+
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
         _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
     }
@@ -222,7 +222,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Description.Should().Be("Không tìm thấy đường dẫn quan hệ.");
         result.Path.Should().BeEmpty();
         result.Edges.Should().BeEmpty();
-        
+
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
         _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.Never); // Verify rule engine was NOT called
     }

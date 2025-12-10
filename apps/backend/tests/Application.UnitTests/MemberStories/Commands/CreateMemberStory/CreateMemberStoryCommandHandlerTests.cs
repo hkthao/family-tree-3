@@ -1,8 +1,8 @@
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.Commands.UploadFileFromUrl;
+using backend.Application.Files.DTOs;
 using backend.Application.MemberFaces.Common; // NEW: For BoundingBoxDto
 using backend.Application.MemberStories.Commands.CreateMemberStory;
 using backend.Application.UnitTests.Common;
@@ -161,11 +161,11 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
 
         _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
             cmd => cmd.FileUrl == tempOriginalUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(backend.Application.Common.Models.Result<backend.Application.AI.DTOs.ImageUploadResponseDto>.Success(new backend.Application.AI.DTOs.ImageUploadResponseDto { Url = permanentOriginalUrl }));
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentOriginalUrl }));
 
         _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
             cmd => cmd.FileUrl == tempResizedUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(backend.Application.Common.Models.Result<backend.Application.AI.DTOs.ImageUploadResponseDto>.Success(new backend.Application.AI.DTOs.ImageUploadResponseDto { Url = permanentResizedUrl }));
+            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentResizedUrl }));
 
         var command = new CreateMemberStoryCommand
         {
@@ -189,7 +189,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         createdStory!.MemberStoryImages.Should().HaveCount(1);
         createdStory.MemberStoryImages.First().ImageUrl.Should().Be(permanentOriginalUrl);
         createdStory.MemberStoryImages.First().ResizedImageUrl.Should().Be(permanentResizedUrl);
-        
+
         _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
@@ -264,7 +264,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
                                 fEvent.MemberStory.MemberStoryImages.Count == 1 &&
                                 fEvent.MemberStory.MemberStoryImages.First().ImageUrl == permanentOriginalStoryImageUrl)
         )), Times.Once);
-        
+
         _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }

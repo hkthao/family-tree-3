@@ -122,7 +122,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
             .Where(r => filteredFamiliesQuery.Any(f => f.Id == r.FamilyId))
             .Where(r => !r.IsDeleted)
             .ToListAsync(cancellationToken);
-        
+
         var events = await _context.Events
             .Where(e => filteredFamiliesQuery.Any(f => f.Id == e.FamilyId))
             .Where(e => !e.IsDeleted)
@@ -222,7 +222,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                 }
             }
         }
-        
+
         // Handle any members that were not reached by the BFS (e.g., truly isolated members, or members
         // whose parents are outside the 'members' collection and thus not included in 'relevantRelationships').
         // These should also be considered Generation 1 as they effectively start new branches.

@@ -93,6 +93,9 @@ public static class DependencyInjection
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 
+        // Register File Storage Service
+        services.AddScoped<IFileStorageService, N8nFileStorageService>();
+
         // Add Novu services
         services.AddNovuServices(configuration);
 

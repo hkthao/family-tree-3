@@ -3,6 +3,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // NEW
 using backend.Application.Families.Commands.UpdateFamily;
+using backend.Application.Files.DTOs;
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW

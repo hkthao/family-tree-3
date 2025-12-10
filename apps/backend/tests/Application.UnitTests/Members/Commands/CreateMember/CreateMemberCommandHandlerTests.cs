@@ -3,6 +3,7 @@ using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // NEW
+using backend.Application.Files.DTOs;
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;

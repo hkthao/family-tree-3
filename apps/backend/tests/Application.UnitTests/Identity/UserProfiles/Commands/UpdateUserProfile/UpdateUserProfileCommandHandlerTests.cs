@@ -2,6 +2,7 @@ using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs;
 using backend.Application.Files.UploadFile;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.UnitTests.Common;

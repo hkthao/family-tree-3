@@ -1,7 +1,7 @@
+using System.Text.Json; // Required for JsonSerializer
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Text.Json; // Required for JsonSerializer
 
 namespace backend.Infrastructure.Persistence.Configurations;
 

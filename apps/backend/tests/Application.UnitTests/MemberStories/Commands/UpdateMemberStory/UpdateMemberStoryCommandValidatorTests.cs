@@ -1,8 +1,8 @@
+using System;
 using backend.Application.MemberStories.Commands.UpdateMemberStory;
 using backend.Domain.Enums;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.MemberStories.Commands.UpdateMemberStory;
 

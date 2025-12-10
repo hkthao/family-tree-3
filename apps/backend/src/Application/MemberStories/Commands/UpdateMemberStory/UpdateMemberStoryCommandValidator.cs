@@ -1,5 +1,3 @@
-using backend.Domain.Enums;
-
 namespace backend.Application.MemberStories.Commands.UpdateMemberStory;
 
 public class UpdateMemberStoryCommandValidator : AbstractValidator<UpdateMemberStoryCommand>
