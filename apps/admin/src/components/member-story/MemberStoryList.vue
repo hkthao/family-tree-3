@@ -32,7 +32,7 @@
         {{ item.year }}
       </template>
       <template #item.lifeStage="{ item }">
-        {{ t(`lifeStage.${LifeStage[item.lifeStage!]}`) }}
+        {{ item.lifeStage ? t(`lifeStage.${LifeStage[item.lifeStage]}`) : t('common.unknown') }}
       </template>
       <template #item.location="{ item }">
         {{ item.location }}
