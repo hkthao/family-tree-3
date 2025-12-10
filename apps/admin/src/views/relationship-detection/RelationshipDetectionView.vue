@@ -89,39 +89,41 @@ watch(selectedFamilyId, () => {
   error.value = null;
 });
 
-const detectRelationship = async () => {
-  if (!selectedFamilyId.value || !selectedMemberAId.value || !selectedMemberBId.value) {
-    error.value = t('relationshipDetection.selectFamilyAndMembersError');
-    return;
-  }
-
-  loading.value = true;
-  error.value = null;
-  result.value = null;
-
-  try {
-    const detectionResult = await relationshipDetectionStore.detectRelationship(
-      selectedFamilyId.value,
-      selectedMemberAId.value,
-      selectedMemberBId.value
-    );
-    if (detectionResult) {
-      result.value = detectionResult;
-      // Update the condition to check the single 'description' property
-      if (result.value.description === 'unknown' || result.value.description === t('relationshipDetection.noRelationshipFound')) {
-        error.value = t('relationshipDetection.noRelationshipFound');
-        result.value = null; // Clear result if unknown
+    const detectRelationship = async () => {
+      if (!selectedFamilyId.value || !selectedMemberAId.value || !selectedMemberBId.value) {
+        error.value = t('relationshipDetection.selectFamilyAndMembersError');
+        return;
       }
-    } else {
-      error.value = t('relationshipDetection.noRelationshipFound');
-    }
-  } catch (err: any) {
-    error.value = err.message || t('relationshipDetection.genericError');
-  } finally {
-    loading.value = false;
-  }
-};
-</script>
+
+      loading.value = true;
+      error.value = null;
+      result.value = null;
+
+      try {
+        const detectionResult = await relationshipDetectionStore.detectRelationship(
+          selectedFamilyId.value,
+          selectedMemberAId.value,
+          selectedMemberBId.value
+        );
+
+        if (detectionResult) {
+          result.value = detectionResult;
+          // Only check description if result.value is not null
+          if (result.value && (result.value.description === 'unknown' || result.value.description === t('relationshipDetection.noRelationshipFound'))) {
+            error.value = t('relationshipDetection.noRelationshipFound');
+            result.value = null; // Clear result if unknown or no relationship found
+          }
+        } else {
+          // If detectionResult is null, it means no relationship was found or an error occurred in the store
+          error.value = t('relationshipDetection.noRelationshipFound');
+          result.value = null;
+        }
+      } catch (err: any) {
+        error.value = err.message || t('relationshipDetection.genericError');
+      } finally {
+        loading.value = false;
+      }
+    };</script>
 
 <style scoped>
 /* Add any specific styles here if needed */
