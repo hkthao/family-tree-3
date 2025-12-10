@@ -1,11 +1,9 @@
-using backend.Application.Common.Models;
 using backend.Application.FamilyMedia.Commands.CreateFamilyMedia;
 using backend.Application.FamilyMedia.Commands.DeleteFamilyMedia;
 using backend.Application.FamilyMedia.Commands.LinkMediaToEntity;
 using backend.Application.FamilyMedia.Commands.UnlinkMediaFromEntity;
-using backend.Application.FamilyMedia.DTOs;
 using backend.Application.FamilyMedia.Queries.GetFamilyMediaById;
-using backend.Application.FamilyMedia.Queries.GetFamilyMediaList;
+using backend.Application.FamilyMedia.Queries.SearchFamilyMedia;
 using backend.Application.FamilyMedia.Queries.GetMediaLinksByFamilyMediaId;
 using backend.Application.FamilyMedia.Queries.GetMediaLinksByRefId;
 using backend.Domain.Enums; // For RefType, MediaType
@@ -65,12 +63,25 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetFamilyMediaList(
         Guid familyId,
-        [FromQuery] FamilyMediaFilter filters,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? orderBy = null)
+        [FromQuery] string? searchQuery,
+        [FromQuery] Guid? refId,
+        [FromQuery] RefType? refType,
+        [FromQuery] MediaType? mediaType,
+        [FromQuery] int page = 1,
+        [FromQuery] int itemsPerPage = 10,
+        [FromQuery] string? sortBy = null)
     {
-        var result = await _mediator.Send(new GetFamilyMediaListQuery(familyId, filters, pageNumber, pageSize, orderBy));
+        var query = new SearchFamilyMediaQuery(familyId)
+        {
+            SearchQuery = searchQuery,
+            RefId = refId,
+            RefType = refType,
+            MediaType = mediaType,
+            Page = page,
+            ItemsPerPage = itemsPerPage,
+            SortBy = sortBy
+        };
+        var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
