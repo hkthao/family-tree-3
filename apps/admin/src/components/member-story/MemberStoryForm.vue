@@ -5,13 +5,11 @@
       <v-progress-circular color="primary" indeterminate></v-progress-circular>
     </div>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" sm="6">
         <FamilyAutocomplete :model-value="props.familyId"
           :readonly="true" :label="t('memberStory.form.familyIdLabel')" :rules="[rules.familyId.required]" />
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
+      <v-col cols="12" sm="6">
         <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!props.familyId"
           @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue || '' }); }"
           :readonly="readonly" :family-id="props.familyId" :label="t('memberStory.form.memberIdLabel')"
