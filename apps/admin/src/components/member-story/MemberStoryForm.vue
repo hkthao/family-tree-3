@@ -6,16 +6,15 @@
     </div>
     <v-row>
       <v-col cols="12">
-        <FamilyAutocomplete :model-value="modelValue.familyId"
-          @update:modelValue="(newValue: string | null) => { updateModelValue({ familyId: newValue || '' }); }"
-          :readonly="readonly" :label="t('memberStory.form.familyIdLabel')" :rules="[rules.familyId.required]" />
+        <FamilyAutocomplete :model-value="props.familyId"
+          :readonly="true" :label="t('memberStory.form.familyIdLabel')" :rules="[rules.familyId.required]" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!modelValue.familyId"
+        <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!props.familyId"
           @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue || '' }); }"
-          :readonly="readonly" :family-id="modelValue.familyId" :label="t('memberStory.form.memberIdLabel')"
+          :readonly="readonly" :family-id="props.familyId" :label="t('memberStory.form.memberIdLabel')"
           :rules="[rules.memberId.required]" />
       </v-col>
     </v-row>
@@ -131,6 +130,7 @@ import { LifeStage } from '@/types/enums'; // Import enums
 const props = defineProps<{
   modelValue: MemberStoryDto;
   readonly?: boolean;
+  familyId?: string; // New prop for external familyId
 }>();
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 const { t } = useI18n();
@@ -144,7 +144,6 @@ const lifeStageOptions = computed(() => [
   { value: LifeStage.OldAge, text: t('lifeStage.oldAge') },
   { value: LifeStage.Deceased, text: t('lifeStage.deceased') },
 ]);
-
 
 // Validation refs
 const familyIdValid = ref(false);
@@ -219,7 +218,7 @@ const {
   modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
   memberId: props.modelValue.memberId,
-  familyId: props.modelValue.familyId,
+  familyId: props.familyId || props.modelValue.familyId, // Use prop familyId if available, else from modelValue
   updateModelValue,
 });
 

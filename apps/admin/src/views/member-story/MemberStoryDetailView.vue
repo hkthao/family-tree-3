@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-card v-if="memberStory" flat>
-      <!-- Cover Image -->
+      <!-- Cover Image - Keep cover image display if preferred, or let form handle it -->
       <v-img v-if="memberStory.memberStoryImages && memberStory.memberStoryImages.length > 0 && memberStory.memberStoryImages[0].imageUrl" :src="memberStory.memberStoryImages[0].imageUrl" cover class="mb-4">
         <v-row class="fill-height align-end meta-data">
           <v-col class="pa-2" style="background: rgba(0, 0, 0, 0.4);">
@@ -20,32 +20,8 @@
           </v-col>
         </v-row> </v-img>
 
-      <v-card-text class="pa-0">
-        <!-- New Fields Display -->
-        <v-list density="compact">
-          <v-list-item v-if="memberStory.year">
-            <v-list-item-title>{{ t('memberStory.form.yearLabel') }}: {{ memberStory.year }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item v-if="memberStory.timeRangeDescription">
-            <v-list-item-title>{{ t('memberStory.form.timeRangeDescriptionLabel') }}: {{ memberStory.timeRangeDescription }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item v-if="memberStory.lifeStage">
-            <v-list-item-title>{{ t('memberStory.form.lifeStageLabel') }}: {{ t(`lifeStage.${LifeStage[memberStory.lifeStage!]}`) }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item v-if="memberStory.location">
-            <v-list-item-title>{{ t('memberStory.form.locationLabel') }}: {{ memberStory.location }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item v-if="memberStory.storytellerId">
-            <v-list-item-title>{{ t('memberStory.form.storytellerLabel') }}: {{ memberStory.storytellerId }}</v-list-item-title> <!-- Needs to display name, not ID -->
-          </v-list-item>
-        </v-list>
-
-        <!-- Story Content -->
-        <div class="mb-6">
-          <h2 class="text-h5 mb-2">{{ t('memberStory.detail.storyContent') }}</h2>
-          <div class="text-body-1" style="white-space: pre-wrap;">{{ memberStory.story }}</div>
-        </div>
-      </v-card-text>
+      <!-- MemberStoryForm in readonly mode -->
+      <MemberStoryForm v-model="memberStory" :readonly="true" :family-id="memberStory?.familyId" />
 
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -80,6 +56,7 @@ import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import { LifeStage } from '@/types/enums';
+import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue'; // Import MemberStoryForm
 
 const props = defineProps<{
   memberStoryId: string;

@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
-    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :readonly="false" />
+    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :readonly="false" :family-id="familyId" />
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">
@@ -29,6 +29,7 @@ import { LifeStage } from '@/types/enums';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
+  familyId: string; // familyId is now required for this view
 }>();
 
 const emit = defineEmits(['close', 'saved']);
@@ -40,6 +41,7 @@ const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null
 const isSaving = ref(false);
 const editedMemberStory = ref<MemberStoryDto>({
   memberId: props.memberId || '',
+  familyId: props.familyId, // Initialize with prop familyId
   title: '',
   story: '',
   year: null,

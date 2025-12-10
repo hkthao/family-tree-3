@@ -16,7 +16,7 @@
 
     <!-- Add MemberStory Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberStoryClosed">
-      <MemberStoryAddView v-if="addDrawer" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" />
+      <MemberStoryAddView v-if="addDrawer" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" :family-id="props.familyId" />
     </BaseCrudDrawer>
 
     <!-- Edit MemberStory Drawer -->
