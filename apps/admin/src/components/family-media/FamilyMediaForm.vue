@@ -1,0 +1,100 @@
+<template>
+  <v-form ref="formRef">
+    <v-file-input
+      v-model="file"
+      :label="t('familyMedia.form.fileLabel')"
+      prepend-icon="mdi-camera"
+      accept="image/*,video/*,audio/*,application/pdf"
+      show-size
+      :rules="readOnly ? [] : [rules.required]"
+      :readonly="readOnly"
+    ></v-file-input>
+    <v-textarea
+      v-model="description"
+      :label="t('familyMedia.form.descriptionLabel')"
+      rows="3"
+      clearable
+      :readonly="readOnly"
+    ></v-textarea>
+    <!-- Display current media if in edit/detail mode -->
+    <div v-if="initialMedia && initialMedia.filePath">
+      <p class="text-subtitle-2">{{ t('familyMedia.form.currentMedia') }}</p>
+      <v-img v-if="initialMedia.mediaType === MediaType.Image" :src="initialMedia.filePath" max-width="200"></v-img>
+      <video v-else-if="initialMedia.mediaType === MediaType.Video" controls :src="initialMedia.filePath" max-width="200"></video>
+      <audio v-else-if="initialMedia.mediaType === MediaType.Audio" controls :src="initialMedia.filePath"></audio>
+      <p v-else-if="initialMedia.mediaType === MediaType.Document">
+        <a :href="initialMedia.filePath" target="_blank">{{ initialMedia.fileName }}</a>
+      </p>
+    </div>
+  </v-form>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { FamilyMedia } from '@/types';
+import { MediaType } from '@/types/enums';
+
+interface FamilyMediaFormProps {
+  initialMedia?: FamilyMedia;
+  readOnly?: boolean;
+}
+
+const props = defineProps<FamilyMediaFormProps>();
+const emit = defineEmits(['update:modelValue']);
+const { t } = useI18n();
+
+const formRef = ref<HTMLFormElement | null>(null);
+const file = ref<File | null>(null);
+const description = ref<string | undefined>(undefined);
+
+const rules = {
+  required: (value: any) => !!value || t('common.required'),
+};
+
+const getFormData = () => {
+  return {
+    file: file.value,
+    description: description.value,
+  };
+};
+
+const validate = async () => {
+  if (formRef.value) {
+    const { valid } = await formRef.value.validate();
+    return valid;
+  }
+  return false;
+};
+
+const resetValidation = () => {
+  if (formRef.value) {
+    formRef.value.resetValidation();
+  }
+};
+
+const resetForm = () => {
+  file.value = null;
+  description.value = undefined;
+  resetValidation();
+};
+
+onMounted(() => {
+  if (props.initialMedia) {
+    description.value = props.initialMedia.description;
+  }
+});
+
+watch(() => props.initialMedia, (newVal) => {
+  if (newVal) {
+    description.value = newVal.description;
+  }
+}, { deep: true });
+
+defineExpose({
+  getFormData,
+  validate,
+  resetValidation,
+  resetForm,
+});
+</script>

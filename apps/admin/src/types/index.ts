@@ -1,6 +1,8 @@
 export * from './family-dict.d';
 export * from './family.d';
+export * from './base.d'; // NEW
 export * from './member.d';
+export * from './routes.d'; // NEW
 
 export * from './dashboard.d';
 export * from './pagination.d';
@@ -19,6 +21,7 @@ export * from './biography.d';
 
 export * from './memberFace.d'; 
 export * from './uploaded-file.d';
+export * from './familyMedia.d'; // NEW
 
 // NEWLY ADDED PUBLIC-FACING DTO EXPORTS
 export * from './public-family.d';

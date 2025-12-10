@@ -27,7 +27,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// <returns>ID của file media vừa được tạo.</returns>
     [HttpPost]
     [Consumes("multipart/form-data")] // Specify content type for file uploads
-    public async Task<IActionResult> CreateFamilyMedia(Guid familyId, [FromForm] CreateFamilyMediaCommand command)
+    public async Task<IActionResult> CreateFamilyMedia([FromRoute] Guid familyId, [FromForm] CreateFamilyMediaCommand command)
     {
         if (familyId != command.FamilyId)
         {
@@ -45,7 +45,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của file media cần lấy.</param>
     /// <returns>Thông tin chi tiết của file media.</returns>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetFamilyMediaById(Guid familyId, Guid id)
+    public async Task<IActionResult> GetFamilyMediaById([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetFamilyMediaByIdQuery(id, familyId));
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
@@ -55,8 +55,9 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// Lấy danh sách các file media cho một gia đình.
     /// </summary>
     [HttpGet("search")]
-    public async Task<IActionResult> SearchFamilyMedia([FromQuery] SearchFamilyMediaQuery query)
+    public async Task<IActionResult> SearchFamilyMedia([FromRoute] Guid familyId, [FromQuery] SearchFamilyMediaQuery query)
     {
+        query.SetFamilyId(familyId);
         var result = await _mediator.Send(query);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
@@ -68,7 +69,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của file media cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteFamilyMedia(Guid familyId, Guid id)
+    public async Task<IActionResult> DeleteFamilyMedia([FromRoute]Guid familyId, [FromRoute]Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyMediaCommand { Id = id, FamilyId = familyId });
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
