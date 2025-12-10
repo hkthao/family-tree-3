@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
-    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :member-id="memberId" :readonly="false" />
+    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :readonly="false" />
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">
@@ -22,9 +22,10 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { MemberStoryDto } from '@/types/memberStory'; // Keep MemberStoryDto for local state
+import type { MemberStoryDto } from '@/types/memberStory';
 import type { CreateMemberStory } from '@/types/memberStory';
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
+import { LifeStage, CertaintyLevel } from '@/types/enums';
 
 const props = defineProps<{
   memberId?: string; // Optional memberId for pre-filling
@@ -35,47 +36,56 @@ const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
-const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null); // Updated
-const isSaving = ref(false); // To manage loading state for buttons
-const editedMemberStory = ref<MemberStoryDto>({ // Keep as MemberStoryDto for form compatibility
-  memberId: props.memberId || '', // Pre-fill if memberId is provided
+const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null);
+const isSaving = ref(false);
+const editedMemberStory = ref<MemberStoryDto>({
+  memberId: props.memberId || '',
   title: '',
   story: '',
-  detectedFaces: [], // Initialize detectedFaces
-  originalImageUrl: '',
-  resizedImageUrl: '',
-  rawInput: null, // Keep for AI generation
-  storyStyle: null, // NEW
-  perspective: null, // NEW
+  year: null,
+  timeRangeDescription: null,
+  isYearEstimated: false,
+  lifeStage: LifeStage.Childhood, // Default value
+  location: null,
+  storytellerId: null,
+  certaintyLevel: CertaintyLevel.Sure, // Default value
+  detectedFaces: [],
+  memberStoryImages: [],
 });
 
 const handleSave = async () => {
-  if (!memberStoryFormRef.value || !editedMemberStory.value.memberId || !editedMemberStory.value.title || !editedMemberStory.value.story) return;
+  if (!memberStoryFormRef.value || !memberStoryFormRef.value.isValid) {
+    showSnackbar(t('common.validations.required'), 'error');
+    return;
+  }
 
   isSaving.value = true;
   try {
-    // Map MemberStoryDto to CreateMemberStory for the backend call
     const createPayload: CreateMemberStory = {
       memberId: editedMemberStory.value.memberId,
       title: editedMemberStory.value.title,
       story: editedMemberStory.value.story,
-      originalImageUrl: editedMemberStory.value.originalImageUrl,
-      resizedImageUrl: editedMemberStory.value.resizedImageUrl,
-      rawInput: editedMemberStory.value.rawInput, // NEW
-      storyStyle: editedMemberStory.value.storyStyle, // NEW
-      perspective: editedMemberStory.value.perspective, // NEW
-      detectedFaces: (editedMemberStory.value.detectedFaces || [])
+      year: editedMemberStory.value.year,
+      timeRangeDescription: editedMemberStory.value.timeRangeDescription,
+      isYearEstimated: editedMemberStory.value.isYearEstimated,
+      lifeStage: editedMemberStory.value.lifeStage,
+      location: editedMemberStory.value.location,
+      storytellerId: editedMemberStory.value.storytellerId,
+      certaintyLevel: editedMemberStory.value.certaintyLevel,
+      detectedFaces: editedMemberStory.value.detectedFaces || [],
+      temporaryOriginalImageUrl: editedMemberStory.value.temporaryOriginalImageUrl,
+      temporaryResizedImageUrl: editedMemberStory.value.temporaryResizedImageUrl,
     };
 
-    const result = await memberStoryStore.addItem(createPayload); // Pass the mapped payload
+    const result = await memberStoryStore.addItem(createPayload);
     if (result.ok) {
-      showSnackbar(t('memberStory.create.saveSuccess'), 'success'); // Updated
+      showSnackbar(t('memberStory.create.saveSuccess'), 'success');
       emit('saved');
     } else {
-      showSnackbar(t('memberStory.create.saveFailed'), 'error'); // Updated
+      showSnackbar(result.error?.message || t('common.saveError'), 'error');
     }
   } catch (error) {
-    console.error('Error saving member story:', error); // Updated
+    console.error('Error saving member story:', error);
     showSnackbar((error as Error).message, 'error');
   } finally {
     isSaving.value = false;

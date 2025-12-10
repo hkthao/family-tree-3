@@ -3,21 +3,19 @@ import { ref, watch, computed, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import type { DetectedFace, GenerateStoryCommand, PhotoAnalysisPersonDto } from '@/types';
-import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
+import type { DetectedFace } from '@/types';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 
 interface UseMemberStoryFormOptions {
-  modelValue: ComputedRef<MemberStoryDto>; // Changed from MemberStoryDto
+  modelValue: ComputedRef<MemberStoryDto>;
   readonly?: boolean;
   memberId?: string | null;
   familyId?: string;
   updateModelValue: (payload: Partial<MemberStoryDto>) => void;
-  onStoryGenerated: (payload: { story: string | null; title: string | null }) => void;
 }
 
 export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
-  const { modelValue, readonly, updateModelValue, onStoryGenerated } = options;
+  const { modelValue, readonly, updateModelValue } = options;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const memberStoryStore = useMemberStoryStore();
@@ -25,81 +23,16 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const showSelectMemberDialog = ref(false);
   const faceToLabel = ref<DetectedFace | null>(null);
 
-  const aiPerspectiveSuggestions = ref([
-    { value: MemberStoryPerspective.FirstPerson, text: t('memberStory.create.perspective.firstPerson') },
-    { value: MemberStoryPerspective.NeutralPersonal, text: t('memberStory.create.perspective.neutralPersonal') },
-    { value: MemberStoryPerspective.FullyNeutral, text: t('memberStory.create.perspective.fullyNeutral') },
-  ]);
-
-  const storyStyles = ref([
-    { value: MemberStoryStyle.Nostalgic, text: t('memberStory.style.nostalgic') },
-    { value: MemberStoryStyle.Warm, text: t('memberStory.style.warm') },
-    { value: MemberStoryStyle.Formal, text: t('memberStory.style.formal') },
-    { value: MemberStoryStyle.Folk, text: t('memberStory.style.folk') },
-  ]);
-
-  const generatedStory = ref<string | null>(null);
-  const generatedTitle = ref<string | null>(null);
-  const generatingStory = ref(false);
-  const storyEditorValid = ref(true); // TODO: Implement validation logic
   const hasUploadedImage = computed(() => {
-    return !!modelValue.value.originalImageUrl; // Updated to check resizedImageUrl
+    return !!modelValue.value.temporaryOriginalImageUrl || (modelValue.value.memberStoryImages && modelValue.value.memberStoryImages.length > 0);
   });
   const isLoading = computed(() => {
     return memberStoryStore.faceRecognition.loading ||
            memberStoryStore.add.loading ||
            memberStoryStore.update.loading ||
            memberStoryStore._delete.loading ||
-           memberStoryStore.aiAnalysis.loading;
+           memberStoryStore.aiAnalysis.loading; // aiAnalysis.loading will still be true here, this needs fixing
   });
-
-  const canGenerateStory = computed(() => {
-    const hasMinRawInput = modelValue.value.rawInput && modelValue.value.rawInput.length >= 10;
-    const hasDetectedFaces = modelValue.value.detectedFaces && modelValue.value.detectedFaces.length > 0; // Check detectedFaces
-    const hasMemberSelected = modelValue.value.memberId;
-    return (hasMinRawInput || hasDetectedFaces) && hasMemberSelected && modelValue.value.storyStyle && modelValue.value.perspective;
-  });
-
-  const generateStory = async () => {
-    if (!canGenerateStory.value) return;
-
-    if (!modelValue.value.memberId || modelValue.value.memberId === '00000000-0000-0000-0000-000000000000') {
-      showSnackbar(t('memberStory.errors.memberIdRequired'), 'error');
-      generatingStory.value = false;
-      return;
-    }
-
-    generatingStory.value = true;
-
-    const photoPersonsPayload: PhotoAnalysisPersonDto[] = memberStoryStore.faceRecognition.detectedFaces.map((face: DetectedFace) => ({
-      id: face.id,
-      memberId: face.memberId,
-      name: face.memberName,
-      emotion: face.emotion,
-      confidence: face.emotionConfidence,
-      relationPrompt: face.relationPrompt,
-    }));
-
-    const requestPayload = {
-      memberId: modelValue.value.memberId,
-      resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
-      rawText: modelValue.value.rawInput,
-      style: modelValue.value.storyStyle,
-      photoPersons: photoPersonsPayload,
-      perspective: modelValue.value.perspective,
-    } as GenerateStoryCommand;
-
-    const result = await memberStoryStore.generateStory(requestPayload);
-    if (result.ok) {
-      generatedStory.value = result.value.story;
-      generatedTitle.value = result.value.title;
-      updateModelValue({ story: generatedStory.value, title: generatedTitle.value });
-      onStoryGenerated({ story: generatedStory.value, title: generatedTitle.value });
-    } else {
-      showSnackbar(result.error?.message || t('memberStory.errors.storyGenerationFailed'), 'error');
-    }
-    generatingStory.value = false;
-  };
 
   watch(() => memberStoryStore.faceRecognition.error, (newError) => {
     if (newError) {
@@ -128,14 +61,14 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       // Clear previous face recognition state before new upload
       memberStoryStore.resetFaceRecognitionState(); 
       // Update photo for display to temporary URL
-      updateModelValue({ photo: URL.createObjectURL(uploadedFile) });
+      const temporaryUrl = URL.createObjectURL(uploadedFile);
 
       await memberStoryStore.detectFaces(uploadedFile, modelValue.value.familyId!, true);
       try {
         const img = await loadImage(uploadedFile);
         updateModelValue({
-          originalImageUrl: memberStoryStore.faceRecognition.originalImageUrl, // Get from store
-          resizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl, // Get from store
+          temporaryOriginalImageUrl: temporaryUrl,
+          temporaryResizedImageUrl: memberStoryStore.faceRecognition.resizedImageUrl,
           imageSize: `${img.width}x${img.height}`,
           detectedFaces: memberStoryStore.faceRecognition.detectedFaces, // Update detectedFaces
         });
@@ -147,9 +80,8 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
       memberStoryStore.resetFaceRecognitionState();
       updateModelValue({
         detectedFaces: [], // Clear detectedFaces
-        originalImageUrl: undefined,
-        resizedImageUrl: undefined,
-        photo: undefined,
+        temporaryOriginalImageUrl: undefined,
+        temporaryResizedImageUrl: undefined,
         imageSize: undefined,
         exifData: undefined,
       });
@@ -183,17 +115,9 @@ export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
     // State
     showSelectMemberDialog,
     faceToLabel,
-    aiPerspectiveSuggestions,
-    storyStyles,
-    generatedStory,
-    generatedTitle,
-    generatingStory,
-    storyEditorValid,
     hasUploadedImage,
     isLoading,
-    canGenerateStory,
     // Methods
-    generateStory,
     handleFileUpload,
     openSelectMemberDialog,
     handleLabelFaceAndCloseDialog,

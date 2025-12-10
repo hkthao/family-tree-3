@@ -24,7 +24,7 @@
       <v-col cols="12">
         <v-carousel v-if="modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0" cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
           <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
-            <v-img :src="image.imageUrl" cover class="fill-height"></v-img>
+            <v-img :src="image.imageUrl ?? ''" cover class="fill-height"></v-img>
           </v-carousel-item>
         </v-carousel>
         <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
@@ -33,7 +33,7 @@
       <v-col cols="12">
         <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
           <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
-            <FaceBoundingBoxViewer :image-src="modelValue.originalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''" :faces="modelValue.detectedFaces"
+            <FaceBoundingBoxViewer :image-src="modelValue.temporaryOriginalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''" :faces="modelValue.detectedFaces"
               selectable @face-selected="openSelectMemberDialog" />
             <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
               @remove-face="handleRemoveFace" />
@@ -60,7 +60,7 @@
       <v-col cols="12" sm="6">
         <v-checkbox
           :model-value="modelValue.isYearEstimated"
-          @update:model-value="(newValue) => { updateModelValue({ isYearEstimated: newValue }); }"
+          @update:model-value="(newValue) => { updateModelValue({ isYearEstimated: !!newValue }); }"
           :label="t('memberStory.form.isYearEstimatedLabel')"
           :readonly="readonly"
           class="mt-0 pt-0"

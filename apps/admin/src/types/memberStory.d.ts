@@ -40,6 +40,8 @@ export interface MemberStoryDto {
   memberAvatarUrl?: string | null;
   memberGender?: string | null;
   memberStoryImages?: MemberStoryImageDto[]; // Collection of images
+  temporaryOriginalImageUrl?: string | null;
+  temporaryResizedImageUrl?: string | null;
   createdAt?: string;
 }
 
