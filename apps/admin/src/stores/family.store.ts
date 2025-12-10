@@ -40,17 +40,13 @@ export const useFamilyStore = defineStore('family', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.family.loadItems(
+      const result = await this.services.family.search(
         {
-          ...this.list.filter,
-          sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
-          sortOrder:
-            this.list.sortBy.length > 0
-              ? (this.list.sortBy[0].order as 'asc' | 'desc')
-              : undefined,
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
         },
-        this.list.currentPage,
-        this.list.itemsPerPage,
+        this.list.filter
       );
 
       if (result.ok) {

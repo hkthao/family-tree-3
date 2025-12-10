@@ -31,6 +31,7 @@ import { ApiPromptService } from './prompt/api.prompt.service';
 import type { IFamilyLinkService } from './familyLink/familyLink.service.interface';
 import { ApiFamilyLinkService } from './familyLink/api.familyLink.service';
 import type { IFamilyLinkRequestService } from './familyLinkRequest/familyLinkRequest.service.interface';
+import { ApiFamilyLinkRequestService } from './familyLinkRequest/api.familyLinkRequest.service'; // ADD THIS IMPORT
 
 // NEW: Import for FamilyMediaService
 import type { IFamilyMediaService } from './family-media/family-media.service.interface';

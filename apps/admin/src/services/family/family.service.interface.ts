@@ -6,12 +6,6 @@ import type { AnalyzedDataDto } from '@/types/ai';
 import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store';
 
 export interface IFamilyService extends ICrudService<Family> {
-  loadItems(
-    filter: FamilyFilter,
-    page: number,
-    itemsPerPage: number
-  ): Promise<Result<Paginated<Family>, ApiError>>;
-  getByIds(ids: string[]): Promise<Result<Family[], ApiError>>;
   addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>>;
   exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>>;
   importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>;

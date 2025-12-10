@@ -767,8 +767,6 @@
   "menu.system": "Hệ thống",
   "menu.supportAndInfo": "Hỗ trợ & Thông tin",
   "menu.donate": "Ủng hộ tác giả",
-
-  // NEW: Family Media Translations
   "familyMedia.list.pageTitle": "Media Gia đình",
   "familyMedia.list.title": "Danh sách Media Gia đình",
   "familyMedia.list.createButton": "Tải lên Media mới",
@@ -830,8 +828,6 @@
   "familyMedia.viewer.videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
   "familyMedia.viewer.audioNotSupported": "Trình duyệt của bạn không hỗ trợ phần tử âm thanh.",
   "familyMedia.viewer.unsupportedMediaType": "Loại media không được hỗ trợ.",
-
-  // Common Media Types (for enums.ts)
   "common.mediaType.Image": "Hình ảnh",
   "common.mediaType.Video": "Video",
   "common.mediaType.Audio": "Âm thanh",

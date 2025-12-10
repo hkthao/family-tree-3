@@ -21,6 +21,7 @@ export interface MediaLink extends BaseAuditableEntity {
 
 export interface FamilyMediaFilter {
   searchQuery?: string;
+  familyId?: string; // Filter by family ID
   refId?: string; // Filter by linked entity ID
   refType?: RefType; // Filter by linked entity type
   mediaType?: MediaType; // Filter by media type

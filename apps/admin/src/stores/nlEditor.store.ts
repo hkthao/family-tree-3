@@ -15,9 +15,15 @@ export const useNLEditorStore = defineStore('nlEditor', {
     async searchMembers(searchQuery: string) {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.member.loadItems({
-        searchQuery,
-      }, 1, 10); // Search top 10
+      const result = await this.services.member.search(
+        {
+          page: 1,
+          itemsPerPage: 10,
+        },
+        {
+          searchQuery,
+        }
+      );
 
       if (result.ok) {
         this.list.items = result.value.items;

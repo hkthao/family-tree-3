@@ -55,13 +55,13 @@ export const useRelationshipStore = defineStore('relationship', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.relationship.loadItems({
-        ...this.list.filters,
-        sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
-        sortOrder: this.list.sortBy.length > 0 ? (this.list.sortBy[0].order as 'asc' | 'desc') : undefined,
-      },
-        this.list.currentPage,
-        this.list.itemsPerPage,
+      const result = await this.services.relationship.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+        },
+        this.list.filters
       );
 
       if (result.ok) {

@@ -614,8 +614,6 @@
   "menu.system": "System",
   "menu.supportAndInfo": "Support & Info",
   "menu.donate": "Donate",
-
-  // NEW: Family Media Translations
   "familyMedia.list.pageTitle": "Family Media",
   "familyMedia.list.title": "Family Media List",
   "familyMedia.list.createButton": "Upload New Media",
@@ -677,8 +675,6 @@
   "familyMedia.viewer.videoNotSupported": "Your browser does not support the video tag.",
   "familyMedia.viewer.audioNotSupported": "Your browser does not support the audio element.",
   "familyMedia.viewer.unsupportedMediaType": "Unsupported media type.",
-
-  // Common Media Types (for enums.ts)
   "common.mediaType.Image": "Image",
   "common.mediaType.Video": "Video",
   "common.mediaType.Audio": "Audio",

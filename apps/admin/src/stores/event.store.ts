@@ -42,11 +42,13 @@ export const useEventStore = defineStore('event', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.event.loadItems(
-        this.list.filters, // Use filters
-        this.list.currentPage,
-        this.list.itemsPerPage,
-        this.list.sortBy, // Pass sortBy
+      const result = await this.services.event.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy,
+        },
+        this.list.filters
       );
       if (result.ok) {
         this.list.items = result.value.items;

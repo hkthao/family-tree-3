@@ -1,25 +1,12 @@
 import {
   type Member,
-  type Result,
-  ok,
-  type MemberFilter,
-  type Paginated,
 } from '@/types';
-import type { IMemberService } from './member.service.interface'; // Import MemberFilter
+import type { Result } from '@/types';
+import type { IMemberService } from './member.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
+import { ApiCrudService } from '../common/api.crud.service';
 
-// Helper function to transform date strings to Date objects
-function transformMemberDates(member: any): Member {
-  if (member.dateOfBirth && typeof member.dateOfBirth === 'string') {
-    member.dateOfBirth = new Date(member.dateOfBirth);
-  }
-  if (member.dateOfDeath && typeof member.dateOfDeath === 'string') {
-    member.dateOfDeath = new Date(member.dateOfDeath);
-  }
-  return member;
-}
 
-// Helper function to transform Member object to API request format (lastName/firstName to fullName)
 function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   const apiMember: any = { ...member };
 
@@ -32,38 +19,27 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   return apiMember;
 }
 
-export class ApiMemberService implements IMemberService {
-  constructor(private http: ApiClientMethods) {}
+export class ApiMemberService extends ApiCrudService<Member> implements IMemberService {
+  constructor(protected http: ApiClientMethods) {
+    super(http, '/member');
+  }
 
   async fetchMembersByFamilyId(
     familyId: string,
   ): Promise<Result<Member[], ApiError>> {
-    const result = await this.http.get<Member[]>(
+    return await this.http.get<Member[]>(
       `/member/by-family/${familyId}`,
     );
-    if (result.ok) {
-      return ok(result.value.map((m) => transformMemberDates(m)));
-    }
-    return result;
   }
 
   async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
-    // Renamed from getMemberById
-    const result = await this.http.get<Member>(`/member/${id}`);
-    if (result.ok) {
-      return ok(result.value ? transformMemberDates(result.value) : undefined);
-    }
-    return result;
+
+    return await this.http.get<Member>(`/member/${id}`);
   }
 
   async add(newItem: Member): Promise<Result<Member, ApiError>> {
-    // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
-    const result = await this.http.post<Member>(`/member`, apiMember);
-    if (result.ok) {
-      return ok(transformMemberDates(result.value));
-    }
-    return result;
+    return await this.http.post<Member>(`/member`, apiMember);
   }
 
   async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
@@ -72,62 +48,15 @@ export class ApiMemberService implements IMemberService {
   }
 
   async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
-    // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);
-    const result = await this.http.put<Member>(
+    return await this.http.put<Member>(
       `/member/${updatedItem.id}`,
       apiMember,
     );
-    if (result.ok) {
-      return ok(transformMemberDates(result.value));
-    }
-    return result;
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    // Renamed from deleteMember
     return this.http.delete<void>(`/member/${id}`);
-  }
-
-  async loadItems(
-    filters: MemberFilter,
-    page: number,
-    itemsPerPage: number,
-  ): Promise<Result<Paginated<Member>, ApiError>> {
-    const params = new URLSearchParams();
-    if (filters.gender) params.append('gender', filters.gender);
-    if (filters.familyId) params.append('familyId', filters.familyId);
-    if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
-    if (filters.sortBy) params.append('sortBy', filters.sortBy);
-    if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-
-    // Add pagination parameters
-    params.append('page', page.toString());
-    params.append('itemsPerPage', itemsPerPage.toString());
-
-    const result = await this.http.get<Paginated<Member>>(
-      `/member/search?${params.toString()}`,
-    );
-
-    if (result.ok) {
-      // Assuming the API returns a Paginated object with items, totalItems, totalPages
-      // The items in the response might need date transformation
-      result.value.items = result.value.items.map(transformMemberDates);
-      return ok(result.value);
-    }
-    return result;
-  }
-
-  async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    const params = new URLSearchParams();
-    params.append('ids', ids.join(','));
-    const result = await this.http.get<Member[]>(
-      `/member/by-ids?${params.toString()}`,
-    );
-    if (result.ok) {
-      return ok(result.value.map((m) => transformMemberDates(m)));
-    }
-    return result;
   }
 
   async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
@@ -136,10 +65,6 @@ export class ApiMemberService implements IMemberService {
   }
 
   async getRelatives(memberId: string): Promise<Result<Member[], ApiError>> {
-    const result = await this.http.get<Member[]>(`/member/${memberId}/relatives`);
-    if (result.ok) {
-      return ok(result.value.map((m) => transformMemberDates(m)));
-    }
-    return result;
+    return await this.http.get<Member[]>(`/member/${memberId}/relatives`);
   }
 }

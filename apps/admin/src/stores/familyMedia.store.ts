@@ -1,11 +1,9 @@
 import { defineStore } from 'pinia';
-import { container } from 'tsyringe';
-import { Services } from '@/services/service.factory';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
-import type { FamilyMedia, MediaLink, FamilyMediaFilter, PaginatedList, ListOptions, RefType } from '@/types';
+import type { FamilyMedia, MediaLink, FamilyMediaFilter, ListOptions, RefType } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
-import { Result } from '@/types/result'; // Import Result
+import { err } from '@/types'; // Import Result, ok, err
 
 export const useFamilyMediaStore = defineStore('familyMedia', {
   state: () => ({
@@ -35,7 +33,7 @@ export const useFamilyMediaStore = defineStore('familyMedia', {
   }),
   getters: {
     familyMediaService(): IFamilyMediaService {
-      return container.resolve(Services.FamilyMedia);
+      return this.services.familyMedia;
     },
     // Add any specific getters here if needed
   },
@@ -58,164 +56,167 @@ export const useFamilyMediaStore = defineStore('familyMedia', {
             showSnackbar(this.list.error, 'error');
             return;
         }
-        const result = await this.familyMediaService.getFamilyMediaList(
-          this.list.filters.familyId,
-          {
-            searchQuery: this.list.filters.searchQuery,
-            refId: this.list.filters.refId,
-            refType: this.list.filters.refType,
-            mediaType: this.list.filters.mediaType,
-            page: this.list.page,
-            itemsPerPage: this.list.itemsPerPage,
-            sortBy: this.list.sortBy ? this.list.sortBy.map(s => `${s.key} ${s.order}`).join(',') : undefined,
-          }
-        );
+                const result = await this.familyMediaService.search(
+                  this.list.filters.familyId,
+                  {
+                    searchQuery: this.list.filters.searchQuery,
+                    refId: this.list.filters.refId,
+                    refType: this.list.filters.refType,
+                    mediaType: this.list.filters.mediaType,
+                  },
+                  this.list.page,
+                  this.list.itemsPerPage,
+                  this.list.sortBy,
+                );
+        
+                if (result.ok) {
+                  this.list.items = result.value.items;
+                  this.list.totalItems = result.value.totalItems;
+                  this.list.page = result.value.page;
 
-        if (result.isSuccess) {
-          this.list.items = result.value.items;
-          this.list.totalItems = result.value.totalItems;
-          this.list.page = result.value.page;
-          this.list.itemsPerPage = result.value.itemsPerPage;
-        } else {
-          this.list.error = result.error?.message || t('familyMedia.errors.loadList');
-          showSnackbar(this.list.error, 'error');
-        }
-      } catch (error: any) {
-        this.list.error = error.message || t('familyMedia.errors.loadList');
-        showSnackbar(this.list.error, 'error');
-      } finally {
-        this.list.loading = false;
-      }
-    },
-
-    async getById(familyId: string, id: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.detail.loading = true;
-      this.detail.error = null;
-      try {
-        const result = await this.familyMediaService.getFamilyMediaById(familyId, id);
-        if (result.isSuccess) {
-          this.detail.item = result.value;
-        } else {
-          this.detail.error = result.error?.message || t('familyMedia.errors.loadDetail');
-          showSnackbar(this.detail.error, 'error');
-        }
-      } catch (error: any) {
-        this.detail.error = error.message || t('familyMedia.errors.loadDetail');
-        showSnackbar(this.detail.error, 'error');
-      } finally {
-        this.detail.loading = false;
-      }
-    },
-
-    async createFamilyMedia(familyId: string, file: File, description?: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.isUploading = true;
-      this.uploadProgress = 0;
-      try {
-        const result = await this.familyMediaService.createFamilyMedia(familyId, file, description);
-        if (result.isSuccess) {
-          showSnackbar(t('familyMedia.messages.uploadSuccess'), 'success');
-          this._loadItems(); // Refresh list after upload
-          return result;
-        } else {
-          showSnackbar(result.error?.message || t('familyMedia.errors.upload'), 'error');
-          return result;
-        }
-      } catch (error: any) {
-        showSnackbar(error.message || t('familyMedia.errors.upload'), 'error');
-        return Result.failure(new Error(error.message));
-      } finally {
-        this.isUploading = false;
-        this.uploadProgress = 0;
-      }
-    },
-
-    async deleteFamilyMedia(familyId: string, id: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.list.loading = true; // Use list loading for deletion too
-      try {
-        const result = await this.familyMediaService.deleteFamilyMedia(familyId, id);
-        if (result.isSuccess) {
-          showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
-          this._loadItems(); // Reload list after deletion
-        } else {
-          showSnackbar(result.error?.message || t('familyMedia.errors.delete'), 'error');
-        }
-      } catch (error: any) {
-        showSnackbar(error.message || t('familyMedia.errors.delete'), 'error');
-      } finally {
-        this.list.loading = false;
-      }
-    },
-
-    async linkMediaToEntity(familyId: string, familyMediaId: string, refType: RefType, refId: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.mediaLinks.loading = true;
-      try {
-        const result = await this.familyMediaService.linkMediaToEntity(familyId, familyMediaId, refType, refId);
-        if (result.isSuccess) {
-          showSnackbar(t('familyMedia.messages.linkSuccess'), 'success');
-          this.getMediaLinksByRefId(familyId, refType, refId); // Refresh links
-          return result;
-        } else {
-          showSnackbar(result.error?.message || t('familyMedia.errors.link'), 'error');
-          return result;
-        }
-      } catch (error: any) {
-        showSnackbar(error.message || t('familyMedia.errors.link'), 'error');
-        return Result.failure(new Error(error.message));
-      } finally {
-        this.mediaLinks.loading = false;
-      }
-    },
-
-    async unlinkMediaFromEntity(familyId: string, familyMediaId: string, refType: RefType, refId: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.mediaLinks.loading = true;
-      try {
-        const result = await this.familyMediaService.unlinkMediaFromEntity(familyId, familyMediaId, refType, refId);
-        if (result.isSuccess) {
-          showSnackbar(t('familyMedia.messages.unlinkSuccess'), 'success');
-          this.getMediaLinksByRefId(familyId, refType, refId); // Refresh links
-          return result;
-        } else {
-          showSnackbar(result.error?.message || t('familyMedia.errors.unlink'), 'error');
-          return result;
-        }
-      } catch (error: any) {
-        showSnackbar(error.message || t('familyMedia.errors.unlink'), 'error');
-        return Result.failure(new Error(error.message));
-      } finally {
-        this.mediaLinks.loading = false;
-      }
-    },
-
-    async getMediaLinksByRefId(familyId: string, refType: RefType, refId: string) {
-      const { showSnackbar } = useGlobalSnackbar();
-      const { t } = useI18n();
-      this.mediaLinks.loading = true;
-      this.mediaLinks.error = null;
-      try {
-        const result = await this.familyMediaService.getMediaLinksByRefId(familyId, refType, refId);
-        if (result.isSuccess) {
-          this.mediaLinks.items = result.value;
-        } else {
-          this.mediaLinks.error = result.error?.message || t('familyMedia.errors.loadLinks');
-          showSnackbar(this.mediaLinks.error, 'error');
-        }
-      } catch (error: any) {
-        this.mediaLinks.error = error.message || t('familyMedia.errors.loadLinks');
-        showSnackbar(this.mediaLinks.error, 'error');
-      } finally {
-        this.mediaLinks.loading = false;
-      }
-    },
+                } else {
+                  this.list.error = result.error.message || t('familyMedia.errors.loadList');
+                  showSnackbar(this.list.error ?? '', 'error');
+                }
+              } catch (error: any) {
+                this.list.error = error.message || t('familyMedia.errors.loadList');
+                showSnackbar(this.list.error ?? '', 'error');
+              } finally {
+                this.list.loading = false;
+              }
+            },
+        
+            async getById(familyId: string, id: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.detail.loading = true;
+              this.detail.error = null;
+              try {
+                const result = await this.familyMediaService.getById(familyId, id);
+                if (result.ok) {
+                  this.detail.item = result.value;
+                } else {
+                  this.detail.error = result.error.message || t('familyMedia.errors.loadDetail');
+                  showSnackbar(this.detail.error ?? '', 'error');
+                }
+              } catch (error: any) {
+                this.detail.error = error.message || t('familyMedia.errors.loadDetail');
+                showSnackbar(this.detail.error ?? '', 'error');
+              }
+              finally {
+                this.detail.loading = false;
+              }
+            },
+        
+            async createFamilyMedia(familyId: string, file: File, description?: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.isUploading = true;
+              this.uploadProgress = 0;
+              try {
+                const result = await this.familyMediaService.create(familyId, file, description);
+                if (result.ok) {
+                  showSnackbar(t('familyMedia.messages.uploadSuccess'), 'success');
+                  this._loadItems(); // Refresh list after upload
+                  return result;
+                } else {
+                  showSnackbar(result.error.message || t('familyMedia.errors.upload'), 'error');
+                  return result;
+                }
+              } catch (error: any) {
+                showSnackbar(error.message || t('familyMedia.errors.upload'), 'error');
+                return err(new Error(error.message)); // Wrap in Result.err for consistency
+              } finally {
+                this.isUploading = false;
+                this.uploadProgress = 0;
+              }
+            },
+        
+            async deleteFamilyMedia(familyId: string, id: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.list.loading = true; // Use list loading for deletion too
+              try {
+                const result = await this.familyMediaService.delete(familyId, id);
+                if (result.ok) {
+                  showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
+                  this._loadItems(); // Reload list after deletion
+                } else {
+                  showSnackbar(result.error.message || t('familyMedia.errors.delete'), 'error');
+                }
+              } catch (error: any) {
+                showSnackbar(error.message || t('familyMedia.errors.delete'), 'error');
+              }
+              finally {
+                this.list.loading = false;
+              }
+            },
+        
+            async linkMediaToEntity(familyId: string, familyMediaId: string, refType: RefType, refId: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.mediaLinks.loading = true;
+              try {
+                const result = await this.familyMediaService.linkMediaToEntity(familyId, familyMediaId, String(refType), refId);
+                if (result.ok) {
+                  showSnackbar(t('familyMedia.messages.linkSuccess'), 'success');
+                  this.getMediaLinksByRefId(familyId, refType, refId); // Refresh links
+                  return result;
+                } else {
+                  showSnackbar(result.error.message || t('familyMedia.errors.link'), 'error');
+                  return result;
+                }
+              } catch (error: any) {
+                showSnackbar(error.message || t('familyMedia.errors.link'), 'error');
+                return err(new Error(error.message));
+              } finally {
+                this.mediaLinks.loading = false;
+              }
+            },
+        
+            async unlinkMediaFromEntity(familyId: string, familyMediaId: string, refType: RefType, refId: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.mediaLinks.loading = true;
+              try {
+                const result = await this.familyMediaService.unlinkMediaFromEntity(familyId, familyMediaId, String(refType), refId);
+                if (result.ok) {
+                  showSnackbar(t('familyMedia.messages.unlinkSuccess'), 'success');
+                  this.getMediaLinksByRefId(familyId, refType, refId); // Refresh links
+                  return result;
+                } else {
+                  showSnackbar(result.error.message || t('familyMedia.errors.unlink'), 'error');
+                  return result;
+                }
+              } catch (error: any) {
+                showSnackbar(error.message || t('familyMedia.errors.unlink'), 'error');
+                return err(new Error(error.message));
+              } finally {
+                this.mediaLinks.loading = false;
+              }
+            },
+        
+            async getMediaLinksByRefId(familyId: string, refType: RefType, refId: string) {
+              const { showSnackbar } = useGlobalSnackbar();
+              const { t } = useI18n();
+              this.mediaLinks.loading = true;
+              this.mediaLinks.error = null;
+              try {
+                const result = await this.familyMediaService.getMediaLinksByRefId(familyId, String(refType), refId);
+                if (result.ok) {
+                  this.mediaLinks.items = result.value;
+                } else {
+                  this.mediaLinks.error = result.error.message || t('familyMedia.errors.loadLinks');
+                  showSnackbar(this.mediaLinks.error ?? '', 'error');
+                }
+              } catch (error: any) {
+                this.mediaLinks.error = error.message || t('familyMedia.errors.loadLinks');
+                showSnackbar(this.mediaLinks.error ?? '', 'error');
+              }
+              finally {
+                this.mediaLinks.loading = false;
+              }
+            },
 
     clearDetail() {
       this.detail.item = null;

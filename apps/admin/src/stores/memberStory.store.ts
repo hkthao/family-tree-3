@@ -5,7 +5,7 @@ import type { MemberStoryDto } from '@/types/memberStory';
 import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
-import type { CreateMemberStory } from '@/types/memberStory';
+
 
 export interface MemberStoryFaceState {
   uploadedImage: string | null;
@@ -85,15 +85,16 @@ export const useMemberStoryStore = defineStore('memberStory', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.memberStory.loadItems(
+      const result = await this.services.memberStory.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+        },
         {
           memberId: this.list.filters.memberId,
           searchQuery: this.list.filters.searchQuery,
-          sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
-          sortOrder: this.list.sortBy.length > 0 ? (this.list.sortBy[0].order as 'asc' | 'desc') : undefined,
-        },
-        this.list.currentPage,
-        this.list.itemsPerPage,
+        }
       );
 
       if (result.ok) {
@@ -110,7 +111,7 @@ export const useMemberStoryStore = defineStore('memberStory', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: CreateMemberStory): Promise<Result<MemberStoryDto, ApiError>> {
+    async addItem(newItem: MemberStoryDto): Promise<Result<MemberStoryDto, ApiError>> {
       this.add.loading = true;
       this.error = null;
       const result = await this.services.memberStory.add(newItem);

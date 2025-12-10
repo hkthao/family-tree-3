@@ -49,11 +49,11 @@ const handleAddFamilyMedia = async () => {
 
   try {
     const result = await familyMediaStore.createFamilyMedia(props.familyId, formData.file, formData.description);
-    if (result.isSuccess) {
+    if (result.ok) {
       showSnackbar(t('familyMedia.messages.addSuccess'), 'success');
       emit('saved');
     } else {
-      showSnackbar(result.error?.message || t('familyMedia.messages.saveError'), 'error');
+      showSnackbar(result.error.message || t('familyMedia.messages.saveError'), 'error');
     }
   } catch (error) {
     showSnackbar(t('familyMedia.messages.saveError'), 'error');

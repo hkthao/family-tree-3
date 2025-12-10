@@ -57,14 +57,15 @@ export const usePromptStore = defineStore('prompt', {
       this.error = null;
       const filters: PromptFilter = {
         searchQuery: this.list.filters.searchQuery,
-        sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
-        sortOrder: this.list.sortBy.length > 0 ? (this.list.sortBy[0].order as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.services.prompt.getPaginated(
-        filters,
-        this.list.currentPage,
-        this.list.itemsPerPage,
+      const result = await this.services.prompt.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy,
+        },
+        filters
       );
 
       if (result.ok) {
@@ -83,7 +84,7 @@ export const usePromptStore = defineStore('prompt', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: Omit<Prompt, 'id'>): Promise<Result<string, ApiError>> {
+    async addItem(newItem: Omit<Prompt, 'id'>): Promise<Result<Prompt, ApiError>> {
       this.add.loading = true;
       this.error = null;
       const result = await this.services.prompt.add(newItem);
@@ -97,7 +98,7 @@ export const usePromptStore = defineStore('prompt', {
       return result;
     },
 
-    async updateItem(updatedItem: Prompt): Promise<Result<void, ApiError>> {
+    async updateItem(updatedItem: Prompt): Promise<Result<Prompt, ApiError>> {
       this.update.loading = true;
       this.error = null;
       const result = await this.services.prompt.update(updatedItem);
@@ -143,10 +144,10 @@ export const usePromptStore = defineStore('prompt', {
       this.detail.item = item;
     },
 
-    async getById(id: string, code?: string): Promise<Prompt | undefined> {
+    async getById(id: string): Promise<Prompt | undefined> {
       this.detail.loading = true;
       this.error = null;
-      const result = await this.services.prompt.getById(id, code);
+      const result = await this.services.prompt.getById(id);
       this.detail.loading = false;
       if (result.ok) {
         if (result.value) {

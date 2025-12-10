@@ -3,7 +3,7 @@ import { useChatStore } from '@/stores/chat.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatResponse } from '@/types';
 import { createServices } from '@/services/service.factory';
-import { ok } from '@/types/result.d';
+import { ok } from '@/types';
 
 // Mock the IChatService
 const mockSendMessage = vi.fn();

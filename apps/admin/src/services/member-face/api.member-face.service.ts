@@ -1,60 +1,12 @@
-import type { MemberFace, MemberFaceFilter, Paginated, Result, FaceDetectionRessult } from '@/types';
+import type { MemberFace, FaceDetectionRessult } from '@/types'; 
+import type { Result } from '@/types'; 
 import type { IMemberFaceService } from './member-face.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok } from '@/types'; 
+import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiMemberFaceService implements IMemberFaceService {
-  constructor(private http: ApiClientMethods) {}
-
-  async getById(id: string): Promise<Result<MemberFace | undefined, ApiError>> {
-    const result = await this.http.get<MemberFace>(`/member-faces/${id}`);
-    if (result.ok) {
-        return ok(result.value || undefined);
-    }
-    return result; 
-  }
-
-  async add(newItem: Omit<MemberFace, 'id'>): Promise<Result<MemberFace, ApiError>> {
-    return await this.http.post<MemberFace>(`/member-faces`, newItem);
-  }
-
-  async update(updatedItem: MemberFace): Promise<Result<MemberFace, ApiError>> {
-    return await this.http.put<MemberFace>(`/member-faces/${updatedItem.id}`, updatedItem);
-  }
-
-  async delete(id: string): Promise<Result<void, ApiError>> {
-    return await this.http.delete<void>(`/member-faces/${id}`);
-  }
-
-  async loadItems(
-    filters: MemberFaceFilter,
-    page: number,
-    itemsPerPage: number,
-    sortBy?: string,
-    sortOrder?: 'asc' | 'desc',
-  ): Promise<Result<Paginated<MemberFace>, ApiError>> {
-    const params = new URLSearchParams();
-    if (filters.memberId) params.append('memberId', filters.memberId);
-    if (filters.familyId) params.append('familyId', filters.familyId);
-    if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
-    if (filters.emotion) params.append('emotion', filters.emotion);
-    if (sortBy) params.append('sortBy', sortBy);
-    if (sortOrder) params.append('sortOrder', sortOrder);
-
-    params.append('page', page.toString());
-    params.append('itemsPerPage', itemsPerPage.toString());
-
-    return await this.http.get<Paginated<MemberFace>>(
-      `/member-faces/search?${params.toString()}`,
-    );
-  }
-
-  async getByIds(ids: string[]): Promise<Result<MemberFace[], ApiError>> {
-    const params = new URLSearchParams();
-    params.append('ids', ids.join(','));
-    return await this.http.get<MemberFace[]>(
-      `/member-faces/by-ids?${params.toString()}`,
-    );
+export class ApiMemberFaceService extends ApiCrudService<MemberFace>  implements IMemberFaceService {
+   constructor(protected http: ApiClientMethods) {
+    super(http, '/member-faces');
   }
 
   async detect(

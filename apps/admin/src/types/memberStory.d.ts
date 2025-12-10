@@ -42,19 +42,3 @@ export interface MemberStoryDto {
   temporaryResizedImageUrl?: string | null;
   createdAt?: string;
 }
-
-// Matches backend.Application.MemberStories.Commands.CreateMemberStory.CreateMemberStoryCommand
-export interface CreateMemberStory {
-  familyId?: string;
-  memberId: string;
-  title?: string | null;
-  story?: string | null;
-  year?: number | null;
-  timeRangeDescription?: string | null;
-  lifeStage?: LifeStage | null;
-  location?: string | null;
-  storytellerId?: string | null;
-  detectedFaces?: DetectedFace[];
-  temporaryOriginalImageUrl?: string | null;
-  temporaryResizedImageUrl?: string | null;
-}

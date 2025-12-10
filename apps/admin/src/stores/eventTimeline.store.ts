@@ -37,11 +37,13 @@ export const useEventTimelineStore = defineStore('eventTimeline', {
       this.error = null;
       // const eventService = useEventService(); // Remove this line
 
-      const result = await this.services.event.loadItems( // Use this.services.event
-        this.list.filters,
-        this.list.currentPage,
-        this.list.itemsPerPage,
-        this.list.sortBy,
+      const result = await this.services.event.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy,
+        },
+        this.list.filters
       );
 
       if (result.ok) {

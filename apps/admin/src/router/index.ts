@@ -24,7 +24,6 @@ import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 import { chatRoutes } from './features/chat.routes'; // New
 import { promptRoutes } from './features/prompt.routes'; // New
 import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
-import { familyMediaRoutes } from './features/family-media.routes'; // NEW: Import family media routes
 
 const router = createRouter({
   history: createWebHistory(getEnvVariable('BASE_URL')),
@@ -48,7 +47,6 @@ const router = createRouter({
         ...chatRoutes, // New
         ...promptRoutes, // New
         ...relationshipDetectionRoutes, // NEW
-        ...familyMediaRoutes, // NEW: Add family media routes
       ],
     },
     ...publicRoutes, // Replaced

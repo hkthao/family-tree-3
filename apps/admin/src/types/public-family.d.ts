@@ -1,12 +1,6 @@
 // apps/admin/src/types/public-family.d.ts
 import type { BaseAuditableDto } from './common-dto';
 
-export enum FamilyRole {
-  Manager = 0,
-  Viewer = 1,
-  Admin = 2,
-}
-
 export interface FamilyUserDto {
   familyId: string;
   userId: string;

@@ -53,6 +53,11 @@
           <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
 
+        <!-- NEW: Family Media Tab -->
+        <v-window-item value="family-media">
+          <FamilyMediaListView :family-id="familyId" />
+        </v-window-item>
+
         <!-- Family Link Requests and Linking are commented out in original, keeping them as-is -->
         <!-- <v-window-item v-if="canManageFamily" value="family-link-requests">
           <FamilyLinkRequestsListView :family-id="familyId" />
@@ -84,6 +89,7 @@ import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 // import FamilyLinkListView from '@/views/family-link/FamilyLinkListView.vue';
 // import FamilyLinkRequestsListView from '@/views/family-link-requests/FamilyLinkRequestsListView.vue';
 import { useAuth } from '@/composables/useAuth';
+import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue'; // NEW: Import FamilyMediaListView
 
 const { t } = useI18n();
 const route = useRoute();
@@ -116,6 +122,7 @@ const allTabDefinitions = computed(() => [
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
+  { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean }, // NEW: Family Media Tab
   // Keeping commented out tabs as they were in the original file
   // { value: 'family-link-requests', text: t('familyLinkRequest.list.title'), condition: canManageFamily.value as boolean },
   // { value: 'family-linking', text: t('familyLink.list.title'), condition: canManageFamily.value as boolean },

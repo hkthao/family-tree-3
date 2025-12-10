@@ -23,7 +23,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import type { MemberStoryDto } from '@/types/memberStory';
-import type { CreateMemberStory } from '@/types/memberStory';
+
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';
 import { LifeStage } from '@/types/enums';
 
@@ -50,7 +50,7 @@ const editedMemberStory = ref<MemberStoryDto>({
   location: null,
   storytellerId: null,
   detectedFaces: [],
-  memberStoryImages: [],
+
 });
 
 const handleSave = async () => {
@@ -61,7 +61,7 @@ const handleSave = async () => {
 
   isSaving.value = true;
   try {
-    const createPayload: CreateMemberStory = {
+    const createPayload: Omit<MemberStoryDto, 'id'> = {
       memberId: editedMemberStory.value.memberId,
       title: editedMemberStory.value.title,
       story: editedMemberStory.value.story,

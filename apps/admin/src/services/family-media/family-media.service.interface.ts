@@ -1,13 +1,18 @@
-import type { Result } from '@/types/result';
+import type { Result } from '@/types';
 import type { PaginatedList, FamilyMedia, MediaLink, FamilyMediaFilter } from '@/types';
-import type { AxiosInstance } from 'axios'; // Assuming Axios is used by ApiClientMethods
 
 export interface IFamilyMediaService {
-  getFamilyMediaList(familyId: string, filters: FamilyMediaFilter): Promise<Result<PaginatedList<FamilyMedia>>>;
-  getFamilyMediaById(familyId: string, id: string): Promise<Result<FamilyMedia>>;
-  createFamilyMedia(familyId: string, file: File, description?: string): Promise<Result<string>>; // Returns ID of created media
-  deleteFamilyMedia(familyId: string, id: string): Promise<Result<boolean>>;
-  linkMediaToEntity(familyId: string, familyMediaId: string, refType: string, refId: string): Promise<Result<string>>; // Returns ID of MediaLink
+  search(
+    familyId: string,
+    filters: FamilyMediaFilter,
+    page?: number,
+    itemsPerPage?: number,
+    sortBy?: { key: string; order: string }[],
+  ): Promise<Result<PaginatedList<FamilyMedia>>>;
+  getById(familyId: string, id: string): Promise<Result<FamilyMedia>>;
+  create(familyId: string, file: File, description?: string): Promise<Result<string>>; 
+  delete(familyId: string, id: string): Promise<Result<boolean>>;
+  linkMediaToEntity(familyId: string, familyMediaId: string, refType: string, refId: string): Promise<Result<string>>; 
   unlinkMediaFromEntity(familyId: string, familyMediaId: string, refType: string, refId: string): Promise<Result<boolean>>;
   getMediaLinksByFamilyMediaId(familyId: string, familyMediaId: string): Promise<Result<MediaLink[]>>;
   getMediaLinksByRefId(familyId: string, refType: string, refId: string): Promise<Result<MediaLink[]>>;

@@ -54,10 +54,12 @@ export const useEventCalendarStore = defineStore('eventCalendar', {
       const page = 1;
       const itemsPerPage = 100; // Default to 100 instead of fetching all
 
-      const result = await this.services.event.loadItems(
-        filters,
-        page,
-        itemsPerPage, // This is where 100 is used
+      const result = await this.services.event.search(
+        {
+          page: page,
+          itemsPerPage: itemsPerPage,
+        },
+        filters
       );
 
       if (result.ok) {

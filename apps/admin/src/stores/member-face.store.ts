@@ -43,12 +43,13 @@ export const useMemberFaceStore = defineStore('memberFace', {
       this.list.loading = true;
       this.list.error = null;
       // Access service via this.services
-      const result = await this.services.memberFace.loadItems(
-        this.list.filters,
-        this.list.options.page,
-        this.list.options.itemsPerPage,
-        this.list.options.sortBy.length > 0 ? this.list.options.sortBy[0].key : undefined,
-        this.list.options.sortOrder === '' ? undefined : this.list.options.sortOrder // Pass undefined if empty
+      const result = await this.services.memberFace.search(
+        {
+          page: this.list.options.page,
+          itemsPerPage: this.list.options.itemsPerPage,
+          sortBy: this.list.options.sortBy.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+        },
+        this.list.filters
       );
 
       if (result.ok) {

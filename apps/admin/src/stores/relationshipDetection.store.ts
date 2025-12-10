@@ -22,8 +22,17 @@ export const useRelationshipDetectionStore = defineStore('relationshipDetection'
       try {
         const { relationship } = useServices(); // Get the relationship service
         const response = await relationship.detectRelationship(familyId, memberAId, memberBId);
-        this.result = response;
-        return response;
+
+        if (response && response.ok) {
+          this.result = response.value;
+          return response.value;
+        } else if (response && !response.ok) {
+          this.error = response.error?.message || 'Lỗi khi xác định quan hệ.';
+          return null;
+        } else { // response is null
+          this.error = 'Không thể xác định quan hệ.';
+          return null;
+        }
       } catch (err: any) {
         this.error = err.message || 'Lỗi khi xác định quan hệ.';
         return null;
