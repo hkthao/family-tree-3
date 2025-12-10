@@ -3,7 +3,7 @@ import type { ApiError } from "@/plugins/axios";
 import type { ICrudService } from "../common/crud.service.interface";
 import type { FamilyExportDto, IFamilyAccess, GenerateFamilyDataCommand } from '@/types/family';
 import type { AnalyzedDataDto } from '@/types/ai';
-import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store';
+import type { PrivacyConfiguration } from '@/types';
 
 export interface IFamilyService extends ICrudService<Family> {
   addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>>;

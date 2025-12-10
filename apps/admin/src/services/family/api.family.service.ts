@@ -8,7 +8,7 @@ import {
   type AnalyzedDataDto,
 } from '@/types';
 import type { Result } from '@/types';
-import type { PrivacyConfiguration } from '@/stores/privacy-configuration.store';
+import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
 import { ApiCrudService } from '../common/api.crud.service';
 
 export class ApiFamilyService extends ApiCrudService<Family> implements IFamilyService {
