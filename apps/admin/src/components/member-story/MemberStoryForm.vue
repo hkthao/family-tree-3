@@ -58,24 +58,6 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" sm="6">
-        <v-checkbox
-          :model-value="modelValue.isYearEstimated"
-          @update:model-value="(newValue) => { updateModelValue({ isYearEstimated: !!newValue }); }"
-          :label="t('memberStory.form.isYearEstimatedLabel')"
-          :readonly="readonly"
-          class="mt-0 pt-0"
-        ></v-checkbox>
-      </v-col>
-      <v-col cols="12">
-        <v-text-field
-          :model-value="modelValue.timeRangeDescription"
-          @update:model-value="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
-          :label="t('memberStory.form.timeRangeDescriptionLabel')"
-          :readonly="readonly"
-          :rules="[rules.timeRangeDescription.maxLength]"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="6">
         <v-select
           :model-value="modelValue.lifeStage"
           @update:model-value="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
@@ -87,17 +69,14 @@
           :rules="[rules.lifeStage.required]"
         ></v-select>
       </v-col>
-      <v-col cols="12" sm="6">
-        <v-select
-          :model-value="modelValue.certaintyLevel"
-          @update:model-value="(newValue) => { updateModelValue({ certaintyLevel: newValue }); }"
-          :label="t('memberStory.form.certaintyLevelLabel')"
-          :items="certaintyLevelOptions"
-          item-title="text"
-          item-value="value"
+      <v-col cols="12">
+        <v-text-field
+          :model-value="modelValue.timeRangeDescription"
+          @update:model-value="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
+          :label="t('memberStory.form.timeRangeDescriptionLabel')"
           :readonly="readonly"
-          :rules="[rules.certaintyLevel.required]"
-        ></v-select>
+          :rules="[rules.timeRangeDescription.maxLength]"
+        ></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-text-field
@@ -166,10 +145,6 @@ const lifeStageOptions = computed(() => [
   { value: LifeStage.Deceased, text: t('lifeStage.deceased') },
 ]);
 
-const certaintyLevelOptions = computed(() => [
-  { value: CertaintyLevel.Sure, text: t('certaintyLevel.sure') },
-  { value: CertaintyLevel.Estimated, text: t('certaintyLevel.estimated') },
-]);
 
 // Validation refs
 const familyIdValid = ref(false);
@@ -177,7 +152,6 @@ const memberIdValid = ref(false);
 const titleValid = ref(false);
 const storyValid = ref(false);
 const lifeStageValid = ref(false);
-const certaintyLevelValid = ref(false);
 
 const rules = {
   familyId: {
@@ -204,9 +178,6 @@ const rules = {
   location: {
     maxLength: (value: string | null) => !value || value.length <= 200 || t('common.validations.maxLength', { length: 200 }),
   },
-  certaintyLevel: {
-    required: (value: CertaintyLevel | null) => value !== null || t('common.validations.required'),
-  },
 };
 
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
@@ -228,13 +199,10 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   if (payload.lifeStage !== undefined) {
     lifeStageValid.value = !!rules.lifeStage.required(newModelValue.lifeStage ?? null);
   }
-  if (payload.certaintyLevel !== undefined) {
-    certaintyLevelValid.value = !!rules.certaintyLevel.required(newModelValue.certaintyLevel ?? null);
-  }
 };
 
 const formValid = computed(() => {
-  return familyIdValid.value && memberIdValid.value && titleValid.value && storyValid.value && lifeStageValid.value && certaintyLevelValid.value;
+  return familyIdValid.value && memberIdValid.value && titleValid.value && storyValid.value && lifeStageValid.value;
 });
 
 const {

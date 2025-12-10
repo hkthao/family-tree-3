@@ -7,11 +7,6 @@ export enum LifeStage {
   Deceased = 6,
 }
 
-export enum CertaintyLevel {
-  Sure = 1,
-  Estimated = 2,
-}
-
 export enum FamilyRole {
   Viewer = 1,
   Manager = 2,

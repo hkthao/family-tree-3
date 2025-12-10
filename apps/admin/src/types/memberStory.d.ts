@@ -26,11 +26,9 @@ export interface MemberStoryDto {
   story?: string | null;
   year?: number | null;
   timeRangeDescription?: string | null;
-  isYearEstimated?: boolean;
   lifeStage?: LifeStage | null;
   location?: string | null;
   storytellerId?: string | null;
-  certaintyLevel?: CertaintyLevel | null;
   detectedFaces?: DetectedFace[];
   photo?: string | null;
   imageSize?: string | null;
@@ -53,11 +51,9 @@ export interface CreateMemberStory {
   story?: string | null;
   year?: number | null;
   timeRangeDescription?: string | null;
-  isYearEstimated?: boolean;
   lifeStage?: LifeStage | null;
   location?: string | null;
   storytellerId?: string | null;
-  certaintyLevel?: CertaintyLevel | null;
   detectedFaces?: DetectedFace[];
   temporaryOriginalImageUrl?: string | null;
   temporaryResizedImageUrl?: string | null;
