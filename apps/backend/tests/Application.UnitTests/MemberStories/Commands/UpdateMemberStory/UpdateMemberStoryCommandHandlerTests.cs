@@ -43,8 +43,13 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Original Title",
             Story = "Original Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString()
+            Year = 2000,
+            TimeRangeDescription = "Start of the millennium",
+            IsYearEstimated = false,
+            LifeStage = LifeStage.Adulthood,
+            Location = "Someplace",
+            StorytellerId = memberId,
+            CertaintyLevel = CertaintyLevel.Sure
         };
 
         _context.Families.Add(family);
@@ -60,8 +65,13 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Updated Title",
             Story = "Updated Story Content",
-            StoryStyle = MemberStoryStyle.Formal.ToString(),
-            Perspective = MemberStoryPerspective.FullyNeutral.ToString()
+            Year = 2005,
+            TimeRangeDescription = "Mid-decade",
+            IsYearEstimated = true,
+            LifeStage = LifeStage.SignificantEvents,
+            Location = "Another Place",
+            StorytellerId = Guid.NewGuid(), // Changed storyteller
+            CertaintyLevel = CertaintyLevel.Estimated
         };
 
         // Act
@@ -73,8 +83,13 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
         updatedMemberStory.Should().NotBeNull();
         updatedMemberStory!.Title.Should().Be(command.Title);
         updatedMemberStory.Story.Should().Be(command.Story);
-        updatedMemberStory.StoryStyle.Should().Be(command.StoryStyle);
-        updatedMemberStory.Perspective.Should().Be(command.Perspective);
+        updatedMemberStory.Year.Should().Be(command.Year);
+        updatedMemberStory.TimeRangeDescription.Should().Be(command.TimeRangeDescription);
+        updatedMemberStory.IsYearEstimated.Should().Be(command.IsYearEstimated);
+        updatedMemberStory.LifeStage.Should().Be(command.LifeStage);
+        updatedMemberStory.Location.Should().Be(command.Location);
+        updatedMemberStory.StorytellerId.Should().Be(command.StorytellerId);
+        updatedMemberStory.CertaintyLevel.Should().Be(command.CertaintyLevel);
     }
 
     [Fact]
@@ -106,8 +121,9 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Original Title",
             Story = "Original Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString()
+            Year = 2000,
+            LifeStage = LifeStage.Adulthood,
+            CertaintyLevel = CertaintyLevel.Sure
         };
 
         _context.MemberStories.Add(memberStory);

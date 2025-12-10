@@ -2,6 +2,7 @@ using backend.Application.MemberStories.Commands.CreateMemberStory;
 using backend.Domain.Enums;
 using FluentValidation.TestHelper;
 using Xunit;
+using System;
 
 namespace backend.Application.UnitTests.MemberStories.Commands.CreateMemberStory;
 
@@ -59,26 +60,62 @@ public class CreateMemberStoryCommandValidatorTests
               .WithErrorMessage("Story content must not exceed 4000 characters.");
     }
 
-
-
     [Fact]
-    public void ShouldHaveError_WhenStoryStyleIsInvalid()
+    public void ShouldHaveError_WhenYearIsOutOfRange()
     {
-        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = "InvalidStyle" };
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = 999 };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.StoryStyle)
-              .WithErrorMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.");
+        result.ShouldHaveValidationErrorFor(x => x.Year)
+              .WithErrorMessage($"Year must be between 1000 and {DateTime.Now.Year + 1}.");
+
+        command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = DateTime.Now.Year + 2 };
+        result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Year)
+              .WithErrorMessage($"Year must be between 1000 and {DateTime.Now.Year + 1}.");
     }
 
-
+    [Fact]
+    public void ShouldNotHaveError_WhenYearIsNull()
+    {
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = null };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.Year);
+    }
 
     [Fact]
-    public void ShouldHaveError_WhenPerspectiveIsInvalid()
+    public void ShouldHaveError_WhenTimeRangeDescriptionExceedsMaxLength()
     {
-        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = MemberStoryStyle.Nostalgic.ToString(), Perspective = "InvalidPerspective" };
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", TimeRangeDescription = new string('a', 101) };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Perspective)
-              .WithErrorMessage($"Invalid perspective. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryPerspective)))}.");
+        result.ShouldHaveValidationErrorFor(x => x.TimeRangeDescription)
+              .WithErrorMessage("Time range description must not exceed 100 characters.");
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenLifeStageIsInvalid()
+    {
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", LifeStage = (LifeStage)99 };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.LifeStage)
+              .WithErrorMessage("Invalid Life Stage.");
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenLocationExceedsMaxLength()
+    {
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Location = new string('a', 201) };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Location)
+              .WithErrorMessage("Location must not exceed 200 characters.");
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenCertaintyLevelIsInvalid()
+    {
+        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", CertaintyLevel = (CertaintyLevel)99 };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.CertaintyLevel)
+              .WithErrorMessage("Invalid Certainty Level.");
     }
 
     [Fact]
@@ -89,11 +126,13 @@ public class CreateMemberStoryCommandValidatorTests
             MemberId = Guid.NewGuid(),
             Title = "Valid Title",
             Story = "Valid Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString(),
-            OriginalImageUrl = "http://example.com/original.jpg",
-            ResizedImageUrl = "http://example.com/resized.jpg",
-            RawInput = "Some raw input",
+            Year = 2000,
+            TimeRangeDescription = "A specific period",
+            IsYearEstimated = false,
+            LifeStage = LifeStage.Adulthood,
+            Location = "Ho Chi Minh City",
+            StorytellerId = Guid.NewGuid(),
+            CertaintyLevel = CertaintyLevel.Sure
         };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
