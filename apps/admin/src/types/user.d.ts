@@ -47,7 +47,7 @@ export interface UserPreference {
   lastModifiedBy: string | null;
 }
 
-export interface UpdateUserProfileRequestDto {
+export interface UpdateUserProfileDto {
     id: string;
     externalId?: string;
     email: string;

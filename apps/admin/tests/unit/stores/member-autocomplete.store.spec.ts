@@ -2,9 +2,8 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useMemberAutocompleteStore } from '@/stores/member-autocomplete.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '@/plugins/i18n';
-import type { Member } from '@/types';
+import type { ApiError, Member } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IMemberService methods used by member-autocomplete.store

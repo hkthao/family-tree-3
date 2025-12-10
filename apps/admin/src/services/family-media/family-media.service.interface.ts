@@ -1,5 +1,5 @@
 import type { Result } from '@/types';
-import type { PaginatedList, FamilyMedia, MediaLink, FamilyMediaFilter } from '@/types';
+import type { Paginated, FamilyMedia, MediaLink, FamilyMediaFilter } from '@/types';
 
 export interface IFamilyMediaService {
   search(
@@ -8,7 +8,7 @@ export interface IFamilyMediaService {
     page?: number,
     itemsPerPage?: number,
     sortBy?: { key: string; order: string }[],
-  ): Promise<Result<PaginatedList<FamilyMedia>>>;
+  ): Promise<Result<Paginated<FamilyMedia>>>;
   getById(familyId: string, id: string): Promise<Result<FamilyMedia>>;
   create(familyId: string, file: File, description?: string): Promise<Result<string>>; 
   delete(familyId: string, id: string): Promise<Result<boolean>>;

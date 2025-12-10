@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import type { MemberFace, Paginated, MemberFaceFilter, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { MemberFace, Paginated, MemberFaceFilter, Result, ApiError } from '@/types';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 export const useMemberFaceStore = defineStore('memberFace', {

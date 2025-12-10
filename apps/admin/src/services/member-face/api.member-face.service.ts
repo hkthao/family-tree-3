@@ -1,7 +1,7 @@
-import type { MemberFace, FaceDetectionRessult } from '@/types'; 
+import type { MemberFace, FaceDetectionRessult, ApiError } from '@/types'; 
 import type { Result } from '@/types'; 
 import type { IMemberFaceService } from './member-face.service.interface';
-import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
+import { type ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '../common/api.crud.service';
 
 export class ApiMemberFaceService extends ApiCrudService<MemberFace>  implements IMemberFaceService {

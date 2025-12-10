@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FamilyDict } from '@/types';
+import type { ApiError, FamilyDict } from '@/types';
 import { ok, err, FamilyDictLineage, FamilyDictType } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IFamilyDictService

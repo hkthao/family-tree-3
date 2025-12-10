@@ -1,5 +1,4 @@
-import type { Family, Result } from "@/types";
-import type { ApiError } from "@/plugins/axios";
+import type { ApiError, Family, Result } from "@/types";
 
 export interface IPublicFamilyService {
   getPublicFamilyById(id: string): Promise<Result<Family, ApiError>>;

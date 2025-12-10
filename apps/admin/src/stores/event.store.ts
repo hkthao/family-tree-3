@@ -1,7 +1,6 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { EventFilter, Event, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { EventFilter, Event, Result, ApiError } from '@/types';
 import { defineStore } from 'pinia';
 
 export const useEventStore = defineStore('event', {

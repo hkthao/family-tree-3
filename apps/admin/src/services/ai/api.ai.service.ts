@@ -1,14 +1,13 @@
-// apps/admin/src/services/ai/api.ai.service.ts
 
 import type { IAiService } from './ai.service.interface';
-import type { ApiClientMethods, ApiError } from '@/plugins/axios';
-import type { Result } from '@/types'; // Still need Result type
+import type { ApiClientMethods } from '@/plugins/axios';
+import type { ApiError } from '@/types';
+import type { Result } from '@/types'; 
 import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
-import type { AnalyzedDataDto } from '@/types/ai'; // NEW IMPORT
+import type { AnalyzedDataDto } from '@/types/ai'; 
 
-// const API_BASE_URL = '/api/memories'; // Base URL for memory-related endpoints (non-AI) - REMOVED
-const AI_BASE_URL = '/ai'; // Corrected Base URL for AI-related endpoints (without /api)
+const AI_BASE_URL = '/ai'; 
 
 export class ApiAiService implements IAiService {
   constructor(private apiClient: ApiClientMethods) {}
@@ -27,11 +26,11 @@ export class ApiAiService implements IAiService {
       userPrompt,
       language,
     };
-    return this.apiClient.post<BiographyResultDto>(`${AI_BASE_URL}/biography`, payload); // CORRECTED URL
+    return this.apiClient.post<BiographyResultDto>(`${AI_BASE_URL}/biography`, payload); 
   }
 
-  async analyzeContent(content: string, sessionId: string, familyId: string): Promise<Result<AnalyzedDataDto, ApiError>> { // UPDATED METHOD SIGNATURE
-    return this.apiClient.post<AnalyzedDataDto>(`${AI_BASE_URL}/generate-family-data`, { content, sessionId, familyId }); // UPDATED
+  async analyzeContent(content: string, sessionId: string, familyId: string): Promise<Result<AnalyzedDataDto, ApiError>> { 
+    return this.apiClient.post<AnalyzedDataDto>(`${AI_BASE_URL}/generate-family-data`, { content, sessionId, familyId }); 
   }
 
   async generateStory(command: GenerateStoryCommand): Promise<Result<GenerateStoryResponseDto, ApiError>> {

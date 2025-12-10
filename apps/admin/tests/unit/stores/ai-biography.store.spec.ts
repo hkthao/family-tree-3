@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { BiographyResultDto, Member } from '@/types';
+import type { ApiError, BiographyResultDto, Member } from '@/types';
 import { BiographyStyle, Gender } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the services

@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { usePublicRelationshipStore } from '@/stores/publicRelationship.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Relationship } from '@/types';
+import type { ApiError, Relationship } from '@/types';
 import { ok, err, RelationshipType } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IPublicRelationshipService

@@ -1,22 +1,19 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { usePublicFamilyStore } from '@/stores/publicFamily.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { type Family, FamilyVisibility } from '@/types'; // Changed from import type to import
+import { type ApiError, type Family, FamilyVisibility } from '@/types'; 
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
-// Mock the IPublicFamilyService
 const mockGetPublicFamilyById = vi.fn();
 
-// Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     publicFamily: {
       getPublicFamilyById: mockGetPublicFamilyById,
-      // Add other publicFamily service methods as empty objects if not directly used
+      
     },
-    // Add other services as empty objects
+    
     ai: {}, auth: {}, chat: {}, event: {}, face: {}, family: {},
     member: {}, naturalLanguageInput: {}, notification: {}, relationship: {},
     systemConfig: {}, userActivity: {}, userPreference: {}, userProfile: {},
@@ -24,11 +21,11 @@ vi.mock('@/services/service.factory', () => ({
   })),
 }));
 
-// Mock i18n
+
 vi.mock('@/plugins/i18n', () => ({
   default: {
     global: {
-      t: vi.fn((key) => key), // Mock the translation function to return the key itself
+      t: vi.fn((key) => key), 
     },
   },
 }));
@@ -44,7 +41,7 @@ describe('publicFamily.store', () => {
     store.services = createServices('test');
     mockGetPublicFamilyById.mockReset();
 
-    // Default mock resolved values
+    
     mockGetPublicFamilyById.mockResolvedValue(ok(mockFamily));
   });
 
@@ -54,7 +51,7 @@ describe('publicFamily.store', () => {
     description: 'A public family for testing',
     address: 'Public Address',
     avatarUrl: 'public-avatar.jpg',
-    visibility: FamilyVisibility.Public, // Fixed
+    visibility: FamilyVisibility.Public, 
     familyUsers: [],
   };
 

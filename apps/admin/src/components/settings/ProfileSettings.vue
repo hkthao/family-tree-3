@@ -46,7 +46,7 @@ import { onMounted, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
 import { useUserProfileStore } from '@/stores';
-import type { UpdateUserProfileRequestDto } from '@/types';
+import type { UpdateUserProfileDto } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
 import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
@@ -102,7 +102,7 @@ const saveProfile = async () => {
   
 
     if (result && userProfileStore.userProfile) {
-      const updatedProfile: UpdateUserProfileRequestDto = {
+      const updatedProfile: UpdateUserProfileDto = {
         id: userProfileStore.userProfile.id,
         externalId: userProfileStore.userProfile.externalId,
         email: formData.email,

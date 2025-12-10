@@ -6,14 +6,7 @@ import axios, {
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
 import { getApiBaseUrl, getEnvVariable } from '@/utils/api.util';
-
-// Define a custom error type for API errors
-export interface ApiError {
-  name: string;
-  message: string;
-  statusCode?: number;
-  details?: any;
-}
+import type { ApiError } from '@/types/apiError';
 
 // Helper function to create an ApiError from an AxiosError
 export const createApiError = (error: AxiosError, customMessage?: string): ApiError => {

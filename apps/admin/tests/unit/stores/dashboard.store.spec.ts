@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useDashboardStore } from '@/stores/dashboard.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventType, type DashboardStats, type Event } from '@/types';
+import { EventType, type ApiError, type DashboardStats, type Event } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IDashboardService and IEventService

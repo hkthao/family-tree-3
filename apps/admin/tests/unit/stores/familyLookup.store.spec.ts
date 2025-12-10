@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { type Family, FamilyVisibility } from '@/types'; // Changed from import type to import
+import { type ApiError, type Family, FamilyVisibility } from '@/types'; // Changed from import type to import
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 // import i18n from '@/plugins/i18n'; // REMOVED
 

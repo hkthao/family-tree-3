@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n'; // Import global i18n instance
-import { Theme, Language, type UserPreference, type Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { Theme, Language, type UserPreference, type Result, type ApiError } from '@/types';
 
 export const useUserSettingsStore = defineStore('userSettings', {
   // State: Defines the reactive data of the store.

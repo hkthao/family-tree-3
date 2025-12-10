@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Relationship, Paginated } from '@/types';
+import type { Relationship, Paginated, ApiError } from '@/types';
 import { RelationshipType } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IRelationshipService

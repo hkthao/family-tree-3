@@ -1,9 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { FamilyDict, FamilyDictFilter, FamilyDictImport, Result } from '@/types';
+import type { ApiError, FamilyDict, FamilyDictFilter, FamilyDictImport, Result } from '@/types';
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
-
 
 export const useFamilyDictStore = defineStore('familyDict', {
   state: () => ({

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, Member, Result } from '@/types'; // Consolidated import
+import type { ApiError, BiographyResultDto, Member, Result } from '@/types'; // Consolidated import
 import { BiographyStyle } from '@/types'; // Import as value
-import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { err } from '@/types';
 

@@ -14,6 +14,3 @@ export interface ListOptions {
 export interface FilterOptions {
   [key: string]: any; // Allows for any key-value pair for filters
 }
-
-// Alias for Paginated
-export type PaginatedList<T> = Paginated<T>;

@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useUserSettingsStore } from '@/stores/user-settings.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { UserPreference } from '@/types';
+import type { ApiError, UserPreference } from '@/types';
 import { Theme, Language } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 import i18n from '@/plugins/i18n';
 

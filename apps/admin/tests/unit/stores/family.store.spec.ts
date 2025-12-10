@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFamilyStore } from '@/stores/family.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Family, Paginated } from '@/types';
+import type { ApiError, Family, Paginated } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IFamilyService

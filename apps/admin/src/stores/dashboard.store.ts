@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import type { DashboardStats, Event, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { ApiError, DashboardStats, Event, Result } from '@/types';
 
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({

@@ -1,9 +1,9 @@
 import {
   type Member,
 } from '@/types';
-import type { Result } from '@/types';
+import type { ApiError, Result } from '@/types';
 import type { IMemberService } from './member.service.interface';
-import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
+import { type ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '../common/api.crud.service';
 
 

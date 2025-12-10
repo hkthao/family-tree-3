@@ -1,5 +1,4 @@
-import type { Relationship, Result, RelationshipDetectionResult } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { Relationship, Result, RelationshipDetectionResult, ApiError } from '@/types';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IRelationshipService extends ICrudService<Relationship> {

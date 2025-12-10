@@ -1,8 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { Relationship, RelationshipFilter, Result } from '@/types'; // Assuming Relationship and RelationshipFilter types exist
+import type { ApiError, Relationship, RelationshipFilter, Result } from '@/types'; // Assuming Relationship and RelationshipFilter types exist
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
 
 export const useRelationshipStore = defineStore('relationship', {
   state: () => ({

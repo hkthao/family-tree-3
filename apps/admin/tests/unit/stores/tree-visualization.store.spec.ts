@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Member, Relationship } from '@/types';
+import type { ApiError, Member, Relationship } from '@/types';
 import { ok, err, RelationshipType,  } from '@/types';
 import { createServices } from '@/services/service.factory';
-import type { ApiError } from '@/plugins/axios';
 
 // Mock services
 const mockGetById = vi.fn();

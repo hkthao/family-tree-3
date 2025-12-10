@@ -1,11 +1,9 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter } from '@/types';
+import type { DetectedFace, SearchResult, Member, Result, SearchStoriesFilter, ApiError } from '@/types';
 import type { MemberStoryDto } from '@/types/memberStory';
 import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
-
 
 export interface MemberStoryFaceState {
   uploadedImage: string | null;

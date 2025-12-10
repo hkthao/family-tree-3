@@ -1,7 +1,6 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import type { Relationship, RelationshipDetectionResult } from '@/types';
-import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { Result } from '@/types'; 
+import type { ApiError, Relationship, RelationshipDetectionResult, Result } from '@/types';
+import { type ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '../common/api.crud.service';
 
 export class ApiRelationshipService extends ApiCrudService<Relationship> implements IRelationshipService {

@@ -1,7 +1,6 @@
 // apps/admin/src/services/ai/ai.service.interface.ts
 
-import type { Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { ApiError, Result } from '@/types';
 import type { GenerateStoryCommand, GenerateStoryResponseDto } from '@/types/ai';
 import type { BiographyStyle, BiographyResultDto } from '@/types/biography';
 

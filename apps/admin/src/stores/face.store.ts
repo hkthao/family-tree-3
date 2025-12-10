@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import type { DetectedFace, SearchResult, Member, Result } from '@/types';
+import type { DetectedFace, SearchResult, Member, Result, ApiError } from '@/types';
 import i18n from '@/plugins/i18n';
-import type { ApiError } from '@/plugins/axios';
 
 interface FaceState {
   uploadedImage: string | null;

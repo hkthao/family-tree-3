@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useEventTimelineStore } from '@/stores/eventTimeline.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Event, EventFilter } from '@/types';
+import type { ApiError, Event, EventFilter } from '@/types';
 import { ok, err, EventType } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 // import i18n from '@/plugins/i18n'; // REMOVED
 

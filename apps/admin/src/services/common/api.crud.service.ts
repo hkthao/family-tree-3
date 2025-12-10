@@ -1,6 +1,6 @@
 import type { ICrudService } from './crud.service.interface';
 import type { Result } from '@/types';
-import type { PaginatedList, ListOptions, FilterOptions } from '@/types';
+import type { Paginated, ListOptions, FilterOptions } from '@/types';
 import type { ApiClientMethods } from '@/plugins/axios';
 
 export class ApiCrudService<T extends { id?: string }> implements ICrudService<T> {
@@ -9,7 +9,7 @@ export class ApiCrudService<T extends { id?: string }> implements ICrudService<T
   async search(
     options: ListOptions = { page: 1, itemsPerPage: 10, sortBy: [] },
     filters: FilterOptions = {},
-  ): Promise<Result<PaginatedList<T>>> {
+  ): Promise<Result<Paginated<T>>> {
     const params: Record<string, any> = {
       page: options.page,
       pageSize: options.itemsPerPage,
@@ -23,7 +23,7 @@ export class ApiCrudService<T extends { id?: string }> implements ICrudService<T
         params[key] = filters[key];
       }
     }
-    return await this.api.get<PaginatedList<T>>(`${this.baseUrl}/search`, { params });
+    return await this.api.get<Paginated<T>>(`${this.baseUrl}/search`, { params });
   }
 
   async getById(id: string): Promise<Result<T | undefined>> {

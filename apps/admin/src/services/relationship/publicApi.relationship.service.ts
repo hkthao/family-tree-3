@@ -1,5 +1,4 @@
-import { ok, type Result, type Relationship } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { ok, type Result, type Relationship, type ApiError } from '@/types';
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IPublicRelationshipService } from './public.service.interface';
 

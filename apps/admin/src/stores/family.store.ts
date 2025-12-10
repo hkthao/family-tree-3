@@ -1,8 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { Family, FamilyFilter, Result } from '@/types';
+import type { ApiError, Family, FamilyFilter, Result } from '@/types';
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({

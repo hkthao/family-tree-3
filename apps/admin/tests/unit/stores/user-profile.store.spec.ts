@@ -2,8 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useUserProfileStore } from '@/stores/user-profile.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok, err } from '@/types';
-import type { UserProfile } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { ApiError, UserProfile } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the ICurrentUserProfileService

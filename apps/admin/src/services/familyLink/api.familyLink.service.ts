@@ -1,7 +1,6 @@
 import type { IFamilyLinkService } from './familyLink.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
-import type { ApiError } from '@/plugins/axios';
-import type { FamilyLinkDto, FamilyLinkFilter, Paginated, Result } from '@/types';
+import type { ApiError, FamilyLinkDto, FamilyLinkFilter, Paginated, Result } from '@/types';
 
 export class ApiFamilyLinkService implements IFamilyLinkService {
   constructor(private apiClient: ApiClientMethods) { }

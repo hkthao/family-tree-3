@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { usePrivacyConfigurationStore, type PrivacyConfiguration } from '@/stores/privacy-configuration.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { ok, err, type ApiError, type PrivacyConfiguration } from '@/types';
 import { createServices } from '@/services/service.factory';
+import { usePrivacyConfigurationStore } from '@/stores/privacy-configuration.store';
 
 // Mock the IPrivacyConfigurationService
 const mockGetPrivacyConfiguration = vi.fn();

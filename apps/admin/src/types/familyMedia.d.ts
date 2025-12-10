@@ -25,5 +25,5 @@ export interface FamilyMediaFilter {
   refId?: string; // Filter by linked entity ID
   refType?: RefType; // Filter by linked entity type
   mediaType?: MediaType; // Filter by media type
-  // Pagination properties will be handled by ListOptions which are part of PaginatedList
+  // Pagination properties will be handled by ListOptions which are part of Paginated
 }

@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Member, Paginated } from '@/types';
+import type { ApiError, Member, Paginated } from '@/types';
 import { Gender } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IMemberService

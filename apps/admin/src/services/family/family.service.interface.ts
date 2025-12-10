@@ -1,9 +1,6 @@
-import type { Family, FamilyFilter, Result, Paginated } from "@/types";
-import type { ApiError } from "@/plugins/axios";
+import type { AnalyzedDataDto, ApiError, Family, PrivacyConfiguration, Result } from "@/types";
 import type { ICrudService } from "../common/crud.service.interface";
 import type { FamilyExportDto, IFamilyAccess, GenerateFamilyDataCommand } from '@/types/family';
-import type { AnalyzedDataDto } from '@/types/ai';
-import type { PrivacyConfiguration } from '@/types';
 
 export interface IFamilyService extends ICrudService<Family> {
   addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>>;

@@ -1,9 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFaceStore } from '@/stores/face.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Gender, type DetectedFace, type SearchResult, type Member } from '@/types';
+import { Gender, type DetectedFace, type SearchResult, type Member, type ApiError } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IFaceService

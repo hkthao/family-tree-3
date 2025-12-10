@@ -2,7 +2,7 @@ import {
   type FamilyDict,
   type FamilyDictFilter,
   type FamilyDictImport,
-  type PaginatedList, 
+  type Paginated, 
   type ListOptions, 
 } from '@/types';
 import { type IFamilyDictService } from './family-dict.service.interface';
@@ -19,7 +19,7 @@ export class ApiFamilyDictService extends ApiCrudService<FamilyDict> implements 
     filters: FamilyDictFilter,
     page: number = 1,
     itemsPerPage: number = 10,
-  ): Promise<Result<PaginatedList<FamilyDict>>> { 
+  ): Promise<Result<Paginated<FamilyDict>>> { 
     const options: ListOptions = {
       page,
       itemsPerPage,

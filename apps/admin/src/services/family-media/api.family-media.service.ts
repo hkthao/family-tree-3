@@ -1,7 +1,7 @@
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IFamilyMediaService } from './family-media.service.interface';
 import { type Result } from '@/types'; // Change to normal import with ok, err
-import type { PaginatedList, FamilyMedia, MediaLink, FamilyMediaFilter } from '@/types'; // Import from '@/types'
+import type {  FamilyMedia, MediaLink, FamilyMediaFilter, Paginated } from '@/types'; // Import from '@/types'
 
 export class ApiFamilyMediaService implements IFamilyMediaService {
   constructor(private api: ApiClientMethods) { }
@@ -12,14 +12,14 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
     page?: number,
     itemsPerPage?: number,
     sortBy?: { key: string; order: string }[],
-  ): Promise<Result<PaginatedList<FamilyMedia>>> {
+  ): Promise<Result<Paginated<FamilyMedia>>> {
     const params: Record<string, any> = { ...filters };
     if (page) params.page = page;
     if (itemsPerPage) params.pageSize = itemsPerPage; // Backend uses pageSize
     if (sortBy && sortBy.length > 0) {
       params.orderBy = sortBy.map(s => `${s.key} ${s.order}`).join(',');
     }
-    return await this.api.get<PaginatedList<FamilyMedia>>(`/family/${familyId}/media`, { params });
+    return await this.api.get<Paginated<FamilyMedia>>(`/family/${familyId}/media`, { params });
   }
 
   async getById(familyId: string, id: string): Promise<Result<FamilyMedia>> {

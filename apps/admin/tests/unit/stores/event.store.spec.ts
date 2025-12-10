@@ -1,10 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useEventStore } from '@/stores/event.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Event, Paginated } from '@/types';
+import type { ApiError, Event, Paginated } from '@/types';
 import { EventType } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IEventService

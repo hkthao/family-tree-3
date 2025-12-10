@@ -1,5 +1,4 @@
-import type { ApiError } from '@/plugins/axios';
-import type { FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result } from '@/types';
+import type { ApiError, FamilyLinkRequestDto, FamilyLinkRequestFilter, Paginated, Result } from '@/types';
 
 export interface IFamilyLinkRequestService {
   searchFamilyLinkRequests(familyId: string, filters: FamilyLinkRequestFilter, page: number, itemsPerPage: number): Promise<Result<Paginated<FamilyLinkRequestDto>, ApiError>>;

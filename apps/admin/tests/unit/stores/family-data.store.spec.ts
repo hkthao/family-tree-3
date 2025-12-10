@@ -2,8 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useFamilyDataStore } from '@/stores/family-data.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FamilyExportDto } from '@/types/family';
-import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { ok, err, type ApiError } from '@/types';
 import { createServices } from '@/services/service.factory';
 // import i18n from '@/plugins/i18n'; // REMOVED
 

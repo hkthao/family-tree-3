@@ -2,8 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useUserPreferenceStore } from '@/stores/user-preference.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok, err } from '@/types';
-import type { UserPreference } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { ApiError, UserPreference } from '@/types';
 import { Theme, Language } from '@/types';
 import { createServices } from '@/services/service.factory';
 
