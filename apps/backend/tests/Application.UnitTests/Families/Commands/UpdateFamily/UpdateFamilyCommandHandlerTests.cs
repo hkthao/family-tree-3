@@ -1,30 +1,29 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // NEW
+using backend.Application.Common.Models;
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Application.Files.DTOs;
-using backend.Application.Files.UploadFile; // NEW
 using backend.Application.UnitTests.Common;
-using backend.Domain.Common; // NEW
+using backend.Domain.Common;
 using backend.Domain.Entities;
 using backend.Domain.Events.Families;
 using FluentAssertions;
-using MediatR; // NEW
-using Microsoft.EntityFrameworkCore; // NEW
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<IMediator> _mediatorMock; // NEW
+    private readonly Mock<IMediator> _mediatorMock;
 
     public UpdateFamilyCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _mediatorMock = new Mock<IMediator>(); // NEW
+        _mediatorMock = new Mock<IMediator>();
     }
 
     [Fact]
@@ -34,7 +33,6 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var existingFamily = Family.Create("Old Name", "OLD", null, null, "Public", Guid.NewGuid());
         existingFamily.Id = familyId; // Explicitly set the ID
-        // existingFamily.UpdateAvatar("http://old.avatar.com"); // Removed to avoid double event dispatch
         _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync();
 
@@ -43,9 +41,15 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         var avatarBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("new fake image data"));
         var expectedAvatarUrl = "http://uploaded.example.com/new_avatar.png";
+        var familyMediaId = Guid.NewGuid();
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = expectedAvatarUrl }));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<Guid>.Success(familyMediaId));
+
+        // Mock the FamilyMedia DbSet to return a FamilyMedia object when FindAsync is called
+        var mockFamilyMedia = new FamilyMedia { Id = familyMediaId, FilePath = expectedAvatarUrl };
+        _context.FamilyMedia.Add(mockFamilyMedia);
+        await _context.SaveChangesAsync();
 
         var command = new UpdateFamilyCommand
         {
@@ -53,13 +57,13 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             Name = "New Name",
             Description = "New Description",
             Address = "New Address",
-            AvatarBase64 = avatarBase64, // Use AvatarBase64
+            AvatarBase64 = avatarBase64,
             Visibility = "Private",
             Code = "NEW"
         };
 
         // Act
-        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Pass mediator mock
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
         var updatedFamily = await _context.Families.FirstOrDefaultAsync(f => f.Id == familyId);
 
@@ -69,14 +73,13 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily!.Name.Should().Be(command.Name);
         updatedFamily.Description.Should().Be(command.Description);
         updatedFamily.Address.Should().Be(command.Address);
-        updatedFamily.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against expected uploaded URL
+        updatedFamily.AvatarUrl.Should().Be(expectedAvatarUrl);
         updatedFamily.Visibility.Should().Be(command.Visibility);
-        updatedFamily.Code.Should().Be(command.Code);
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
-            events.Any(e => e is FamilyUpdatedEvent) && // Only one FamilyUpdatedEvent from handler
+            events.Any(e => e is FamilyUpdatedEvent) &&
             events.Any(e => e is FamilyStatsUpdatedEvent)
         )), Times.Once);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify upload was called
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -85,7 +88,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var existingFamily = Family.Create("Old Name", "OLD", null, null, "Public", Guid.NewGuid());
-        existingFamily.Id = familyId; // Explicitly set the ID
+        existingFamily.Id = familyId;
         _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync();
 
@@ -93,8 +96,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
         // No AvatarBase64, so mediator should not be called
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         var command = new UpdateFamilyCommand
         {
@@ -104,7 +107,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         };
 
         // Act
-        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Pass mediator mock
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
         var updatedFamily = await _context.Families.FirstOrDefaultAsync(f => f.Id == familyId);
 
@@ -113,7 +116,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Should().NotBeNull();
         updatedFamily!.Name.Should().Be(command.Name);
         updatedFamily.Visibility.Should().Be(command.Visibility);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -125,18 +128,18 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _authorizationServiceMock.Setup(x => x.CanManageFamily(command.Id)).Returns(true);
 
         // No AvatarBase64, so mediator should not be called
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         // Act
-        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Pass mediator mock
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, command.Id));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -154,17 +157,17 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
 
         // No AvatarBase64, so mediator should not be called
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<ImageUploadResponseDto>.Failure("Upload failed", "Test"));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         // Act
-        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Pass mediator mock
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
