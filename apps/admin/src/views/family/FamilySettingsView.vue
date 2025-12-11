@@ -58,7 +58,7 @@ import { useI18n } from 'vue-i18n';
 import { useFamilyDataStore } from '@/stores/family-data.store';
 import { useGlobalSnackbar } from '@/composables';
 import type { FamilyExportDto } from '@/types/family';
-import PrivacySettings from './PrivacySettings.vue'; // Import the new component
+import PrivacySettings from '@/components/family/PrivacySettings.vue'; // Import the new component
 
 const { t } = useI18n();
 const familyDataStore = useFamilyDataStore();

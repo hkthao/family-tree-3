@@ -21,7 +21,7 @@ export { default as FaceSearchView } from './face/FaceSearchView.vue';
 
 // Export pages from family
 export { default as FamilyAddView } from './family/FamilyAddView.vue';
-export { default as FamilyDetailView } from './family/FamilyDetailView.vue';
+export { default as FamilyTabsView } from './family/FamilyTabsView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as FamilyListView } from './family/FamilyListView.vue';
 export { default as FamilyTreeView } from './family/FamilyTreeView.vue';
