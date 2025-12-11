@@ -1,26 +1,47 @@
 <template>
-  <v-card class="mt-5" elevation="2">
-    <v-card-title class="d-flex align-center">
-      {{ t('familyMedia.list.title') }}
-      <v-spacer></v-spacer>
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        @click="emit('create')"
-      >
-        {{ t('familyMedia.list.createButton') }}
-      </v-btn>
-    </v-card-title>
-    <v-data-table-server
-      :headers="headers"
-      :items="props.items"
-      :items-length="props.totalItems"
-      :loading="props.loading"
-      :items-per-page="10"
-      @update:options="handleOptionsUpdate"
-      item-value="id"
-      class="elevation-1"
-    >
+  <v-data-table-server
+    v-model:items-per-page="itemsPerPage"
+    :headers="headers"
+    :items="props.items"
+    :items-length="props.totalItems"
+    :loading="props.loading"
+    item-value="id"
+    @update:options="handleOptionsUpdate"
+    elevation="0"
+    data-testid="family-media-list"
+    fixed-header
+  >
+    <template #top>
+      <slot name="top">
+        <v-toolbar flat>
+          <v-toolbar-title>{{ t('familyMedia.list.title') }}</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn
+            v-if="canPerformActions"
+            color="primary"
+            icon
+            @click="emit('create')"
+            data-testid="add-new-family-media-button"
+          >
+            <v-tooltip :text="t('familyMedia.list.createButton')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-plus</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <v-text-field
+            v-model="debouncedSearch"
+            :label="t('common.search')"
+            append-inner-icon="mdi-magnify"
+            single-line
+            hide-details
+            clearable
+            class="mr-2"
+            data-test-id="family-media-list-search-input"
+          ></v-text-field>
+        </v-toolbar>
+      </slot>
+    </template>
       <template v-slot:item.thumbnailPath="{ item }">
         <v-img v-if="item.thumbnailPath" :src="item.thumbnailPath" max-height="50" max-width="50" class="my-2"></v-img>
         <v-icon v-else>mdi-file-image-outline</v-icon>
@@ -37,7 +58,8 @@
       <template v-slot:item.created="{ item }">
         {{ formatDate(item.created) }}
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
+      <div v-if="canPerformActions">
         <v-icon
           small
           class="me-2"
@@ -58,43 +80,85 @@
         >
           mdi-delete
         </v-icon>
-      </template>
+      </div>
+    </template>
       <template v-slot:no-data>
-        <v-alert :value="true" color="info" icon="mdi-information">
-          {{ t('familyMedia.list.noData') }}
-        </v-alert>
+        <div class="text-center mt-4">{{ t('familyMedia.list.noData') }}</div>
       </template>
     </v-data-table-server>
-  </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyMedia, ListOptions } from '@/types';
+import type { FamilyMedia } from '@/types';
+import type { DataTableHeader } from 'vuetify';
 import { MediaType } from '@/types/enums';
-import { formatDate, formatBytes } from '@/utils/format.utils'; // Assuming these utilities exist
+import { formatDate, formatBytes } from '@/utils/format.utils';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { useAuth } from '@/composables/useAuth';
 
 interface FamilyMediaListProps {
   items: FamilyMedia[];
   totalItems: number;
   loading: boolean;
+  search?: string;
+  readOnly?: boolean;
 }
 
 const props = defineProps<FamilyMediaListProps>();
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'update:search']);
 const { t } = useI18n();
+const { isAdmin } = useAuth();
 
-const headers = ref([
-  { title: '', key: 'thumbnailPath', sortable: false },
-  { title: t('familyMedia.list.headers.fileName'), key: 'fileName' },
-  { title: t('familyMedia.list.headers.mediaType'), key: 'mediaType' },
-  { title: t('familyMedia.list.headers.fileSize'), key: 'fileSize' },
-  { title: t('familyMedia.list.headers.description'), key: 'description' },
-  { title: t('familyMedia.list.headers.uploadedBy'), key: 'uploadedBy' },
-  { title: t('familyMedia.list.headers.created'), key: 'created' },
-  { title: t('familyMedia.list.headers.actions'), key: 'actions', sortable: false },
-]);
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
+const canPerformActions = computed(() => {
+  return !props.readOnly && isAdmin.value;
+});
+
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
+
+const headers = computed<DataTableHeader[]>(() => {
+  const baseHeaders: DataTableHeader[] = [
+    { title: '', key: 'thumbnailPath', sortable: false, width: '60px' },
+    { title: t('familyMedia.list.headers.fileName'), key: 'fileName', width: 'auto' },
+    { title: t('familyMedia.list.headers.mediaType'), key: 'mediaType', width: '150px' },
+    { title: t('familyMedia.list.headers.fileSize'), key: 'fileSize', width: '150px' },
+    { title: t('familyMedia.list.headers.created'), key: 'created', width: '150px' },
+  ];
+
+  if (canPerformActions.value) {
+    baseHeaders.push({
+      title: t('familyMedia.list.headers.actions'),
+      key: 'actions',
+      sortable: false,
+      align: 'end',
+      width: '100px',
+    });
+  }
+  return baseHeaders;
+});
 
 const handleOptionsUpdate = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) => {
   emit('update:options', options);

@@ -780,9 +780,11 @@
   "familyMedia.list.headers.actions": "Hành động",
   "familyMedia.list.confirmDelete": "Bạn có chắc muốn xóa media '{fileName}'?",
 
-  "familyMedia.search.title": "Tìm kiếm Media Gia đình",
+  "familyMedia.search.title": "Tìm kiếm nâng cao",
   "familyMedia.search.searchQueryLabel": "Tìm kiếm theo Tên tệp hoặc Mô tả",
   "familyMedia.search.mediaTypeLabel": "Lọc theo Loại Media",
+  "familyMedia.search.apply": "Áp dụng Bộ lọc",
+
 
   "familyMedia.form.addTitle": "Tải lên Media Gia đình",
   "familyMedia.form.editTitle": "Chỉnh sửa Media Gia đình",
@@ -834,7 +836,7 @@
   "common.mediaType.Document": "Tài liệu",
   "common.mediaType.Other": "Khác",
 
-  "common.clearFilters": "Xóa Bộ lọc",
+  "common.resetFilters": "Đặt lại Bộ lọc",
   "donate.title": "Ủng hộ Phát triển Ứng dụng",
   "donate.description": "Nếu bạn thấy ứng dụng này hữu ích, hãy cân nhắc ủng hộ tác giả một ly cà phê để giúp duy trì máy chủ và phát triển thêm các tính năng mới. Mọi đóng góp đều được trân trọng!",
   "donate.buyMeACoffee": "Ủng hộ qua Buy Me a Coffee",

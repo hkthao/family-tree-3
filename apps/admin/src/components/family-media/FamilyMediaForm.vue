@@ -1,21 +1,27 @@
 <template>
   <v-form ref="formRef">
-    <v-file-input
-      v-model="file"
-      :label="t('familyMedia.form.fileLabel')"
-      prepend-icon="mdi-camera"
-      accept="image/*,video/*,audio/*,application/pdf"
-      show-size
-      :rules="readOnly ? [] : [rules.required]"
-      :readonly="readOnly"
-    ></v-file-input>
-    <v-textarea
-      v-model="description"
-      :label="t('familyMedia.form.descriptionLabel')"
-      rows="3"
-      clearable
-      :readonly="readOnly"
-    ></v-textarea>
+    <v-row>
+      <v-col cols="12">
+        <VFileUpload
+          v-model="file"
+          :label="t('familyMedia.form.fileLabel')"
+          prepend-icon="mdi-camera"
+          accept="image/*,video/*,audio/*,application/pdf"
+          show-size
+          :rules="readOnly ? [] : [rules.required]"
+          :readonly="readOnly"
+        ></VFileUpload>
+      </v-col>
+      <v-col cols="12">
+        <v-textarea
+          v-model="description"
+          :label="t('familyMedia.form.descriptionLabel')"
+          rows="3"
+          clearable
+          :readonly="readOnly"
+        ></v-textarea>
+      </v-col>
+    </v-row>
     <!-- Display current media if in edit/detail mode -->
     <div v-if="initialMedia && initialMedia.filePath">
       <p class="text-subtitle-2">{{ t('familyMedia.form.currentMedia') }}</p>
@@ -34,6 +40,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
+import { VFileUpload } from 'vuetify/labs/VFileUpload'
 
 interface FamilyMediaFormProps {
   initialMedia?: FamilyMedia;
@@ -45,7 +52,7 @@ const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const formRef = ref<HTMLFormElement | null>(null);
-const file = ref<File | null>(null);
+const file = ref<File | undefined>(undefined);
 const description = ref<string | undefined>(undefined);
 
 const rules = {
@@ -74,7 +81,7 @@ const resetValidation = () => {
 };
 
 const resetForm = () => {
-  file.value = null;
+  file.value = undefined;
   description.value = undefined;
   resetValidation();
 };
