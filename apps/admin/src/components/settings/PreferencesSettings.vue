@@ -24,50 +24,49 @@
 
     <v-row>
       <v-col cols="12" class="text-right">
-        <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+        <v-btn color="primary" type="submit" :loading="isSaving">{{ t('common.save') }}</v-btn>
       </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue'; // Add watch here
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
-import { useUserSettingsStore } from '@/stores';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
 import { useGlobalSnackbar } from '@/composables';
+import { useUserPreferences } from '@/composables/useUserPreferences'; // Import useUserPreferences
+import { type UserPreference, Theme, Language } from '@/types'; // Import UserPreference, Theme, Language
 
 const { t } = useI18n();
-const userSettingsStore = useUserSettingsStore();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
+const { preferences, isLoading, isError, savePreferences: mutateSavePreferences, isSaving, saveError } = useUserPreferences();
 
-const preferencesForm = ref({
-  theme: userSettingsStore.preferences.theme,
-  language: userSettingsStore.preferences.language,
+const preferencesForm = ref<UserPreference>({
+  ...(preferences.value || {} as UserPreference), // Spread existing preferences or an empty object cast to UserPreference
+  theme: preferences.value?.theme || Theme.Dark, // Default to Dark enum
+  language: preferences.value?.language || Language.English, // Default to English enum
 });
+
+// Watch for preferences to be loaded and update the form
+watch(preferences, (newPreferences) => {
+  if (newPreferences) {
+    preferencesForm.value = { ...newPreferences };
+  }
+}, { immediate: true });
+
 
 const languageOptions = computed(() => getLanguageOptions(t));
 const themeOptions = computed(() => getThemeOptions(t));
 
 const savePreferences = async () => {
-  // Update store state
-  userSettingsStore.setLanguage(preferencesForm.value.language);
-  userSettingsStore.setTheme(preferencesForm.value.theme);
-  const success = await userSettingsStore.saveUserSettings();
-  if (success) {
+  await mutateSavePreferences(preferencesForm.value);
+  if (!isSaving.value && !saveError.value) { // Check if saving is complete and no error
     showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
-  } else {
-    showSnackbar(userSettingsStore.error || t('userSettings.preferences.saveError'), 'error');
+  } else if (saveError.value) {
+    showSnackbar(saveError.value.message || t('userSettings.preferences.saveError'), 'error');
   }
 };
-
-onMounted(async () => {
-  await userSettingsStore.fetchUserSettings();
-  preferencesForm.value = {
-    theme: userSettingsStore.preferences.theme,
-    language: userSettingsStore.preferences.language,
-  };
-});
 </script>

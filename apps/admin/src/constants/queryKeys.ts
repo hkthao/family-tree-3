@@ -11,4 +11,11 @@ export const queryKeys = {
     all: ['userActivity'] as const,
     recent: (familyId?: string, page?: number, itemsPerPage?: number, targetType?: string, targetId?: string) => [...queryKeys.userActivity.all, 'recent', familyId, page, itemsPerPage, targetType, targetId] as const,
   },
+  auth: {
+    accessToken: ['auth', 'accessToken'] as const,
+  },
+  userSettings: {
+    preferences: ['userSettings', 'preferences'] as const,
+  },
 };
+
