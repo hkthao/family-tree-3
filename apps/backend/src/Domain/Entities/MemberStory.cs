@@ -1,7 +1,6 @@
 // Removed using backend.Domain.Common.Interfaces; assuming IAggregateRoot is in Common
 // Removed using backend.Domain.ValueObjects; as it's not used here
 
-using System.Collections.Generic;
 using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;

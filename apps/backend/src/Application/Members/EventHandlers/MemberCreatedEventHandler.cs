@@ -40,5 +40,15 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
 
         // Publish notification for member creation
         await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
+
+        // Sync member life events
+        await _familyTreeService.SyncMemberLifeEvents(
+            notification.Member.Id,
+            notification.Member.FamilyId,
+            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : (DateOnly?)null,
+            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : (DateOnly?)null,
+            notification.Member.FullName,
+            cancellationToken
+        );
     }
 }

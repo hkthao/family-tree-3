@@ -102,89 +102,18 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
         // --- End Handle AvatarBase64 upload ---
 
-        // Handle FatherId
-        if (request.FatherId.HasValue)
-        {
-            if (request.FatherId.Value == member.Id)
-            {
-                return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
-            }
-            var father = await _context.Members.FindAsync(request.FatherId.Value);
-            if (father != null)
-            {
-                var fatherChildRelationship = member.AddFatherRelationship(father.Id);
-                _context.Relationships.Add(fatherChildRelationship);
-
-                // Automatically add the reverse Child relationship
-                var childParentRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, father.Id, RelationshipType.Child);
-                _context.Relationships.Add(childParentRelationship);
-            }
-        }
-
-        // Handle MotherId
-        if (request.MotherId.HasValue)
-        {
-            if (request.MotherId.Value == member.Id)
-            {
-                return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
-            }
-            var mother = await _context.Members.FindAsync(request.MotherId.Value);
-            if (mother != null)
-            {
-                var motherChildRelationship = member.AddMotherRelationship(mother.Id);
-                _context.Relationships.Add(motherChildRelationship);
-
-                // Automatically add the reverse Child relationship
-                var childParentRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, mother.Id, RelationshipType.Child);
-                _context.Relationships.Add(childParentRelationship);
-            }
-        }
-
-        // Handle HusbandId
-        if (request.HusbandId.HasValue)
-        {
-            var husband = await _context.Members.FindAsync(request.HusbandId.Value);
-            if (husband != null)
-            {
-                var currentToSpouse = member.AddHusbandRelationship(husband.Id);
-                _context.Relationships.Add(currentToSpouse);
-            }
-        }
-
-        // Handle WifeId
-        if (request.WifeId.HasValue)
-        {
-            var wife = await _context.Members.FindAsync(request.WifeId.Value);
-            if (wife != null)
-            {
-                var currentToSpouse = member.AddWifeRelationship(wife.Id);
-                _context.Relationships.Add(currentToSpouse);
-            }
-        }
-
-        // Automatically create Birth and Death events
-        if (member.DateOfBirth.HasValue)
-        {
-            var birthEvent = new Domain.Entities.Event(_localizer["Birth of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, member.DateOfBirth.Value);
-            birthEvent.AddEventMember(member.Id);
-            _context.Events.Add(birthEvent);
-        }
-
-        if (member.DateOfDeath.HasValue)
-        {
-            var deathEvent = new Domain.Entities.Event(_localizer["Death of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, member.DateOfDeath.Value);
-            deathEvent.AddEventMember(member.Id);
-            _context.Events.Add(deathEvent);
-        }
-
         member.AddDomainEvent(new MemberCreatedEvent(member));
-        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Update denormalized relationship fields after all relationships are established
-        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        // Cập nhật các mối quan hệ bằng phương thức mới
+        await _memberRelationshipService.UpdateMemberRelationshipsAsync(
+            member.Id,
+            request.FatherId,
+            request.MotherId,
+            request.HusbandId,
+            request.WifeId,
+            cancellationToken
+        );
 
         return Result<Guid>.Success(member.Id);
     }

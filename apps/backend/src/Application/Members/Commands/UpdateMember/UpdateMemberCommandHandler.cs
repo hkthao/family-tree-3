@@ -125,217 +125,22 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             member.UnsetAsRoot();
         }
 
-        // Get existing relationship IDs
-        var existingFatherId = member.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father)?.SourceMemberId;
-        var existingMotherId = member.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother)?.SourceMemberId;
-        var existingHusbandId = member.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife)?.TargetMemberId; // Corrected: current member is wife of husband
-        var existingWifeId = member.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband)?.TargetMemberId; // Corrected: current member is husband of wife
-
-        // Handle Father relationship
-        if (request.FatherId != existingFatherId)
-        {
-            // Remove old father relationship
-            if (existingFatherId.HasValue)
-            {
-                var oldFatherRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == existingFatherId.Value && r.TargetMemberId == member.Id && r.Type == RelationshipType.Father);
-                if (oldFatherRelationship != null)
-                {
-                    member.TargetRelationships.Remove(oldFatherRelationship); // Explicitly remove from navigation property
-                    _context.Relationships.Remove(oldFatherRelationship);
-                }
-
-                // Remove corresponding child-to-parent relationship
-                var oldChildToFatherRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingFatherId.Value && r.Type == RelationshipType.Child);
-                if (oldChildToFatherRelationship != null)
-                {
-                    member.SourceRelationships.Remove(oldChildToFatherRelationship);
-                    _context.Relationships.Remove(oldChildToFatherRelationship);
-                }
-            }
-            // Add new father relationship
-            if (request.FatherId.HasValue)
-            {
-                if (request.FatherId.Value == member.Id)
-                {
-                    return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
-                }
-                var father = await _context.Members.FindAsync(request.FatherId.Value);
-                if (father != null)
-                {
-                    var newFatherRelationship = member.AddFatherRelationship(request.FatherId.Value);
-                    _context.Relationships.Add(newFatherRelationship);
-
-                    // Add corresponding child-to-parent relationship
-                    var newChildToFatherRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, request.FatherId.Value, RelationshipType.Child);
-                    _context.Relationships.Add(newChildToFatherRelationship);
-                }
-            }
-        }
-
-        // Handle Mother relationship
-        if (request.MotherId != existingMotherId)
-        {
-            // Remove old mother relationship
-            if (existingMotherId.HasValue)
-            {
-                var oldMotherRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == existingMotherId.Value && r.TargetMemberId == member.Id && r.Type == RelationshipType.Mother);
-                if (oldMotherRelationship != null)
-                {
-                    member.TargetRelationships.Remove(oldMotherRelationship); // Explicitly remove from navigation property
-                    _context.Relationships.Remove(oldMotherRelationship);
-                }
-
-                // Remove corresponding child-to-parent relationship
-                var oldChildToMotherRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingMotherId.Value && r.Type == RelationshipType.Child);
-                if (oldChildToMotherRelationship != null)
-                {
-                    member.SourceRelationships.Remove(oldChildToMotherRelationship);
-                    _context.Relationships.Remove(oldChildToMotherRelationship);
-                }
-            }
-            // Add new mother relationship
-            if (request.MotherId.HasValue)
-            {
-                if (request.MotherId.Value == member.Id)
-                {
-                    return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
-                }
-                var mother = await _context.Members.FindAsync(request.MotherId.Value);
-                if (mother != null)
-                {
-                    var newMotherRelationship = member.AddMotherRelationship(request.MotherId.Value);
-                    _context.Relationships.Add(newMotherRelationship);
-
-                    // Add corresponding child-to-parent relationship
-                    var newChildToMotherRelationship = new Domain.Entities.Relationship(member.FamilyId, member.Id, request.MotherId.Value, RelationshipType.Child);
-                    _context.Relationships.Add(newChildToMotherRelationship);
-                }
-            }
-        }
-
-        // Handle Husband relationship
-        if (request.HusbandId != existingHusbandId)
-        {
-            // Remove old husband relationship
-            if (existingHusbandId.HasValue)
-            {
-                var oldHusbandRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingHusbandId.Value && r.Type == RelationshipType.Wife);
-                if (oldHusbandRelationship != null)
-                {
-                    member.SourceRelationships.Remove(oldHusbandRelationship); // Explicitly remove from navigation property
-                    _context.Relationships.Remove(oldHusbandRelationship);
-                }
-            }
-            // Add new husband relationship
-            if (request.HusbandId.HasValue)
-            {
-                var husband = await _context.Members.FindAsync(request.HusbandId.Value);
-                if (husband != null)
-                {
-                    var newHusbandRelationship = member.AddHusbandRelationship(husband.Id);
-                    _context.Relationships.Add(newHusbandRelationship);
-                }
-            }
-        }
-
-        // Handle Wife relationship
-        if (request.WifeId != existingWifeId)
-        {
-            // Remove old wife relationship
-            if (existingWifeId.HasValue)
-            {
-                var oldWifeRelationship = _context.Relationships
-                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingWifeId.Value && r.Type == RelationshipType.Husband);
-                if (oldWifeRelationship != null)
-                {
-                    member.SourceRelationships.Remove(oldWifeRelationship); // Explicitly remove from navigation property
-                    _context.Relationships.Remove(oldWifeRelationship);
-                }
-            }
-            // Add new wife relationship
-            if (request.WifeId.HasValue)
-            {
-                var wife = await _context.Members.FindAsync(request.WifeId.Value);
-                if (wife != null)
-                {
-                    var newWifeRelationship = member.AddWifeRelationship(wife.Id);
-                    _context.Relationships.Add(newWifeRelationship);
-                }
-            }
-        }
-
-        // Synchronize Birth and Death events
-        await SyncLifeEvents(request, member, cancellationToken);
-
-        // Update denormalized relationship fields after all relationships are established
-        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
+        // Synchronize Birth and Death events (now handled by MemberUpdatedEventHandler)
 
         member.AddDomainEvent(new MemberUpdatedEvent(member));
-        member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
 
         await _context.SaveChangesAsync(cancellationToken);
 
+        // Cập nhật các mối quan hệ bằng phương thức mới
+        await _memberRelationshipService.UpdateMemberRelationshipsAsync(
+            member.Id,
+            request.FatherId,
+            request.MotherId,
+            request.HusbandId,
+            request.WifeId,
+            cancellationToken
+        );
+
         return Result<Guid>.Success(member.Id);
-    }
-
-    private async Task SyncLifeEvents(UpdateMemberCommand request, Domain.Entities.Member member, CancellationToken cancellationToken)
-    {
-        // Find existing birth and death events for the member
-        var birthEvent = await _context.Events
-            .Include(e => e.EventMembers)
-            .FirstOrDefaultAsync(e => e.Type == EventType.Birth && e.EventMembers.Any(em => em.MemberId == member.Id), cancellationToken);
-
-        var deathEvent = await _context.Events
-            .Include(e => e.EventMembers)
-            .FirstOrDefaultAsync(e => e.Type == EventType.Death && e.EventMembers.Any(em => em.MemberId == member.Id), cancellationToken);
-
-        // Handle Birth Event
-        if (request.DateOfBirth.HasValue)
-        {
-            if (birthEvent != null)
-            {
-                // Update existing birth event
-                birthEvent.UpdateEvent(birthEvent.Name, birthEvent.Code, birthEvent.Description, request.DateOfBirth.Value, birthEvent.EndDate, birthEvent.Location, birthEvent.Type, birthEvent.Color);
-            }
-            else
-            {
-                // Create new birth event
-                var newBirthEvent = new Domain.Entities.Event(_localizer["Birth of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, request.DateOfBirth.Value);
-                newBirthEvent.AddEventMember(member.Id);
-                _context.Events.Add(newBirthEvent);
-            }
-        }
-        else if (birthEvent != null)
-        {
-            // Remove existing birth event if date is cleared
-            _context.Events.Remove(birthEvent);
-        }
-
-        // Handle Death Event
-        if (request.DateOfDeath.HasValue)
-        {
-            if (deathEvent != null)
-            {
-                // Update existing death event
-                deathEvent.UpdateEvent(deathEvent.Name, deathEvent.Code, deathEvent.Description, request.DateOfDeath.Value, deathEvent.EndDate, deathEvent.Location, deathEvent.Type, deathEvent.Color);
-            }
-            else
-            {
-                // Create new death event
-                var newDeathEvent = new Domain.Entities.Event(_localizer["Death of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, request.DateOfDeath.Value);
-                newDeathEvent.AddEventMember(member.Id);
-                _context.Events.Add(newDeathEvent);
-            }
-        }
-        else if (deathEvent != null)
-        {
-            // Remove existing death event if date is cleared
-            _context.Events.Remove(deathEvent);
-        }
     }
 }

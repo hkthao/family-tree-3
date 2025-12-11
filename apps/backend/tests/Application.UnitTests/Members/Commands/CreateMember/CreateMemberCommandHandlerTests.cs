@@ -72,7 +72,11 @@ public class CreateMemberCommandHandlerTests : TestBase
             LastName = "Doe",
             FamilyId = familyId,
             Gender = "Male",
-            AvatarBase64 = avatarBase64 // Use AvatarBase64
+            AvatarBase64 = avatarBase64,
+            FatherId = Guid.NewGuid(), // Add father to test relationship service call
+            MotherId = Guid.NewGuid(), // Add mother
+            HusbandId = null,
+            WifeId = Guid.NewGuid() // Add wife
         };
 
         // Act
@@ -90,6 +94,14 @@ public class CreateMemberCommandHandlerTests : TestBase
             events.Any(e => e is Domain.Events.Members.MemberCreatedEvent)
         )), Times.Once);
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Verify upload was called
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            It.IsAny<Guid>(),
+            command.FatherId,
+            command.MotherId,
+            command.HusbandId,
+            command.WifeId,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
@@ -115,6 +127,14 @@ public class CreateMemberCommandHandlerTests : TestBase
         result.Error.Should().Be(ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            It.IsAny<Guid>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Never);
     }
 
     [Fact]
@@ -138,6 +158,14 @@ public class CreateMemberCommandHandlerTests : TestBase
         result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Family with ID {nonExistentFamilyId}"));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            It.IsAny<Guid>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<Guid?>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Never);
     }
 
     [Fact]
@@ -170,6 +198,14 @@ public class CreateMemberCommandHandlerTests : TestBase
         createdMember!.Code.Should().NotBeNullOrEmpty();
         createdMember.Code.Should().StartWith("MEM-");
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            It.IsAny<Guid>(),
+            null,
+            null,
+            null,
+            null,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
@@ -209,5 +245,13 @@ public class CreateMemberCommandHandlerTests : TestBase
         oldRootAfter.Should().NotBeNull();
         oldRootAfter!.IsRoot.Should().BeFalse();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            It.IsAny<Guid>(),
+            null,
+            null,
+            null,
+            null,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 }

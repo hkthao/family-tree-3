@@ -65,9 +65,10 @@ public static class DependencyInjection
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
+        services.AddScoped<IFamilyTreeService, FamilyTreeService>(); // NEW: Register IFamilyTreeService
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
-        services.AddScoped<Domain.Interfaces.IRelationshipGraph, Infrastructure.Services.RelationshipGraph>();
-        services.AddScoped<Domain.Interfaces.IRelationshipRuleEngine, Infrastructure.Services.RelationshipRuleEngine>();
+        services.AddScoped<Domain.Interfaces.IRelationshipGraph, RelationshipGraph>();
+        services.AddScoped<Domain.Interfaces.IRelationshipRuleEngine, RelationshipRuleEngine>();
 
 
         // Register Face API Service and configure its HttpClient
@@ -113,7 +114,7 @@ public static class DependencyInjection
         services.AddSingleton(Options.Create(novuSettings));
 
         // 2. Register NovuSDK
-        services.AddSingleton<NovuSDK>(provider =>
+        services.AddSingleton(provider =>
         {
             var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
             var logger = provider.GetRequiredService<ILogger<NovuSDK>>();

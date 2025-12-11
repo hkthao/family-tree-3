@@ -1,5 +1,3 @@
-using System;
-
 namespace backend.Domain.Entities;
 
 /// <summary>

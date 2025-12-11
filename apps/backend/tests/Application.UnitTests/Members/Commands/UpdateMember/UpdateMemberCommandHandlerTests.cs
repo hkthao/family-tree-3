@@ -107,19 +107,11 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var initialFather = new Member("Initial", "Father", "IF", familyId, false) { Id = initialFatherId };
         var newFather = new Member("New", "Father", "NF", familyId, false) { Id = newFatherId };
 
-        family.AddMember(member);
-        family.AddMember(initialFather);
-        family.AddMember(newFather);
-        member.AddFatherRelationship(initialFather.Id);
-
         _context.Families.Add(family);
+        _context.Members.AddRange(member, initialFather, newFather);
         await _context.SaveChangesAsync();
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
-
-        // Update mediator mock to use CreateFamilyMediaCommand
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         var command = new UpdateMemberCommand
         {
@@ -127,19 +119,25 @@ public class UpdateMemberCommandHandlerTests : TestBase
             FirstName = "John",
             LastName = "Doe",
             FamilyId = familyId,
-            FatherId = newFatherId
+            FatherId = newFatherId,
+            MotherId = null, // Ensure other relationships are not set
+            HusbandId = null,
+            WifeId = null
         };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        updatedMember.Should().NotBeNull();
-        updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newFatherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Father);
-        updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialFatherId);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            memberId,
+            newFatherId,
+            null,
+            null,
+            null,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
@@ -155,19 +153,11 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var initialMother = new Member("Initial", "Mother", "IM", familyId, false) { Id = initialMotherId };
         var newMother = new Member("New", "Mother", "NM", familyId, false) { Id = newMotherId };
 
-        family.AddMember(member);
-        family.AddMember(initialMother);
-        family.AddMember(newMother);
-        member.AddMotherRelationship(initialMother.Id);
-
         _context.Families.Add(family);
+        _context.Members.AddRange(member, initialMother, newMother);
         await _context.SaveChangesAsync();
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
-
-        // Update mediator mock to use CreateFamilyMediaCommand
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         var command = new UpdateMemberCommand
         {
@@ -175,19 +165,25 @@ public class UpdateMemberCommandHandlerTests : TestBase
             FirstName = "John",
             LastName = "Doe",
             FamilyId = familyId,
-            MotherId = newMotherId
+            FatherId = null, // Ensure other relationships are not set
+            MotherId = newMotherId,
+            HusbandId = null,
+            WifeId = null
         };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        updatedMember.Should().NotBeNull();
-        updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newMotherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Mother);
-        updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialMotherId);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            memberId,
+            null,
+            newMotherId,
+            null,
+            null,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
@@ -196,29 +192,20 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var initialSpouseId = Guid.NewGuid();
         var newSpouseId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
-        var member = new Member("John", "Doe", "JD", familyId, false) { Id = memberId };
-        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null, null, null, null, false);
-        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null, false) { Id = initialSpouseId };
-        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null, false) { Id = newSpouseId };
-
-        family.AddMember(member);
-        family.AddMember(initialSpouse);
-        family.AddMember(newSpouse);
-        var rel1 = member.AddWifeRelationship(initialSpouse.Id); // Changed
-        _context.Relationships.Add(rel1); // Added rel1 to context
-
+        var member = new Member("John", "Doe", "JD", familyId);
+        member.Id = memberId;
+        member.UpdateGender("Male");
+        var newSpouse = new Member("New", "Spouse", "NS", familyId);
+        newSpouse.Id = newSpouseId;
+        newSpouse.UpdateGender("Female");
 
         _context.Families.Add(family);
+        _context.Members.AddRange(member, newSpouse);
         await _context.SaveChangesAsync();
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
-
-        // Update mediator mock to use CreateFamilyMediaCommand
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
 
         var command = new UpdateMemberCommand
         {
@@ -226,7 +213,10 @@ public class UpdateMemberCommandHandlerTests : TestBase
             FirstName = "John",
             LastName = "Doe",
             FamilyId = familyId,
-            WifeId = newSpouseId // Changed to WifeId
+            FatherId = null,
+            MotherId = null,
+            HusbandId = null,
+            WifeId = newSpouseId // Updating the wife
         };
 
         // Act
@@ -234,19 +224,14 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-
-        // Reload members after the command has completed and saved changes
-        var updatedMember = await _context.Members
-            .Include(m => m.SourceRelationships)
-            .Include(m => m.TargetRelationships)
-            .FirstOrDefaultAsync(m => m.Id == memberId);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        updatedMember.Should().NotBeNull();
-        updatedMember!.SourceRelationships.Should().ContainSingle(r => r.SourceMemberId == memberId && r.TargetMemberId == newSpouseId && r.Type == backend.Domain.Enums.RelationshipType.Husband); // Changed assertion
-        updatedMember.SourceRelationships.Should().NotContain(r => r.SourceMemberId == memberId && r.TargetMemberId == initialSpouseId); // Changed assertion
-        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _memberRelationshipServiceMock.Verify(s => s.UpdateMemberRelationshipsAsync(
+            memberId,
+            null,
+            null,
+            null,
+            newSpouseId,
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]

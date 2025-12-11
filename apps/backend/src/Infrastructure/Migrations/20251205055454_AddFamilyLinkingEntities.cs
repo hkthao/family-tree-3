@@ -111,7 +111,7 @@ namespace backend.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_family_links_family1_id_family2_id",
                 table: "family_links",
-                columns: new[] { "family1_id", "family2_id" },
+                columns: ["family1_id", "family2_id"],
                 unique: true);
 
             migrationBuilder.CreateIndex(
