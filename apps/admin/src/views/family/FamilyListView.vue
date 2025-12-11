@@ -1,11 +1,21 @@
 <template>
   <div data-testid="family-list-view">
     <FamilySearch id="tour-step-1" @update:filters="handleFilterUpdate" />
-    <FamilyList id="tour-step-2" :items="list.items" :total-items="familyStore.list.totalItems"
-      :loading="familyStore.list.loading" :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
-      @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
-      @update:search="handleSearchUpdate" @view="navigateToFamilyDetail" @delete="confirmDelete"
-      @create="openAddDrawer" />
+    <FamilyList
+      id="tour-step-2"
+      :items="families"
+      :total-items="totalItems"
+      :loading="loading"
+      :items-per-page="itemsPerPage"
+      :search="familyListSearchQuery"
+      :sortBy="sortBy"
+      @update:options="handleListOptionsUpdate"
+      @update:itemsPerPage="setItemsPerPage($event)"
+      @update:search="handleSearchUpdate"
+      @view="navigateToFamilyDetail"
+      @delete="confirmDelete"
+      @create="openAddDrawer"
+    />
 
     <!-- Add Family Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleFamilyAddClosed">
@@ -15,28 +25,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
+import { ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFamilyStore } from '@/stores/family.store';
-import { FamilySearch, FamilyList } from '@/components/family'; // Removed FamilyForm
+import { FamilySearch, FamilyList } from '@/components/family';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer, useFamilyTour } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useRouter } from 'vue-router';
 import FamilyAddView from './FamilyAddView.vue';
+import { useFamilyListFilters, useFamiliesQuery, useDeleteFamilyMutation } from '@/composables/family';
 
 const router = useRouter();
 const { t } = useI18n();
-const familyStore = useFamilyStore();
-const { list } = storeToRefs(familyStore);
+
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 useFamilyTour();
 
-const currentFilters = ref<FamilyFilter>({});
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+const familyListFiltersComposables = useFamilyListFilters();
+const {
+  searchQuery: familyListSearchQuery,
+  page,
+  itemsPerPage,
+  sortBy,
+  filters,
+} = toRefs(familyListFiltersComposables);
+
+const {
+  setPage,
+  setItemsPerPage,
+  setSortBy,
+  setSearchQuery,
+  setFilters,
+} = familyListFiltersComposables;
+
+const { families, totalItems, loading, refetch } = useFamiliesQuery(filters);
+const { mutate: deleteFamily } = useDeleteFamilyMutation();
 
 const {
   addDrawer,
@@ -44,20 +69,16 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const handleFilterUpdate = async (filters: FamilyFilter) => {
-  currentFilters.value = filters;
-  familyStore.list.filter = currentFilters.value;
-  await familyStore._loadItems()
+const handleFilterUpdate = (newFilters: FamilyFilter) => {
+  setFilters(newFilters);
 };
 
 const navigateToFamilyDetail = (item: Family) => {
   router.push({ name: 'FamilyDetail', params: { id: item.id } });
 }
 
-const handleSearchUpdate = async (search: string) => {
-  currentFilters.value.searchQuery = search;
-  familyStore.list.filter = currentFilters.value;
-  await familyStore._loadItems();
+const handleSearchUpdate = (search: string) => {
+  setSearchQuery(search);
 };
 
 const handleListOptionsUpdate = (options: {
@@ -65,7 +86,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  familyStore.setListOptions(options);
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
 
 const confirmDelete = async (family: Family) => {
@@ -78,22 +101,26 @@ const confirmDelete = async (family: Family) => {
   });
 
   if (confirmed) {
-    try {
-      await familyStore.deleteItem(family.id);
-      showSnackbar(
-        t('family.management.messages.deleteSuccess'),
-        'success',
-      );
-    } catch (error) {
-      showSnackbar(
-        t('family.management.messages.deleteError'),
-        'error',
-      );
-    }
+    deleteFamily(family.id, {
+      onSuccess: () => {
+        showSnackbar(
+          t('family.management.messages.deleteSuccess'),
+          'success',
+        );
+        refetch(); // Refetch the list after successful deletion
+      },
+      onError: () => {
+        showSnackbar(
+          t('family.management.messages.deleteError'),
+          'error',
+        );
+      },
+    });
   }
 };
 
 const handleFamilyAddClosed = () => {
   closeAllDrawers(); // Close the drawer on cancel
+  refetch(); // Refetch the list in case a family was added
 };
 </script>

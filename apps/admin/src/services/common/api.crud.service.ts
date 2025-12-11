@@ -15,7 +15,8 @@ export class ApiCrudService<T extends { id?: string }> implements ICrudService<T
       pageSize: options.itemsPerPage,
     };
     if (options.sortBy && options.sortBy.length > 0) {
-      params.orderBy = options.sortBy.map(s => `${s.key} ${s.order}`).join(',');
+      params.sortBy = options.sortBy[0].key;
+      params.sortOrder = options.sortBy[0].order;
     }
 
     for (const key in filters) {

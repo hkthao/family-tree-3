@@ -27,8 +27,9 @@ export interface FamilyFilter {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;
   familyId?: string;
-  sortBy?: string; // Column name to sort by
-  sortOrder?: 'asc' | 'desc'; // Sort order
+  page?: number;
+  itemsPerPage?: number;
+  sortBy?: { key: string; order: 'asc' | 'desc' }[];
 }
 
 export interface FamilyUser {

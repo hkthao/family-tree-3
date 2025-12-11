@@ -1,7 +1,7 @@
 <template>
   <v-data-table-server :items-per-page="props.itemsPerPage" @update:itemsPerPage="emit('update:itemsPerPage', $event)"
     :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading" item-value="id"
-    @update:options="emit('update:options', $event)" elevation="1">
+    :sort-by="props.sortBy" @update:options="emit('update:options', $event)" elevation="1">
     <template #top>
       <ListToolbar
         :search="searchQuery"
@@ -96,6 +96,7 @@ const props = defineProps<{
   loading: boolean;
   itemsPerPage: number;
   search: string;
+  sortBy: { key: string; order: 'asc' | 'desc' }[];
 }>();
 
 const emit = defineEmits([
@@ -105,6 +106,7 @@ const emit = defineEmits([
   'update:itemsPerPage',
   'create',
   'update:search',
+  'update:sortBy',
 ]);
 
 const { t } = useI18n();
@@ -131,24 +133,28 @@ const headers = computed<DataTableHeader[]>(() => [
   {
     title: t('family.management.headers.name'),
     key: 'name',
+    sortable: true,
     width: 'auto',
     align: 'start',
   },
   {
     title: t('family.management.headers.code'),
     key: 'code',
+    sortable: true,
     width: '120px',
     align: 'start',
   },
   {
     title: t('family.management.headers.totalMembers'),
     key: 'totalMembers',
+    sortable: true,
     width: '120px',
     align: 'center',
   },
   {
     title: t('family.management.headers.totalGenerations'),
     key: 'totalGenerations',
+    sortable: true,
     width: '120px',
     align: 'center',
   },
@@ -157,6 +163,7 @@ const headers = computed<DataTableHeader[]>(() => [
   {
     title: t('family.management.headers.visibility'),
     key: 'visibility',
+    sortable: true,
     width: '120px',
     align: 'center',
   },

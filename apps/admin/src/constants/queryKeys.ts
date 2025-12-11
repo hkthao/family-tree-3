@@ -1,3 +1,5 @@
+import type { FamilyFilter } from '@/types';
+
 export const queryKeys = {
   dashboard: {
     all: ['dashboard'] as const,
@@ -16,6 +18,10 @@ export const queryKeys = {
   },
   userSettings: {
     preferences: ['userSettings', 'preferences'] as const,
+  },
+  families: {
+    all: ['families'] as const,
+    list: (filters?: FamilyFilter) => [...queryKeys.families.all, 'list', filters] as const,
   },
 };
 

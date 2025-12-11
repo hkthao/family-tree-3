@@ -51,7 +51,7 @@ const internalSearch = ref(props.search);
 watch(
   () => internalSearch.value,
   (newValue) => {
-    emit('update:search', newValue);
+    emit('update:search', newValue ?? '');
   },
 );
 
