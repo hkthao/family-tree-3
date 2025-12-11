@@ -25,11 +25,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs } from 'vue';
+import { toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilySearch, FamilyList } from '@/components/family';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer, useFamilyTour } from '@/composables';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useRouter } from 'vue-router';

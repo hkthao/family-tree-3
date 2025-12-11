@@ -34,6 +34,7 @@ import FamilyEditView from '@/views/family/FamilyEditView.vue';
 import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { Family } from '@/types';
 import { useAuth, useCrudDrawer } from '@/composables';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 
 const { t } = useI18n();
 const router = useRouter();
