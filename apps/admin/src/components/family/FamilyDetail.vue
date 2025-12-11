@@ -1,6 +1,6 @@
 <template>
   <div>
-    <FamilyForm :initial-family-data="family" :read-only="props.readOnly" :title="t('family.detail.title')" />
+    <FamilyForm :initial-family-data="props.familyData" :read-only="props.readOnly" :title="t('family.detail.title')" />
     <v-card-actions class="justify-end pa-0">
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
@@ -12,99 +12,47 @@
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
-
-    <BaseCrudDrawer v-model="editDrawer" :title="t('family.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-      <FamilyEditView v-if="family && editDrawer" :initial-family="family" @close="closeEditDrawer"
-        @saved="handleFamilySaved" />
-    </BaseCrudDrawer>
-
-    <BaseCrudDrawer v-model="aiDrawer" :title="t('aiInput.title')" icon="mdi-robot-happy-outline" @close="closeAiDrawer">
-      <NLEditorView v-if="aiDrawer" :family-id="props.familyId" @close="closeAiDrawer" />
-    </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
-import FamilyEditView from '@/views/family/FamilyEditView.vue';
-import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { Family } from '@/types';
-import { useAuth, useCrudDrawer } from '@/composables';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { useAuth } from '@/composables';
 
 const { t } = useI18n();
 const router = useRouter();
-const familyStore = useFamilyStore();
 const { isAdmin, isFamilyManager } = useAuth();
 
 const props = defineProps<{
   familyId: string;
   readOnly: boolean;
+  familyData?: Family; // New prop to receive family data
 }>();
 
-const emit = defineEmits(['familyUpdated', 'edit-family']); // Add emit for edit-family
+const emit = defineEmits(['openEditDrawer', 'openAiDrawer']);
 
 const canManageFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
 
-const family = ref<Family | undefined>(undefined);
-
-const {
-  editDrawer,
-  addDrawer: aiDrawer, // Rename addDrawer to aiDrawer for clarity in this context
-  openEditDrawer: openEditDrawerComposable,
-  openAddDrawer: openAiDrawerComposable, // Rename openAddDrawer to openAiDrawer
-  closeEditDrawer,
-  closeAddDrawer: closeAiDrawer, // Rename closeAddDrawer to closeAiDrawer
-} = useCrudDrawer<string>();
+// The local 'family' ref is no longer needed as data comes via prop
+// const family = ref<Family | undefined>(undefined);
 
 const openEditDrawer = () => {
-  if (family.value) {
-    openEditDrawerComposable(family.value.id, family.value);
-  }
+  emit('openEditDrawer', props.familyId);
 };
 
 const openAiDrawer = () => {
-  openAiDrawerComposable();
-};
-
-const loadFamily = async () => {
-  if (props.familyId) {
-    await familyStore.getById(props.familyId);
-    if (!familyStore.error) {
-      family.value = familyStore.detail.item as Family;
-    } else {
-      family.value = undefined; // Clear family on error
-    }
-  }
-};
-
-const handleFamilySaved = async () => {
-  closeEditDrawer(); // Close the edit drawer
-  await loadFamily(); // Reload family data after saving
-  emit('familyUpdated'); // Notify parent that family data has been updated
+  emit('openAiDrawer', props.familyId);
 };
 
 const closeView = () => {
   router.push('/family');
 };
 
-onMounted(() => {
-  loadFamily();
-});
-
-watch(
-  () => props.familyId,
-  (newId) => {
-    if (newId) {
-      loadFamily();
-    }
-  },
-);
 
 </script>

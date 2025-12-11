@@ -22,7 +22,7 @@
 
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyDetail :family-id="familyId" :read-only="readOnlyValue" />
+          <FamilyDetail :family-id="familyId" :read-only="readOnlyValue" :family-data="family" @openEditDrawer="handleOpenEditDrawer" @openAiDrawer="handleOpenAiDrawer" />
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -73,6 +73,15 @@
       </v-window>
     </v-card-text>
   </v-card>
+
+  <BaseCrudDrawer v-model="editDrawer" :title="t('family.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
+    <FamilyEditView v-if="family && editDrawer" :initial-family="family" @close="closeEditDrawer"
+      @saved="handleFamilySaved" />
+  </BaseCrudDrawer>
+
+  <BaseCrudDrawer v-model="aiDrawer" :title="t('aiInput.title')" icon="mdi-robot-happy-outline" @close="closeAiDrawer">
+    <NLEditorView v-if="aiDrawer" :family-id="familyId" @close="closeAiDrawer" />
+  </BaseCrudDrawer>
 </template>
 
 <script setup lang="ts">
@@ -86,18 +95,24 @@ import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
-import { useAuth } from '@/composables';
+import { useAuth, useCrudDrawer } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
-import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents'; // Import useUpcomingEvents
+import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents';
+import FamilyEditView from '@/views/family/FamilyEditView.vue';
+import NLEditorView from '@/views/member/NLEditorView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { useFamilyQuery } from '@/composables/family'; // Import useFamilyQuery
 
 const { t } = useI18n();
 const route = useRoute();
 const { isAdmin, isFamilyManager } = useAuth();
 
 const familyId = computed(() => route.params.id as string);
-const readOnlyValue = true; // Use a plain boolean const
+const readOnlyValue = true;
 
 const { upcomingEvents: familyEvents, isLoading: isLoadingFamilyEvents } = useUpcomingEvents(familyId);
+
+const { family, refetch: refetchFamilyData } = useFamilyQuery(familyId); // Fetch family data
 
 const canViewFaceDataTab = computed(() => {
   return isAdmin.value || isFamilyManager.value;
@@ -106,6 +121,28 @@ const canViewFaceDataTab = computed(() => {
 const canManageFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
+
+const {
+  editDrawer,
+  addDrawer: aiDrawer,
+  openEditDrawer: openEditDrawerComposable,
+  openAddDrawer: openAiDrawerComposable,
+  closeEditDrawer,
+  closeAddDrawer: closeAiDrawer,
+} = useCrudDrawer<string>();
+
+const handleOpenEditDrawer = () => {
+  openEditDrawerComposable(familyId.value, family.value);
+};
+
+const handleOpenAiDrawer = () => {
+  openAiDrawerComposable();
+};
+
+const handleFamilySaved = () => {
+  refetchFamilyData(); // Refetch family data after update
+  closeEditDrawer(); // Close the edit drawer
+};
 
 interface TabItem {
   value: string;
@@ -123,7 +160,7 @@ const allTabDefinitions = computed(() => [
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
-  { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean }, // NEW: Family Media Tab
+  { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
   // Keeping commented out tabs as they were in the original file
   // { value: 'family-link-requests', text: t('familyLinkRequest.list.title'), condition: canManageFamily.value as boolean },
   // { value: 'family-linking', text: t('familyLink.list.title'), condition: canManageFamily.value as boolean },
@@ -135,17 +172,16 @@ const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.c
 
 const visibleTabs = ref<TabItem[]>([]);
 const moreTabs = ref<TabItem[]>([]);
-const selectedTab = ref('general'); // Initialize with a default value
+const selectedTab = ref('general');
 
-const MAX_VISIBLE_TABS = 4; // Number of tabs to show initially
-const MAX_FIXED_TABS = 3; // Number of initial tabs that are fixed and cannot be swapped
+const MAX_VISIBLE_TABS = 4;
+const MAX_FIXED_TABS = 3;
 
 // Function to initialize visible and more tabs
 const initializeTabs = (currentSelectedTabValue: string | null) => {
   const activeTabs = availableTabs.value;
   let actualSelectedTabValue = currentSelectedTabValue;
 
-  // Ensure actualSelectedTabValue is valid and among activeTabs, default if not
   if (!actualSelectedTabValue || !activeTabs.some(tab => tab.value === actualSelectedTabValue)) {
     actualSelectedTabValue = activeTabs.length > 0 ? activeTabs[0].value : 'general';
   }
@@ -154,32 +190,23 @@ const initializeTabs = (currentSelectedTabValue: string | null) => {
   const newVisible: TabItem[] = [];
   const newMore: TabItem[] = [];
 
-  // 1. Add fixed tabs to newVisible
-  // Take a slice to avoid modifying activeTabs directly for the loop conditions
   const fixedTabs = activeTabs.slice(0, MAX_FIXED_TABS);
   newVisible.push(...fixedTabs);
 
-  // 2. Determine remaining tabs (candidates for the 4th swappable tab and more)
   let remainingTabs = activeTabs.slice(MAX_FIXED_TABS);
 
-  // 3. Handle the 4th visible tab (the swappable one)
-  // Ensure we only try to fill the 4th slot if it's available and there are tabs to fill it with.
   if (newVisible.length < MAX_VISIBLE_TABS && remainingTabs.length > 0) {
     const selectedTabInRemaining = remainingTabs.find(tab => tab.value === actualSelectedTabValue);
     const selectedTabIsFixed = fixedTabs.some(tab => tab.value === actualSelectedTabValue);
 
     if (selectedTabInRemaining && !selectedTabIsFixed) {
-      // If the currently selected tab is among the remaining and not a fixed tab,
-      // bring it to the 4th visible position.
       newVisible.push(selectedTabInRemaining);
       remainingTabs = remainingTabs.filter(tab => tab.value !== actualSelectedTabValue);
     } else {
-      // Otherwise, just take the next available tab from remaining as the 4th tab.
       newVisible.push(remainingTabs.shift()!);
     }
   }
 
-  // 4. Add any leftover tabs (including the one swapped out if selectedTab was fixed) to newMore
   newMore.push(...remainingTabs);
 
   visibleTabs.value = newVisible;
@@ -188,39 +215,31 @@ const initializeTabs = (currentSelectedTabValue: string | null) => {
 
 // Function to handle selecting a tab from the "more" menu
 const selectMoreTab = (tabToSelect: TabItem) => {
-  // If the tab is already visible and it's a fixed tab, simply select it.
-  // If it's the 4th tab (swappable), it will be handled by the swap logic below.
   if (visibleTabs.value.some(tab => tab.value === tabToSelect.value) && visibleTabs.value.indexOf(tabToSelect) < MAX_FIXED_TABS) {
     selectedTab.value = tabToSelect.value;
     return;
   }
 
-  // Create new arrays to ensure reactivity updates correctly
   const newVisibleTabs = [...visibleTabs.value];
   const newMoreTabs = [...moreTabs.value];
 
-  // The swappable tab is at index MAX_FIXED_TABS (which is 3 for the 4th tab)
   const swappableTabIndex = MAX_FIXED_TABS;
   let swappedOutTab: TabItem | undefined;
 
-  // 1. Remove the current swappable tab from visibleTabs and add to moreTabs
   if (newVisibleTabs.length > swappableTabIndex) {
-    swappedOutTab = newVisibleTabs.splice(swappableTabIndex, 1)[0]; // Remove the 4th tab
+    swappedOutTab = newVisibleTabs.splice(swappableTabIndex, 1)[0];
     if (swappedOutTab) {
-      newMoreTabs.push(swappedOutTab); // Add it to newMoreTabs
+      newMoreTabs.push(swappedOutTab);
     }
   }
 
-  // 2. Remove selected tab from newMoreTabs (if it exists there)
   const indexInMore = newMoreTabs.findIndex(tab => tab.value === tabToSelect.value);
   if (indexInMore !== -1) {
     newMoreTabs.splice(indexInMore, 1);
   }
 
-  // 3. Insert the newly selected tab into the 4th position of visibleTabs
   newVisibleTabs.splice(swappableTabIndex, 0, tabToSelect);
   
-  // Reassign the refs with the new arrays
   visibleTabs.value = newVisibleTabs;
   moreTabs.value = newMoreTabs;
 
@@ -234,17 +253,14 @@ onMounted(() => {
   initializeTabs(savedTab);
 });
 
-// Watch selectedTab to save to local storage and re-arrange tabs if necessary
 watch(selectedTab, (newTab) => {
   localStorage.setItem('familyDetailSelectedTab', newTab);
-  // If the new tab is not in the currently visible tabs, re-initialize to make it visible
   if (!visibleTabs.value.some(tab => tab.value === newTab)) {
     initializeTabs(newTab);
   }
 });
 
-// Watch availableTabs to react to changes in conditions (e.g., user roles change)
 watch(availableTabs, () => {
-  initializeTabs(selectedTab.value); // Re-initialize if available tabs change
-}, { deep: true }); // Deep watch is important for array changes
+  initializeTabs(selectedTab.value);
+}, { deep: true });
 </script>
