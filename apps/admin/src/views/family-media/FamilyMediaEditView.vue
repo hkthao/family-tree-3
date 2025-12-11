@@ -20,7 +20,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyMediaStore } from '@/stores/familyMedia.store';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 interface FamilyMediaEditViewProps {
   familyMediaId: string;

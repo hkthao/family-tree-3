@@ -31,7 +31,7 @@ import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 interface FaceRecognitionViewProps {
   familyId?: string;

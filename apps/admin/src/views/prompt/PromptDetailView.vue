@@ -21,10 +21,8 @@ import { useI18n } from 'vue-i18n';
 import { usePromptStore } from '@/stores/prompt.store';
 import { PromptForm } from '@/components/prompt';
 import type { Prompt } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { storeToRefs } from 'pinia';
-import { useAuth } from '@/composables/useAuth';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 interface PromptDetailViewProps {
   promptId: string;

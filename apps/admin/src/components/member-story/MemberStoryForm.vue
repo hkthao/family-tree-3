@@ -122,7 +122,7 @@ import type { MemberStoryDto } from '@/types/memberStory';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
-import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
+import { useMemberStoryForm } from '@/composables';
 import { LifeStage } from '@/types/enums'; // Import enums
 
 const props = defineProps<{

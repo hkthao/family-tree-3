@@ -30,7 +30,7 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import type { FamilyDict } from '@/types';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 

@@ -22,7 +22,7 @@ import { usePromptStore } from '@/stores/prompt.store';
 import { PromptForm } from '@/components/prompt';
 import type { Prompt } from '@/types';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 interface PromptEditViewProps {
   promptId: string;

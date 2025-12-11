@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import type { UserProfile } from '@/types';
-import { useUserAutocomplete } from '@/composables/useUserAutocomplete';
+import { useUserAutocomplete } from '@/composables';
 import { ref, watch, onMounted, computed } from 'vue';
 
 interface UserAutocompleteProps {

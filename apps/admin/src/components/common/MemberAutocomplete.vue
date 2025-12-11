@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import type { Member } from '@/types';
 import RemoteAutocomplete from './RemoteAutocomplete.vue';
-import { useMemberAutocomplete } from '@/composables/useMemberAutocomplete';
+import { useMemberAutocomplete } from '@/composables';
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 interface MemberAutocompleteProps {

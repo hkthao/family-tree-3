@@ -67,7 +67,7 @@ import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps({
   familyId: { type: String, default: null },

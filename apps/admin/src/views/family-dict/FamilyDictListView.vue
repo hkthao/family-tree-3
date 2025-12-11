@@ -1,11 +1,11 @@
 <template>
   <div data-testid="family-dict-list-view">
-    <FamilyDictSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
+    <FamilyDictSearch v-if="!computedHideSearch" @update:filters="handleFilterUpdate" />
 
     <FamilyDictList :items="familyDictStore.list.items" :total-items="familyDictStore.list.totalItems"
       :loading="list.loading" :search="searchQuery" @update:search="handleSearchUpdate"
       @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer"
-      @delete="confirmDelete" @create="openAddDrawer" @import="openImportDialog" :read-only="props.readOnly">
+      @delete="confirmDelete" @create="openAddDrawer" @import="openImportDialog" :read-only="computedReadOnly">
     </FamilyDictList>
 
     <!-- Edit FamilyDict Drawer -->
@@ -34,24 +34,23 @@
 <script setup lang="ts">
 import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictSearch, FamilyDictList } from '@/components/family-dict';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
-import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
-import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
-import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue'; // Import FamilyDictImportDialog
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { FamilyDictFilter, FamilyDict } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import { onMounted, ref, computed } from 'vue';
+
+// Component Imports
+import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
+import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
+import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
+import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 
 interface FamilyDictListViewProps {
   readOnly?: boolean;
   hideSearch?: boolean;
 }
-
 const props = defineProps<FamilyDictListViewProps>();
 
 const { t } = useI18n();
@@ -59,6 +58,9 @@ const familyDictStore = useFamilyDictStore();
 const { list } = storeToRefs(familyDictStore);
 const searchQuery = ref('');
 const importDialog = ref(false); // State for import dialog
+
+const computedHideSearch = computed(() => props.hideSearch);
+const computedReadOnly = computed(() => props.readOnly);
 
 const {
   addDrawer,

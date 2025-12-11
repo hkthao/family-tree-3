@@ -43,7 +43,7 @@ import { useMemberFaceStore } from '@/stores/member-face.store';
 import { useFaceStore } from '@/stores/face.store'; // NEW
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face'; // NEW
 import type { DetectedFace, MemberFace } from '@/types'; // NEW
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // NEW
 
 interface MemberFaceAddViewProps {

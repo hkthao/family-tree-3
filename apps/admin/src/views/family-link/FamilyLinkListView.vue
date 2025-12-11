@@ -13,8 +13,7 @@
 
 <script setup lang="ts">
 import { useFamilyLinkStore } from '@/stores';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { nextTick, onMounted, watch } from 'vue';

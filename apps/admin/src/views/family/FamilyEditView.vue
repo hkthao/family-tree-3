@@ -30,7 +30,7 @@ import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;

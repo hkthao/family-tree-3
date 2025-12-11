@@ -52,7 +52,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import { LifeStage } from '@/types/enums';

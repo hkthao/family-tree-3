@@ -22,7 +22,7 @@ import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 const emit = defineEmits(['close', 'saved']);
 

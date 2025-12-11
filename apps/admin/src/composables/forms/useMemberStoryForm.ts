@@ -2,7 +2,7 @@
 import { ref, watch, computed, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '../ui/useGlobalSnackbar';
 import type { DetectedFace } from '@/types';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 

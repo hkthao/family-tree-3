@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import type { Family } from '@/types';
 import RemoteAutocomplete from './RemoteAutocomplete.vue';
-import { useFamilyAutocomplete } from '@/composables/useFamilyAutocomplete';
+import { useFamilyAutocomplete } from '@/composables';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 interface FamilyAutocompleteProps {

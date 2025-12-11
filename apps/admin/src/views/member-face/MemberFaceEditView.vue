@@ -23,7 +23,7 @@ import { useMemberFaceStore } from '@/stores/member-face.store';
 import { MemberFaceForm } from '@/components/member-face'; // Will be created later
 import type { MemberFace } from '@/types';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 interface MemberFaceEditViewProps {
   memberFaceId: string;

@@ -28,17 +28,11 @@
 <script setup lang="ts">
 import { usePromptStore } from '@/stores/prompt.store';
 import { PromptList } from '@/components/prompt';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import PromptEditView from '@/views/prompt/PromptEditView.vue';
-import PromptAddView from '@/views/prompt/PromptAddView.vue';
-import PromptDetailView from '@/views/prompt/PromptDetailView.vue';
-import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useCrudDrawer } from '@/composables/useCrudDrawer';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { Prompt } from '@/types';
+import { useI18n } from 'vue-i18n'; // Import useI18n
+import { storeToRefs } from 'pinia'; // Import storeToRefs
+import { ref, onMounted } from 'vue'; // Import ref and onMounted
 
 const { t } = useI18n();
 const promptStore = usePromptStore();

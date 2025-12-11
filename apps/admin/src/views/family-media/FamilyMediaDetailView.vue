@@ -31,8 +31,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyMediaStore } from '@/stores/familyMedia.store';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { MediaType } from '@/types/enums';
 
 interface FamilyMediaDetailViewProps {

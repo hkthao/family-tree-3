@@ -20,15 +20,12 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilySearch, FamilyList } from '@/components/family'; // Removed FamilyForm
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer, useFamilyTour } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
-import { useFamilyTour } from '@/composables';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; 
 import { useRouter } from 'vue-router';
-import FamilyAddView from './FamilyAddView.vue'; // NEW: Added FamilyAddView
+import FamilyAddView from './FamilyAddView.vue';
 
 const router = useRouter();
 const { t } = useI18n();

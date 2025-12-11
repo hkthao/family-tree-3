@@ -25,7 +25,7 @@ import { useEventStore } from '@/stores/event.store';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
 import { storeToRefs } from 'pinia'; // Added storeToRefs
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 interface EventFormExposed {
   validate: () => Promise<boolean>;

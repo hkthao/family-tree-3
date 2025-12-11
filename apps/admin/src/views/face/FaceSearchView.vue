@@ -41,7 +41,7 @@ import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const { t } = useI18n();

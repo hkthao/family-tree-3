@@ -21,10 +21,8 @@ import { useI18n } from 'vue-i18n';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { storeToRefs } from 'pinia';
-import { useAuth } from '@/composables/useAuth';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 interface FamilyDictDetailViewProps {
   familyDictId: string;

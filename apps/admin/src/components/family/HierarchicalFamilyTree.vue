@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
+import { useHierarchicalTreeChart } from '@/composables';
 import type { Member, Relationship } from '@/types';
 
 import { onMounted, watch } from 'vue'; // Import onMounted and watch

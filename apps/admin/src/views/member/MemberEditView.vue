@@ -22,7 +22,7 @@ import { useMemberStore } from '@/stores/member.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 interface MemberEditViewProps {
   memberId: string;

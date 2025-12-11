@@ -26,7 +26,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 interface EventAddViewProps {
   familyId?: string;

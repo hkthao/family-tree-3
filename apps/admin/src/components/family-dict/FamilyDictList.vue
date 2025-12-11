@@ -138,7 +138,7 @@ import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   items: FamilyDict[];

@@ -140,7 +140,7 @@ import { useVuelidate } from '@vuelidate/core';
 import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const props = defineProps<{

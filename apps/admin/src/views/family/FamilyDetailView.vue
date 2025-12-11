@@ -88,7 +88,7 @@ import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 // import FamilyLinkListView from '@/views/family-link/FamilyLinkListView.vue';
 // import FamilyLinkRequestsListView from '@/views/family-link-requests/FamilyLinkRequestsListView.vue';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth, useCrudDrawer } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue'; // NEW: Import FamilyMediaListView
 
 const { t } = useI18n();

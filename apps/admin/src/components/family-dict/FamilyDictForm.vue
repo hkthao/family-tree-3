@@ -59,7 +59,7 @@ import type { FamilyDict } from '@/types';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useFamilyDictRules } from '@/validations/family-dict.validation'; // Will create this file
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   readOnly?: boolean;

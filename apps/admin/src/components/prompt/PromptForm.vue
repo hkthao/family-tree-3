@@ -34,7 +34,7 @@ import { useI18n } from 'vue-i18n';
 import type { Prompt } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { usePromptRules } from '@/validations/prompt.validation'; // This file needs to be created
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   readOnly?: boolean;

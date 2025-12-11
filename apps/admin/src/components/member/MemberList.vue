@@ -110,7 +110,7 @@ import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const { isAdmin, isFamilyManager } = useAuth();

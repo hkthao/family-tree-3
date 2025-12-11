@@ -21,7 +21,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyMediaStore } from '@/stores/familyMedia.store';
 import { FamilyMediaForm } from '@/components/family-media'; // Assuming index.ts exports FamilyMediaForm
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 interface FamilyMediaAddViewProps {
   familyId: string;

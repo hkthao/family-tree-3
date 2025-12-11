@@ -69,7 +69,7 @@ import { MemberName } from '@/components/member';
 import { LifeStage } from '@/types/enums';
 import { computed } from 'vue'; 
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; 
-import { useAuth } from '@/composables/useAuth'; 
+import { useAuth } from '@/composables';
 
 interface MemberStoryListProps {
   items: MemberStoryDto[];

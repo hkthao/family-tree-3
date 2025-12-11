@@ -54,11 +54,9 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import type { MemberFace } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { useAuth } from '@/composables/useAuth'; // NEW
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;

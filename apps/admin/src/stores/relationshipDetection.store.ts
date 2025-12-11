@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { RelationshipDetectionResult } from '@/types';
-import { useServices } from '@/composables/useServices'; // Import useServices
+import { useServices } from '@/composables';
 
 interface RelationshipDetectionState {
   result: RelationshipDetectionResult | null;

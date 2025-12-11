@@ -33,10 +33,8 @@ import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { FamilyLinkRequestForm } from '@/components/family-link-requests';
 import type { FamilyLinkRequestDto } from '@/types';
 import { LinkStatus } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { storeToRefs } from 'pinia';
-import { useAuth } from '@/composables/useAuth';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 interface FamilyLinkRequestDetailViewProps {
   familyLinkRequestId: string;

@@ -30,14 +30,12 @@ import { useI18n } from 'vue-i18n';
 import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/event';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
-import EventAddView from '@/views/event/EventAddView.vue'; // New import
-import EventEditView from '@/views/event/EventEditView.vue'; // New import
-import EventDetailView from '@/views/event/EventDetailView.vue'; // New import
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import EventAddView from '@/views/event/EventAddView.vue';
+import EventEditView from '@/views/event/EventEditView.vue';
+import EventDetailView from '@/views/event/EventDetailView.vue';
 
 const props = defineProps<{
   familyId: string;

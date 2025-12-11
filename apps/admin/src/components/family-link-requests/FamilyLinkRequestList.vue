@@ -66,7 +66,7 @@ import type { FamilyLinkRequestDto } from '@/types';
 import { LinkStatus } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
-import { useAuth } from '@/composables/useAuth'; // Import useAuth composable
+import { useAuth } from '@/composables';
 
 interface FamilyLinkRequestListProps {
   items: FamilyLinkRequestDto[];

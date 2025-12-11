@@ -88,7 +88,7 @@ import type { Prompt } from '@/types/prompt';
 import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   items: Prompt[];

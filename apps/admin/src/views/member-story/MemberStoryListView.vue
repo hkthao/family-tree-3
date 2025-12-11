@@ -36,17 +36,14 @@
 import { watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useCrudDrawer } from '@/composables/useCrudDrawer';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import type { MemberStoryDto } from '@/types/memberStory';
 import MemberStoryAddView from './MemberStoryAddView.vue';
-import MemberStoryEditView from './MemberStoryEditView.vue'; // NEW IMPORT
+import MemberStoryEditView from './MemberStoryEditView.vue';
 import MemberStoryDetailView from './MemberStoryDetailView.vue';
 import MemberStoryList from '@/components/member-story/MemberStoryList.vue';
-import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
-import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
+import { removeDiacritics } from '@/utils/string.utils';
 
 interface MemberStoryListViewProps {
   memberId?: string;

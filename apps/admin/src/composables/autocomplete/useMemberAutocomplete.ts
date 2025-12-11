@@ -2,7 +2,7 @@ import { ref, watch } from 'vue';
 import { useMemberAutocompleteStore } from '@/stores/member-autocomplete.store';
 import { debounce } from 'lodash';
 import type { Member } from '@/types';
-import { removeDiacritics } from '../utils/string.utils'; // NEW IMPORT
+import { removeDiacritics } from '@/utils/string.utils';
 
 interface UseMemberAutocompleteOptions {
   familyId?: string;

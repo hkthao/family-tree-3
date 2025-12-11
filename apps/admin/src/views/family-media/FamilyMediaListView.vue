@@ -35,9 +35,7 @@ import { ref, onMounted, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useFamilyMediaStore } from '@/stores/familyMedia.store';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // Generic CRUD drawer composable
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions, FamilyMedia } from '@/types';
 
 // Components

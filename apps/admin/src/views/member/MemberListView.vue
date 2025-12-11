@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores/member.store';
 import { MemberSearch, MemberList } from '@/components/member';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
@@ -45,10 +45,8 @@ import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { nextTick, onMounted, ref, watch } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; 
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; 
-import { removeDiacritics } from '@/utils/string.utils'; 
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { removeDiacritics } from '@/utils/string.utils';
 interface MemberListViewProps {
   familyId: string;
   readOnly?: boolean;

@@ -49,7 +49,7 @@ import { useUserProfileStore } from '@/stores';
 import type { UpdateUserProfileDto } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables';
 
 const { t } = useI18n();
 const userProfileStore = useUserProfileStore();

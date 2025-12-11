@@ -33,9 +33,7 @@ import { FamilyForm } from '@/components/family';
 import FamilyEditView from '@/views/family/FamilyEditView.vue';
 import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { Family } from '@/types';
-import { useAuth } from '@/composables/useAuth';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import { useAuth, useCrudDrawer } from '@/composables';
 
 const { t } = useI18n();
 const router = useRouter();

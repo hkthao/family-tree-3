@@ -96,7 +96,7 @@ import type { DataTableHeader } from 'vuetify';
 import { MediaType } from '@/types/enums';
 import { formatDate, formatBytes } from '@/utils/format.utils';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 interface FamilyMediaListProps {
   items: FamilyMedia[];

@@ -29,7 +29,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyLinkRequestStore } from '@/stores/familyLinkRequest.store';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import FamilyLinkRequestForm from '@/components/family-link-requests/FamilyLinkRequestForm.vue';
 import type { FamilyLinkRequestDto } from '@/types';
 

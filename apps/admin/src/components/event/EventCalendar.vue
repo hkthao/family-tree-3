@@ -62,7 +62,7 @@ import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;

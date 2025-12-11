@@ -22,9 +22,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useCrudDrawer } from '@/composables/useCrudDrawer';
+import { useGlobalSnackbar, useConfirmDialog, useCrudDrawer } from '@/composables';
 import { useMemberFaceStore } from '@/stores/member-face.store';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace, MemberFaceFilter } from '@/types'; // Import MemberFaceFilter

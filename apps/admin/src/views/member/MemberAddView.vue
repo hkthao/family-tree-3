@@ -23,7 +23,7 @@ import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 interface MemberAddViewProps {
   familyId: string | null;
 }

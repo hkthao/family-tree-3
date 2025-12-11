@@ -21,7 +21,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import type { MemberStoryDto } from '@/types/memberStory';
 
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue';

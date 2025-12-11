@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
 import type { FamilyMedia, MediaLink, FamilyMediaFilter, ListOptions, RefType } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
 import { err } from '@/types'; // Import Result, ok, err
 

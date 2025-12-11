@@ -40,10 +40,8 @@ import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { storeToRefs } from 'pinia';
-import { useAuth } from '@/composables/useAuth';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
+import { storeToRefs } from 'pinia'; // Import storeToRefs from pinia
 
 interface MemberDetailViewProps {
   memberId: string;
