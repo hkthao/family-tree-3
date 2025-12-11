@@ -19,7 +19,7 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
     if (sortBy && sortBy.length > 0) {
       params.orderBy = sortBy.map(s => `${s.key} ${s.order}`).join(',');
     }
-    return await this.api.get<Paginated<FamilyMedia>>(`/family/${familyId}/media`, { params });
+    return await this.api.get<Paginated<FamilyMedia>>(`/family/${familyId}/media/search`, { params });
   }
 
   async getById(familyId: string, id: string): Promise<Result<FamilyMedia>> {

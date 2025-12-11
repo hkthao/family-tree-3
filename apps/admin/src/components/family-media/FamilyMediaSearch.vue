@@ -22,16 +22,6 @@
         <v-card-text>
           <v-row dense>
             <v-col cols="12" md="6" lg="4">
-              <v-text-field
-                v-model="filters.searchQuery"
-                :label="t('familyMedia.search.searchQueryLabel')"
-                density="compact"
-                hide-details
-                clearable
-                @update:model-value="applyFilters"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6" lg="4">
               <v-select
                 v-model="filters.mediaType"
                 :items="mediaTypes"
@@ -69,7 +59,6 @@ const { t } = useI18n();
 const expanded = ref(false);
 
 const filters = ref<FamilyMediaFilter>({
-  searchQuery: undefined,
   mediaType: undefined,
 });
 
@@ -96,7 +85,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    searchQuery: undefined,
     mediaType: undefined,
   };
   emit('update:filters', filters.value); // Emit updated filters after resetting

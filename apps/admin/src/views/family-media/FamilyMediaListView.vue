@@ -1,60 +1,61 @@
 <template>
   <div data-testid="family-media-list-view">
     <FamilyMediaSearch @update:filters="handleFilterUpdate" />
-    <FamilyMediaList
-      :items="familyMediaStore.list.items"
-      :total-items="familyMediaStore.list.totalItems"
-      :loading="familyMediaStore.list.loading"
-      @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer"
-      @edit="openEditDrawer"
-      @delete="confirmDelete"
-      @create="openAddDrawer()"
-    />
+    <FamilyMediaList :items="familyMediaList" :total-items="totalItems" :loading="isLoading || isDeleting"
+      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
+      @create="openAddDrawer()" />
 
     <!-- Add/Edit/Detail Drawers (similar to MemberListView) -->
     <!-- Detail Family Media Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <FamilyMediaDetailView v-if="selectedItemId && detailDrawer" :family-media-id="selectedItemId" @close="handleDetailClosed" />
+      <FamilyMediaDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId"
+        :family-media-id="selectedItemId" @close="handleDetailClosed" />
     </BaseCrudDrawer>
 
     <!-- Edit Family Media Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMediaClosed">
-      <FamilyMediaEditView v-if="selectedItemId && editDrawer" :family-media-id="selectedItemId" @close="handleMediaClosed" @saved="handleMediaSaved" />
+      <FamilyMediaEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId"
+        :family-media-id="selectedItemId" @close="handleMediaClosed" @saved="handleMediaSaved" />
     </BaseCrudDrawer>
 
     <!-- Add Family Media Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMediaClosed">
-      <FamilyMediaAddView v-if="addDrawer" :family-id="currentFamilyId" @close="handleMediaClosed" @saved="handleMediaSaved" />
+      <FamilyMediaAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMediaClosed"
+        @saved="handleMediaSaved" />
     </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, nextTick, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
-import { useFamilyMediaStore } from '@/stores/familyMedia.store';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions, FamilyMedia } from '@/types';
-
+import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters } from '@/composables/family-media';
 // Components
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';
 import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
-import FamilyMediaAddView from '@/views/family-media/FamilyMediaAddView.vue'; // Will create these views later
-import FamilyMediaEditView from '@/views/family-media/FamilyMediaEditView.vue'; // Will create these views later
-import FamilyMediaDetailView from '@/views/family-media/FamilyMediaDetailView.vue'; // Will create these views later
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Assuming this exists
+import FamilyMediaAddView from '@/views/family-media/FamilyMediaAddView.vue';
+import FamilyMediaEditView from '@/views/family-media/FamilyMediaEditView.vue';
+import FamilyMediaDetailView from '@/views/family-media/FamilyMediaDetailView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+
+const props = defineProps<{
+  familyId: string;
+}>();
 
 const { t } = useI18n();
-const familyMediaStore = useFamilyMediaStore();
-const { list } = storeToRefs(familyMediaStore);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-// Assuming there's a way to get the current family ID, perhaps from a family store or route param
-// For now, let's hardcode or get from a placeholder
-const currentFamilyId = ref('YOUR_FAMILY_ID_HERE'); // TODO: Replace with actual family ID from context/store
+const familyIdRef = toRef(props, 'familyId');
+
+const familyMediaListFiltersComposable = useFamilyMediaListFilters();
+const { filters, listOptions } = familyMediaListFiltersComposable;
+const { setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
+
+const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(familyIdRef, filters, listOptions);
+const { mutate: deleteFamilyMedia, isPending: isDeleting } = useDeleteFamilyMediaMutation();
 
 const {
   addDrawer,
@@ -67,18 +68,19 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const handleFilterUpdate = async (filters: FamilyMediaFilter) => {
-  familyMediaStore.list.filters = { ...filters, familyId: currentFamilyId.value };
-  await familyMediaStore._loadItems();
+const handleFilterUpdate = (newFilters: FamilyMediaFilter) => {
+  setFilters(newFilters);
 };
 
 const handleListOptionsUpdate = async (options: ListOptions) => {
   await nextTick();
-  familyMediaStore.setListOptions(options);
+  setPage(options.page || 1);
+  setItemsPerPage(options.itemsPerPage || 10);
+  setSortBy(options.sortBy);
 };
 
 const confirmDelete = async (familyMediaId: string) => {
-  const media = familyMediaStore.list.items.find(m => m.id === familyMediaId);
+  const media = familyMediaList.value.find(m => m.id === familyMediaId);
   if (!media) {
     showSnackbar(t('familyMedia.messages.notFound'), 'error');
     return;
@@ -91,25 +93,21 @@ const confirmDelete = async (familyMediaId: string) => {
     confirmColor: 'error',
   });
   if (confirmed) {
-    await handleDeleteConfirm(media);
+    deleteFamilyMedia({ familyId: props.familyId, id: media.id }, {
+      onSuccess: () => {
+        showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
+        refetch(); // Refetch the list after successful deletion
+      },
+      onError: (error) => {
+        showSnackbar(error.message || t('familyMedia.messages.deleteError'), 'error');
+      },
+    });
   }
-};
-
-const handleDeleteConfirm = async (media: FamilyMedia) => {
-  if (media) {
-    await familyMediaStore.deleteFamilyMedia(media.familyId, media.id);
-    if (familyMediaStore.list.error) {
-      showSnackbar(t('familyMedia.messages.deleteError', { error: familyMediaStore.list.error }), 'error');
-    } else {
-      showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
-    }
-  }
-  familyMediaStore._loadItems();
 };
 
 const handleMediaSaved = () => {
   closeAllDrawers();
-  familyMediaStore._loadItems();
+  refetch(); // Refetch the list after add/edit/delete
 };
 
 const handleMediaClosed = () => {
@@ -119,17 +117,4 @@ const handleMediaClosed = () => {
 const handleDetailClosed = () => {
   closeAllDrawers();
 };
-
-onMounted(() => {
-  if (currentFamilyId.value) {
-    familyMediaStore.list.filters = { familyId: currentFamilyId.value };
-    familyMediaStore._loadItems();
-  } else {
-    showSnackbar(t('familyMedia.errors.familyIdRequired'), 'error');
-  }
-});
 </script>
-
-<style scoped>
-/* Scoped styles for the view */
-</style>
