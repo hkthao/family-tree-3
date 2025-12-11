@@ -20,23 +20,31 @@
       <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
         <v-tooltip :text="t('event.list.action.create')">
           <template v-slot:activator="{ props }">
-            <v-icon v-bind="props">mdi-plus</v-icon>
+            <v-icon v-bind="props" icon="mdi-plus" />
           </template>
         </v-tooltip>
       </v-btn>
     </v-toolbar>
-    <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
-      :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
-      :weekdays="weekdays">
-      <template #event="{ event }">
-        <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
-          {{ event.title }}
+        <div>
+          <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 200px;">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </div>
+          <div v-else-if="!events || events.length === 0" class="d-flex justify-center align-center" style="min-height: 200px;">
+            <v-alert type="info" dense>{{ t('event.calendar.noEvents') }}</v-alert>
+          </div>
+          <v-calendar v-else class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
+            :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
+            :weekdays="weekdays">
+            <template #event="{ event }">
+              <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
+                {{ event.title }}
+              </div>
+              <div class="v-event-description">
+                {{ event.eventObject.description }}
+              </div>
+            </template>
+          </v-calendar>
         </div>
-        <div class="v-event-description">
-          {{ event.eventObject.description }}
-        </div>
-      </template>
-    </v-calendar>
 
     <BaseCrudDrawer v-model="editDrawer" v-if="canEditEvent" @close="handleEventClosed">
       <EventEditView v-if="selectedEventId && editDrawer" :event-id="selectedEventId" @close="handleEventClosed"
@@ -54,27 +62,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
-import { useEventCalendarStore } from '@/stores/eventCalendar.store'; // Import new calendar store
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
-import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
+import EventDetailView from '@/views/event/EventDetailView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useAuth } from '@/composables';
 
-// Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
 
 const props = defineProps<{
-  familyId?: string; // Optional prop for family ID
-  memberId?: string; // Optional prop for member ID
-  readOnly?: boolean; // Add readOnly prop
+  familyId?: string;
+  memberId?: string;
+  readOnly?: boolean;
+  events: Event[]; // New prop for events
+  loading: boolean; // New prop for loading state
 }>();
 
 const { t, locale } = useI18n();
-const eventCalendarStore = useEventCalendarStore(); // Use new calendar store
 const { isAdmin, isFamilyManager } = useAuth();
 
 const canAddEvent = computed(() => {
@@ -85,14 +92,14 @@ const canEditEvent = computed(() => {
   return !props.readOnly && (isAdmin.value || isFamilyManager.value);
 });
 
-const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
+const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]);
 
 const selectedDate = ref(new Date());
-const editDrawer = ref(false); // Control visibility of the edit drawer
-const addDrawer = ref(false); // Control visibility of the add drawer
-const detailDrawer = ref(false); // Control visibility of the detail drawer
-const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
-const isDatePickerOpen = ref(false); // Controls the visibility of the date picker
+const editDrawer = ref(false);
+const addDrawer = ref(false);
+const detailDrawer = ref(false);
+const selectedEventId = ref<string | null>(null);
+const isDatePickerOpen = ref(false);
 
 const calendarRef = ref<{
   title: string;
@@ -118,6 +125,8 @@ const calendarTypes = computed(() => [
 
 const calendarTitle = computed(() => {
   if (calendarRef.value) {
+    // This will ideally update when calendarRef updates
+    // For now, it will show static or initial value
     return calendarRef.value.title;
   }
   return '';
@@ -141,9 +150,9 @@ const setToday = () => {
   }
 };
 
-// Data loading is now handled by the store
 const formattedEvents = computed(() => {
-  const events = eventCalendarStore.list.items
+  if (!props.events) return [];
+  return props.events
     .filter((event) => event.startDate)
     .map((event) => ({
       title: event.name,
@@ -155,7 +164,6 @@ const formattedEvents = computed(() => {
       timed: true,
       eventObject: event,
     }));
-  return events;
 });
 
 const getEventColor: CalendarEventColorFunction = (event: {
@@ -176,7 +184,7 @@ const showEventDetails = (eventSlotScope: Event) => {
 const handleEventSaved = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
-  eventCalendarStore.setCurrentMonth(selectedDate.value); // Reload events after saving
+  // TODO: Emit an event to parent to refetch data
 };
 
 const handleEventClosed = () => {
@@ -186,7 +194,7 @@ const handleEventClosed = () => {
 
 const handleAddSaved = () => {
   addDrawer.value = false;
-  eventCalendarStore.setCurrentMonth(selectedDate.value); // Reload events after adding
+  // TODO: Emit an event to parent to refetch data
 };
 
 const handleAddClosed = () => {
@@ -204,26 +212,12 @@ const handleDetailEdit = (event: Event) => {
   editDrawer.value = true;
 };
 
-// Watch for changes in props.familyId and props.memberId
-watch(
-  [() => props.familyId, () => props.memberId],
-  ([newFamilyId, newMemberId]) => {
-    eventCalendarStore.setFilters({ familyId: newFamilyId, memberId: newMemberId });
-  },
-  { immediate: true },
-);
-
-// Watch for changes in selectedDate to reload events for the new month
+// Watch for changes in selectedDate for calendar navigation, but not for data fetching
 watch(
   selectedDate,
   (newDate) => {
-    eventCalendarStore.setCurrentMonth(newDate);
+    // Logic here for calendar view changes if needed, but not data fetching
   },
   { immediate: true },
 );
-
-// No longer needed here as watch on selectedDate handles it
-onMounted(() => {
-  // eventCalendarStore.setCurrentMonth(selectedDate.value);
-});
 </script>

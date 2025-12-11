@@ -30,7 +30,7 @@
         </v-window-item>
 
         <v-window-item value="calendar">
-          <EventCalendar :family-id="familyId" />
+          <EventCalendar :family-id="familyId" :events="familyEvents || []" :loading="isLoadingFamilyEvents" />
         </v-window-item>
 
         <v-window-item value="events">
@@ -86,10 +86,9 @@ import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
-// import FamilyLinkListView from '@/views/family-link/FamilyLinkListView.vue';
-// import FamilyLinkRequestsListView from '@/views/family-link-requests/FamilyLinkRequestsListView.vue';
-import { useAuth, useCrudDrawer } from '@/composables';
-import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue'; // NEW: Import FamilyMediaListView
+import { useAuth } from '@/composables';
+import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
+import { useUpcomingEvents } from '@/composables/useUpcomingEvents'; // Import useUpcomingEvents
 
 const { t } = useI18n();
 const route = useRoute();
@@ -97,6 +96,8 @@ const { isAdmin, isFamilyManager } = useAuth();
 
 const familyId = computed(() => route.params.id as string);
 const readOnlyValue = true; // Use a plain boolean const
+
+const { upcomingEvents: familyEvents, isLoading: isLoadingFamilyEvents } = useUpcomingEvents(familyId);
 
 const canViewFaceDataTab = computed(() => {
   return isAdmin.value || isFamilyManager.value;

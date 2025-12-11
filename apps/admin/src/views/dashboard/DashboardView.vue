@@ -10,7 +10,7 @@
     <!-- Top Summary Section -->
     <v-row>
       <v-col cols="12">
-        <DashboardStats :family-id="selectedFamilyId || undefined" id="dashboard-stats" />
+        <DashboardStats :family-id="selectedFamilyId || undefined" :stats="dashboardStats" :loading="isLoadingStats" id="dashboard-stats" />
       </v-col>
     </v-row>
 
@@ -24,10 +24,10 @@
     <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
-        <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" id="dashboard-event-calendar" />
+        <EventCalendar :family-id="selectedFamilyId || undefined" :events="upcomingEvents || []" :loading="isLoadingEvents" :read-only="true" id="dashboard-event-calendar" />
       </v-col>
       <v-col cols="12" md="6">
-        <RecentActivity :family-id="selectedFamilyId || undefined" id="dashboard-recent-activity" />
+        <RecentActivity :family-id="selectedFamilyId || undefined" :activities="recentActivities" :loading="isLoadingRecentActivities" id="dashboard-recent-activity" />
       </v-col>
     </v-row>
 
@@ -35,28 +35,26 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables';
+import { useDashboardStats } from '@/composables/useDashboardStats';
+import { useUpcomingEvents } from '@/composables/useUpcomingEvents';
+import { useRecentActivities } from '@/composables/useRecentActivities';
 
 const { t } = useI18n();
 useOnboardingTour();
 
-const dashboardStore = useDashboardStore();
-
 const selectedFamilyId = ref<string | null>(null);
 
-onMounted(async () => {
-  dashboardStore.fetchAllDashboardData();
-});
+const familyIdForQueries = computed(() => selectedFamilyId.value || undefined);
 
-watch(selectedFamilyId, (newFamilyId) => {
-  dashboardStore.fetchAllDashboardData(newFamilyId || undefined);
-});
+const { dashboardStats, isLoading: isLoadingStats } = useDashboardStats(familyIdForQueries);
+const { upcomingEvents, isLoading: isLoadingEvents } = useUpcomingEvents(familyIdForQueries);
+const { activities: recentActivities, isLoading: isLoadingRecentActivities } = useRecentActivities(familyIdForQueries);
 </script>
 
 <style scoped>
