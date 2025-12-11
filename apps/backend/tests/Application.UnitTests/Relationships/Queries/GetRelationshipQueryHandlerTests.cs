@@ -1,8 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
-using backend.Application.Relationships.Queries.GetRelationship; // Updated using directive
+using backend.Application.Relationships.Queries.DetectRelationship;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;
@@ -18,12 +15,12 @@ namespace backend.Application.UnitTests.Relationships.Queries;
 public class GetRelationshipQueryHandlerTests : TestBase
 {
     private readonly Mock<IRelationshipDetectionService> _mockRelationshipDetectionService;
-    private readonly GetRelationshipQueryHandler _handler;
+    private readonly DetectRelationshipQueryHandler _handler;
 
     public GetRelationshipQueryHandlerTests()
     {
         _mockRelationshipDetectionService = new Mock<IRelationshipDetectionService>();
-        _handler = new GetRelationshipQueryHandler(_mockRelationshipDetectionService.Object);
+        _handler = new DetectRelationshipQueryHandler(_mockRelationshipDetectionService.Object);
     }
 
     /// <summary>
@@ -49,7 +46,7 @@ public class GetRelationshipQueryHandlerTests : TestBase
         _mockRelationshipDetectionService.Setup(s => s.DetectRelationshipAsync(familyId, memberAId, memberBId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
 
-        var query = new GetRelationshipQuery(familyId, memberAId, memberBId); // Corrected constructor call
+        var query = new DetectRelationshipQuery(familyId, memberAId, memberBId); // Corrected constructor call
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

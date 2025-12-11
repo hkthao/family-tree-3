@@ -1,4 +1,3 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;

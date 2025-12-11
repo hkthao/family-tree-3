@@ -7,12 +7,12 @@ import { createServices } from '@/services/service.factory';
 // import i18n from '@/plugins/i18n'; // REMOVED
 
 // Mock the IEventService
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     event: {
-      loadItems: mockLoadItems,
+      search: mockSearch,
       fetch: vi.fn(),
       getById: vi.fn(),
       add: vi.fn(),
@@ -57,9 +57,9 @@ describe('eventTimeline.store', () => {
     store = useEventTimelineStore();
     store.$reset();
     store.services = createServices('test');
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
 
-    mockLoadItems.mockResolvedValue(ok({
+    mockSearch.mockResolvedValue(ok({
       items: [],
       page: 1,
       totalItems: 0,
@@ -89,7 +89,7 @@ describe('eventTimeline.store', () => {
 
   describe('_loadItems', () => {
     it('should load items successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       await store._loadItems();
 
@@ -98,25 +98,23 @@ describe('eventTimeline.store', () => {
       expect(store.list.items).toEqual([mockEvent]);
       expect(store.list.totalItems).toBe(1);
       expect(store.list.totalPages).toBe(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledWith(
-        store.list.filters,
-        store.list.currentPage,
-        store.list.itemsPerPage,
-        store.list.sortBy,
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledWith(
+        { page: store.list.currentPage, itemsPerPage: store.list.itemsPerPage, sortBy: store.list.sortBy }, // options
+        store.list.filters, // filters
       );
     });
 
     it('should handle load items failure', async () => {
       const errorMessage = 'Failed to load events.';
-      mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBe('event.errors.load');
       expect(store.list.items).toEqual([]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -127,14 +125,14 @@ describe('eventTimeline.store', () => {
         itemsPerPage: 20,
         sortBy: [{ key: 'name', order: 'desc' }],
       };
-      mockLoadItems.mockResolvedValue(ok({ ...mockPaginatedEvents, page: options.page }));
+      mockSearch.mockResolvedValue(ok({ ...mockPaginatedEvents, page: options.page }));
 
       store.setListOptions(options);
 
       expect(store.list.currentPage).toBe(options.page);
       expect(store.list.itemsPerPage).toBe(options.itemsPerPage);
       expect(store.list.sortBy).toEqual(options.sortBy);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should not call _loadItems if options are the same', async () => {
@@ -150,20 +148,20 @@ describe('eventTimeline.store', () => {
 
       store.setListOptions(options);
 
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('setFilters', () => {
     it('should update filters and call _loadItems', async () => {
       const newFilters: EventFilter = { familyId: 'family-2' };
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       store.setFilters(newFilters);
 
       expect(store.list.filters.familyId).toBe('family-2');
       expect(store.list.currentPage).toBe(1); // Should reset page
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 });

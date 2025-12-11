@@ -7,14 +7,14 @@ import { ok, err } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IMemberService methods used by member-autocomplete.store
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 const mockGetByIds = vi.fn();
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     member: {
-      loadItems: mockLoadItems,
+      search: mockSearch,
       getByIds: mockGetByIds,
       // Add other services as empty objects if they are not directly used by member-autocomplete.store
       add: vi.fn(),
@@ -49,7 +49,7 @@ describe('member-autocomplete.store', () => {
     // Manually inject the mocked services
     store.services = createServices('test');
     // Reset mocks before each test
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
     mockGetByIds.mockReset();
   });
 
@@ -66,22 +66,21 @@ describe('member-autocomplete.store', () => {
         { id: '1', fullName: 'Member A', lastName: 'A', firstName: 'Member', familyId: 'family-1' },
         { id: '2', fullName: 'Member B', lastName: 'B', firstName: 'Member', familyId: 'family-1' },
       ];
-      mockLoadItems.mockResolvedValue(ok({ items: mockMembers, totalItems: 2, totalPages: 1 }));
+      mockSearch.mockResolvedValue(ok({ items: mockMembers, totalItems: 2, totalPages: 1 }));
 
       await store.search({ searchQuery: 'Member' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.items).toEqual(mockMembers);
-      expect(mockLoadItems).toHaveBeenCalledWith(
-        { searchQuery: 'Member' },
-        1,
-        50,
+      expect(mockSearch).toHaveBeenCalledWith(
+        { page: 1, itemsPerPage: 50 }, // options
+        { searchQuery: 'Member' }, // filters
       );
     });
 
     it('should handle fetch members failure', async () => {
-      mockLoadItems.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
+      mockSearch.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
       await store.search({ searchQuery: 'Member' });
 

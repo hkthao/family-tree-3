@@ -1,4 +1,3 @@
-using System.Text.Json;
 using backend.Application.AI.Commands;
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Prompts;

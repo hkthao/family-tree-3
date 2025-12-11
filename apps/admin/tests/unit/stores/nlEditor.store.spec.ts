@@ -7,13 +7,13 @@ import type { Paginated } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IMemberService
-const mockMemberLoadItems = vi.fn();
+const mockMemberSearch = vi.fn();
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     member: {
-      loadItems: mockMemberLoadItems,
+      search: mockMemberSearch,
       // Add other member service methods as empty objects if not directly used
       fetch: vi.fn(),
       getById: vi.fn(),
@@ -48,10 +48,10 @@ describe('nlEditor.store', () => {
     store = useNLEditorStore();
     store.$reset();
     store.services = createServices('test');
-    mockMemberLoadItems.mockReset();
+    mockMemberSearch.mockReset();
 
     // Default mock resolved values
-    mockMemberLoadItems.mockResolvedValue(ok(mockPaginatedMembers));
+    mockMemberSearch.mockResolvedValue(ok(mockPaginatedMembers));
   });
 
   const mockMember: Member = {
@@ -73,7 +73,7 @@ describe('nlEditor.store', () => {
 
   describe('searchMembers', () => {
     it('should load members successfully', async () => {
-      mockMemberLoadItems.mockResolvedValue(ok(mockPaginatedMembers));
+      mockMemberSearch.mockResolvedValue(ok(mockPaginatedMembers));
       const searchQuery = 'Nguyen';
 
       await store.searchMembers(searchQuery);
@@ -81,17 +81,16 @@ describe('nlEditor.store', () => {
       expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.list.items).toEqual([mockMember]);
-      expect(mockMemberLoadItems).toHaveBeenCalledTimes(1);
-      expect(mockMemberLoadItems).toHaveBeenCalledWith(
-        { searchQuery: searchQuery },
-        1,
-        10,
+      expect(mockMemberSearch).toHaveBeenCalledTimes(1);
+      expect(mockMemberSearch).toHaveBeenCalledWith(
+        { page: 1, itemsPerPage: 10 }, // options
+        { searchQuery: searchQuery }, // filters
       );
     });
 
     it('should handle load members failure', async () => {
       const errorMessage = 'Failed to load members.';
-      mockMemberLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockMemberSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
       const searchQuery = 'Nguyen';
 
       await store.searchMembers(searchQuery);
@@ -99,11 +98,11 @@ describe('nlEditor.store', () => {
       expect(store.list.loading).toBe(false);
       expect(store.error).toBe('member.errors.load');
       expect(store.list.items).toEqual([]);
-      expect(mockMemberLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockMemberSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should set loading state correctly', async () => {
-      mockMemberLoadItems.mockResolvedValue(ok(mockPaginatedMembers));
+      mockMemberSearch.mockResolvedValue(ok(mockPaginatedMembers));
       const promise = store.searchMembers('Nguyen');
 
       expect(store.list.loading).toBe(true);

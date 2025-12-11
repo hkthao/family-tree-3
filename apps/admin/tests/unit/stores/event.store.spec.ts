@@ -12,7 +12,7 @@ const mockGetById = vi.fn();
 const mockAdd = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 const mockGetByIds = vi.fn();
 const mockAddItems = vi.fn();
 
@@ -25,7 +25,7 @@ vi.mock('@/services/service.factory', () => ({
       add: mockAdd,
       update: mockUpdate,
       delete: mockDelete,
-      loadItems: mockLoadItems,
+      search: mockSearch,
       getByIds: mockGetByIds,
       addItems: mockAddItems,
     },
@@ -66,12 +66,12 @@ describe('event.store', () => {
     mockAdd.mockReset();
     mockUpdate.mockReset();
     mockDelete.mockReset();
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
     mockGetByIds.mockReset();
     mockAddItems.mockReset();
     mockDelete.mockResolvedValue(ok(undefined));
     mockAddItems.mockResolvedValue(ok(['new-id-1']));
-    // mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents)); // Moved to specific tests
+    // mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
   });
 
   const mockEvent: Event = {
@@ -94,7 +94,7 @@ describe('event.store', () => {
 
   describe('_loadItems', () => {
     it('should load items successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       await store._loadItems();
 
@@ -103,32 +103,32 @@ describe('event.store', () => {
       expect(store.list.items).toEqual([mockEvent]);
       expect(store.list.totalItems).toBe(1);
       expect(store.list.totalPages).toBe(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle load items failure', async () => {
       const errorMessage = 'Failed to load events.';
-      mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(store.list.items).toEqual([]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('addItem', () => {
     it('should add an item successfully', async () => {
       mockAdd.mockResolvedValue(ok(mockEvent));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents)); // _loadItems is called after successful add
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents)); // _loadItems is called after successful add
       await store.addItem({ ...mockEvent });
 
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add item failure', async () => {
@@ -140,21 +140,21 @@ describe('event.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('updateItem', () => {
     it('should update an item successfully', async () => {
       mockUpdate.mockResolvedValue(ok(mockEvent));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       await store.updateItem(mockEvent);
 
       expect(store.update.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle update item failure', async () => {
@@ -166,14 +166,14 @@ describe('event.store', () => {
       expect(store.update.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteItem', () => {
     it('should delete an item successfully', async () => {
       mockDelete.mockResolvedValue(ok(undefined));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       const result = await store.deleteItem(mockEvent.id!);
 
@@ -181,7 +181,7 @@ describe('event.store', () => {
       expect(store._delete.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle delete item failure', async () => {
@@ -194,7 +194,7 @@ describe('event.store', () => {
       expect(store._delete.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
@@ -253,7 +253,7 @@ describe('event.store', () => {
   describe('addItems', () => {
     it('should add multiple items successfully', async () => {
       mockAddItems.mockResolvedValue(ok(['new-id-1', 'new-id-2']));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents)); // _loadItems is called after successful add
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents)); // _loadItems is called after successful add
 
       const newEvents = [
         { familyId: 'f1', name: 'Event 1', type: EventType.Other, startDate: new Date() },
@@ -265,7 +265,7 @@ describe('event.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAddItems).toHaveBeenCalledWith(newEvents);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add multiple items failure', async () => {
@@ -281,7 +281,7 @@ describe('event.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAddItems).toHaveBeenCalledWith(newEvents);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,7 +9,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore; // Needed for .AsNoTracking() and .FirstOrDefaultAsync()
 using Moq;
 using Xunit;
 

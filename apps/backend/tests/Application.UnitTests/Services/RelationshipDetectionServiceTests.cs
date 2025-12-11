@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.AI; // Added
 using backend.Application.AI.DTOs; // Added
 using backend.Application.Common.Interfaces; // Added
 using backend.Application.Common.Models; // Added

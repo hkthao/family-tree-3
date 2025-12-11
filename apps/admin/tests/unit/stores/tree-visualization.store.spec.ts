@@ -9,7 +9,7 @@ import { createServices } from '@/services/service.factory';
 const mockGetById = vi.fn();
 const mockGetRelatives = vi.fn();
 const mockFetchMembersByFamilyId = vi.fn();
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
@@ -19,7 +19,7 @@ vi.mock('@/services/service.factory', () => ({
       fetchMembersByFamilyId: mockFetchMembersByFamilyId,
     },
     relationship: {
-      loadItems: mockLoadItems,
+      search: mockSearch,
     },
   })),
 }));
@@ -81,13 +81,13 @@ describe('tree-visualization.store', () => {
     mockGetById.mockReset();
     mockGetRelatives.mockReset();
     mockFetchMembersByFamilyId.mockReset();
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
 
     // Default successful mocks
     mockGetById.mockResolvedValue(ok(mockMember1));
     mockGetRelatives.mockResolvedValue(ok([]));
     mockFetchMembersByFamilyId.mockResolvedValue(ok([mockMember1, mockMember2]));
-    mockLoadItems.mockResolvedValue(ok({ items: [mockRelationship], totalCount: 1 }));
+    mockSearch.mockResolvedValue(ok({ items: [mockRelationship], totalCount: 1 }));
   });
 
   it('should have correct initial state', () => {
@@ -177,7 +177,7 @@ describe('tree-visualization.store', () => {
         await store.fetchTreeData(mockFamilyId);
 
         expect(mockFetchMembersByFamilyId).toHaveBeenCalledWith(mockFamilyId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId }, 1, 1000);
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId });
         expect(store.trees[mockFamilyId].members).toEqual([mockMember1, mockMember2]);
         expect(store.trees[mockFamilyId].relationships).toEqual([mockRelationship]);
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -191,7 +191,7 @@ describe('tree-visualization.store', () => {
         await store.fetchTreeData(mockFamilyId);
 
         expect(mockFetchMembersByFamilyId).toHaveBeenCalledWith(mockFamilyId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId }, 1, 1000); // Still called
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId });
         expect(store.trees[mockFamilyId].members).toEqual([]); // Members should be empty
         expect(store.trees[mockFamilyId].relationships).toEqual([mockRelationship]); // Relationships still fetched
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -200,12 +200,12 @@ describe('tree-visualization.store', () => {
 
       it('should handle relationship fetch failure', async () => {
         const testError: ApiError = { name: 'ApiError', message: 'Failed to fetch relationships' };
-        mockLoadItems.mockResolvedValue(err(testError));
+        mockSearch.mockResolvedValue(err(testError));
 
         await store.fetchTreeData(mockFamilyId);
 
         expect(mockFetchMembersByFamilyId).toHaveBeenCalledWith(mockFamilyId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId }, 1, 1000);
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId });
         expect(store.trees[mockFamilyId].members).toEqual([mockMember1, mockMember2]); // Members still fetched
         expect(store.trees[mockFamilyId].relationships).toEqual([]); // Relationships should be empty
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -216,7 +216,7 @@ describe('tree-visualization.store', () => {
         const memberError: ApiError = { name: 'ApiError', message: 'Failed to fetch members' };
         const relationshipError: ApiError = { name: 'ApiError', message: 'Failed to fetch relationships' };
         mockFetchMembersByFamilyId.mockResolvedValue(err(memberError));
-        mockLoadItems.mockResolvedValue(err(relationshipError));
+        mockSearch.mockResolvedValue(err(relationshipError));
 
         await store.fetchTreeData(mockFamilyId);
 
@@ -259,7 +259,7 @@ describe('tree-visualization.store', () => {
       beforeEach(() => {
         mockGetById.mockResolvedValue(ok(mockMember1));
         mockGetRelatives.mockResolvedValue(ok([mockRelative]));
-        mockLoadItems.mockResolvedValue(ok({ items: [mockMemberRelationship], totalCount: 1 }));
+        mockSearch.mockResolvedValue(ok({ items: [mockMemberRelationship], totalCount: 1 }));
       });
 
       it('should fetch specific member, relatives and relationships successfully', async () => {
@@ -267,7 +267,7 @@ describe('tree-visualization.store', () => {
 
         expect(mockGetById).toHaveBeenCalledWith(targetMemberId);
         expect(mockGetRelatives).toHaveBeenCalledWith(targetMemberId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId, memberIds: [targetMemberId, mockRelative.id] }, 1, 1000);
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId, memberIds: [targetMemberId, mockRelative.id] });
         expect(store.trees[mockFamilyId].members).toEqual([mockMember1, mockRelative]);
         expect(store.trees[mockFamilyId].relationships).toEqual([mockMemberRelationship]);
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -277,13 +277,13 @@ describe('tree-visualization.store', () => {
       it('should handle getById failure', async () => {
         const testError: ApiError = { name: 'ApiError', message: 'Failed to get member by ID' };
         mockGetById.mockResolvedValue(err(testError));
-        mockLoadItems.mockResolvedValue(ok({ items: [], totalCount: 0 })); // Mock loadItems to return empty
+        mockSearch.mockResolvedValue(ok({ items: [], totalCount: 0 })); // Mock loadItems to return empty
 
         await store.fetchTreeData(mockFamilyId, targetMemberId);
 
         expect(mockGetById).toHaveBeenCalledWith(targetMemberId);
         expect(mockGetRelatives).not.toHaveBeenCalled(); // Should not be called
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId, memberIds: [] }, 1, 1000); // Called with empty memberIds
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId, memberIds: [] }); // Called with empty memberIds
         expect(store.trees[mockFamilyId].members).toEqual([]);
         expect(store.trees[mockFamilyId].relationships).toEqual([]);
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -298,7 +298,7 @@ describe('tree-visualization.store', () => {
 
         expect(mockGetById).toHaveBeenCalledWith(targetMemberId);
         expect(mockGetRelatives).toHaveBeenCalledWith(targetMemberId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId, memberIds: [targetMemberId] }, 1, 1000); // Only target member
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId, memberIds: [targetMemberId] }); // Only target member
         expect(store.trees[mockFamilyId].members).toEqual([mockMember1]);
         expect(store.trees[mockFamilyId].relationships).toEqual([mockMemberRelationship]); // Relationships still fetched
         expect(store.isLoading(mockFamilyId)).toBe(false);
@@ -307,13 +307,13 @@ describe('tree-visualization.store', () => {
 
       it('should handle relationship loadItems failure', async () => {
         const testError: ApiError = { name: 'ApiError', message: 'Failed to load relationships' };
-        mockLoadItems.mockResolvedValue(err(testError));
+        mockSearch.mockResolvedValue(err(testError));
 
         await store.fetchTreeData(mockFamilyId, targetMemberId);
 
         expect(mockGetById).toHaveBeenCalledWith(targetMemberId);
         expect(mockGetRelatives).toHaveBeenCalledWith(targetMemberId);
-        expect(mockLoadItems).toHaveBeenCalledWith({ familyId: mockFamilyId, memberIds: [targetMemberId, mockRelative.id] }, 1, 1000);
+        expect(mockSearch).toHaveBeenCalledWith({ page: 1, itemsPerPage: 1000 }, { familyId: mockFamilyId, memberIds: [targetMemberId, mockRelative.id] });
         expect(store.trees[mockFamilyId].members).toEqual([mockMember1, mockRelative]);
         expect(store.trees[mockFamilyId].relationships).toEqual([]); // Relationships should be empty
         expect(store.isLoading(mockFamilyId)).toBe(false);

@@ -1,7 +1,6 @@
 <template>
-  <v-card class="mb-5" elevation="2">
+  <v-card class="mb-4" :elevation="0">
     <v-card-title class="d-flex align-center">
-      <v-icon icon="mdi-magnify" class="mr-2"></v-icon>
       {{ t('familyMedia.search.title') }}
       <v-spacer></v-spacer>
       <v-btn

@@ -1,4 +1,3 @@
-using System;
 using backend.Application.MemberStories.Commands.UpdateMemberStory;
 using backend.Domain.Enums;
 using FluentValidation.TestHelper;

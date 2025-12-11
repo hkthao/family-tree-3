@@ -2,7 +2,7 @@ using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.Relationships.Commands.UpdateRelationship;
-using backend.Application.Relationships.Queries.GetRelationship; // Added for new GetRelationshipQuery location
+using backend.Application.Relationships.Queries.DetectRelationship;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
@@ -28,8 +28,6 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     /// <summary>
     /// Xử lý GET request để lấy danh sách các mối quan hệ.
     /// </summary>
-    /// <param name="query">Đối tượng truy vấn chứa các tiêu chí lọc và phân trang.</param>
-    /// <returns>Một PaginatedList chứa danh sách các mối quan hệ.</returns>
     [HttpGet]
     public async Task<IActionResult> GetRelationships([FromQuery] GetRelationshipsQuery query)
     {
@@ -71,7 +69,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     [HttpGet("detect-relationship")]
     public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
     {
-        var result = await _mediator.Send(new GetRelationshipQuery(familyId, memberAId, memberBId));
+        var result = await _mediator.Send(new DetectRelationshipQuery(familyId, memberAId, memberBId));
         return result.Description != "unknown" ? Ok(result) : NotFound(result);
     }
 

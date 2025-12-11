@@ -1,9 +1,9 @@
 using System.Text.Json; // Required for JsonSerializer
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using backend.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Infrastructure.Persistence.Configurations;
 

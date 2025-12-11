@@ -12,7 +12,7 @@ const mockGetById = vi.fn();
 const mockAdd = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 const mockGetByIds = vi.fn(); // Keep this mock as it's used in the mocked service factory
 const mockAddItems = vi.fn();
 
@@ -25,7 +25,7 @@ vi.mock('@/services/service.factory', () => ({
       add: mockAdd,
       update: mockUpdate,
       delete: mockDelete,
-      loadItems: mockLoadItems,
+      search: mockSearch,
       getByIds: mockGetByIds, // Keep this here for the mock
       addItems: mockAddItems,
     },
@@ -68,7 +68,7 @@ describe('relationship.store', () => {
     mockAdd.mockReset();
     mockUpdate.mockReset();
     mockDelete.mockReset();
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
     mockGetByIds.mockReset();
     mockAddItems.mockReset();
 
@@ -76,7 +76,7 @@ describe('relationship.store', () => {
     mockUpdate.mockResolvedValue(ok(mockRelationship)); // Default for updateItem
     mockDelete.mockResolvedValue(ok(undefined)); // Default for deleteItem
     mockAddItems.mockResolvedValue(ok(['new-id-1'])); // Default for addItems
-    // mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships)); // Moved to specific tests
+    // mockSearch.mockResolvedValue(ok(mockPaginatedRelationships)); // Moved to specific tests
   });
 
   const mockRelationship: Relationship = {
@@ -100,7 +100,7 @@ describe('relationship.store', () => {
 
   describe('_loadItems', () => {
     it('should load items successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
+      mockSearch.mockResolvedValue(ok(mockPaginatedRelationships));
 
       await store._loadItems();
 
@@ -109,31 +109,31 @@ describe('relationship.store', () => {
       expect(store.list.items).toEqual([mockRelationship]);
       expect(store.list.totalPages).toEqual(1);
       expect(store.list.totalItems).toEqual(1); // Corrected from 0
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle load items failure', async () => {
       const errorMessage = 'Failed to load relationships.';
-      mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(store.list.items).toEqual([]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('addItem', () => {
     it('should add an item successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships)); // _loadItems is called after successful add
+      mockSearch.mockResolvedValue(ok(mockPaginatedRelationships)); // _loadItems is called after successful add
       await store.addItem({ ...mockRelationship });
 
       expect(store.add.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeNull();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add item failure', async () => {
@@ -145,20 +145,20 @@ describe('relationship.store', () => {
       expect(store.add.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeTruthy();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('updateItem', () => {
     it('should update an item successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
+      mockSearch.mockResolvedValue(ok(mockPaginatedRelationships));
 
       await store.updateItem(mockRelationship);
 
       expect(store.update.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeNull();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle update item failure', async () => {
@@ -170,13 +170,13 @@ describe('relationship.store', () => {
       expect(store.update.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeTruthy();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteItem', () => {
     it('should delete an item successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
+      mockSearch.mockResolvedValue(ok(mockPaginatedRelationships));
 
       const result = await store.deleteItem(mockRelationship.id!);
 
@@ -184,7 +184,7 @@ describe('relationship.store', () => {
       expect(store._delete.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeNull();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle delete item failure', async () => {
@@ -197,7 +197,7 @@ describe('relationship.store', () => {
       expect(store._delete.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeTruthy();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
@@ -234,7 +234,7 @@ describe('relationship.store', () => {
   describe('addItems', () => {
     it('should add multiple items successfully', async () => {
       mockAddItems.mockResolvedValue(ok(['new-id-1', 'new-id-2']));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
+      mockSearch.mockResolvedValue(ok(mockPaginatedRelationships));
 
       const newRelationships = [
         { ...mockRelationship, id: undefined, sourceMemberId: 'm3', targetMemberId: 'm4' },
@@ -246,7 +246,7 @@ describe('relationship.store', () => {
       expect(store.add.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeNull();
       expect(mockAddItems).toHaveBeenCalledWith(newRelationships);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add multiple items failure', async () => {
@@ -262,7 +262,7 @@ describe('relationship.store', () => {
       expect(store.add.loading).toBe(false); // Corrected from store.loading
       expect(store.error).toBeTruthy();
       expect(mockAddItems).toHaveBeenCalledWith(newRelationships);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,13 @@ export class ApiRelationshipService extends ApiCrudService<Relationship> impleme
     super(http, '/relationship');
   }
 
+  async getRelationShips(familyId: string): Promise<Result<Relationship[], ApiError>> {
+    const payload = { familyId: familyId };
+    return this.http.get<Relationship[]>(`/relationship`, {
+      params: payload
+    });
+  }
+
   async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> {
     const payload = { relationships: newItems };
     return this.http.post<string[]>(`/relationship/bulk-create`, payload);
@@ -15,14 +22,14 @@ export class ApiRelationshipService extends ApiCrudService<Relationship> impleme
 
   async detectRelationship(familyId: string, memberAId: string, memberBId: string): Promise<Result<RelationshipDetectionResult> | null> {
     return await this.http.get<RelationshipDetectionResult>(
-        `/relationship/detect-relationship`,
-        {
-          params: {
-            familyId,
-            memberAId,
-            memberBId,
-          },
+      `/relationship/detect-relationship`,
+      {
+        params: {
+          familyId,
+          memberAId,
+          memberBId,
         },
-      );
+      },
+    );
   }
 }

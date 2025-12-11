@@ -3,9 +3,9 @@ using backend.Application.FamilyMedia.Commands.DeleteFamilyMedia;
 using backend.Application.FamilyMedia.Commands.LinkMediaToEntity;
 using backend.Application.FamilyMedia.Commands.UnlinkMediaFromEntity;
 using backend.Application.FamilyMedia.Queries.GetFamilyMediaById;
-using backend.Application.FamilyMedia.Queries.SearchFamilyMedia;
 using backend.Application.FamilyMedia.Queries.GetMediaLinksByFamilyMediaId;
 using backend.Application.FamilyMedia.Queries.GetMediaLinksByRefId;
+using backend.Application.FamilyMedia.Queries.SearchFamilyMedia;
 using backend.Domain.Enums; // For RefType, MediaType
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +69,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của file media cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteFamilyMedia([FromRoute]Guid familyId, [FromRoute]Guid id)
+    public async Task<IActionResult> DeleteFamilyMedia([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyMediaCommand { Id = id, FamilyId = familyId });
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);

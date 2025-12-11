@@ -7,14 +7,14 @@ import { ok, err } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IFamilyService methods used by family-autocomplete.store
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 const mockGetByIds = vi.fn();
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     family: {
-      loadItems: mockLoadItems,
+      search: mockSearch,
       getByIds: mockGetByIds,
       // Add other services as empty objects if they are not directly used by family-autocomplete.store
       add: vi.fn(),
@@ -49,7 +49,7 @@ describe('family-autocomplete.store', () => {
     // Manually inject the mocked services
     store.services = createServices('test');
     // Reset mocks before each test
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
     mockGetByIds.mockReset();
   });
 
@@ -66,22 +66,21 @@ describe('family-autocomplete.store', () => {
         { id: '1', name: 'Family A' },
         { id: '2', name: 'Family B' },
       ];
-      mockLoadItems.mockResolvedValue(ok({ items: mockFamilies, totalItems: 2, totalPages: 1 }));
+      mockSearch.mockResolvedValue(ok({ items: mockFamilies, totalItems: 2, totalPages: 1 }));
 
       await store.search({ searchQuery: 'Family' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.items).toEqual(mockFamilies);
-      expect(mockLoadItems).toHaveBeenCalledWith(
-        { searchQuery: 'Family' },
-        1,
-        50,
+      expect(mockSearch).toHaveBeenCalledWith(
+        { page: 1, itemsPerPage: 50 }, // options
+        { searchQuery: 'Family' }, // filters
       );
     });
 
     it('should handle fetch families failure', async () => {
-      mockLoadItems.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
+      mockSearch.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
       await store.search({ searchQuery: 'Family' });
 

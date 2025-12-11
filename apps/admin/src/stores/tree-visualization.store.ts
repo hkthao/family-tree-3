@@ -57,6 +57,7 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
 
       this.loading[familyId] = true;
       this.error[familyId] = null;
+      this.trees[familyId] = { members: [], relationships: [] };
 
       try {
         let fetchedMembers: Member[] = [];
@@ -100,15 +101,7 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
           // Original logic: Fetch all members and relationships for the family
           const [memberResult, relationshipResult] = await Promise.all([
             this.services.member.fetchMembersByFamilyId(familyId),
-            this.services.relationship.search(
-              {
-                page: 1,
-                itemsPerPage: 1000,
-              },
-              {
-                familyId: familyId,
-              }
-            ),
+            this.services.relationship.getRelationShips(familyId),
           ]);
 
           if (memberResult.ok) {
@@ -118,7 +111,7 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
           }
 
           if (relationshipResult.ok) {
-            fetchedRelationships = relationshipResult.value.items;
+            fetchedRelationships = relationshipResult.value;
           } else {
             this.error[familyId] = relationshipResult.error;
           }

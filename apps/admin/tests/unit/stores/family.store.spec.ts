@@ -12,7 +12,7 @@ const mockGetById = vi.fn();
 const mockAdd = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 const mockGetByIds = vi.fn();
 const mockAddItems = vi.fn();
 
@@ -25,7 +25,7 @@ vi.mock('@/services/service.factory', () => ({
       add: mockAdd,
       update: mockUpdate,
       delete: mockDelete,
-      loadItems: mockLoadItems,
+      search: mockSearch,
       getByIds: mockGetByIds,
       addItems: mockAddItems,
     },
@@ -65,13 +65,13 @@ describe('family.store', () => {
     mockAdd.mockReset();
     mockUpdate.mockReset();
     mockDelete.mockReset();
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
     mockGetByIds.mockReset();
     mockAddItems.mockReset();
     mockAdd.mockResolvedValue(ok(mockFamily));
     mockDelete.mockResolvedValue(ok(undefined));
     mockAddItems.mockResolvedValue(ok(['new-id-1']));
-    mockLoadItems.mockResolvedValue(ok(mockPaginatedFamilies));
+    mockSearch.mockResolvedValue(ok(mockPaginatedFamilies));
   });
 
   const mockFamily: Family = {
@@ -92,7 +92,7 @@ describe('family.store', () => {
 
   describe('_loadItems', () => {
     it('should load items successfully', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedFamilies));
+      mockSearch.mockResolvedValue(ok(mockPaginatedFamilies));
 
       await store._loadItems();
 
@@ -101,19 +101,19 @@ describe('family.store', () => {
       expect(store.list.items).toEqual([mockFamily]);
       expect(store.list.totalItems).toBe(1);
       expect(store.list.totalPages).toBe(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle load items failure', async () => {
       const errorMessage = 'Failed to load families.';
-      mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(store.list.items).toEqual([]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -126,7 +126,7 @@ describe('family.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add item failure', async () => {
@@ -139,21 +139,21 @@ describe('family.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAdd).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('updateItem', () => {
     it('should update an item successfully', async () => {
       mockUpdate.mockResolvedValue(ok(mockFamily));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedFamilies));
+      mockSearch.mockResolvedValue(ok(mockPaginatedFamilies));
 
       await store.updateItem(mockFamily);
 
       expect(store.update.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle update item failure', async () => {
@@ -165,14 +165,14 @@ describe('family.store', () => {
       expect(store.update.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteItem', () => {
     it('should delete an item successfully', async () => {
       mockDelete.mockResolvedValue(ok(undefined));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedFamilies));
+      mockSearch.mockResolvedValue(ok(mockPaginatedFamilies));
 
       const result = await store.deleteItem(mockFamily.id!);
 
@@ -180,7 +180,7 @@ describe('family.store', () => {
       expect(store._delete.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle delete item failure', async () => {
@@ -193,7 +193,7 @@ describe('family.store', () => {
       expect(store._delete.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockDelete).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
@@ -252,7 +252,7 @@ describe('family.store', () => {
   describe('addItems', () => {
     it('should add multiple items successfully', async () => {
       mockAddItems.mockResolvedValue(ok(['new-id-1', 'new-id-2']));
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedFamilies));
+      mockSearch.mockResolvedValue(ok(mockPaginatedFamilies));
 
       const newFamilies = [
         { name: 'Family 1', visibility: FamilyVisibility.Public },
@@ -264,7 +264,7 @@ describe('family.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAddItems).toHaveBeenCalledWith(newFamilies);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add multiple items failure', async () => {
@@ -280,7 +280,7 @@ describe('family.store', () => {
       expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAddItems).toHaveBeenCalledWith(newFamilies);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 });

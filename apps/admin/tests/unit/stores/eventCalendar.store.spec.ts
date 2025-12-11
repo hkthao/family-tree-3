@@ -7,13 +7,13 @@ import { createServices } from '@/services/service.factory';
 // import i18n from '@/plugins/i18n'; // Import i18n to mock it - REMOVED
 
 // Mock the IEventService
-const mockLoadItems = vi.fn();
+const mockSearch = vi.fn();
 
 // Mock the entire service factory to control service injection
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     event: {
-      loadItems: mockLoadItems,
+      search: mockSearch,
       // Add other event service methods as empty objects if they are not directly used by eventCalendar.store
       fetch: vi.fn(),
       getById: vi.fn(),
@@ -63,10 +63,10 @@ describe('eventCalendar.store', () => {
     // Manually inject the mocked services
     store.services = createServices('test');
     // Reset mocks before each test
-    mockLoadItems.mockReset();
+    mockSearch.mockReset();
 
     // Default mock resolved values
-    mockLoadItems.mockResolvedValue(ok({
+    mockSearch.mockResolvedValue(ok({
       items: [],
       page: 1,
       totalItems: 0,
@@ -98,18 +98,17 @@ describe('eventCalendar.store', () => {
     it('should load items successfully', async () => {
       store.list.currentMonthStartDate = new Date('2024-01-01');
       store.list.currentMonthEndDate = new Date('2024-01-31');
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.list.items).toEqual([mockEvent]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
-      expect(mockLoadItems).toHaveBeenCalledWith(
-        { ...store.list.filters, startDate: store.list.currentMonthStartDate, endDate: store.list.currentMonthEndDate },
-        1,
-        100, // Default itemsPerPage for calendar
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledWith(
+        { page: 1, itemsPerPage: 100 }, // options
+        { ...store.list.filters, startDate: store.list.currentMonthStartDate, endDate: store.list.currentMonthEndDate }, // filters
       );
     });
 
@@ -117,14 +116,14 @@ describe('eventCalendar.store', () => {
       store.list.currentMonthStartDate = new Date('2024-01-01');
       store.list.currentMonthEndDate = new Date('2024-01-31');
       const errorMessage = 'Failed to load events.';
-      mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
+      mockSearch.mockResolvedValue(err({ message: errorMessage } as ApiError));
 
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
       expect(store.error).toBe('event.errors.load');
       expect(store.list.items).toEqual([]);
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
 
     it('should not load items if currentMonthStartDate or currentMonthEndDate are null', async () => {
@@ -134,7 +133,7 @@ describe('eventCalendar.store', () => {
       await store._loadItems();
 
       expect(store.list.loading).toBe(false);
-      expect(mockLoadItems).not.toHaveBeenCalled();
+      expect(mockSearch).not.toHaveBeenCalled();
     });
   });
 
@@ -142,20 +141,20 @@ describe('eventCalendar.store', () => {
     it('should update filters and call _loadItems', () => { // Removed async
       store.list.currentMonthStartDate = new Date('2024-01-01');
       store.list.currentMonthEndDate = new Date('2024-01-31');
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
       const newFilters: EventFilter = { familyId: 'family-2' };
 
       store.setFilters(newFilters); // Removed await
 
       expect(store.list.filters.familyId).toBe('family-2');
       expect(store.list.currentPage).toBe(1); // Should reset page
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('setCurrentMonth', () => {
     it('should set current month start/end dates and call _loadItems', async () => {
-      mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents));
+      mockSearch.mockResolvedValue(ok(mockPaginatedEvents));
       const testDate = new Date('2024-02-10');
       // Using date-fns startOfMonth and endOfMonth directly to get the local time based dates
       const expectedStartDate = new Date(testDate);
@@ -170,7 +169,7 @@ describe('eventCalendar.store', () => {
 
       expect(store.list.currentMonthStartDate?.getTime()).toBe(expectedStartDate.getTime());
       expect(store.list.currentMonthEndDate?.getTime()).toBe(expectedEndDate.getTime());
-      expect(mockLoadItems).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 });
