@@ -9,7 +9,7 @@ using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyLinks.Queries;
-using backend.Application.FamilyMedia.DTOs;
+using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;

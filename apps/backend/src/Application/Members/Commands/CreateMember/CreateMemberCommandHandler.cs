@@ -2,10 +2,10 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
-using backend.Application.Files.UploadFile; // NEW
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Domain.Enums;
 using backend.Domain.Events.Families;
-using backend.Domain.Events.Members; // NEW
+using backend.Domain.Events.Members;
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
@@ -16,7 +16,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IStringLocalizer<CreateMemberCommandHandler> _localizer = localizer;
     private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
-    private readonly IMediator _mediator = mediator; // NEW
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -65,27 +65,31 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             try
             {
                 var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
-                var uploadCommand = new UploadFileCommand
+                var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    ImageData = imageData,
-                    FileName = $"Member_Avatar_{Guid.NewGuid().ToString()}.png",
+                    FamilyId = request.FamilyId, // Add FamilyId
+                    File = imageData,
+                    FileName = $"Member_Avatar_{Guid.NewGuid().ToString()}.png", // Use FileName property
                     Folder = string.Format(UploadConstants.MemberAvatarFolder, member.FamilyId),
-                    ContentType = "image/png"
+                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
                 };
 
-                var uploadResult = await _mediator.Send(uploadCommand, cancellationToken);
+                var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
 
                 if (!uploadResult.IsSuccess)
                 {
                     return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
                 }
 
-                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.Url))
+                // CreateFamilyMediaCommand returns a Guid (the ID of the new FamilyMedia record), not an object with a Url.
+                // We need to fetch the FamilyMedia object to get its FilePath (URL).
+                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value);
+                if (familyMedia == null || string.IsNullOrEmpty(familyMedia.FilePath))
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                member.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
+                member.UpdateAvatar(familyMedia.FilePath); // Update avatar after successful upload
             }
             catch (FormatException)
             {

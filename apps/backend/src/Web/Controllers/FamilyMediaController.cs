@@ -1,11 +1,11 @@
-using backend.Application.FamilyMedia.Commands.CreateFamilyMedia;
-using backend.Application.FamilyMedia.Commands.DeleteFamilyMedia;
-using backend.Application.FamilyMedia.Commands.LinkMediaToEntity;
-using backend.Application.FamilyMedia.Commands.UnlinkMediaFromEntity;
-using backend.Application.FamilyMedia.Queries.GetFamilyMediaById;
-using backend.Application.FamilyMedia.Queries.GetMediaLinksByFamilyMediaId;
-using backend.Application.FamilyMedia.Queries.GetMediaLinksByRefId;
-using backend.Application.FamilyMedia.Queries.SearchFamilyMedia;
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
+using backend.Application.FamilyMedias.Commands.DeleteFamilyMedia;
+using backend.Application.FamilyMedias.Commands.LinkMediaToEntity;
+using backend.Application.FamilyMedias.Commands.UnlinkMediaFromEntity;
+using backend.Application.FamilyMedias.Queries.GetFamilyMediaById;
+using backend.Application.FamilyMedias.Queries.GetMediaLinksByFamilyMediaId;
+using backend.Application.FamilyMedias.Queries.GetMediaLinksByRefId;
+using backend.Application.FamilyMedias.Queries.SearchFamilyMedia;
 using backend.Domain.Enums; // For RefType, MediaType
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
