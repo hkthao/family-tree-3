@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import EventEditView from '@/views/event/EventEditView.vue';
@@ -70,6 +70,7 @@ import EventAddView from '@/views/event/EventAddView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useAuth } from '@/composables';
+import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents'; // Import useUpcomingEvents
 
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
 
@@ -77,12 +78,14 @@ const props = defineProps<{
   familyId?: string;
   memberId?: string;
   readOnly?: boolean;
-  events: Event[]; // New prop for events
-  loading: boolean; // New prop for loading state
 }>();
+
+const emit = defineEmits(['refetchEvents']);
 
 const { t, locale } = useI18n();
 const { isAdmin, isFamilyManager } = useAuth();
+
+const { upcomingEvents: events, isLoading: loading, refetch: refetchEvents } = useUpcomingEvents(toRef(props, 'familyId'));
 
 const canAddEvent = computed(() => {
   return !props.readOnly && (isAdmin.value || isFamilyManager.value);
@@ -151,8 +154,8 @@ const setToday = () => {
 };
 
 const formattedEvents = computed(() => {
-  if (!props.events) return [];
-  return props.events
+  if (!events.value) return [];
+  return events.value
     .filter((event) => event.startDate)
     .map((event) => ({
       title: event.name,
@@ -184,7 +187,7 @@ const showEventDetails = (eventSlotScope: Event) => {
 const handleEventSaved = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
-  // TODO: Emit an event to parent to refetch data
+  refetchEvents(); // Refetch data
 };
 
 const handleEventClosed = () => {
@@ -194,7 +197,7 @@ const handleEventClosed = () => {
 
 const handleAddSaved = () => {
   addDrawer.value = false;
-  // TODO: Emit an event to parent to refetch data
+  refetchEvents(); // Refetch data
 };
 
 const handleAddClosed = () => {
