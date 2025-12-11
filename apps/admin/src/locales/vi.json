@@ -302,6 +302,7 @@
   "event.calendar.viewMode.day": "Ngày",
   "event.calendar.viewMode.month": "Tháng",
   "event.calendar.viewMode.week": "Tuần",
+  "event.calendar.noEvents": "Không có sự kiện nào để hiển thị",
   "event.description": "Mô tả",
   "event.detail.title": "Chi tiết Sự kiện",
   "event.endDate": "Ngày kết thúc",

@@ -284,6 +284,7 @@
   "event.calendar.viewMode.day": "Day",
   "event.calendar.viewMode.month": "Month",
   "event.calendar.viewMode.week": "Week",
+  "event.calendar.noEvents": "No events to display",
   "event.errors.add": "Failed to add event.",
   "event.errors.delete": "Failed to delete event.",
   "event.errors.load": "Failed to load events.",
