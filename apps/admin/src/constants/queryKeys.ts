@@ -1,4 +1,4 @@
-import type { FamilyFilter, FamilyMediaFilter, ListOptions } from '@/types';
+import type { FamilyFilter, FamilyMediaFilter, ListOptions, FamilyDictFilter } from '@/types';
 
 export const queryKeys = {
   dashboard: {
@@ -28,5 +28,10 @@ export const queryKeys = {
     all: ['familyMedia'] as const,
     list: (familyId: string, filters?: FamilyMediaFilter, page?: number, itemsPerPage?: number, sortBy?: ListOptions['sortBy']) => [...queryKeys.familyMedia.all, 'list', familyId, filters, page, itemsPerPage, sortBy] as const,
     detail: (familyId: string, mediaId: string) => [...queryKeys.familyMedia.all, 'detail', familyId, mediaId] as const,
+  },
+  familyDicts: {
+    all: ['familyDicts'] as const,
+    list: (filters?: FamilyDictFilter) => [...queryKeys.familyDicts.all, 'list', filters] as const,
+    detail: (familyDictId: string) => [...queryKeys.familyDicts.all, 'detail', familyDictId] as const,
   },
 };

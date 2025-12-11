@@ -3,26 +3,24 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('familyDict.detail.title') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="detail.loading" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="loading || isDeletingFamilyDict" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <FamilyDictForm v-if="familyDict" :initial-family-dict-data="familyDict" :read-only="true" />
     </v-card-text>
     <v-card-actions class="justify-end">
-      <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!familyDict || detail.loading" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!familyDict || detail.loading" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
+      <v-btn color="grey" @click="handleClose" :disabled="isDeletingFamilyDict">{{ t('common.close') }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!familyDict || loading || isDeletingFamilyDict" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!familyDict || loading || isDeletingFamilyDict" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictForm } from '@/components/family-dict';
-import type { FamilyDict } from '@/types';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
-import { storeToRefs } from 'pinia';
+import { useFamilyDictQuery, useDeleteFamilyDictMutation } from '@/composables/family-dict';
 
 interface FamilyDictDetailViewProps {
   familyDictId: string;
@@ -32,42 +30,17 @@ const props = defineProps<FamilyDictDetailViewProps>();
 const emit = defineEmits(['close', 'family-dict-deleted', 'edit-family-dict']);
 
 const { t } = useI18n();
-const familyDictStore = useFamilyDictStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
-const { detail } = storeToRefs(familyDictStore);
-
-const familyDict = ref<FamilyDict | undefined>(undefined);
+const { familyDictId } = toRefs(props);
+const { familyDict, loading } = useFamilyDictQuery(familyDictId);
+const { mutate: deleteFamilyDict, isPending: isDeletingFamilyDict } = useDeleteFamilyDictMutation();
 
 const canEditOrDelete = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
-
-const loadFamilyDict = async (id: string) => {
-  await familyDictStore.getById(id);
-  if (familyDictStore.detail.item) {
-    familyDict.value = familyDictStore.detail.item;
-  } else {
-    familyDict.value = undefined;
-  }
-};
-
-onMounted(async () => {
-  if (props.familyDictId) {
-    await loadFamilyDict(props.familyDictId);
-  }
-});
-
-watch(
-  () => props.familyDictId,
-  async (newId) => {
-    if (newId) {
-      await loadFamilyDict(newId);
-    }
-  },
-);
 
 const handleClose = () => {
   emit('close');
@@ -88,18 +61,16 @@ const handleDelete = async () => {
   });
 
   if (confirmed) {
-    try {
-      await familyDictStore.deleteItem(familyDict.value.id);
-      if (!familyDictStore.error) {
+    deleteFamilyDict(familyDict.value.id, {
+      onSuccess: () => {
         showSnackbar(t('familyDict.messages.deleteSuccess'), 'success');
         emit('family-dict-deleted');
         emit('close');
-      } else {
-        showSnackbar(familyDictStore.error || t('familyDict.messages.deleteError'), 'error');
-      }
-    } catch (error) {
-      showSnackbar(t('familyDict.messages.deleteError'), 'error');
-    }
+      },
+      onError: (error) => {
+        showSnackbar(error.message || t('familyDict.messages.deleteError'), 'error');
+      },
+    });
   }
 };
 </script>
