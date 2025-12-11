@@ -18,6 +18,7 @@ public class MemberUpdatedEventHandlerTests
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IN8nService> _n8nServiceMock;
+    private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly MemberUpdatedEventHandler _handler;
 
     public MemberUpdatedEventHandlerTests()
@@ -26,7 +27,8 @@ public class MemberUpdatedEventHandlerTests
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
         _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new MemberUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _familyTreeServiceMock = new Mock<IFamilyTreeService>();
+        _handler = new MemberUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
