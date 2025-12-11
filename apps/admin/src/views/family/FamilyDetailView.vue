@@ -12,9 +12,6 @@
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="secondary" @click="openAiDrawer()" data-testid="button-ai-input" v-if="canManageFamily">
-        {{ t('common.aiInput') }}
-      </v-btn>
       <v-btn color="primary" @click="openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
@@ -39,7 +36,7 @@ const props = defineProps<{
   readOnly: boolean;
 }>();
 
-const emit = defineEmits(['openEditDrawer', 'openAiDrawer']);
+const emit = defineEmits(['openEditDrawer']);
 
 const familyIdRef = toRef(props, 'familyId');
 const { family: familyData, isLoading, error } = useFamilyQuery(familyIdRef);
@@ -50,10 +47,6 @@ const canManageFamily = computed(() => {
 
 const openEditDrawer = () => {
   emit('openEditDrawer', props.familyId);
-};
-
-const openAiDrawer = () => {
-  emit('openAiDrawer', props.familyId);
 };
 
 const closeView = () => {
