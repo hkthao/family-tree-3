@@ -22,6 +22,7 @@ export const queryKeys = {
   families: {
     all: ['families'] as const,
     list: (filters?: FamilyFilter) => [...queryKeys.families.all, 'list', filters] as const,
+    detail: (familyId: string) => [...queryKeys.families.all, 'detail', familyId] as const,
   },
 };
 

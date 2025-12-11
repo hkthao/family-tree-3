@@ -6,16 +6,18 @@
         }}</span>
     </v-card-title>
     <v-card-text>
-      <FamilyForm ref="familyFormRef" v-if="props.initialFamily" :initial-family-data="props.initialFamily" :read-only="false" />
+      <FamilyForm ref="familyFormRef" v-if="family" :initial-family-data="family" :read-only="false" />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isLoading || isUpdatingFamily">{{ t('common.cancel') }}</v-btn>
       <v-btn
         color="primary"
         data-testid="button-save"
         @click="handleUpdateItem"
+        :loading="isUpdatingFamily"
+        :disabled="isLoading || isUpdatingFamily"
         >{{
         t('common.save')
         }}</v-btn
@@ -25,12 +27,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
+import { useFamilyQuery, useUpdateFamilyMutation } from '@/composables/family';
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;
@@ -38,8 +40,8 @@ interface FamilyFormExposed {
 }
 
 interface FamilyEditViewProps {
-  initialFamily?: Family; // Make optional for better flexibility
-  initialFamilyId?: string; // New prop to fetch family if not provided
+  initialFamily?: Family;
+  initialFamilyId?: string;
 }
 
 const props = defineProps<FamilyEditViewProps>();
@@ -48,46 +50,16 @@ const emit = defineEmits(['close', 'saved']);
 const familyFormRef = ref<FamilyFormExposed | null>(null);
 
 const { t } = useI18n();
-const familyStore = useFamilyStore();
 const { showSnackbar } = useGlobalSnackbar();
 
-const family = ref<Family | undefined>(undefined); // Internal ref for family data
+const familyId = computed(() => props.initialFamilyId || props.initialFamily?.id);
 
-// Fetch family if initialFamilyId is provided or if initialFamily is not
-const loadFamily = async (id: string) => {
-  await familyStore.getById(id);
-  if (!familyStore.error) {
-    family.value = familyStore.detail.item as Family;
-  } else {
-    family.value = undefined; // Clear family on error
-  }
-};
+const { family: fetchedFamily, isLoading: isLoadingFamily } = useFamilyQuery(toRef(props, 'initialFamilyId') as any); // Cast for initialFamilyId, will refine if error occurs
+const { mutate: updateFamily, isPending: isUpdatingFamily } = useUpdateFamilyMutation();
 
-onMounted(() => {
-  if (props.initialFamily) {
-    family.value = props.initialFamily;
-  } else if (props.initialFamilyId) {
-    loadFamily(props.initialFamilyId);
-  }
-});
+const family = computed(() => props.initialFamily || fetchedFamily.value);
+const isLoading = computed(() => isLoadingFamily.value);
 
-watch(
-  () => props.initialFamilyId,
-  (newId) => {
-    if (newId) {
-      loadFamily(newId);
-    }
-  },
-);
-
-watch(
-  () => props.initialFamily,
-  (newFamily) => {
-    if (newFamily) {
-      family.value = newFamily;
-    }
-  },
-);
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;
@@ -103,29 +75,24 @@ const handleUpdateItem = async () => {
     return;
   }
 
-  try {
-    await familyStore.updateItem(itemData);
-    if (!familyStore.error) {
+  updateFamily(itemData, {
+    onSuccess: () => {
       showSnackbar(
         t('family.management.messages.updateSuccess'),
         'success',
       );
-      emit('saved'); // Emit saved event
-    } else {
+      emit('saved');
+    },
+    onError: (error) => {
       showSnackbar(
-        familyStore.error || t('family.management.messages.saveError'),
+        error.message || t('family.management.messages.saveError'),
         'error',
       );
-    }
-  } catch (error) {
-    showSnackbar(
-      t('family.management.messages.saveError'),
-      'error',
-    );
-  }
+    },
+  });
 };
 
 const closeForm = () => {
-  emit('close'); // Emit close event
+  emit('close');
 };
 </script>

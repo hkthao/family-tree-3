@@ -3,3 +3,5 @@ export * from './useFamilyListFilters';
 export * from './useFamiliesQuery';
 export * from './useDeleteFamilyMutation';
 export * from './useAddFamilyMutation';
+export * from './useFamilyQuery';
+export * from './useUpdateFamilyMutation';
