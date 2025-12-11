@@ -23,7 +23,7 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useN8nChat } from '@/composables/useN8nChat'; // Import the new composable
+import { useN8nChat } from '@/composables/chat/useN8nChat'; // Import the new composable
 
 const { t } = useI18n();
 const chatOpen = ref(false);

@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n';
 import '@n8n/chat/style.css';
 import { getEnvVariable } from '@/utils/api.util';
 
-import { useAccessToken } from './useAccessToken';
-import { useUserPreferences } from './useUserPreferences';
+import { useAccessToken } from '../auth/useAccessToken';
+import { useUserPreferences } from '../data/useUserPreferences';
 
 export function useN8nChat(selectedFamilyId: Ref<string | undefined> | ComputedRef<string | undefined>, chatOpen: Ref<boolean>) {
   const { t } = useI18n();

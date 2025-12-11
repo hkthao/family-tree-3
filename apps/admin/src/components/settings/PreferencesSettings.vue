@@ -37,7 +37,7 @@ import { useI18n } from 'vue-i18n';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
 import { useGlobalSnackbar } from '@/composables';
-import { useUserPreferences } from '@/composables/useUserPreferences'; // Import useUserPreferences
+import { useUserPreferences } from '@/composables/data/useUserPreferences'; // Import useUserPreferences
 import { type UserPreference, Theme, Language } from '@/types'; // Import UserPreference, Theme, Language
 
 const { t } = useI18n();

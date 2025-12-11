@@ -88,7 +88,7 @@ import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
-import { useUpcomingEvents } from '@/composables/useUpcomingEvents'; // Import useUpcomingEvents
+import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents'; // Import useUpcomingEvents
 
 const { t } = useI18n();
 const route = useRoute();
