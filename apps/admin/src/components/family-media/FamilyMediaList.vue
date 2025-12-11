@@ -47,7 +47,7 @@
         <v-icon v-else>mdi-file-image-outline</v-icon>
       </template>
       <template v-slot:item.fileName="{ item }">
-        <a :href="item.filePath" target="_blank">{{ item.fileName }}</a>
+        <span class="text-primary cursor-pointer" @click="emit('view', item.id)">{{ item.fileName }}</span>
       </template>
       <template v-slot:item.mediaType="{ item }">
         {{ t(`common.mediaType.${MediaType[item.mediaType]}`) }}
@@ -60,20 +60,6 @@
       </template>
       <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-icon
-          small
-          class="me-2"
-          @click="emit('view', item.id)"
-        >
-          mdi-eye
-        </v-icon>
-        <v-icon
-          small
-          class="me-2"
-          @click="emit('edit', item.id)"
-        >
-          mdi-pencil
-        </v-icon>
         <v-icon
           small
           @click="emit('delete', item.id)"
@@ -107,7 +93,7 @@ interface FamilyMediaListProps {
 }
 
 const props = defineProps<FamilyMediaListProps>();
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'update:search']);
+const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search']);
 const { t } = useI18n();
 const { isAdmin } = useAuth();
 
@@ -154,7 +140,7 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'actions',
       sortable: false,
       align: 'end',
-      width: '100px',
+      minWidth: '100px',
     });
   }
   return baseHeaders;

@@ -27,10 +27,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, toRef } from 'vue';
+import { nextTick, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
-import type { FamilyMediaFilter, ListOptions, FamilyMedia } from '@/types';
+import type { FamilyMediaFilter, ListOptions } from '@/types';
 import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters } from '@/composables/family-media';
 // Components
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';

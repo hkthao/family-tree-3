@@ -20,9 +20,9 @@ export enum RefType {
 }
 
 export enum MediaType {
-  Image = 0,
-  Video = 1,
-  Audio = 2,
-  Document = 3,
-  Other = 4,
+  Image = 1,
+  Video = 2,
+  Audio = 3,
+  Document = 4,
+  Other = 5,
 }
