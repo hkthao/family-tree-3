@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.FamilyMedia.Commands.CreateFamilyMedia;
@@ -61,7 +62,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             FamilyId = request.FamilyId,
             FileName = request.File.FileName, // Store original file name
             FilePath = uploadResult.Value!, // The URL returned by the storage service
-            MediaType = request.MediaType,
+            MediaType = request.MediaType ?? InferMediaTypeFromContentType(request.File.ContentType),
             FileSize = request.File.Length,
             Description = request.Description,
             UploadedBy = _currentUser.UserId // Current user uploading the file
@@ -71,5 +72,32 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(familyMedia.Id);
+    }
+
+    private static MediaType InferMediaTypeFromContentType(string contentType)
+    {
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            return MediaType.Other;
+        }
+
+        if (contentType.StartsWith("image/"))
+        {
+            return MediaType.Image;
+        }
+        if (contentType.StartsWith("video/"))
+        {
+            return MediaType.Video;
+        }
+        if (contentType.StartsWith("audio/"))
+        {
+            return MediaType.Audio;
+        }
+        if (contentType.Contains("pdf")) // Covers application/pdf
+        {
+            return MediaType.Document;
+        }
+
+        return MediaType.Other;
     }
 }
