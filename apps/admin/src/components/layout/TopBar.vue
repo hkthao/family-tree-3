@@ -22,14 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, watch } from 'vue';
+import { ref, type PropType, watch, onMounted } from 'vue'; // Added onMounted
 import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
 import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserSettingsStore } from '@/stores';
+import { useUserProfileStore, useUserPreferenceStore } from '@/stores'; // Added useUserPreferenceStore
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
@@ -39,7 +39,8 @@ const { t } = useI18n();
 const theme = useTheme();
 
 const router = useRouter();
-const userSettingsStore = useUserSettingsStore();
+const userProfileStore = useUserProfileStore();
+const userPreferenceStore = useUserPreferenceStore(); // Initialized useUserPreferenceStore
 
 const showChatWidget = ref(false); // Reactive variable to control chat widget visibility
 
@@ -58,14 +59,18 @@ const getThemeCode = (theme: Theme) => {
 
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? Theme.Light : Theme.Dark;
-  userSettingsStore.setTheme(newTheme);
+  userPreferenceStore.setTheme(newTheme); // Used userPreferenceStore
 }
 
-watch(() => userSettingsStore.preferences.theme, (newTheme) => {
-  theme.change(getThemeCode(newTheme))
+watch(() => userPreferenceStore.userPreference?.theme, (newTheme) => { // Used userPreferenceStore
+  if (newTheme !== undefined) { // Check for undefined as userPreference might not be loaded yet
+    theme.global.name.value = getThemeCode(newTheme);
+  }
 }, { immediate: true });
 
-
+onMounted(async () => {
+  await userPreferenceStore.fetchUserPreferences(); // Fetch preferences on mount
+});
 
 const handleNavigation = (route: string) => {
   router.push(route);

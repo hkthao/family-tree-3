@@ -10,7 +10,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="exportFamilyData" :loading="familyDataStore.exporting">
+            <v-btn color="primary" @click="exportData(familyId)" :loading="isExportingFamilyData">
               {{ t('family.export.button') }}
             </v-btn>
           </v-card-actions>
@@ -29,7 +29,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="importFamilyData" :loading="familyDataStore.importing"
+            <v-btn color="primary" @click="importData" :loading="isImportingFamilyData"
               :disabled="!importFile">
               {{ t('family.import.button') }}
             </v-btn>
@@ -53,69 +53,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'; // ref is still needed for importFile and clearExistingData
 import { useI18n } from 'vue-i18n';
-import { useFamilyDataStore } from '@/stores/family-data.store';
-import { useGlobalSnackbar } from '@/composables';
-import type { FamilyExportDto } from '@/types/family';
+import { useFamilyDataManagement } from '@/composables/family/useFamilyDataManagement';
 import PrivacySettings from '@/components/family/PrivacySettings.vue'; // Import the new component
 
 const { t } = useI18n();
-const familyDataStore = useFamilyDataStore();
-const { showSnackbar } = useGlobalSnackbar();
 
 const props = defineProps<{
   familyId: string;
 }>();
 
-const importFile = ref<File | null>(null);
-const clearExistingData = ref(true);
-
-const exportFamilyData = async () => {
-  const success = await familyDataStore.exportFamilyData(props.familyId);
-  if (success) {
-    showSnackbar(t('family.export.success'), 'success');
-  } else {
-    showSnackbar(`${t('family.export.error')}: ${familyDataStore.error}`, 'error');
-  }
-};
-
-const importFamilyData = async () => {
-  if (!importFile.value) return;
-
-  try {
-    const file = importFile.value;
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-      try {
-        const fileContent = e.target?.result as string;
-        const familyData: FamilyExportDto = JSON.parse(fileContent);
-        const newFamilyId = await familyDataStore.importFamilyData(props.familyId, familyData, clearExistingData.value);
-
-        if (newFamilyId) {
-          showSnackbar(`${t('family.import.success')}: ${newFamilyId}`, 'success');
-          importFile.value = null; // Clear file input
-        } else {
-          showSnackbar(`${t('family.import.error')}: ${familyDataStore.error}`, 'error');
-        }
-      } catch (parseError) {
-        console.error('Error parsing JSON file:', parseError);
-        showSnackbar(t('family.import.parse_error'), 'error');
-      }
-    };
-
-    reader.onerror = (e) => {
-      console.error('Error reading file:', e);
-      showSnackbar(t('family.import.read_error'), 'error');
-    };
-
-    reader.readAsText(file);
-  } catch (error) {
-    console.error('Error importing family data:', error);
-    showSnackbar(t('family.import.error'), 'error');
-  }
-};
+const {
+  importFile,
+  clearExistingData,
+  exportData,
+  isExportingFamilyData,
+  importData,
+  isImportingFamilyData,
+} = useFamilyDataManagement(props.familyId);
 </script>
 
 <style scoped>
