@@ -1,37 +1,46 @@
 <template>
   <div>
-    <!-- Display selected chips -->
-    <div v-if="props.multiple && internalValue && (internalValue as UserDto[]).length > 0 && !hideChips" class="mb-2">
-      <v-chip
-        v-for="user in (internalValue as UserDto[])"
-        :key="user.id"
-        size="small"
-        :prepend-avatar="getAvatarUrl(user.avatarUrl, undefined)"
-        class="mr-1 mb-1"
-        closable
-        @click:close="removeUser(user)"
-      >
-        {{ user.email || user.name }}
-      </v-chip>
-    </div>
-
-    <v-text-field
-      v-model="currentSearchText"
+    <v-autocomplete
+      v-model="internalValue"
+      v-model:search="currentSearchText"
+      :items="autocompleteItems"
       :label="label"
       :rules="rules"
       :readonly="readOnly"
-      :clearable="clearable && !props.multiple"
+      :clearable="clearable"
       :disabled="disabled"
-      @keydown.enter.prevent="handleEnter"
+      :multiple="props.multiple"
+      chips
+      closable-chips
+      item-title="email"
+      item-value="id"
+      return-object
+      no-filter
+      @update:modelValue="handleUpdateModelValue"
       @click:clear="handleClear"
       v-bind="$attrs"
       variant="outlined"
       density="comfortable"
+      :loading="isLoadingAutocomplete"
+      :hide-details="props.hideDetails"
     >
-      <template #append-inner v-if="shouldShowAppendInner">
-        <v-avatar :image="avatarSrc" size="small" class="mr-2"></v-avatar>
+      <template v-slot:chip="{ props, item }">
+        <v-chip
+          v-bind="props"
+          :prepend-avatar="getAvatarUrl(item.raw.avatarUrl, undefined)"
+          :text="item.raw.email || item.raw.name"
+        ></v-chip>
       </template>
-    </v-text-field>
+
+      <template v-slot:item="{ props, item }">
+        <v-list-item
+          v-bind="props"
+          :prepend-avatar="getAvatarUrl(item.raw.avatarUrl, undefined)"
+          :title="item.raw.email || item.raw.name"
+          :subtitle="item.raw.email && item.raw.name ? item.raw.name : ''"
+        ></v-list-item>
+      </template>
+    </v-autocomplete>
   </div>
 </template>
 
@@ -53,70 +62,82 @@ interface UserAutocompleteProps {
   clearable?: boolean;
   multiple?: boolean;
   disabled?: boolean;
-  hideChips?: boolean; // For member-chip display
+  hideChips?: boolean; // For member-chip display (no longer needed with v-autocomplete chips)
+  hideDetails?: boolean; // For member-chip display
 }
 
 const props = defineProps<UserAutocompleteProps>();
 
 const emit = defineEmits(['update:modelValue']);
 
-// Logic for preloading selected item(s) when modelValue is an ID(s)
-const preloadedUsers = ref<UserDto[]>([]);
 const internalValue = ref<UserDto | UserDto[] | null>(null);
-const isLoadingPreload = ref(false); // Retaining for future loading states if needed, though less critical now.
-
-// Use a local ref for searchText
 const currentSearchText = ref('');
+const autocompleteItems = ref<UserDto[]>([]);
+const isLoadingAutocomplete = ref(false);
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-// Computed properties for template logic
-const shouldShowAppendInner = computed(() => !props.multiple && internalValue.value);
-
-const avatarSrc = computed(() => {
-  const user = internalValue.value;
-  if (!props.multiple && user && typeof user === 'object' && 'avatarUrl' in user && 'userId' in user) { // Check for 'userId' to confirm it's UserDto-like
-    return getAvatarUrl((user as UserDto).avatarUrl, undefined);
-  }
-  return '';
-});
-
-const fetchUserByIds = async (ids: string[]) => {
-  if (!ids || ids.length === 0) {
-    preloadedUsers.value = [];
+const fetchAutocompleteItems = async (query: string) => {
+  if (!query) {
+    autocompleteItems.value = [];
     return;
   }
-  isLoadingPreload.value = true;
+  isLoadingAutocomplete.value = true;
+  try {
+    const result = await userService.search(query, 1, 10);
+    if (result.ok) {
+      autocompleteItems.value = result.value.items;
+    } else {
+      console.error('Error fetching autocomplete items:', result.error);
+      autocompleteItems.value = [];
+    }
+  } finally {
+    isLoadingAutocomplete.value = false;
+  }
+};
+
+watch(currentSearchText, (newSearchText) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    fetchAutocompleteItems(newSearchText);
+  }, 300); // Debounce time
+});
+
+
+// Logic for preloading selected item(s) when modelValue is an ID(s)
+const fetchUserByIds = async (ids: string[]) => {
+  if (!ids || ids.length === 0) {
+    return [];
+  }
+  isLoadingAutocomplete.value = true; // Use common loading indicator
   try {
     const result = await userService.getByIds(ids);
     if (result.ok) {
-      preloadedUsers.value = result.value || [];
+      return result.value || [];
     } else {
       console.error('Error preloading users:', result.error);
-      preloadedUsers.value = [];
+      return [];
     }
   } finally {
-    isLoadingPreload.value = false;
+    isLoadingAutocomplete.value = false;
   }
 };
 
 watch(() => props.modelValue, async (newModelValue) => {
-  if (newModelValue) {
-    if (props.multiple && Array.isArray(newModelValue)) {
-      await fetchUserByIds(newModelValue as string[]);
-      internalValue.value = preloadedUsers.value;
-    } else if (!props.multiple && typeof newModelValue === 'string') {
-      await fetchUserByIds([newModelValue as string]);
-      const user = preloadedUsers.value[0];
-      if (user) {
-        internalValue.value = user;
-        currentSearchText.value = user.email || user.name || ''; // Display preloaded user in text field
-      } else {
-        internalValue.value = null;
-        currentSearchText.value = '';
-      }
+  if (props.multiple) {
+    if (Array.isArray(newModelValue) && newModelValue.length > 0) {
+      internalValue.value = await fetchUserByIds(newModelValue as string[]);
+    } else {
+      internalValue.value = [];
     }
   } else {
-    internalValue.value = null;
-    currentSearchText.value = '';
+    if (typeof newModelValue === 'string' && newModelValue) {
+      const users = await fetchUserByIds([newModelValue]);
+      internalValue.value = users[0] || null;
+    } else {
+      internalValue.value = null;
+    }
   }
 }, { immediate: true });
 
@@ -131,59 +152,13 @@ const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
   }
 };
 
-// Handle Enter key press to add user if not selected from dropdown
-const handleEnter = async () => {
-  const query = currentSearchText.value.trim();
-  if (!query) return;
-
-  // Perform a direct search to check for exact match
-  const result = await userService.findUser(query);
-  if (result.ok && result.value) { // Check if result is OK and a user was found (not undefined)
-    const foundUser = result.value;
-
-    // If multiple selection, add the user to internalValue if not already present
-    if (props.multiple) {
-      const currentSelected = (internalValue.value as UserDto[] || []);
-      if (!currentSelected.some(user => user.id === foundUser.id)) {
-        internalValue.value = [...currentSelected, foundUser];
-        handleUpdateModelValue(internalValue.value); // Emit updated IDs
-      }
-    } else {
-      // For single selection, set the found user
-      internalValue.value = foundUser;
-      handleUpdateModelValue(internalValue.value); // Emit updated ID
-      currentSearchText.value = foundUser.email || foundUser.name || ''; // Display selected user
-    }
-    currentSearchText.value = ''; // Clear search text after adding (for multiple) or selection
-  } else {
-    // Optionally: show a message that user was not found or not unique
-    console.log(`User "${query}" not found or not unique.`);
-    // Keep search text if user not found, so user can edit
-  }
-};
-
-const removeUser = (userToRemove: UserDto) => {
-  if (props.multiple && Array.isArray(internalValue.value)) {
-    internalValue.value = internalValue.value.filter(user => user.id !== userToRemove.id);
-    handleUpdateModelValue(internalValue.value);
-  }
-};
-
 const handleClear = () => {
-  if (!props.multiple) {
-    internalValue.value = null;
-    handleUpdateModelValue(null);
-    currentSearchText.value = '';
-  }
-  // For multiple, clear button would ideally clear only currentSearchText, not selected chips
-  // If the clear button for v-text-field is used, it only clears currentSearchText
+  internalValue.value = props.multiple ? [] : null;
+  currentSearchText.value = '';
+  autocompleteItems.value = [];
+  handleUpdateModelValue(internalValue.value);
 };
 
-// For single selection, if the input text is manually cleared, also clear the modelValue
-watch(currentSearchText, (newValue) => {
-  if (!props.multiple && !newValue && internalValue.value) {
-    internalValue.value = null;
-    handleUpdateModelValue(null);
-  }
-});
+// No longer need handleEnter or removeUser explicitly as v-autocomplete handles them
+
 </script>
