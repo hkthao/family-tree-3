@@ -4,7 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Users.Specifications;
 
-namespace backend.Application.Users.Queries;
+namespace backend.Application.Identity.Queries;
 
 public class SearchUsersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchUsersQuery, Result<PaginatedList<UserDto>>>
 {
