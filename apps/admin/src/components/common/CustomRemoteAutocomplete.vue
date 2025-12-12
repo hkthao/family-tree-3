@@ -52,6 +52,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  multiple: { // Add this prop
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -139,7 +143,6 @@ watch(
 
 const updateModelValue = (newValue: any) => {
   if (props.returnObject) {
-    // If returning object, newValue is already the full object.
     emit('update:modelValue', newValue);
   } else {
     // If not returning object, newValue is the item's value.
@@ -148,14 +151,17 @@ const updateModelValue = (newValue: any) => {
     emit('update:modelValue', selectedItem ? getItemValue(selectedItem) : null);
   }
 
-  // After selecting, update searchText to show the selected item's title
-  if (newValue) {
+  // After selecting, update searchText to show the selected item's title (for single selection)
+  // or clear it (for multiple selection)
+  if (props.multiple) {
+    searchText.value = ''; // Clear search text for multiple selections
+  } else if (newValue) {
     const selectedItem = remoteItems.value.find(item => getItemValue(item) === (props.returnObject ? getItemValue(newValue) : newValue));
     if (selectedItem) {
       searchText.value = getItemTitle(selectedItem);
     }
   } else {
-    searchText.value = ''; // Clear search text if selection is cleared
+    searchText.value = ''; // Clear search text if selection is cleared (single selection)
   }
 };
 
@@ -176,12 +182,11 @@ const updateModelValue = (newValue: any) => {
     :variant="variant"
     :density="density"
     :no-data-text="internalNoDataText"
+    :hide-selected="props.multiple"
+    :chips="props.multiple"
     no-filter
     @focus="handleFocus"
     v-bind="$attrs"
   >
-    <template v-for="(_, name) in $slots" #[name]="slotProps">
-      <slot :name="name" v-bind="slotProps || {}" />
-    </template>
   </v-autocomplete>
 </template>
