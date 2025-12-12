@@ -10,6 +10,7 @@
     :multiple="multiple"
     item-title="fullName"
     item-value="id"
+    density="compact"
     :fetch-items="fetchItems"
     :loading="isLoadingPreload"
     :disabled="disabled"

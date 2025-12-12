@@ -13,6 +13,7 @@
     :fetch-items="fetchItems"
     :loading="isLoadingPreload"
     :disabled="disabled"
+    density="compact"
     :return-object="true"
   >
     <template #item="{ props: itemProps, item }">

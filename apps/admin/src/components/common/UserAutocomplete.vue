@@ -2,6 +2,7 @@
   <CustomRemoteAutocomplete v-bind="$attrs" v-model="internalValue" @update:model-value="handleUpdateModelValue"
     :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple" item-title="email"
     item-value="id" :fetch-items="fetchItems" :loading="isLoadingPreload" :disabled="disabled" :return-object="true"
+    density="compact"
     :hide-no-data="true" :hide-details="hideDetails" chips :closable-chips="!disabled">
   </CustomRemoteAutocomplete>
 </template>
