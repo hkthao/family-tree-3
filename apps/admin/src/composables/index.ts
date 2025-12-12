@@ -7,7 +7,7 @@ export * from './data/useUpcomingEvents';
 export * from './data/useUserPreferences';
 export * from './ui/useConfirmDialog';
 export * from './ui/useCrudDrawer';
-export * from './autocomplete/useFamilyAutocomplete';
+
 export * from './tour/useFamilyTour';
 export * from './tour/useFaceSearchTour';
 export * from './ui/useGlobalSnackbar';
@@ -17,3 +17,4 @@ export * from './tour/useOnboardingTour';
 export * from './utils/useServices';
 export * from './autocomplete/useUserAutocomplete';
 export * from './forms/useMemberStoryForm';
+export * from './family/useFamilySearch';

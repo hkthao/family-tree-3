@@ -230,7 +230,7 @@
   "common.na": "N/A",
   "common.name": "Tên",
   "common.next": "Tiếp theo",
-  "common.noData": "Không có dữ liệu",
+  "common.no_data": "Không có dữ liệu",
   "common.or": "hoặc",
   "common.refresh": "Làm mới",
   "common.resetFilters": "Đặt lại Bộ lọc",
