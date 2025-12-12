@@ -8,6 +8,7 @@ using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -32,7 +33,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetRelationships([FromQuery] GetRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetRelationshipById(Guid id)
     {
         var result = await _mediator.Send(new GetRelationshipByIdQuery(id));
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
     {
         var result = await _mediator.Send(new DetectRelationshipQuery(familyId, memberAId, memberBId));
-        return result.Description != "unknown" ? Ok(result) : NotFound(result);
+        return result.Description != "unknown" ? Ok(result) : NotFound(result); // Leave as is
     }
 
     /// <summary>
@@ -82,9 +83,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateRelationship([FromBody] CreateRelationshipCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess
-            ? CreatedAtAction(nameof(GetRelationshipById), new { id = result.Value }, result.Value)
-            : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetRelationshipById), new { id = result.Value });
     }
 
     /// <summary>
@@ -96,7 +95,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateRelationships([FromBody] CreateRelationshipsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -113,7 +112,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -125,6 +124,6 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteRelationship(Guid id)
     {
         var result = await _mediator.Send(new DeleteRelationshipCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 }

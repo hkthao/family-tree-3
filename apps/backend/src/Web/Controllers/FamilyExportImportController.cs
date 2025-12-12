@@ -1,6 +1,7 @@
 using backend.Application.ExportImport.Commands;
 using backend.Application.ExportImport.Queries;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -22,11 +23,7 @@ public class FamilyExportImportController : ControllerBase
     public async Task<IActionResult> ExportFamily(Guid familyId)
     {
         var result = await _mediator.Send(new GetFamilyExportQuery(familyId));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     [HttpPost("import/{familyId}")]
@@ -42,12 +39,6 @@ public class FamilyExportImportController : ControllerBase
             ClearExistingData = clearExistingData
         };
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
-
-
 }

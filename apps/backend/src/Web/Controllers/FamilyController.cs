@@ -14,6 +14,7 @@ using backend.Application.PrivacyConfigurations.Commands; // New using
 using backend.Application.PrivacyConfigurations.Queries; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -39,7 +40,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUserFamilyAccess()
     {
         var result = await _mediator.Send(new GetUserFamilyAccessQuery());
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -51,11 +52,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyByIdQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -67,7 +64,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchFamiliesQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -79,7 +76,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetFamilyById), new { id = result.Value });
     }
 
     /// <summary>
@@ -91,7 +88,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamilies([FromBody] CreateFamiliesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -108,7 +105,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -120,7 +117,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -132,11 +129,11 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamiliesByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
-            return Ok(Result<List<FamilyDto>>.Success([]).Value);
+            return Result<List<FamilyDto>>.Success([]).ToActionResult(this);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -148,7 +145,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> UpdateDenormalizedFields([FromRoute] Guid familyId)
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
-        return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -160,7 +157,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -172,7 +169,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPrivacyConfiguration(Guid familyId)
     {
         var result = await _mediator.Send(new GetPrivacyConfigurationQuery(familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -189,6 +186,6 @@ public class FamilyController(IMediator mediator) : ControllerBase
             return BadRequest("FamilyId in URL does not match command body.");
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 }

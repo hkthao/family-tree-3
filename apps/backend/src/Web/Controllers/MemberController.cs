@@ -11,6 +11,7 @@ using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -42,11 +43,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> Search([FromQuery] SearchMembersQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error); // Or other appropriate error handling
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -58,11 +55,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -75,16 +68,12 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (string.IsNullOrEmpty(ids))
         {
-            return Ok(Result<List<MemberListDto>>.Success([]).Value);
+            return Result<List<MemberListDto>>.Success([]).ToActionResult(this);
         }
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetMembersByIdsQuery(guids));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error); // Or other appropriate error handling
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -96,18 +85,14 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> GetMembersByFamilyId(Guid familyId)
     {
         var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetMemberById), new { id = result.Value });
     }
 
     /// <summary>
@@ -119,7 +104,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> CreateMembers([FromBody] CreateMembersCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -136,7 +121,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -148,7 +133,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> DeleteMember(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -165,6 +150,6 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 }

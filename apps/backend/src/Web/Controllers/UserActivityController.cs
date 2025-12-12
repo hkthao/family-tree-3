@@ -2,6 +2,7 @@ using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -46,6 +47,6 @@ public class UserActivityController(IMediator mediator) : ControllerBase
 
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

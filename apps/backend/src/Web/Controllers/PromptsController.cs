@@ -5,6 +5,7 @@ using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.Prompts.Queries.SearchPrompts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -32,7 +33,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPromptById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Id = id });
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPromptByCode([FromRoute] string code)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Code = code });
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SearchPrompts([FromQuery] SearchPromptsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -68,7 +69,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreatePrompt([FromBody] CreatePromptCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? CreatedAtAction(nameof(GetPromptById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetPromptById), new { id = result.Value });
     }
 
     /// <summary>
@@ -85,7 +86,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -97,6 +98,6 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeletePrompt(Guid id)
     {
         var result = await _mediator.Send(new DeletePromptCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 }

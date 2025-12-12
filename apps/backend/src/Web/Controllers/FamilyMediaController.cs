@@ -9,6 +9,7 @@ using backend.Application.FamilyMedias.Queries.SearchFamilyMedia;
 using backend.Domain.Enums; // For RefType, MediaType
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -35,7 +36,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
         }
 
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? CreatedAtAction(nameof(GetFamilyMediaById), new { familyId, id = result.Value }, result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetFamilyMediaById), new { familyId = familyId, id = result.Value });
     }
 
     /// <summary>
@@ -48,7 +49,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyMediaById([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetFamilyMediaByIdQuery(id, familyId));
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -59,7 +60,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         query.SetFamilyId(familyId);
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -72,7 +73,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamilyMedia([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyMediaCommand { Id = id, FamilyId = familyId });
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -91,7 +92,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
         }
         // Assuming familyId is implicitly handled by authorization within the command handler
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Created("", result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 200); // Changed to 200 OK as there's no specific Get endpoint for MediaLink
     }
 
     /// <summary>
@@ -107,7 +108,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         // Assuming familyId is implicitly handled by authorization within the command handler
         var result = await _mediator.Send(new UnlinkMediaFromEntityCommand { FamilyMediaId = familyMediaId, RefType = refType, RefId = refId });
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -120,7 +121,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetMediaLinksByFamilyMediaId(Guid familyId, Guid familyMediaId)
     {
         var result = await _mediator.Send(new GetMediaLinksByFamilyMediaIdQuery(familyMediaId, familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -134,6 +135,6 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetMediaLinksByRefId(Guid familyId, RefType refType, Guid refId)
     {
         var result = await _mediator.Send(new GetMediaLinksByRefIdQuery(refId, refType, familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

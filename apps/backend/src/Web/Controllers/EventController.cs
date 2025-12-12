@@ -6,6 +6,7 @@ using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -32,11 +33,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetEventById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -52,7 +49,7 @@ public class EventController(IMediator mediator) : ControllerBase
             return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetEventById), new { id = result.Value });
     }
 
     /// <summary>
@@ -70,7 +67,7 @@ public class EventController(IMediator mediator) : ControllerBase
         }
 
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -82,7 +79,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteEventCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -94,7 +91,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchEventsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -112,7 +109,7 @@ public class EventController(IMediator mediator) : ControllerBase
             EndDate = DateTime.UtcNow.Date.AddDays(30)
         };
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -124,6 +121,6 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

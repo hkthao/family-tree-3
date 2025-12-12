@@ -3,6 +3,7 @@ using backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
 using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -21,10 +22,10 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     /// <param name="family2Id">ID của gia đình thứ hai.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("delete/{familyLinkId}")] // Changed route
-    public async Task<ActionResult> DeleteFamilyLink(Guid familyLinkId) // Changed signature
+    public async Task<IActionResult> DeleteFamilyLink(Guid familyLinkId) // Changed signature
     {
         var result = await _mediator.Send(new DeleteLinkFamilyCommand(familyLinkId)); // Updated command
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -36,7 +37,7 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     public async Task<IActionResult> Search([FromQuery] SearchFamilyLinksQuery query) // Renamed and changed signature
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -48,6 +49,6 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     public async Task<IActionResult> GetFamilyLinkById(Guid familyLinkId)
     {
         var result = await _mediator.Send(new GetFamilyLinkByIdQuery(familyLinkId));
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 }

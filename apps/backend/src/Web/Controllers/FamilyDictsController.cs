@@ -7,6 +7,7 @@ using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyDicts.Queries;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -29,11 +30,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyDictById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyDictByIdQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -46,7 +43,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SearchFamilyDicts([FromQuery] SearchFamilyDictsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -60,7 +57,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamilyDict([FromBody] CreateFamilyDictCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(new { id = result.Value }) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetFamilyDictById), new { id = result.Value });
     }
 
     /// <summary>
@@ -74,7 +71,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> ImportFamilyDicts([FromBody] ImportFamilyDictsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -94,7 +91,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -108,6 +105,6 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamilyDict(Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyDictCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 }

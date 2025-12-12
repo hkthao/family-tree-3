@@ -3,6 +3,7 @@ using backend.Application.AI.Commands;
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -30,7 +31,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> ChatWithAssistant([FromBody] ChatWithAssistantCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -54,6 +55,6 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

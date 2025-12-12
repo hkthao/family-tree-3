@@ -7,6 +7,7 @@ using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -20,21 +21,21 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMemberFaceById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateMemberFace(CreateMemberFaceCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetMemberFaceById), new { id = result.Value });
     }
 
     [HttpPut("{id}")]
@@ -42,17 +43,17 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
-            return BadRequest(Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).Error);
+            return Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).ToActionResult(this);
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMemberFace(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberFaceCommand { Id = id });
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -84,10 +85,6 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
         };
 
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

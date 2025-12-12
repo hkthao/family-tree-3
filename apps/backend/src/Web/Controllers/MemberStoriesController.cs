@@ -8,6 +8,7 @@ using backend.Application.MemberStories.Queries.GetMemberStoryDetail;
 using backend.Application.MemberStories.Queries.SearchStories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -34,11 +35,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -50,11 +47,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetMemberStoryDetail), new { memberStoryId = result.Value }, result.Value); // Updated
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, 201, nameof(GetMemberStoryDetail), new { memberStoryId = result.Value });
     }
 
     /// <summary>
@@ -71,7 +64,7 @@ public class MemberStoriesController : ControllerBase // Updated
             return BadRequest("MemberStory ID in URL does not match body."); // Updated
         }
         var result = await _mediator.Send(command, cancellationToken);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -83,7 +76,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, 204);
     }
 
     /// <summary>
@@ -97,11 +90,7 @@ public class MemberStoriesController : ControllerBase // Updated
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -113,10 +102,6 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new GetMemberStoryDetailQuery(memberStoryId), cancellationToken); // Updated
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 }

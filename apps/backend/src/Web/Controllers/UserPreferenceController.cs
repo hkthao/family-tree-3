@@ -2,6 +2,7 @@ using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -27,7 +28,7 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUserPreferences()
     {
         var result = await _mediator.Send(new GetUserPreferencesQuery());
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -39,6 +40,6 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

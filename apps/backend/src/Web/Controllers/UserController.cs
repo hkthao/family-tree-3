@@ -2,6 +2,7 @@ using backend.Application.Common.Models;
 using backend.Application.Users.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -28,7 +29,7 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchUsersQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -40,11 +41,11 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUsersByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
-            return Ok(Result<List<UserDto>>.Success([]).Value);
+            return Result<List<UserDto>>.Success([]).ToActionResult(this);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetUsersByIdsQuery(guids));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> IsAdmin() // Change to async Task<IActionResult>
     {
         var result = await _mediator.Send(new IsAdminQuery());
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -70,6 +71,6 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> IsFamilyManager(Guid familyId) // Change to async Task<IActionResult>
     {
         var result = await _mediator.Send(new IsFamilyManagerQuery(familyId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

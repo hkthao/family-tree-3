@@ -1,6 +1,7 @@
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -29,6 +30,6 @@ public class DashboardController(IMediator mediator) : ControllerBase
         var query = new GetDashboardStatsQuery { FamilyId = familyId };
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }

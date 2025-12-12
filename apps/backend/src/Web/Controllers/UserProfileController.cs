@@ -2,6 +2,7 @@ using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -28,7 +29,7 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetCurrentUserProfile()
     {
         var result = await _mediator.Send(new GetCurrentUserProfileQuery());
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        return result.ToActionResult(this);
     }
 
     /// <summary>
@@ -42,6 +43,6 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     {
         command.SetId(id);
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
+        return result.ToActionResult(this);
     }
 }
