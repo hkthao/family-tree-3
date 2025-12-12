@@ -1,39 +1,14 @@
 <template>
-  <CustomRemoteAutocomplete
-    v-bind="$attrs"
-    v-model="internalValue"
-    @update:model-value="handleUpdateModelValue"
-    :label="label"
-    :rules="rules"
-    :read-only="readOnly"
-    :clearable="clearable"
-    :multiple="multiple"
-    item-title="email"
-    item-value="id"
-    :fetch-items="fetchItems"
-    :loading="isLoadingPreload"
-    :disabled="disabled"
-    :return-object="true"
-    :hide-details="hideDetails"
-  >
-    <template #chip="{ props: chipProps, item }" v-if="!hideChips">
-      <v-chip v-bind="chipProps" size="small" v-if="item.raw"
-        :prepend-avatar="getAvatarUrl(item.raw.avatarUrl, undefined)" :text="item.raw.email || item.raw.name"></v-chip>
-    </template>
-    <template #item="{ props: itemProps, item }">
-      <v-list-item v-bind="itemProps" :subtitle="item.raw?.name">
-        <template #prepend>
-          <v-avatar :image="getAvatarUrl(item.raw?.avatarUrl, undefined)" size="small"></v-avatar>
-        </template>
-      </v-list-item>
-    </template>
+  <CustomRemoteAutocomplete v-bind="$attrs" v-model="internalValue" @update:model-value="handleUpdateModelValue"
+    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple" item-title="email"
+    item-value="id" :fetch-items="fetchItems" :loading="isLoadingPreload" :disabled="disabled" :return-object="true"
+    :hide-no-data="true" :hide-details="hideDetails" chips :closable-chips="!disabled">
   </CustomRemoteAutocomplete>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import type { UserDto } from '@/types';
-import { getAvatarUrl } from '@/utils/avatar.utils';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
@@ -88,11 +63,14 @@ watch(() => props.modelValue, (newModelValue) => {
 
 
 const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
+  console.log('UserAutocomplete - handleUpdateModelValue received value:', value);
   if (props.multiple) {
     const ids = Array.isArray(value) ? value.map((item: UserDto) => item.id) : [];
+    console.log('UserAutocomplete - Emitting IDs (multiple):', ids);
     emit('update:modelValue', ids);
   } else {
     const id = value ? (value as UserDto).id : undefined;
+    console.log('UserAutocomplete - Emitting ID (single):', id);
     emit('update:modelValue', id);
   }
 };

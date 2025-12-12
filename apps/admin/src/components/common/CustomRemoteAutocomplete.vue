@@ -184,6 +184,7 @@ const updateModelValue = (newValue: any) => {
     :no-data-text="internalNoDataText"
     :hide-selected="props.multiple"
     :chips="props.multiple"
+    :multiple="props.multiple"
     no-filter
     @focus="handleFocus"
     v-bind="$attrs"

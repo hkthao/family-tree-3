@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family, FamilyUser, UserDto } from '@/types';
+import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
@@ -138,7 +138,7 @@ const validate = async () => {
 };
 
 const getFormData = () => {
-  const dataToSubmit = { ...formData }; // Create a shallow copy
+  const dataToSubmit = { ...formData };
   dataToSubmit.familyUsers = familyUsers.value;
   return dataToSubmit;
 };

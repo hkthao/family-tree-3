@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{
         t('family.form.addTitle')
-      }}</span>
+        }}</span>
     </v-card-title>
     <v-card-text>
       <FamilyForm ref="familyFormRef" @cancel="closeForm" />
@@ -12,15 +12,9 @@
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isAddingFamily">{{
         t('common.cancel')
-      }}</v-btn>
-      <v-btn
-        color="primary"
-        data-testid="button-save"
-        @click="handleAddItem"
-        :loading="isAddingFamily"
-        :disabled="isAddingFamily"
-        >{{ t('common.save') }}</v-btn
-      >
+        }}</v-btn>
+      <v-btn color="primary" data-testid="button-save" @click="handleAddItem" :loading="isAddingFamily"
+        :disabled="isAddingFamily">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -46,7 +40,6 @@ const handleAddItem = async () => {
   const isValid = await familyFormRef.value.validate();
   if (!isValid) return;
   const itemData = familyFormRef.value.getFormData();
-
   addFamily(itemData as Omit<Family, 'id'>, {
     onSuccess: () => {
       showSnackbar(
