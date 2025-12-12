@@ -8,11 +8,9 @@
         </v-avatar>
       </div>
 
-      <v-alert v-if="faceStore.error" type="error" class="mb-4">{{ faceStore.error }}</v-alert>
-
       <v-autocomplete
         v-model="selectedMemberId"
-        :items="availableMembers"
+        :items="members"
         item-title="fullName"
         item-value="id"
         :label="t('face.labelCard.selectMember')"
@@ -36,8 +34,7 @@
       <v-btn
         block
         color="primary"
-        :disabled="!selectedMemberId || faceStore.loading"
-        :loading="faceStore.loading"
+        :disabled="!selectedMemberId"
         @click="handleSaveMapping"
         class="mb-2"
       >
@@ -77,28 +74,20 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFaceStore } from '@/stores/face.store';
 import type { DetectedFace, Member } from '@/types';
 
 const { t } = useI18n();
-const faceStore = useFaceStore();
 
 const props = defineProps({
   face: { type: Object as () => DetectedFace, required: true },
+  members: { type: Array as () => Member[], default: () => [] }, // New prop for available members
 });
 
-const emit = defineEmits(['save-mapping', 'create-new-member']);
+const emit = defineEmits(['label-face', 'create-member']); // Updated emits
 
 const selectedMemberId = ref<string | null | undefined>(props.face.memberId);
 const showCreateMemberDialog = ref(false);
 const newMemberName = ref('');
-
-// Mock data for available members (replace with actual data from a member store or API)
-const availableMembers = computed<Member[]>(() => [
-  { id: 'member123', fullName: 'John Doe', firstName: 'John', lastName: 'Doe', familyId: 'mock-family-1', avatarUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
-  { id: 'member456', fullName: 'Jane Smith', firstName: 'Jane', lastName: 'Smith', familyId: 'mock-family-1', avatarUrl: 'https://randomuser.me/api/portraits/women/2.jpg' },
-  { id: 'member789', fullName: 'Peter Jones', firstName: 'Peter', lastName: 'Jones', familyId: 'mock-family-2', avatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
-]);
 
 watch(() => props.face.memberId, (newMemberId) => {
   selectedMemberId.value = newMemberId;
@@ -106,22 +95,17 @@ watch(() => props.face.memberId, (newMemberId) => {
 
 const handleSaveMapping = () => {
   if (selectedMemberId.value) {
-    emit('save-mapping', props.face.id, selectedMemberId.value);
+    emit('label-face', props.face.id, selectedMemberId.value);
   }
 };
 
 const handleCreateNewMember = () => {
   if (newMemberName.value) {
-    // In a real application, this would involve an API call to create a new member
-    // and then mapping the face to this new member.
-    // For now, we'll just emit the event.
-  
-    // Simulate a new member ID for demonstration
-    const newId = `new-member-${Date.now()}`;
-    emit('create-new-member', props.face.id, { id: newId, fullName: newMemberName.value });
+    emit('create-member', props.face.id, newMemberName.value);
     showCreateMemberDialog.value = false;
     newMemberName.value = '';
-    selectedMemberId.value = newId; // Automatically select the newly created member
+    // The parent component will update the detectedFaces array,
+    // which will then update selectedMemberId via the watch on props.face.memberId
   }
 };
 </script>

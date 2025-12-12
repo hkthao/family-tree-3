@@ -3,7 +3,7 @@ export * from './auth.store';
 export * from './chat.store';
 export * from './dashboard.store';
 export * from './event.store';
-export * from './face.store';
+
 export * from './family-autocomplete.store';
 export * from './family.store';
 

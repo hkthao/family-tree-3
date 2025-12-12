@@ -41,12 +41,12 @@ interface SearchResult {
 }
 
 export interface FaceDetectionRessult {
-  imageId: string; 
+  imageId: string;
   originalImageUrl: string | null;
+  originalImageBase64?: string; // NEW: Base64 string of the original uploaded image
   resizedImageUrl: string | null;
   detectedFaces: DetectedFace[];
 }
-
 
 export interface MemberFace {
   id: string; 
