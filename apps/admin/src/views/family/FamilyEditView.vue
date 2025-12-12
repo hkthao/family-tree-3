@@ -6,7 +6,7 @@
         }}</span>
     </v-card-title>
     <v-card-text>
-      <FamilyForm ref="familyFormRef" v-if="family" :initial-family-data="family" :read-only="false" />
+      <FamilyForm ref="familyFormRef" v-if="family" :data="family" :read-only="false" />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
@@ -40,8 +40,7 @@ interface FamilyFormExposed {
 }
 
 interface FamilyEditViewProps {
-  initialFamily?: Family;
-  initialFamilyId?: string;
+  familyId?: string;
 }
 
 const props = defineProps<FamilyEditViewProps>();
@@ -52,14 +51,9 @@ const familyFormRef = ref<FamilyFormExposed | null>(null);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 
-const familyId = computed(() => props.initialFamilyId || props.initialFamily?.id);
-
-const { family: fetchedFamily, isLoading: isLoadingFamily } = useFamilyQuery(toRef(props, 'initialFamilyId') as any); // Cast for initialFamilyId, will refine if error occurs
+const { family: family, isLoading: isLoadingFamily } = useFamilyQuery(toRef(props, 'familyId') as any); // Cast for initialFamilyId, will refine if error occurs
 const { mutate: updateFamily, isPending: isUpdatingFamily } = useUpdateFamilyMutation();
-
-const family = computed(() => props.initialFamily || fetchedFamily.value);
 const isLoading = computed(() => isLoadingFamily.value);
-
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;

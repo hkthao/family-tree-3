@@ -57,8 +57,8 @@
   <!-- Edit Family Drawer -->
   <BaseCrudDrawer :model-value="showEditDrawer" @update:model-value="showEditDrawer = $event" @close="handleCloseEditDrawer">
     <FamilyEditView
-      v-if="editingFamilyId"
-      :initial-family-id="editingFamilyId"
+      v-if="familyId"
+      :family-id="familyId"
       @close="handleCloseEditDrawer"
       @saved="handleFamilySaved"
     />
@@ -79,38 +79,32 @@ import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
-import { useAuth, useGlobalSnackbar } from '@/composables';
+import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useServices } from '@/plugins/services.plugin';
+import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
 const { isAdmin, isFamilyManager } = useAuth();
-const { showSnackbar } = useGlobalSnackbar();
-const services = useServices();
+const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);
 const readOnlyValue = true;
 
 const showEditDrawer = ref(false);
-const editingFamilyId = ref<string | null>(null);
 
 const handleOpenEditDrawer = (id: string) => {
-  editingFamilyId.value = id;
   showEditDrawer.value = true;
 };
 
 const handleCloseEditDrawer = () => {
-  editingFamilyId.value = null;
   showEditDrawer.value = false;
-  // Potentially re-fetch data in FamilyDetailView if needed
 };
 
 const handleFamilySaved = () => {
   handleCloseEditDrawer();
-  // Invalidate query for family detail to refetch fresh data
-  // queryClient.invalidateQueries(['family', familyId.value]); // If use vue-query client
+  queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyId.value] });
 };
 
 const canViewFaceDataTab = computed(() => {

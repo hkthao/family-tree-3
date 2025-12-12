@@ -6,6 +6,7 @@ using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Families;
+using backend.Domain.ValueObjects; // NEW
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
@@ -86,8 +87,14 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Visibility,
             entity.Code // Pass the existing code, as it's not updated via this command input
         );
-
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
+
+        // --- Update FamilyUsers ---
+        var familyUserUpdateInfos = request.FamilyUsers
+            .Select(fu => new FamilyUserUpdateInfo(fu.UserId, fu.Role))
+            .ToList();
+        entity.UpdateFamilyUsers(familyUserUpdateInfos);
+        // --- End Update FamilyUsers ---
 
         entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
         entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));

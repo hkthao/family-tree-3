@@ -63,14 +63,11 @@ watch(() => props.modelValue, (newModelValue) => {
 
 
 const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
-  console.log('UserAutocomplete - handleUpdateModelValue received value:', value);
   if (props.multiple) {
     const ids = Array.isArray(value) ? value.map((item: UserDto) => item.id) : [];
-    console.log('UserAutocomplete - Emitting IDs (multiple):', ids);
     emit('update:modelValue', ids);
   } else {
     const id = value ? (value as UserDto).id : undefined;
-    console.log('UserAutocomplete - Emitting ID (single):', id);
     emit('update:modelValue', id);
   }
 };

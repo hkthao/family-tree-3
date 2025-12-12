@@ -5,7 +5,6 @@
     <div v-else class="d-flex justify-center mb-4">
       <AvatarDisplay :src="getFamilyAvatarUrl(formData.avatarUrl)" :size="96" />
     </div>
-
     <v-row>
       <v-col cols="6">
         <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
@@ -54,14 +53,14 @@ import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const props = defineProps<{
-  initialFamilyData?: Family;
+  data?: Family;
   readOnly?: boolean;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
 const { t } = useI18n();
 
 const formData = reactive<Family | Omit<Family, 'id'>>(
-  props.initialFamilyData || {
+  props.data ? JSON.parse(JSON.stringify(props.data)) : {
     name: '',
     description: '',
     address: '',
@@ -78,7 +77,7 @@ const initialAvatarDisplay = computed(() => {
 });
 
 watch(
-  () => props.initialFamilyData,
+  () => props.data,
   (newVal) => {
     if (newVal) {
       Object.assign(formData, newVal);
@@ -93,7 +92,7 @@ const rules = useFamilyRules();
 
 const v$ = useVuelidate(rules, formData);
 
-const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers || []);
+const familyUsers = ref<FamilyUser[]>(props.data?.familyUsers || []);
 const Manager = 0;
 const Viewer = 1;
 
