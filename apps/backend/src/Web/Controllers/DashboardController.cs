@@ -1,7 +1,6 @@
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

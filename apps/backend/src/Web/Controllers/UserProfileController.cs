@@ -2,7 +2,6 @@ using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

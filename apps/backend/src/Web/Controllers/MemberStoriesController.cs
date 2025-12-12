@@ -8,7 +8,6 @@ using backend.Application.MemberStories.Queries.GetMemberStoryDetail;
 using backend.Application.MemberStories.Queries.SearchStories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

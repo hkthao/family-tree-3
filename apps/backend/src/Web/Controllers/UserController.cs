@@ -1,8 +1,8 @@
 using backend.Application.Common.Models;
-using backend.Application.Users.Queries;
+using backend.Application.Identity.Queries;
+using backend.Application.Identity.Queries.GetUserByUsernameOrEmail; // Added
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
@@ -49,28 +49,14 @@ public class UserController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Checks if the current user is an admin.
+    /// Xử lý GET request để tìm kiếm một người dùng dựa trên tên người dùng hoặc email.
     /// </summary>
-    /// <returns>True if the user is an admin, otherwise false.</returns>
-    [HttpGet("IsAdmin")]
-    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-    public async Task<IActionResult> IsAdmin() // Change to async Task<IActionResult>
+    /// <param name="usernameOrEmail">Tên người dùng hoặc email để tìm kiếm.</param>
+    /// <returns>Thông tin chi tiết của người dùng nếu tìm thấy.</returns>
+    [HttpGet("find")]
+    public async Task<IActionResult> FindUser([FromQuery] string usernameOrEmail)
     {
-        var result = await _mediator.Send(new IsAdminQuery());
-        return result.ToActionResult(this);
-    }
-
-    /// <summary>
-    /// Checks if the current user has manager privileges for a specific family.
-    /// </summary>
-    /// <param name="familyId">The ID of the family to check.</param>
-    /// <returns>True if the user can manage the family, otherwise false.</returns>
-    [HttpGet("IsFamilyManager/{familyId}")]
-    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> IsFamilyManager(Guid familyId) // Change to async Task<IActionResult>
-    {
-        var result = await _mediator.Send(new IsFamilyManagerQuery(familyId));
+        var result = await _mediator.Send(new GetUserByUsernameOrEmailQuery { UsernameOrEmail = usernameOrEmail });
         return result.ToActionResult(this);
     }
 }

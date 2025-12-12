@@ -7,7 +7,6 @@ using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

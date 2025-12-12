@@ -6,7 +6,6 @@ using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

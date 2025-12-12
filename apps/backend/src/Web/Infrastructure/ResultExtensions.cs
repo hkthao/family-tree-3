@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

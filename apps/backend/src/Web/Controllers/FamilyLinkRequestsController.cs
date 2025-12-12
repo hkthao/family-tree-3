@@ -8,7 +8,6 @@ using backend.Application.FamilyLinkRequests.Queries.SearchFamilyLinkRequests;
 using backend.Application.FamilyLinks.Queries; // Keep this for FamilyLinkRequestDto
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

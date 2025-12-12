@@ -9,7 +9,6 @@ using backend.Application.FamilyMedias.Queries.SearchFamilyMedia;
 using backend.Domain.Enums; // For RefType, MediaType
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

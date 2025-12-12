@@ -3,7 +3,6 @@ using backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
 using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

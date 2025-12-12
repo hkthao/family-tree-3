@@ -14,7 +14,6 @@ using backend.Application.PrivacyConfigurations.Commands; // New using
 using backend.Application.PrivacyConfigurations.Queries; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

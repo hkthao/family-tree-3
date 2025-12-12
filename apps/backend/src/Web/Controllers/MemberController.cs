@@ -11,7 +11,6 @@ using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

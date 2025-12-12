@@ -2,7 +2,6 @@ using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 

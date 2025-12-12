@@ -5,7 +5,6 @@ using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.Prompts.Queries.SearchPrompts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Web.Infrastructure; // Added
 
 namespace backend.Web.Controllers;
 
