@@ -43,13 +43,7 @@ const menu: MenuSection[] = [
         to: '/relationship-detection',
         roles: ['Admin', 'Manager'],
       },
-      // NEW: Add Family Media entry
-      {
-        titleKey: 'familyMedia.list.pageTitle',
-        icon: 'mdi-folder-multiple-image',
-        to: '/family-media',
-        roles: ['Admin', 'Manager', 'Viewer'], // Assuming Viewer can see family media
-      },
+
     ],
   },
   {
