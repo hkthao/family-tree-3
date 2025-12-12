@@ -15,7 +15,8 @@ export * from './charts/useHierarchicalTreeChart';
 
 export * from './tour/useOnboardingTour';
 export * from './utils/useServices';
-export * from './autocomplete/useUserAutocomplete';
+
 export * from './forms/useMemberStoryForm';
 export * from './family/useFamilySearch';
 export * from './member/useMemberSearch';
+export * from './user/useUserSearch';

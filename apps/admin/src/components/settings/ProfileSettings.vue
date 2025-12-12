@@ -35,104 +35,27 @@
     </v-row>
     <v-row>
       <v-col cols="12" class="text-right">
-        <v-btn color="primary" type="submit" :loading="loading">{{ t('common.save') }}</v-btn>
+        <v-btn color="primary" type="submit" :loading="isSavingProfile || isFetchingProfile">{{ t('common.save') }}</v-btn>
       </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, reactive, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
-import { useUserProfileStore } from '@/stores';
-import type { UpdateUserProfileDto } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
-import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
-import { useGlobalSnackbar } from '@/composables';
+import { useProfileSettings } from '@/composables/user/useProfileSettings'; // Import the new composable
 
 const { t } = useI18n();
-const userProfileStore = useUserProfileStore();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
-const formRef = ref<HTMLFormElement | null>(null);
-const loading = ref(false);
+const {
+  formData,
+  v$,
+  initialAvatarDisplay,
+  isFetchingProfile,
+  isSavingProfile,
+  saveProfile,
+} = useProfileSettings();
 
-const formData = reactive({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  avatar: null as string | null, // Stores the URL of the current avatar from API
-  avatarBase64: null as string | null, // Stores the new avatar as a base64 string
-  externalId: '',
-});
-
-const rules = useProfileSettingsRules();
-
-const v$ = useVuelidate(rules, formData);
-
-const generatedFullName = computed(() => {
-  return `${formData.firstName} ${formData.lastName}`.trim();
-});
-
-// Computed property to pass the initial avatar URL to AvatarInput
-const initialAvatarDisplay = computed(() => {
-  return formData.avatarBase64 || formData.avatar;
-});
-
-onMounted(async () => {
-  await userProfileStore.fetchCurrentUserProfile();
-  if (userProfileStore.userProfile) {
-    formData.firstName = userProfileStore.userProfile.firstName || '';
-    formData.lastName = userProfileStore.userProfile.lastName || '';
-    formData.email = userProfileStore.userProfile.email;
-    formData.phone = userProfileStore.userProfile.phone || '';
-    formData.avatar = userProfileStore.userProfile.avatar || null;
-    formData.externalId = userProfileStore.userProfile.externalId;
-  } else if (userProfileStore.error) {
-    showSnackbar(userProfileStore.error, 'error');
-  }
-});
-
-const saveProfile = async () => {
-  loading.value = true;
-  try {
-    const result = await v$.value.$validate();
-  
-
-    if (result && userProfileStore.userProfile) {
-      const updatedProfile: UpdateUserProfileDto = {
-        id: userProfileStore.userProfile.id,
-        externalId: userProfileStore.userProfile.externalId,
-        email: formData.email,
-        name: generatedFullName.value,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        avatarBase64: formData.avatarBase64,
-      };
-
-      const success = await userProfileStore.updateUserProfile(updatedProfile);
-      if (success) {
-        showSnackbar(
-          t('userSettings.profile.saveSuccess'),
-          'success',
-        );
-      } else {
-        showSnackbar(
-          userProfileStore.error || t('userSettings.profile.saveError'),
-          'error',
-        );
-      }
-    } else if (!result) {
-      showSnackbar(
-        t('userSettings.profile.validationError'),
-        'error',
-      );
-    }
-  } finally {
-    loading.value = false;
-  }
-};
 </script>

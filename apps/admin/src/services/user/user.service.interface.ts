@@ -1,9 +1,9 @@
-import type { ApiError, Paginated, RecentActivity, Result, TargetType, UpdateUserProfileDto, UserPreference, UserProfile } from '@/types';
+import type { ApiError, Paginated, RecentActivity, Result, TargetType, UpdateUserProfileDto, UserDto, UserPreference, UserProfile } from '@/types';
 
 export interface IUserService {
-  search(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<{ items: UserProfile[]; totalItems: number; totalPages: number; }, ApiError>>;
-  getByIds(ids: string[]): Promise<Result<UserProfile[], ApiError>>;
-  getById(id: string): Promise<Result<UserProfile, ApiError>>;
+  search(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<{ items: UserDto[]; totalItems: number; totalPages: number; }, ApiError>>;
+  getByIds(ids: string[]): Promise<Result<UserDto[], ApiError>>;
+  getById(id: string): Promise<Result<UserDto, ApiError>>;
   getRecentActivities( // NEW METHOD
     page: number,
     itemsPerPage?: number,

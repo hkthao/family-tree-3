@@ -27,7 +27,7 @@ import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
 import { useRouter } from 'vue-router';
 
-import type { User } from '@/types';
+import type { UserProfile } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
@@ -45,7 +45,7 @@ const showChatWidget = ref(false); // Reactive variable to control chat widget v
 
 defineProps({
   currentUser: {
-    type: Object as PropType<User | null>,
+    type: Object as PropType<UserProfile | null>,
     required: false,
   },
 });

@@ -5,17 +5,6 @@ export enum Language {
   Vietnamese = 1,
 }
 
-export interface User {
-  id: string;
-  externalId: string;
-  name: string;
-  email: string;
-  roles?: string[];
-  avatar?: string;
-  online?: boolean;
-  familyId?: string;
-}
-
 export interface UserMenuItem {
   key: string;
   labelKey: string;
@@ -34,6 +23,14 @@ export interface UserProfile {
     phone?: string;
     avatar?: string;
     roles?: string[];
+}
+
+export interface UserDto {
+    id: string;
+    authProviderId: string;
+    email?: string;
+    name?: string;
+    avatarUrl?: string;
 }
 
 export interface UserPreference {

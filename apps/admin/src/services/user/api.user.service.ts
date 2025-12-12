@@ -1,12 +1,12 @@
 import type { IUserService } from './user.service.interface';
-import type { UserProfile, Result, Paginated, User, RecentActivity, TargetType, UserPreference, UpdateUserProfileDto, ApiError } from '@/types'; // NEW IMPORTS
+import type { UserDto, Result, Paginated, RecentActivity, TargetType, UserPreference, UpdateUserProfileDto, ApiError, UserProfile } from '@/types'; // NEW IMPORTS
 import { type ApiClientMethods } from '@/plugins/axios';
 
 export class ApiUserService implements IUserService {
   constructor(private http: ApiClientMethods) { }
 
-  async search(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<{ items: UserProfile[]; totalItems: number; totalPages: number; }, ApiError>> {
-    return await this.http.get<Paginated<User>>(`/user/search`, {
+  async search(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<Paginated<UserDto>, ApiError>> {
+    return await this.http.get<Paginated<UserDto>>(`/user/search`, {
       params: {
         searchQuery,
         page,
@@ -15,16 +15,16 @@ export class ApiUserService implements IUserService {
     });
   }
 
-  async getByIds(ids: string[]): Promise<Result<User[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<UserDto[], ApiError>> {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
-    return this.http.get<User[]>(
+    return this.http.get<UserDto[]>(
       `/user/by-ids?${params.toString()}`,
     );
   }
 
-  async getById(id: string): Promise<Result<User, ApiError>> {
-    return this.http.get<User>(
+  async getById(id: string): Promise<Result<UserDto, ApiError>> {
+    return this.http.get<UserDto>(
       `/user/${id}`,
     );
   }
@@ -59,5 +59,9 @@ export class ApiUserService implements IUserService {
 
   public async getCurrentUserProfile(): Promise<Result<UserProfile, ApiError>> { // NEW METHOD
     return this.http.get<UserProfile>(`/user-profile/me`);
+  }
+
+  public async findUser(usernameOrEmail: string): Promise<Result<UserDto, ApiError>> { // NEW METHOD
+    return this.http.get<UserDto>(`/user/find?usernameOrEmail=${usernameOrEmail}`);
   }
 }
