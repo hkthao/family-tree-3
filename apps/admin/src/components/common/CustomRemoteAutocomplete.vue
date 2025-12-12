@@ -72,7 +72,7 @@ const handleFocus = () => {
   }
 };
 
-const internalNoDataText = computed(() => props.noDataText || t('common.no_data'));
+const internalNoDataText = computed(() => t('common.no_data'));
 
 const getItemTitle = (item: Item): string => {
   if (typeof props.itemTitle === 'function') {
