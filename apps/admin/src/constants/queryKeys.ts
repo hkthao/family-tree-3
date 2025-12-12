@@ -39,4 +39,9 @@ export const queryKeys = {
     list: (filters?: FamilyDictFilter) => [...queryKeys.familyDicts.all, 'list', filters] as const,
     detail: (familyDictId: string) => [...queryKeys.familyDicts.all, 'detail', familyDictId] as const,
   },
+  users: {
+    all: ['users'] as const,
+    search: (searchQuery: string) => [...queryKeys.users.all, 'search', searchQuery] as const,
+    byIds: (ids: string[]) => [...queryKeys.users.all, 'byIds', ids] as const,
+  },
 };

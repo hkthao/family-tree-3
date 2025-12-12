@@ -30,12 +30,12 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="6">
-        <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
+      <v-col cols="12">
+        <UserAutocomplete v-model="managers" multiple :disabled="props.readOnly" hideDetails
           :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
       </v-col>
-      <v-col cols="6">
-        <UserAutocomplete v-model="viewers" chips closable-chips multiple :disabled="props.readOnly"
+      <v-col cols="12">
+        <UserAutocomplete v-model="viewers" multiple :disabled="props.readOnly" hideDetails
           :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
       </v-col>
     </v-row>
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family, FamilyUser } from '@/types';
+import type { Family, FamilyUser, UserDto } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
@@ -59,8 +59,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['submit', 'cancel']);
 const { t } = useI18n();
-
-const formRef = ref<HTMLFormElement | null>(null);
 
 const formData = reactive<Family | Omit<Family, 'id'>>(
   props.initialFamilyData || {
@@ -100,9 +98,9 @@ const Manager = 0;
 const Viewer = 1;
 
 const managers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === 0).map(fu => fu.userId),
-  set: (newuserIds) => {
-    const newManagers = newuserIds.map(id => ({ userId: id, role: Manager }));
+  get: () => familyUsers.value.filter(fu => fu.role === Manager).map(fu => fu.userId),
+  set: (newUserIds: string[]) => {
+    const newManagers = newUserIds.map(userId => ({ userId: userId, role: Manager }));
     const otherUsers = familyUsers.value.filter(fu => fu.role !== Manager);
     familyUsers.value = [...otherUsers, ...newManagers];
   }
@@ -110,8 +108,8 @@ const managers = computed({
 
 const viewers = computed({
   get: () => familyUsers.value.filter(fu => fu.role === Viewer).map(fu => fu.userId),
-  set: (newuserIds) => {
-    const newViewers = newuserIds.map(id => ({ userId: id, role: Viewer }));
+  set: (newUserIds: string[]) => {
+    const newViewers = newUserIds.map(userId => ({ userId: userId, role: Viewer }));
     const otherUsers = familyUsers.value.filter(fu => fu.role !== Viewer);
     familyUsers.value = [...otherUsers, ...newViewers];
   }
@@ -140,8 +138,9 @@ const validate = async () => {
 };
 
 const getFormData = () => {
-  formData.familyUsers = familyUsers.value;
-  return formData;
+  const dataToSubmit = { ...formData }; // Create a shallow copy
+  dataToSubmit.familyUsers = familyUsers.value;
+  return dataToSubmit;
 };
 
 defineExpose({

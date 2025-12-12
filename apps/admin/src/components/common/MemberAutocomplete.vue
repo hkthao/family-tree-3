@@ -30,8 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import type { PropType } from 'vue';
+import { ref, watch } from 'vue';
 import type { Member } from '@/types';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
 import { getAvatarUrl } from '@/utils/avatar.utils';
