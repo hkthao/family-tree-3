@@ -5,7 +5,7 @@
     <FamilyDictList :items="familyDicts" :total-items="totalItems" :loading="loading"
       :items-per-page="itemsPerPage" :search="searchQuery" :sortBy="sortBy"
       @update:options="handleListOptionsUpdate" @update:search="handleSearchUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer"
+      @view="item => openDetailDrawer(item.id)" @edit="item => openEditDrawer(item.id)" @delete="confirmDelete" @create="openAddDrawer"
       @import="openImportDialog" :read-only="computedReadOnly">
     </FamilyDictList>
 
@@ -23,7 +23,7 @@
     <!-- Detail FamilyDict Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" :title="t('familyDict.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
       <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId"
-        @close="closeDetailDrawer" @edit-family-dict="openEditDrawer" />
+        @close="closeDetailDrawer" @edit-family-dict="item => openEditDrawer(item.id)" />
     </BaseCrudDrawer>
 
     <!-- Import FamilyDict Dialog -->

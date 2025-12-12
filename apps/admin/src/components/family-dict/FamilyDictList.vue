@@ -102,24 +102,14 @@
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" v-bind="props" size="small">
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item @click="viewFamilyDict(item)" data-testid="view-family-dict-button">
-              <v-list-item-title>{{ t('common.viewDetails') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="editFamilyDict(item)" data-testid="edit-family-dict-button">
-              <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="confirmDelete(item)" data-testid="delete-family-dict-button">
-              <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        <v-btn icon variant="text" size="small" @click="editFamilyDict(item)" data-testid="edit-family-dict-button">
+          <v-tooltip :text="t('common.edit')" activator="parent" location="top" />
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
+        <v-btn icon variant="text" size="small" @click="confirmDelete(item)" data-testid="delete-family-dict-button">
+          <v-tooltip :text="t('common.delete')" activator="parent" location="top" />
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
       </div>
     </template>
 
