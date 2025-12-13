@@ -67,7 +67,7 @@ public class MappingProfile : Profile
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<User, UserDto>();
         CreateMap<FamilyUser, FamilyUserDto>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
 
         // FamilyDict
         CreateMap<FamilyDict, FamilyDictDto>();
