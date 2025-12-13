@@ -22,8 +22,11 @@ export function useEventsQuery(filters: Ref<EventFilter>) {
 
       const filterOptions: FilterOptions = {
         searchQuery: currentFilters.searchQuery,
-        familyId: currentFilters.familyId, // Specific to EventFilter
-        // Add other specific event filters here if they exist in EventFilter
+        familyId: currentFilters.familyId,
+        type: currentFilters.type,
+        startDate: currentFilters.startDate,
+        endDate: currentFilters.endDate,
+        memberId: currentFilters.memberId,
       };
 
       const response = await apiEventService.search(listOptions, filterOptions);
