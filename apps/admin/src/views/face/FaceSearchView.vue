@@ -36,57 +36,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
-import { useGlobalSnackbar } from '@/composables';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useDetectFacesMutation } from '@/composables/member-face';
-import type { DetectedFace } from '@/types';
+import { useFaceSearch } from '@/composables/face'; // Import the new composable
 
-const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
+const {
+  selectedFamilyId,
+  uploadedImage,
+  detectedFaces,
+  isDetectingFaces,
+  handleFileUpload,
+  t, // t is now exposed from useFaceSearch
+} = useFaceSearch();
 
-useFaceSearchTour();
-
-const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = useDetectFacesMutation();
-
-const selectedFamilyId = ref<string | undefined>(undefined);
-const uploadedImage = ref<string | null | undefined>(undefined);
-const detectedFaces = ref<DetectedFace[]>([]);
-const originalImageUrl = ref<string | null>(null);
-
-watch(detectError, (newError) => {
-  if (newError) {
-    showSnackbar(newError.message, 'error');
-  }
-});
-
-const resetState = () => {
-  uploadedImage.value = null;
-  detectedFaces.value = [];
-  originalImageUrl.value = null;
-};
-
-const handleFileUpload = async (file: File | null) => {
-  resetState();
-  if (!file) {
-    return;
-  }
-  if (!selectedFamilyId.value) {
-    showSnackbar(t('face.selectFamilyToUpload'), 'warning');
-    return;
-  }
-  detectFaces({ imageFile: file, familyId: selectedFamilyId.value, resize: true }, {
-    onSuccess: (data) => {
-      uploadedImage.value = data.originalImageBase64;
-      detectedFaces.value = data.detectedFaces;
-      originalImageUrl.value = data.originalImageUrl;
-    },
-    onError: (error) => {
-      showSnackbar(error.message, 'error');
-    },
-  });
-};
+useFaceSearchTour(); // Still use the tour composable directly here
 </script>
