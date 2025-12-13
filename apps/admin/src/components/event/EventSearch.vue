@@ -48,55 +48,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { EventFilter } from '@/types';
-import { EventType } from '@/types'; // Import EventType enum
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
+import { useEventSearch } from '@/composables/event/useEventSearch';
 
 const emit = defineEmits(['update:filters']);
 
-const { t } = useI18n();
-
-const expanded = ref(false); // Default to collapsed
-
-const filters = ref<Omit<EventFilter, 'searchQuery'>>({
-  type: undefined,
-  memberId: null,
-  startDate: undefined,
-  endDate: undefined,
-});
-
-const eventTypes = [
-  { title: t('event.type.birth'), value: EventType.Birth },
-  { title: t('event.type.marriage'), value: EventType.Marriage },
-  { title: t('event.type.death'), value: EventType.Death },
-  { title: t('event.type.migration'), value: EventType.Migration },
-  { title: t('event.type.other'), value: EventType.Other },
-];
-
-watch(
-  filters.value,
-  () => {
-    // Debounce or apply immediately based on preference
-    applyFilters();
-  },
-  { deep: true },
-);
-
-const applyFilters = () => {
-  emit('update:filters', filters.value);
-};
-
-const resetFilters = () => {
-  filters.value = {
-    type: undefined,
-    memberId: null, // Change to memberId
-    startDate: undefined,
-    endDate: undefined,
-  };
-  emit('update:filters', filters.value);
-};
-
-
+const {
+  t,
+  expanded,
+  filters,
+  eventTypes,
+  applyFilters,
+  resetFilters,
+} = useEventSearch(emit);
 </script>

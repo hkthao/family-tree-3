@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef } from 'vue';
+import { reactive, toRefs, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { EventType } from '@/types';
@@ -92,8 +92,6 @@ interface EventFormProps {
 const props = defineProps<EventFormProps>();
 
 const { t } = useI18n();
-
-const formRef = ref<HTMLFormElement | null>(null);
 
 const formData = reactive<Omit<Event, 'id'> | Event>(
   props.initialEventData

@@ -58,15 +58,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { formatDate } from '@/utils/dateUtils';
-import { useEventTimelineStore } from '@/stores/eventTimeline.store';
-import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
+
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import type { Event } from '@/types';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
+import { useEventTimeline } from '@/composables/event/useEventTimeline';
 
 const props = defineProps<{
   familyId?: string;
@@ -74,43 +70,17 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const eventTimelineStore = useEventTimelineStore();
-
-const { list } = storeToRefs(eventTimelineStore);
-const { t } = useI18n();
-
-const selectedEventId = ref<string | null>(null);
-const detailDrawer = ref(false);
-
-const paginationLength = computed(() => {
-  return Math.max(1, list.value.totalPages);
-});
-
-const showEventDetails = (event: Event) => {
-  selectedEventId.value = event.id;
-  detailDrawer.value = true;
-};
-
-const handleDetailClosed = () => {
-  detailDrawer.value = false;
-  selectedEventId.value = null;
-};
-
-const handlePageChange = (newPage: number) => {
-  eventTimelineStore.setListOptions({
-    page: newPage,
-    itemsPerPage: list.value.itemsPerPage,
-    sortBy: list.value.sortBy,
-  });
-};
-
-watch(
-  [() => props.familyId, () => props.memberId],
-  ([newFamilyId, newMemberId]) => {
-    eventTimelineStore.setFilters({ familyId: newFamilyId, memberId: newMemberId });
-  },
-  { immediate: true },
-);
+const {
+  t,
+  list,
+  selectedEventId,
+  detailDrawer,
+  paginationLength,
+  showEventDetails,
+  handleDetailClosed,
+  handlePageChange,
+  formatDate,
+} = useEventTimeline(props);
 </script>
 
 <style scoped>
