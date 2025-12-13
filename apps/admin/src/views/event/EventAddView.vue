@@ -22,11 +22,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
-import { useGlobalSnackbar } from '@/composables';
-import { useAddEventMutation } from '@/composables/event'; // Import useAddEventMutation
+import { useEventAdd } from '@/composables/event/useEventAdd'; // Import useEventAdd
 
 interface EventAddViewProps {
   familyId?: string;
@@ -37,9 +35,7 @@ const emit = defineEmits(['close', 'saved']);
 
 const eventFormRef = ref<InstanceType<typeof EventForm> | null>(null);
 
-const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
-const { mutate: addEvent, isPending: isAddingEvent } = useAddEventMutation(); // Use useAddEventMutation
+const { isAddingEvent, handleAddEvent: handleAddEventComposable, closeForm, t } = useEventAdd(emit);
 
 const handleAddEvent = async () => {
   if (!eventFormRef.value) return;
@@ -47,19 +43,7 @@ const handleAddEvent = async () => {
   if (!isValid) return;
 
   const eventData = eventFormRef.value.getFormData();
-
-  addEvent(eventData as Omit<Event, 'id'>, {
-    onSuccess: () => {
-      showSnackbar(t('event.messages.addSuccess'), 'success');
-      emit('saved');
-    },
-    onError: (error) => {
-      showSnackbar(error.message || t('event.messages.saveError'), 'error');
-    },
-  });
+  handleAddEventComposable(eventData as Omit<Event, 'id'>);
 };
 
-const closeForm = () => {
-  emit('close');
-};
 </script>

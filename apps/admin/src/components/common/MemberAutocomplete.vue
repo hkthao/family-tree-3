@@ -15,6 +15,8 @@
     :loading="isLoadingPreload"
     :disabled="disabled"
     :return-object="true"
+    :hide-no-data="true" 
+    :closable-chips="!disabled"
   >
     <template #chip="{ props: chipProps, item }" v-if="!hideChips">
       <v-chip v-bind="chipProps" size="small" v-if="item.raw"

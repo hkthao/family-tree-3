@@ -81,6 +81,7 @@ import { EventType } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import { cloneDeep } from 'lodash';
 
 interface EventFormProps {
   readOnly?: boolean;
@@ -95,17 +96,19 @@ const { t } = useI18n();
 const formRef = ref<HTMLFormElement | null>(null);
 
 const formData = reactive<Omit<Event, 'id'> | Event>(
-  props.initialEventData || {
-    name: '',
-    type: EventType.Other,
-    familyId: props.familyId || null, // Use prop familyId if provided
-    startDate: null,
-    endDate: null,
-    location: '',
-    description: '',
-    color: '#1976D2',
-    relatedMemberIds: [],
-  },
+  props.initialEventData
+    ? cloneDeep(props.initialEventData)
+    : {
+        name: '',
+        type: EventType.Other,
+        familyId: props.familyId || null,
+        startDate: null,
+        endDate: null,
+        location: '',
+        description: '',
+        color: '#1976D2',
+        relatedMemberIds: [],
+      },
 );
 
 const state = reactive({
