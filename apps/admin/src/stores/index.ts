@@ -1,6 +1,6 @@
 
 export * from './auth.store';
-export * from './chat.store';
+
 export * from './dashboard.store';
 export * from './event.store';
 export * from './family-autocomplete.store';
