@@ -18,7 +18,8 @@
           </v-card-title>
 
           <!-- Family Name (if available) -->
-          <FamilyName v-if="memberFace.familyName" :name="memberFace.familyName" :avatar-url="memberFace.familyAvatarUrl" />
+          <FamilyName v-if="memberFace.familyName" :name="memberFace.familyName"
+            :avatar-url="memberFace.familyAvatarUrl" />
 
           <v-chip v-if="memberFace.emotion" color="info" size="small" class="mb-4">
             {{ memberFace.emotion }}
@@ -29,7 +30,7 @@
           <!-- Other Details in a List -->
           <v-list class="w-100">
             <v-list-item v-if="memberFace.originalImageUrl">
-              <v-list-item-title class="font-weight-medium">{{ t('memberFace.form.originalImage')}}:</v-list-item-title>
+              <v-list-item-title class="font-weight-medium">{{ t('memberFace.form.originalImage') }}:</v-list-item-title>
               <v-list-item-subtitle>
                 <a :href="memberFace.originalImageUrl" target="_blank">{{ t('memberFace.form.viewOriginal') }}</a>
               </v-list-item-subtitle>
@@ -41,7 +42,8 @@
       </v-card-text>
 
       <v-card-actions class="justify-end">
-              <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>        <v-btn v-if="canPerformActions" color="error" @click="handleDelete" :disabled="isDeleting || queryLoading">{{ t('common.delete') }}</v-btn>
+        <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn> <v-btn v-if="canPerformActions"
+          color="error" @click="handleDelete" :disabled="isDeleting || queryLoading">{{ t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
     <v-progress-linear v-else-if="queryLoading" indeterminate color="primary"></v-progress-linear>
