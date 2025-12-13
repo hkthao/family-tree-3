@@ -144,13 +144,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           relatedMembers: eventData.relatedMemberIds,
         };
 
-        const result: Result<string[], ApiError> = await this.services.event.addItems([newEvent]); // Use eventStore.addItems
+        const result: Result<Event, ApiError> = await this.services.event.add(newEvent);
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError');
           return { ok: false, error: result.error } as Result<string, ApiError>;
         }
-        // Assuming only one event is added, return the first ID
-        return { ok: true, value: result.value[0] } as Result<string, ApiError>;
+        // Assuming only one event is added, return its ID
+        return { ok: true, value: result.value.id! } as Result<string, ApiError>;
       } catch (e: any) {
         this.error = e.message;
         return { ok: false, error: { message: this.error } } as Result<string, ApiError>;

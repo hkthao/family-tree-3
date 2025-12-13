@@ -1,13 +1,13 @@
 <template>
   <EventSearch @update:filters="handleFilterUpdate" />
-  <EventList :events="list.items" :total-events="list.totalItems" :loading="list.loading"
-    :search="currentFilters.searchQuery || ''" @update:options="handleListOptionsUpdate"
+  <EventList :events="events" :total-events="totalItems" :loading="loading"
+    :search="eventListSearchQuery || ''" @update:options="handleListOptionsUpdate"
     @update:search="handleSearchUpdate" @view="openDetailDrawer"
     @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer" />
 
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
-    <EventAddView v-if="addDrawer" :family-id="currentFilters.familyId || undefined" @close="closeAddDrawer"
+    <EventAddView v-if="addDrawer" :family-id="filters.familyId || undefined" @close="closeAddDrawer"
       @saved="handleEventSaved" />
   </BaseCrudDrawer>
 
@@ -25,17 +25,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/event';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
-import { storeToRefs } from 'pinia';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
+import { useEventListFilters, useEventsQuery, useDeleteEventMutation } from '@/composables/event'; // Import new composables
 
 const props = defineProps<{
   familyId: string;
@@ -43,11 +42,29 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const eventStore = useEventStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-const { list } = storeToRefs(eventStore);
-const currentFilters = ref<EventFilter>({});
+
+const eventListFiltersComposables = useEventListFilters();
+const {
+  searchQuery: eventListSearchQuery,
+  page,
+  itemsPerPage,
+  sortBy,
+  filters,
+} = toRefs(eventListFiltersComposables);
+
+const {
+  setPage,
+  setItemsPerPage,
+  setSortBy,
+  setSearchQuery,
+  setFilters,
+} = eventListFiltersComposables;
+
+const { events, totalItems, loading, refetch } = useEventsQuery(filters);
+const { mutate: deleteEvent } = useDeleteEventMutation();
+
 
 const {
   addDrawer,
@@ -64,14 +81,12 @@ const {
 } = useCrudDrawer<string>();
 
 
-const handleFilterUpdate = (filters: Omit<EventFilter, 'searchQuery'>) => {
-  list.value.filters = { ...currentFilters.value, ...filters };
-  eventStore._loadItems()
+const handleFilterUpdate = (newFilters: Omit<EventFilter, 'searchQuery'>) => {
+  setFilters(newFilters);
 };
 
 const handleSearchUpdate = (searchQuery: string) => {
-  list.value.filters.searchQuery = searchQuery;
-  eventStore._loadItems()
+  setSearchQuery(searchQuery);
 };
 
 const handleListOptionsUpdate = (options: {
@@ -79,7 +94,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  eventStore.setListOptions(options); // Use the new setListOptions action
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
 
 const confirmDelete = async (event: Event) => {
@@ -92,27 +109,35 @@ const confirmDelete = async (event: Event) => {
   });
 
   if (confirmed) {
-    try {
-      await eventStore.deleteItem(event.id!);
-      showSnackbar(
-        t('event.messages.deleteSuccess'),
-        'success',
-      );
-    } catch (error) {
-      showSnackbar(
-        t('event.messages.deleteError'),
-        'error',
-      );
-    }
+    deleteEvent(event.id!, {
+      onSuccess: () => {
+        showSnackbar(
+          t('event.messages.deleteSuccess'),
+          'success',
+        );
+        refetch(); // Refetch the list after successful deletion
+      },
+      onError: (error) => {
+        showSnackbar(
+          error.message || t('event.messages.deleteError'),
+          'error',
+        );
+      },
+    });
   }
 };
 
 const handleEventSaved = () => {
   closeAllDrawers(); // Close whichever drawer was open
+  refetch(); // Refetch the list in case an event was added/updated
 };
 
 onMounted(() => {
-  currentFilters.value.familyId = props.familyId;
-  eventStore._loadItems();
+  setFilters({ familyId: props.familyId });
+});
+
+// Watch for changes in familyId prop and update filters
+watch(() => props.familyId, (newFamilyId) => {
+  setFilters({ familyId: newFamilyId });
 });
 </script>

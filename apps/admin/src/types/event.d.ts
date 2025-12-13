@@ -1,3 +1,9 @@
+export interface ListOptions {
+  page?: number;
+  itemsPerPage?: number;
+  sortBy?: { key: string; order: string }[];
+}
+
 export enum EventType {
   Birth = 0,
   Marriage = 1,
@@ -23,7 +29,7 @@ export interface Event {
   validationErrors?: string[];
 }
 
-export interface EventFilter {
+export interface EventFilter extends ListOptions {
   searchQuery?: string;
   type?: EventType;
   eventType?: EventType;
@@ -32,6 +38,4 @@ export interface EventFilter {
   endDate?: Date | null;
   location?: string;
   memberId?: string | null; // Changed from relatedMemberId to memberId
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }

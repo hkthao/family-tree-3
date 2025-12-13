@@ -4,10 +4,17 @@
       <span class="text-h5 text-uppercase" data-testid="event-detail-title">{{ t('event.detail.title') }}</span>
     </v-card-title>
     <v-card-text>
-      <EventForm ref="eventFormRef" v-if="event" :initial-event-data="event" :read-only="true"
-        data-testid="event-detail-form" />
-      <v-progress-circular v-else indeterminate color="primary"
-        data-testid="event-detail-loading-spinner"></v-progress-circular>
+      <div v-if="isLoading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        {{ t('common.loading') }}
+      </div>
+      <div v-else-if="error">
+        <v-alert type="error" :text="error?.message || t('event.detail.errorLoading')"></v-alert>
+      </div>
+      <div v-else-if="eventData">
+        <EventForm ref="eventFormRef" v-if="eventData" :initial-event-data="eventData" :read-only="true"
+          data-testid="event-detail-form" />
+      </div>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -17,11 +24,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useEventStore } from '@/stores/event.store';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
+import { useEventQuery } from '@/composables/event'; // Import useEventQuery
 
 interface EventDetailViewProps {
   eventId: string;
@@ -30,33 +37,20 @@ interface EventDetailViewProps {
 const props = defineProps<EventDetailViewProps>();
 const emit = defineEmits(['close', 'edit']);
 const { t } = useI18n();
-const eventStore = useEventStore();
-const event = ref<Event | undefined>(undefined);
 
-const loadEvent = async () => {
-  if (props.eventId) {
-    await eventStore.getById(props.eventId);
-    if (!eventStore.error) {
-      event.value = eventStore.detail.item as Event;
-    } else {
-      event.value = undefined;
-    }
-  }
-};
+const eventIdRef = toRef(props, 'eventId');
+const { event: eventData, isLoading, error } = useEventQuery(eventIdRef); // Use useEventQuery
 
 const closeView = () => {
   emit('close');
 };
 
-onMounted(() => {
-  loadEvent();
-});
-
 watch(
   () => props.eventId,
   (newId) => {
     if (newId) {
-      loadEvent();
+      // The useEventQuery composable will react to changes in eventIdRef
+      // No explicit loadEvent call needed here
     }
   },
 );

@@ -15,18 +15,18 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey"  @click="closeForm" data-testid="event-add-cancel-button">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary"  @click="handleAddEvent" data-testid="event-add-save-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary"  @click="handleAddEvent" data-testid="event-add-save-button" :loading="isAddingEvent">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { useEventStore } from '@/stores/event.store';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
-import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables';
+import { useAddEventMutation } from '@/composables/event'; // Import useAddEventMutation
 
 interface EventAddViewProps {
   familyId?: string;
@@ -38,8 +38,8 @@ const emit = defineEmits(['close', 'saved']);
 const eventFormRef = ref<InstanceType<typeof EventForm> | null>(null);
 
 const { t } = useI18n();
-const eventStore = useEventStore();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
+const { mutate: addEvent, isPending: isAddingEvent } = useAddEventMutation(); // Use useAddEventMutation
 
 const handleAddEvent = async () => {
   if (!eventFormRef.value) return;
@@ -48,17 +48,15 @@ const handleAddEvent = async () => {
 
   const eventData = eventFormRef.value.getFormData();
 
-  try {
-    await eventStore.addItem(eventData as Omit<Event, 'id'>);
-    if (!eventStore.error) {
+  addEvent(eventData as Omit<Event, 'id'>, {
+    onSuccess: () => {
       showSnackbar(t('event.messages.addSuccess'), 'success');
-      emit('saved'); // Emit saved event
-    } else {
-      showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
-    }
-  } catch (error) {
-    showSnackbar(t('event.messages.saveError'), 'error');
-  }
+      emit('saved');
+    },
+    onError: (error) => {
+      showSnackbar(error.message || t('event.messages.saveError'), 'error');
+    },
+  });
 };
 
 const closeForm = () => {

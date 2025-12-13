@@ -156,8 +156,8 @@ const setToday = () => {
 const formattedEvents = computed(() => {
   if (!events.value) return [];
   return events.value
-    .filter((event) => event.startDate)
-    .map((event) => ({
+    .filter((event: Event) => event.startDate)
+    .map((event: Event) => ({
       title: event.name,
       start: new Date(event.startDate as Date),
       end: event.endDate

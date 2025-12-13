@@ -1,4 +1,4 @@
-import type { FamilyFilter, FamilyMediaFilter, ListOptions, FamilyDictFilter, FilterOptions } from '@/types';
+import type { FamilyFilter, FamilyMediaFilter, ListOptions, FamilyDictFilter, FilterOptions, EventFilter } from '@/types';
 
 export const queryKeys = {
   dashboard: {
@@ -7,7 +7,8 @@ export const queryKeys = {
   },
   events: {
     all: ['events'] as const,
-    upcoming: (familyId?: string) => [...queryKeys.events.all, 'upcoming', familyId] as const,
+    list: (filters?: EventFilter) => [...queryKeys.events.all, 'list', filters] as const,
+    detail: (eventId: string) => [...queryKeys.events.all, 'detail', eventId] as const,
   },
   userActivity: {
     all: ['userActivity'] as const,

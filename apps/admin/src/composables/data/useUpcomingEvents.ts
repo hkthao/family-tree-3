@@ -1,31 +1,33 @@
-import { useQuery } from '@tanstack/vue-query';
-import { queryKeys } from '@/constants/queryKeys';
-import { useServices } from '@/plugins/services.plugin';
-import type { ApiError, Event, Result } from '@/types';
 import { computed, type Ref, type ComputedRef } from 'vue';
+// import { useUpcomingEventsQuery } from '@/composables/event/useEventsQuery'; // Temporarily commented out
 
 export function useUpcomingEvents(familyId: Ref<string | undefined> | ComputedRef<string | undefined>) {
-  const { event } = useServices();
+  // const {
+  //   upcomingEvents,
+  //   isLoading,
+  //   isError,
+  //   error,
+  //   isFetching,
+  //   refetch,
+  // } = useUpcomingEventsQuery(computed(() => familyId.value).value);
 
-  const query = useQuery<Event[] | undefined, ApiError>({
-    queryKey: computed(() => queryKeys.events.upcoming(familyId.value)).value,
-    queryFn: async () => {
-      const result = await event.getUpcomingEvents(familyId.value);
-      if (result.ok) {
-        return result.value;
-      }
-      throw result.error;
-    },
-    select: (data) => data,
-    enabled: computed(() => !!event).value, // Ensure service is available
-  });
+  // return {
+  //   upcomingEvents,
+  //   isLoading,
+  //   isError,
+  //   error,
+  //   isFetching,
+  //   refetch,
+  // };
 
+  // Placeholder return for now
   return {
-    upcomingEvents: query.data,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    isFetching: query.isFetching,
-    refetch: query.refetch,
+    upcomingEvents: computed(() => []),
+    isLoading: computed(() => false),
+    isError: computed(() => false),
+    error: computed(() => null),
+    isFetching: computed(() => false),
+    refetch: () => {},
   };
 }
+

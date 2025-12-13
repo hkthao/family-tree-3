@@ -23,4 +23,9 @@ export * from './user/useUserSearch';
 export * from './novu/useNovuInbox';
 export * from './family/useFamilyDataManagement';
 
-
+// Event Composables
+export * from './event/useEventQuery';
+export * from './event/useEventsQuery';
+export * from './event/useAddEventMutation';
+export * from './event/useUpdateEventMutation';
+export * from './event/useDeleteEventMutation';

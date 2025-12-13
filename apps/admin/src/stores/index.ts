@@ -2,7 +2,7 @@
 export * from './auth.store';
 
 
-export * from './event.store';
+
 export * from './family-autocomplete.store';
 export * from './family.store';
 export * from './member-autocomplete.store';
