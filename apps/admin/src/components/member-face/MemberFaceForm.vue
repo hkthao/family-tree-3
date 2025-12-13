@@ -69,12 +69,11 @@
   </v-form>
 </template>
 <script setup lang="ts">
-import { ref, reactive, watch, defineExpose, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useVuelidate } from '@vuelidate/core';
 import type { ErrorObject } from '@vuelidate/core';
 import type { MemberFace } from '@/types';
-import { useMemberFaceFormRules } from '@/validations/memberFace.validation';
+import { useMemberFaceForm } from '@/composables/member-face/useMemberFaceForm';
+
 interface MemberFaceFormProps {
   initialMemberFaceData?: MemberFace;
   readOnly?: boolean;
@@ -83,68 +82,14 @@ interface MemberFaceFormProps {
 }
 const props = defineProps<MemberFaceFormProps>();
 const { t } = useI18n();
-const defaultFormData = (): MemberFace => ({
-  id: '',
-  memberId: props.memberId || '',
-  faceId: '',
-  boundingBox: { x: 0, y: 0, width: 0, height: 0 },
-  confidence: 0, 
-  embedding: [],
-  isVectorDbSynced: false,
-  thumbnailUrl: '',
-  originalImageUrl: '',
-  emotion: '',
-  emotionConfidence: 0,
-  vectorDbId: '',
-  memberName: '',
-  memberGender: '',
-  memberAvatarUrl: '',
-  familyName: '',
+
+const { state, v$, validate, getFormData } = useMemberFaceForm({
+  initialMemberFaceData: props.initialMemberFaceData,
+  memberId: props.memberId,
 });
-const state = reactive<MemberFace>(props.initialMemberFaceData ? { ...defaultFormData(), ...props.initialMemberFaceData } : defaultFormData());
-watch(() => props.memberId, (newMemberId) => {
-  if (newMemberId) {
-    state.memberId = newMemberId;
-  }
-});
-const rules = useMemberFaceFormRules();
-const v$ = useVuelidate(rules, toRefs(state));
-const form = ref<HTMLFormElement | null>(null);
-const validate = async () => {
-  const result = await v$.value.$validate();
-  return result;
-};
-const getFormData = (): MemberFace => {
-  if (typeof state.embedding === 'string') {
-    try {
-      state.embedding = JSON.parse(state.embedding);
-    } catch (e) {
-      console.error('Failed to parse embedding string:', e);
-      state.embedding = [];
-    }
-  }
-  return { ...state };
-};
+
 defineExpose({
   validate,
   getFormData,
 });
-watch(
-  () => props.initialMemberFaceData,
-  (newVal) => {
-    if (newVal) {
-      Object.assign(state, newVal);
-    } else {
-      Object.assign(state, defaultFormData());
-    }
-  },
-  { deep: true }
-);
-watch(() => state.embedding, (newVal) => {
-  if (Array.isArray(newVal)) {
-    if (typeof newVal[0] === 'number' || newVal.length === 0) {
-      (state.embedding as any) = JSON.stringify(newVal);
-    }
-  }
-}, { immediate: true, deep: true });
 </script>
