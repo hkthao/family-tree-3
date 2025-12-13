@@ -80,10 +80,52 @@ export interface MemberFaceFilter {
 
 export interface PaginatedMemberFaces extends Paginated<MemberFace> {}
 
+// ... existing interfaces ...
+
+export interface CreateMemberFaceCommand {
+  memberId: string;
+  familyId: string;
+  faceId: string; // ID from the face detection service
+  boundingBox: BoundingBox;
+  confidence?: number;
+  thumbnail?: string; // Base64 encoded cropped face image
+  thumbnailUrl?: string; // Public URL to the cropped face image
+  originalImageUrl?: string | null;
+  embedding: number[];
+  emotion?: string;
+  emotionConfidence?: number;
+  isVectorDbSynced?: boolean;
+  vectorDbId?: string;
+}
+
+export interface UpdateMemberFaceCommand {
+  id: string; // ID of the member face to update
+  memberId: string;
+  familyId: string;
+  // Potentially updateable fields
+  // For simplicity, assuming only memberId and familyId might change, or other metadata.
+  // Full update would include boundingBox, confidence etc.
+  // For now, let's just include description as it's the main editable field in many forms.
+  // If the form allows updating bounding box, etc., they should be added here.
+  // Based on the edit view, it seems only description (or relinking member) is the primary edit.
+  // Let's match the backend command's expected fields for update.
+  boundingBox?: BoundingBox;
+  confidence?: number;
+  thumbnail?: string; // Base64 encoded cropped face image
+  thumbnailUrl?: string; // Public URL to the cropped face image
+  originalImageUrl?: string | null;
+  embedding?: number[];
+  emotion?: string;
+  emotionConfidence?: number;
+  isVectorDbSynced?: boolean;
+  vectorDbId?: string;
+}
+
+// Re-export existing interfaces and types
 export {
-SearchResult,
-FaceMapping,
-DetectedFace,
-FaceStatus,
-BoundingBox,
+  SearchResult,
+  FaceMapping,
+  DetectedFace,
+  FaceStatus,
+  BoundingBox,
 }

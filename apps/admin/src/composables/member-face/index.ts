@@ -6,3 +6,5 @@ export * from './useMemberFaceDetailQuery';
 export * from './useDeleteMemberFaceMutation';
 export * from './useUpdateMemberFaceMutation';
 export * from './useDetectFacesMutation';
+export * from './useMemberFaceFormLogic';
+export * from './useMemberFaceDeletion';

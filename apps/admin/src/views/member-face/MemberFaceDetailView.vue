@@ -53,9 +53,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
+import { useAuth } from '@/composables';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
+import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;
@@ -65,12 +66,22 @@ const props = defineProps<MemberFaceDetailViewProps>();
 const emit = defineEmits(['close', 'edit-member-face', 'member-face-deleted']);
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
-const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
 
 const { memberFace, queryLoading } = useMemberFaceDetailQuery(props.memberFaceId);
-const { mutate: deleteMemberFace, isPending: isDeleting } = useDeleteMemberFaceMutation();
+const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
+
+const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+  deleteMutation: deleteMemberFaceMutation,
+  successMessageKey: 'memberFace.messages.deleteSuccess',
+  errorMessageKey: 'memberFace.messages.deleteError',
+  confirmationTitleKey: 'confirmDelete.title',
+  confirmationMessageKey: 'memberFace.list.confirmDelete',
+  onSuccess: () => {
+    emit('member-face-deleted'); // Notify parent that member face was deleted
+    emit('close'); // Close the detail drawer
+  },
+});
 
 const canPerformActions = computed(() => {
   return isAdmin.value || isFamilyManager.value;
@@ -82,26 +93,6 @@ const handleClose = () => {
 
 const handleDelete = async () => {
   if (!memberFace.value) return;
-
-  const confirmed = await showConfirmDialog({
-    title: t('confirmDelete.title'),
-    message: t('memberFace.list.confirmDelete', { faceId: memberFace.value.faceId }),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    confirmColor: 'error',
-  });
-
-  if (confirmed) {
-    deleteMemberFace(memberFace.value.id, {
-      onSuccess: () => {
-        showSnackbar(t('memberFace.messages.deleteSuccess'), 'success');
-        emit('member-face-deleted'); // Notify parent that member face was deleted
-        emit('close'); // Close the detail drawer
-      },
-      onError: (error) => {
-        showSnackbar(error.message || t('memberFace.messages.deleteError'), 'error');
-      },
-    });
-  }
+  await confirmAndDelete(memberFace.value.id, memberFace.value.faceId);
 };
 </script>

@@ -2,7 +2,7 @@
   <div data-testid="member-face-list-view">
     <MemberFaceSearch @update:filters="handleFilterUpdate" />
 
-    <MemberFaceList :items="memberFaces" :total-items="totalItems" :loading="queryLoading" :search="searchQuery"
+    <MemberFaceList :items="memberFaces" :total-items="totalItems" :loading="queryLoading || isDeleting" :search="searchQuery"
       :items-per-page="itemsPerPage" :sortBy="sortBy" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
       @delete="confirmDelete" @create="openAddDrawer()" @update:search="handleSearchUpdate" />
 
@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { onMounted, watch, toRefs, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useGlobalSnackbar, useConfirmDialog, useCrudDrawer } from '@/composables';
+import { useCrudDrawer } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace, MemberFaceFilter, ListOptions, FilterOptions } from '@/types';
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
@@ -29,6 +29,7 @@ import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
 import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue';
 import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
+import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
 
 interface MemberFaceListViewProps {
   memberId?: string;
@@ -37,8 +38,6 @@ interface MemberFaceListViewProps {
 const props = defineProps<MemberFaceListViewProps>();
 const { t } = useI18n();
 
-const { showSnackbar } = useGlobalSnackbar();
-const { showConfirmDialog } = useConfirmDialog();
 const {
   addDrawer,
   detailDrawer,
@@ -77,7 +76,16 @@ const queryFilters = computed<FilterOptions>(() => ({
 }));
 
 const { memberFaces, totalItems, queryLoading, refetch } = useMemberFacesQuery(listOptions, queryFilters);
-const { mutate: deleteMemberFace } = useDeleteMemberFaceMutation();
+const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
+
+const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+  deleteMutation: deleteMemberFaceMutation,
+  successMessageKey: 'memberFace.messages.deleteSuccess',
+  errorMessageKey: 'memberFace.messages.deleteError',
+  confirmationTitleKey: 'confirmDelete.title',
+  confirmationMessageKey: 'memberFace.list.confirmDelete',
+  refetchList: refetch,
+});
 
 const handleFilterUpdate = (newFilters: MemberFaceFilter) => {
   setFilters(newFilters);
@@ -98,24 +106,7 @@ const handleListOptionsUpdate = (options: {
 };
 
 const confirmDelete = async (memberFace: MemberFace) => {
-  const confirmed = await showConfirmDialog({
-    title: t('confirmDelete.title'),
-    message: t('memberFace.list.confirmDelete', { faceId: memberFace.faceId }),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    confirmColor: 'error',
-  });
-  if (confirmed) {
-    deleteMemberFace(memberFace.id, {
-      onSuccess: () => {
-        showSnackbar(t('memberFace.messages.deleteSuccess'), 'success');
-        refetch(); // Refetch the list after successful deletion
-      },
-      onError: (error) => {
-        showSnackbar(error.message || t('memberFace.messages.deleteError'), 'error');
-      },
-    });
-  }
+  await confirmAndDelete(memberFace.id, memberFace.faceId);
 };
 
 const handleMemberFaceSaved = () => {
