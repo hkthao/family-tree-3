@@ -1,38 +1,22 @@
 <template>
-  <v-autocomplete
-    v-bind="$attrs"
-    v-model="internalSelectedItems"
-    @update:model-value="handleUpdateModelValue"
-    :label="label"
-    :rules="rules"
-    :readonly="readOnly"
-    :clearable="clearable"
-    :multiple="multiple"
-    :disabled="disabled"
-    item-title="name"
-    item-value="id"
-    :loading="composableLoading"
-    :items="combinedItems"
-    :search="searchQuery"
-    @update:search="onSearchChange"
-    chips
-    :closable-chips="!disabled"
-    return-object
-  >
-    <template #item="{ props, item }">
-      <v-list-item v-bind="props" :subtitle="item.raw.email">
-        <template #prepend>
-          <v-avatar v-if="item.raw.avatar" :image="item.raw.avatar" size="small"></v-avatar>
-        </template>
-      </v-list-item>
-    </template>
-  </v-autocomplete>
+  <CustomRemoteAutocomplete v-bind="$attrs" v-model="internalValue" @update:model-value="handleUpdateModelValue"
+    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple" item-title="email"
+    item-value="id" :fetch-items="fetchItems" :loading="isLoadingPreload" :disabled="disabled" :return-object="true"
+    density="compact"
+    :hide-no-data="true" :hide-details="hideDetails" chips :closable-chips="!disabled">
+  </CustomRemoteAutocomplete>
 </template>
 
 <script setup lang="ts">
-import type { UserProfile } from '@/types';
-import { useUserAutocomplete } from '@/composables/useUserAutocomplete';
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
+import type { UserDto } from '@/types';
+import { ApiUserService } from '@/services/user/api.user.service';
+import apiClient from '@/plugins/axios';
+import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
+import { useUserByIdsQuery } from '@/composables/user/useUserByIdsQuery';
+
+// Instantiate the service for direct use
+const userService = new ApiUserService(apiClient);
 
 interface UserAutocompleteProps {
   modelValue: string | string[] | undefined | null;
@@ -42,46 +26,63 @@ interface UserAutocompleteProps {
   clearable?: boolean;
   multiple?: boolean;
   disabled?: boolean;
+  hideChips?: boolean;
+  hideDetails?: boolean;
 }
 
 const props = defineProps<UserAutocompleteProps>();
 
 const emit = defineEmits(['update:modelValue']);
 
-const { items, selectedItems, onSearchChange, preloadById, loading: composableLoading } = useUserAutocomplete({
-  multiple: props.multiple,
-  initialValue: props.modelValue ?? undefined,
+// Logic for preloading selected item(s) when modelValue is an ID(s)
+const internalValue = ref<UserDto | UserDto[] | null>(null);
+
+const userIdsToPreload = computed(() => {
+  if (props.multiple && Array.isArray(props.modelValue)) {
+    return props.modelValue as string[];
+  } else if (!props.multiple && typeof props.modelValue === 'string') {
+    return [props.modelValue as string];
+  }
+  return [];
 });
 
-const searchQuery = ref('');
-const internalSelectedItems = ref<UserProfile | UserProfile[] | null>(props.multiple ? [] : null);
+const { users: preloadedUsersData, isLoading: isLoadingPreload } = useUserByIdsQuery(userIdsToPreload);
 
-const handleUpdateModelValue = (newValues: UserProfile | UserProfile[] | null) => {
+watch(preloadedUsersData, (newUsers) => {
   if (props.multiple) {
-    const ids = Array.isArray(newValues) ? newValues.map((item: UserProfile) => item.id) : [];
+    internalValue.value = newUsers;
+  } else {
+    internalValue.value = newUsers[0] || null;
+  }
+}, { immediate: true });
+
+watch(() => props.modelValue, (newModelValue) => {
+  if (!newModelValue) {
+    internalValue.value = null;
+  }
+});
+
+
+const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
+  if (props.multiple) {
+    const ids = Array.isArray(value) ? value.map((item: UserDto) => item.id) : [];
     emit('update:modelValue', ids);
   } else {
-    const id = newValues ? (newValues as UserProfile).id : undefined;
+    const id = value ? (value as UserDto).id : undefined;
     emit('update:modelValue', id);
   }
 };
 
-const combinedItems = computed(() => {
-  const allItems = [...items.value, ...selectedItems.value];
-  // Remove duplicates based on 'id'
-  const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values());
-  return uniqueItems;
-});
-
-watch(() => props.modelValue, async (newVal) => {
-  if (newVal) {
-    await preloadById(Array.isArray(newVal) ? newVal : [newVal]);
-    internalSelectedItems.value = props.multiple ? selectedItems.value : selectedItems.value[0] || null;
-  } else {
-    internalSelectedItems.value = props.multiple ? [] : null;
+const fetchItems = async (query: string): Promise<UserDto[]> => {
+  if (!query) {
+    return [];
   }
-}, { immediate: true });
 
-onMounted(() => {
-  onSearchChange('');
-});</script>
+  const result = await userService.search(query, 1, 10);
+  if (result.ok) {
+    return result.value.items;
+  }
+  console.error('Error fetching users:', result.error);
+  return [];
+};
+</script>

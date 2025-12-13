@@ -12,7 +12,7 @@
         <div v-else-if="!chartData.series[0].data.length" class="text-body-2 font-weight-bold">
           {{ t('dashboard.membersPerGenerationChart.noData') }}
         </div>
-        <apexchart v-else type="bar" :options="chartOptions" :series="chartData.series"></apexchart>
+        <apexchart width="500"  v-else type="bar" :options="chartOptions" :series="chartData.series"></apexchart>
       </div>
     </v-card-text>
   </v-card>
@@ -57,8 +57,6 @@ const chartData = computed(() => {
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'bar',
-    height: '300px',
-    width: '100%', // Ensure chart fills the width of the card
     foreColor: theme.global.current.value.colors['on-surface'], // Set chart text color
   },
   plotOptions: {

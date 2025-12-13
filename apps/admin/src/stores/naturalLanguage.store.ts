@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
-import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types'; // Update type import to global
-import type { ApiError } from '@/plugins/axios';
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto, ApiError } from '@/types'; // Update type import to global
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
-import { type Member, type Event, type Gender, type Result } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
-import { useRelationshipStore } from './relationship.store'; // Import relationship store
+import { type Member, type Event, type Gender, type Result, type Relationship } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
@@ -35,7 +33,12 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
       const sessionId = uuidv4(); // Generate sessionId here
 
-      const result = await this.services.ai.analyzeContent(this.input, sessionId, this.familyId); // Use services.ai, pass familyId
+      const command = {
+      content: this.input,
+      sessionId: sessionId,
+      familyId: this.familyId,
+    };
+    const result = await this.services.family.generateFamilyData(command);
 
       if (result.ok) {
         this.parsedData = result.value; // Directly assign the object
@@ -88,7 +91,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.input = newInput;
     },
 
-    async saveMember(memberData: MemberDataDto): Promise<Result<string, ApiError>> { // Re-added function declaration
+    async saveMember(memberData: MemberDataDto): Promise<Result<string, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -105,14 +108,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
           dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
         };
-        const result: Result<string[], ApiError> = await this.services.member.addItems([newMember]); // Call addItems
+        const result: Result<Member, ApiError> = await this.services.member.add(newMember);
 
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError');
           return { ok: false, error: result.error } as Result<string, ApiError>;
         }
-        // Assuming only one member is added, return the first ID
-        return { ok: true, value: result.value[0] } as Result<string, ApiError>;
+        return { ok: true, value: result.value.id! } as Result<string, ApiError>;
       } catch (e: any) {
         this.error = e.message;
         return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
@@ -121,7 +123,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       }
     },
 
-    async saveEvent(eventData: EventDataDto): Promise<Result<string, ApiError>> { // Re-added function declaration
+    async saveEvent(eventData: EventDataDto): Promise<Result<string, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -137,16 +139,16 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           location: eventData.location || undefined,
           familyId: this.familyId,
           type: eventData.type,
-          relatedMembers: eventData.relatedMemberIds,
+          relatedMemberIds: eventData.relatedMemberIds,
         };
 
-        const result: Result<string[], ApiError> = await this.services.event.addItems([newEvent]); // Use eventStore.addItems
+        const result: Result<Event, ApiError> = await this.services.event.add(newEvent);
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError');
           return { ok: false, error: result.error } as Result<string, ApiError>;
         }
-        // Assuming only one event is added, return the first ID
-        return { ok: true, value: result.value[0] } as Result<string, ApiError>;
+        // Assuming only one event is added, return its ID
+        return { ok: true, value: result.value.id! } as Result<string, ApiError>;
       } catch (e: any) {
         this.error = e.message;
         return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
@@ -164,9 +166,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           return { ok: false, error: { message: this.error } } as Result<any, ApiError>;
         }
 
-        const relationshipStore = useRelationshipStore();
-
-        const newRelationship = {
+        const newRelationship: Omit<Relationship, 'id'> = {
           sourceMemberId: relationshipData.sourceMemberId,
           targetMemberId: relationshipData.targetMemberId,
           type: relationshipData.type,
@@ -174,7 +174,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           familyId: this.familyId,
         };
 
-        const result = await relationshipStore.addItem(newRelationship);
+        const result = await this.services.relationship.add(newRelationship);
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError');
         }

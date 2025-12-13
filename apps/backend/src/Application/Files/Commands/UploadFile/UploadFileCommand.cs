@@ -1,5 +1,5 @@
-using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs; // Moved DTOs
 
 namespace backend.Application.Files.UploadFile;
 

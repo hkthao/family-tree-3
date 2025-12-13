@@ -4,7 +4,6 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
-using backend.Application.MemberFaces.Common; // For MemberFaceDto
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using Microsoft.AspNetCore.Mvc;
@@ -12,43 +11,50 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Web.Controllers;
 
 [ApiController]
-[Route("api/memberfaces")]
-public class MemberFacesController(IMediator mediator) : ControllerBase
+[Route("api/member-faces")]
+public class MemberFacesController(IMediator mediator, ILogger<MemberFacesController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
+    private readonly ILogger<MemberFacesController> _logger = logger;
 
-    [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<MemberFaceDto>>>> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchMemberFaces([FromQuery] SearchMemberFacesQuery query)
     {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Result<MemberFaceDto>>> GetMemberFaceById(Guid id)
+    public async Task<IActionResult> GetMemberFaceById(Guid id)
     {
-        return await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
+        var result = await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
+        return result.ToActionResult(this, _logger);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<Guid>>> CreateMemberFace(CreateMemberFaceCommand command)
+    public async Task<IActionResult> CreateMemberFace(CreateMemberFaceCommand command)
     {
-        return await _mediator.Send(command);
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201, nameof(GetMemberFaceById), new { id = result.Value });
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result<Unit>>> UpdateMemberFace(Guid id, UpdateMemberFaceCommand command)
+    public async Task<IActionResult> UpdateMemberFace(Guid id, UpdateMemberFaceCommand command)
     {
         if (id != command.Id)
         {
-            return BadRequest(Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation));
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberFaceCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
+            return Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).ToActionResult(this, _logger);
         }
-        return await _mediator.Send(command);
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result<Unit>>> DeleteMemberFace(Guid id)
+    public async Task<IActionResult> DeleteMemberFace(Guid id)
     {
-        return await _mediator.Send(new DeleteMemberFaceCommand { Id = id });
+        var result = await _mediator.Send(new DeleteMemberFaceCommand { Id = id });
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -59,10 +65,11 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
     /// <returns>Đối tượng chứa thông tin về các khuôn mặt đã phát hiện.</returns>
     [HttpPost("detect")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromForm] IFormFile file, Guid familyId, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
+    public async Task<IActionResult> DetectFaces([FromForm] IFormFile file, Guid familyId, [FromQuery] bool resizeImageForAnalysis = false, [FromQuery] bool returnCrop = true)
     {
         if (file == null || file.Length == 0)
         {
+            _logger.LogWarning("DetectFaces received no image file from {RemoteIpAddress}", HttpContext.Connection.RemoteIpAddress);
             return BadRequest("No image file uploaded.");
         }
 
@@ -80,10 +87,6 @@ public class MemberFacesController(IMediator mediator) : ControllerBase
         };
 
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 }

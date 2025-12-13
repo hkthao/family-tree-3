@@ -17,12 +17,13 @@ import { donateRoutes } from './features/donate.routes';
 import { eventRoutes } from './features/event.routes';
 import { dashboardRoutes } from './features/dashboard.routes'; // New
 
-import { nlEditorRoutes } from './features/nl-editor.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
 import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 import { chatRoutes } from './features/chat.routes'; // New
+import { promptRoutes } from './features/prompt.routes'; // New
+import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
 
 const router = createRouter({
   history: createWebHistory(getEnvVariable('BASE_URL')),
@@ -42,9 +43,10 @@ const router = createRouter({
         ...settingRoutes,
         ...donateRoutes,
         ...eventRoutes,
-        ...nlEditorRoutes, // Replaced
         ...infoPagesRoutes, // Replaced
         ...chatRoutes, // New
+        ...promptRoutes, // New
+        ...relationshipDetectionRoutes, // NEW
       ],
     },
     ...publicRoutes, // Replaced

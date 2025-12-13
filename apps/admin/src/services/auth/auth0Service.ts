@@ -1,7 +1,7 @@
 import { Auth0Client, createAuth0Client } from '@auth0/auth0-spa-js';
 import type { RedirectLoginOptions, LogoutOptions } from '@auth0/auth0-spa-js';
 import type { AuthService } from './authService';
-import type { AppState, User } from '@/types';
+import type { AppState, UserProfile } from '@/types';
 import { getEnvVariable } from '@/utils/api.util';
 
 const AUTH0_DOMAIN = getEnvVariable('VITE_AUTH0_DOMAIN') || '';
@@ -46,7 +46,7 @@ export const auth0Service: AuthService = {
     }
     return null;
   },
-  register: async (): Promise<User | null> => {
+  register: async (): Promise<UserProfile | null> => {
     const client = await initAuth0();
     await client.loginWithRedirect({
       appState: { target: '/' }, // Redirect to home after signup

@@ -1,6 +1,6 @@
 <template>
-  <v-card class="mb-4" data-testid="member-search">
-    <v-card-title class="text-h6 d-flex align-center">
+  <v-card :elevation="0" class="mb-4" data-testid="member-search">
+    <v-card-title class="text-h6 d-flex align-center pa-0">
       {{ t('member.search.title') }}
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="member-search-expand-button">
@@ -13,15 +13,43 @@
     </v-card-title>
     <v-expand-transition>
       <div v-show="expanded">
-        <v-card-text>
+        <v-card-text class="pa-0">
           <v-row>
             <v-col cols="12" md="6">
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable
                 data-testid="member-gender-filter" />
             </v-col>
             <v-col cols="12" md="6">
-              <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable
-                data-testid="member-family-filter" />
+              <MemberAutocomplete
+                v-model="filters.fatherId"
+                :label="t('member.search.father')"
+                clearable
+                data-testid="member-father-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.motherId"
+                :label="t('member.search.mother')"
+                clearable
+                data-testid="member-mother-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.husbandId"
+                :label="t('member.search.husband')"
+                clearable
+                data-testid="member-husband-filter"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <MemberAutocomplete
+                v-model="filters.wifeId"
+                :label="t('member.search.wife')"
+                clearable
+                data-testid="member-wife-filter"
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -42,12 +70,16 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
 import { GenderSelect } from '@/components/common';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 const emit = defineEmits(['update:filters']);
 const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 const filters = ref<MemberFilter>({
   gender: undefined,
-  familyId: null,
+  fatherId: null,
+  motherId: null,
+  husbandId: null,
+  wifeId: null,
 });
 
 watch(
@@ -66,7 +98,10 @@ const applyFilters = () => {
 const resetFilters = () => {
   filters.value = {
     gender: undefined,
-    familyId: null,
+    fatherId: null,
+    motherId: null,
+    husbandId: null,
+    wifeId: null,
   };
   emit('update:filters', filters.value);
 };

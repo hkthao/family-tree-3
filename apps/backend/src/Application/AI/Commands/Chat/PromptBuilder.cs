@@ -1,10 +1,7 @@
 using System.Globalization;
 using System.Text;
-using System.Text.Json; // NEW
 using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
-using backend.Application.AI.DTOs; // NEW USING for AiPhotoAnalysisInputDto
-using backend.Application.AI.Models; // NEW USING
 using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using backend.Domain.Entities; // Add using directive for Member and Family
 
@@ -15,6 +12,8 @@ namespace backend.Application.AI.Prompts;
 /// </summary>
 public static class PromptBuilder
 {
+    private record MentionData(string Id, string DisplayName);
+
     /// <summary>
     /// Xây dựng prompt cho AI Agent dựa trên văn bản và các mention đã trích xuất từ phân tích ngôn ngữ tự nhiên.
     /// </summary>
@@ -118,27 +117,6 @@ public static class PromptBuilder
     }
 
     /// <summary>
-    /// Xây dựng prompt cho AI Agent để phân tích ảnh dựa trên dữ liệu AiPhotoAnalysisInputDto.
-    /// </summary>
-    /// <param name="input">Đối tượng AiPhotoAnalysisInputDto chứa dữ liệu ảnh và các thông tin liên quan.</param>
-    /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
-    public static string BuildPhotoAnalysisPrompt(AiPhotoAnalysisInputDto input)
-    {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, // Ensure camelCase for JSON keys
-            WriteIndented = false // Keep JSON concise
-        };
-        var jsonInput = System.Text.Json.JsonSerializer.Serialize(input, options);
-
-        var promptBuilder = new StringBuilder();
-        promptBuilder.AppendLine("Hãy phân tích bức ảnh dựa trên dữ liệu JSON sau:");
-        promptBuilder.AppendLine(jsonInput);
-        promptBuilder.AppendLine("Trả về kết quả phân tích theo đúng định dạng JSON đã được hướng dẫn trong system prompt.");
-        return promptBuilder.ToString();
-    }
-
-    /// <summary>
     /// Xây dựng prompt cho AI Agent để tạo câu chuyện về một thành viên gia đình.
     /// </summary>
     /// <param name="request">Lệnh tạo câu chuyện chứa thông tin yêu cầu.</param>
@@ -186,7 +164,7 @@ public static class PromptBuilder
             promptBuilder.AppendLine(request.RawText);
         }
 
-        if (request.ResizedImageUrl != null || (request.PhotoPersons != null && request.PhotoPersons.Any()))
+        if (!string.IsNullOrEmpty(request.ResizedImageUrl) || (request.PhotoPersons != null && request.PhotoPersons.Any()))
         {
             promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
             if (!string.IsNullOrEmpty(request.ResizedImageUrl))
@@ -198,9 +176,7 @@ public static class PromptBuilder
                 promptBuilder.AppendLine("- Người trong ảnh:");
                 foreach (var person in request.PhotoPersons)
                 {
-                    // Correct confidence format
-                    var confidenceFormatted = $"{(person.Confidence ?? 0) * 100:0.000}%";
-                    promptBuilder.AppendLine($"  - {person.Name ?? "Không rõ"} (Cảm xúc: {person.Emotion ?? "Không rõ"}, Độ tự tin: {confidenceFormatted}{(string.IsNullOrEmpty(person.RelationPrompt) ? "" : $", Quan hệ: {person.RelationPrompt}")})");
+                    promptBuilder.AppendLine($"  - {person.Name} (Cảm xúc: {person.Emotion}, Độ tự tin: {person.Confidence:P}, Quan hệ: {person.RelationPrompt})");
                 }
             }
         }

@@ -31,8 +31,8 @@ public class CreateMembersCommandHandlerTests : TestBase
         // Arrange
         var membersToCreate = new List<AIMemberDto>
         {
-            new() { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" },
-            new() { FirstName = "Jane", LastName = "Doe", Gender = "Female", DateOfBirth = new DateTime(1992, 2, 2), FamilyName = "Doe" }
+            new() { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) },
+            new() { FirstName = "Jane", LastName = "Doe", Gender = "Female", DateOfBirth = new DateTime(1992, 2, 2) }
         };
         var command = new CreateMembersCommand(membersToCreate);
 
@@ -55,8 +55,8 @@ public class CreateMembersCommandHandlerTests : TestBase
     public async Task Handle_ShouldSkipInvalidMembers_AndCreateValidOnes()
     {
         // Arrange
-        var validMember = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" };
-        var invalidMember = new AIMemberDto { FirstName = "", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" }; // Invalid FirstName
+        var validMember = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) };
+        var invalidMember = new AIMemberDto { FirstName = "", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) }; // Invalid FirstName
         var membersToCreate = new List<AIMemberDto> { validMember, invalidMember };
         var command = new CreateMembersCommand(membersToCreate);
 
@@ -83,7 +83,7 @@ public class CreateMembersCommandHandlerTests : TestBase
     public async Task Handle_ShouldCaptureErrors_FromIndividualMemberCreation()
     {
         // Arrange
-        var memberToCreate = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" };
+        var memberToCreate = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) };
         var command = new CreateMembersCommand(new List<AIMemberDto> { memberToCreate });
         var creationError = "Failed to create member.";
 

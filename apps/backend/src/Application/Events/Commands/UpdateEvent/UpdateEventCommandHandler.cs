@@ -29,7 +29,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             return Result<bool>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound);
         }
 
-        var membersSpec = new MembersByIdsSpec(request.RelatedMembers);
+        var membersSpec = new MembersByIdsSpec(request.RelatedMemberIds);
         var relatedMembers = await _context.Members
             .WithSpecification(membersSpec)
             .ToListAsync(cancellationToken);
@@ -51,7 +51,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.ClearEventMembers(); // Clear the in-memory collection
 
         // Add new members
-        foreach (var memberId in request.RelatedMembers)
+        foreach (var memberId in request.RelatedMemberIds)
         {
             entity.AddEventMember(memberId);
         }

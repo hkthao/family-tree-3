@@ -1,5 +1,3 @@
-using backend.Application.Common.Models;
-using backend.Application.UserActivities.Queries;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +12,17 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserActivityController(IMediator mediator) : ControllerBase
+public class UserActivityController(IMediator mediator, ILogger<UserActivityController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<UserActivityController> _logger = logger;
 
     /// <summary>
     /// Truy xuất danh sách các hoạt động gần đây của người dùng hiện tại.
@@ -30,7 +33,7 @@ public class UserActivityController(IMediator mediator) : ControllerBase
     /// <param name="groupId">Tùy chọn: Lọc hoạt động theo ID nhóm (FamilyId).</param>
     /// <returns>Danh sách các hoạt động gần đây của người dùng.</returns>
     [HttpGet("recent")]
-    public async Task<ActionResult<PaginatedList<UserActivityDto>>> GetRecentActivities(
+    public async Task<IActionResult> GetRecentActivities(
         [FromQuery] int page,
         [FromQuery] int itemsPerPage = 10,
         [FromQuery] TargetType? targetType = null,
@@ -48,6 +51,6 @@ public class UserActivityController(IMediator mediator) : ControllerBase
 
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? (ActionResult<PaginatedList<UserActivityDto>>)Ok(result.Value) : (ActionResult<PaginatedList<UserActivityDto>>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 }

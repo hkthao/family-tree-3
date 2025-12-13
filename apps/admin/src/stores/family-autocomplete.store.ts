@@ -14,7 +14,13 @@ export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.family.loadItems(filters, 1, 50); // Assuming page 1, 50 items per page
+        const result = await this.services.family.search(
+          {
+            page: 1,
+            itemsPerPage: 50,
+          },
+          filters
+        );
 
         if (result.ok) {
           this.items = result.value.items;

@@ -43,14 +43,12 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
-import { type PropType, computed } from 'vue';
+import { type PropType } from 'vue';
 import MemberFaceDisplay from '../common/MemberFaceDisplay.vue'; // NEW IMPORT
+import { useFaceDetectionSidebar } from '@/composables/face/useFaceDetectionSidebar';
 
-const { t } = useI18n();
-
-const { faces, selectedFaceId, readOnly } = defineProps({
+const props = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },
   selectedFaceId: { type: String as PropType<string | undefined>, default: undefined },
   readOnly: { type: Boolean, default: false },
@@ -58,12 +56,11 @@ const { faces, selectedFaceId, readOnly } = defineProps({
 
 const emit = defineEmits(['face-selected', 'remove-face']);
 
-const removeFace = (faceId: string) => {
-  emit('remove-face', faceId);
-};
-
-const unlabeledFacesCount = computed(() => faces.filter(face => !face.memberId).length);
-
+const {
+  t,
+  removeFace,
+  unlabeledFacesCount,
+} = useFaceDetectionSidebar(props, emit);
 </script>
 
 <style scoped>

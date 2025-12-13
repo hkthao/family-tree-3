@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div v-if="dashboardStore.loading">
+    <div v-if="loading">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
       <p class="mt-2">{{ t('dashboard.stats.loading') }}</p>
     </div>
-    <v-alert v-else-if="dashboardStore.error" type="error" dense dismissible>
-      {{ dashboardStore.error }}
+    <v-alert v-else-if="!stats && !loading" type="info" dense>
+      {{ t('common.noDataAvailable') }}
     </v-alert>
     <v-row v-else-if="stats">
       <v-col cols="12" sm="6" md="3">
@@ -50,24 +50,24 @@
     <v-row v-if="stats">
       <v-col cols="12" md="4">
         <GenderRatioChart class="fill-height" :male-ratio="stats.maleRatio" :female-ratio="stats.femaleRatio"
-          :loading="dashboardStore.loading" />
+          :loading="loading" />
       </v-col>
 
       <v-col cols="12" md="8">
         <v-row>
           <v-col>
-            <AverageAgeCard :average-age="stats.averageAge" :loading="dashboardStore.loading" />
+            <AverageAgeCard :average-age="stats.averageAge" :loading="loading" />
           </v-col>
           <v-col>
             <LivingDeceasedCard :living-members-count="stats.livingMembersCount"
-              :deceased-members-count="stats.deceasedMembersCount" :loading="dashboardStore.loading" />
+              :deceased-members-count="stats.deceasedMembersCount" :loading="loading" />
           </v-col>
         </v-row>
 
         <v-row>
           <v-col>
             <MembersPerGenerationChart :members-per-generation="stats.membersPerGeneration"
-              :loading="dashboardStore.loading" />
+              :loading="loading" />
           </v-col>
         </v-row>
 
@@ -77,33 +77,19 @@
 </template>
 
 <script setup lang="ts">
-import { useDashboardStore } from '@/stores/dashboard.store';
-import { onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { PropType } from 'vue';
 import AverageAgeCard from './AverageAgeCard.vue';
 import LivingDeceasedCard from './LivingDeceasedCard.vue';
 import GenderRatioChart from './GenderRatioChart.vue';
 import MembersPerGenerationChart from './MembersPerGenerationChart.vue';
+import type { DashboardStats } from '@/types';
 
 const { t } = useI18n();
 
-const props = defineProps({
-  familyId: { type: String, default: null },
-});
-
-const dashboardStore = useDashboardStore();
-
-const stats = computed(() => dashboardStore.stats);
-
-const fetchStats = (familyId: string | null) => {
-  dashboardStore.fetchDashboardStats(familyId || undefined);
-};
-
-onMounted(() => {
-  fetchStats(props.familyId);
-});
-
-watch(() => props.familyId, (newFamilyId) => {
-  fetchStats(newFamilyId);
+defineProps({
+  familyId: { type: String, default: null }, // Keep familyId for consistency if it's used elsewhere for context
+  stats: { type: Object as PropType<DashboardStats | null>, default: null },
+  loading: { type: Boolean, default: false },
 });
 </script>

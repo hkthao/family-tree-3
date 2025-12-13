@@ -62,7 +62,7 @@ import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper, type CropperResult } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; 
+import { useGlobalSnackbar } from '@/composables';
 const props = defineProps({
   modelValue: { type: String as PropType<string | null | undefined>, default: null },
   size: { type: Number, default: 128 },

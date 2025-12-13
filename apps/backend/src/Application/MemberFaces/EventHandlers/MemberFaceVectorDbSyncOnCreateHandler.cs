@@ -27,7 +27,7 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
             _logger.LogWarning("Member not found for MemberFaceId {MemberFaceId}. Cannot sync familyId to vector DB.", memberFace.Id);
             return; // Exit if member is not found
         }
-        
+
         string? effectiveThumbnailUrl = memberFace.ThumbnailUrl;
         var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
         {
@@ -35,7 +35,7 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
             Vector = [.. memberFace.Embedding.Select(d => (float)d)], // Convert double to float
             Payload = new Dictionary<string, object>
             {
-                { "localDbId", memberFace.Id.ToString() }, 
+                { "localDbId", memberFace.Id.ToString() },
                 { "memberId", memberFace.MemberId.ToString() },
                 { "familyId", member.FamilyId.ToString() }, // Add FamilyId to payload
                 { "faceId", memberFace.FaceId },

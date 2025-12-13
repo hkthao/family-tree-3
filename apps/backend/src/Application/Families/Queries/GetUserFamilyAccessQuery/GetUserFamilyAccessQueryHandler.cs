@@ -1,10 +1,10 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums; 
+using backend.Domain.Enums;
 
 namespace backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 
-public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAccessQuery, List<FamilyAccessDto>>
+public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAccessQuery, Result<List<FamilyAccessDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -17,7 +17,7 @@ public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAcce
         _currentUser = currentUser;
     }
 
-    public async Task<List<FamilyAccessDto>> Handle(GetUserFamilyAccessQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FamilyAccessDto>>> Handle(GetUserFamilyAccessQuery request, CancellationToken cancellationToken)
     {
         var familyAccessList = await _context.FamilyUsers
             .Where(fu => fu.UserId == _currentUser.UserId && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer))
@@ -28,6 +28,6 @@ public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAcce
             })
             .ToListAsync(cancellationToken);
 
-        return familyAccessList;
+        return Result<List<FamilyAccessDto>>.Success(familyAccessList);
     }
 }

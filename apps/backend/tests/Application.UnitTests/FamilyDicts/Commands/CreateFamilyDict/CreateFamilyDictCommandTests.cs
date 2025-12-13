@@ -3,7 +3,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
-using backend.Application.Common.Exceptions; // Added for ForbiddenAccessException
 
 namespace backend.Application.UnitTests.FamilyDicts.Commands.CreateFamilyDict;
 
@@ -14,14 +13,13 @@ public class CreateFamilyDictCommandTests : TestBase
         // Set up authenticated user by default for most tests
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        // Default to admin for these command tests, as most successful tests require admin rights
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
     }
 
     [Fact]
     public async Task Handle_ShouldPersistFamilyDict()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
@@ -56,6 +54,7 @@ public class CreateFamilyDictCommandTests : TestBase
         // Arrange
         // Note: For validation tests, authorization check is not the primary focus,
         // but the handler still needs the authorizationService mock.
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
@@ -79,6 +78,7 @@ public class CreateFamilyDictCommandTests : TestBase
     public async Task Handle_ShouldThrowValidationException_WhenNameIsTooLong()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
@@ -102,6 +102,7 @@ public class CreateFamilyDictCommandTests : TestBase
     public async Task Handle_ShouldThrowValidationException_WhenNorthNamesByRegionIsEmpty()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
@@ -137,9 +138,12 @@ public class CreateFamilyDictCommandTests : TestBase
             NamesByRegion = new NamesByRegionCommandDto { North = "New N", Central = "New C", South = "New S" }
         };
 
-        // Act & Assert
-        await FluentActions.Awaiting(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<ForbiddenAccessException>()
-            .WithMessage("Chỉ quản trị viên mới được phép tạo FamilyDict.");
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.StatusCode.Should().Be(403);
+        result.ErrorSource.Should().Be("Authorization");
     }
 }

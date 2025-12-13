@@ -8,7 +8,7 @@
 
 **Công nghệ chính:**
 *   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation, JWT Authentication, Novu
-*   **Frontend (Admin):** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
+*   **Frontend (Admin)::** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
 *   **Cơ sở dữ liệu:** MySQL
 *   **Triển khai:** Docker, Docker Compose, Nginx
 *   **CI/CD:** GitHub Actions
@@ -54,13 +54,6 @@ npm run dev
 ```
 Ứng dụng sẽ chạy trên `http://localhost:5173`.
 
-### 📱 Cách chạy mobile app (riêng lẻ):
-
-```bash
-cd apps/mobile/family_tree_rn
-npm install
-npm run android # hoặc npm run ios
-```
 
 ### 🐳 Chạy bằng Docker Compose (tất cả các service):
 
@@ -119,8 +112,7 @@ Dự án sử dụng GitHub Actions để tự động hóa quy trình CI/CD.
 family-tree-3/
 ├── apps/
 │   ├── admin/         # Giao diện quản trị (Vue + Vuetify)
-│   ├── backend/       # API Backend (ASP.NET Core)
-│   └── mobile/        # Ứng dụng di động (React Native)
+│   └── backend/       # API Backend (ASP.NET Core)
 ├── services/
 │   └── face-service/  # Dịch vụ xử lý khuôn mặt (Python)
 ├── packages/

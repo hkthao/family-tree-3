@@ -53,13 +53,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef, computed } from 'vue';
+import { reactive, toRefs, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useFamilyDictRules } from '@/validations/family-dict.validation'; // Will create this file
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -68,8 +68,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const { isAdmin, isFamilyManager } = useAuth();
-
-const formRef = ref<HTMLFormElement | null>(null);
 
 const isFormReadOnly = computed(() => {
   return props.readOnly || !(isAdmin.value || isFamilyManager.value);

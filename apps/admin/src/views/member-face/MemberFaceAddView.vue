@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('memberFace.form.addTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="faceStore.loading || memberFaceStore.add.loading" indeterminate color="primary"
+    <v-progress-linear v-if="isDetectingFaces || isAddingMemberFace" indeterminate color="primary"
       class="my-4"></v-progress-linear>
     <v-card-text>
       <FamilyAutocomplete v-model="selectedFamilyId" :label="t('memberFace.form.family')" class="mb-4"
@@ -11,23 +11,22 @@
       <div v-if="selectedFamilyId">
         <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
 
-        <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
-          <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
+        <div v-if="uploadedImage && detectedFaces.length > 0" class="mt-4">
+          <FaceBoundingBoxViewer :image-src="uploadedImage" :faces="detectedFaces" selectable
             @face-selected="openSelectMemberDialog" class="mb-4" /> <!-- Added mb-4 for spacing -->
-          <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog"
+          <FaceDetectionSidebar :faces="detectedFaces" @face-selected="openSelectMemberDialog"
             @remove-face="handleRemoveFace" />
         </div>
-        <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+        <v-alert v-else-if="!isDetectingFaces && !uploadedImage" type="info" class="my-4">{{
           t('face.recognition.uploadPrompt') }}</v-alert>
-        <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
-          type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
+        <v-alert v-else-if="!isDetectingFaces && uploadedImage && detectedFaces.length === 0" type="info"
+          class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
 
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces"
-        :loading="memberFaceStore.add.loading">
+      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces" :loading="isAddingMemberFace">
         {{ t('face.recognition.saveAllLabeledFacesButton') }}
       </v-btn>
     </v-card-actions>
@@ -39,12 +38,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberFaceStore } from '@/stores/member-face.store';
-import { useFaceStore } from '@/stores/face.store'; // NEW
-import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face'; // NEW
-import type { DetectedFace, MemberFace } from '@/types'; // NEW
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // NEW
+import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
+import type { DetectedFace, MemberFace } from '@/types';
+import { useGlobalSnackbar } from '@/composables';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables/member-face';
 
 interface MemberFaceAddViewProps {
   memberId?: string; // Optional, might be pre-selected if adding from a member detail page
@@ -55,38 +53,81 @@ const props = defineProps<MemberFaceAddViewProps>();
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
-const memberFaceStore = useMemberFaceStore();
-const faceStore = useFaceStore(); // NEW
 const { showSnackbar } = useGlobalSnackbar();
+
+const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = useDetectFacesMutation();
+const { mutateAsync: addMemberFace, isPending: isAddingMemberFace, error: addError } = useAddMemberFaceMutation(); // Use mutateAsync for awaiting in loop
 
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
-const selectedFamilyId = ref<string | undefined>(props.familyId); // NEW
+const selectedFamilyId = ref<string | undefined>(props.familyId);
+
+const uploadedImage = ref<string | null | undefined>(undefined); // Base64 string of the uploaded image
+const detectedFaces = ref<DetectedFace[]>([]);
+const originalImageUrl = ref<string | null>(null);
 
 watch(() => props.familyId, (newFamilyId) => {
   selectedFamilyId.value = newFamilyId;
 });
 
-// Watch for faceStore errors
-watch(() => faceStore.error, (newError) => {
+// Watch for errors from mutations
+watch(detectError, (newError) => {
   if (newError) {
-    showSnackbar(newError, 'error');
+    showSnackbar(newError.message, 'error');
+  }
+});
+watch(addError, (newError) => {
+  if (newError) {
+    showSnackbar(newError.message, 'error');
   }
 });
 
-const handleFileUpload = async (file: File | File[] | null) => {
-  if (file instanceof File) {
-    await faceStore.detectFaces(file, selectedFamilyId.value!, false); // Assuming false means no resize for analysis here
-  } else if (Array.isArray(file) && file.length > 0) {
-    await faceStore.detectFaces(file[0], selectedFamilyId.value!, false);
-  } else {
-    faceStore.resetState();
+const resetState = () => {
+  uploadedImage.value = null;
+  detectedFaces.value = [];
+  originalImageUrl.value = null;
+  faceToLabel.value = null;
+  showSelectMemberDialog.value = false;
+  if (faceUploadInputRef.value) {
+    faceUploadInputRef.value.reset();
   }
 };
 
+const handleFileUpload = async (file: File | File[] | null) => {
+  if (!file) {
+    resetState(); // If file is null, the input was cleared, so reset everything.
+    return;
+  }
+
+  detectedFaces.value = []; // Always clear detected faces for a new upload
+  originalImageUrl.value = null; // Clear original image URL
+
+  const fileToUpload = Array.isArray(file) ? file[0] : file;
+
+  // Immediately create a local URL for display
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedImage.value = e.target?.result as string;
+  };
+  reader.readAsDataURL(fileToUpload);
+
+  detectFaces({ imageFile: fileToUpload, familyId: selectedFamilyId.value!, resize: false }, {
+    onSuccess: (data) => {
+      // uploadedImage.value is now set from local blob
+      detectedFaces.value = data.detectedFaces;
+      originalImageUrl.value = data.originalImageUrl;
+    },
+    onError: (error) => {
+      showSnackbar(error.message, 'error');
+      uploadedImage.value = null; // Clear image on error
+      detectedFaces.value = []; // Ensure faces are cleared on error
+    },
+  });
+};
+
 const openSelectMemberDialog = (face: DetectedFace) => {
-  if (face.status === 'recognized') { // NEW: Add this check
+  if (face.status === 'recognized') {
     return;
   }
   if (face) {
@@ -96,30 +137,30 @@ const openSelectMemberDialog = (face: DetectedFace) => {
 };
 
 const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
-  const index = faceStore.detectedFaces.findIndex(f => f.id === updatedFace.id);
+  const index = detectedFaces.value.findIndex(f => f.id === updatedFace.id);
   if (index !== -1) {
-    faceStore.detectedFaces.splice(index, 1, updatedFace); // Replace the old face with the updated one
+    detectedFaces.value.splice(index, 1, updatedFace); // Replace the old face with the updated one
   }
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
 };
 
 const handleRemoveFace = (faceId: string) => {
-  faceStore.removeFace(faceId);
+  detectedFaces.value = detectedFaces.value.filter(face => face.id !== faceId);
 };
 
 const canSaveLabels = computed(() => {
-  if (!selectedFamilyId.value) { // NEW: Cannot save if no family is selected
+  if (!selectedFamilyId.value) {
     return false;
   }
-  const hasFacesToSave = faceStore.detectedFaces.some(face =>
-    (face.status === 'labeled') || // User explicitly labeled this face
-    (face.status === 'unrecognized' && face.memberId !== null) || // User labeled a previously unrecognized face
-    (face.status === 'recognized' && face.originalMemberId !== face.memberId) // User changed a recognized face's label
+  const hasFacesToSave = detectedFaces.value.some(face =>
+    (face.status === 'labeled') ||
+    (face.status === 'unrecognized' && face.memberId !== null) ||
+    (face.status === 'recognized' && face.originalMemberId !== face.memberId)
   );
 
-  const hasUnlabeledFacesLeft = faceStore.detectedFaces.some(face =>
-    face.status === 'unrecognized' && face.memberId === null // Still an unrecognized face that hasn't been labeled
+  const hasUnlabeledFacesLeft = detectedFaces.value.some(face =>
+    face.status === 'unrecognized' && face.memberId === null
   );
 
   return hasFacesToSave && !hasUnlabeledFacesLeft;
@@ -131,7 +172,7 @@ const saveAllLabeledFaces = async () => {
     return;
   }
   // Filter out unlabeled faces and transform DetectedFace to MemberFace for creation
-  const facesToSave = faceStore.detectedFaces
+  const facesToSave = detectedFaces.value
     .filter(face => face.memberId)
     .map(face => {
       // Create a new MemberFace object from DetectedFace properties
@@ -140,15 +181,15 @@ const saveAllLabeledFaces = async () => {
         faceId: face.id, // Use the detected face ID as the backend FaceId
         boundingBox: face.boundingBox,
         confidence: face.confidence,
-        thumbnail: face.thumbnail, // NEW: Include thumbnail (base64)
-        thumbnailUrl: face.thumbnailUrl, // Use the detected thumbnail URL
-        originalImageUrl: faceStore.originalImageUrl, // The original uploaded image URL
+        thumbnail: face.thumbnail,
+        thumbnailUrl: face.thumbnailUrl,
+        originalImageUrl: originalImageUrl.value, // Use the locally managed original image URL
         embedding: face.embedding || [],
         emotion: face.emotion,
         emotionConfidence: face.emotionConfidence,
-        isVectorDbSynced: false, // Will be updated by backend after n8n sync
-        vectorDbId: undefined, // Will be set by backend
-        familyId: selectedFamilyId.value!, // NEW: Add familyId from selectedFamilyId
+        isVectorDbSynced: false,
+        vectorDbId: undefined,
+        familyId: selectedFamilyId.value!,
       };
       return memberFace;
     });
@@ -158,35 +199,31 @@ const saveAllLabeledFaces = async () => {
     return;
   }
 
-  // Iterate and add each member face
-  let allSucceeded = true;
-  for (const memberFace of facesToSave) {
-    // Override memberId if prop is provided, to ensure consistency
-    if (props.memberId) {
-      memberFace.memberId = props.memberId;
-    }
-    const result = await memberFaceStore.addItem(memberFace);
-    if (!result.ok) {
-      allSucceeded = false;
-      showSnackbar(t('memberFace.messages.saveErrorForFace', { faceId: memberFace.faceId, error: result.error?.message }), 'error');
-    }
-  }
+  const results = await Promise.allSettled(
+    facesToSave.map(memberFace => {
+      if (props.memberId) {
+        memberFace.memberId = props.memberId;
+      }
+      return addMemberFace(memberFace);
+    })
+  );
 
-  if (allSucceeded) {
+  const successfulSaves = results.filter(result => result.status === 'fulfilled').length;
+  const failedSaves = results.filter(result => result.status === 'rejected').length;
+
+  if (successfulSaves > 0 && failedSaves === 0) {
     showSnackbar(t('memberFace.messages.addSuccess'), 'success');
-    faceStore.resetState(); // Reset face store after saving
-    if (faceUploadInputRef.value) {
-      faceUploadInputRef.value.reset(); // Clear the file input
-    }
+    resetState(); // Reset state after saving
     emit('saved');
-  } else {
-    // A generic error message if some failed but not all
+  } else if (successfulSaves > 0 && failedSaves > 0) {
     showSnackbar(t('memberFace.messages.partialSaveError'), 'warning');
+  } else {
+    showSnackbar(t('memberFace.messages.saveError'), 'error');
   }
 };
 
 const closeForm = () => {
-  faceStore.resetState(); // Clear face detection state on close
+  resetState(); // Clear face detection state on close
   emit('close');
 };
 

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div>
     <MemberStoryList
       :items="memberStoryStore.list.items"
       :total-items="memberStoryStore.list.totalItems"
@@ -16,7 +16,7 @@
 
     <!-- Add MemberStory Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberStoryClosed">
-      <MemberStoryAddView v-if="addDrawer" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" />
+      <MemberStoryAddView v-if="addDrawer" @close="handleMemberStoryClosed" @saved="handleMemberStorySaved" :family-id="props.familyId" />
     </BaseCrudDrawer>
 
     <!-- Edit MemberStory Drawer -->
@@ -29,27 +29,26 @@
       <MemberStoryDetailView v-if="selectedItemId && detailDrawer" :member-story-id="selectedItemId"
         @close="handleMemberStoryClosed" @edit-item="openEditDrawer" />
     </BaseCrudDrawer>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useCrudDrawer } from '@/composables/useCrudDrawer';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import { useMemberStoryStore } from '@/stores/memberStory.store';
 import type { MemberStoryDto } from '@/types/memberStory';
 import MemberStoryAddView from './MemberStoryAddView.vue';
-import MemberStoryEditView from './MemberStoryEditView.vue'; // NEW IMPORT
+import MemberStoryEditView from './MemberStoryEditView.vue';
 import MemberStoryDetailView from './MemberStoryDetailView.vue';
 import MemberStoryList from '@/components/member-story/MemberStoryList.vue';
-import { removeDiacritics } from '@/utils/string.utils'; // NEW IMPORT
-import { useAuth } from '@/composables/useAuth'; // NEW IMPORT
+import { removeDiacritics } from '@/utils/string.utils';
 
 interface MemberStoryListViewProps {
   memberId?: string;
+  familyId: string;
+  readOnly?: boolean;
 }
 
 const props = defineProps<MemberStoryListViewProps>();
@@ -137,10 +136,14 @@ const handleSearchUpdate = async (search: string) => {
 };
 
 // Watch for changes in memberId prop to update filters and reload items
-watch(() => props.memberId, (newMemberId) => {
-  memberStoryStore.setFilters({ memberId: newMemberId || undefined, searchQuery: searchQuery.value });
+watch(() => [props.memberId, props.familyId], ([newMemberId, newFamilyId]) => {
+  memberStoryStore.setFilters({
+    memberId: newMemberId || undefined,
+    familyId: newFamilyId,
+    searchQuery: searchQuery.value
+  });
   memberStoryStore._loadItems();
-}, { immediate: true }); // Immediate to load on initial mount
+}, { immediate: true });
 
 
 

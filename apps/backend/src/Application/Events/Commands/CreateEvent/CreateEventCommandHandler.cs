@@ -29,7 +29,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             request.Color
         );
 
-        foreach (var memberId in request.RelatedMembers)
+        foreach (var memberId in request.RelatedMemberIds)
         {
             entity.AddEventMember(memberId);
         }

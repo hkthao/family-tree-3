@@ -53,6 +53,10 @@ export interface Member {
 export interface MemberFilter {
   gender?: Gender | undefined;
   familyId?: string | null;
+  fatherId?: string | null;
+  motherId?: string | null;
+  husbandId?: string | null;
+  wifeId?: string | null;
   searchQuery?: string; // New property for search term
   sortBy?: string; // Column name to sort by
   sortOrder?: 'asc' | 'desc'; // Sort order

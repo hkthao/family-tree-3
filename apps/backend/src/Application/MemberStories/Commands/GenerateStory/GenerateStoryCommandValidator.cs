@@ -1,0 +1,31 @@
+namespace backend.Application.MemberStories.Commands.GenerateStory; // Updated
+
+public class GenerateStoryCommandValidator : AbstractValidator<GenerateStoryCommand>
+{
+    public GenerateStoryCommandValidator()
+    {
+        RuleFor(v => v.MemberId)
+            .NotEmpty().WithMessage("Member ID is required.");
+
+        RuleFor(v => v.RawText)
+            .MaximumLength(2000).WithMessage("Raw text must not exceed 2000 characters."); // Arbitrary max length
+
+        RuleFor(v => v.Style)
+            .NotEmpty().WithMessage("Style is required.")
+            .Must(BeAValidStyle).WithMessage("Invalid style provided.");
+
+        RuleFor(v => v.MaxWords)
+            .InclusiveBetween(100, 1000).WithMessage("Max words must be between 100 and 1000.");
+    }
+
+    private bool BeAValidStyle(string style)
+    {
+        if (style == null)
+        {
+            return false;
+        }
+        // Define your valid styles here
+        var validStyles = new[] { "nostalgic", "warm", "formal", "folk" };
+        return validStyles.Contains(style.ToLower());
+    }
+}

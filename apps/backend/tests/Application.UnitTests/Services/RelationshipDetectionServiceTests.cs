@@ -1,0 +1,283 @@
+using backend.Application.AI.DTOs; // Added
+using backend.Application.Common.Interfaces; // Added
+using backend.Application.Common.Models; // Added
+using backend.Application.Services;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using backend.Domain.Interfaces;
+using backend.Domain.ValueObjects;
+using FluentAssertions;
+using Moq;
+using Xunit;
+
+namespace backend.Application.UnitTests.Services;
+
+/// <summary>
+/// 🎯 Mục tiêu: Kiểm thử hành vi của RelationshipDetectionService.
+/// ⚙️ Các bước: Arrange - Act - Assert.
+/// 💡 Giải thích: Đảm bảo service có thể phát hiện và suy luận các mối quan hệ một cách chính xác dựa trên đồ thị, AI và các quy tắc cục bộ.
+/// </summary>
+public class RelationshipDetectionServiceTests : TestBase
+{
+    private readonly RelationshipDetectionService _service;
+    private readonly Mock<IRelationshipGraph> _mockRelationshipGraph;
+    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
+    private readonly Mock<IRelationshipRuleEngine> _mockRelationshipRuleEngine; // Added
+
+    public RelationshipDetectionServiceTests()
+    {
+        _mockRelationshipGraph = new Mock<IRelationshipGraph>();
+        _mockAiGenerateService = new Mock<IAiGenerateService>();
+        _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>(); // Initialized
+        _service = new RelationshipDetectionService(_context, _mockRelationshipGraph.Object, _mockAiGenerateService.Object, _mockRelationshipRuleEngine.Object); // Updated constructor
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu: Kiểm tra phát hiện quan hệ cha-con trực tiếp thông qua AI khi không có quy tắc cục bộ.
+    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (không suy luận cục bộ).
+    /// ⚙️ Act: Gọi DetectRelationshipAsync.
+    /// ⚙️ Assert: Kết quả trả về phải là "cha" và "con" đúng như kỳ vọng từ AI.
+    /// </summary>
+    [Fact]
+    public async Task DetectRelationshipAsync_ShouldReturnFatherChild_ForDirectRelation_ViaAI()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        father.UpdateGender(Gender.Male.ToString());
+        var child = new Member("Child", "Test", "C1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        child.UpdateGender(Gender.Male.ToString());
+
+        _context.Members.Add(father);
+        _context.Members.Add(child);
+        _context.Relationships.Add(new Relationship(familyId, father.Id, child.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
+        await _context.SaveChangesAsync();
+
+        var members = _context.Members.ToList();
+        var relationships = _context.Relationships.ToList();
+
+        // Mock graph behavior
+        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
+            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
+
+        var pathToChild = new RelationshipPath(new List<Guid> { father.Id, child.Id }, new List<GraphEdge> { new GraphEdge(father.Id, child.Id, RelationshipType.Father) });
+        var pathToFather = new RelationshipPath(new List<Guid> { child.Id, father.Id }, new List<GraphEdge> { new GraphEdge(child.Id, father.Id, RelationshipType.Child) });
+
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(child.Id, father.Id)).Returns(pathToFather);
+
+        // Mock RuleEngine to return "unknown" so AI is triggered
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+
+        // Mock AI service behavior
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "cha (từ A đến B) và con (từ B đến A)" }));
+
+
+        // Act
+        var result = await _service.DetectRelationshipAsync(familyId, father.Id, child.Id, CancellationToken.None); // Added CancellationToken.None
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Description.Should().Contain("cha (từ A đến B)");
+        result.Description.Should().Contain("con (từ B đến A)");
+        result.Path.Should().HaveCount(2);
+        result.Edges.Should().HaveCount(1);
+        result.Path.First().Should().Be(father.Id);
+        result.Path.Last().Should().Be(child.Id);
+        result.Edges.First().Should().Be(nameof(RelationshipType.Father));
+
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
+        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu: Kiểm tra phát hiện quan hệ ông nội-cháu nội thông qua AI khi không có quy tắc cục bộ.
+    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (không suy luận cục bộ).
+    /// ⚙️ Act: Gọi DetectRelationshipAsync.
+    /// ⚙️ Assert: Kết quả trả về phải là "ông nội" và "cháu nội" đúng như kỳ vọng từ AI.
+    /// </summary>
+    [Fact]
+    public async Task DetectRelationshipAsync_ShouldReturnGrandfatherGrandchild_ForTwoGenerationRelation_ViaAI()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var grandfather = new Member("Grandfather", "Test", "GF1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        grandfather.UpdateGender(Gender.Male.ToString());
+
+        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        father.UpdateGender(Gender.Male.ToString());
+
+        var grandchild = new Member("Grandchild", "Test", "GC1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        grandchild.UpdateGender(Gender.Male.ToString());
+
+        _context.Members.Add(grandfather);
+        _context.Members.Add(father);
+        _context.Members.Add(grandchild);
+        _context.Relationships.Add(new Relationship(familyId, grandfather.Id, father.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
+        _context.Relationships.Add(new Relationship(familyId, father.Id, grandchild.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
+        await _context.SaveChangesAsync();
+
+        var members = _context.Members.ToList();
+        var relationships = _context.Relationships.ToList();
+
+        // Mock graph behavior
+        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
+            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
+
+        var pathToGrandchild = new RelationshipPath(
+            new List<Guid> { grandfather.Id, father.Id, grandchild.Id },
+            new List<GraphEdge> {
+                new GraphEdge(grandfather.Id, father.Id, RelationshipType.Father),
+                new GraphEdge(father.Id, grandchild.Id, RelationshipType.Father)
+            });
+        var pathToGrandfather = new RelationshipPath(
+            new List<Guid> { grandchild.Id, father.Id, grandfather.Id },
+            new List<GraphEdge> {
+                new GraphEdge(grandchild.Id, father.Id, RelationshipType.Child),
+                new GraphEdge(father.Id, grandfather.Id, RelationshipType.Child)
+            });
+
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandfather.Id, grandchild.Id)).Returns(pathToGrandchild);
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandchild.Id, grandfather.Id)).Returns(pathToGrandfather);
+
+        // Mock RuleEngine to return "unknown" so AI is triggered
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+
+        // Mock AI service behavior
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "ông nội (từ A đến B) và cháu nội (từ B đến A)" }));
+
+        // Act
+        var result = await _service.DetectRelationshipAsync(familyId, grandfather.Id, grandchild.Id, CancellationToken.None); // Added CancellationToken.None
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Description.Should().Contain("ông nội (từ A đến B)");
+        result.Description.Should().Contain("cháu nội (từ B đến A)");
+        result.Path.Should().HaveCount(3);
+        result.Edges.Should().HaveCount(2);
+        result.Path.First().Should().Be(grandfather.Id);
+        result.Path.Last().Should().Be(grandchild.Id);
+        result.Edges.First().Should().Be(nameof(RelationshipType.Father));
+        result.Edges.Last().Should().Be(nameof(RelationshipType.Father));
+
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
+        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu: Kiểm tra phát hiện không có quan hệ khi hai thành viên không liên quan.
+    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên không liên quan và các mock.
+    /// ⚙️ Act: Gọi DetectRelationshipAsync.
+    /// ⚙️ Assert: Kết quả trả về phải là "Không tìm thấy đường dẫn quan hệ."
+    /// </summary>
+    [Fact]
+    public async Task DetectRelationshipAsync_ShouldReturnUnknown_ForUnrelatedMembers()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberA = new Member("MemberA", "Test", "A1", familyId) { Id = Guid.NewGuid() };
+        var memberB = new Member("MemberB", "Test", "B1", familyId) { Id = Guid.NewGuid() };
+
+        _context.Members.Add(memberA);
+        _context.Members.Add(memberB);
+        await _context.SaveChangesAsync();
+
+        var members = _context.Members.ToList();
+        var relationships = _context.Relationships.ToList();
+
+        // Mock graph behavior for no path
+        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
+            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
+
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberA.Id, memberB.Id)).Returns(new RelationshipPath());
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberB.Id, memberA.Id)).Returns(new RelationshipPath());
+
+        // Mock RuleEngine to return "unknown" as no path found
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+
+        // Mock AI service behavior (should NOT be called)
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "Should not be called" }));
+
+        // Act
+        var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None); // Added CancellationToken.None
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Description.Should().Be("Không tìm thấy đường dẫn quan hệ.");
+        result.Path.Should().BeEmpty();
+        result.Edges.Should().BeEmpty();
+
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
+        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.Never); // Verify rule engine was NOT called
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu: Kiểm tra phát hiện quan hệ cha-con trực tiếp thông qua quy tắc cục bộ (bỏ qua AI).
+    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (suy luận cục bộ thành công).
+    /// ⚙️ Act: Gọi DetectRelationshipAsync.
+    /// ⚙️ Assert: Kết quả trả về phải là "cha" và "con" đúng như kỳ vọng từ quy tắc cục bộ. AI không được gọi.
+    /// </summary>
+    [Fact]
+    public async Task DetectRelationshipAsync_ShouldReturnLocalInferredRelationship_ForSimpleCases()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        father.UpdateGender(Gender.Male.ToString());
+        var child = new Member("Child", "Test", "C1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        child.UpdateGender(Gender.Male.ToString());
+
+        _context.Members.Add(father);
+        _context.Members.Add(child);
+        _context.Relationships.Add(new Relationship(familyId, father.Id, child.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
+        await _context.SaveChangesAsync();
+
+        var members = _context.Members.ToList();
+        var relationships = _context.Relationships.ToList();
+
+        // Mock graph behavior
+        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
+            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
+
+        var pathToChild = new RelationshipPath(new List<Guid> { father.Id, child.Id }, new List<GraphEdge> { new GraphEdge(father.Id, child.Id, RelationshipType.Father) });
+        var pathToFather = new RelationshipPath(new List<Guid> { child.Id, father.Id }, new List<GraphEdge> { new GraphEdge(child.Id, father.Id, RelationshipType.Child) });
+
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(child.Id, father.Id)).Returns(pathToFather);
+
+        // Mock RuleEngine to return specific relationships
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToChild, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("cha");
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToFather, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("con");
+
+        // Mock AI service behavior (should NOT be called)
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "Should not be called" }));
+
+        // Act
+        var result = await _service.DetectRelationshipAsync(familyId, father.Id, child.Id, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Description.Should().Be($"{father.FullName} là cha của {child.FullName} và {child.FullName} là con của {father.FullName}.");
+        result.Path.Should().HaveCount(2);
+        result.Edges.Should().HaveCount(1);
+        result.Path.First().Should().Be(father.Id);
+        result.Path.Last().Should().Be(child.Id);
+        result.Edges.First().Should().Be(nameof(RelationshipType.Father));
+
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
+        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
+    }
+}

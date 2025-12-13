@@ -41,8 +41,9 @@ public class GetFamilyDictByIdQueryHandlerTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(familyDictId);
-        result.Name.Should().Be("Test FamilyDict");
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Id.Should().Be(familyDictId);
+        result.Value!.Name.Should().Be("Test FamilyDict");
     }
 
     [Fact]
@@ -55,6 +56,9 @@ public class GetFamilyDictByIdQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.StatusCode.Should().Be(404);
+        result.ErrorSource.Should().Be("NotFound");
     }
 }

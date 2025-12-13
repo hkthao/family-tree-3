@@ -1,23 +1,18 @@
 <template>
   <v-data-table-server :items-per-page="props.itemsPerPage" @update:itemsPerPage="emit('update:itemsPerPage', $event)"
     :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading" item-value="id"
-    @update:options="emit('update:options', $event)" elevation="1">
+    :sort-by="props.sortBy" @update:options="emit('update:options', $event)" elevation="1">
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button"
-          aria-label="Create Family">
-          <v-tooltip :text="t('family.list.action.create')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-plus</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" data-test-id="family-list-search-input"
-          append-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-2"></v-text-field>
-      </v-toolbar>
+      <ListToolbar
+        :search="searchQuery"
+        @update:search="searchQuery = $event"
+        @create="emit('create')"
+        :title="t('family.management.title')"
+        :createButtonTooltip="t('family.list.action.create')"
+        :searchPlaceholder="t('common.search')"
+        createButtonTestId="add-new-family-button"
+        searchInputTestId="family-list-search-input"
+      />
     </template>
     <!-- Avatar column -->
     <template #item.avatarUrl="{ item }">
@@ -87,11 +82,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
+import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
+import ListToolbar from '@/components/common/ListToolbar.vue';
+import { useDebouncedSearch } from '@/composables/family';
 
 const props = defineProps<{
   items: Family[];
@@ -99,6 +96,7 @@ const props = defineProps<{
   loading: boolean;
   itemsPerPage: number;
   search: string;
+  sortBy: { key: string; order: 'asc' | 'desc' }[];
 }>();
 
 const emit = defineEmits([
@@ -108,24 +106,14 @@ const emit = defineEmits([
   'update:itemsPerPage',
   'create',
   'update:search',
+  'update:sortBy',
 ]);
 
 const { t } = useI18n();
+const { searchQuery, debouncedSearchQuery } = useDebouncedSearch(props.search);
 
-const searchQuery = ref(props.search);
-let debounceTimer: ReturnType<typeof setTimeout>;
-
-const debouncedSearch = computed({
-  get() {
-    return searchQuery.value;
-  },
-  set(newValue: string) {
-    searchQuery.value = newValue;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      emit('update:search', newValue);
-    }, 300);
-  },
+watch(debouncedSearchQuery, (newValue) => {
+  emit('update:search', newValue);
 });
 
 watch(() => props.search, (newSearch) => {
@@ -145,24 +133,28 @@ const headers = computed<DataTableHeader[]>(() => [
   {
     title: t('family.management.headers.name'),
     key: 'name',
+    sortable: true,
     width: 'auto',
     align: 'start',
   },
   {
     title: t('family.management.headers.code'),
     key: 'code',
+    sortable: true,
     width: '120px',
     align: 'start',
   },
   {
     title: t('family.management.headers.totalMembers'),
     key: 'totalMembers',
+    sortable: true,
     width: '120px',
     align: 'center',
   },
   {
     title: t('family.management.headers.totalGenerations'),
     key: 'totalGenerations',
+    sortable: true,
     width: '120px',
     align: 'center',
   },
@@ -171,6 +163,7 @@ const headers = computed<DataTableHeader[]>(() => [
   {
     title: t('family.management.headers.visibility'),
     key: 'visibility',
+    sortable: true,
     width: '120px',
     align: 'center',
   },

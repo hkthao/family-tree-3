@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog } from '@/composables';
 
 const { isDialogOpen, dialogOptions, confirm, cancel } = useConfirmDialog();
 </script>

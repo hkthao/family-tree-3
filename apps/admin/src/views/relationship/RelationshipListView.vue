@@ -38,15 +38,13 @@ import { useI18n } from 'vue-i18n';
 // import { useRouter } from 'vue-router'; // Removed as no longer used for navigation directly
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipSearch, RelationshipList } from '@/components/relationship';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { RelationshipFilter, Relationship } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
-import RelationshipAddView from '@/views/relationship/RelationshipAddView.vue'; // New import
-import RelationshipEditView from '@/views/relationship/RelationshipEditView.vue'; // New import
-import RelationshipDetailView from '@/views/relationship/RelationshipDetailView.vue'; // New import
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import RelationshipAddView from '@/views/relationship/RelationshipAddView.vue';
+import RelationshipEditView from '@/views/relationship/RelationshipEditView.vue';
+import RelationshipDetailView from '@/views/relationship/RelationshipDetailView.vue';
 
 const { t } = useI18n();
 

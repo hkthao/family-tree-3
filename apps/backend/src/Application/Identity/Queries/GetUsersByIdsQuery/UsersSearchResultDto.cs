@@ -1,6 +1,6 @@
-using backend.Application.Users.Queries;
+using backend.Application.Identity.Queries;
 
-namespace backend.Application.Common.Models;
+namespace backend.Application.Identity.Queries;
 
 public class UsersSearchResultDto
 {

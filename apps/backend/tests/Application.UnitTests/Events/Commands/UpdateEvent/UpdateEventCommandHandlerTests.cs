@@ -95,7 +95,7 @@ public class UpdateEventCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldAddAndRemoveMembers_WhenUpdatingRelatedMembers()
+    public async Task Handle_ShouldAddAndRemoveMembers_WhenUpdatingRelatedMemberIds()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -118,7 +118,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             Id = eventId,
             FamilyId = familyId,
             Name = "Updated Event",
-            RelatedMembers = new List<Guid> { member2Id, member3Id }
+            RelatedMemberIds = new List<Guid> { member2Id, member3Id }
         };
 
         // Act
@@ -135,7 +135,7 @@ public class UpdateEventCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldRemoveAllMembers_WhenRelatedMembersListIsEmpty()
+    public async Task Handle_ShouldRemoveAllMembers_WhenRelatedMemberIdsListIsEmpty()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -156,7 +156,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             Id = eventId,
             FamilyId = familyId,
             Name = "Updated Event",
-            RelatedMembers = new List<Guid>() // Empty list
+            RelatedMemberIds = new List<Guid>() // Empty list
         };
 
         // Act
@@ -170,7 +170,7 @@ public class UpdateEventCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldRemoveOneMember_WhenUpdatingRelatedMembers()
+    public async Task Handle_ShouldRemoveOneMember_WhenUpdatingRelatedMemberIds()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -193,7 +193,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             Id = eventId,
             FamilyId = familyId,
             Name = "Updated Event",
-            RelatedMembers = new List<Guid> { member1Id, member3Id } // Remove member2Id
+            RelatedMemberIds = new List<Guid> { member1Id, member3Id } // Remove member2Id
         };
 
         // Act

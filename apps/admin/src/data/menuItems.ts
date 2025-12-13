@@ -38,29 +38,12 @@ const menu: MenuSection[] = [
         exact: true,
       },
       {
-        titleKey: 'event.list.title', 
-        icon: 'mdi-calendar-month-outline', 
-        to: '/event', 
-        exact: true,
+        titleKey: 'relationshipDetection.title', // NEW
+        icon: 'mdi-graph-outline',
+        to: '/relationship-detection',
+        roles: ['Admin', 'Manager'],
       },
-      {
-        titleKey: 'search.face',
-        icon: 'mdi-magnify-expand',
-        to: '/face/search',
-        exact: true,
-      },
-      {
-        titleKey: 'memberFace.list.title',
-        icon: 'mdi-face-recognition',
-        to: '/member/faces',
-        exact: true,
-      },
-      {
-        titleKey: 'memberStory.list.title', 
-        icon: 'mdi-book-open-outline', 
-        to: '/member-story-studio/list', 
-        exact: true,
-      },
+
     ],
   },
   {
@@ -75,41 +58,28 @@ const menu: MenuSection[] = [
     ],
   },
   {
+    titleKey: 'menu.admin',
+    items: [
+      {
+        titleKey: 'menu.prompts',
+        icon: 'mdi-text-box-multiple-outline',
+        to: '/prompts',
+        roles: ['Admin'],
+      },
+    ],
+  },
+  {
     titleKey: 'menu.supportAndInfo',
     items: [
       {
         titleKey: 'menu.applicationInfo',
         icon: 'mdi-information-outline',
         to: '/application-info',
-        children: [
-          {
-            titleKey: 'about.title',
-            icon: 'mdi-information-outline',
-          },
-          {
-            titleKey: 'version.title',
-            icon: 'mdi-tag-outline',
-          },
-        ],
       },
       {
         titleKey: 'menu.supportAndLegal',
         icon: 'mdi-lifebuoy',
         to: '/support-legal',
-        children: [
-          {
-            titleKey: 'help.title',
-            icon: 'mdi-help-circle-outline',
-          },
-          {
-            titleKey: 'terms.title',
-            icon: 'mdi-file-document-outline',
-          },
-          {
-            titleKey: 'privacy.title',
-            icon: 'mdi-shield-lock-outline',
-          },
-        ],
       },
       {
         titleKey: 'menu.donate',

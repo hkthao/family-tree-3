@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -65,27 +64,7 @@ namespace backend.Infrastructure.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
-                name: "bounding_box",
-                columns: table => new
-                {
-                    MemberFaceId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    x = table.Column<double>(type: "double", nullable: false),
-                    y = table.Column<double>(type: "double", nullable: false),
-                    width = table.Column<double>(type: "double", nullable: false),
-                    height = table.Column<double>(type: "double", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_bounding_box", x => x.MemberFaceId);
-                    table.ForeignKey(
-                        name: "FK_bounding_box_member_faces_MemberFaceId",
-                        column: x => x.MemberFaceId,
-                        principalTable: "member_faces",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+
 
             migrationBuilder.CreateIndex(
                 name: "ix_member_faces_member_id",
@@ -96,8 +75,7 @@ namespace backend.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "bounding_box");
+
 
             migrationBuilder.DropTable(
                 name: "member_faces");

@@ -6,34 +6,26 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/family-data")] // Changed route to avoid conflict with /api/family
-public class FamilyExportImportController : ControllerBase
+public class FamilyExportImportController(IMediator mediator, ILogger<FamilyExportImportController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public FamilyExportImportController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<FamilyExportImportController> _logger = logger;
 
     [HttpGet("{familyId}/export")]
     [ProducesResponseType(typeof(FamilyExportDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FamilyExportDto>> ExportFamily(Guid familyId)
+    public async Task<IActionResult> ExportFamily(Guid familyId)
     {
         var result = await _mediator.Send(new GetFamilyExportQuery(familyId));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     [HttpPost("import/{familyId}")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<Guid>> ImportFamily(Guid familyId, [FromBody] FamilyExportDto familyData, [FromQuery] bool clearExistingData = true)
+    public async Task<IActionResult> ImportFamily(Guid familyId, [FromBody] FamilyExportDto familyData, [FromQuery] bool clearExistingData = true)
     {
         var command = new ImportFamilyCommand
         {
@@ -42,12 +34,6 @@ public class FamilyExportImportController : ControllerBase
             ClearExistingData = clearExistingData
         };
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
-
-
 }

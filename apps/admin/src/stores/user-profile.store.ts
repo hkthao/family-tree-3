@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { UserProfile, UpdateUserProfileRequestDto } from '@/types';
+import type { UserProfile, UpdateUserProfileDto } from '@/types';
 import i18n from '@/plugins/i18n';
 
 export const useUserProfileStore = defineStore('userProfile', {
@@ -27,7 +27,7 @@ export const useUserProfileStore = defineStore('userProfile', {
       }
     },
 
-    async updateUserProfile(profile: UpdateUserProfileRequestDto): Promise<boolean> {
+    async updateUserProfile(profile: UpdateUserProfileDto): Promise<boolean> {
       this.loading = true;
       this.error = null;
       try {

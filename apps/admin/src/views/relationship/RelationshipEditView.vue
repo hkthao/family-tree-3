@@ -28,7 +28,7 @@ import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import {RelationshipForm} from '@/components/relationship';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
 
 const props = defineProps<{ relationshipId: string }>(); // Renamed id to relationshipId
 const emit = defineEmits(['close', 'saved']); // Add emit

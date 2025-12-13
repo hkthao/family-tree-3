@@ -153,7 +153,7 @@ public class SearchMemberFacesQueryHandlerTests : TestBase
     public async Task SearchMemberFaces_ShouldReturnFailure_WhenUnauthorizedForFamilyFilter()
     {
         // Arrange
-       
+
 
         var family = new Family { Name = "Family A", Code = "FA", CreatedBy = Guid.NewGuid().ToString() }; // Family not created by unauthorizedUser
         var member = new Member(Guid.NewGuid(), "Member One", "MO", "MO", family.Id, family);

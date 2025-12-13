@@ -1,10 +1,10 @@
 import type { AuthService } from './authService';
-import type { User } from '@/types';
+import type { UserProfile } from '@/types';
 import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 import type { AppState } from '@/types';
 
 class FakeAuthService implements AuthService {
-  private currentUser: User | null = null;
+  private currentUser: UserProfile | null = null;
   private currentToken: string | null = null;
 
   constructor() {
@@ -45,7 +45,7 @@ class FakeAuthService implements AuthService {
     this.currentToken = null;
   }
 
-  async register(data: any): Promise<User | null> {
+  async register(data: any): Promise<UserProfile | null> {
 
     // Simulate successful registration
     this.currentUser = {
@@ -60,7 +60,7 @@ class FakeAuthService implements AuthService {
     return this.currentUser;
   }
 
-  async getUser(): Promise<User | null> {
+  async getUser(): Promise<UserProfile | null> {
     return this.currentUser;
   }
 

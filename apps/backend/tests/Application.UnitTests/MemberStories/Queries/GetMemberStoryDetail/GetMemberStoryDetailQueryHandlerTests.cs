@@ -9,7 +9,7 @@ using Xunit;
 
 namespace backend.Application.UnitTests.MemberStories.Queries.GetMemberStoryDetail;
 
-    public class GetMemberStoryDetailQueryHandlerTests : TestBase
+public class GetMemberStoryDetailQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly GetMemberStoryDetailQueryHandler _handler;

@@ -54,21 +54,6 @@ services:
     volumes:
       - ../infra/app/models:/face-service/app/models/dlib_models
 
-
-
-
-  puppeteer-service:
-    build:
-      context: ../services/puppeteer-service
-      dockerfile: Dockerfile
-    container_name: family-tree-puppeteer-service
-    ports:
-      - "3000:3000" # Map host port 3000 to container port 3000
-    environment:
-      - PUPPETEER_DISABLE_HEADLESS_WARNING=true
-    cap_add: # Required for Chrome in Docker
-      - SYS_ADMIN
-
 volumes:
   mysql-data:
   backend-dataprotection-keys:

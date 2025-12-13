@@ -14,5 +14,19 @@ public class FamilyDetailDto : BaseAuditableDto
     public string Visibility { get; set; } = null!;
     public int TotalMembers { get; set; }
     public int TotalGenerations { get; set; }
-    public ICollection<FamilyUserDto> FamilyUsers { get; set; } = new List<FamilyUserDto>();
+    public ICollection<FamilyUserDto> FamilyUsers { get; set; } = [];
+    public List<Guid> ManagerIds
+    {
+        get
+        {
+            return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Manager).Select(e => e.UserId)];
+        }
+    }
+    public List<Guid> ViewerIds
+    {
+        get
+        {
+            return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Viewer).Select(e => e.UserId)];
+        }
+    }
 }

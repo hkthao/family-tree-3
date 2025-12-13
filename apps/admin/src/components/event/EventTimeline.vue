@@ -23,15 +23,15 @@
           <div v-if="event.location" class="text-body-2 text-grey-darken-1">
             <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
           </div>
-          <ChipLookup
-            v-if="event.relatedMembers && event.relatedMembers.length > 0"
-            :model-value="event.relatedMembers"
-            :data-source="memberLookupStore"
-            display-expr="fullName"
-            value-expr="id"
-            image-expr="avatarUrl"
-            class="mt-1"
-          />
+          <div v-if="event.relatedMembers && event.relatedMembers.length > 0" class="mt-1">
+            <MemberName
+              v-for="member in event.relatedMembers"
+              :key="member.id"
+              :full-name="member.fullName"
+              :avatar-url="member.avatarUrl"
+              :gender="member.gender"
+            />
+          </div>
         </v-card-text>
       </v-card>
     </v-timeline-item>
@@ -58,16 +58,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { formatDate } from '@/utils/dateUtils';
-import { useMemberLookupStore } from '@/stores/memberLookup.store';
-import { useEventTimelineStore } from '@/stores/eventTimeline.store'; // Import new store
-import ChipLookup from '@/components/common/ChipLookup.vue';
-import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
+
 import EventDetailView from '@/views/event/EventDetailView.vue';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
-import type { Event } from '@/types';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
+import { useEventTimeline } from '@/composables/event/useEventTimeline';
 
 const props = defineProps<{
   familyId?: string;
@@ -75,49 +70,17 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const memberLookupStore = useMemberLookupStore();
-const eventTimelineStore = useEventTimelineStore(); // Use new store
-
-const { list } = storeToRefs(eventTimelineStore); // Get list state from new store
-const { t } = useI18n();
-
-// const page = ref(1); // Removed
-// const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Removed
-// const totalEvents = ref(0); // Removed
-const selectedEventId = ref<string | null>(null);
-const detailDrawer = ref(false);
-
-// const paginatedEvents = computed(() => list.items);
-
-const paginationLength = computed(() => {
-  return Math.max(1, list.value.totalPages);
-});
-
-const showEventDetails = (event: Event) => {
-  selectedEventId.value = event.id;
-  detailDrawer.value = true;
-};
-
-const handleDetailClosed = () => {
-  detailDrawer.value = false;
-  selectedEventId.value = null;
-};
-
-const handlePageChange = (newPage: number) => {
-  eventTimelineStore.setListOptions({
-    page: newPage,
-    itemsPerPage: list.value.itemsPerPage,
-    sortBy: list.value.sortBy,
-  });
-};
-
-watch(
-  [() => props.familyId, () => props.memberId],
-  ([newFamilyId, newMemberId]) => {
-    eventTimelineStore.setFilters({ familyId: newFamilyId, memberId: newMemberId });
-  },
-  { immediate: true },
-);
+const {
+  t,
+  list,
+  selectedEventId,
+  detailDrawer,
+  paginationLength,
+  showEventDetails,
+  handleDetailClosed,
+  handlePageChange,
+  formatDate,
+} = useEventTimeline(props);
 </script>
 
 <style scoped>

@@ -1,4 +1,4 @@
-namespace backend.Application.Users.Queries;
+namespace backend.Application.Identity.Queries;
 
 public class UserDto
 {

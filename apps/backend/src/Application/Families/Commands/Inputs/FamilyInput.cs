@@ -8,5 +8,5 @@ public record class FamilyInput
     public string? Address { get; set; }
     public string? AvatarBase64 { get; set; }
     public string Visibility { get; set; } = "Private";
-    public IList<FamilyUserDto> FamilyUsers { get; set; } = [];
+    public IList<FamilyUserInput> FamilyUsers { get; set; } = [];
 }

@@ -1,16 +1,17 @@
 <template>
   <div data-testid="family-dict-list-view">
-    <FamilyDictSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
+    <FamilyDictSearch v-if="!computedHideSearch" @update:filters="handleFilterUpdate" />
 
-    <FamilyDictList :items="familyDictStore.list.items" :total-items="familyDictStore.list.totalItems"
-      :loading="list.loading" :search="searchQuery" @update:search="handleSearchUpdate"
-      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer"
-      @delete="confirmDelete" @create="openAddDrawer" @import="openImportDialog" :read-only="props.readOnly">
+    <FamilyDictList :items="familyDicts" :total-items="totalItems" :loading="loading"
+      :items-per-page="itemsPerPage" :search="searchQuery" :sortBy="sortBy"
+      @update:options="handleListOptionsUpdate" @update:search="handleSearchUpdate"
+      @view="item => openDetailDrawer(item.id)" @edit="item => openEditDrawer(item.id)" @delete="confirmDelete" @create="openAddDrawer"
+      @import="openImportDialog" :read-only="computedReadOnly">
     </FamilyDictList>
 
     <!-- Edit FamilyDict Drawer -->
     <BaseCrudDrawer v-model="editDrawer" :title="t('familyDict.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
-      <FamilyDictEditView v-if="selectedItemId && editDrawer" :family-dict-id="selectedItemId as string"
+      <FamilyDictEditView v-if="selectedItemId && editDrawer" :family-dict-id="selectedItemId"
         @close="closeEditDrawer" @saved="handleFamilyDictSaved" />
     </BaseCrudDrawer>
 
@@ -21,8 +22,8 @@
 
     <!-- Detail FamilyDict Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" :title="t('familyDict.detail.title')" icon="mdi-information-outline" @close="closeDetailDrawer">
-      <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId as string"
-        @close="closeDetailDrawer" @edit-family-dict="openEditDrawer" />
+      <FamilyDictDetailView v-if="selectedItemId && detailDrawer" :family-dict-id="selectedItemId"
+        @close="closeDetailDrawer" @edit-family-dict="item => openEditDrawer(item.id)" />
     </BaseCrudDrawer>
 
     <!-- Import FamilyDict Dialog -->
@@ -32,33 +33,46 @@
 </template>
 
 <script setup lang="ts">
-import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictSearch, FamilyDictList } from '@/components/family-dict';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
+import type { FamilyDictFilter, FamilyDict } from '@/types';
+import { useI18n } from 'vue-i18n';
+import { ref, computed } from 'vue';
+
+// Component Imports
 import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
 import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
 import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
-import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue'; // Import FamilyDictImportDialog
-import type { FamilyDictFilter, FamilyDict } from '@/types';
-import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // New import
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; // New import
+import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { useFamilyDictListFilters, useFamilyDictsQuery, useDeleteFamilyDictMutation } from '@/composables/family-dict';
 
 interface FamilyDictListViewProps {
   readOnly?: boolean;
   hideSearch?: boolean;
 }
-
 const props = defineProps<FamilyDictListViewProps>();
 
 const { t } = useI18n();
-const familyDictStore = useFamilyDictStore();
-const { list } = storeToRefs(familyDictStore);
-const searchQuery = ref('');
 const importDialog = ref(false); // State for import dialog
+
+const computedHideSearch = computed(() => props.hideSearch);
+const computedReadOnly = computed(() => props.readOnly);
+
+const {
+  searchQuery,
+  itemsPerPage,
+  sortBy,
+  filters,
+  setPage,
+  setItemsPerPage,
+  setSortBy,
+  setSearchQuery,
+  setFilters,
+} = useFamilyDictListFilters();
+
+const { familyDicts, totalItems, loading, refetch } = useFamilyDictsQuery(filters);
+const { mutate: deleteFamilyDict } = useDeleteFamilyDictMutation();
 
 const {
   addDrawer,
@@ -77,15 +91,12 @@ const {
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-const handleFilterUpdate = async (filters: FamilyDictFilter) => {
-  familyDictStore.list.filters = { ...filters, searchQuery: searchQuery.value };
-  await familyDictStore._loadItems()
+const handleFilterUpdate = (newFilters: FamilyDictFilter) => {
+  setFilters(newFilters);
 };
 
-const handleSearchUpdate = async (search: string) => {
-  searchQuery.value = search;
-  familyDictStore.list.filters = { ...familyDictStore.list.filters, searchQuery: searchQuery.value };
-  await familyDictStore._loadItems();
+const handleSearchUpdate = (search: string) => {
+  setSearchQuery(search);
 };
 
 const handleListOptionsUpdate = (options: {
@@ -93,7 +104,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  familyDictStore.setListOptions(options);
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
 
 const openImportDialog = () => {
@@ -110,35 +123,26 @@ const confirmDelete = async (familyDict: FamilyDict) => {
   });
 
   if (confirmed) {
-    await handleDeleteConfirm(familyDict);
+    deleteFamilyDict(familyDict.id, {
+      onSuccess: () => {
+        showSnackbar(
+          t('familyDict.messages.deleteSuccess'),
+          'success',
+        );
+        refetch(); // Refetch the list after successful deletion
+      },
+      onError: (error) => {
+        showSnackbar(
+          error.message || t('familyDict.messages.deleteError'),
+          'error',
+        );
+      },
+    });
   }
-};
-
-const handleDeleteConfirm = async (familyDict: FamilyDict) => {
-  if (familyDict) {
-    await familyDictStore.deleteItem(familyDict.id);
-    if (familyDictStore.error) {
-      showSnackbar(
-        t('familyDict.messages.deleteError', { error: familyDictStore.error }),
-        'error',
-      );
-    } else {
-      showSnackbar(
-        t('familyDict.messages.deleteSuccess'),
-        'success',
-      );
-    }
-  }
-  familyDictStore._loadItems();
 };
 
 const handleFamilyDictSaved = () => {
   closeAllDrawers(); // Close whichever drawer was open
-  familyDictStore._loadItems(); // Reload list after save
+  refetch(); // Reload list after save
 };
-
-onMounted(() => {
-  familyDictStore._loadItems();
-})
-
 </script>

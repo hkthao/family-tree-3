@@ -1,13 +1,7 @@
-import type { FamilyDict, Result, FamilyDictFilter, FamilyDictImport, Paginated } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { FamilyDict, FamilyDictImport } from '@/types'; // Changed Paginated to Paginated
 import type { ICrudService } from '../common/crud.service.interface';
+import type { Result } from '@/types'; // Added type keyword
 
 export interface IFamilyDictService extends ICrudService<FamilyDict> {
-  loadItems(
-    filters: FamilyDictFilter,
-    page: number,
-    itemsPerPage: number,
-  ): Promise<Result<Paginated<FamilyDict>, ApiError>>;
-
-  importItems(data: FamilyDictImport): Promise<Result<string[], ApiError>>;
+  importItems(data: FamilyDictImport): Promise<Result<string[]>>; // Removed ApiError
 }

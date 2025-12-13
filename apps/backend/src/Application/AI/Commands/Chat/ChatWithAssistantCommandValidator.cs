@@ -10,8 +10,8 @@ public class ChatWithAssistantCommandValidator : AbstractValidator<ChatWithAssis
         RuleFor(v => v.SessionId)
             .NotEmpty().WithMessage("SessionId cannot be empty.");
 
-        RuleFor(v => v.Message)
-            .NotEmpty().WithMessage("Message cannot be empty.")
-            .MaximumLength(2000).WithMessage("Message must not exceed 2000 characters.");
+        RuleFor(v => v.ChatInput)
+            .NotEmpty().WithMessage("ChatInput cannot be empty.")
+            .MaximumLength(2000).WithMessage("ChatInput must not exceed 2000 characters.");
     }
 }

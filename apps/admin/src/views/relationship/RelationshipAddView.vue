@@ -27,7 +27,7 @@ import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 const relationshipFormRef = ref<InstanceType<typeof RelationshipForm> | null>(null);
 

@@ -15,7 +15,8 @@ public static class DependencyInjection
         services.AddExceptionHandler<CustomExceptionHandler>();
         // Customise default API behaviour
         services.Configure<ApiBehaviorOptions>(options =>
-            options.SuppressModelStateInvalidFilter = true);
+            options.SuppressModelStateInvalidFilter = false); // Re-enable ModelStateInvalidFilter
+
         services.AddEndpointsApiExplorer();
         services.AddOpenApiDocument((configure, sp) =>
         {

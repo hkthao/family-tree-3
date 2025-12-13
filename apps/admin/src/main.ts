@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { Resize } from 'vuetify/directives';
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'; // Import VueQueryPlugin
 
 import App from './App.vue';
 import router from './router';
@@ -30,6 +31,10 @@ app.use(router);
 app.use(vuetify);
 app.use(i18n);
 app.use(servicesPlugin); // Use the default export (for Vue app providing)
+
+const queryClient = new QueryClient(); // Create a QueryClient instance
+app.use(VueQueryPlugin, { queryClient }); // Install VueQueryPlugin with the QueryClient
+
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
 setAuthService(auth0Service);

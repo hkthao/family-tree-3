@@ -1,3 +1,4 @@
+using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Enums;
 
 namespace backend.Application.Events;
@@ -16,5 +17,12 @@ public class EventDto
     public string? Color { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
-    public ICollection<Guid> RelatedMembers { get; set; } = [];
+    public List<MemberListDto> RelatedMembers { get; set; } = [];
+    public List<Guid> RelatedMemberIds
+    {
+        get
+        {
+            return RelatedMembers.Select(e => e.Id).ToList();
+        }
+    }
 }

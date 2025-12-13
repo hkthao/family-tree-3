@@ -26,6 +26,7 @@ public class CreateMembersCommandHandler(IValidator<AIMemberDto> aiMemberDtoVali
             // Create a CreateMemberCommand from the memberDto
             var createMemberCommand = new CreateMemberCommand
             {
+                Id = memberDto.Id,
                 FirstName = memberDto.FirstName,
                 LastName = memberDto.LastName,
                 Nickname = memberDto.Nickname,

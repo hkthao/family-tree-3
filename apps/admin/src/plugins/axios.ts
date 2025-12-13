@@ -6,17 +6,10 @@ import axios, {
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
 import { getApiBaseUrl, getEnvVariable } from '@/utils/api.util';
-
-// Define a custom error type for API errors
-export interface ApiError {
-  name: string;
-  message: string;
-  statusCode?: number;
-  details?: any;
-}
+import type { ApiError } from '@/types/apiError';
 
 // Helper function to create an ApiError from an AxiosError
-const createApiError = (error: AxiosError): ApiError => {
+export const createApiError = (error: AxiosError, customMessage?: string): ApiError => {
   if (error.response) {
     let errorMessage = error.message;
     if (error.response.data) {
@@ -30,20 +23,20 @@ const createApiError = (error: AxiosError): ApiError => {
     }
     return {
       name: 'ApiError',
-      message: errorMessage,
+      message: customMessage || errorMessage,
       statusCode: error.response.status,
       details: error.response.data,
     };
   } else if (error.request) {
     return {
       name: 'ApiError',
-      message: 'No response received from server.',
+      message: customMessage || 'No response received from server.',
       details: error.request,
     };
   } else {
     return {
       name: 'ApiError',
-      message: error.message,
+      message: customMessage || error.message,
     };
   }
 };

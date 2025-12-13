@@ -1,4 +1,5 @@
 ﻿using backend.Application.Common.Dtos;
+using backend.Application.Families.Dtos;
 
 namespace backend.Application.Families.Queries;
 
@@ -13,5 +14,20 @@ public class FamilyDto : BaseAuditableDto
     public int? TotalGenerations { get; set; } = null;
     public string? Visibility { get; set; }
     public string? AvatarUrl { get; set; }
-    public List<string> ValidationErrors { get; set; } = new List<string>();
+    public List<string> ValidationErrors { get; set; } = [];
+    public List<FamilyUserDto> FamilyUsers { get; set; } = [];
+    public List<Guid> ManagerIds
+    {
+        get
+        {
+            return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Manager).Select(e => e.UserId)];
+        }
+    }
+    public List<Guid> ViewerIds
+    {
+        get
+        {
+            return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Viewer).Select(e => e.UserId)];
+        }
+    }
 }

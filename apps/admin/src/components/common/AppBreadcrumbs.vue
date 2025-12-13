@@ -1,5 +1,5 @@
 <template>
-  <v-breadcrumbs :items="breadcrumbs" >
+  <v-breadcrumbs class="breadcrumbs" :items="breadcrumbs" >
     <template v-slot:item="{ item }">
       <v-breadcrumbs-item v-bind="item">
         {{ item.title }}
@@ -91,3 +91,8 @@ onMounted(() => {
   generateBreadcrumbs();
 });
 </script>
+<style scoped>
+.breadcrumbs{
+  padding-bottom: 0px;
+}
+</style>

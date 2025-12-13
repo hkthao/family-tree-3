@@ -4,7 +4,7 @@
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
           @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
-          :read-only="props.readOnly" :multiple="false" :disabled="props.readOnly || !props.allowFamilyEdit" data-testid="event-family-autocomplete" />
+          :read-only="props.readOnly" :multiple="false" :disabled="true" data-testid="event-family-autocomplete" />
       </v-col>
     </v-row>
 
@@ -53,7 +53,7 @@
     <v-row>
       <v-col cols="12">
         <MemberAutocomplete
-          v-model="formData.relatedMembers"
+          v-model="formData.relatedMemberIds"
           :label="t('event.form.relatedMembers')"
           :family-id="formData.familyId || undefined"
           :disabled="props.readOnly"
@@ -74,39 +74,39 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef } from 'vue';
+import { reactive, toRefs, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { EventType } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import { cloneDeep } from 'lodash';
 
 interface EventFormProps {
   readOnly?: boolean;
   initialEventData?: Event;
-  familyId?: string; // New prop
-  allowFamilyEdit?: boolean; // New prop
+  familyId?: string;
 }
 
 const props = defineProps<EventFormProps>();
 
 const { t } = useI18n();
 
-const formRef = ref<HTMLFormElement | null>(null);
-
 const formData = reactive<Omit<Event, 'id'> | Event>(
-  props.initialEventData || {
-    name: '',
-    type: EventType.Other,
-    familyId: props.familyId || null, // Use prop familyId if provided
-    startDate: null,
-    endDate: null,
-    location: '',
-    description: '',
-    color: '#1976D2',
-    relatedMembers: [],
-  },
+  props.initialEventData
+    ? cloneDeep(props.initialEventData)
+    : {
+        name: '',
+        type: EventType.Other,
+        familyId: props.familyId || null,
+        startDate: null,
+        endDate: null,
+        location: '',
+        description: '',
+        color: '#1976D2',
+        relatedMemberIds: [],
+      },
 );
 
 const state = reactive({
@@ -115,7 +115,7 @@ const state = reactive({
   familyId: toRef(formData, 'familyId'), // Added familyId to state
   startDate: toRef(formData, 'startDate'),
   endDate: toRef(formData, 'endDate'),
-  relatedMembers: toRef(formData, 'relatedMembers'),
+  relatedMemberIds: toRef(formData, 'relatedMemberIds'),
 });
 
 const eventTypes = [

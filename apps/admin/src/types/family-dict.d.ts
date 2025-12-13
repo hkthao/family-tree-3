@@ -37,6 +37,8 @@ export interface FamilyDictFilter {
   searchQuery?: string;
   lineage?: FamilyDictLineage;
   region?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: { key: string; order: 'asc' | 'desc' }[]; // Updated type
+  sortOrder?: 'asc' | 'desc'; // Keep this for backward compatibility if needed, but sortBy should cover it
+  page?: number;
+  itemsPerPage?: number;
 }

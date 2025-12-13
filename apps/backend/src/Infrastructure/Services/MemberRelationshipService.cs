@@ -77,4 +77,112 @@ public class MemberRelationshipService : IMemberRelationshipService
             member.WifeAvatarUrl = wifeRelationship.SourceMember?.AvatarUrl;
         }
     }
+
+    public async Task UpdateMemberRelationshipsAsync(Guid memberId, Guid? fatherId, Guid? motherId, Guid? husbandId, Guid? wifeId, CancellationToken cancellationToken)
+    {
+        // 1. Lấy thông tin thành viên hiện tại và FamilyId
+        var currentMember = await _context.Members
+            .Where(m => m.Id == memberId)
+            .Select(m => new { Member = m, m.FamilyId })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (currentMember == null)
+        {
+            return; // Member not found
+        }
+        var familyId = currentMember.FamilyId;
+
+        // 2. Xóa tất cả các mối quan hệ hiện có liên quan đến thành viên này
+        var existingRelationships = await _context.Relationships
+            .Where(r => r.SourceMemberId == memberId || r.TargetMemberId == memberId)
+            .ToListAsync(cancellationToken);
+
+        _context.Relationships.RemoveRange(existingRelationships);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // 3. Tạo lại các mối quan hệ hai chiều
+        var relationshipsToCreate = new List<Relationship>();
+
+        // Helper to create bidirectional relationships
+        void CreateBidirectionalRelationship(Guid sourceId, Guid targetId, RelationshipType sourceToTarget, RelationshipType targetToSource)
+        {
+            relationshipsToCreate.Add(new Relationship(familyId, sourceId, targetId, sourceToTarget));
+            relationshipsToCreate.Add(new Relationship(familyId, targetId, sourceId, targetToSource));
+        }
+
+        if (fatherId.HasValue)
+        {
+            CreateBidirectionalRelationship(fatherId.Value, memberId, RelationshipType.Father, RelationshipType.Child);
+        }
+        if (motherId.HasValue)
+        {
+            CreateBidirectionalRelationship(motherId.Value, memberId, RelationshipType.Mother, RelationshipType.Child);
+        }
+        if (husbandId.HasValue)
+        {
+            CreateBidirectionalRelationship(husbandId.Value, memberId, RelationshipType.Husband, RelationshipType.Wife);
+        }
+        if (wifeId.HasValue)
+        {
+            CreateBidirectionalRelationship(wifeId.Value, memberId, RelationshipType.Wife, RelationshipType.Husband);
+        }
+
+        _context.Relationships.AddRange(relationshipsToCreate);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // 4. Cập nhật các trường FullName và AvatarUrl của thành viên
+        currentMember.Member.FatherId = fatherId;
+        currentMember.Member.MotherId = motherId;
+        currentMember.Member.HusbandId = husbandId;
+        currentMember.Member.WifeId = wifeId;
+
+        if (fatherId.HasValue)
+        {
+            var father = await _context.Members.FindAsync(fatherId.Value);
+            currentMember.Member.FatherFullName = father?.FullName;
+            currentMember.Member.FatherAvatarUrl = father?.AvatarUrl;
+        }
+        else
+        {
+            currentMember.Member.FatherFullName = null;
+            currentMember.Member.FatherAvatarUrl = null;
+        }
+
+        if (motherId.HasValue)
+        {
+            var mother = await _context.Members.FindAsync(motherId.Value);
+            currentMember.Member.MotherFullName = mother?.FullName;
+            currentMember.Member.MotherAvatarUrl = mother?.AvatarUrl;
+        }
+        else
+        {
+            currentMember.Member.MotherFullName = null;
+            currentMember.Member.MotherAvatarUrl = null;
+        }
+
+        if (husbandId.HasValue)
+        {
+            var husband = await _context.Members.FindAsync(husbandId.Value);
+            currentMember.Member.HusbandFullName = husband?.FullName;
+            currentMember.Member.HusbandAvatarUrl = husband?.AvatarUrl;
+        }
+        else
+        {
+            currentMember.Member.HusbandFullName = null;
+            currentMember.Member.HusbandAvatarUrl = null;
+        }
+
+        if (wifeId.HasValue)
+        {
+            var wife = await _context.Members.FindAsync(wifeId.Value);
+            currentMember.Member.WifeFullName = wife?.FullName;
+            currentMember.Member.WifeAvatarUrl = wife?.AvatarUrl;
+        }
+        else
+        {
+            currentMember.Member.WifeFullName = null;
+            currentMember.Member.WifeAvatarUrl = null;
+        }
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -1,7 +1,7 @@
-using backend.Application.AI.DTOs; // NEW USING FOR IMAGE UPLOAD DTOs
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
@@ -12,13 +12,13 @@ namespace backend.Application.UnitTests.Files.UploadFile;
 
 public class UploadFileCommandHandlerTests : TestBase
 {
-    private readonly Mock<IN8nService> _n8nServiceMock; // Changed from IFileStorage
+    private readonly Mock<IFileStorageService> _fileStorageServiceMock;
     private readonly UploadFileCommandHandler _handler;
 
     public UploadFileCommandHandlerTests()
     {
-        _n8nServiceMock = new Mock<IN8nService>(); // Changed from IFileStorageMock
-        _handler = new UploadFileCommandHandler(_n8nServiceMock.Object);
+        _fileStorageServiceMock = new Mock<IFileStorageService>();
+        _handler = new UploadFileCommandHandler(_fileStorageServiceMock.Object);
     }
 
     private UploadFileCommand CreateValidCommand(byte[] imageData, string contentType = "image/jpeg")
@@ -33,54 +33,53 @@ public class UploadFileCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnSuccess_WhenN8nUploadIsSuccessful()
+    public async Task Handle_ShouldReturnSuccess_WhenFileStorageUploadIsSuccessful()
     {
         // Arrange
         var imageData = new byte[] { 1, 2, 3 };
         var contentType = "image/jpeg";
         var command = CreateValidCommand(imageData, contentType);
         var imageUrl = "http://uploaded.image.url/test.jpg";
-        var n8nResponse = new ImageUploadResponseDto { Url = imageUrl, Filename = command.FileName, ContentType = contentType };
+        var expectedResponse = new ImageUploadResponseDto { Url = imageUrl, DisplayUrl = imageUrl, Filename = command.FileName, ContentType = contentType, Extension = Path.GetExtension(command.FileName) };
 
-        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
+        _fileStorageServiceMock.Setup(x => x.UploadFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
+            .ReturnsAsync(Result<string>.Success(imageUrl)); // IFileStorageService returns Result<string>
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEquivalentTo(n8nResponse); // Assert the DTO object
-        _n8nServiceMock.Verify(x => x.CallImageUploadWebhookAsync(
-            It.Is<ImageUploadWebhookDto>(dto =>
-                dto.ImageData == command.ImageData &&
-                dto.FileName == command.FileName &&
-                dto.Folder == command.Folder &&
-                dto.ContentType == command.ContentType
-            ),
+        result.Value.Should().BeEquivalentTo(expectedResponse);
+        _fileStorageServiceMock.Verify(x => x.UploadFileAsync(
+            It.IsAny<Stream>(),
+            command.FileName,
+            command.Folder,
             It.IsAny<CancellationToken>()
         ), Times.Once);
 
-        // Verify that FileMetadata is NOT saved
+        // Verify that FileMetadata is NOT saved (as per UploadFileCommandHandler logic)
         _context.FileMetadata.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nUploadFails()
+    public async Task Handle_ShouldReturnFailure_WhenFileStorageUploadFails()
     {
         // Arrange
-        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var errorMessage = "N8n upload failed.";
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 });
+        var errorMessage = "File storage upload failed.";
         var errorSource = ErrorSources.ExternalServiceError;
 
-        var failureResult = Result<ImageUploadResponseDto>.Failure(errorMessage, errorSource); // Create result explicitly
-
-        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
+        _fileStorageServiceMock.Setup(x => x.UploadFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(failureResult!); // Add null-forgiving operator to the returned result
+            .ReturnsAsync(Result<string>.Failure(errorMessage, errorSource));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -93,44 +92,18 @@ public class UploadFileCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsEmptyUrl()
+    public async Task Handle_ShouldReturnFailure_WhenFileStorageReturnsEmptyUrl()
     {
         // Arrange
-        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var n8nResponse = new ImageUploadResponseDto { Url = "", Filename = command.FileName, ContentType = command.ContentType }; // Empty URL
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 });
+        var emptyUrl = "";
 
-        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
+        _fileStorageServiceMock.Setup(x => x.UploadFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Debugging assertion: Check what result.IsSuccess actually is, and if true, what result.Value is
-        if (result.IsSuccess)
-        {
-            result.Value.Should().BeNull("because the handler should have returned a failure when URL is empty.");
-        }
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(ErrorMessages.FileUploadNullUrl);
-        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
-        _context.FileMetadata.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nResponseIsEmptyList()
-    {
-        // Arrange
-        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var n8nResponse = new ImageUploadResponseDto(); // Empty DTO with default values
-
-        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(n8nResponse));
+            .ReturnsAsync(Result<string>.Success(emptyUrl));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -143,18 +116,18 @@ public class UploadFileCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsNullResponse()
+    public async Task Handle_ShouldReturnFailure_WhenFileStorageReturnsNullUrlResult()
     {
         // Arrange
-        var command = CreateValidCommand(new byte[] { 1, 2, 3 }); // Added imageData
-        var errorMessage = ErrorMessages.FileUploadNullUrl;
-        var errorSource = ErrorSources.ExternalServiceError;
+        var command = CreateValidCommand(new byte[] { 1, 2, 3 });
+        var errorMessage = "Null URL result from file storage.";
 
-        // Simulate n8n returning a failure, as the handler would interpret a null value as a failure
-        _n8nServiceMock.Setup(x => x.CallImageUploadWebhookAsync(
-            It.IsAny<ImageUploadWebhookDto>(),
+        _fileStorageServiceMock.Setup(x => x.UploadFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Failure(errorMessage, errorSource)); // Changed to return explicit Failure
+            .ReturnsAsync(Result<string>.Failure(errorMessage, ErrorSources.ExternalServiceError)); // Simulate null/empty URL result as failure
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -162,7 +135,7 @@ public class UploadFileCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain(errorMessage);
-        result.ErrorSource.Should().Be(errorSource);
+        result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
         _context.FileMetadata.Should().BeEmpty();
     }
 }

@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <v-card :elevation="0" v-if="memberFace">
       <v-card-title class="text-center text-h5 text-uppercase mb-2">
         {{ t('memberFace.detail.title') }}
@@ -19,7 +18,8 @@
           </v-card-title>
 
           <!-- Family Name (if available) -->
-          <FamilyName v-if="memberFace.familyName" :name="memberFace.familyName" :avatar-url="memberFace.familyAvatarUrl" />
+          <FamilyName v-if="memberFace.familyName" :name="memberFace.familyName"
+            :avatar-url="memberFace.familyAvatarUrl" />
 
           <v-chip v-if="memberFace.emotion" color="info" size="small" class="mb-4">
             {{ memberFace.emotion }}
@@ -30,7 +30,7 @@
           <!-- Other Details in a List -->
           <v-list class="w-100">
             <v-list-item v-if="memberFace.originalImageUrl">
-              <v-list-item-title class="font-weight-medium">{{ t('memberFace.form.originalImage')}}:</v-list-item-title>
+              <v-list-item-title class="font-weight-medium">{{ t('memberFace.form.originalImage') }}:</v-list-item-title>
               <v-list-item-subtitle>
                 <a :href="memberFace.originalImageUrl" target="_blank">{{ t('memberFace.form.viewOriginal') }}</a>
               </v-list-item-subtitle>
@@ -42,23 +42,20 @@
       </v-card-text>
 
       <v-card-actions class="justify-end">
-              <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>        <v-btn v-if="canPerformActions" color="error" @click="handleDelete" :disabled="detail.loading">{{ t('common.delete') }}</v-btn>
+        <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn> <v-btn v-if="canPerformActions"
+          color="error" @click="handleDelete" :disabled="isDeleting || queryLoading">{{ t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
-    <v-progress-linear v-else-if="detail.loading" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-else-if="queryLoading" indeterminate color="primary"></v-progress-linear>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberFaceStore } from '@/stores/member-face.store';
-import type { MemberFace } from '@/types';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { useAuth } from '@/composables/useAuth'; // NEW
+import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;
@@ -68,48 +65,20 @@ const props = defineProps<MemberFaceDetailViewProps>();
 const emit = defineEmits(['close', 'edit-member-face', 'member-face-deleted']);
 
 const { t } = useI18n();
-const memberFaceStore = useMemberFaceStore();
 const { showSnackbar } = useGlobalSnackbar();
 const { showConfirmDialog } = useConfirmDialog();
-const { isAdmin, isFamilyManager } = useAuth(); // NEW
+const { isAdmin, isFamilyManager } = useAuth();
 
-const { detail } = storeToRefs(memberFaceStore);
+const { memberFace, queryLoading } = useMemberFaceDetailQuery(props.memberFaceId);
+const { mutate: deleteMemberFace, isPending: isDeleting } = useDeleteMemberFaceMutation();
 
-const memberFace = ref<MemberFace | undefined>(undefined);
-
-const canPerformActions = computed(() => { // NEW
+const canPerformActions = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
-
-const loadMemberFace = async (id: string) => {
-  await memberFaceStore.getById(id);
-  if (memberFaceStore.detail.item) {
-    memberFace.value = memberFaceStore.detail.item;
-  } else {
-    memberFace.value = undefined;
-  }
-};
-
-onMounted(async () => {
-  if (props.memberFaceId) {
-    await loadMemberFace(props.memberFaceId);
-  }
-});
-
-watch(
-  () => props.memberFaceId,
-  async (newId) => {
-    if (newId) {
-      await loadMemberFace(newId);
-    }
-  },
-);
 
 const handleClose = () => {
   emit('close');
 };
-
-
 
 const handleDelete = async () => {
   if (!memberFace.value) return;
@@ -123,18 +92,16 @@ const handleDelete = async () => {
   });
 
   if (confirmed) {
-    try {
-      await memberFaceStore.deleteItem(memberFace.value.id);
-      if (!memberFaceStore.delete.error) {
+    deleteMemberFace(memberFace.value.id, {
+      onSuccess: () => {
         showSnackbar(t('memberFace.messages.deleteSuccess'), 'success');
         emit('member-face-deleted'); // Notify parent that member face was deleted
         emit('close'); // Close the detail drawer
-      } else {
-        showSnackbar(memberFaceStore.delete.error.message || t('memberFace.messages.deleteError'), 'error');
-      }
-    } catch (error) {
-      showSnackbar(t('memberFace.messages.deleteError'), 'error');
-    }
+      },
+      onError: (error) => {
+        showSnackbar(error.message || t('memberFace.messages.deleteError'), 'error');
+      },
+    });
   }
 };
 </script>

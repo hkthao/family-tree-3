@@ -47,7 +47,7 @@ import { useI18n } from 'vue-i18n';
 import { usePublicFamilyStore } from '@/stores/publicFamily.store';
 import { usePublicMemberStore } from '@/stores/publicMember.store';
 import { usePublicRelationshipStore } from '@/stores/publicRelationship.store';
-import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
+import { useHierarchicalTreeChart } from '@/composables';
 import type { Family, Member, Relationship } from '@/types';
 
 const route = useRoute();

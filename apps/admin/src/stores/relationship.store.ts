@@ -1,8 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { Relationship, RelationshipFilter, Result } from '@/types'; // Assuming Relationship and RelationshipFilter types exist
+import type { ApiError, Relationship, RelationshipFilter, Result } from '@/types'; // Assuming Relationship and RelationshipFilter types exist
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
 
 export const useRelationshipStore = defineStore('relationship', {
   state: () => ({
@@ -55,13 +54,13 @@ export const useRelationshipStore = defineStore('relationship', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      const result = await this.services.relationship.loadItems({
-        ...this.list.filters,
-        sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
-        sortOrder: this.list.sortBy.length > 0 ? (this.list.sortBy[0].order as 'asc' | 'desc') : undefined,
-      },
-        this.list.currentPage,
-        this.list.itemsPerPage,
+      const result = await this.services.relationship.search(
+        {
+          page: this.list.currentPage,
+          itemsPerPage: this.list.itemsPerPage,
+          sortBy: this.list.sortBy.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+        },
+        this.list.filters
       );
 
       if (result.ok) {

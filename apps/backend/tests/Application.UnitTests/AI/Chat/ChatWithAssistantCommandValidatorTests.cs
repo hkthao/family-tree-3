@@ -14,38 +14,38 @@ public class ChatWithAssistantCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenMessageIsEmpty()
+    public void ShouldHaveError_WhenChatInputIsEmpty()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand { SessionId = "testSession", Message = "" };
+        var command = new ChatWithAssistantCommand { SessionId = "testSession", ChatInput = "" };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Message)
-              .WithErrorMessage("Message cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.ChatInput)
+              .WithErrorMessage("ChatInput cannot be empty.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenMessageIsTooLong()
+    public void ShouldHaveError_WhenChatInputIsTooLong()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand { SessionId = "testSession", Message = new string('a', 2001) };
+        var command = new ChatWithAssistantCommand { SessionId = "testSession", ChatInput = new string('a', 2001) };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Message)
-              .WithErrorMessage("Message must not exceed 2000 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.ChatInput)
+              .WithErrorMessage("ChatInput must not exceed 2000 characters.");
     }
 
     [Fact]
     public void ShouldHaveError_WhenSessionIdIsEmpty()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand { SessionId = "", Message = "Valid message" };
+        var command = new ChatWithAssistantCommand { SessionId = "", ChatInput = "Valid message" };
 
         // Act
         var result = _validator.TestValidate(command);
@@ -59,7 +59,7 @@ public class ChatWithAssistantCommandValidatorTests
     public void ShouldNotHaveError_WhenCommandIsValid()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand { SessionId = "testSession", Message = "Valid message" };
+        var command = new ChatWithAssistantCommand { SessionId = "testSession", ChatInput = "Valid message" };
 
         // Act
         var result = _validator.TestValidate(command);

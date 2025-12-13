@@ -1,9 +1,10 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Users.Specifications;
+using backend.Application.Identity.Queries; // Added
+using backend.Application.Identity.Specifications; // Updated
 
-namespace backend.Application.Users.Queries;
+namespace backend.Application.Identity.Queries;
 
 public class GetUsersByIdsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetUsersByIdsQuery, Result<List<UserDto>>>
 {
