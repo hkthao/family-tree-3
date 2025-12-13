@@ -15,12 +15,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/prompts")]
-public class PromptsController(IMediator mediator) : ControllerBase
+public class PromptsController(IMediator mediator, ILogger<PromptsController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<PromptsController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một lời nhắc theo ID hoặc Code.
@@ -32,7 +37,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPromptById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Id = id });
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -44,7 +49,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPromptByCode([FromRoute] string code)
     {
         var result = await _mediator.Send(new GetPromptByIdQuery { Code = code });
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -56,7 +61,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SearchPrompts([FromQuery] SearchPromptsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -68,7 +73,7 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreatePrompt([FromBody] CreatePromptCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetPromptById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetPromptById), new { id = result.Value });
     }
 
     /// <summary>
@@ -82,10 +87,11 @@ public class PromptsController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdatePromptCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -97,6 +103,6 @@ public class PromptsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeletePrompt(Guid id)
     {
         var result = await _mediator.Send(new DeletePromptCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

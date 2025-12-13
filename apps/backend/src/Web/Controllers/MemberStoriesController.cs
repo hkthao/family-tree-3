@@ -19,10 +19,12 @@ public class MemberStoriesController : ControllerBase // Updated
     // private readonly IPhotoAnalysisService _photoAnalysisService; // Removed
     // private readonly IStoryGenerationService _storyGenerationService; // Removed
     private readonly IMediator _mediator; // Injected IMediator
+    private readonly ILogger<MemberStoriesController> _logger;
 
-    public MemberStoriesController(IMediator mediator) // Updated
+    public MemberStoriesController(IMediator mediator, ILogger<MemberStoriesController> logger) // Updated
     {
         _mediator = mediator; // Initialized IMediator
+        _logger = logger;
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -46,7 +48,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(command, cancellationToken);
-        return result.ToActionResult(this, 201, nameof(GetMemberStoryDetail), new { memberStoryId = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetMemberStoryDetail), new { memberStoryId = result.Value });
     }
 
     /// <summary>
@@ -60,10 +62,11 @@ public class MemberStoriesController : ControllerBase // Updated
     {
         if (memberStoryId != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({MemberStoryId}) and request body ({CommandId}) for UpdateMemberStoryCommand from {RemoteIpAddress}", memberStoryId, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("MemberStory ID in URL does not match body."); // Updated
         }
         var result = await _mediator.Send(command, cancellationToken);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -75,7 +78,7 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -89,7 +92,7 @@ public class MemberStoriesController : ControllerBase // Updated
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -101,6 +104,6 @@ public class MemberStoriesController : ControllerBase // Updated
     public async Task<IActionResult> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new GetMemberStoryDetailQuery(memberStoryId), cancellationToken); // Updated
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

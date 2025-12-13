@@ -16,12 +16,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/event")]
-public class EventController(IMediator mediator) : ControllerBase
+public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<EventController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một sự kiện theo ID.
@@ -32,7 +37,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetEventById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -45,10 +50,11 @@ public class EventController(IMediator mediator) : ControllerBase
     {
         if (command == null)
         {
+            _logger.LogWarning("CreateEventCommand received a null command object from {RemoteIpAddress}", HttpContext.Connection.RemoteIpAddress);
             return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetEventById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetEventById), new { id = result.Value });
     }
 
     /// <summary>
@@ -62,11 +68,12 @@ public class EventController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateEventCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
 
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -78,7 +85,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteEventCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -90,7 +97,7 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchEventsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -108,7 +115,7 @@ public class EventController(IMediator mediator) : ControllerBase
             EndDate = DateTime.UtcNow.Date.AddDays(30)
         };
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -120,6 +127,6 @@ public class EventController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

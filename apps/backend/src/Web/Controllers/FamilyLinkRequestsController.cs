@@ -30,7 +30,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> CreateFamilyLinkRequest([FromBody] CreateFamilyLinkRequestCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> GetFamilyLinkRequestById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyLinkRequestByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> DeleteFamilyLinkRequest(Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyLinkRequestCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> ApproveFamilyLinkRequest(Guid requestId, [FromBody] string? responseMessage = null)
     {
         var result = await _mediator.Send(new ApproveFamilyLinkRequestCommand(requestId, responseMessage));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> RejectFamilyLinkRequest(Guid requestId, [FromBody] string? responseMessage = null)
     {
         var result = await _mediator.Send(new RejectFamilyLinkRequestCommand(requestId, responseMessage));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -104,6 +104,6 @@ public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLink
     public async Task<IActionResult> GetFamilyLinkRequests([FromQuery] SearchFamilyLinkRequestsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

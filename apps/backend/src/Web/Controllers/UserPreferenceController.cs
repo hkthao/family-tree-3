@@ -12,12 +12,17 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến tùy chọn người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserPreferenceController(IMediator mediator) : ControllerBase
+public class UserPreferenceController(IMediator mediator, ILogger<UserPreferenceController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<UserPreferenceController> _logger = logger;
 
     /// <summary>
     /// Truy xuất tùy chọn của người dùng hiện tại.
@@ -27,7 +32,7 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUserPreferences()
     {
         var result = await _mediator.Send(new GetUserPreferencesQuery());
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -39,6 +44,6 @@ public class UserPreferenceController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

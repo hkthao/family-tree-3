@@ -12,13 +12,18 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hồ sơ người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserProfileController(IMediator mediator) : ControllerBase
+public class UserProfileController(IMediator mediator, ILogger<UserProfileController> logger) : ControllerBase
 {
 
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<UserProfileController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy hồ sơ của người dùng hiện tại.
@@ -28,7 +33,7 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetCurrentUserProfile()
     {
         var result = await _mediator.Send(new GetCurrentUserProfileQuery());
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -42,6 +47,6 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     {
         command.SetId(id);
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

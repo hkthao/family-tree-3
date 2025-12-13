@@ -13,12 +13,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/user")]
-public class UserController(IMediator mediator) : ControllerBase
+public class UserController(IMediator mediator, ILogger<UserController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<UserController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để tìm kiếm người dùng dựa trên các tiêu chí được cung cấp.
@@ -29,7 +34,7 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchUsersQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -41,11 +46,11 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUsersByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
-            return Result<List<UserDto>>.Success([]).ToActionResult(this);
+            return Result<List<UserDto>>.Success([]).ToActionResult(this, _logger);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetUsersByIdsQuery(guids));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -57,6 +62,6 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> FindUser([FromQuery] string usernameOrEmail)
     {
         var result = await _mediator.Send(new GetUserByUsernameOrEmailQuery { UsernameOrEmail = usernameOrEmail });
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

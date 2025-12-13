@@ -18,12 +18,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/relationship")]
-public class RelationshipController(IMediator mediator) : ControllerBase
+public class RelationshipController(IMediator mediator, ILogger<RelationshipController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<RelationshipController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy danh sách các mối quan hệ.
@@ -32,7 +37,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetRelationships([FromQuery] GetRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -44,7 +49,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetRelationshipById(Guid id)
     {
         var result = await _mediator.Send(new GetRelationshipByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -56,7 +61,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -82,7 +87,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateRelationship([FromBody] CreateRelationshipCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetRelationshipById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetRelationshipById), new { id = result.Value });
     }
 
     /// <summary>
@@ -94,7 +99,7 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateRelationships([FromBody] CreateRelationshipsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -108,10 +113,11 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateRelationshipCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -123,6 +129,6 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteRelationship(Guid id)
     {
         var result = await _mediator.Send(new DeleteRelationshipCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

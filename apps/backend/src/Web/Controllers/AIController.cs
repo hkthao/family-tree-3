@@ -15,10 +15,12 @@ namespace backend.Web.Controllers;
 public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<AIController> _logger;
 
-    public AIController(IMediator mediator)
+    public AIController(IMediator mediator, ILogger<AIController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     /// <summary>
@@ -30,7 +32,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> ChatWithAssistant([FromBody] ChatWithAssistantCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -42,7 +44,7 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -54,6 +56,6 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

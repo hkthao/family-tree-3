@@ -24,7 +24,7 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     public async Task<IActionResult> DeleteFamilyLink(Guid familyLinkId) // Changed signature
     {
         var result = await _mediator.Send(new DeleteLinkFamilyCommand(familyLinkId)); // Updated command
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     public async Task<IActionResult> Search([FromQuery] SearchFamilyLinksQuery query) // Renamed and changed signature
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -48,6 +48,6 @@ public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkControll
     public async Task<IActionResult> GetFamilyLinkById(Guid familyLinkId)
     {
         var result = await _mediator.Send(new GetFamilyLinkByIdQuery(familyLinkId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

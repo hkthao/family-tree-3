@@ -6,14 +6,10 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/family-data")] // Changed route to avoid conflict with /api/family
-public class FamilyExportImportController : ControllerBase
+public class FamilyExportImportController(IMediator mediator, ILogger<FamilyExportImportController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public FamilyExportImportController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<FamilyExportImportController> _logger = logger;
 
     [HttpGet("{familyId}/export")]
     [ProducesResponseType(typeof(FamilyExportDto), StatusCodes.Status200OK)]
@@ -22,7 +18,7 @@ public class FamilyExportImportController : ControllerBase
     public async Task<IActionResult> ExportFamily(Guid familyId)
     {
         var result = await _mediator.Send(new GetFamilyExportQuery(familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     [HttpPost("import/{familyId}")]
@@ -38,6 +34,6 @@ public class FamilyExportImportController : ControllerBase
             ClearExistingData = clearExistingData
         };
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

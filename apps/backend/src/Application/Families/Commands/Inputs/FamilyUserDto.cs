@@ -5,6 +5,5 @@ namespace backend.Application.Families.Commands.Inputs;
 public record FamilyUserInput
 {
     public Guid UserId { get; set; }
-    public string? UserName { get; set; }
     public FamilyRole Role { get; set; } // Corresponds to FamilyRole enum
 }

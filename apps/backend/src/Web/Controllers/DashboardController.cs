@@ -11,12 +11,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/dashboard")]
-public class DashboardController(IMediator mediator) : ControllerBase
+public class DashboardController(IMediator mediator, ILogger<DashboardController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<DashboardController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy các số liệu thống kê cho bảng điều khiển của người dùng hiện tại.
@@ -29,6 +34,6 @@ public class DashboardController(IMediator mediator) : ControllerBase
         var query = new GetDashboardStatsQuery { FamilyId = familyId };
         var result = await _mediator.Send(query);
 
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

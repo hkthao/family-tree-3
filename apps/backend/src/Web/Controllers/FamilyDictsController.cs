@@ -13,9 +13,10 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-dict")]
-public class FamilyDictsController(IMediator mediator) : ControllerBase
+public class FamilyDictsController(IMediator mediator, ILogger<FamilyDictsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
+    private readonly ILogger<FamilyDictsController> _logger = logger;
 
 
     /// <summary>
@@ -29,7 +30,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyDictById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyDictByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> SearchFamilyDicts([FromQuery] SearchFamilyDictsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamilyDict([FromBody] CreateFamilyDictCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetFamilyDictById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetFamilyDictById), new { id = result.Value });
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> ImportFamilyDicts([FromBody] ImportFamilyDictsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -87,10 +88,11 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateFamilyDictCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -104,6 +106,6 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamilyDict(Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyDictCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

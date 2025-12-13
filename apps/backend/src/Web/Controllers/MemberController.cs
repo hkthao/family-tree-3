@@ -42,7 +42,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> Search([FromQuery] SearchMembersQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -67,12 +67,12 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (string.IsNullOrEmpty(ids))
         {
-            return Result<List<MemberListDto>>.Success([]).ToActionResult(this);
+            return Result<List<MemberListDto>>.Success([]).ToActionResult(this, _logger);
         }
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetMembersByIdsQuery(guids));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -84,14 +84,14 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> GetMembersByFamilyId(Guid familyId)
     {
         var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetMemberById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetMemberById), new { id = result.Value });
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> CreateMembers([FromBody] CreateMembersCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -117,10 +117,11 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -132,7 +133,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> DeleteMember(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -146,9 +147,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (id != command.MemberId)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandMemberId}) for UpdateMemberBiographyCommand from {RemoteIpAddress}", id, command.MemberId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

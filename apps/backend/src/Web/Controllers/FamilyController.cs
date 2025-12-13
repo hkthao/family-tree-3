@@ -24,12 +24,17 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
-public class FamilyController(IMediator mediator) : ControllerBase
+public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
+
+    /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<FamilyController> _logger = logger;
 
     /// <summary>
     /// Lấy danh sách các gia đình mà người dùng hiện tại có quyền truy cập (Manager hoặc Viewer).
@@ -39,7 +44,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetUserFamilyAccess()
     {
         var result = await _mediator.Send(new GetUserFamilyAccessQuery());
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -51,7 +56,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyByIdQuery(id));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -63,7 +68,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchFamiliesQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -75,7 +80,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetFamilyById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetFamilyById), new { id = result.Value });
     }
 
     /// <summary>
@@ -87,7 +92,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateFamilies([FromBody] CreateFamiliesCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -101,10 +106,11 @@ public class FamilyController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateFamilyCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -116,7 +122,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyCommand(id));
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -128,11 +134,11 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamiliesByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
-            return Result<List<FamilyDto>>.Success([]).ToActionResult(this);
+            return Result<List<FamilyDto>>.Success([]).ToActionResult(this, _logger);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -144,7 +150,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> UpdateDenormalizedFields([FromRoute] Guid familyId)
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -156,7 +162,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -168,7 +174,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPrivacyConfiguration(Guid familyId)
     {
         var result = await _mediator.Send(new GetPrivacyConfigurationQuery(familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -182,9 +188,10 @@ public class FamilyController(IMediator mediator) : ControllerBase
     {
         if (familyId != command.FamilyId)
         {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyId}) and command body ({CommandFamilyId}) for UpdatePrivacyConfigurationCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("FamilyId in URL does not match command body.");
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

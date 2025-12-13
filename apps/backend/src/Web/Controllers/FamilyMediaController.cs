@@ -15,9 +15,10 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family/{familyId}/media")]
-public class FamilyMediaController(IMediator mediator) : ControllerBase
+public class FamilyMediaController(IMediator mediator, ILogger<FamilyMediaController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
+    private readonly ILogger<FamilyMediaController> _logger = logger;
 
     /// <summary>
     /// Tải lên một file media mới cho một gia đình.
@@ -31,11 +32,12 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         if (familyId != command.FamilyId)
         {
+            _logger.LogWarning("Mismatched FamilyId in route ({FamilyId}) and command body ({CommandFamilyId}) for CreateFamilyMediaCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("FamilyId in route does not match command body.");
         }
 
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 201, nameof(GetFamilyMediaById), new { familyId = familyId, id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetFamilyMediaById), new { familyId = familyId, id = result.Value });
     }
 
     /// <summary>
@@ -48,7 +50,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFamilyMediaById([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetFamilyMediaByIdQuery(id, familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -59,7 +61,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         query.SetFamilyId(familyId);
         var result = await _mediator.Send(query);
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -72,7 +74,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteFamilyMedia([FromRoute] Guid familyId, [FromRoute] Guid id)
     {
         var result = await _mediator.Send(new DeleteFamilyMediaCommand { Id = id, FamilyId = familyId });
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -87,11 +89,12 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         if (familyMediaId != command.FamilyMediaId)
         {
+            _logger.LogWarning("Mismatched FamilyMediaId in route ({FamilyMediaId}) and command body ({CommandFamilyMediaId}) for LinkMediaToEntityCommand from {RemoteIpAddress}", familyMediaId, command.FamilyMediaId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("FamilyMediaId in route does not match command body.");
         }
         // Assuming familyId is implicitly handled by authorization within the command handler
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, 200); // Changed to 200 OK as there's no specific Get endpoint for MediaLink
+        return result.ToActionResult(this, _logger, 200); // Changed to 200 OK as there's no specific Get endpoint for MediaLink
     }
 
     /// <summary>
@@ -107,7 +110,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     {
         // Assuming familyId is implicitly handled by authorization within the command handler
         var result = await _mediator.Send(new UnlinkMediaFromEntityCommand { FamilyMediaId = familyMediaId, RefType = refType, RefId = refId });
-        return result.ToActionResult(this, 204);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -120,7 +123,7 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetMediaLinksByFamilyMediaId(Guid familyId, Guid familyMediaId)
     {
         var result = await _mediator.Send(new GetMediaLinksByFamilyMediaIdQuery(familyMediaId, familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -134,6 +137,6 @@ public class FamilyMediaController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetMediaLinksByRefId(Guid familyId, RefType refType, Guid refId)
     {
         var result = await _mediator.Send(new GetMediaLinksByRefIdQuery(refId, refType, familyId));
-        return result.ToActionResult(this);
+        return result.ToActionResult(this, _logger);
     }
 }

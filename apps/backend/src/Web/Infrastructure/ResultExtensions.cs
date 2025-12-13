@@ -1,6 +1,7 @@
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Web.Infrastructure;
 
@@ -18,6 +19,7 @@ public static class ResultExtensions
     public static IActionResult ToActionResult(
         this Result result,
         ControllerBase controller,
+        ILogger logger,
         int successStatusCode = 204, // Default to 204 No Content for successful non-value operations
         string? createdAtActionName = null, // These parameters are typically not used for non-generic Result, but included for signature consistency
         object? createdAtRouteValues = null)
@@ -32,7 +34,7 @@ public static class ResultExtensions
             };
         }
 
-        return HandleFailure(result, controller);
+        return HandleFailure(result, controller, logger);
     }
 
     /// <summary>
@@ -48,6 +50,7 @@ public static class ResultExtensions
     public static IActionResult ToActionResult<T>(
         this Result<T> result,
         ControllerBase controller,
+        ILogger logger,
         int successStatusCode = 200,
         string? createdAtActionName = null,
         object? createdAtRouteValues = null)
@@ -64,17 +67,26 @@ public static class ResultExtensions
             };
         }
 
-        return HandleFailure(result, controller);
+        return HandleFailure(result, controller, logger);
     }
 
-    private static IActionResult HandleFailure(Result result, ControllerBase controller)
+    private static IActionResult HandleFailure(Result result, ControllerBase controller, ILogger logger)
     {
         if (result.ErrorSource == "Validation" && result.ValidationErrors != null && result.ValidationErrors.Any())
         {
+            foreach (var error in result.ValidationErrors)
+            {
+                foreach (var message in error.Value)
+                {
+                    logger.LogWarning("Validation Error: {PropertyName} - {ErrorMessage}", error.Key, message);
+                }
+            }
             return CreateValidationProblemDetails(result, controller);
         }
 
         // Use controller.StatusCode with ProblemDetails for more consistent error responses
+        logger.LogError("API Error: StatusCode={StatusCode}, ErrorSource={ErrorSource}, Error={Error}",
+            result.StatusCode, result.ErrorSource, result.Error);
         return result.StatusCode switch
         {
             400 => controller.BadRequest(new ProblemDetails { Title = "Bad Request", Detail = result.Error, Status = 400 }),
@@ -85,14 +97,23 @@ public static class ResultExtensions
         };
     }
 
-    private static IActionResult HandleFailure<TValue>(Result<TValue> result, ControllerBase controller)
+    private static IActionResult HandleFailure<TValue>(Result<TValue> result, ControllerBase controller, ILogger logger)
     {
         if (result.ErrorSource == "Validation" && result.ValidationErrors != null && result.ValidationErrors.Any())
         {
+            foreach (var error in result.ValidationErrors)
+            {
+                foreach (var message in error.Value)
+                {
+                    logger.LogWarning("Validation Error: {PropertyName} - {ErrorMessage}", error.Key, message);
+                }
+            }
             return CreateValidationProblemDetails(result, controller);
         }
 
         // Use controller.StatusCode with ProblemDetails for more consistent error responses
+        logger.LogError("API Error: StatusCode={StatusCode}, ErrorSource={ErrorSource}, Error={Error}",
+            result.StatusCode, result.ErrorSource, result.Error);
         return result.StatusCode switch
         {
             400 => controller.BadRequest(new ProblemDetails { Title = "Bad Request", Detail = result.Error, Status = 400 }),
