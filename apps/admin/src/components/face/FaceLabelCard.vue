@@ -72,11 +72,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
-
-const { t } = useI18n();
+import { useFaceLabelCard } from '@/composables/face/useFaceLabelCard';
 
 const props = defineProps({
   face: { type: Object as () => DetectedFace, required: true },
@@ -85,29 +82,14 @@ const props = defineProps({
 
 const emit = defineEmits(['label-face', 'create-member']); // Updated emits
 
-const selectedMemberId = ref<string | null | undefined>(props.face.memberId);
-const showCreateMemberDialog = ref(false);
-const newMemberName = ref('');
-
-watch(() => props.face.memberId, (newMemberId) => {
-  selectedMemberId.value = newMemberId;
-});
-
-const handleSaveMapping = () => {
-  if (selectedMemberId.value) {
-    emit('label-face', props.face.id, selectedMemberId.value);
-  }
-};
-
-const handleCreateNewMember = () => {
-  if (newMemberName.value) {
-    emit('create-member', props.face.id, newMemberName.value);
-    showCreateMemberDialog.value = false;
-    newMemberName.value = '';
-    // The parent component will update the detectedFaces array,
-    // which will then update selectedMemberId via the watch on props.face.memberId
-  }
-};
+const {
+  t,
+  selectedMemberId,
+  showCreateMemberDialog,
+  newMemberName,
+  handleSaveMapping,
+  handleCreateNewMember,
+} = useFaceLabelCard(props, emit);
 </script>
 
 <style scoped>

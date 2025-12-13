@@ -3,7 +3,8 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('memberFace.form.addTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="isDetectingFaces || isAddingMemberFace" indeterminate color="primary" class="my-4"></v-progress-linear>
+    <v-progress-linear v-if="isDetectingFaces || isAddingMemberFace" indeterminate color="primary"
+      class="my-4"></v-progress-linear>
     <v-card-text>
       <FamilyAutocomplete v-model="selectedFamilyId" :label="t('memberFace.form.family')" class="mb-4"
         :disabled="!!props.familyId" />
@@ -18,15 +19,14 @@
         </div>
         <v-alert v-else-if="!isDetectingFaces && !uploadedImage" type="info" class="my-4">{{
           t('face.recognition.uploadPrompt') }}</v-alert>
-        <v-alert v-else-if="!isDetectingFaces && uploadedImage && detectedFaces.length === 0"
-          type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
+        <v-alert v-else-if="!isDetectingFaces && uploadedImage && detectedFaces.length === 0" type="info"
+          class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
 
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces"
-        :loading="isAddingMemberFace">
+      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces" :loading="isAddingMemberFace">
         {{ t('face.recognition.saveAllLabeledFacesButton') }}
       </v-btn>
     </v-card-actions>
@@ -95,30 +95,35 @@ const resetState = () => {
 };
 
 const handleFileUpload = async (file: File | File[] | null) => {
-  resetState(); // Reset state before new upload
-  if (file instanceof File) {
-    detectFaces({ imageFile: file, familyId: selectedFamilyId.value!, resize: false }, {
-      onSuccess: (data) => {
-        uploadedImage.value = data.originalImageBase64;
-        detectedFaces.value = data.detectedFaces;
-        originalImageUrl.value = data.originalImageUrl;
-      },
-      onError: (error) => {
-        showSnackbar(error.message, 'error');
-      },
-    });
-  } else if (Array.isArray(file) && file.length > 0) {
-    detectFaces({ imageFile: file[0], familyId: selectedFamilyId.value!, resize: false }, {
-      onSuccess: (data) => {
-        uploadedImage.value = data.originalImageBase64;
-        detectedFaces.value = data.detectedFaces;
-        originalImageUrl.value = data.originalImageUrl;
-      },
-      onError: (error) => {
-        showSnackbar(error.message, 'error');
-      },
-    });
+  if (!file) {
+    resetState(); // If file is null, the input was cleared, so reset everything.
+    return;
   }
+
+  detectedFaces.value = []; // Always clear detected faces for a new upload
+  originalImageUrl.value = null; // Clear original image URL
+
+  const fileToUpload = Array.isArray(file) ? file[0] : file;
+
+  // Immediately create a local URL for display
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedImage.value = e.target?.result as string;
+  };
+  reader.readAsDataURL(fileToUpload);
+
+  detectFaces({ imageFile: fileToUpload, familyId: selectedFamilyId.value!, resize: false }, {
+    onSuccess: (data) => {
+      // uploadedImage.value is now set from local blob
+      detectedFaces.value = data.detectedFaces;
+      originalImageUrl.value = data.originalImageUrl;
+    },
+    onError: (error) => {
+      showSnackbar(error.message, 'error');
+      uploadedImage.value = null; // Clear image on error
+      detectedFaces.value = []; // Ensure faces are cleared on error
+    },
+  });
 };
 
 const openSelectMemberDialog = (face: DetectedFace) => {

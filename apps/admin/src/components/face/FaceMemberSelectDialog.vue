@@ -33,13 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { DetectedFace, Member } from '@/types';
-import { useFaceMemberSelectStore } from '@/stores/faceMemberSelect.store';
-
-const { t } = useI18n();
-const faceMemberSelectStore = useFaceMemberSelectStore();
+import { useFaceMemberSelectDialog } from '@/composables/face/useFaceMemberSelectDialog';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -54,42 +50,12 @@ const emit = defineEmits<{
   (e: 'label-face', updatedFace: DetectedFace): void; // Changed to pass updatedFace
 }>();
 
-const selectedMemberId = ref<string | null | undefined>(undefined);
-const selectedMemberDetails = ref<Member | null>(null);
-const internalRelationPrompt = ref<string | undefined>(undefined); // New ref
-
-watch(() => props.selectedFace, (newFace) => {
-  selectedMemberId.value = newFace?.memberId;
-  internalRelationPrompt.value = newFace?.relationPrompt; // Initialize from selectedFace
-}, { immediate: true });
-
-watch(selectedMemberId, async (newMemberId) => {
-  if (newMemberId) {
-    await faceMemberSelectStore.getById(newMemberId);
-    selectedMemberDetails.value = faceMemberSelectStore.detail.item || null;
-  } else {
-    selectedMemberDetails.value = null;
-  }
-}, { immediate: true });
-
-const faceThumbnailSrc = computed(() => {
-  if (props.selectedFace?.thumbnail) {
-    // Assuming the thumbnail is always a JPEG base64 string. Adjust if other formats are possible.
-    return `data:image/jpeg;base64,${props.selectedFace.thumbnail}`;
-  }
-  return '';
-});
-
-const handleSave = () => {
-  if (props.selectedFace && selectedMemberId.value && selectedMemberDetails.value) {
-    const updatedFace: DetectedFace = {
-      ...props.selectedFace,
-      memberId: selectedMemberDetails.value.id,
-      memberName: selectedMemberDetails.value.fullName,
-      relationPrompt: internalRelationPrompt.value,
-    };
-    emit('label-face', updatedFace); // Emit the fully updated face object
-    emit('update:show', false);
-  }
-};
+const {
+  t,
+  selectedMemberId,
+  selectedMemberDetails,
+  internalRelationPrompt,
+  faceThumbnailSrc,
+  handleSave,
+} = useFaceMemberSelectDialog(props, emit);
 </script>
