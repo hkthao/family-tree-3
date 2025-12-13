@@ -53,7 +53,7 @@
     <v-row>
       <v-col cols="12">
         <MemberAutocomplete
-          v-model="formData.relatedMembers"
+          v-model="formData.relatedMemberIds"
           :label="t('event.form.relatedMembers')"
           :family-id="formData.familyId || undefined"
           :disabled="props.readOnly"
@@ -104,7 +104,7 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
     location: '',
     description: '',
     color: '#1976D2',
-    relatedMembers: [],
+    relatedMemberIds: [],
   },
 );
 
@@ -114,7 +114,7 @@ const state = reactive({
   familyId: toRef(formData, 'familyId'), // Added familyId to state
   startDate: toRef(formData, 'startDate'),
   endDate: toRef(formData, 'endDate'),
-  relatedMembers: toRef(formData, 'relatedMembers'),
+  relatedMemberIds: toRef(formData, 'relatedMemberIds'),
 });
 
 const eventTypes = [

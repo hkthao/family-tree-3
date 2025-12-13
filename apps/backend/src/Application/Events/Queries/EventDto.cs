@@ -17,5 +17,12 @@ public class EventDto
     public string? Color { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
-    public ICollection<MemberListDto> RelatedMembers { get; set; } = [];
+    public List<MemberListDto> RelatedMembers { get; set; } = [];
+    public List<Guid> RelatedMemberIds
+    {
+        get
+        {
+            return RelatedMembers.Select(e => e.Id).ToList();
+        }
+    }
 }

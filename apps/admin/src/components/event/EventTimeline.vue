@@ -24,8 +24,8 @@
             <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
           </div>
           <ChipLookup
-            v-if="event.relatedMembers && event.relatedMembers.length > 0"
-            :model-value="event.relatedMembers"
+            v-if="event.relatedMemberIds && event.relatedMemberIds.length > 0"
+            :model-value="event.relatedMemberIds"
             :data-source="memberLookupStore"
             display-expr="fullName"
             value-expr="id"

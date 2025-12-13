@@ -1,14 +1,6 @@
 <template>
-  <v-data-table-server
-    v-model:items-per-page="itemsPerPage"
-    :headers="headers"
-    :items="events"
-    :items-length="totalEvents"
-    :loading="loading"
-    item-value="id"
-    @update:options="loadEvents"
-    elevation="0"
-  >
+  <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="events"
+    :items-length="totalEvents" :loading="loading" item-value="id" @update:options="loadEvents" elevation="0">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title data-testid="event-list-title">{{ t('event.list.title') }}</v-toolbar-title>
@@ -21,16 +13,8 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field
-          v-model="debouncedSearch"
-          :label="t('common.search')"
-          append-inner-icon="mdi-magnify"
-          single-line
-          hide-details
-          clearable
-          class="mr-2"
-          data-test-id="event-list-search-input"
-        ></v-text-field>
+        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+          hide-details clearable class="mr-2" data-test-id="event-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
 
@@ -41,46 +25,39 @@
 
     <!-- Event Name column -->
     <template #item.name="{ item }">
-      <a
-        @click="$emit('view', item.id)"
-        class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
-        data-testid="event-name-link"
-      >
+      <a @click="$emit('view', item.id)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+        data-testid="event-name-link">
         {{ item.name }}
       </a>
     </template>
 
     <!-- Family column -->
     <template #item.familyId="{ item }">
-      <FamilyName
-        :name="item.familyName"
-        :avatar-url="item.familyAvatarUrl"
-      />
+      <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
     </template>
 
     <!-- Related Members column -->
     <template #item.relatedMembers="{ item }">
-      <ChipLookup
-        :model-value="item.relatedMembers || []"
-        :data-source="memberLookupStore"
-        display-expr="fullName"
-        value-expr="id"
-        image-expr="avatarUrl"
-      />
+      <div class="d-flex flex-wrap">
+        <MemberName v-for="member in item.relatedMembers" :key="member.id" :fullName="member.fullName"
+          :avatarUrl="member.avatarUrl" :gender="member.gender" />
+      </div>
     </template>
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)" data-testid="edit-event-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)"
+            data-testid="edit-event-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)" data-testid="delete-event-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
+            data-testid="delete-event-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -101,8 +78,8 @@ import type { Event } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberLookupStore } from '@/stores/memberLookup.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import ChipLookup from '@/components/common/ChipLookup.vue';
 import FamilyName from '@/components/common/FamilyName.vue';
+import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
 import { formatDate } from '@/utils/dateUtils';
 
 const props = defineProps<{

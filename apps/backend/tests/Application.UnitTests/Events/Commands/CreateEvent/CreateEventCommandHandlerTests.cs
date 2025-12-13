@@ -102,7 +102,7 @@ public class CreateEventCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldAddRelatedMembers_WhenProvided()
+    public async Task Handle_ShouldAddRelatedMemberIds_WhenProvided()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -120,7 +120,7 @@ public class CreateEventCommandHandlerTests : TestBase
             Name = "Event with members",
             FamilyId = familyId,
             Type = EventType.Other,
-            RelatedMembers = new List<Guid> { member1Id, member2Id }
+            RelatedMemberIds = new List<Guid> { member1Id, member2Id }
         };
 
         // Act

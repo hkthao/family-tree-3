@@ -141,7 +141,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           location: eventData.location || undefined,
           familyId: this.familyId,
           type: eventData.type,
-          relatedMembers: eventData.relatedMemberIds,
+          relatedMemberIds: eventData.relatedMemberIds,
         };
 
         const result: Result<Event, ApiError> = await this.services.event.add(newEvent);
