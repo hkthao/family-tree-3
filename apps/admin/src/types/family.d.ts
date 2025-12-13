@@ -16,6 +16,9 @@ export interface Family {
   familyUsers?: FamilyUser[];
   totalMembers?: number;
   totalGenerations?: number;
+  managerIds: [];
+  viewerIds: [];
+
 }
 
 export interface IFamilyAccess {

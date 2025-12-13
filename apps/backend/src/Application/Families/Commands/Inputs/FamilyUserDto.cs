@@ -2,7 +2,7 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.Commands.Inputs;
 
-public record FamilyUserDto
+public record FamilyUserInput
 {
     public Guid UserId { get; set; }
     public string? UserName { get; set; }
