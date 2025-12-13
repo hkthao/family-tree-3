@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
-import { ref, type Ref, nextTick } from 'vue'; // Import Ref and nextTick from vue
-import { ref, type Ref } from 'vue'; // Import Ref
+import { ref, type Ref, nextTick } from 'vue';
 import { useFaceSearch } from '@/composables/face/useFaceSearch';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
@@ -26,7 +25,7 @@ vi.mock('@/composables', () => ({
 
 const mockMutate = vi.fn();
 const mockIsPending = ref(false);
-const mockError: Ref<Error | null> = ref(null); // Explicitly type mockError
+const mockError: Ref<Error | null> = ref(null);
 vi.mock('@/composables/member-face', () => ({
   useDetectFacesMutation: vi.fn(() => ({
     mutate: mockMutate,
@@ -34,6 +33,18 @@ vi.mock('@/composables/member-face', () => ({
     error: mockError,
   })),
 }));
+
+// Mock FileReader
+const mockFileReader = {
+  result: 'data:image/png;base64,mock-local-base64',
+  onload: null as any,
+  readAsDataURL: vi.fn(function(this: any, _file: File) {
+    this.onload({ target: { result: this.result } });
+  }),
+  // Mock event target for onload
+};
+
+vi.spyOn(window, 'FileReader').mockImplementation(() => mockFileReader as any);
 
 // Helper to mount a component that uses the composable
 const queryClient = new QueryClient();
@@ -58,6 +69,7 @@ describe('useFaceSearch', () => {
     vi.clearAllMocks();
     mockIsPending.value = false;
     mockError.value = null;
+    mockFileReader.readAsDataURL.mockClear();
   });
 
   it('should initialize with default values', () => {
@@ -75,7 +87,7 @@ describe('useFaceSearch', () => {
 
     selectedFamilyId.value = 'test-family-id';
     uploadedImage.value = 'base64-image';
-    detectedFaces.value = [{ id: '1', box: [0, 0, 10, 10] }] as DetectedFace[];
+    detectedFaces.value = [{ id: '1', boundingBox: { x: 0, y: 0, width: 10, height: 10 } }] as DetectedFace[];
     originalImageUrl.value = 'original-url';
 
     resetState();
@@ -93,6 +105,7 @@ describe('useFaceSearch', () => {
 
     expect(mockMutate).not.toHaveBeenCalled();
     expect(mockShowSnackbar).not.toHaveBeenCalled();
+    expect(mockFileReader.readAsDataURL).not.toHaveBeenCalled();
   });
 
   it('handleFileUpload should show warning if no familyId is selected', async () => {
@@ -103,32 +116,33 @@ describe('useFaceSearch', () => {
 
     expect(mockShowSnackbar).toHaveBeenCalledWith('face.selectFamilyToUpload', 'warning');
     expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile); // FileReader should still be called
   });
 
-  it('handleFileUpload should call detectFaces on successful upload', async () => {
+  it('handleFileUpload should call detectFaces on successful upload and display local image', async () => {
     const { selectedFamilyId, uploadedImage, detectedFaces, originalImageUrl, handleFileUpload } = mountComposable();
     selectedFamilyId.value = 'test-family-id';
     const mockFile = new File(['dummy content'], 'test.png', { type: 'image/png' });
-    const mockData = {
-      originalImageBase64: 'base64-mock',
-      detectedFaces: [{ id: 'face1', box: [0, 0, 10, 10] }] as DetectedFace[],
-      originalImageUrl: 'original-url-mock',
-    };
+
+    const mockDetectedFaces = [{ id: 'face1', boundingBox: { x: 0, y: 0, width: 10, height: 10 } }] as DetectedFace[];
+    const mockOriginalImageUrl = 'original-url-mock';
 
     // Simulate mutation success
     mockMutate.mockImplementationOnce((_payload, callbacks) => {
-      callbacks.onSuccess(mockData);
+      callbacks.onSuccess({ detectedFaces: mockDetectedFaces, originalImageUrl: mockOriginalImageUrl });
     });
 
     await handleFileUpload(mockFile);
+
+    expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
+    expect(uploadedImage.value).toBe(mockFileReader.result); // Should be the local Data URL
 
     expect(mockMutate).toHaveBeenCalledWith(
       { imageFile: mockFile, familyId: 'test-family-id', resize: true },
       expect.any(Object)
     );
-    expect(uploadedImage.value).toBe(mockData.originalImageBase64);
-    expect(detectedFaces.value).toEqual(mockData.detectedFaces);
-    expect(originalImageUrl.value).toBe(mockData.originalImageUrl);
+    expect(detectedFaces.value).toEqual(mockDetectedFaces);
+    expect(originalImageUrl.value).toBe(mockOriginalImageUrl);
     expect(mockShowSnackbar).not.toHaveBeenCalled(); // No snackbar on success
   });
 
@@ -145,12 +159,15 @@ describe('useFaceSearch', () => {
 
     await handleFileUpload(mockFile);
 
+    expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
+    expect(uploadedImage.value).toBe(mockFileReader.result); // Still the local Data URL until cleared by onError
+
     expect(mockMutate).toHaveBeenCalledWith(
       { imageFile: mockFile, familyId: 'test-family-id', resize: true },
       expect.any(Object)
     );
     expect(mockShowSnackbar).toHaveBeenCalledWith(mockErrorData.message, 'error');
-    // State should be reset by resetState() call at the beginning of handleFileUpload
+    // On error, uploadedImage and detectedFaces should be cleared
     expect(uploadedImage.value).toBeNull();
     expect(detectedFaces.value).toEqual([]);
     expect(originalImageUrl.value).toBeNull();

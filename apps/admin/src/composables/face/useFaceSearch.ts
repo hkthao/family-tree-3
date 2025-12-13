@@ -36,14 +36,24 @@ export function useFaceSearch() {
       showSnackbar(t('face.selectFamilyToUpload'), 'warning');
       return;
     }
+
+    // Immediately create a local URL for display
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedImage.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+
     detectFaces({ imageFile: file, familyId: selectedFamilyId.value, resize: true }, {
       onSuccess: (data) => {
-        uploadedImage.value = data.originalImageBase64;
+        // uploadedImage.value is now set from local blob
         detectedFaces.value = data.detectedFaces;
         originalImageUrl.value = data.originalImageUrl;
       },
       onError: (error) => {
         showSnackbar(error.message, 'error');
+        uploadedImage.value = null; // Clear image on error
+        detectedFaces.value = []; // Ensure faces are cleared on error
       },
     });
   };

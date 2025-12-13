@@ -42,105 +42,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { Family, FamilyUser } from '@/types';
-import { FamilyVisibility } from '@/types';
+import { ref } from 'vue';
+import type { Family } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
-import { useVuelidate } from '@vuelidate/core';
-import { useFamilyRules } from '@/validations/family.validation';
-import { getFamilyAvatarUrl } from '@/utils/avatar.utils'; // NEW
+import { useFamilyForm } from '@/composables/family/useFamilyForm'; // Import the new composable
 
 const props = defineProps<{
   data?: Family;
   readOnly?: boolean;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
-const { t } = useI18n();
 
-const formData = reactive<Family | Omit<Family, 'id'>>(
-  props.data ? JSON.parse(JSON.stringify(props.data)) : {
-    name: '',
-    description: '',
-    address: '',
-    avatarUrl: '',
-    avatarBase64: null, // NEW FIELD
-    visibility: FamilyVisibility.Public,
-    familyUsers: [],
-  },
-);
+const formRef = ref<HTMLFormElement | null>(null);
 
-// Computed property to pass the initial avatar URL to AvatarInput
-const initialAvatarDisplay = computed(() => {
-  return formData.avatarBase64 || formData.avatarUrl;
-});
-
-watch(
-  () => props.data,
-  (newVal) => {
-    if (newVal) {
-      Object.assign(formData, newVal);
-      familyUsers.value = newVal.familyUsers || [];
-      formData.avatarBase64 = null; // Reset avatarBase64 when initial data changes
-    }
-  },
-  { deep: true }
-);
-
-const rules = useFamilyRules();
-
-const v$ = useVuelidate(rules, formData);
-
-const familyUsers = ref<FamilyUser[]>(props.data?.familyUsers || []);
-const Manager = 0;
-const Viewer = 1;
-
-const managers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === Manager).map(fu => fu.userId),
-  set: (newUserIds: string[]) => {
-    const newManagers = newUserIds.map(userId => ({ userId: userId, role: Manager }));
-    const otherUsers = familyUsers.value.filter(fu => fu.role !== Manager);
-    familyUsers.value = [...otherUsers, ...newManagers];
-  }
-});
-
-const viewers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === Viewer).map(fu => fu.userId),
-  set: (newUserIds: string[]) => {
-    const newViewers = newUserIds.map(userId => ({ userId: userId, role: Viewer }));
-    const otherUsers = familyUsers.value.filter(fu => fu.role !== Viewer);
-    familyUsers.value = [...otherUsers, ...newViewers];
-  }
-});
-
-const visibilityItems = computed(() => [
-  {
-    title: t('family.form.visibility.private'),
-    value: FamilyVisibility.Private,
-  },
-  { title: t('family.form.visibility.public'), value: FamilyVisibility.Public },
-]);
-
-
-const submitForm = async () => {
-  const result = await v$.value.$validate();
-  if (result) {
-    emit('submit', formData);
-  }
-};
-
-// Expose form validation and data for parent component
-const validate = async () => {
-  const result = await v$.value.$validate();
-  return result;
-};
-
-const getFormData = () => {
-  const dataToSubmit = { ...formData };
-  dataToSubmit.familyUsers = familyUsers.value;
-  return dataToSubmit;
-};
+const {
+  t,
+  formData,
+  initialAvatarDisplay,
+  v$,
+  managers,
+  viewers,
+  visibilityItems,
+  submitForm,
+  validate,
+  getFormData,
+  getFamilyAvatarUrl,
+} = useFamilyForm(props, emit);
 
 defineExpose({
   validate,

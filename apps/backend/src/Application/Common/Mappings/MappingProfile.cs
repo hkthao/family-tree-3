@@ -66,9 +66,8 @@ public class MappingProfile : Profile
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<User, UserDto>();
-        CreateMap<FamilyUser, FamilyUserDto>() // New mapping
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? (src.User.Profile != null ? src.User.Profile.Name : src.User.Email) : null));
+        CreateMap<FamilyUser, FamilyUserDto>();
+        CreateMap<FamilyUser, FamilyUserDto>(); // NEW: Add mapping for Commands.Inputs.FamilyUserDto
 
         // FamilyDict
         CreateMap<FamilyDict, FamilyDictDto>();
