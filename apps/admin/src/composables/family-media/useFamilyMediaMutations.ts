@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { FamilyMedia } from '@/types';
+
 import { ApiFamilyMediaService } from '@/services/family-media/api.family-media.service';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
 import { apiClient } from '@/plugins/axios';

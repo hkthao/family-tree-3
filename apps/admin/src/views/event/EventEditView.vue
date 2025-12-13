@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, toRef } from 'vue';
+import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';

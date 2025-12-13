@@ -80,7 +80,7 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const emit = defineEmits(['refetchEvents']);
+ defineEmits(['refetchEvents']);
 
 const { t, locale } = useI18n();
 const { isAdmin, isFamilyManager } = useAuth();
@@ -218,7 +218,7 @@ const handleDetailEdit = (event: Event) => {
 // Watch for changes in selectedDate for calendar navigation, but not for data fetching
 watch(
   selectedDate,
-  (newDate) => {
+  (_newDate) => {
     // Logic here for calendar view changes if needed, but not data fetching
   },
   { immediate: true },

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 import { useServices } from '@/plugins/services.plugin';
 import type { ApiError, UserPreference, Result } from '@/types';
-import { computed, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import i18n from '@/plugins/i18n'; // Import global i18n instance
 import { Language } from '@/types';
 

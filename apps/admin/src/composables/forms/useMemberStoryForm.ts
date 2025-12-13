@@ -1,6 +1,5 @@
 
 import { ref, watch, computed, type ComputedRef } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { useGlobalSnackbar } from '../ui/useGlobalSnackbar';
 import type { DetectedFace } from '@/types';
@@ -16,7 +15,7 @@ interface UseMemberStoryFormOptions {
 
 export function useMemberStoryForm(options: UseMemberStoryFormOptions) {
   const { modelValue, readonly, updateModelValue } = options;
-  const { t } = useI18n();
+
   const { showSnackbar } = useGlobalSnackbar();
   const memberStoryStore = useMemberStoryStore();
 

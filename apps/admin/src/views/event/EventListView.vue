@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, toRefs, watch } from 'vue';
+import { onMounted, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/event';
@@ -48,9 +48,6 @@ const { showSnackbar } = useGlobalSnackbar();
 const eventListFiltersComposables = useEventListFilters();
 const {
   searchQuery: eventListSearchQuery,
-  page,
-  itemsPerPage,
-  sortBy,
   filters,
 } = toRefs(eventListFiltersComposables);
 

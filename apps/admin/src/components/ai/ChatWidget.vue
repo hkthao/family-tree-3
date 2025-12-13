@@ -13,12 +13,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useAuthStore } from '@/stores'; // Only AuthStore is needed for user context if any
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const chatOpen = ref(false);
-const authStore = useAuthStore();
 
 const props = defineProps({
   modelValue: {

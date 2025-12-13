@@ -29,7 +29,7 @@ import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserProfileStore, useUserPreferenceStore } from '@/stores'; // Added useUserPreferenceStore
+import { useUserPreferenceStore } from '@/stores'; // Added useUserPreferenceStore
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
@@ -39,7 +39,6 @@ const { t } = useI18n();
 const theme = useTheme();
 
 const router = useRouter();
-const userProfileStore = useUserProfileStore();
 const userPreferenceStore = useUserPreferenceStore(); // Initialized useUserPreferenceStore
 
 const showChatWidget = ref(false); // Reactive variable to control chat widget visibility

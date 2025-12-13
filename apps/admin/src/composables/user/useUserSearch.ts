@@ -2,7 +2,7 @@ import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
-import type { UserProfile, Paginated, UserDto } from '@/types';
+import type { Paginated, UserDto } from '@/types';
 
 // Instantiate the service outside the composable to avoid re-instantiation on every call
 const userService = new ApiUserService(apiClient);

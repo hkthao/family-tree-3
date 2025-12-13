@@ -6,7 +6,7 @@ export * from './auth.store';
 export * from './family-autocomplete.store';
 export * from './family.store';
 export * from './member-autocomplete.store';
-export * from './member.store';
+
 export * from './notification.store';
 export * from './relationship.store';
 export * from './memberStory.store';

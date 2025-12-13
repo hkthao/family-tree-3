@@ -53,7 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'; // ref is still needed for importFile and clearExistingData
 import { useI18n } from 'vue-i18n';
 import { useFamilyDataManagement } from '@/composables/family/useFamilyDataManagement';
 import PrivacySettings from '@/components/family/PrivacySettings.vue'; // Import the new component

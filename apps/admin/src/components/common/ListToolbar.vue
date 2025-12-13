@@ -31,7 +31,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   search: string;
@@ -44,7 +43,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:search', 'create']);
 
-const { t } = useI18n();
 
 const internalSearch = ref(props.search);
 

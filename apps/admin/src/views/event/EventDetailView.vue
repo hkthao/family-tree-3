@@ -24,10 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, toRef } from 'vue';
+import { watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EventForm } from '@/components/event';
-import type { Event } from '@/types';
 import { useEventQuery } from '@/composables/event'; // Import useEventQuery
 
 interface EventDetailViewProps {

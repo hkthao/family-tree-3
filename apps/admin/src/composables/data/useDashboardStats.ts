@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 import { useServices } from '@/plugins/services.plugin';
-import type { ApiError, DashboardStats, Result } from '@/types';
+import type { ApiError, DashboardStats } from '@/types';
 import { computed, type Ref, type ComputedRef } from 'vue';
 
 export function useDashboardStats(familyId: Ref<string | undefined> | ComputedRef<string | undefined>) {

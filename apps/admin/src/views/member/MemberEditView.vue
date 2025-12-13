@@ -3,26 +3,26 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="detail.loading || update.loading" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="isLoadingMember || isUpdatingMember" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <MemberForm ref="memberFormRef" v-if="member" :initial-member-data="member" @close="closeForm" :family-id="member.familyId" />
+      <v-alert v-else-if="memberError" type="error" class="mt-4">{{ memberError.message || t('member.messages.notFound') }}</v-alert>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleUpdateMember" data-testid="save-member-button" :loading="update.loading">{{ t('common.save') }}</v-btn>
+      <v-btn color="grey" @click="closeForm" :disabled="isLoadingMember || isUpdatingMember">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="primary" @click="handleUpdateMember" data-testid="save-member-button" :loading="isUpdatingMember" :disabled="isLoadingMember || isUpdatingMember">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStore } from '@/stores/member.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
-import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables'; // Import useGlobalSnackbar
+import { useGlobalSnackbar } from '@/composables';
+import { useMemberQuery, useUpdateMemberMutation } from '@/composables/member'; // Import new composables
 
 interface MemberEditViewProps {
   memberId: string;
@@ -34,63 +34,38 @@ const emit = defineEmits(['close', 'saved']);
 const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 
 const { t } = useI18n();
-const memberStore = useMemberStore();
-const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
+const { showSnackbar } = useGlobalSnackbar();
 
-const { detail, update } = storeToRefs(memberStore);
-
-const member = ref<Member | undefined>(undefined);
-
-const loadMember = async (id: string) => {
-  await memberStore.getById(id);
-  if (memberStore.detail.item)
-    member.value = memberStore.detail.item;
-};
-
-onMounted(async () => {
-  if (props.memberId) {
-    await loadMember(props.memberId);
-  }
-});
-
-watch(
-  () => props.memberId,
-  async (newId) => {
-    if (newId) {
-      await loadMember(newId);
-    }
-  },
-);
+const memberIdRef = toRef(props, 'memberId');
+const { data: member, isLoading: isLoadingMember, error: memberError } = useMemberQuery(memberIdRef);
+const { mutate: updateMember, isPending: isUpdatingMember } = useUpdateMemberMutation();
 
 const handleUpdateMember = async () => {
   if (!memberFormRef.value) return;
   const isValid = await memberFormRef.value.validate();
 
   if (!isValid) {
-  
     return;
   }
 
   const memberData = memberFormRef.value.getFormData() as Member;
-  if (!memberData.id) { // Use memberData.id for the check
+  if (!memberData.id) {
     showSnackbar(t('member.messages.saveError'), 'error');
     return;
   }
 
-  try {
-    await memberStore.updateItem(memberData as Member);
-    if (!memberStore.error) {
+  updateMember(memberData, {
+    onSuccess: () => {
       showSnackbar(t('member.messages.updateSuccess'), 'success');
-      emit('saved'); // Emit saved event
-    } else {
-      showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
-    }
-  } catch (error) {
-    showSnackbar(t('member.messages.saveError'), 'error');
-  }
+      emit('saved');
+    },
+    onError: (error) => {
+      showSnackbar(error.message || t('member.messages.saveError'), 'error');
+    },
+  });
 };
 
 const closeForm = () => {
-  emit('close'); // Emit close event
+  emit('close');
 };
 </script>

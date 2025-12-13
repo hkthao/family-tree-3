@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemberFace } from '@/types';
 import { useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';

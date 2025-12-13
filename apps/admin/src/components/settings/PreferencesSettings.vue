@@ -42,7 +42,7 @@ import { type UserPreference, Theme, Language } from '@/types'; // Import UserPr
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-const { preferences, isLoading, isError, savePreferences: mutateSavePreferences, isSaving, saveError } = useUserPreferences();
+const { preferences, savePreferences: mutateSavePreferences, isSaving, saveError } = useUserPreferences();
 
 const preferencesForm = ref<UserPreference>({
   ...(preferences.value || {} as UserPreference), // Spread existing preferences or an empty object cast to UserPreference

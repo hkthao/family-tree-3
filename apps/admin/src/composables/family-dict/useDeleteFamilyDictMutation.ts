@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { FamilyDict } from '@/types';
+
 import { ApiFamilyDictService } from '@/services/family-dict/api.family-dict.service';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
 import { apiClient } from '@/plugins/axios';

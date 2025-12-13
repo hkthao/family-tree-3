@@ -1,7 +1,7 @@
 import { computed, type Ref, type ComputedRef } from 'vue';
 // import { useUpcomingEventsQuery } from '@/composables/event/useEventsQuery'; // Temporarily commented out
 
-export function useUpcomingEvents(familyId: Ref<string | undefined> | ComputedRef<string | undefined>) {
+export function useUpcomingEvents(_familyId: Ref<string | undefined> | ComputedRef<string | undefined>) {
   // const {
   //   upcomingEvents,
   //   isLoading,

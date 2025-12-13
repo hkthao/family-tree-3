@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/vue-query';
-import type { DetectedFace, FaceDetectionRessult } from '@/types';
+
 import { useServices } from '@/plugins/services.plugin';
 
 interface DetectFacesPayload {

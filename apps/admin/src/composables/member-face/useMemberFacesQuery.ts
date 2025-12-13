@@ -1,6 +1,6 @@
 import { computed, type ComputedRef } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { MemberFace, Paginated, ListOptions, FilterOptions } from '@/types';
+import type { MemberFace, ListOptions, FilterOptions } from '@/types';
 import { queryKeys } from '@/constants/queryKeys';
 import { useServices } from '@/plugins/services.plugin';
 

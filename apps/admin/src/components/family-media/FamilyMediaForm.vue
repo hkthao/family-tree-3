@@ -42,7 +42,7 @@ interface FamilyMediaFormProps {
 }
 
 const props = defineProps<FamilyMediaFormProps>();
-const emit = defineEmits(['update:modelValue']);
+defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const formRef = ref<HTMLFormElement | null>(null);

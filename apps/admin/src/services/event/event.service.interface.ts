@@ -1,4 +1,4 @@
-import type { Event, Result, ApiError } from "@/types";
+import type { Event } from "@/types";
 import type { ICrudService } from "../common/crud.service.interface";
 
 export interface IEventService extends ICrudService<Event> {

@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { PropType } from 'vue';
+
 import type { Family } from '@/types';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';

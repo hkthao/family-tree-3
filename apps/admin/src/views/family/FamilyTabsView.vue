@@ -94,7 +94,7 @@ const readOnlyValue = true;
 
 const showEditDrawer = ref(false);
 
-const handleOpenEditDrawer = (id: string) => {
+const handleOpenEditDrawer = (_id: string) => {
   showEditDrawer.value = true;
 };
 

@@ -35,7 +35,7 @@ const { showSnackbar } = useGlobalSnackbar();
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaIdRef = toRef(props, 'familyMediaId');
 
-const { familyMedia, isLoading: isLoadingFamilyMedia, error: familyMediaError } = useFamilyMediaQuery(familyIdRef, familyMediaIdRef);
+const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyIdRef, familyMediaIdRef);
 const { mutate: deleteFamilyMedia, isPending: isDeletingFamilyMedia } = useDeleteFamilyMediaMutation();
 
 const handleClose = () => {

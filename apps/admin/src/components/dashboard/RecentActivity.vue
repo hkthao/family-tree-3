@@ -35,7 +35,7 @@ import type { PropType } from 'vue';
 
 const { t } = useI18n();
 
-const props = defineProps({
+ defineProps({
   familyId: { type: String, default: null }, // Keep familyId if it's used elsewhere for context
   activities: { type: Array as PropType<RecentActivity[]>, default: () => [] },
   loading: { type: Boolean, default: false },

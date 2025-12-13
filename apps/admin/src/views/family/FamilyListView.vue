@@ -45,7 +45,6 @@ useFamilyTour();
 const familyListFiltersComposables = useFamilyListFilters();
 const {
   searchQuery: familyListSearchQuery,
-  page,
   itemsPerPage,
   sortBy,
   filters,

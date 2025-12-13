@@ -37,7 +37,7 @@ import { FamilyDictSearch, FamilyDictList } from '@/components/family-dict';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { FamilyDictFilter, FamilyDict } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed } from 'vue';
 
 // Component Imports
 import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
@@ -61,7 +61,6 @@ const computedReadOnly = computed(() => props.readOnly);
 
 const {
   searchQuery,
-  page,
   itemsPerPage,
   sortBy,
   filters,

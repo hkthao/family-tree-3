@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
-import type { Event, EventFilter } from '@/types';
+import type { Event, EventFilter, Member, RelatedMember } from '@/types';
+import { Gender } from '@/types'; // Import Member and RelatedMember
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination'; // Import DEFAULT_ITEMS_PER_PAGE
 
 interface EventTimelineState {
@@ -35,7 +36,6 @@ export const useEventTimelineStore = defineStore('eventTimeline', {
     async _loadItems() {
       this.list.loading = true;
       this.error = null;
-      // const eventService = useEventService(); // Remove this line
 
       const result = await this.services.event.search(
         {
@@ -47,7 +47,43 @@ export const useEventTimelineStore = defineStore('eventTimeline', {
       );
 
       if (result.ok) {
-        this.list.items = result.value.items;
+        let fetchedEvents = result.value.items;
+
+        // Collect all unique relatedMemberIds
+        const allRelatedMemberIds = new Set<string>();
+        fetchedEvents.forEach(event => {
+          event.relatedMemberIds?.forEach(memberId => allRelatedMemberIds.add(memberId));
+        });
+
+        if (allRelatedMemberIds.size > 0) {
+          // Fetch full member objects for these IDs
+          const membersResult = await this.services.member.getByIds(Array.from(allRelatedMemberIds));
+          if (membersResult.ok) {
+            const memberMap = new Map<string, Member>();
+            membersResult.value.forEach(member => memberMap.set(member.id, member));
+
+            // Hydrate relatedMembers for each event
+            fetchedEvents = fetchedEvents.map(event => {
+              const relatedMembers: RelatedMember[] = [];
+              event.relatedMemberIds?.forEach(memberId => {
+                const member = memberMap.get(memberId);
+                if (member) {
+                  relatedMembers.push({
+                    id: member.id,
+                    fullName: member.fullName ?? '', // Provide fallback for fullName
+                    avatarUrl: member.avatarUrl,
+                    gender: member.gender ?? Gender.Other, // Provide fallback for gender
+                  });
+                }
+              });
+              return { ...event, relatedMembers };
+            });
+          } else {
+            console.error('Failed to fetch related members for events:', membersResult.error);
+          }
+        }
+
+        this.list.items = fetchedEvents;
         this.list.totalItems = result.value.totalItems;
         this.list.totalPages = result.value.totalPages;
       } else {

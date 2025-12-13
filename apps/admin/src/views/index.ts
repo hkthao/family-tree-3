@@ -23,7 +23,6 @@ export { default as FamilyAddView } from './family/FamilyAddView.vue';
 export { default as FamilyTabsView } from './family/FamilyTabsView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as FamilyListView } from './family/FamilyListView.vue';
-export { default as FamilyTreeView } from './family/FamilyTreeView.vue';
 
 // Export pages from member
 export { default as MemberAddView } from './member/MemberAddView.vue';

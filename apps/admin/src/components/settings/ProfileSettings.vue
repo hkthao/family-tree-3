@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
 import { useProfileSettings } from '@/composables/user/useProfileSettings'; // Import the new composable

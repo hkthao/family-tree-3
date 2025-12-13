@@ -4,12 +4,7 @@ import { useServices } from '@/plugins/services.plugin';
 import type { ApiError, RecentActivity, TargetType } from '@/types';
 import { computed, type Ref, type ComputedRef } from 'vue';
 
-interface RecentActivitiesResponse {
-  items: RecentActivity[];
-  page: number;
-  totalPages: number;
-  totalItems: number;
-}
+
 
 export function useRecentActivities(
   familyId: Ref<string | undefined> | ComputedRef<string | undefined>,

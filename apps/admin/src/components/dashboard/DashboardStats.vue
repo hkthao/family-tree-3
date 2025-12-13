@@ -87,7 +87,7 @@ import type { DashboardStats } from '@/types';
 
 const { t } = useI18n();
 
-const props = defineProps({
+defineProps({
   familyId: { type: String, default: null }, // Keep familyId for consistency if it's used elsewhere for context
   stats: { type: Object as PropType<DashboardStats | null>, default: null },
   loading: { type: Boolean, default: false },
