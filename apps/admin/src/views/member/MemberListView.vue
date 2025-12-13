@@ -4,7 +4,7 @@
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      @ai-biography="navigateToAIBiography" @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
+ @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
     </MemberList>
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
@@ -19,13 +19,9 @@
     <!-- Detail Member Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
       <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId" @close="handleDetailClosed"
-        @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
+        @edit-member="openEditDrawer" />
     </BaseCrudDrawer>
-    <!-- Biography Drawer -->
-    <BaseCrudDrawer v-model="biographyDrawer" @close="closeAllMemberDrawers">
-      <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
-        @close="closeAllMemberDrawers" />
-    </BaseCrudDrawer>
+
     <!-- AI Create Member Drawer -->
     <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
       <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
@@ -39,7 +35,7 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import MemberBiographyView from '@/views/member/MemberBiographyView.vue';
+
 import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
@@ -66,14 +62,11 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>(); 
-const biographyDrawer = ref(false);
-const biographyMemberId = ref<string | null>(null);
+
 const aiCreateDrawer = ref(false);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-const navigateToAIBiography = (member: Member) => {
-  handleGenerateBiography(member);
-};
+
 const navigateToAICreateMember = () => {
   aiCreateDrawer.value = true;
 };
@@ -139,15 +132,9 @@ const handleMemberClosed = () => {
 const handleDetailClosed = () => {
   closeAllMemberDrawers(); 
 };
-const handleGenerateBiography = (member: Member) => {
-  biographyMemberId.value = member.id;
-  closeAllDrawers(); 
-  biographyDrawer.value = true;
-};
+
 const closeAllMemberDrawers = () => {
   closeAllDrawers();
-  biographyDrawer.value = false;
-  biographyMemberId.value = null;
   aiCreateDrawer.value = false;
 };
 onMounted(() => {

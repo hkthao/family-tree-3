@@ -27,7 +27,7 @@ export { default as FamilyTreeView } from './family/FamilyTreeView.vue';
 
 // Export pages from member
 export { default as MemberAddView } from './member/MemberAddView.vue';
-export { default as MemberBiographyView } from './member/MemberBiographyView.vue';
+
 export { default as MemberDetailView } from './member/MemberDetailView.vue';
 export { default as MemberEditView } from './member/MemberEditView.vue';
 export { default as MemberListView } from './member/MemberListView.vue';

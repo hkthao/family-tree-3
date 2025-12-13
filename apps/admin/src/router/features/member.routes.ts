@@ -1,4 +1,4 @@
-import { MainRouterView, MemberAddView, MemberBiographyView, MemberDetailView, MemberEditView, MemberListView } from '@/views';
+import { MainRouterView, MemberAddView, MemberDetailView, MemberEditView, MemberListView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const memberRoutes: RouteRecordRaw[] = [
@@ -32,12 +32,7 @@ export const memberRoutes: RouteRecordRaw[] = [
         component: MemberEditView,
         meta: { breadcrumb: 'member.form.editTitle' },
       },
-      {
-        path: 'biography/:memberId',
-        name: 'MemberBiography',
-        component: MemberBiographyView,
-        meta: { breadcrumb: 'aiBiography.generator.title' },
-      },
+
       {
         path: 'faces',
         name: 'MemberFaces',
