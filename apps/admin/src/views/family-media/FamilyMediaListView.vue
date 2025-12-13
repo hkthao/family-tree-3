@@ -29,9 +29,9 @@
 <script setup lang="ts">
 import { nextTick, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
+import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
-import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters } from '@/composables/family-media';
+import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables/family-media';
 // Components
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';
 import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
@@ -45,17 +45,23 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar();
-
 const familyIdRef = toRef(props, 'familyId');
 
 const familyMediaListFiltersComposable = useFamilyMediaListFilters();
-const { filters, listOptions } = familyMediaListFiltersComposable;
-const { setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
+const { filters, listOptions, setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
 
 const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(familyIdRef, filters, listOptions);
-const { mutate: deleteFamilyMedia, isPending: isDeleting } = useDeleteFamilyMediaMutation();
+const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
+
+const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
+  familyId: familyIdRef,
+  deleteMutation: deleteFamilyMediaMutation,
+  successMessageKey: 'familyMedia.messages.deleteSuccess',
+  errorMessageKey: 'familyMedia.messages.deleteError',
+  confirmationTitleKey: 'confirmDelete.title',
+  confirmationMessageKey: 'familyMedia.list.confirmDelete',
+  refetchList: refetch,
+});
 
 const {
   addDrawer,
@@ -82,27 +88,10 @@ const handleListOptionsUpdate = async (options: ListOptions) => {
 const confirmDelete = async (familyMediaId: string) => {
   const media = familyMediaList.value.find(m => m.id === familyMediaId);
   if (!media) {
-    showSnackbar(t('familyMedia.messages.notFound'), 'error');
+    // Optionally show a snackbar here that the media was not found
     return;
   }
-  const confirmed = await showConfirmDialog({
-    title: t('confirmDelete.title'),
-    message: t('familyMedia.list.confirmDelete', { fileName: media.fileName || '' }),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    confirmColor: 'error',
-  });
-  if (confirmed) {
-    deleteFamilyMedia({ familyId: props.familyId, id: media.id }, {
-      onSuccess: () => {
-        showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
-        refetch(); // Refetch the list after successful deletion
-      },
-      onError: (error) => {
-        showSnackbar(error.message || t('familyMedia.messages.deleteError'), 'error');
-      },
-    });
-  }
+  await confirmAndDelete(familyMediaId, media.fileName || '');
 };
 
 const handleMediaSaved = () => {

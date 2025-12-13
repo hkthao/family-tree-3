@@ -3,13 +3,13 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('familyMedia.detail.title') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="isLoadingFamilyMedia || isDeletingFamilyMedia" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="isLoadingFamilyMedia || isDeleting" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <FamilyMediaForm v-if="familyMedia" :initial-media="familyMedia" :read-only="true" />
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!familyMedia || isLoadingFamilyMedia || isDeletingFamilyMedia">{{ t('common.delete') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!familyMedia || isLoadingFamilyMedia || isDeleting">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -18,8 +18,8 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { useFamilyMediaQuery, useDeleteFamilyMediaMutation } from '@/composables/family-media';
+import { useFamilyMediaDeletion } from '@/composables/family-media/useFamilyMediaDeletion';
 
 interface FamilyMediaDetailViewProps {
   familyId: string;
@@ -29,14 +29,25 @@ interface FamilyMediaDetailViewProps {
 const props = defineProps<FamilyMediaDetailViewProps>();
 const emit = defineEmits(['close', 'media-deleted']);
 const { t } = useI18n();
-const { showConfirmDialog } = useConfirmDialog();
-const { showSnackbar } = useGlobalSnackbar();
 
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaIdRef = toRef(props, 'familyMediaId');
 
 const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyIdRef, familyMediaIdRef);
-const { mutate: deleteFamilyMedia, isPending: isDeletingFamilyMedia } = useDeleteFamilyMediaMutation();
+const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
+
+const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
+  familyId: familyIdRef,
+  deleteMutation: deleteFamilyMediaMutation,
+  successMessageKey: 'familyMedia.messages.deleteSuccess',
+  errorMessageKey: 'familyMedia.messages.deleteError',
+  confirmationTitleKey: 'confirmDelete.title',
+  confirmationMessageKey: 'familyMedia.list.confirmDelete',
+  onSuccess: () => {
+    emit('media-deleted');
+    emit('close');
+  },
+});
 
 const handleClose = () => {
   emit('close');
@@ -44,23 +55,6 @@ const handleClose = () => {
 
 const handleDelete = async () => {
   if (!familyMedia.value) return;
-
-  const confirmed = await showConfirmDialog({
-    title: t('confirmDelete.title'),
-    message: t('familyMedia.list.confirmDelete', { fileName: familyMedia.value.fileName }),
-  });
-
-  if (confirmed) {
-    deleteFamilyMedia({ familyId: props.familyId, id: familyMedia.value.id }, {
-      onSuccess: () => {
-        showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
-        emit('media-deleted');
-        emit('close');
-      },
-      onError: (error) => {
-        showSnackbar(error.message || t('familyMedia.messages.deleteError'), 'error');
-      },
-    });
-  }
+  await confirmAndDelete(familyMedia.value.id, familyMedia.value.fileName);
 };
 </script>
