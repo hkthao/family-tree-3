@@ -27,7 +27,6 @@ const emit = defineEmits(['file-uploaded']);
 
 const {
   t,
-  fileUploadRef,
   files,
   reset,
 } = useFaceUploadInput(props, emit);
