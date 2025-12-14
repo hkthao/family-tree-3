@@ -6,8 +6,5 @@ public class DeleteFamilyMediaCommandValidator : AbstractValidator<DeleteFamilyM
     {
         RuleFor(v => v.Id)
             .NotEmpty().WithMessage("FamilyMedia ID is required.");
-
-        RuleFor(v => v.FamilyId)
-            .NotEmpty().WithMessage("Family ID is required.");
     }
 }

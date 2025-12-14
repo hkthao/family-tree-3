@@ -8,13 +8,12 @@ using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 
-public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator, IThumbnailUploadService thumbnailUploadService) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
+public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<CreateMemberFaceCommandHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IThumbnailUploadService _thumbnailUploadService = thumbnailUploadService;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
         var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
@@ -27,18 +26,6 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
         string? thumbnailUrl = null;
-        if (!string.IsNullOrEmpty(request.Thumbnail))
-        {
-            var uploadResult = await _thumbnailUploadService.UploadThumbnailAsync(request.Thumbnail, member.FamilyId, request.FaceId, cancellationToken);
-            if (uploadResult.IsSuccess)
-            {
-                thumbnailUrl = uploadResult.Value;
-            }
-            else
-            {
-                _logger.LogWarning("Failed to upload face thumbnail using ThumbnailUploadService for FaceId {FaceId}: {Error}", request.FaceId, uploadResult.Error);
-            }
-        }
         var searchMemberFaceQuery = new SearchMemberFaceQuery(member.FamilyId)
         {
             Vector = request.Embedding.ToList(),

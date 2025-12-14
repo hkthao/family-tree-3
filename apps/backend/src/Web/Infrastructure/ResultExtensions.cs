@@ -1,7 +1,6 @@
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Web.Infrastructure;
 

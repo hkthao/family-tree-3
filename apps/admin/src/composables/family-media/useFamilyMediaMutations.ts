@@ -62,7 +62,7 @@ export function useDeleteFamilyMediaMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ familyId, id }: { familyId: string; id: string }) => {
-      const response = await apiFamilyMediaService.delete(familyId, id);
+      const response = await apiFamilyMediaService.delete(id);
       if (response.ok) {
         return response.value;
       }

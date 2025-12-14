@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
 public class CreateFamilyMediaCommandValidator : AbstractValidator<CreateFamilyMediaCommand>

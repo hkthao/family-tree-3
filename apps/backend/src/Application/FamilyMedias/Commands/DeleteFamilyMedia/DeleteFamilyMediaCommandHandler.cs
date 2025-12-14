@@ -26,18 +26,19 @@ public class DeleteFamilyMediaCommandHandler : IRequestHandler<DeleteFamilyMedia
 
     public async Task<Result> Handle(DeleteFamilyMediaCommand request, CancellationToken cancellationToken)
     {
-        // Authorization check
-        if (!_authorizationService.CanManageFamily(request.FamilyId))
-        {
-            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-        }
 
         var familyMedia = await _context.FamilyMedia
-            .FirstOrDefaultAsync(fm => fm.Id == request.Id && fm.FamilyId == request.FamilyId && !fm.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(fm => fm.Id == request.Id && !fm.IsDeleted, cancellationToken);
 
         if (familyMedia == null)
         {
             return Result.Failure(string.Format(ErrorMessages.NotFound, $"FamilyMedia with ID {request.Id}"), ErrorSources.NotFound);
+        }
+
+        // Authorization check
+        if (!_authorizationService.CanManageFamily(familyMedia.FamilyId))
+        {
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         // Attempt to delete the file from storage

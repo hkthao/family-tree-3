@@ -74,7 +74,7 @@ export function useFamilyMediaQuery(familyId: Ref<string | undefined>, familyMed
       if (!fId || !fmId) {
         throw new Error('Family ID and Family Media ID are required');
       }
-      const response = await apiFamilyMediaService.getById(fId, fmId);
+      const response = await apiFamilyMediaService.getById(fmId);
       if (response.ok) {
         return response.value;
       }

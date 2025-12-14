@@ -21,21 +21,20 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
     private readonly Mock<IMediator> _mediatorMock; // NEW
-    private readonly Mock<IThumbnailUploadService> _thumbnailUploadServiceMock; // NEW
 
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
         _mediatorMock = new Mock<IMediator>(); // NEW
-        _thumbnailUploadServiceMock = new Mock<IThumbnailUploadService>(); // NEW
+
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _thumbnailUploadServiceMock.Object); // NEW: Pass mocks
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object);
     }
 
     [Fact]
@@ -64,9 +63,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         };
 
         // Mock thumbnail upload service
-        _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
-            It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("http://uploaded.thumbnail.url")); // Return a mocked URL
+ // Return a mocked URL
 
         // Mock mediator for SearchMemberFaceQuery
         _mediatorMock.Setup(m => m.Send(
@@ -88,7 +85,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         createdMemberFace!.MemberId.Should().Be(command.MemberId);
         createdMemberFace.FaceId.Should().Be(command.FaceId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
-        createdMemberFace.ThumbnailUrl.Should().Be("http://uploaded.thumbnail.url"); // Assert against the mocked URL
+        createdMemberFace.ThumbnailUrl.Should().BeNull(); // Assert against the mocked URL
 
         // Verify that the domain event was added
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
@@ -110,9 +107,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         };
 
         // Mock thumbnail upload service (it won't be called if member not found, but good practice)
-        _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
-            It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("http://uploaded.thumbnail.url"));
+
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if member not found)
         _mediatorMock.Setup(m => m.Send(
@@ -152,9 +147,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         };
 
         // Mock thumbnail upload service (won't be called if unauthorized)
-        _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
-            It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("http://uploaded.thumbnail.url"));
+
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if unauthorized)
         _mediatorMock.Setup(m => m.Send(
@@ -206,9 +199,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         };
 
         // Mock thumbnail upload service
-        _thumbnailUploadServiceMock.Setup(s => s.UploadThumbnailAsync(
-            It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("http://uploaded.thumbnail.url"));
+
 
         // Mock mediator for SearchMemberFaceQuery to return a conflict
         _mediatorMock.Setup(m => m.Send(

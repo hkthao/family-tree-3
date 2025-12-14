@@ -24,12 +24,7 @@ public class GetFamilyMediaByIdQueryHandler : IRequestHandler<GetFamilyMediaById
 
     public async Task<Result<FamilyMediaDto>> Handle(GetFamilyMediaByIdQuery request, CancellationToken cancellationToken)
     {
-        if (!_authorizationService.CanViewFamily(request.FamilyId))
-        {
-            return Result<FamilyMediaDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-        }
-
-        var specification = new FamilyMediaByIdSpecification(request.Id, request.FamilyId);
+        var specification = new FamilyMediaByIdSpecification(request.Id);
 
         var familyMedia = await _context.FamilyMedia
             .WithSpecification(specification)
