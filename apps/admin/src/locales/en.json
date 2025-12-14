@@ -789,6 +789,7 @@
   "memberStory.detail.shortDescription": "Short Description",
   "memberStory.detail.storyContent": "Story Content",
   "memberStory.detail.titleDefault": "MemberStory Details",
+  "memberStory.detail.viewTitle": "Story Details",
   "memberStory.edit.loading": "Loading member story for editing...",
   "memberStory.edit.notFound": "MemberStory not found for editing.",
   "memberStory.edit.saveFailed": "Failed to update member story.",

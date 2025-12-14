@@ -19,24 +19,18 @@ public class MemberStory : BaseAuditableEntity, ISoftDelete
     public LifeStage LifeStage { get; set; }
     public string? Location { get; set; }
 
-    public Guid? StorytellerId { get; set; }
-    public CertaintyLevel CertaintyLevel { get; set; }
-
     // Navigation properties
     public Member Member { get; set; } = default!;
     public ICollection<MemberStoryImage> MemberStoryImages { get; set; } = new List<MemberStoryImage>();
 
-    public void Update(string title, string story, int? year, string? timeRangeDescription, bool isYearEstimated, LifeStage lifeStage, string? location, Guid? storytellerId, CertaintyLevel certaintyLevel)
+    public void Update(string title, string story, int? year, string? timeRangeDescription, LifeStage lifeStage, string? location)
     {
         Title = title;
         Story = story;
         Year = year;
         TimeRangeDescription = timeRangeDescription;
-        IsYearEstimated = isYearEstimated;
         LifeStage = lifeStage;
         Location = location;
-        StorytellerId = storytellerId;
-        CertaintyLevel = certaintyLevel;
     }
 }
 

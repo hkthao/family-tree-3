@@ -70,9 +70,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             TimeRangeDescription = "Early childhood",
             IsYearEstimated = false,
             LifeStage = LifeStage.Childhood,
-            Location = "Hanoi, Vietnam",
-            StorytellerId = memberId, // Assuming the member is the storyteller
-            CertaintyLevel = CertaintyLevel.Sure
+            Location = "Hanoi, Vietnam"
         };
 
         // Act
@@ -94,8 +92,6 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         createdStory.IsYearEstimated.Should().Be(command.IsYearEstimated);
         createdStory.LifeStage.Should().Be(command.LifeStage);
         createdStory.Location.Should().Be(command.Location);
-        createdStory.StorytellerId.Should().Be(command.StorytellerId);
-        createdStory.CertaintyLevel.Should().Be(command.CertaintyLevel);
         createdStory.MemberStoryImages.Should().BeEmpty(); // No images provided in this test
     }
 
@@ -174,7 +170,6 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             Story = "Content.",
             Year = 2000,
             LifeStage = LifeStage.Adulthood,
-            CertaintyLevel = CertaintyLevel.Sure,
             TemporaryOriginalImageUrl = tempOriginalUrl,
             TemporaryResizedImageUrl = tempResizedUrl
         };
@@ -223,7 +218,6 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             Story = "Content.",
             Year = 2005,
             LifeStage = LifeStage.Adulthood,
-            CertaintyLevel = CertaintyLevel.Sure,
             TemporaryOriginalImageUrl = tempOriginalStoryImageUrl,
             TemporaryResizedImageUrl = tempResizedStoryImageUrl,
             DetectedFaces = new List<DetectedFaceDto>

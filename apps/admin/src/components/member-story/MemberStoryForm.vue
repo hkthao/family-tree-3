@@ -7,13 +7,13 @@
 
     <v-row>
       <v-col cols="12" sm="6">
-        <FamilyAutocomplete :model-value="props.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')"
+        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')"
           :rules="[rules.familyId.required]" />
       </v-col>
       <v-col cols="12" sm="6">
-        <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!props.familyId"
+        <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!modelValue.familyId"
           @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue || '' }); }"
-          :readonly="readonly" :family-id="props.familyId" :label="t('memberStory.form.memberIdLabel')"
+          :readonly="readonly" :family-id="modelValue.familyId" :label="t('memberStory.form.memberIdLabel')"
           :rules="[rules.memberId.required]" />
       </v-col>
     </v-row>
@@ -65,18 +65,23 @@
       </v-col>
     </v-row>
 
-    <!-- Photo Upload Input -->
-    <v-row v-if="modelValue.memberId">
+    <!-- Photo Display (visible in readonly mode if images exist) -->
+    <v-row v-if="modelValue.memberId && modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0">
       <v-col cols="12">
-        <v-carousel v-if="modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0" cycle
-          hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
+        <v-carousel cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
           <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
             <v-img :src="image.imageUrl ?? ''" cover class="fill-height"></v-img>
           </v-carousel-item>
         </v-carousel>
+      </v-col>
+    </v-row>
+
+    <!-- Photo Upload Input (only visible in edit mode) -->
+    <v-row v-if="modelValue.memberId && !readonly">
+      <v-col cols="12">
         <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
       </v-col>
-      <!-- Face Detection and Selection -->
+      <!-- Face Detection and Selection (only visible in edit mode) -->
       <v-col cols="12">
         <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
           <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
@@ -112,7 +117,6 @@ import { LifeStage } from '@/types/enums'; // Import enums
 const props = defineProps<{
   modelValue: MemberStoryDto;
   readonly?: boolean;
-  familyId?: string; // New prop for external familyId
 }>();
 const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 const { t } = useI18n();
@@ -199,7 +203,7 @@ const {
   modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
   memberId: props.modelValue.memberId,
-  familyId: props.familyId || props.modelValue.familyId, // Use prop familyId if available, else from modelValue
+  familyId: props.modelValue.familyId, // Now always from modelValue
   updateModelValue,
 });
 

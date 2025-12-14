@@ -1,13 +1,20 @@
 import type { DetectedFace } from './memberFace.d';
 import { LifeStage } from './enums';
+import type { ListOptions } from './pagination.d'; // NEW import
 
-export interface SearchStoriesFilter {
+// ------------------------------------
+// Request Interfaces
+// ------------------------------------
+
+export interface SearchMemberStoriesRequest extends ListOptions {
   memberId?: string;
   familyId?: string;
   searchQuery?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }
+
+// ------------------------------------
+// DTOs (Data Transfer Objects)
+// ------------------------------------
 
 export interface MemberStoryImageDto {
   id?: string;

@@ -912,6 +912,7 @@
   "memberStory.detail.shortDescription": "Mô tả ngắn",
   "memberStory.detail.storyContent": "Nội dung Câu chuyện",
   "memberStory.detail.titleDefault": "Chi tiết ký ức",
+  "memberStory.detail.viewTitle": "Chi tiết câu chuyện",
   "memberStory.edit.loading": "Đang tải ký ức để chỉnh sửa...",
   "memberStory.edit.notFound": "Không tìm thấy ký ức để chỉnh sửa.",
   "memberStory.edit.saveFailed": "Cập nhật ký ức thất bại.",

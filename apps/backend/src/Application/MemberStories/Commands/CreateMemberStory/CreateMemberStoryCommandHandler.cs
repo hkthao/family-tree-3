@@ -59,11 +59,8 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             Story = request.Story,
             Year = request.Year,
             TimeRangeDescription = request.TimeRangeDescription,
-            IsYearEstimated = request.IsYearEstimated,
             LifeStage = request.LifeStage,
-            Location = request.Location,
-            StorytellerId = request.StorytellerId,
-            CertaintyLevel = request.CertaintyLevel
+            Location = request.Location
         };
 
         MemberStoryImage? primaryImage = null;

@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h6">{{ t('memberStory.create.title') }}</span>
     </v-card-title>
-    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :readonly="false" :family-id="familyId" />
+    <MemberStoryForm ref="memberStoryFormRef" v-model="editedMemberStory" :readonly="false" />
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="blue-darken-1" variant="text" @click="handleClose">

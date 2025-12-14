@@ -13,7 +13,7 @@ public class SearchUsersQueryHandler(IApplicationDbContext context, IMapper mapp
 
     public async Task<Result<PaginatedList<UserDto>>> Handle(SearchUsersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Users.Include(e=>e.Profile).AsQueryable();
+        var query = _context.Users.Include(e => e.Profile).AsQueryable();
 
         query = query.WithSpecification(new UserSearchTermSpecification(request.SearchQuery));
 

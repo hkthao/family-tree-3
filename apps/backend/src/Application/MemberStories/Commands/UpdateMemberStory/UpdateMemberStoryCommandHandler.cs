@@ -41,11 +41,8 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
             request.Story,
             request.Year,
             request.TimeRangeDescription,
-            request.IsYearEstimated,
             request.LifeStage,
-            request.Location,
-            request.StorytellerId,
-            request.CertaintyLevel
+            request.Location
         );
 
         await _context.SaveChangesAsync(cancellationToken);

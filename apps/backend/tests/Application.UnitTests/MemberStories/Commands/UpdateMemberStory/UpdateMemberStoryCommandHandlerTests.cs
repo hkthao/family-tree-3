@@ -47,9 +47,7 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             TimeRangeDescription = "Start of the millennium",
             IsYearEstimated = false,
             LifeStage = LifeStage.Adulthood,
-            Location = "Someplace",
-            StorytellerId = memberId,
-            CertaintyLevel = CertaintyLevel.Sure
+            Location = "Someplace"
         };
 
         _context.Families.Add(family);
@@ -69,9 +67,7 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             TimeRangeDescription = "Mid-decade",
             IsYearEstimated = true,
             LifeStage = LifeStage.SignificantEvents,
-            Location = "Another Place",
-            StorytellerId = Guid.NewGuid(), // Changed storyteller
-            CertaintyLevel = CertaintyLevel.Estimated
+            Location = "Another Place"
         };
 
         // Act
@@ -88,8 +84,6 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
         updatedMemberStory.IsYearEstimated.Should().Be(command.IsYearEstimated);
         updatedMemberStory.LifeStage.Should().Be(command.LifeStage);
         updatedMemberStory.Location.Should().Be(command.Location);
-        updatedMemberStory.StorytellerId.Should().Be(command.StorytellerId);
-        updatedMemberStory.CertaintyLevel.Should().Be(command.CertaintyLevel);
     }
 
     [Fact]
@@ -121,10 +115,8 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Original Title",
             Story = "Original Story",
-            Year = 2000,
-            LifeStage = LifeStage.Adulthood,
-            CertaintyLevel = CertaintyLevel.Sure
-        };
+            LifeStage = LifeStage.Adulthood
+        }; // Missing closing brace here.
 
         _context.MemberStories.Add(memberStory);
         await _context.SaveChangesAsync();

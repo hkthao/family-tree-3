@@ -1,6 +1,7 @@
 <template>
-  <v-container fluid>
+  <div>
     <v-card v-if="memberStory" flat>
+      <v-card-title class="text-h5 text-uppercase">{{ t('memberStory.detail.viewTitle') }}</v-card-title>
       <!-- Cover Image - Keep cover image display if preferred, or let form handle it -->
       <v-img v-if="memberStory.memberStoryImages && memberStory.memberStoryImages.length > 0 && memberStory.memberStoryImages[0].imageUrl" :src="memberStory.memberStoryImages[0].imageUrl" cover class="mb-4">
         <v-row class="fill-height align-end meta-data">
@@ -21,7 +22,7 @@
         </v-row> </v-img>
 
       <!-- MemberStoryForm in readonly mode -->
-      <MemberStoryForm v-model="memberStory" :readonly="true" :family-id="memberStory?.familyId" />
+      <MemberStoryForm v-model="memberStory" :readonly="true" />
 
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -38,7 +39,7 @@
       {{ error?.message || t('memberStory.detail.loadError') }}
     </v-alert>
     <v-progress-linear v-else-if="isLoading" indeterminate color="primary" class="mt-4"></v-progress-linear>
-  </v-container>
+  </div>
 </template>
 
 <style scoped>

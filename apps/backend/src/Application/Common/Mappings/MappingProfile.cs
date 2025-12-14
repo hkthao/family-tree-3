@@ -89,11 +89,6 @@ public class MappingProfile : Profile
 
         // PdfTemplate DTO
         CreateMap<PdfTemplate, PdfTemplateDto>();
-        CreateMap<MemberStory, MemberStoryDto>()
-            .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : string.Empty))
-            .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
-            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
-            .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created));
 
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.Name : null))
@@ -119,5 +114,21 @@ public class MappingProfile : Profile
 
         CreateMap<MediaLink, MediaLinkDto>()
             .ForMember(dest => dest.RefName, opt => opt.Ignore()); // Placeholder, will need a resolver to get name from Member/MemberStory
+
+        CreateMap<MemberStory, MemberStoryDto>()
+           .ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.Member.FamilyId))
+           .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member.FullName ?? string.Empty))
+           .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member.AvatarUrl))
+           .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member.Gender))
+           .ForMember(dest => dest.MemberStoryImages, opt => opt.MapFrom(src => src.MemberStoryImages.Select(img => new MemberStoryImageDto
+           {
+               Id = img.Id,
+               ImageUrl = img.ImageUrl,
+               ResizedImageUrl = img.ResizedImageUrl,
+               Caption = img.Caption
+           }).ToList()));
+
+        // Mapping for MemberStoryImage to MemberStoryImageDto
+        CreateMap<MemberStoryImage, MemberStoryImageDto>();
     }
 }

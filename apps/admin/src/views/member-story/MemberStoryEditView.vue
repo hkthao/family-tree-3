@@ -13,7 +13,6 @@
     <MemberStoryForm v-else
       ref="memberStoryFormRef"
       v-model="editedMemberStory"
-      :family-id="editedMemberStory?.familyId"
     />
     <v-card-actions v-if="editedMemberStory">
       <v-spacer></v-spacer>

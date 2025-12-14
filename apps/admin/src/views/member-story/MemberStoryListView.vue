@@ -42,7 +42,7 @@ import { useI18n } from 'vue-i18n';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
 import { useMemberStoriesQuery, useDeleteMemberStoryMutation } from '@/composables/memberStory';
-import type { MemberStoryListOptions } from '@/composables/memberStory/useMemberStoriesQuery'; // Import interface
+import type { SearchMemberStoriesRequest } from '@/types/memberStory.d'; // Import interface
 import type { MemberStoryDto } from '@/types/memberStory';
 import MemberStoryAddView from './MemberStoryAddView.vue';
 import MemberStoryEditView from './MemberStoryEditView.vue';
@@ -76,7 +76,7 @@ const { showSnackbar } = useGlobalSnackbar();
 const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
 useAuth();
 
-const listOptions = reactive<MemberStoryListOptions>({
+const listOptions = reactive<SearchMemberStoriesRequest>({
   page: 1,
   itemsPerPage: 10,
   sortBy: [],
