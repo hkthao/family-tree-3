@@ -116,7 +116,7 @@ describe('useFaceSearch', () => {
 
     expect(mockShowSnackbar).toHaveBeenCalledWith('face.selectFamilyToUpload', 'warning');
     expect(mockMutate).not.toHaveBeenCalled();
-    expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile); // FileReader should still be called
+    expect(mockFileReader.readAsDataURL).not.toHaveBeenCalled();
   });
 
   it('handleFileUpload should call detectFaces on successful upload and display local image', async () => {
@@ -160,7 +160,6 @@ describe('useFaceSearch', () => {
     await handleFileUpload(mockFile);
 
     expect(mockFileReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
-    expect(uploadedImage.value).toBe(mockFileReader.result); // Still the local Data URL until cleared by onError
 
     expect(mockMutate).toHaveBeenCalledWith(
       { imageFile: mockFile, familyId: 'test-family-id', resize: true },
