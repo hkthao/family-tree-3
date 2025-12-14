@@ -47,8 +47,6 @@ const editedMemberStory = ref<MemberStoryDto>({
   timeRangeDescription: null,
   lifeStage: LifeStage.Childhood, // Default value
   location: null,
-  detectedFaces: [],
-
 });
 
 const handleSave = async () => {
@@ -66,7 +64,6 @@ const handleSave = async () => {
       timeRangeDescription: editedMemberStory.value.timeRangeDescription,
       lifeStage: editedMemberStory.value.lifeStage,
       location: editedMemberStory.value.location,
-      detectedFaces: editedMemberStory.value.detectedFaces || [],
       temporaryOriginalImageUrl: editedMemberStory.value.temporaryOriginalImageUrl,
       temporaryResizedImageUrl: editedMemberStory.value.temporaryResizedImageUrl,
     };

@@ -1,4 +1,3 @@
-import type { DetectedFace } from './memberFace.d';
 import { LifeStage } from './enums';
 import type { ListOptions } from './pagination.d'; // NEW import
 
@@ -36,7 +35,6 @@ export interface MemberStoryDto {
   lifeStage?: LifeStage | null;
   location?: string | null;
 
-  detectedFaces?: DetectedFace[];
   photo?: string | null;
   imageSize?: string | null;
   exifData?: any;

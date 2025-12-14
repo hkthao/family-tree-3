@@ -1,10 +1,37 @@
 <template>
   <v-container>
-    <!-- Member Selection -->
+    <!-- Loading Indicator -->
     <div v-if="isLoading" class="my-4">
       <v-progress-linear color="primary" indeterminate></v-progress-linear>
     </div>
 
+    <!-- NEW: File Upload Input (moved to top, always visible if not readonly) -->
+    <v-row v-if="!readonly">
+      <v-col cols="12">
+        <v-file-input
+          v-model="selectedFiles"
+          :label="t('memberStory.form.uploadImagesLabel')"
+          prepend-icon="mdi-camera"
+          multiple
+          accept="image/*"
+          show-size
+          counter
+        ></v-file-input>
+      </v-col>
+    </v-row>
+
+    <!-- NEW: Combined Carousel for existing and newly selected images -->
+    <v-row v-if="combinedImageUrls.length > 0">
+      <v-col cols="12">
+        <v-carousel cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
+          <v-carousel-item v-for="(imageUrl, i) in combinedImageUrls" :key="i">
+            <v-img :src="imageUrl" cover class="fill-height"></v-img>
+          </v-carousel-item>
+        </v-carousel>
+      </v-col>
+    </v-row>
+
+    <!-- Member Selection -->
     <v-row>
       <v-col cols="12" sm="6">
         <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')" />
@@ -21,25 +48,25 @@
     <v-row>
       <v-col cols="12" sm="6">
         <v-text-field :model-value="modelValue.year"
-          @update:model-value="(newValue) => { updateModelValue({ year: parseInt(newValue) || null }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ year: parseInt(newValue) || null }); }"
           :label="t('memberStory.form.yearLabel')" type="number" :readonly="readonly"
           :rules="[rules.year.valid]"></v-text-field>
       </v-col>
       <v-col cols="12" sm="6">
         <v-select :model-value="modelValue.lifeStage"
-          @update:model-value="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
           :label="t('memberStory.form.lifeStageLabel')" :items="lifeStageOptions" item-title="text" item-value="value"
           :readonly="readonly"></v-select>
       </v-col>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.timeRangeDescription"
-          @update:model-value="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
           :label="t('memberStory.form.timeRangeDescriptionLabel')" :readonly="readonly"
           :rules="[rules.timeRangeDescription.maxLength]"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.location"
-          @update:model-value="(newValue) => { updateModelValue({ location: newValue }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ location: newValue }); }"
           :label="t('memberStory.form.locationLabel')" :readonly="readonly"
           :rules="[rules.location.maxLength]"></v-text-field>
       </v-col>
@@ -50,63 +77,26 @@
     <v-row>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.title"
-          @update:model-value="(newValue) => { updateModelValue({ title: newValue }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ title: newValue }); }"
           :label="t('memberStory.storyEditor.title')" outlined class="mb-4" :rules="[rules.title.required]"
           :readonly="readonly" />
         <v-textarea :model-value="modelValue.story"
-          @update:model-value="(newValue) => { updateModelValue({ story: newValue }); }"
+          @update:modelValue="(newValue) => { updateModelValue({ story: newValue }); }"
           :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow :rules="[rules.story.required]"
           :readonly="readonly" />
       </v-col>
     </v-row>
-
-    <!-- Photo Display (visible in readonly mode if images exist) -->
-    <v-row v-if="modelValue.memberId && modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0">
-      <v-col cols="12">
-        <v-carousel cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
-          <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
-            <v-img :src="image.imageUrl ?? ''" cover class="fill-height"></v-img>
-          </v-carousel-item>
-        </v-carousel>
-      </v-col>
-    </v-row>
-
-    <!-- Photo Upload Input (only visible in edit mode) -->
-    <v-row v-if="modelValue.memberId && !readonly">
-      <v-col cols="12">
-        <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
-      </v-col>
-      <!-- Face Detection and Selection (only visible in edit mode) -->
-      <v-col cols="12">
-        <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
-          <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
-            <FaceBoundingBoxViewer
-              :image-src="modelValue.temporaryOriginalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''"
-              :faces="modelValue.detectedFaces" selectable @face-selected="openSelectMemberDialog" />
-            <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
-              @remove-face="handleRemoveFace" />
-          </div>
-          <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
-        </div>
-        <v-alert v-else type="info">{{
-          t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
-      </v-col>
-    </v-row>
-
-    <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
-      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="modelValue.familyId"
-      :show-relation-prompt-field="true" :disable-save-validation="true" />
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onUnmounted } from 'vue'; // Added watch, onUnmounted
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
-import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
+// Removed FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
-import { useMemberStoryForm } from '@/composables';
+import { useMemberStoryForm } from '@/composables'; // This composable needs to be adapted.
 import { LifeStage } from '@/types/enums'; // Import enums
 
 const props = defineProps<{
@@ -173,20 +163,55 @@ const formValid = computed(() => {
   return memberIdValid.value && titleValid.value && storyValid.value;
 });
 
+// New State for file input
+const selectedFiles = ref<File[]>([]);
+const temporaryLocalImageUrls = ref<string[]>([]);
+
+// Combined image URLs for carousel
+const combinedImageUrls = computed(() => {
+  const existingImages = props.modelValue.memberStoryImages?.map(img => img.imageUrl).filter(url => url !== null && url !== undefined) as string[] || [];
+  return [...existingImages, ...temporaryLocalImageUrls.value];
+});
+
+// Watch for selectedFiles changes and create local blob URLs
+watch(selectedFiles, (newFiles) => {
+  temporaryLocalImageUrls.value.forEach(url => URL.revokeObjectURL(url)); // Clean up old blobs
+  temporaryLocalImageUrls.value = [];
+
+  if (newFiles && newFiles.length > 0) {
+    newFiles.forEach(file => {
+      temporaryLocalImageUrls.value.push(URL.createObjectURL(file));
+    });
+    // Update modelValue with the first selected file's temporary URLs
+    // This part assumes that modelValue can handle multiple temporary images,
+    // which MemberStoryDto currently doesn't. Will pass the first one for now.
+    updateModelValue({
+      temporaryOriginalImageUrl: temporaryLocalImageUrls.value[0],
+      temporaryResizedImageUrl: temporaryLocalImageUrls.value[0], // Assuming resized can be same as original for display
+    });
+  } else {
+    updateModelValue({
+      temporaryOriginalImageUrl: undefined,
+      temporaryResizedImageUrl: undefined,
+    });
+  }
+}, { deep: true }); // Use deep: true for watching array changes
+
+// Cleanup blob URLs when component is unmounted
+onUnmounted(() => {
+  temporaryLocalImageUrls.value.forEach(url => URL.revokeObjectURL(url));
+});
+
+
+// Simplified useMemberStoryForm (no face detection logic)
 const {
-  showSelectMemberDialog,
-  faceToLabel,
-  hasUploadedImage,
   isLoading,
-  handleFileUpload,
-  openSelectMemberDialog,
-  handleLabelFaceAndCloseDialog,
-  handleRemoveFace,
+  // handleFileUpload is removed from destructuring, as it's now handled locally via selectedFiles watch
 } = useMemberStoryForm({
   modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
   memberId: props.modelValue.memberId,
-  familyId: props.modelValue.familyId, // Now always from modelValue
+  familyId: props.modelValue.familyId,
   updateModelValue,
 });
 
