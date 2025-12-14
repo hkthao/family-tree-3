@@ -5,21 +5,6 @@
       <v-progress-linear color="primary" indeterminate></v-progress-linear>
     </div>
 
-    <!-- NEW: File Upload Input (moved to top, always visible if not readonly) -->
-    <v-row v-if="!readonly">
-      <v-col cols="12">
-        <v-file-input
-          v-model="selectedFiles"
-          :label="t('memberStory.form.uploadImagesLabel')"
-          prepend-icon="mdi-camera"
-          multiple
-          accept="image/*"
-          show-size
-          counter
-        ></v-file-input>
-      </v-col>
-    </v-row>
-
     <!-- NEW: Combined Carousel for existing and newly selected images -->
     <v-row v-if="combinedImageUrls.length > 0">
       <v-col cols="12">
@@ -31,10 +16,19 @@
       </v-col>
     </v-row>
 
+    <!-- NEW: File Upload Input (moved to top, always visible if not readonly) -->
+    <v-row v-if="!readonly">
+      <v-col cols="12">
+        <v-file-input v-model="selectedFiles" :label="t('memberStory.form.uploadImagesLabel')" prepend-icon="mdi-camera"
+          multiple accept="image/*" show-size counter></v-file-input>
+      </v-col>
+    </v-row>
+
     <!-- Member Selection -->
     <v-row>
       <v-col cols="12" sm="6">
-        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')" />
+        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true"
+          :label="t('memberStory.form.familyIdLabel')" />
       </v-col>
       <v-col cols="12" sm="6">
         <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!modelValue.familyId"
@@ -80,9 +74,9 @@
           @update:modelValue="(newValue) => { updateModelValue({ title: newValue }); }"
           :label="t('memberStory.storyEditor.title')" outlined class="mb-4" :rules="[rules.title.required]"
           :readonly="readonly" />
-        <v-textarea :model-value="modelValue.story"
+        <v-textarea :model-value="modelValue.story" :rows="20"
           @update:modelValue="(newValue) => { updateModelValue({ story: newValue }); }"
-          :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow :rules="[rules.story.required]"
+          :label="t('memberStory.storyEditor.storyContent')" outlined :rules="[rules.story.required]"
           :readonly="readonly" />
       </v-col>
     </v-row>
@@ -148,15 +142,10 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   const newModelValue = { ...props.modelValue, ...payload };
   emit('update:modelValue', newModelValue);
 
-  if (payload.memberId !== undefined) {
-    memberIdValid.value = !!rules.memberId.required(newModelValue.memberId ?? null);
-  }
-  if (payload.title !== undefined) {
-    titleValid.value = !!rules.title.required(newModelValue.title ?? null);
-  }
-  if (payload.story !== undefined) {
-    storyValid.value = !!rules.story.required(newModelValue.story ?? null);
-  }
+  // Always re-evaluate validity for all required fields
+  memberIdValid.value = !!rules.memberId.required(newModelValue.memberId ?? null);
+  titleValid.value = !!rules.title.required(newModelValue.title ?? null);
+  storyValid.value = !!rules.story.required(newModelValue.story ?? null);
 };
 
 const formValid = computed(() => {

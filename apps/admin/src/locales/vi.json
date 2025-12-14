@@ -929,6 +929,7 @@
   "memberStory.form.rules.memberIdRequired": "ID thành viên là bắt buộc.",
   "memberStory.form.storytellerLabel": "Người kể chuyện",
   "memberStory.form.timeRangeDescriptionLabel": "Mô tả khoảng thời gian",
+  "memberStory.form.uploadImagesLabel": "Tải lên hình ảnh",
   "memberStory.form.yearLabel": "Năm",
   "memberStory.list.action.create": "Tạo Câu chuyện",
   "memberStory.list.confirmDelete": "Bạn có chắc chắn muốn xóa ký ức '{title}'?",

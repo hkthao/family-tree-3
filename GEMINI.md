@@ -97,7 +97,7 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 ## 6. Hướng dẫn Phát triển
 
 *   **Code Style & Linting:** Sử dụng `dotnet format` cho `apps/backend`, `eslint` cho `apps/admin`.
-*   **Testing:** Chạy unit tests (Vitest) và kiểm tra code coverage cho cả backend và frontend. Chạy end-to-end tests (Playwright) cho frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
+*   **Testing:** Chạy unit tests (Vitest) với `npm run test:coverage` và kiểm tra code coverage cho cả backend và frontend. Chạy end-to-end tests (Playwright) cho frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
 *   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code. Chi tiết tại [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md).
 *   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
