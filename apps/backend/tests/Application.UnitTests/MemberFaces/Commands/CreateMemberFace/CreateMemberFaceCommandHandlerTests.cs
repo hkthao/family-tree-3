@@ -54,7 +54,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring", // Provide a base64 string
-            ThumbnailUrl = "http://thumbnail.url",
             OriginalImageUrl = "http://original.url",
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
             Emotion = "happy",
@@ -190,7 +189,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring",
-            ThumbnailUrl = "http://thumbnail.url",
             OriginalImageUrl = "http://original.url",
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
             Emotion = "happy",

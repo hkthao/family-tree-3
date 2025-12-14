@@ -25,7 +25,6 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
-        string? thumbnailUrl = null;
         var searchMemberFaceQuery = new SearchMemberFaceQuery(member.FamilyId)
         {
             Vector = request.Embedding.ToList(),
@@ -55,7 +54,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 Height = request.BoundingBox.Height
             },
             Confidence = request.Confidence,
-            ThumbnailUrl = thumbnailUrl,
+            ThumbnailUrl = request.ThumbnailUrl,
             OriginalImageUrl = request.OriginalImageUrl,
             Embedding = request.Embedding,
             Emotion = request.Emotion,

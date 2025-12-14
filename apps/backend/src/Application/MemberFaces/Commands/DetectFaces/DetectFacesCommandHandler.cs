@@ -32,10 +32,10 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 ? $"uploaded_image_{Guid.NewGuid()}{Path.GetExtension(request.ContentType)}"
                 : request.FileName;
             string? originalImageUrl = null;
-            byte[]? imageBytesToAnalyze = request.ImageBytes;
-            string? resizedImageUrl = null;
+
+
             string uploadFolder = UploadConstants.TemporaryUploadsFolder;
-            string resizeFolder = UploadConstants.TemporaryUploadsFolder;
+
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
                 var originalUploadCommand = new UploadFileCommand
@@ -54,35 +54,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 {
                     return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
                 }
-                if (request.ResizeImageForAnalysis)
-                {
-                    try
-                    {
-                        var resizedImageBytes = await _faceApiService.ResizeImageAsync(request.ImageBytes, request.ContentType, 512);
-                        var resizedFileName = $"resized_{effectiveFileName}";
-                        var resizedUploadCommand = new UploadFileCommand
-                        {
-                            ImageData = resizedImageBytes,
-                            FileName = resizedFileName,
-                            Folder = resizeFolder,
-                            ContentType = request.ContentType
-                        };
-                        var resizedUploadResult = await _mediator.Send(resizedUploadCommand, cancellationToken);
-                        if (resizedUploadResult.IsSuccess && resizedUploadResult.Value != null)
-                        {
-                            resizedImageUrl = resizedUploadResult.Value.Url;
-                            imageBytesToAnalyze = resizedImageBytes;
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Failed to upload resized image to n8n: {Error}", resizedUploadResult.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to resize or upload image for analysis.");
-                    }
-                }
+
             }
             var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
             var imageId = Guid.NewGuid();
@@ -175,7 +147,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             {
                 ImageId = imageId,
                 OriginalImageUrl = originalImageUrl,
-                ResizedImageUrl = resizedImageUrl,
+                ResizedImageUrl = null,
                 DetectedFaces = detectedFaceDtos
             });
         }

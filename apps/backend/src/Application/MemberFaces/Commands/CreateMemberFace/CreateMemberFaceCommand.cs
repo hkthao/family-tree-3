@@ -11,7 +11,7 @@ public record CreateMemberFaceCommand : IRequest<Result<Guid>>
     public double Confidence { get; init; }
     public string? ThumbnailUrl { get; init; }
     public string? OriginalImageUrl { get; init; }
-    public List<double> Embedding { get; init; } = new List<double>();
+    public List<double> Embedding { get; init; } = [];
     public string? Emotion { get; init; }
     public double? EmotionConfidence { get; init; }
     public bool IsVectorDbSynced { get; init; }
