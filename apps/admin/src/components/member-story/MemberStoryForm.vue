@@ -7,8 +7,7 @@
 
     <v-row>
       <v-col cols="12" sm="6">
-        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')"
-          :rules="[rules.familyId.required]" />
+        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')" />
       </v-col>
       <v-col cols="12" sm="6">
         <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!modelValue.familyId"
@@ -30,7 +29,7 @@
         <v-select :model-value="modelValue.lifeStage"
           @update:model-value="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
           :label="t('memberStory.form.lifeStageLabel')" :items="lifeStageOptions" item-title="text" item-value="value"
-          :readonly="readonly" :rules="[rules.lifeStage.required]"></v-select>
+          :readonly="readonly"></v-select>
       </v-col>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.timeRangeDescription"
@@ -44,11 +43,7 @@
           :label="t('memberStory.form.locationLabel')" :readonly="readonly"
           :rules="[rules.location.maxLength]"></v-text-field>
       </v-col>
-      <v-col cols="12">
-        <MemberAutocomplete :model-value="modelValue.storytellerId"
-          @update:modelValue="(newValue: string | null) => { updateModelValue({ storytellerId: newValue || null }); }"
-          :readonly="readonly" :family-id="modelValue.familyId" :label="t('memberStory.form.storytellerLabel')" />
-      </v-col>
+
     </v-row>
 
     <!-- Title and Story -->
@@ -132,16 +127,11 @@ const lifeStageOptions = computed(() => [
 ]);
 
 // Validation refs
-const familyIdValid = ref(false);
 const memberIdValid = ref(false);
 const titleValid = ref(false);
 const storyValid = ref(false);
-const lifeStageValid = ref(false);
 
 const rules = {
-  familyId: {
-    required: (value: string | null) => !!value || t('common.validations.required'),
-  },
   memberId: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
@@ -158,7 +148,6 @@ const rules = {
     maxLength: (value: string | null) => !value || value.length <= 100 || t('common.validations.maxLength', { length: 100 }),
   },
   lifeStage: {
-    required: (value: LifeStage | null) => value !== null || t('common.validations.required'),
   },
   location: {
     maxLength: (value: string | null) => !value || value.length <= 200 || t('common.validations.maxLength', { length: 200 }),
@@ -169,9 +158,6 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   const newModelValue = { ...props.modelValue, ...payload };
   emit('update:modelValue', newModelValue);
 
-  if (payload.familyId !== undefined) {
-    familyIdValid.value = !!rules.familyId.required(newModelValue.familyId ?? null);
-  }
   if (payload.memberId !== undefined) {
     memberIdValid.value = !!rules.memberId.required(newModelValue.memberId ?? null);
   }
@@ -181,13 +167,10 @@ const updateModelValue = (payload: Partial<MemberStoryDto>) => {
   if (payload.story !== undefined) {
     storyValid.value = !!rules.story.required(newModelValue.story ?? null);
   }
-  if (payload.lifeStage !== undefined) {
-    lifeStageValid.value = !!rules.lifeStage.required(newModelValue.lifeStage ?? null);
-  }
 };
 
 const formValid = computed(() => {
-  return familyIdValid.value && memberIdValid.value && titleValid.value && storyValid.value && lifeStageValid.value;
+  return memberIdValid.value && titleValid.value && storyValid.value;
 });
 
 const {

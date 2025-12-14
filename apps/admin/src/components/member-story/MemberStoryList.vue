@@ -34,9 +34,6 @@
       <template #item.lifeStage="{ item }">
         {{ item.lifeStage ? t(`lifeStage.${LifeStage[item.lifeStage]}`) : t('common.unknown') }}
       </template>
-      <template #item.location="{ item }">
-        {{ item.location }}
-      </template>
       <template #item.actions="{ item: rowItem }">
         <div v-if="canPerformActions">
           <v-tooltip :text="t('common.edit')">
@@ -114,7 +111,6 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('memberStory.list.headers.memberFullName'), key: 'memberFullName' },
   { title: t('memberStory.list.headers.year'), key: 'year' },
   { title: t('memberStory.list.headers.lifeStage'), key: 'lifeStage' },
-  { title: t('memberStory.list.headers.location'), key: 'location' },
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end', minWidth: '120px' },
 ]);
 

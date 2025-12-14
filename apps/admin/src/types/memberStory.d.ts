@@ -35,7 +35,7 @@ export interface MemberStoryDto {
   timeRangeDescription?: string | null;
   lifeStage?: LifeStage | null;
   location?: string | null;
-  storytellerId?: string | null;
+
   detectedFaces?: DetectedFace[];
   photo?: string | null;
   imageSize?: string | null;
