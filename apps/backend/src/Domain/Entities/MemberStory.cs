@@ -11,11 +11,8 @@ public class MemberStory : BaseAuditableEntity, ISoftDelete
     public Guid MemberId { get; set; }
     public string Title { get; set; } = string.Empty; // max 120
     public string Story { get; set; } = string.Empty; // long text
-
     public int? Year { get; set; }
     public string? TimeRangeDescription { get; set; }
-    public bool IsYearEstimated { get; set; }
-
     public LifeStage LifeStage { get; set; }
     public string? Location { get; set; }
 

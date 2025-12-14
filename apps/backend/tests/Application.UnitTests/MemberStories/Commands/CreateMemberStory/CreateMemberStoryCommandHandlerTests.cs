@@ -11,8 +11,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -21,25 +19,19 @@ namespace backend.Application.UnitTests.MemberStories.Commands.CreateMemberStory
 public class CreateMemberStoryCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<IStringLocalizer<CreateMemberStoryCommandHandler>> _localizerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<ILogger<CreateMemberStoryCommandHandler>> _loggerMock;
 
     private readonly CreateMemberStoryCommandHandler _handler;
 
     public CreateMemberStoryCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _localizerMock = new Mock<IStringLocalizer<CreateMemberStoryCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _loggerMock = new Mock<ILogger<CreateMemberStoryCommandHandler>>();
 
         _handler = new CreateMemberStoryCommandHandler(
             _context,
             _authorizationServiceMock.Object,
-            _localizerMock.Object,
-            _mediatorMock.Object,
-            _loggerMock.Object
+            _mediatorMock.Object
         );
 
     }
@@ -146,51 +138,74 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
-        var tempOriginalUrl1 = "http://temp.com/temp/original1.jpg";
-        var permanentOriginalUrl1 = "http://permanent.com/original1.jpg";
+                var tempOriginalUrl1 = "http://temp.com/temp/original1.jpg";
 
-        var tempOriginalUrl2 = "http://example.com/images/original2.png";
+                var permanentOriginalUrl1 = "http://permanent.com/original1.jpg";
 
-        // Setup mediator mocks for image uploads
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentOriginalUrl1 }));
+        
+
+                // Setup mediator mocks for image uploads
+
+                _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
+
+                    cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()))
+
+                    .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentOriginalUrl1 }));
+
+        
+
+        
+
+                var command = new CreateMemberStoryCommand
+
+                {
+
+                    MemberId = memberId,
+
+                    Title = "Story with Single Image",
+
+                    Story = "Content.",
+
+                    Year = 2000,
+
+                    LifeStage = LifeStage.Adulthood,
+
+                    TemporaryOriginalImageUrl = tempOriginalUrl1
+
+                };
+
+        
+
+                // Act
+
+                var result = await _handler.Handle(command, CancellationToken.None);
+
+        
+
+                // Assert
+
+                result.IsSuccess.Should().BeTrue();
+
+                var createdStory = await _context.MemberStories.Include(ms => ms.MemberStoryImages).FirstOrDefaultAsync(ms => ms.Id == result.Value);
+
+                createdStory.Should().NotBeNull();
+
+                createdStory!.MemberStoryImages.Should().HaveCount(1);
+
+        
+
+                var image1 = createdStory.MemberStoryImages.FirstOrDefault(img => img.ImageUrl == permanentOriginalUrl1);
+
+                image1.Should().NotBeNull();
+
+                image1!.ImageUrl.Should().Be(permanentOriginalUrl1);
+
+                // Verify mediator calls for only temp URLs
+                _mediatorMock.Verify(m => m.Send(It.Is<UploadFileFromUrlCommand>(cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()), Times.Once);
+                _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Total calls
 
 
-        var command = new CreateMemberStoryCommand
-        {
-            MemberId = memberId,
-            Title = "Story with Multiple Images",
-            Story = "Content.",
-            Year = 2000,
-            LifeStage = LifeStage.Adulthood,
-            MemberStoryImageUrls = new List<string>
-            {
-                tempOriginalUrl1,
-                tempOriginalUrl2
-            }
-        };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        var createdStory = await _context.MemberStories.Include(ms => ms.MemberStoryImages).FirstOrDefaultAsync(ms => ms.Id == result.Value);
-        createdStory.Should().NotBeNull();
-        createdStory!.MemberStoryImages.Should().HaveCount(2);
-
-        var image1 = createdStory.MemberStoryImages.FirstOrDefault(img => img.ImageUrl == permanentOriginalUrl1);
-        image1.Should().NotBeNull();
-        image1!.ImageUrl.Should().Be(permanentOriginalUrl1);
-
-        var image2 = createdStory.MemberStoryImages.FirstOrDefault(img => img.ImageUrl == tempOriginalUrl2);
-        image2.Should().NotBeNull();
-        image2!.ImageUrl.Should().Be(tempOriginalUrl2);
-
-        // Verify mediator calls for only temp URLs
-        _mediatorMock.Verify(m => m.Send(It.Is<UploadFileFromUrlCommand>(cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()), Times.Once);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Total calls
+        
     }
 
 

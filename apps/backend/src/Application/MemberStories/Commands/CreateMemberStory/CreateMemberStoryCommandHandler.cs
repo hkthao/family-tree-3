@@ -8,8 +8,6 @@ using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberStories;
 using backend.Domain.ValueObjects;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using static backend.Domain.Events.MemberStories.MemberStoryCreatedWithFacesEvent;
 namespace backend.Application.MemberStories.Commands.CreateMemberStory;
 
@@ -17,16 +15,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer;
     private readonly IMediator _mediator;
-    private readonly ILogger<CreateMemberStoryCommandHandler> _logger;
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator, ILogger<CreateMemberStoryCommandHandler> logger)
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _localizer = localizer;
         _mediator = mediator;
-        _logger = logger;
     }
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken)
     {
@@ -65,10 +59,9 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
 
         MemberStoryImage? primaryImage = null;
 
-        if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl) || !string.IsNullOrEmpty(request.TemporaryResizedImageUrl))
+        if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl))
         {
             string originalImageUrl = string.Empty;
-            string resizedImageUrl = string.Empty;
 
             if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl) && request.TemporaryOriginalImageUrl.Contains("/temp/"))
             {
@@ -89,31 +82,13 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             }
 
 
-            if (!string.IsNullOrEmpty(request.TemporaryResizedImageUrl) && request.TemporaryResizedImageUrl.Contains("/temp/"))
-            {
-                var resizedUploadResult = await UploadImageFromTempUrlAsync(
-                    request.TemporaryResizedImageUrl,
-                    "resized_image",
-                    familyId,
-                    cancellationToken);
-                if (!resizedUploadResult.IsSuccess)
-                {
-                    return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
-                }
-                resizedImageUrl = resizedUploadResult.Value?.Url ?? string.Empty;
-            }
-            else if (!string.IsNullOrEmpty(request.TemporaryResizedImageUrl))
-            {
-                resizedImageUrl = request.TemporaryResizedImageUrl;
-            }
 
-            if (!string.IsNullOrEmpty(originalImageUrl) || !string.IsNullOrEmpty(resizedImageUrl))
+
+            if (!string.IsNullOrEmpty(originalImageUrl))
             {
                 primaryImage = new MemberStoryImage
                 {
                     ImageUrl = originalImageUrl,
-                    ResizedImageUrl = resizedImageUrl,
-                    // Caption can be added from request if available
                 };
                 memberStory.MemberStoryImages.Add(primaryImage);
             }

@@ -14,8 +14,6 @@ public record CreateMemberStoryCommand : IRequest<Result<Guid>>
     public bool IsYearEstimated { get; init; }
     public LifeStage LifeStage { get; init; }
     public string? Location { get; init; }
-    public Guid? StorytellerId { get; init; }
-    public CertaintyLevel CertaintyLevel { get; init; }
     public List<DetectedFaceDto> DetectedFaces { get; init; } = new List<DetectedFaceDto>();
     // Property to hold image URLs that will be converted to MemberStoryImage entities
     public string? TemporaryOriginalImageUrl { get; init; }

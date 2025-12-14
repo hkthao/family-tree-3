@@ -123,9 +123,7 @@ public class MappingProfile : Profile
            .ForMember(dest => dest.MemberStoryImages, opt => opt.MapFrom(src => src.MemberStoryImages.Select(img => new MemberStoryImageDto
            {
                Id = img.Id,
-               ImageUrl = img.ImageUrl,
-               ResizedImageUrl = img.ResizedImageUrl,
-               Caption = img.Caption
+               ImageUrl = img.ImageUrl
            }).ToList()));
 
         // Mapping for MemberStoryImage to MemberStoryImageDto

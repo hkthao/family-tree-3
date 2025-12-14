@@ -108,14 +108,7 @@ public class CreateMemberStoryCommandValidatorTests
               .WithErrorMessage("Location must not exceed 200 characters.");
     }
 
-    [Fact]
-    public void ShouldHaveError_WhenCertaintyLevelIsInvalid()
-    {
-        var command = new CreateMemberStoryCommand { MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", CertaintyLevel = (CertaintyLevel)99 };
-        var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.CertaintyLevel)
-              .WithErrorMessage("Invalid Certainty Level.");
-    }
+
 
     [Fact]
     public void ShouldNotHaveError_WhenCommandIsValid()
@@ -129,9 +122,7 @@ public class CreateMemberStoryCommandValidatorTests
             TimeRangeDescription = "A specific period",
             IsYearEstimated = false,
             LifeStage = LifeStage.Adulthood,
-            Location = "Ho Chi Minh City",
-            StorytellerId = Guid.NewGuid(),
-            CertaintyLevel = CertaintyLevel.Sure
+            Location = "Ho Chi Minh City"
         };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();

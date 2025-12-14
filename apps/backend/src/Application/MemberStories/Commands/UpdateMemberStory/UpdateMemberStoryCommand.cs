@@ -11,9 +11,7 @@ public record UpdateMemberStoryCommand : IRequest<Result>
     public string Story { get; init; } = string.Empty;
     public int? Year { get; init; }
     public string? TimeRangeDescription { get; init; }
-    public bool IsYearEstimated { get; init; }
     public LifeStage LifeStage { get; init; }
     public string? Location { get; init; }
-    public Guid? StorytellerId { get; init; }
-    public CertaintyLevel CertaintyLevel { get; init; }
+    public List<string>? MemberStoryImageUrls { get; init; }
 }

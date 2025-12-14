@@ -28,7 +28,6 @@ public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberS
         RuleFor(v => v.Location)
             .MaximumLength(200).WithMessage("Location must not exceed 200 characters.");
 
-        RuleFor(v => v.CertaintyLevel)
-            .IsInEnum().WithMessage("Invalid Certainty Level.");
+
     }
 }
