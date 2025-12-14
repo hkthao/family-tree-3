@@ -19,6 +19,8 @@ public class MemberFaceDto
     public string? MemberName { get; set; }
     public string? MemberGender { get; set; } // NEW
     public string? MemberAvatarUrl { get; set; } // NEW
+    public int? BirthYear { get; set; }
+    public int? DeathYear { get; set; }
     public Guid? FamilyId { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }

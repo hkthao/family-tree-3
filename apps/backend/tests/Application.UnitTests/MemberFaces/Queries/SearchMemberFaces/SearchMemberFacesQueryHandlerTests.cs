@@ -1,4 +1,3 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -11,18 +10,16 @@ namespace backend.Application.UnitTests.MemberFaces.Queries.SearchMemberFaces;
 
 public class SearchMemberFacesQueryHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
 
     public SearchMemberFacesQueryHandlerTests()
     {
-        _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
-        _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
     }
 
     private SearchMemberFacesQueryHandler CreateSearchHandler()
     {
-        return new SearchMemberFacesQueryHandler(_context, _mockUser.Object, _authorizationServiceMock.Object); // Updated
+        return new SearchMemberFacesQueryHandler(_context, _mockUser.Object, _mockAuthorizationService.Object, _mapper);
     }
 
     private async Task SeedData(Family family, Member member, List<MemberFace> memberFaces)

@@ -91,8 +91,17 @@ public class MappingProfile : Profile
         CreateMap<PdfTemplate, PdfTemplateDto>();
 
         CreateMap<MemberFace, MemberFaceDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.Family.AvatarUrl : null));
+            .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? (src.Member.LastName + " " + src.Member.FirstName).Trim() : null))
+            .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
+            .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
+            .ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.Member != null ? src.Member.FamilyId : (Guid?)null))
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Member != null && src.Member.Family != null ? src.Member.Family.Name : null))
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Member != null && src.Member.Family != null ? src.Member.Family.AvatarUrl : null))
+            .ForMember(dest => dest.BirthYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfBirth.HasValue ? src.Member.DateOfBirth.Value.Year : (int?)null))
+            .ForMember(dest => dest.DeathYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfDeath.HasValue ? src.Member.DateOfDeath.Value.Year : (int?)null));
+
+        CreateMap<backend.Domain.ValueObjects.BoundingBox, backend.Application.MemberFaces.Common.BoundingBoxDto>();
+
 
         // PrivacyConfiguration mapping (already exists, ensuring no duplication)
         CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()

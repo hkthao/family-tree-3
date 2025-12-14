@@ -1,4 +1,7 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -10,17 +13,27 @@ using Xunit;
 namespace backend.Application.UnitTests.MemberFaces.Queries.GetMemberFaceById;
 
 public class GetMemberFaceByIdQueryHandlerTests : TestBase
+
 {
 
     public GetMemberFaceByIdQueryHandlerTests()
+
     {
+
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Default non-admin
+
         _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+
     }
 
+
+
     private GetMemberFaceByIdQueryHandler CreateGetByIdHandler()
+
     {
-        return new GetMemberFaceByIdQueryHandler(_context, _mockUser.Object, _mockAuthorizationService.Object); // Updated
+
+        return new GetMemberFaceByIdQueryHandler(_context, _mockUser.Object, _mockAuthorizationService.Object, _mapper);
+
     }
 
     [Fact]

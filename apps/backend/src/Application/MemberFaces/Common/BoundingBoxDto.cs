@@ -2,8 +2,8 @@ namespace backend.Application.MemberFaces.Common;
 
 public class BoundingBoxDto
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Width { get; set; }
+    public double Height { get; set; }
 }
