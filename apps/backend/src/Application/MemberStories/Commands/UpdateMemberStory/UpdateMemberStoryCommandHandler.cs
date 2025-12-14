@@ -54,36 +54,15 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
             request.Location
         );
 
-        // Logic to update MemberStoryImages
-        var existingImages = memberStory.MemberStoryImages.ToList();
+        // Remove existing images that are no longer in the request
         var incomingImageUrls = request.MemberStoryImageUrls ?? new List<string>();
+        var existingImages = await _context.MemberStoryImages.Where(x => x.MemberStoryId == memberStory.Id).ToListAsync(cancellationToken);
+        _context.MemberStoryImages.RemoveRange(existingImages.Where(ei => !incomingImageUrls.Contains(ei.ImageUrl)));
 
-        // 1. Remove images no longer in the request
-        var imagesToRemove = new List<MemberStoryImage>();
-        foreach (var existingImage in existingImages)
-        {
-            bool isFound = false;
-            if (existingImage.ImageUrl != null && incomingImageUrls.Contains(existingImage.ImageUrl))
-            {
-                isFound = true;
-            }
-            
-            if (!isFound)
-            {
-                imagesToRemove.Add(existingImage);
-            }
-        }
-        foreach (var image in imagesToRemove)
-        {
-            _context.MemberStoryImages.Remove(image);
-        }
-
-        // 2. Add new images and update existing ones
+        // Add new images
         foreach (var imageUrl in incomingImageUrls)
         {
-            var existingImage = existingImages.FirstOrDefault(ei => ei.ImageUrl != null && ei.ImageUrl == imageUrl);
-
-            if (existingImage == null)
+            if (!existingImages.Any(ei => ei.ImageUrl == imageUrl)) // Only add if it's a new image
             {
                 // New image, process and add
                 string processedImageUrl = imageUrl;
@@ -115,8 +94,7 @@ public class UpdateMemberStoryCommandHandler : IRequestHandler<UpdateMemberStory
                     });
                 }
             }
-            // If existingImage is not null, it means the URL is already present, no update needed as List<string> provides no caption.
-        }        
+        }
         await _context.SaveChangesAsync(cancellationToken);
 
         // Publish notification for story update

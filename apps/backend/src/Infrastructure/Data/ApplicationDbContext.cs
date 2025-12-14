@@ -78,6 +78,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
     /// </summary>
     public DbSet<MemberStory> MemberStories => Set<MemberStory>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
+    /// </summary>
+    public DbSet<MemberStoryImage> MemberStoryImages => Set<MemberStoryImage>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
