@@ -1,6 +1,5 @@
 <template>
   <v-form ref="form" @submit.prevent>
-    <v-container>
       <v-row>
         <v-col cols="12" md="6">
           <v-text-field v-model="state.memberId" :label="t('memberFace.form.memberId')"
@@ -65,7 +64,6 @@
             rows="2" data-testid="memberFace-embedding"></v-textarea>
         </v-col>
       </v-row>
-    </v-container>
   </v-form>
 </template>
 <script setup lang="ts">

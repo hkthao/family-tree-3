@@ -1,13 +1,14 @@
 <template>
   <v-container>
     <!-- Member Selection -->
-    <div v-if="isLoading" class="overlay">
-      <v-progress-circular color="primary" indeterminate></v-progress-circular>
+    <div v-if="isLoading" class="my-4">
+      <v-progress-linear color="primary" indeterminate></v-progress-linear>
     </div>
+
     <v-row>
       <v-col cols="12" sm="6">
-        <FamilyAutocomplete :model-value="props.familyId"
-          :readonly="true" :label="t('memberStory.form.familyIdLabel')" :rules="[rules.familyId.required]" />
+        <FamilyAutocomplete :model-value="props.familyId" :readonly="true" :label="t('memberStory.form.familyIdLabel')"
+          :rules="[rules.familyId.required]" />
       </v-col>
       <v-col cols="12" sm="6">
         <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!props.familyId"
@@ -16,82 +17,37 @@
           :rules="[rules.memberId.required]" />
       </v-col>
     </v-row>
-    <!-- Photo Upload Input -->
-    <v-row v-if="modelValue.memberId">
-      <v-col cols="12">
-        <v-carousel v-if="modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0" cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
-          <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
-            <v-img :src="image.imageUrl ?? ''" cover class="fill-height"></v-img>
-          </v-carousel-item>
-        </v-carousel>
-        <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
-      </v-col>
-      <!-- Face Detection and Selection -->
-      <v-col cols="12">
-        <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
-          <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
-            <FaceBoundingBoxViewer :image-src="modelValue.temporaryOriginalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''" :faces="modelValue.detectedFaces"
-              selectable @face-selected="openSelectMemberDialog" />
-            <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
-              @remove-face="handleRemoveFace" />
-          </div>
-          <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
-        </div>
-        <v-alert v-else type="info">{{
-          t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
-      </v-col>
-    </v-row>
 
     <!-- New fields for Life Story -->
     <v-row>
       <v-col cols="12" sm="6">
-        <v-text-field
-          :model-value="modelValue.year"
+        <v-text-field :model-value="modelValue.year"
           @update:model-value="(newValue) => { updateModelValue({ year: parseInt(newValue) || null }); }"
-          :label="t('memberStory.form.yearLabel')"
-          type="number"
-          :readonly="readonly"
-          :rules="[rules.year.valid]"
-        ></v-text-field>
+          :label="t('memberStory.form.yearLabel')" type="number" :readonly="readonly"
+          :rules="[rules.year.valid]"></v-text-field>
       </v-col>
       <v-col cols="12" sm="6">
-        <v-select
-          :model-value="modelValue.lifeStage"
+        <v-select :model-value="modelValue.lifeStage"
           @update:model-value="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
-          :label="t('memberStory.form.lifeStageLabel')"
-          :items="lifeStageOptions"
-          item-title="text"
-          item-value="value"
-          :readonly="readonly"
-          :rules="[rules.lifeStage.required]"
-        ></v-select>
+          :label="t('memberStory.form.lifeStageLabel')" :items="lifeStageOptions" item-title="text" item-value="value"
+          :readonly="readonly" :rules="[rules.lifeStage.required]"></v-select>
       </v-col>
       <v-col cols="12">
-        <v-text-field
-          :model-value="modelValue.timeRangeDescription"
+        <v-text-field :model-value="modelValue.timeRangeDescription"
           @update:model-value="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
-          :label="t('memberStory.form.timeRangeDescriptionLabel')"
-          :readonly="readonly"
-          :rules="[rules.timeRangeDescription.maxLength]"
-        ></v-text-field>
+          :label="t('memberStory.form.timeRangeDescriptionLabel')" :readonly="readonly"
+          :rules="[rules.timeRangeDescription.maxLength]"></v-text-field>
       </v-col>
       <v-col cols="12">
-        <v-text-field
-          :model-value="modelValue.location"
+        <v-text-field :model-value="modelValue.location"
           @update:model-value="(newValue) => { updateModelValue({ location: newValue }); }"
-          :label="t('memberStory.form.locationLabel')"
-          :readonly="readonly"
-          :rules="[rules.location.maxLength]"
-        ></v-text-field>
+          :label="t('memberStory.form.locationLabel')" :readonly="readonly"
+          :rules="[rules.location.maxLength]"></v-text-field>
       </v-col>
       <v-col cols="12">
-        <MemberAutocomplete
-          :model-value="modelValue.storytellerId"
+        <MemberAutocomplete :model-value="modelValue.storytellerId"
           @update:modelValue="(newValue: string | null) => { updateModelValue({ storytellerId: newValue || null }); }"
-          :readonly="readonly"
-          :family-id="modelValue.familyId"
-          :label="t('memberStory.form.storytellerLabel')"
-        />
+          :readonly="readonly" :family-id="modelValue.familyId" :label="t('memberStory.form.storytellerLabel')" />
       </v-col>
     </v-row>
 
@@ -106,6 +62,34 @@
           @update:model-value="(newValue) => { updateModelValue({ story: newValue }); }"
           :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow :rules="[rules.story.required]"
           :readonly="readonly" />
+      </v-col>
+    </v-row>
+
+    <!-- Photo Upload Input -->
+    <v-row v-if="modelValue.memberId">
+      <v-col cols="12">
+        <v-carousel v-if="modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0" cycle
+          hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
+          <v-carousel-item v-for="(image, i) in modelValue.memberStoryImages" :key="i">
+            <v-img :src="image.imageUrl ?? ''" cover class="fill-height"></v-img>
+          </v-carousel-item>
+        </v-carousel>
+        <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
+      </v-col>
+      <!-- Face Detection and Selection -->
+      <v-col cols="12">
+        <div v-if="hasUploadedImage || (modelValue.memberStoryImages && modelValue.memberStoryImages.length > 0)">
+          <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
+            <FaceBoundingBoxViewer
+              :image-src="modelValue.temporaryOriginalImageUrl || modelValue.memberStoryImages?.[0]?.imageUrl || ''"
+              :faces="modelValue.detectedFaces" selectable @face-selected="openSelectMemberDialog" />
+            <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
+              @remove-face="handleRemoveFace" />
+          </div>
+          <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
+        </div>
+        <v-alert v-else type="info">{{
+          t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
       </v-col>
     </v-row>
 

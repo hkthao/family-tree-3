@@ -102,13 +102,6 @@ export interface UpdateMemberFaceCommand {
   id: string; // ID of the member face to update
   memberId: string;
   familyId: string;
-  // Potentially updateable fields
-  // For simplicity, assuming only memberId and familyId might change, or other metadata.
-  // Full update would include boundingBox, confidence etc.
-  // For now, let's just include description as it's the main editable field in many forms.
-  // If the form allows updating bounding box, etc., they should be added here.
-  // Based on the edit view, it seems only description (or relinking member) is the primary edit.
-  // Let's match the backend command's expected fields for update.
   boundingBox?: BoundingBox;
   confidence?: number;
   thumbnail?: string; // Base64 encoded cropped face image

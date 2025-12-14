@@ -1,9 +1,13 @@
 <template>
   <div data-testid="prompt-list-view">
-    <PromptList :items="promptStore.list.items" :total-items="promptStore.list.totalItems" :loading="list.loading"
-      :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
+    <PromptList :items="items" :total-items="totalItems" :loading="loading"
+      :items-per-page="(listOptions.itemsPerPage as number)" :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer">
     </PromptList>
+
+    <v-alert v-if="isListError" type="error" dismissible class="mt-4">
+      {{ listError?.message || t('prompt.list.loadError') }}
+    </v-alert>
 
     <!-- Edit Prompt Drawer -->
     <BaseCrudDrawer v-model="editDrawer" :title="t('prompt.form.editTitle')" icon="mdi-pencil" @close="closeEditDrawer">
@@ -26,18 +30,35 @@
 </template>
 
 <script setup lang="ts">
-import { usePromptStore } from '@/stores/prompt.store';
 import { PromptList } from '@/components/prompt';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import type { Prompt } from '@/types';
-import { useI18n } from 'vue-i18n'; // Import useI18n
-import { storeToRefs } from 'pinia'; // Import storeToRefs
-import { ref, onMounted } from 'vue'; // Import ref and onMounted
+import { useI18n } from 'vue-i18n';
+import { ref, reactive, computed } from 'vue';
+import { usePromptsQuery, useDeletePromptMutation } from '@/composables/prompt';
+import type { PromptListOptions } from '@/composables/prompt/usePromptsQuery';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import PromptAddView from './PromptAddView.vue';
+import PromptEditView from './PromptEditView.vue';
+import PromptDetailView from './PromptDetailView.vue';
 
 const { t } = useI18n();
-const promptStore = usePromptStore();
-const { list } = storeToRefs(promptStore);
+
 const searchQuery = ref('');
+
+const listOptions = reactive<PromptListOptions>({
+  page: 1,
+  itemsPerPage: 10,
+  sortBy: [],
+  searchQuery: searchQuery.value,
+});
+
+const { data: promptsData, isLoading: isListLoading, isError: isListError, error: listError } = usePromptsQuery(listOptions);
+const { mutateAsync: deletePrompt, isPending: isDeletingPrompt } = useDeletePromptMutation();
+
+const items = computed(() => promptsData.value?.items || []);
+const totalItems = computed(() => promptsData.value?.totalItems || 0);
+const loading = computed(() => isListLoading.value || isDeletingPrompt.value);
 
 const {
   addDrawer,
@@ -56,10 +77,9 @@ const {
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-const handleSearchUpdate = async (search: string) => {
+const handleSearchUpdate = (search: string) => {
   searchQuery.value = search;
-  promptStore.list.filters = { ...promptStore.list.filters, searchQuery: searchQuery.value };
-  await promptStore._loadItems();
+  listOptions.searchQuery = search;
 };
 
 const handleListOptionsUpdate = (options: {
@@ -67,7 +87,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  promptStore.setListOptions(options);
+  listOptions.page = options.page;
+  listOptions.itemsPerPage = options.itemsPerPage;
+  listOptions.sortBy = options.sortBy;
 };
 
 const confirmDelete = async (prompt: Prompt) => {
@@ -86,28 +108,17 @@ const confirmDelete = async (prompt: Prompt) => {
 
 const handleDeleteConfirm = async (prompt: Prompt) => {
   if (prompt) {
-    await promptStore.deleteItem(prompt.id);
-    if (promptStore.error) {
-      showSnackbar(
-        t('prompt.messages.deleteError', { error: promptStore.error }),
-        'error',
-      );
-    } else {
-      showSnackbar(
-        t('prompt.messages.deleteSuccess'),
-        'success',
-      );
+    try {
+      await deletePrompt(prompt.id);
+      showSnackbar(t('prompt.messages.deleteSuccess'), 'success');
+    } catch (error) {
+      showSnackbar((error as Error).message || t('prompt.messages.deleteError'), 'error');
     }
   }
-  promptStore._loadItems();
 };
 
 const handlePromptSaved = () => {
   closeAllDrawers(); // Close whichever drawer was open
-  promptStore._loadItems(); // Reload list after save
+  // Query invalidation handles refetching
 };
-
-onMounted(() => {
-  promptStore._loadItems();
-})
 </script>

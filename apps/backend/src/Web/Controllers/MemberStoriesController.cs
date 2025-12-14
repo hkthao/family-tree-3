@@ -98,7 +98,7 @@ public class MemberStoriesController : ControllerBase // Updated
     /// <summary>
     /// Gets detailed information for a specific member story.
     /// </summary>
-    [HttpGet("detail/{memberStoryId}")] // Updated
+    [HttpGet("{memberStoryId}")] // Updated
     [ProducesResponseType(typeof(MemberStoryDto), StatusCodes.Status200OK)] // Updated
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
