@@ -20,7 +20,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberFaceForm } from '@/components/member-face';
-import type { MemberFace, UpdateMemberFaceCommand } from '@/types';
+import type { UpdateMemberFaceCommand } from '@/types';
 import { useMemberFaceDetailQuery, useUpdateMemberFaceMutation } from '@/composables/member-face';
 import { useMemberFaceFormLogic } from '@/composables/member-face/useMemberFaceFormLogic';
 

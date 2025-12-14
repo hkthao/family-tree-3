@@ -1,10 +1,10 @@
 <template>
   <div>
     <MemberStoryList
-      :items="memberStoryStore.list.items"
-      :total-items="memberStoryStore.list.totalItems"
-      :loading="memberStoryStore.list.loading"
-      :items-per-page="memberStoryStore.list.itemsPerPage"
+      :items="items"
+      :total-items="totalItems"
+      :loading="loading"
+      :items-per-page="(listOptions.itemsPerPage as number)"
       :search="searchQuery"
       @update:options="handleListOptionsUpdate"
       @update:search="handleSearchUpdate"
@@ -13,6 +13,10 @@
       @delete="confirmDelete"
       @create="openAddDrawer"
     />
+
+    <v-alert v-if="isListError" type="error" dismissible class="mt-4">
+      {{ listError?.message || t('memberStory.list.loadError') }}
+    </v-alert>
 
     <!-- Add MemberStory Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberStoryClosed">
@@ -33,11 +37,12 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref } from 'vue';
+import { watch, ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar, useAuth } from '@/composables';
-import { useMemberStoryStore } from '@/stores/memberStory.store';
+import { useMemberStoriesQuery, useDeleteMemberStoryMutation } from '@/composables/memberStory';
+import type { MemberStoryListOptions } from '@/composables/memberStory/useMemberStoriesQuery'; // Import interface
 import type { MemberStoryDto } from '@/types/memberStory';
 import MemberStoryAddView from './MemberStoryAddView.vue';
 import MemberStoryEditView from './MemberStoryEditView.vue';
@@ -54,18 +59,12 @@ interface MemberStoryListViewProps {
 const props = defineProps<MemberStoryListViewProps>();
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore();
-const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
-
-// No need to destructure isAdmin, isFamilyManager if not used directly here
-useAuth(); // NEW: Use auth composable (just call it if no destructuring needed)
-
 const {
   addDrawer,
   editDrawer,
   detailDrawer,
   selectedItemId,
-  openAddDrawer, // Use directly from useCrudDrawer
+  openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
   closeAllDrawers,
@@ -73,6 +72,30 @@ const {
 
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
+
+const searchQuery = ref(''); // Use a ref to hold the current search query for filtering
+useAuth();
+
+const listOptions = reactive<MemberStoryListOptions>({
+  page: 1,
+  itemsPerPage: 10,
+  sortBy: [],
+  searchQuery: '',
+  memberId: props.memberId,
+  familyId: props.familyId,
+});
+
+const { data: memberStoriesData, isLoading: isListLoading, isError: isListError, error: listError } = useMemberStoriesQuery(listOptions);
+const { mutateAsync: deleteMemberStory, isPending: isDeleting } = useDeleteMemberStoryMutation();
+
+const items = computed(() => memberStoriesData.value?.items || []);
+const totalItems = computed(() => memberStoriesData.value?.totalItems || 0);
+const loading = computed(() => isListLoading.value || isDeleting.value);
+
+watch([() => props.memberId, () => props.familyId], ([newMemberId, newFamilyId]) => {
+  listOptions.memberId = newMemberId;
+  listOptions.familyId = newFamilyId;
+}, { immediate: true });
 
 const confirmDelete = async (item: MemberStoryDto) => {
   const confirmed = await showConfirmDialog({
@@ -90,25 +113,15 @@ const confirmDelete = async (item: MemberStoryDto) => {
 
 const handleDeleteConfirm = async (item: MemberStoryDto) => {
   if (item && item.id) {
-    await memberStoryStore.deleteItem(item.id);
-    if (memberStoryStore.error) {
-      showSnackbar(
-        t('memberStory.messages.deleteError', { error: memberStoryStore.error }),
-        'error',
-      );
-    } else {
-      showSnackbar(
-        t('memberStory.messages.deleteSuccess'),
-        'success',
-      );
+    try {
+      await deleteMemberStory(item.id);
+      showSnackbar(t('memberStory.messages.deleteSuccess'), 'success');
+    } catch (error) {
+      showSnackbar((error as Error).message, 'error');
     }
   } else {
-    showSnackbar(
-      t('memberStory.messages.deleteError', { error: t('common.invalidId') }),
-      'error',
-    );
+    showSnackbar(t('memberStory.messages.deleteError', { error: t('common.invalidId') }), 'error');
   }
-  memberStoryStore._loadItems();
 };
 
 const handleListOptionsUpdate = (options: {
@@ -116,7 +129,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  memberStoryStore.setListOptions(options); // Updated
+  listOptions.page = options.page;
+  listOptions.itemsPerPage = options.itemsPerPage;
+  listOptions.sortBy = options.sortBy;
 };
 
 const handleMemberStoryClosed = () => {
@@ -125,28 +140,11 @@ const handleMemberStoryClosed = () => {
 
 const handleMemberStorySaved = () => {
   closeAllDrawers();
-  memberStoryStore._loadItems();
 };
 
 const handleSearchUpdate = async (search: string) => {
   const processedSearch = removeDiacritics(search);
-  searchQuery.value = search; // Giữ nguyên chuỗi tìm kiếm gốc cho hiển thị nếu cần
-  memberStoryStore.setFilters({ searchQuery: processedSearch, memberId: props.memberId });
-  memberStoryStore._loadItems();
+  searchQuery.value = search;
+  listOptions.searchQuery = processedSearch;
 };
-
-// Watch for changes in memberId prop to update filters and reload items
-watch(() => [props.memberId, props.familyId], ([newMemberId, newFamilyId]) => {
-  memberStoryStore.setFilters({
-    memberId: newMemberId || undefined,
-    familyId: newFamilyId,
-    searchQuery: searchQuery.value
-  });
-  memberStoryStore._loadItems();
-}, { immediate: true });
-
-
-
-
-
 </script>

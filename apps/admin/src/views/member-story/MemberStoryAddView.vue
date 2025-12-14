@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStoryStore } from '@/stores/memberStory.store';
+import { useCreateMemberStoryMutation } from '@/composables/memberStory';
 import { useGlobalSnackbar } from '@/composables';
 import type { MemberStoryDto } from '@/types/memberStory';
 
@@ -35,10 +35,9 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 const memberStoryFormRef = ref<InstanceType<typeof MemberStoryForm> | null>(null);
-const isSaving = ref(false);
+const { mutateAsync: createMemberStory, isPending: isSaving } = useCreateMemberStoryMutation();
 const editedMemberStory = ref<MemberStoryDto>({
   memberId: props.memberId || '',
   familyId: props.familyId, // Initialize with prop familyId
@@ -59,7 +58,6 @@ const handleSave = async () => {
     return;
   }
 
-  isSaving.value = true;
   try {
     const createPayload: Omit<MemberStoryDto, 'id'> = {
       memberId: editedMemberStory.value.memberId,
@@ -75,18 +73,12 @@ const handleSave = async () => {
       temporaryResizedImageUrl: editedMemberStory.value.temporaryResizedImageUrl,
     };
 
-    const result = await memberStoryStore.addItem(createPayload);
-    if (result.ok) {
-      showSnackbar(t('memberStory.create.saveSuccess'), 'success');
-      emit('saved');
-    } else {
-      showSnackbar(result.error?.message || t('common.saveError'), 'error');
-    }
+    await createMemberStory(createPayload);
+    showSnackbar(t('memberStory.create.saveSuccess'), 'success');
+    emit('saved');
   } catch (error) {
     console.error('Error saving member story:', error);
     showSnackbar((error as Error).message, 'error');
-  } finally {
-    isSaving.value = false;
   }
 };
 

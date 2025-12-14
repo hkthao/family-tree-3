@@ -34,10 +34,10 @@
       </v-card-actions>
     </v-card>
 
-    <v-alert v-else-if="memberStoryStore.error" type="error" dismissible class="mt-4">
-      {{ memberStoryStore.error }}
+    <v-alert v-else-if="isError" type="error" dismissible class="mt-4">
+      {{ error?.message || t('memberStory.detail.loadError') }}
     </v-alert>
-    <v-progress-linear v-else indeterminate color="primary" class="mt-4"></v-progress-linear>
+    <v-progress-linear v-else-if="isLoading" indeterminate color="primary" class="mt-4"></v-progress-linear>
   </v-container>
 </template>
 
@@ -49,9 +49,9 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStoryStore } from '@/stores/memberStory.store';
+import { useMemberStoryQuery } from '@/composables/memberStory';
 import { useGlobalSnackbar } from '@/composables';
 import type { MemberStoryDto } from '@/types/memberStory';
 import { getAvatarUrl } from '@/utils/avatar.utils';
@@ -64,29 +64,17 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'edit-item']);
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
-const memberStory = ref<MemberStoryDto | null>(null);
+const { data: memberStory, isLoading, isError, error } = useMemberStoryQuery(toRef(props, 'memberStoryId'));
 
-const fetchMemberStory = async (id: string) => {
-  memberStory.value = await memberStoryStore.getById(id) || null;
-  if (!memberStory.value) {
+watch([isLoading, isError, memberStory], () => {
+  if (!isLoading.value && isError.value) {
+    showSnackbar(error.value?.message || t('memberStory.detail.notFound'), 'error');
+  } else if (!isLoading.value && !memberStory.value) {
     showSnackbar(t('memberStory.detail.notFound'), 'error');
   }
-};
-
-onMounted(() => {
-  if (props.memberStoryId) {
-    fetchMemberStory(props.memberStoryId);
-  }
-});
-
-watch(() => props.memberStoryId, (newId) => {
-  if (newId) {
-    fetchMemberStory(newId);
-  }
-});
+}, { immediate: true });
 </script>
 <style scoped>
 .meta-data {

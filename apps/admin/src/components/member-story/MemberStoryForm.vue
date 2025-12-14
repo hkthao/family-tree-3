@@ -211,7 +211,6 @@ const {
   openSelectMemberDialog,
   handleLabelFaceAndCloseDialog,
   handleRemoveFace,
-  memberStoryStoreFaceRecognition,
 } = useMemberStoryForm({
   modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
@@ -222,7 +221,6 @@ const {
 
 defineExpose({
   isValid: computed(() => formValid.value),
-  memoryFaceStore: memberStoryStoreFaceRecognition,
 });
 </script>
 
