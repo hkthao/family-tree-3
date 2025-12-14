@@ -1,13 +1,7 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
-import type { Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
-
-export interface PrivacyConfiguration {
-  id: string;
-  familyId: string;
-  publicMemberProperties: string[];
-}
+import type { ApiError, Result } from '@/types';
+import type { PrivacyConfiguration } from '@/types';
 
 export const usePrivacyConfigurationStore = defineStore('privacyConfiguration', {
   state: () => ({

@@ -1,4 +1,4 @@
-using System.Text.Json;
+using backend.Application.AI.DTOs; // For GenerateRequest
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -14,12 +14,12 @@ namespace backend.Application.UnitTests.MemberStories.Commands.GenerateStory; //
 
 public class GenerateStoryCommandTests : TestBase
 {
-    private readonly Mock<IN8nService> _n8nServiceMock;
+    private readonly Mock<IAiGenerateService> _aiGenerateServiceMock;
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
 
     public GenerateStoryCommandTests() : base()
     {
-        _n8nServiceMock = new Mock<IN8nService>();
+        _aiGenerateServiceMock = new Mock<IAiGenerateService>();
         _authorizationServiceMock = new Mock<IAuthorizationService>(); // Mock AuthorizationService
     }
 
@@ -28,7 +28,7 @@ public class GenerateStoryCommandTests : TestBase
         return new GenerateStoryCommandHandler(
             _context,
             _authorizationServiceMock.Object,
-            _n8nServiceMock.Object
+            _aiGenerateServiceMock.Object
         );
     }
 
@@ -59,6 +59,11 @@ public class GenerateStoryCommandTests : TestBase
         var member = new Member("Last", "First", "CODE", familyId, false);
         member.SetId(memberId);
         _context.Members.Add(member);
+
+        // Add prompt for BuildSystemPrompt
+        var promptCode = PromptConstants.StoryGenerationPromptCode;
+        var promptEntity = new Prompt { Code = promptCode, Content = "Test Story Prompt", Title = "Story Generation Prompt" };
+        _context.Prompts.Add(promptEntity);
         await _context.SaveChangesAsync();
 
         var command = new GenerateStoryCommand { MemberId = memberId };
@@ -74,8 +79,6 @@ public class GenerateStoryCommandTests : TestBase
         result.Error.Should().Contain(ErrorMessages.AccessDenied);
     }
 
-
-
     [Fact]
     public async Task Handle_ShouldGenerateStorySuccessfully()
     {
@@ -88,6 +91,11 @@ public class GenerateStoryCommandTests : TestBase
         var member = new Member("Last", "First", "CODE", familyId, false);
         member.SetId(memberId);
         _context.Members.Add(member);
+
+        // Add prompt for BuildSystemPrompt
+        var promptCode = PromptConstants.StoryGenerationPromptCode;
+        var promptEntity = new Prompt { Code = promptCode, Content = "Test Story Prompt", Title = "Story Generation Prompt" };
+        _context.Prompts.Add(promptEntity);
         await _context.SaveChangesAsync();
 
         var command = new GenerateStoryCommand { MemberId = memberId, Style = "nostalgic", RawText = "User provided some context." };
@@ -103,11 +111,10 @@ public class GenerateStoryCommandTests : TestBase
             Keywords = new[] { "Nguyễn Văn A", "gia đình" }
         };
 
-        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
-            It.IsAny<string>(), // sessionId
-            It.IsAny<string>(), // message
+        _aiGenerateServiceMock.Setup(s => s.GenerateDataAsync<GenerateStoryResponseDto>(
+            It.IsAny<GenerateRequest>(), // Expect GenerateRequest
             It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success(JsonSerializer.Serialize(generatedStoryResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })));
+        )).ReturnsAsync(Result<GenerateStoryResponseDto>.Success(generatedStoryResponse));
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -120,7 +127,7 @@ public class GenerateStoryCommandTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nServiceFails()
+    public async Task Handle_ShouldReturnFailure_WhenAiServiceFails()
     {
         // Arrange
         var memberId = Guid.NewGuid();
@@ -131,6 +138,11 @@ public class GenerateStoryCommandTests : TestBase
         var member = new Member("Last", "First", "CODE", familyId, false);
         member.SetId(memberId);
         _context.Members.Add(member);
+
+        // Add prompt for BuildSystemPrompt
+        var promptCode = PromptConstants.StoryGenerationPromptCode;
+        var promptEntity = new Prompt { Code = promptCode, Content = "Test Story Prompt", Title = "Story Generation Prompt" };
+        _context.Prompts.Add(promptEntity);
         await _context.SaveChangesAsync();
 
         var command = new GenerateStoryCommand { MemberId = memberId, Style = "nostalgic", RawText = "User provided some context." };
@@ -138,83 +150,41 @@ public class GenerateStoryCommandTests : TestBase
 
         _authorizationServiceMock.Setup(a => a.CanAccessFamily(familyId)).Returns(true);
 
-        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
-            It.IsAny<string>(), // sessionId
-            It.IsAny<string>(), // message
+        _aiGenerateServiceMock.Setup(s => s.GenerateDataAsync<GenerateStoryResponseDto>(
+            It.IsAny<GenerateRequest>(),
             It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Failure("N8n service error.", ErrorSources.ExternalServiceError));
+        )).ReturnsAsync(Result<GenerateStoryResponseDto>.Failure("AI service error.", ErrorSources.ExternalServiceError));
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("N8n service error.");
+        result.Error.Should().Contain("AI service error.");
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsInvalidJson()
+    public async Task BuildSystemPrompt_ShouldReturnCorrectPrompt()
     {
         // Arrange
-        var memberId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "FAMCODE" };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
-        var member = new Member("Last", "First", "CODE", familyId, false);
-        member.SetId(memberId);
-        _context.Members.Add(member);
+        var promptCode = PromptConstants.StoryGenerationPromptCode;
+        var expectedPromptContent = "Generate a compelling story based on the provided data.";
+        var promptEntity = new Prompt { Code = promptCode, Content = expectedPromptContent, Title = "Story Generation Prompt" };
+        _context.Prompts.Add(promptEntity);
         await _context.SaveChangesAsync();
 
-        var command = new GenerateStoryCommand { MemberId = memberId, Style = "nostalgic", RawText = "User provided some context." };
         var handler = CreateHandler();
 
-        _authorizationServiceMock.Setup(a => a.CanAccessFamily(familyId)).Returns(true);
-
-        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
-            It.IsAny<string>(), // sessionId
-            It.IsAny<string>(), // message
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("{invalid json"));
+        // Use reflection to call the private method BuildSystemPrompt
+        var method = typeof(GenerateStoryCommandHandler).GetMethod("BuildSystemPrompt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method.Should().NotBeNull(); // Ensure method was found
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var invokedTask = method!.Invoke(handler, new object[] { Guid.NewGuid() }) as Task<string>;
+        invokedTask.Should().NotBeNull(); // Ensure the invoked result is a Task<string>
+        var result = await invokedTask!;
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Tạo câu chuyện từ n8n trả về phản hồi không hợp lệ");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenN8nReturnsEmptyResponse()
-    {
-        // Arrange
-        var memberId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "FAMCODE" };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
-        var member = new Member("Last", "First", "CODE", familyId, false);
-        member.SetId(memberId);
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
-
-        var command = new GenerateStoryCommand { MemberId = memberId, Style = "nostalgic", RawText = "User provided some context." };
-        var handler = CreateHandler();
-
-        _authorizationServiceMock.Setup(a => a.CanAccessFamily(familyId)).Returns(true);
-
-        _n8nServiceMock.Setup(s => s.CallChatWebhookAsync(
-            It.IsAny<string>(), // sessionId
-            It.IsAny<string>(), // message
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("")); // Empty response
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Tạo câu chuyện từ n8n trả về phản hồi rỗng.");
+        result.Should().Be(expectedPromptContent);
     }
 }

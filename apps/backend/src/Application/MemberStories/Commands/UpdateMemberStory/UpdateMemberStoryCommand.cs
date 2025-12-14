@@ -1,13 +1,17 @@
 using backend.Application.Common.Models;
+using backend.Domain.Enums;
 
-namespace backend.Application.MemberStories.Commands.UpdateMemberStory; // Updated
+namespace backend.Application.MemberStories.Commands.UpdateMemberStory;
 
-public record UpdateMemberStoryCommand : IRequest<Result> // Updated
+public record UpdateMemberStoryCommand : IRequest<Result>
 {
     public Guid Id { get; init; }
     public Guid MemberId { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Story { get; init; } = string.Empty;
-    public string? StoryStyle { get; init; }
-    public string? Perspective { get; init; }
+    public int? Year { get; init; }
+    public string? TimeRangeDescription { get; init; }
+    public LifeStage LifeStage { get; init; }
+    public string? Location { get; init; }
+    public List<string>? MemberStoryImageUrls { get; init; }
 }

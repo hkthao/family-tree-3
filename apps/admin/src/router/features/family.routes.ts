@@ -1,4 +1,4 @@
-import { MainRouterView, FamilyAddView, FamilyDetailView, FamilyEditView, FamilyListView, FamilyTreeView } from '@/views';
+import { MainRouterView, FamilyAddView, FamilyTabsView, FamilyEditView, FamilyListView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const familyRoutes: RouteRecordRaw[] = [
@@ -23,7 +23,7 @@ export const familyRoutes: RouteRecordRaw[] = [
       {
         path: 'detail/:id',
         name: 'FamilyDetail',
-        component: FamilyDetailView,
+        component: FamilyTabsView,
         meta: { breadcrumb: 'family.detail.title' },
       },
       {
@@ -31,12 +31,6 @@ export const familyRoutes: RouteRecordRaw[] = [
         name: 'EditFamily',
         component: FamilyEditView,
         meta: { breadcrumb: 'family.form.editTitle' },
-      },
-      {
-        path: 'tree',
-        name: 'FamilyTree',
-        component: FamilyTreeView,
-        meta: { breadcrumb: 'family.tree.title' },
       },
     ],
   },

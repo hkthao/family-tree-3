@@ -1,111 +1,199 @@
-* Từ dữ liệu Domain Events (MemberCreated, FamilyUpdated, StoryAdded…) Gemini sẽ **lấy đủ dữ liệu từ API nội bộ**,
-* **Tổng hợp** lại thành 4 loại bản ghi AI,
-* **Chuẩn hóa format**,
-* Thêm **family_id** để đảm bảo tách biệt giữa các gia đình,
-* Gửi về webhook n8n để nhét vào vector store.
-
-1. **Fetch full and latest data** from internal APIs (member, family, events, stories, relationships).
-
-2. **Generate up to 4 types of AI Text Records**:
-
-   * **(A) Member Record**
-   * **(B) Family Summary Record**
-   * **(C) Event Record**
-   * **(D) Story Record**
-
-3. Each record must include `family_id` and `record_type`.
-
-4. **POST all generated records to the n8n webhook** in JSON format.
-
-5. Make sure all records are deterministic, complete, and ready for vector embedding.
 
 ---
 
-### **FORMAT BẮT BUỘC CHO 4 LOẠI AI TEXT RECORDS**
+# 📘 TESTING GUIDELINE FOR VUE 3 (SMALL TEAM)
+
+## 🎯 Mục tiêu
+
+* Ưu tiên **độ ổn định & regression safety**
+* Tránh viết test dư thừa
+* Tối ưu cho **team nhỏ, deadline nhanh**
 
 ---
 
-## **(A) Member Record**
+## 1️⃣ Nguyên tắc tổng quát
 
-**Một người = 1 block text.**
+### 🔹 Triết lý
 
+* **Test logic, không test UI**
+* **Composable & Store là nơi test chính**
+* `.vue` component **chỉ test khi quyết định flow**
+
+### 🔹 KHÔNG theo đuổi
+
+* 100% test coverage
+* Snapshot test UI
+* Test các component chỉ render template
+
+---
+
+## 2️⃣ Quy tắc cho COMPOSABLE
+
+### ✅ Khi viết test cho composable
+
+Composable **BẮT BUỘC** viết test nếu có ít nhất 1 yếu tố:
+
+* Logic điều kiện
+* Side effect (API, router, store, timer)
+* Watch / debounce / throttle
+* Dùng lại ở nhiều component
+
+---
+
+### 🧪 Test case BẮT BUỘC cho composable
+
+#### 1. Initial state
+
+```ts
+it('init with correct default state', () => {})
 ```
-{
-  "record_type": "member",
-  "family_id": "<family-id>",
-  "member_id": "<member-id>",
-  "text": "
-Tên: …
-Ngày sinh: …
-Ngày mất (nếu có): …
-Giới tính: …
-Quan hệ: (Cha/Mẹ/Vợ/Chồng/Con của ai)
-Sự kiện quan trọng: (list)
-Tiểu sử tóm tắt: …
-Câu chuyện nổi bật: …
-"
+
+#### 2. Happy path (logic chính)
+
+```ts
+it('handles success case correctly', () => {})
+```
+
+#### 3. Error path
+
+```ts
+it('handles error correctly', () => {})
+```
+
+#### 4. Side effect chính
+
+```ts
+expect(api.call).toHaveBeenCalled()
+expect(router.push).toHaveBeenCalled()
+```
+
+> ❌ Không test edge case nhỏ, timing chi tiết, UI state phụ
+
+---
+
+## 3️⃣ Quy tắc cho `.vue` COMPONENT
+
+### ❌ KHÔNG viết test nếu component:
+
+* Chỉ nhận props → render UI
+* Emit event đơn giản
+* Không chứa logic nghiệp vụ
+* Logic đã được tách xuống composable / store
+
+---
+
+### ✅ CHỈ viết test `.vue` khi:
+
+1. **Component quyết định flow**
+
+   * Page chính
+   * Wizard
+   * Form nhiều bước
+
+2. **Có logic điều kiện quan trọng**
+
+   * Permission
+   * Feature flag
+   * Role-based UI
+
+3. **Có side effect trực tiếp**
+
+   * Gọi API
+   * Router navigation
+   * Store mutation
+
+👉 Test **hành vi**, không test layout.
+
+---
+
+## 4️⃣ QUY TRÌNH BẮT BUỘC: REFACTOR TRƯỚC KHI TEST
+
+### ⚠️ Nếu `.vue` có UI phức tạp + logic lẫn nhau
+
+#### KHÔNG viết test trực tiếp
+
+👉 **PHẢI refactor theo bước sau:**
+
+### 🔁 Bước 1: Tách logic ra composable
+
+```ts
+// useFormLogic.ts
+export function useFormLogic() {
+  // state
+  // computed
+  // validation
+  // submit logic
 }
 ```
 
----
+### 🔁 Bước 2: Component chỉ còn UI
 
-## **(B) Family Summary Record**
-
-**Mỗi gia đình = 1 block summary tổng hợp.**
-
+```vue
+<script setup>
+const {
+  state,
+  submit,
+  error
+} = useFormLogic()
+</script>
 ```
-{
-  "record_type": "family_summary",
-  "family_id": "<family-id>",
-  "text": "
-Tên gia đình: …
-Tên các thành viên: …
-Sơ đồ quan hệ chính: …
-Sự kiện quan trọng của gia đình: …
-Điểm nổi bật lịch sử: …
-Câu chuyện truyền thống: …
-"
-}
-```
+
+### 🔁 Bước 3: Viết test cho composable
+
+* Không viết test cho UI component
+* Component được coi là “glue code”
 
 ---
 
-## **(C) Event Record**
+## 5️⃣ Cách Gemini nên xử lý khi gặp UI phức tạp
 
-**Mỗi event = 1 block.**
+### 👉 BẮT BUỘC làm theo thứ tự:
+
+1. **Phân tích file `.vue`**
+2. Nếu:
+
+   * Logic > UI
+   * Có nhiều `watch`, `computed`, `if/else`
+
+   ➜ **Đề xuất refactor**
+3. Tạo composable mới
+4. Di chuyển logic
+5. Viết test cho composable
+6. Chỉ viết test `.vue` nếu component vẫn quyết định flow
+
+---
+
+## 6️⃣ Công cụ & chuẩn test
+
+* Test runner: **Vitest**
+* Mock bằng `vi.mock`
+* Không snapshot test
+* Không test CSS / DOM chi tiết
+
+### 📁 Structure
 
 ```
-{
-  "record_type": "event",
-  "family_id": "<family-id>",
-  "event_id": "<event-id>",
-  "text": "
-Tên sự kiện: …
-Ngày diễn ra: …
-Ai tham gia: …
-Ý nghĩa: …
-Chi tiết mô tả: …
-"
-}
+composables/
+  useX.ts
+  __tests__/
+    useX.spec.ts
 ```
 
 ---
 
-## **(D) Story Record**
+## 7️⃣ Checklist trước khi viết test (Gemini PHẢI tự hỏi)
 
-**Mỗi story = 1 block (câu chuyện).**
+* [ ] Đây là logic hay chỉ là UI?
+* [ ] Logic đã tách composable chưa?
+* [ ] Test này có ngăn regression thật không?
+* [ ] Có thể bỏ test `.vue` và chỉ test composable không?
 
-```
-{
-  "record_type": "story",
-  "family_id": "<family-id>",
-  "story_id": "<story-id>",
-  "text": "
-Tiêu đề câu chuyện: …
-Nhân vật chính: …
-Bối cảnh: …
-Cốt truyện: …
-Ý nghĩa và cảm xúc: …
-"
-}
-```
+Nếu câu trả lời là **YES** → **KHÔNG viết test component**
+
+---
+
+## 8️⃣ Câu chốt tiêu chuẩn
+
+> “Nếu khó test → kiến trúc đang sai → refactor trước, test sau.”
+
+---

@@ -1,9 +1,8 @@
-using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.Relationships.Commands.UpdateRelationship;
-using backend.Application.Relationships.Queries;
+using backend.Application.Relationships.Queries.DetectRelationship;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
@@ -19,7 +18,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/relationship")]
-public class RelationshipController(IMediator mediator) : ControllerBase
+public class RelationshipController(IMediator mediator, ILogger<RelationshipController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
@@ -27,15 +26,18 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     /// <summary>
+    /// Đối tượng ILogger để ghi log.
+    /// </summary>
+    private readonly ILogger<RelationshipController> _logger = logger;
+
+    /// <summary>
     /// Xử lý GET request để lấy danh sách các mối quan hệ.
     /// </summary>
-    /// <param name="query">Đối tượng truy vấn chứa các tiêu chí lọc và phân trang.</param>
-    /// <returns>Một PaginatedList chứa danh sách các mối quan hệ.</returns>
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<RelationshipListDto>>> GetRelationships([FromQuery] GetRelationshipsQuery query)
+    public async Task<IActionResult> GetRelationships([FromQuery] GetRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<RelationshipListDto>>)Ok(result.Value) : (ActionResult<PaginatedList<RelationshipListDto>>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -44,10 +46,10 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của mối quan hệ cần lấy.</param>
     /// <returns>Thông tin chi tiết của mối quan hệ.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<RelationshipDto>> GetRelationshipById(Guid id)
+    public async Task<IActionResult> GetRelationshipById(Guid id)
     {
         var result = await _mediator.Send(new GetRelationshipByIdQuery(id));
-        return result.IsSuccess ? (ActionResult<RelationshipDto>)Ok(result.Value) : (ActionResult<RelationshipDto>)NotFound(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -56,10 +58,24 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các mối quan hệ tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<RelationshipListDto>>> Search([FromQuery] SearchRelationshipsQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
-        return result.IsSuccess ? (ActionResult<PaginatedList<RelationshipListDto>>)Ok(result.Value) : (ActionResult<PaginatedList<RelationshipListDto>>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để phát hiện mối quan hệ giữa hai thành viên.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình mà các thành viên thuộc về.</param>
+    /// <param name="memberAId">ID của thành viên A.</param>
+    /// <param name="memberBId">ID của thành viên B.</param>
+    /// <returns>Kết quả phát hiện mối quan hệ.</returns>
+    [HttpGet("detect-relationship")]
+    public async Task<IActionResult> DetectRelationship([FromQuery] Guid familyId, [FromQuery] Guid memberAId, [FromQuery] Guid memberBId)
+    {
+        var result = await _mediator.Send(new DetectRelationshipQuery(familyId, memberAId, memberBId));
+        return result.Description != "unknown" ? Ok(result) : NotFound(result); // Leave as is
     }
 
     /// <summary>
@@ -68,12 +84,10 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo mối quan hệ với thông tin chi tiết.</param>
     /// <returns>ID của mối quan hệ vừa được tạo.</returns>
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateRelationship([FromBody] CreateRelationshipCommand command)
+    public async Task<IActionResult> CreateRelationship([FromBody] CreateRelationshipCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess
-            ? (ActionResult<Guid>)CreatedAtAction(nameof(GetRelationshipById), new { id = result.Value }, result.Value)
-            : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 201, nameof(GetRelationshipById), new { id = result.Value });
     }
 
     /// <summary>
@@ -82,10 +96,10 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo nhiều mối quan hệ với danh sách thông tin chi tiết.</param>
     /// <returns>Danh sách ID của các mối quan hệ vừa được tạo.</returns>
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<List<Guid>>> CreateRelationships([FromBody] CreateRelationshipsCommand command)
+    public async Task<IActionResult> CreateRelationships([FromBody] CreateRelationshipsCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -99,21 +113,22 @@ public class RelationshipController(IMediator mediator) : ControllerBase
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateRelationshipCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
     /// Xử lý DELETE request để xóa một mối quan hệ.
     /// </summary>
     /// <param name="id">ID của mối quan hệ cần xóa.</param>
-    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
+    /// <returns>NoContent nếu xóa thành công.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRelationship(Guid id)
     {
         var result = await _mediator.Send(new DeleteRelationshipCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

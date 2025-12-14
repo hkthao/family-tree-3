@@ -4,7 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Users.Specifications;
 
-namespace backend.Application.Users.Queries;
+namespace backend.Application.Identity.Queries;
 
 public class SearchUsersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchUsersQuery, Result<PaginatedList<UserDto>>>
 {
@@ -13,7 +13,7 @@ public class SearchUsersQueryHandler(IApplicationDbContext context, IMapper mapp
 
     public async Task<Result<PaginatedList<UserDto>>> Handle(SearchUsersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Users.AsQueryable();
+        var query = _context.Users.Include(e => e.Profile).AsQueryable();
 
         query = query.WithSpecification(new UserSearchTermSpecification(request.SearchQuery));
 

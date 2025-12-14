@@ -1,10 +1,14 @@
-import type { Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { Paginated, ListOptions, FilterOptions } from '@/types';
+import type { Result } from '@/types'; // Explicitly import Result type
 
 export interface ICrudService<T> {
-  getById(id: string): Promise<Result<T | undefined, ApiError>>;
-  add(newItem: Omit<T, 'id'>): Promise<Result<T, ApiError>>;
-  update(updatedItem: T): Promise<Result<T, ApiError>>;
-  delete(id: string): Promise<Result<void, ApiError>>;
-  getByIds(ids: string[]): Promise<Result<T[], ApiError>>; // New method for fetching multiple items by IDs
+  search(
+    options?: ListOptions,
+    filters?: FilterOptions,
+  ): Promise<Result<Paginated<T>>>;
+  getById(id: string): Promise<Result<T | undefined>>;
+  add(newItem: Omit<T, 'id'>): Promise<Result<T>>;
+  update(updatedItem: T): Promise<Result<T>>;
+  delete(id: string): Promise<Result<void>>;
+  getByIds(ids: string[]): Promise<Result<T[]>>;
 }

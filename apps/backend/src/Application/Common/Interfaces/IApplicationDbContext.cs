@@ -71,6 +71,11 @@ public interface IApplicationDbContext
     DbSet<MemberStory> MemberStories { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
+    /// </summary>
+    DbSet<MemberStoryImage> MemberStoryImages { get; }
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
     DbSet<MemberFace> MemberFaces { get; }
@@ -81,6 +86,31 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     DbSet<PdfTemplate> PdfTemplates { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.
+    /// </summary>
+    DbSet<Prompt> Prompts { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
+    /// </summary>
+    DbSet<FamilyLinkRequest> FamilyLinkRequests { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
+    /// </summary>
+    DbSet<FamilyLink> FamilyLinks { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyMedia.
+    /// </summary>
+    DbSet<backend.Domain.Entities.FamilyMedia> FamilyMedia { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
+    /// </summary>
+    DbSet<MediaLink> MediaLinks { get; }
 
     /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.

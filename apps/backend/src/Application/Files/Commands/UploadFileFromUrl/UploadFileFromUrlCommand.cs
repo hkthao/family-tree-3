@@ -1,5 +1,5 @@
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs; // Updated DTOs path
 
 namespace backend.Application.Files.Commands.UploadFileFromUrl;
 

@@ -19,7 +19,8 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
 
-        services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
+
+        services.AddScoped<Common.Interfaces.IRelationshipDetectionService, Services.RelationshipDetectionService>();
 
         return services;
     }

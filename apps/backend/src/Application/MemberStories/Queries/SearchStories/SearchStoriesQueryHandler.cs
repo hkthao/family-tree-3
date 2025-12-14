@@ -1,8 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore; // Added
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberStories.DTOs;
-using Ardalis.Specification.EntityFrameworkCore; // Added
 using backend.Application.MemberStories.Specifications; // Added
 
 namespace backend.Application.MemberStories.Queries.SearchStories;
@@ -24,7 +24,7 @@ public class SearchStoriesQueryHandler : IRequestHandler<SearchStoriesQuery, Res
 
     public async Task<Result<PaginatedList<MemberStoryDto>>> Handle(SearchStoriesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.MemberStories.AsQueryable(); // Changed to AsQueryable()
+        var query = _context.MemberStories.Include(ms => ms.Member).AsQueryable(); // Changed to AsQueryable()
 
         // Apply MemberStoryAccessSpecification to filter member stories based on user's access
         query = query.WithSpecification(new MemberStoryAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));

@@ -42,7 +42,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePrivacyConfigurationStore } from '@/stores/privacy-configuration.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 
 const props = defineProps<{
   familyId: string;

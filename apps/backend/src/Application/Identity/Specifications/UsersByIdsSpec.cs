@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Users.Specifications;
+namespace backend.Application.Identity.Specifications;
 
 public class UsersByIdsSpec : Specification<User>
 {

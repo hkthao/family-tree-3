@@ -1,7 +1,7 @@
-using backend.Application.AI.DTOs; // For ImageUploadWebhookDto
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs; // Moved DTOs
 
 namespace backend.Application.Files.Commands.UploadFileFromUrl;
 

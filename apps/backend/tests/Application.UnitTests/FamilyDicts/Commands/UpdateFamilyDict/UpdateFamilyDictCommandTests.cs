@@ -1,4 +1,3 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -15,8 +14,6 @@ public class UpdateFamilyDictCommandTests : TestBase
         // Set up authenticated user by default for most tests (not directly used here, but good practice)
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        // Default to admin for these command tests, as most successful tests require admin rights
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
     }
 
     [Fact]
@@ -26,6 +23,8 @@ public class UpdateFamilyDictCommandTests : TestBase
         // Clear existing data to ensure test isolation
         _context.FamilyDicts.RemoveRange(_context.FamilyDicts);
         await _context.SaveChangesAsync();
+
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
         var initialFamilyDict = new FamilyDict
         {
@@ -72,6 +71,7 @@ public class UpdateFamilyDictCommandTests : TestBase
     public async Task Handle_ShouldThrowNotFoundException_WhenFamilyDictDoesNotExist()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new UpdateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new UpdateFamilyDictCommand
         {
@@ -84,15 +84,19 @@ public class UpdateFamilyDictCommandTests : TestBase
             NamesByRegion = new NamesByRegionUpdateCommandDto { North = "N", Central = "C", South = "S" }
         };
 
-        // Act & Assert
-        await FluentActions.Invoking(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<NotFoundException>();
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
     public async Task Handle_ShouldThrowValidationException_WhenNameIsEmpty()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new UpdateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new UpdateFamilyDictCommand
         {
@@ -117,6 +121,7 @@ public class UpdateFamilyDictCommandTests : TestBase
     public async Task Handle_ShouldThrowValidationException_WhenNameIsTooLong()
     {
         // Arrange
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new UpdateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new UpdateFamilyDictCommand
         {
@@ -154,9 +159,11 @@ public class UpdateFamilyDictCommandTests : TestBase
             NamesByRegion = new NamesByRegionUpdateCommandDto { North = "N", Central = "C", South = "S" }
         };
 
-        // Act & Assert
-        await FluentActions.Awaiting(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<ForbiddenAccessException>()
-            .WithMessage("Chỉ quản trị viên mới được phép cập nhật FamilyDict.");
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNullOrEmpty();
     }
 }

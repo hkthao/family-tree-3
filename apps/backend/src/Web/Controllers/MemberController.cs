@@ -6,6 +6,7 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Members.Queries.GetMembersByFamilyId;
 using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
@@ -38,14 +39,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các thành viên tìm được.</returns>
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] SearchMembersQuery query)
+    public async Task<IActionResult> Search([FromQuery] SearchMembersQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error); // Or other appropriate error handling
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -54,14 +51,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="id">ID của thành viên cần lấy.</param>
     /// <returns>Thông tin chi tiết của thành viên.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<MemberDetailDto>> GetMemberById(Guid id)
+    public async Task<IActionResult> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -70,32 +63,35 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="ids">Chuỗi chứa các ID thành viên, phân tách bằng dấu phẩy.</param>
     /// <returns>Danh sách các thành viên.</returns>
     [HttpGet("by-ids")]
-    public async Task<ActionResult<List<MemberListDto>>> GetMembersByIds([FromQuery] string ids)
+    public async Task<IActionResult> GetMembersByIds([FromQuery] string ids)
     {
         if (string.IsNullOrEmpty(ids))
         {
-            return Ok(Result<List<MemberListDto>>.Success([]).Value);
+            return Result<List<MemberListDto>>.Success([]).ToActionResult(this, _logger);
         }
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetMembersByIdsQuery(guids));
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error); // Or other appropriate error handling
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
-    /// Xử lý POST request để tạo một thành viên mới.
+    /// Xử lý GET request để lấy danh sách thành viên theo ID gia đình.
     /// </summary>
-    /// <param name="command">Lệnh tạo thành viên với thông tin chi tiết.</param>
-    /// <returns>ID của thành viên vừa được tạo.</returns>
+    /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
+    /// <returns>Danh sách các thành viên thuộc gia đình.</returns>
+    [HttpGet("by-family/{familyId}")]
+    public async Task<IActionResult> GetMembersByFamilyId(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateMember([FromBody] CreateMemberCommand command)
+    public async Task<IActionResult> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 201, nameof(GetMemberById), new { id = result.Value });
     }
 
     /// <summary>
@@ -104,10 +100,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// <param name="command">Lệnh tạo nhiều thành viên với danh sách thông tin chi tiết.</param>
     /// <returns>Danh sách ID của các thành viên vừa được tạo.</returns>
     [HttpPost("bulk-create")]
-    public async Task<ActionResult<List<Guid>>> CreateMembers([FromBody] CreateMembersCommand command)
+    public async Task<IActionResult> CreateMembers([FromBody] CreateMembersCommand command)
     {
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -121,10 +117,11 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (id != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -136,7 +133,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> DeleteMember(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberCommand(id));
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -150,9 +147,10 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         if (id != command.MemberId)
         {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandMemberId}) for UpdateMemberBiographyCommand from {RemoteIpAddress}", id, command.MemberId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 204);
     }
 }

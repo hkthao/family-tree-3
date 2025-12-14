@@ -1,12 +1,12 @@
-import type { AppState, User } from '@/types';
+import type { AppState, UserProfile } from '@/types';
 import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 export interface AuthService {
   isAuthenticated(): Promise<boolean>;
   login(options?: RedirectLoginOptions): Promise<void>;
   logout(): Promise<void>;
-  register(data: any): Promise<User | null>; // 'any' for now, define specific type later
-  getUser(): Promise<User | null>;
+  register(data: any): Promise<UserProfile | null>; // 'any' for now, define specific type later
+  getUser(): Promise<UserProfile | null>;
   getAccessToken(): Promise<string | null>;
   handleRedirectCallback(): Promise<AppState>;
 }

@@ -19,7 +19,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnPaginatedListOfRelationships()
+    public async Task Handle_ShouldReturnRelationshipsForGivenFamilyId()
     {
         // Arrange
         // Clear existing data to ensure test isolation
@@ -52,13 +52,12 @@ public class GetRelationshipsQueryHandlerTests : TestBase
 
         // Act
         var handler = new GetRelationshipsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-        var query = new GetRelationshipsQuery();
+        var query = new GetRelationshipsQuery { FamilyId = familyId };
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value!.Items.Should().HaveCount(2);
-        result.Value.TotalItems.Should().Be(2);
+        result.Value!.Should().HaveCount(2);
     }
 
     [Fact]
@@ -109,138 +108,10 @@ public class GetRelationshipsQueryHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value!.Items.Should().HaveCount(1);
-        // result.Value.Items.First().FamilyId.Should().Be(familyId1); // Commented out due to missing FamilyId in RelationshipListDto
+        result.Value!.Should().HaveCount(1);
     }
 
-    [Fact]
-    public async Task Handle_ShouldFilterBySourceMemberId()
-    {
-        // Arrange
-        // Clear existing data to ensure test isolation
-        _context.Relationships.RemoveRange(_context.Relationships);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync();
 
-        var authenticatedUserId = _mockUser.Object.UserId;
-        var familyId = Guid.NewGuid();
-        var sourceMemberId = Guid.NewGuid();
-        var targetMemberId1 = Guid.NewGuid();
-        var sourceMemberId2 = Guid.NewGuid();
-        var targetMemberId2 = Guid.NewGuid();
-
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF", CreatedBy = authenticatedUserId.ToString() };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
-
-        var sourceMember = new Member("Source1", "Member1", "SM1", familyId) { Id = sourceMemberId };
-        var targetMember1 = new Member("Target1", "Member1", "TM1", familyId) { Id = targetMemberId1 };
-        var sourceMember2 = new Member("Source2", "Member2", "SM2", familyId) { Id = sourceMemberId2 };
-        var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
-        _context.Members.AddRange(sourceMember, targetMember1, sourceMember2, targetMember2);
-        _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId, targetMemberId1, RelationshipType.Father, 1),
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 1)
-        );
-        await _context.SaveChangesAsync();
-
-        var handler = new GetRelationshipsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-        var query = new GetRelationshipsQuery { SourceMemberId = sourceMemberId };
-
-        // Act
-        var result = await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value!.Items.Should().HaveCount(1);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFilterByTargetMemberId()
-    {
-        // Arrange
-        // Clear existing data to ensure test isolation
-        _context.Relationships.RemoveRange(_context.Relationships);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync();
-
-        var authenticatedUserId = _mockUser.Object.UserId;
-        var familyId = Guid.NewGuid();
-        var sourceMemberId1 = Guid.NewGuid();
-        var targetMemberId = Guid.NewGuid();
-        var sourceMemberId2 = Guid.NewGuid();
-        var targetMemberId2 = Guid.NewGuid();
-
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF", CreatedBy = authenticatedUserId.ToString() };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
-
-        var sourceMember1 = new Member("Source1", "Member1", "SM1", familyId) { Id = sourceMemberId1 };
-        var targetMember = new Member("Target1", "Member1", "TM1", familyId) { Id = targetMemberId };
-        var sourceMember2 = new Member("Source2", "Member2", "SM2", familyId) { Id = sourceMemberId2 };
-        var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
-        _context.Members.AddRange(sourceMember1, targetMember, sourceMember2, targetMember2);
-        _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId1, targetMemberId, RelationshipType.Father, 1),
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 1)
-        );
-        await _context.SaveChangesAsync();
-
-        var handler = new GetRelationshipsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-        var query = new GetRelationshipsQuery { TargetMemberId = targetMemberId };
-
-        // Act
-        var result = await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value!.Items.Should().HaveCount(1);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFilterByType()
-    {
-        // Arrange
-        // Clear existing data to ensure test isolation
-        _context.Relationships.RemoveRange(_context.Relationships);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync();
-
-        var authenticatedUserId = _mockUser.Object.UserId;
-        var familyId = Guid.NewGuid();
-        var sourceMemberId1 = Guid.NewGuid();
-        var targetMemberId1 = Guid.NewGuid();
-        var sourceMemberId2 = Guid.NewGuid();
-        var targetMemberId2 = Guid.NewGuid();
-
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF", CreatedBy = authenticatedUserId.ToString() };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
-
-        var sourceMember1 = new Member("Source1", "Member1", "SM1", familyId) { Id = sourceMemberId1 };
-        var targetMember1 = new Member("Target1", "Member1", "TM1", familyId) { Id = targetMemberId1 };
-        var sourceMember2 = new Member("Source2", "Member2", "SM2", familyId) { Id = sourceMemberId2 };
-        var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
-        _context.Members.AddRange(sourceMember1, targetMember1, sourceMember2, targetMember2);
-        _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId1, targetMemberId1, RelationshipType.Father, 1),
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 1)
-        );
-        await _context.SaveChangesAsync();
-
-        var handler = new GetRelationshipsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-        var query = new GetRelationshipsQuery { Type = "Father" };
-
-        // Act
-        var result = await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value!.Items.Should().HaveCount(1);
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnAllRelationships_WhenUserIsAdmin()
@@ -285,7 +156,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().HaveCount(2); // Admin should see all relationships
+        result.Value!.Should().HaveCount(2); // Admin should see all relationships
     }
 
     [Fact]
@@ -293,11 +164,12 @@ public class GetRelationshipsQueryHandlerTests : TestBase
     {
         // Arrange
         var authenticatedUserId = Guid.NewGuid();
-      
-        var accessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Accessible Family", Code = "AF" };
-        var inaccessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Inaccessible Family", Code = "IF"};
+
+        var accessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Accessible Family", Code = "AF", CreatedBy = authenticatedUserId.ToString() };
+        var inaccessibleFamily = new Family { Id = Guid.NewGuid(), Name = "Inaccessible Family", Code = "IF", CreatedBy = Guid.NewGuid().ToString() };
         _context.Families.AddRange(accessibleFamily, inaccessibleFamily);
         _context.FamilyUsers.Add(new FamilyUser(accessibleFamily.Id, authenticatedUserId, FamilyRole.Viewer));
+        await _context.SaveChangesAsync(); // Ensure FamilyUsers are saved
 
         var accessibleMember1 = new Member("Acc", "Member1", "AM1", accessibleFamily.Id) { Id = Guid.NewGuid() };
         var accessibleMember2 = new Member("Acc", "Member2", "AM2", accessibleFamily.Id) { Id = Guid.NewGuid() };
@@ -315,7 +187,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetRelationshipsQuery();
-        
+
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Simulate non-admin user
@@ -328,8 +200,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().HaveCount(1); // Should only see relationships from accessible family
-        // result.Value.Items.First().FamilyId.Should().Be(accessibleFamily.Id); // Commented out due to missing FamilyId in RelationshipListDto
+        result.Value!.Should().HaveCount(1); // Should only see relationships from accessible family
     }
 
     [Fact]
@@ -374,7 +245,6 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().HaveCount(0); // Unauthenticated user should not see any relationships by default
-        // result.Value.Items.First().FamilyId.Should().Be(publicFamily.Id); // Commented out due to missing FamilyId in RelationshipListDto
+        result.Value!.Should().HaveCount(0); // Unauthenticated user should not see any relationships by default
     }
 }

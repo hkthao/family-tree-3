@@ -1,7 +1,7 @@
 <template>
-  <v-card class="mb-4" data-testid="member-face-search">
-    <v-card-title class="text-h6 d-flex align-center">
-      <span class="font-weight-bold">{{ t('common.advancedSearch') }}</span>
+  <v-card :elevation="0" class="mb-4" data-testid="member-face-search">
+    <v-card-title class="text-h6 d-flex align-center  pa-0">
+      <span>{{ t('common.advancedSearch') }}</span>
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="member-face-search-expand-button">
         <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
@@ -13,7 +13,7 @@
     </v-card-title>
     <v-expand-transition>
       <div v-show="expanded">
-        <v-card-text>
+        <v-card-text class="pa-0">
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <MemberAutocomplete

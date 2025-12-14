@@ -3,7 +3,6 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Events;
 using Microsoft.Extensions.Logging;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 
 namespace backend.Application.Events.EventHandlers;
 
@@ -32,6 +31,6 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event creation
-       // await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
+        // await _mediator.Send(new GenerateFamilyKbCommand(notification.Event.FamilyId?.ToString() ?? string.Empty, notification.Event.Id.ToString(), KbRecordType.Event), cancellationToken);
     }
 }

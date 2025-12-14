@@ -25,6 +25,13 @@ public class AuthorizationService(ICurrentUser user, IApplicationDbContext conte
         return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId && fu.Role == FamilyRole.Manager);
     }
 
+    public bool CanViewFamily(Guid familyId)
+    {
+        if (IsAdmin()) return true; // Admin can view any family
+        // A user can view a family if they are either a Manager or a Viewer
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer));
+    }
+
     public bool HasFamilyRole(Guid familyId, FamilyRole requiredRole)
     {
         if (IsAdmin()) return true; // Admin bypasses family-specific role checks

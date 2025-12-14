@@ -2,7 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
-using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -66,7 +65,11 @@ public static class DependencyInjection
         services.AddScoped<IPrivacyService, PrivacyService>();
         services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
+        services.AddScoped<IFamilyTreeService, FamilyTreeService>(); // NEW: Register IFamilyTreeService
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
+        services.AddScoped<Domain.Interfaces.IRelationshipGraph, RelationshipGraph>();
+        services.AddScoped<Domain.Interfaces.IRelationshipRuleEngine, RelationshipRuleEngine>();
+
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
@@ -86,9 +89,13 @@ public static class DependencyInjection
 
         // Register n8n Service
         services.AddScoped<IN8nService, N8nService>();
-
+        services.AddScoped<IAiChatService, AiChatService>();
+        services.AddScoped<IAiGenerateService, AiGenerateService>();
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
+
+        // Register File Storage Service
+        services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
         services.AddNovuServices(configuration);
@@ -107,7 +114,7 @@ public static class DependencyInjection
         services.AddSingleton(Options.Create(novuSettings));
 
         // 2. Register NovuSDK
-        services.AddSingleton<NovuSDK>(provider =>
+        services.AddSingleton(provider =>
         {
             var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
             var logger = provider.GetRequiredService<ILogger<NovuSDK>>();

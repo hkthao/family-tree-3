@@ -37,7 +37,7 @@ public class GetMemberStoryDetailQueryHandler : IRequestHandler<GetMemberStoryDe
             return Result<MemberStoryDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden); // Updated
         }
 
-        var memberStoryDto = _mapper.Map<MemberStoryDto>(memberStory); // Updated
-        return Result<MemberStoryDto>.Success(memberStoryDto); // Updated
+        var memberStoryDto = _mapper.Map<MemberStoryDto>(memberStory);
+        return Result<MemberStoryDto>.Success(memberStoryDto);
     }
 }

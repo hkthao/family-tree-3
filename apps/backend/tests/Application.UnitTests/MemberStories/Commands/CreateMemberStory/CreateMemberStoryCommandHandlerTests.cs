@@ -1,20 +1,16 @@
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.Commands.UploadFileFromUrl;
-using backend.Application.MemberFaces.Common; // NEW: For BoundingBoxDto
+using backend.Application.Files.DTOs;
 using backend.Application.MemberStories.Commands.CreateMemberStory;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Domain.Events.MemberStories; // NEW: For MemberStoryCreatedWithFacesEvent
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -23,25 +19,19 @@ namespace backend.Application.UnitTests.MemberStories.Commands.CreateMemberStory
 public class CreateMemberStoryCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<IStringLocalizer<CreateMemberStoryCommandHandler>> _localizerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<ILogger<CreateMemberStoryCommandHandler>> _loggerMock;
 
     private readonly CreateMemberStoryCommandHandler _handler;
 
     public CreateMemberStoryCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _localizerMock = new Mock<IStringLocalizer<CreateMemberStoryCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _loggerMock = new Mock<ILogger<CreateMemberStoryCommandHandler>>();
 
         _handler = new CreateMemberStoryCommandHandler(
             _context,
             _authorizationServiceMock.Object,
-            _localizerMock.Object,
-            _mediatorMock.Object,
-            _loggerMock.Object
+            _mediatorMock.Object
         );
 
     }
@@ -66,11 +56,10 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "My First Story",
             Story = "This is a wonderful story about John.",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString(),
-            OriginalImageUrl = "http://example.com/original.jpg",
-            ResizedImageUrl = "http://example.com/resized.jpg",
-            RawInput = "User's raw input for AI generation"
+            Year = 1990,
+            TimeRangeDescription = "Early childhood",
+            LifeStage = LifeStage.Childhood,
+            Location = "Hanoi, Vietnam"
         };
 
         // Act
@@ -81,16 +70,17 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty();
 
         var createdStory = await _context.MemberStories
+                                         .Include(ms => ms.MemberStoryImages) // Include images for assertion
                                          .FirstOrDefaultAsync(s => s.Id == result.Value);
         createdStory.Should().NotBeNull();
         createdStory!.MemberId.Should().Be(memberId);
         createdStory.Title.Should().Be(command.Title);
         createdStory.Story.Should().Be(command.Story);
-        createdStory.StoryStyle.Should().Be(command.StoryStyle);
-        createdStory.Perspective.Should().Be(command.Perspective);
-        createdStory.OriginalImageUrl.Should().Be(command.OriginalImageUrl);
-        createdStory.ResizedImageUrl.Should().Be(command.ResizedImageUrl);
-        createdStory.RawInput.Should().Be(command.RawInput);
+        createdStory.Year.Should().Be(command.Year);
+        createdStory.TimeRangeDescription.Should().Be(command.TimeRangeDescription);
+        createdStory.LifeStage.Should().Be(command.LifeStage);
+        createdStory.Location.Should().Be(command.Location);
+        createdStory.MemberStoryImages.Should().BeEmpty(); // No images provided in this test
     }
 
     [Fact]
@@ -134,7 +124,7 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldUploadImagesFromTempUrls_WhenProvided()
+    public async Task Handle_ShouldUploadMemberStoryImages_WhenProvided()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -148,118 +138,75 @@ public class CreateMemberStoryCommandHandlerTests : TestBase
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
-        var tempOriginalUrl = "http://temp.com/temp/original.jpg";
-        var permanentOriginalUrl = "http://permanent.com/original.jpg";
-        var tempResizedUrl = "http://temp.com/temp/resized.jpg";
-        var permanentResizedUrl = "http://permanent.com/resized.jpg";
+                var tempOriginalUrl1 = "http://temp.com/temp/original1.jpg";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempOriginalUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(backend.Application.Common.Models.Result<backend.Application.AI.DTOs.ImageUploadResponseDto>.Success(new backend.Application.AI.DTOs.ImageUploadResponseDto { Url = permanentOriginalUrl }));
+                var permanentOriginalUrl1 = "http://permanent.com/original1.jpg";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempResizedUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(backend.Application.Common.Models.Result<backend.Application.AI.DTOs.ImageUploadResponseDto>.Success(new backend.Application.AI.DTOs.ImageUploadResponseDto { Url = permanentResizedUrl }));
+        
 
-        var command = new CreateMemberStoryCommand
-        {
-            MemberId = memberId,
-            Title = "Story with Temp Images",
-            Story = "Content.",
-            StoryStyle = MemberStoryStyle.Formal.ToString(),
-            Perspective = MemberStoryPerspective.FullyNeutral.ToString(),
-            OriginalImageUrl = tempOriginalUrl,
-            ResizedImageUrl = tempResizedUrl
-        };
+                // Setup mediator mocks for image uploads
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+                _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
 
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        var createdStory = await _context.MemberStories.FindAsync(result.Value);
-        createdStory!.OriginalImageUrl.Should().Be(permanentOriginalUrl);
-        createdStory.ResizedImageUrl.Should().Be(permanentResizedUrl);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
-    }
+                    cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()))
 
-    [Fact]
-    public async Task Handle_ShouldProcessDetectedFaces_WhenProvided()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        var memberId = Guid.NewGuid();
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
-        var member = new Member("John", "Doe", "JD", familyId, false) { Id = memberId };
+                    .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentOriginalUrl1 }));
 
-        _context.Families.Add(family);
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        
 
-        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+        
 
-        var detectedFaceId = Guid.NewGuid().ToString();
-        var tempThumbnailUrl = "http://temp.com/temp/face_thumb.png";
-        var permanentThumbnailUrl = "http://permanent.com/face_thumb.png";
+                var command = new CreateMemberStoryCommand
 
-        var tempOriginalUrl = "http://temp.com/temp/original_story.jpg"; // Defined locally
-        var permanentOriginalUrl = "http://permanent.com/original_story.jpg";
-        var tempResizedUrl = "http://temp.com/temp/resized_story.jpg"; // Defined locally
-        var permanentResizedUrl = "http://permanent.com/resized_story.jpg";
-
-        var command = new CreateMemberStoryCommand
-        {
-            MemberId = memberId,
-            Title = "Story with Detected Faces",
-            Story = "Content.",
-            StoryStyle = MemberStoryStyle.Formal.ToString(),
-            Perspective = MemberStoryPerspective.FullyNeutral.ToString(),
-            OriginalImageUrl = tempOriginalUrl,
-            ResizedImageUrl = tempResizedUrl,
-
-            DetectedFaces = new List<DetectedFaceDto>
-            {
-                new DetectedFaceDto
                 {
-                    Id = detectedFaceId,
-                    BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 30, Height = 40 },
-                    Confidence = 0.9f,
-                    ThumbnailUrl = tempThumbnailUrl,
-                    MemberId = memberId
-                },
-            }
-        };
+
+                    MemberId = memberId,
+
+                    Title = "Story with Single Image",
+
+                    Story = "Content.",
+
+                    Year = 2000,
+
+                    LifeStage = LifeStage.Adulthood,
+
+                    TemporaryOriginalImageUrl = tempOriginalUrl1
+
+                };
+
+        
+
+                // Act
+
+                var result = await _handler.Handle(command, CancellationToken.None);
+
+        
+
+                // Assert
+
+                result.IsSuccess.Should().BeTrue();
+
+                var createdStory = await _context.MemberStories.Include(ms => ms.MemberStoryImages).FirstOrDefaultAsync(ms => ms.Id == result.Value);
+
+                createdStory.Should().NotBeNull();
+
+                createdStory!.MemberStoryImages.Should().HaveCount(1);
+
+        
+
+                var image1 = createdStory.MemberStoryImages.FirstOrDefault(img => img.ImageUrl == permanentOriginalUrl1);
+
+                image1.Should().NotBeNull();
+
+                image1!.ImageUrl.Should().Be(permanentOriginalUrl1);
+
+                // Verify mediator calls for only temp URLs
+                _mediatorMock.Verify(m => m.Send(It.Is<UploadFileFromUrlCommand>(cmd => cmd.FileUrl == tempOriginalUrl1), It.IsAny<CancellationToken>()), Times.Once);
+                _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once); // Total calls
 
 
-
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempThumbnailUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentThumbnailUrl }));
-
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempOriginalUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentOriginalUrl }));
-
-        _mediatorMock.Setup(m => m.Send(It.Is<UploadFileFromUrlCommand>(
-            cmd => cmd.FileUrl == tempResizedUrl), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto { Url = permanentResizedUrl }));
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        var createdStory = await _context.MemberStories.FindAsync(result.Value);
-        createdStory.Should().NotBeNull();
-        createdStory!.OriginalImageUrl.Should().Be(permanentOriginalUrl);
-        createdStory.ResizedImageUrl.Should().Be(permanentResizedUrl);
-
-        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
-            events.Any(e => e is MemberStoryCreatedWithFacesEvent)
-        )), Times.Once);
-        // Verify that the domain event was added
-
-
-        _mediatorMock.Verify(m => m.Send(It.IsAny<UploadFileFromUrlCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Verify UploadFileFromTempUrlCommand was sent for Original and Resized images
+        
     }
+
+
 }

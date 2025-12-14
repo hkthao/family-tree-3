@@ -22,6 +22,13 @@ public interface IAuthorizationService
     bool CanAccessFamily(Guid familyId);
 
     /// <summary>
+    /// Kiểm tra xem người dùng hiện tại có quyền xem (Người xem hoặc Quản lý) một gia đình cụ thể hay không.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần kiểm tra quyền xem.</param>
+    /// <returns>True nếu người dùng có quyền xem gia đình, ngược lại là false.</returns>
+    bool CanViewFamily(Guid familyId);
+
+    /// <summary>
     /// Kiểm tra xem người dùng hiện tại có quyền quản lý (vai trò Quản lý) đối với một gia đình cụ thể hay không.
     /// </summary>
     /// <param name="familyId">ID của gia đình cần kiểm tra quyền quản lý.</param>

@@ -1,12 +1,17 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added for Result
+using backend.Application.Files.Commands.UploadFileFromUrl; // Added
+using backend.Application.Files.DTOs; // Added
 using backend.Application.MemberStories.Commands.UpdateMemberStory;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
+using Microsoft.EntityFrameworkCore; // Added for .Include
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -25,7 +30,7 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _localizerMock = new Mock<IStringLocalizer<UpdateMemberStoryCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _handler = new UpdateMemberStoryCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _mediatorMock.Object);
+        _handler = new UpdateMemberStoryCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _mediatorMock.Object, new Mock<ILogger<UpdateMemberStoryCommandHandler>>().Object);
     }
 
     [Fact]
@@ -43,8 +48,10 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Original Title",
             Story = "Original Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString()
+            Year = 2000,
+            TimeRangeDescription = "Start of the millennium",
+            LifeStage = LifeStage.Adulthood,
+            Location = "Someplace"
         };
 
         _context.Families.Add(family);
@@ -60,8 +67,10 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Updated Title",
             Story = "Updated Story Content",
-            StoryStyle = MemberStoryStyle.Formal.ToString(),
-            Perspective = MemberStoryPerspective.FullyNeutral.ToString()
+            Year = 2005,
+            TimeRangeDescription = "Mid-decade",
+            LifeStage = LifeStage.SignificantEvents,
+            Location = "Another Place"
         };
 
         // Act
@@ -73,8 +82,10 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
         updatedMemberStory.Should().NotBeNull();
         updatedMemberStory!.Title.Should().Be(command.Title);
         updatedMemberStory.Story.Should().Be(command.Story);
-        updatedMemberStory.StoryStyle.Should().Be(command.StoryStyle);
-        updatedMemberStory.Perspective.Should().Be(command.Perspective);
+        updatedMemberStory.Year.Should().Be(command.Year);
+        updatedMemberStory.TimeRangeDescription.Should().Be(command.TimeRangeDescription);
+        updatedMemberStory.LifeStage.Should().Be(command.LifeStage);
+        updatedMemberStory.Location.Should().Be(command.Location);
     }
 
     [Fact]
@@ -106,9 +117,8 @@ public class UpdateMemberStoryCommandHandlerTests : TestBase
             MemberId = memberId,
             Title = "Original Title",
             Story = "Original Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString()
-        };
+            LifeStage = LifeStage.Adulthood
+        }; // Missing closing brace here.
 
         _context.MemberStories.Add(memberStory);
         await _context.SaveChangesAsync();

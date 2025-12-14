@@ -26,21 +26,17 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import type { SearchResult } from '@/types';
+import { useFaceResultList } from '@/composables/face/useFaceResultList';
 
-const { t } = useI18n();
-const router = useRouter();
-
-const { results } = defineProps({
+const props = defineProps({
   results: { type: Array as () => SearchResult[], default: () => [] },
 });
 
-const goToMemberProfile = (memberId: string) => {
-  // Assuming a route exists for member profiles
-  router.push({ name: 'MemberDetail', params: { id: memberId } });
-};
+const {
+  t,
+  goToMemberProfile,
+} = useFaceResultList(props);
 </script>
 
 <style scoped>

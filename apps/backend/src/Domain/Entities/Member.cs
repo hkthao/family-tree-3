@@ -1,5 +1,4 @@
 using backend.Domain.Enums; // Add this for RelationshipType
-using backend.Domain.Events.Members;
 
 namespace backend.Domain.Entities;
 
@@ -78,6 +77,22 @@ public class Member : BaseAuditableEntity
         IsDeceased = isDeceased;
     }
 
+    public void UpdateRelationShip(Guid? fatherId, string? fatherFullName, string? fatherAvatarUrl, Guid? motherId, string? motherFullName, string? motherAvatarUrl, Guid? husbandId, string? husbandFullName, string? husbandAvatarUrl, Guid? wifeId, string? wifeFullName, string? wifeAvatarUrl)
+    {
+        FatherId = fatherId;
+        FatherFullName = fatherFullName;
+        FatherAvatarUrl = fatherAvatarUrl;
+        MotherId = motherId;
+        MotherFullName = motherFullName;
+        MotherAvatarUrl = motherAvatarUrl;
+        HusbandId = husbandId;
+        HusbandFullName = husbandFullName;
+        HusbandAvatarUrl = husbandAvatarUrl;
+        WifeId = wifeId;
+        WifeFullName = wifeFullName;
+        WifeAvatarUrl = wifeAvatarUrl;
+    }
+
     public void UpdateBiography(string? biography)
     {
         Biography = biography;
@@ -87,7 +102,11 @@ public class Member : BaseAuditableEntity
     public void UpdateAvatar(string? newAvatarUrl)
     {
         AvatarUrl = newAvatarUrl;
+    }
 
+    public void UpdateGender(string? gender)
+    {
+        Gender = gender;
     }
 
     public Relationship AddFatherRelationship(Guid fatherId)

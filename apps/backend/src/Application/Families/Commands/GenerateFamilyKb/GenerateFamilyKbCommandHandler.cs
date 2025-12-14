@@ -1,10 +1,10 @@
+using System.Text;
 using backend.Application.AI.DTOs.Embeddings;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
-using System.Text;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // For Domain Entities
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.Commands.GenerateFamilyKb
 {
@@ -279,7 +279,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             textBuilder.AppendLine($"Số lượng thành viên nữ: {totalFemales}");
             textBuilder.AppendLine($"Số người còn sống: {livingMembersCount}");
             textBuilder.AppendLine($"Số người đã mất: {deceasedMembersCount}");
-            
+
             return new FamilyEmbeddingsDto
             {
                 FamilyId = familyId,

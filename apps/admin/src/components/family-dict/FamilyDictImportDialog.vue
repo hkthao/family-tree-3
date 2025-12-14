@@ -4,7 +4,7 @@
       <v-card-title class="d-flex align-center">
         {{ t('familyDict.import.title') }}
       </v-card-title>
-      <v-progress-linear v-if="familyDictStore.add.loading" indeterminate color="primary"></v-progress-linear>
+      <v-progress-linear v-if="isImportingFamilyDicts" indeterminate color="primary"></v-progress-linear>
       <v-card-text>
         <VFileUpload clearable v-model="selectedFile" :label="t('familyDict.import.selectJsonFile')" accept=".json"
           show-size counter prepend-icon="mdi-json" @update:modelValue="onFileSelected" data-testid="json-file-input">
@@ -17,8 +17,8 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey" @click="closeDialog" data-testid="import-cancel-button">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" @click="importFamilyDicts" :loading="familyDictStore.add.loading"
-          :disabled="!parsedData || !!parsedDataError || familyDictStore.add.loading" data-testid="import-save-button">
+        <v-btn color="primary" @click="importFamilyDicts" :loading="isImportingFamilyDicts"
+          :disabled="!parsedData || !!parsedDataError || isImportingFamilyDicts" data-testid="import-save-button">
           {{ t('common.import') }}
         </v-btn>
       </v-card-actions>
@@ -29,10 +29,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFamilyDictStore } from '@/stores/family-dict.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables';
 import type { FamilyDict } from '@/types';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
+import { useImportFamilyDictMutation } from '@/composables/family-dict';
+
 
 const props = defineProps<{
   show: boolean;
@@ -41,13 +42,14 @@ const props = defineProps<{
 const emit = defineEmits(['update:show', 'imported']);
 
 const { t } = useI18n();
-const familyDictStore = useFamilyDictStore();
 const { showSnackbar } = useGlobalSnackbar();
 
 const dialog = ref(props.show);
 const selectedFile = ref<File[]>([]);
 const parsedData = ref<Omit<FamilyDict, 'id'>[] | null>(null);
 const parsedDataError = ref('');
+
+const { mutate: importFamilyDictsMutation, isPending: isImportingFamilyDicts } = useImportFamilyDictMutation();
 
 watch(() => props.show, (newVal) => {
   dialog.value = newVal;
@@ -95,16 +97,18 @@ const onFileSelected = (files: File[]) => {
 const importFamilyDicts = async () => {
   if (!parsedData.value) return;
 
-  const result = await familyDictStore.importItems({
+  importFamilyDictsMutation({
     familyDicts: parsedData.value as FamilyDict[]
+  }, {
+    onSuccess: () => {
+      showSnackbar(t('familyDict.import.messages.importSuccess'), 'success');
+      emit('imported');
+      closeDialog();
+    },
+    onError: (error) => {
+      showSnackbar(error.message || t('familyDict.import.messages.importError'), 'error');
+    },
   });
-  if (result.ok) {
-    showSnackbar(t('familyDict.import.messages.importSuccess'), 'success');
-    emit('imported');
-    closeDialog();
-  } else {
-    showSnackbar(familyDictStore.error || t('familyDict.import.messages.importError'), 'error');
-  }
 };
 
 const closeDialog = () => {
@@ -115,6 +119,5 @@ const resetState = () => {
   selectedFile.value = [];
   parsedData.value = null;
   parsedDataError.value = '';
-  familyDictStore.error = null; // Clear store error related to add/import
 };
 </script>

@@ -32,12 +32,15 @@
 
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
-      <a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+      <div class="member-full-name-column">
+<a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
       <div class="text-caption text-medium-emphasis">
         {{ item.code }}
       </div>
+      </div>
+      
     </template>
 
     <!-- Father column -->
@@ -107,7 +110,7 @@ import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const { isAdmin, isFamilyManager } = useAuth();
@@ -167,13 +170,13 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.avatar'),
       key: 'avatarUrl',
       sortable: false,
-      width: '100px',
+      minWidth: '110px',
       align: 'center',
     },
     {
       title: t('member.list.headers.fullName'),
       key: 'fullName',
-      width: '250px',
+      minWidth: '250px',
       align: 'start',
     },
     {
@@ -200,7 +203,7 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('member.list.headers.birthDeathYears'),
       key: 'birthDeathYears',
-      width: '120px',
+      minWidth: '120px',
       align: 'center',
       sortable: false,
     },
@@ -218,7 +221,8 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'actions',
       sortable: false,
       align: 'center',
-      width: '140px',
+      minWidth: '120px',
+      fixed: "end"
     });
   }
   return baseHeaders;

@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
 import { useAuthService } from '@/services/auth/authService';
-import type { User, Result, IFamilyAccess } from '@/types'; // Thêm IFamilyAccess vào import
+import type { UserProfile, Result, IFamilyAccess } from '@/types'; // Thêm IFamilyAccess vào import
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as User | null,
+    user: null as UserProfile | null,
     token: null as string | null,
     loading: false,
     error: null as string | null,
@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async initAuth(): Promise<Result<User | null, string>> {
+    async initAuth(): Promise<Result<UserProfile | null, string>> {
       this.loading = true;
       this.error = null;
       try {
@@ -90,7 +90,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async register(data: any): Promise<Result<User | null, string>> {
+    async register(data: any): Promise<Result<UserProfile | null, string>> {
       this.loading = true;
       this.error = null;
       try {

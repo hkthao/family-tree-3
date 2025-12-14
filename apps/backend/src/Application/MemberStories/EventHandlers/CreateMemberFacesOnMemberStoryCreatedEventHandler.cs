@@ -2,7 +2,6 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Domain.Events.MemberStories;
 using Microsoft.Extensions.Logging;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 namespace backend.Application.MemberStories.EventHandlers;
 public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHandler<MemberStoryCreatedWithFacesEvent>
 {
@@ -19,13 +18,20 @@ public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHa
         var facesData = notification.FacesData;
         foreach (var faceData in facesData)
         {
+            var imageUrl = memberStory.MemberStoryImages.FirstOrDefault()?.ImageUrl;
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                _logger.LogWarning("Cannot create face for MemberStory {MemberStoryId} because no image URL was found.", memberStory.Id);
+                continue;
+            }
+
             var createFaceCommand = new CreateMemberFaceCommand
             {
                 MemberId = faceData.MemberId,
                 FaceId = faceData.Id,
                 BoundingBox = new BoundingBoxDto { X = (int)faceData.BoundingBox.X, Y = (int)faceData.BoundingBox.Y, Width = (int)faceData.BoundingBox.Width, Height = (int)faceData.BoundingBox.Height },
                 Confidence = (float)faceData.Confidence,
-                OriginalImageUrl = memberStory.OriginalImageUrl,
+                OriginalImageUrl = imageUrl,
                 Embedding = faceData.Embedding.ToList(),
                 Thumbnail = faceData.Thumbnail,
                 Emotion = faceData.Emotion,
@@ -40,6 +46,6 @@ public class CreateMemberFacesOnMemberStoryCreatedEventHandler : INotificationHa
         }
 
         // Publish notification for story creation
-       // await _mediator.Send(new GenerateFamilyKbCommand(memberStory.Member.FamilyId.ToString(), memberStory.Id.ToString(), KbRecordType.Story), cancellationToken);
+        // await _mediator.Send(new GenerateFamilyKbCommand(memberStory.Member.FamilyId.ToString(), memberStory.Id.ToString(), KbRecordType.Story), cancellationToken);
     }
 }

@@ -1,8 +1,9 @@
 <template>
-  <v-container fluid>
+  <div>
     <v-card v-if="memberStory" flat>
-      <!-- Cover Image -->
-      <v-img v-if="memberStory.resizedImageUrl" :src="memberStory.resizedImageUrl" cover class="mb-4">
+      <v-card-title class="text-h5 text-uppercase">{{ t('memberStory.detail.viewTitle') }}</v-card-title>
+      <!-- Cover Image - Keep cover image display if preferred, or let form handle it -->
+      <v-img v-if="memberStory.memberStoryImages && memberStory.memberStoryImages.length > 0 && memberStory.memberStoryImages[0].imageUrl" :src="memberStory.memberStoryImages[0].imageUrl" cover class="mb-4">
         <v-row class="fill-height align-end meta-data">
           <v-col class="pa-2" style="background: rgba(0, 0, 0, 0.4);">
             <h1 class="text-h4 text-white text-shadow">{{ memberStory.title || t('memberStory.detail.titleDefault') }}
@@ -20,26 +21,8 @@
           </v-col>
         </v-row> </v-img>
 
-      <v-card-text class="pa-0">
-        <!-- Story Content -->
-        <div class="mb-6">
-          <div class="text-body-1" style="white-space: pre-wrap;">{{ memberStory.story }}</div>
-        </div>
-
-        <!-- Short Description (Raw Input) -->
-        <div class="mb-6" v-if="memberStory.rawInput">
-          <h2 class="text-h5 mb-2">{{ t('memberStory.detail.shortDescription') }}</h2>
-          <p class="text-body-2 text-medium-emphasis text-justify">{{ memberStory.rawInput }}</p>
-        </div>
-
-        <!-- Style and Perspective Chips -->
-        <div class="mb-6">
-          <v-chip-group>
-            <v-chip v-if="memberStory.storyStyle" color="primary" variant="outlined">{{ storyStyleText }}</v-chip>
-            <v-chip v-if="memberStory.perspective" color="secondary" variant="outlined">{{ perspectiveText }}</v-chip>
-          </v-chip-group>
-        </div>
-      </v-card-text>
+      <!-- MemberStoryForm in readonly mode -->
+      <MemberStoryForm v-model="memberStory" :readonly="true" />
 
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -52,11 +35,11 @@
       </v-card-actions>
     </v-card>
 
-    <v-alert v-else-if="memberStoryStore.error" type="error" dismissible class="mt-4">
-      {{ memberStoryStore.error }}
+    <v-alert v-else-if="isError" type="error" dismissible class="mt-4">
+      {{ error?.message || t('memberStory.detail.loadError') }}
     </v-alert>
-    <v-progress-linear v-else indeterminate color="primary" class="mt-4"></v-progress-linear>
-  </v-container>
+    <v-progress-linear v-else-if="isLoading" indeterminate color="primary" class="mt-4"></v-progress-linear>
+  </div>
 </template>
 
 <style scoped>
@@ -67,13 +50,13 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStoryStore } from '@/stores/memberStory.store';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
+import { useMemberStoryQuery } from '@/composables/memberStory';
+import { useGlobalSnackbar } from '@/composables';
 import type { MemberStoryDto } from '@/types/memberStory';
-import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
-import { MemberStoryPerspective, MemberStoryStyle } from '@/types/enums'; // Import enums
+import { getAvatarUrl } from '@/utils/avatar.utils';
+import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue'; // Import MemberStoryForm
 
 const props = defineProps<{
   memberStoryId: string;
@@ -82,56 +65,17 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'edit-item']);
 
 const { t } = useI18n();
-const memberStoryStore = useMemberStoryStore();
 const { showSnackbar } = useGlobalSnackbar();
 
-const memberStory = ref<MemberStoryDto | null>(null);
+const { data: memberStory, isLoading, isError, error } = useMemberStoryQuery(toRef(props, 'memberStoryId'));
 
-const fetchMemberStory = async (id: string) => {
-  memberStory.value = await memberStoryStore.getById(id) || null;
-  if (!memberStory.value) {
+watch([isLoading, isError, memberStory], () => {
+  if (!isLoading.value && isError.value) {
+    showSnackbar(error.value?.message || t('memberStory.detail.notFound'), 'error');
+  } else if (!isLoading.value && !memberStory.value) {
     showSnackbar(t('memberStory.detail.notFound'), 'error');
   }
-};
-
-// Helper to get display text for story style
-const getStoryStyleText = (style: MemberStoryStyle | null | undefined): string => {
-  switch (style) {
-    case MemberStoryStyle.Nostalgic: return t('memberStory.style.nostalgic');
-    case MemberStoryStyle.Warm: return t('memberStory.style.warm');
-    case MemberStoryStyle.Formal: return t('memberStory.style.formal');
-    case MemberStoryStyle.Folk: return t('memberStory.style.folk');
-    default: return '';
-  }
-};
-
-// Helper to get display text for perspective
-const getPerspectiveText = (perspective: MemberStoryPerspective | null | undefined): string => {
-  switch (perspective) {
-    case MemberStoryPerspective.FirstPerson: return t('memberStory.create.perspective.firstPerson');
-    case MemberStoryPerspective.ThirdPerson: return t('memberStory.create.perspective.thirdPerson');
-    case MemberStoryPerspective.FamilyMember: return t('memberStory.create.perspective.familyMember');
-    case MemberStoryPerspective.NeutralPersonal: return t('memberStory.create.perspective.neutralPersonal');
-    case MemberStoryPerspective.FullyNeutral: return t('memberStory.create.perspective.fullyNeutral');
-    default: return '';
-  }
-};
-
-const storyStyleText = computed(() => getStoryStyleText(memberStory.value?.storyStyle as MemberStoryStyle));
-const perspectiveText = computed(() => getPerspectiveText(memberStory.value?.perspective as MemberStoryPerspective));
-
-
-onMounted(() => {
-  if (props.memberStoryId) {
-    fetchMemberStory(props.memberStoryId);
-  }
-});
-
-watch(() => props.memberStoryId, (newId) => {
-  if (newId) {
-    fetchMemberStory(newId);
-  }
-});
+}, { immediate: true });
 </script>
 <style scoped>
 .meta-data {

@@ -19,10 +19,12 @@ public class MemberStoriesController : ControllerBase // Updated
     // private readonly IPhotoAnalysisService _photoAnalysisService; // Removed
     // private readonly IStoryGenerationService _storyGenerationService; // Removed
     private readonly IMediator _mediator; // Injected IMediator
+    private readonly ILogger<MemberStoriesController> _logger;
 
-    public MemberStoriesController(IMediator mediator) // Updated
+    public MemberStoriesController(IMediator mediator, ILogger<MemberStoriesController> logger) // Updated
     {
         _mediator = mediator; // Initialized IMediator
+        _logger = logger;
     }
 
     /// <summary>
@@ -31,14 +33,10 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpPost("generate")]
     [ProducesResponseType(typeof(GenerateStoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<GenerateStoryResponseDto>> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
@@ -47,14 +45,10 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Guid>> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> CreateMemberStory([FromBody] CreateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetMemberStoryDetail), new { memberStoryId = result.Value }, result.Value); // Updated
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, _logger, 201, nameof(GetMemberStoryDetail), new { memberStoryId = result.Value });
     }
 
     /// <summary>
@@ -64,14 +58,15 @@ public class MemberStoriesController : ControllerBase // Updated
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> UpdateMemberStory(Guid memberStoryId, [FromBody] UpdateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> UpdateMemberStory(Guid memberStoryId, [FromBody] UpdateMemberStoryCommand command, CancellationToken cancellationToken) // Updated
     {
         if (memberStoryId != command.Id)
         {
+            _logger.LogWarning("Mismatched ID in URL ({MemberStoryId}) and request body ({CommandId}) for UpdateMemberStoryCommand from {RemoteIpAddress}", memberStoryId, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("MemberStory ID in URL does not match body."); // Updated
         }
-        await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        var result = await _mediator.Send(command, cancellationToken);
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -80,10 +75,10 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpDelete("{memberStoryId}")] // Updated
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> DeleteMemberStory(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
-        await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
-        return NoContent();
+        var result = await _mediator.Send(new DeleteMemberStoryCommand { Id = memberStoryId }, cancellationToken); // Updated
+        return result.ToActionResult(this, _logger, 204);
     }
 
     /// <summary>
@@ -92,31 +87,23 @@ public class MemberStoriesController : ControllerBase // Updated
     [HttpGet("search")] // Route sẽ là api/member-stories/search
     [ProducesResponseType(typeof(PaginatedList<MemberStoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PaginatedList<MemberStoryDto>>> SearchMemberStories(
+    public async Task<IActionResult> SearchMemberStories(
         [FromQuery] SearchStoriesQuery query,
         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
     /// Gets detailed information for a specific member story.
     /// </summary>
-    [HttpGet("detail/{memberStoryId}")] // Updated
+    [HttpGet("{memberStoryId}")] // Updated
     [ProducesResponseType(typeof(MemberStoryDto), StatusCodes.Status200OK)] // Updated
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<MemberStoryDto>> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
+    public async Task<IActionResult> GetMemberStoryDetail(Guid memberStoryId, CancellationToken cancellationToken) // Updated
     {
         var result = await _mediator.Send(new GetMemberStoryDetailQuery(memberStoryId), cancellationToken); // Updated
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.ToActionResult(this, _logger);
     }
 }

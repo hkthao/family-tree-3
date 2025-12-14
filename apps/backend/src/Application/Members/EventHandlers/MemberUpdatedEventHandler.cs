@@ -1,5 +1,5 @@
-using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.Common.Interfaces;
+using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -7,10 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IFamilyTreeService familyTreeService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
     private readonly ICurrentUser _user = _user;
     private readonly IN8nService _n8nService = n8nService;
 
@@ -33,5 +34,15 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
 
         // Publish notification for member update
         await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
+
+        // Sync member life events
+        await _familyTreeService.SyncMemberLifeEvents(
+            notification.Member.Id,
+            notification.Member.FamilyId,
+            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : (DateOnly?)null,
+            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : (DateOnly?)null,
+            notification.Member.FullName,
+            cancellationToken
+        );
     }
 }

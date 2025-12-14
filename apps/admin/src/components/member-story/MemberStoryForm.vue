@@ -1,131 +1,117 @@
 <template>
   <v-container>
+    <!-- Loading Indicator -->
+    <div v-if="isLoading" class="my-4">
+      <v-progress-linear color="primary" indeterminate></v-progress-linear>
+    </div>
+
+    <!-- NEW: Combined Carousel for existing and newly selected images -->
+    <v-row v-if="combinedImageUrls.length > 0">
+      <v-col cols="12">
+        <v-carousel cycle hide-delimiter-background show-arrows="hover" :height="300" class="mb-4">
+          <v-carousel-item v-for="(imageUrl, i) in combinedImageUrls" :key="i">
+            <v-img :src="imageUrl" cover class="fill-height"></v-img>
+          </v-carousel-item>
+        </v-carousel>
+      </v-col>
+    </v-row>
+
+    <!-- NEW: File Upload Input (moved to top, always visible if not readonly) -->
+    <v-row v-if="!readonly">
+      <v-col cols="12">
+        <v-file-input v-model="selectedFiles" :label="t('memberStory.form.uploadImagesLabel')" prepend-icon="mdi-camera"
+          multiple accept="image/*" show-size counter></v-file-input>
+      </v-col>
+    </v-row>
+
     <!-- Member Selection -->
     <v-row>
-      <v-col cols="12">
-        <MemberAutocomplete :model-value="modelValue.memberId"
+      <v-col cols="12" sm="6">
+        <FamilyAutocomplete :model-value="modelValue.familyId" :readonly="true"
+          :label="t('memberStory.form.familyIdLabel')" />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <MemberAutocomplete :model-value="modelValue.memberId" :disabled="!modelValue.familyId"
           @update:modelValue="(newValue: string | null) => { updateModelValue({ memberId: newValue || '' }); }"
-          :readonly="readonly" :family-id="familyId" :label="t('memberStory.form.memberIdLabel')"
-          :rules="[rules.memberId.required]" @update:focused="(focused: boolean) => { if (!focused) memberIdValid = true }" />
-      </v-col>
-    </v-row>
-    <!-- Photo Upload Input -->
-    <v-row v-if="modelValue.memberId">
-      <v-col v-if="isLoading" cols="12">
-        <v-progress-linear indeterminate color="primary"></v-progress-linear>
-      </v-col>
-      <v-col cols="12">
-        <FaceUploadInput @file-uploaded="handleFileUpload" :readonly="readonly" />
-      </v-col>
-      <!-- Face Detection and Selection -->
-      <v-col cols="12">
-        <div v-if="hasUploadedImage && !isLoading">
-          <div v-if="modelValue.detectedFaces && modelValue.detectedFaces.length > 0">
-            <FaceBoundingBoxViewer :image-src="modelValue.originalImageUrl!" :faces="modelValue.detectedFaces" selectable
-              @face-selected="openSelectMemberDialog" />
-            <FaceDetectionSidebar :faces="modelValue.detectedFaces" @face-selected="openSelectMemberDialog"
-              @remove-face="handleRemoveFace" />
-          </div>
-          <v-alert v-else type="info">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
-        </div>
-        <v-alert v-else type="info">{{
-          t('memberStory.faceRecognition.uploadPrompt') }}</v-alert>
+          :readonly="readonly" :family-id="modelValue.familyId" :label="t('memberStory.form.memberIdLabel')"
+          :rules="[rules.memberId.required]" />
       </v-col>
     </v-row>
 
-    <!-- Raw Input & Story Style -->
-    <v-row v-if="hasUploadedImage && !isLoading">
-      <v-col cols="12">
-        <h4>{{ t('memberStory.create.rawInputPlaceholder') }}</h4>
-        <v-textarea class="mt-4" :model-value="modelValue.rawInput" :rows="2"
-          @update:model-value="(newValue) => { updateModelValue({ rawInput: newValue }); }"
-          :label="t('memberStory.create.rawInputPlaceholder')" :readonly="readonly" auto-grow
-          :rules="[rules.rawInput.minLength]" @update:focused="(focused: boolean) => { if (!focused) rawInputValid = true }"></v-textarea>
+    <!-- New fields for Life Story -->
+    <v-row>
+      <v-col cols="12" sm="6">
+        <v-text-field :model-value="modelValue.year"
+          @update:modelValue="(newValue) => { updateModelValue({ year: parseInt(newValue) || null }); }"
+          :label="t('memberStory.form.yearLabel')" type="number" :readonly="readonly"
+          :rules="[rules.year.valid]"></v-text-field>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-select :model-value="modelValue.lifeStage"
+          @update:modelValue="(newValue) => { updateModelValue({ lifeStage: newValue }); }"
+          :label="t('memberStory.form.lifeStageLabel')" :items="lifeStageOptions" item-title="text" item-value="value"
+          :readonly="readonly"></v-select>
       </v-col>
       <v-col cols="12">
-        <h4>{{ t('memberStory.create.storyStyle.question') }}</h4>
-        <v-chip-group :model-value="modelValue.storyStyle"
-          @update:model-value="(newValue) => updateModelValue({ storyStyle: newValue })" color="primary" mandatory
-          column :disabled="readonly">
-          <v-chip v-for="style in storyStyles" :key="style.value" :value="style.value" filter variant="tonal">
-            {{ style.text }}
-          </v-chip>
-        </v-chip-group>
+        <v-text-field :model-value="modelValue.timeRangeDescription"
+          @update:modelValue="(newValue) => { updateModelValue({ timeRangeDescription: newValue }); }"
+          :label="t('memberStory.form.timeRangeDescriptionLabel')" :readonly="readonly"
+          :rules="[rules.timeRangeDescription.maxLength]"></v-text-field>
       </v-col>
-    </v-row>
+      <v-col cols="12">
+        <v-text-field :model-value="modelValue.location"
+          @update:modelValue="(newValue) => { updateModelValue({ location: newValue }); }"
+          :label="t('memberStory.form.locationLabel')" :readonly="readonly"
+          :rules="[rules.location.maxLength]"></v-text-field>
+      </v-col>
 
-    <!-- Perspective -->
-    <v-row v-if="hasUploadedImage && !isLoading">
-      <v-col cols="12">
-        <h4>{{ t('memberStory.create.perspective.question') }}</h4>
-        <v-chip-group :model-value="modelValue.perspective"
-          @update:model-value="(newValue) => updateModelValue({ perspective: newValue })" color="primary" mandatory
-          column :disabled="readonly">
-          <v-chip :value="aiPerspectiveSuggestions[0].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[0].text }}
-          </v-chip>
-          <v-chip :value="aiPerspectiveSuggestions[1].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[1].text }}
-          </v-chip>
-          <v-chip :value="aiPerspectiveSuggestions[2].value" filter variant="tonal">
-            {{ aiPerspectiveSuggestions[2].text }}
-          </v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-row>
-
-    <v-row v-if="hasUploadedImage && !isLoading">
-      <v-col cols="12">
-        <v-btn color="primary" :disabled="readonly || generatingStory || isLoading || !canGenerateStory"
-          :loading="generatingStory" @click="generateStory">
-          {{ t('memberStory.create.generateStoryButton') }}
-        </v-btn>
-        <v-alert type="info" class="mt-4">
-          {{ t('memberStory.create.aiConsentInfo') }}
-        </v-alert>
-      </v-col>
     </v-row>
 
     <!-- Title and Story -->
-    <v-row v-if="hasUploadedImage && !isLoading">
+    <v-row>
       <v-col cols="12">
         <v-text-field :model-value="modelValue.title"
-          @update:model-value="(newValue) => { updateModelValue({ title: newValue }); }"
-          :label="t('memberStory.storyEditor.title')" outlined class="mb-4"
-          :rules="[rules.title.required]" @update:focused="(focused: boolean) => { if (!focused) titleValid = true }"></v-text-field>
-        <v-textarea :model-value="modelValue.story"
-          @update:model-value="(newValue) => { updateModelValue({ story: newValue }); }"
-          :label="t('memberStory.storyEditor.storyContent')" outlined auto-grow
-          :rules="[rules.story.required]" @update:focused="(focused: boolean) => { if (!focused) storyValid = true }"></v-textarea>
+          @update:modelValue="(newValue) => { updateModelValue({ title: newValue }); }"
+          :label="t('memberStory.storyEditor.title')" outlined class="mb-4" :rules="[rules.title.required]"
+          :readonly="readonly" />
+        <v-textarea :model-value="modelValue.story" :rows="20"
+          @update:modelValue="(newValue) => { updateModelValue({ story: newValue }); }"
+          :label="t('memberStory.storyEditor.storyContent')" outlined :rules="[rules.story.required]"
+          :readonly="readonly" />
       </v-col>
     </v-row>
-
-    <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
-      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" :family-id="props.familyId"
-      :show-relation-prompt-field="true" :disable-save-validation="true" />
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onUnmounted } from 'vue'; // Added watch, onUnmounted
 import { useI18n } from 'vue-i18n';
 import type { MemberStoryDto } from '@/types/memberStory';
-import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
+// Removed FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useMemberStoryForm } from '@/composables/useMemberStoryForm';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
+import { useMemberStoryForm } from '@/composables'; // This composable needs to be adapted.
+import { LifeStage } from '@/types/enums'; // Import enums
 
 const props = defineProps<{
   modelValue: MemberStoryDto;
   readonly?: boolean;
-  memberId?: string | null;
-  familyId?: string;
 }>();
-const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles', 'story-generated']);
+const emit = defineEmits(['update:modelValue', 'submit', 'update:selectedFiles']);
 const { t } = useI18n();
+
+// Options for v-select
+const lifeStageOptions = computed(() => [
+  { value: LifeStage.Childhood, text: t('lifeStage.childhood') },
+  { value: LifeStage.Adulthood, text: t('lifeStage.adulthood') },
+  { value: LifeStage.StartingAFamily, text: t('lifeStage.startingAFamily') },
+  { value: LifeStage.SignificantEvents, text: t('lifeStage.significantEvents') },
+  { value: LifeStage.OldAge, text: t('lifeStage.oldAge') },
+  { value: LifeStage.Deceased, text: t('lifeStage.deceased') },
+]);
 
 // Validation refs
 const memberIdValid = ref(false);
-const rawInputValid = ref(false);
 const titleValid = ref(false);
 const storyValid = ref(false);
 
@@ -133,63 +119,106 @@ const rules = {
   memberId: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
-  rawInput: {
-    minLength: (value: string | null) => (value && value.length >= 10) || t('memberStory.form.rules.rawInputMinLength', { length: 10 }),
-  },
   title: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
   story: {
     required: (value: string | null) => !!value || t('common.validations.required'),
   },
+  year: {
+    valid: (value: number | null) => !value || (value >= 1000 && value <= new Date().getFullYear() + 1) || t('memberStory.form.yearRangeValidation'),
+  },
+  timeRangeDescription: {
+    maxLength: (value: string | null) => !value || value.length <= 100 || t('common.validations.maxLength', { length: 100 }),
+  },
+  lifeStage: {
+  },
+  location: {
+    maxLength: (value: string | null) => !value || value.length <= 200 || t('common.validations.maxLength', { length: 200 }),
+  },
 };
 
 const updateModelValue = (payload: Partial<MemberStoryDto>) => {
-  emit('update:modelValue', { ...props.modelValue, ...payload });
-};
-const onStoryGenerated = (payload: { story: string | null; title: string | null }) => {
-  emit('story-generated', payload);
+  const newModelValue = { ...props.modelValue, ...payload };
+  emit('update:modelValue', newModelValue);
+
+  // Always re-evaluate validity for all required fields
+  memberIdValid.value = !!rules.memberId.required(newModelValue.memberId ?? null);
+  titleValid.value = !!rules.title.required(newModelValue.title ?? null);
+  storyValid.value = !!rules.story.required(newModelValue.story ?? null);
 };
 
 const formValid = computed(() => {
-  return memberIdValid.value && rawInputValid.value && titleValid.value && storyValid.value;
+  return memberIdValid.value && titleValid.value && storyValid.value;
 });
 
+// New State for file input
+const selectedFiles = ref<File[]>([]);
+const temporaryLocalImageUrls = ref<string[]>([]);
+
+// Combined image URLs for carousel
+const combinedImageUrls = computed(() => {
+  const existingImages = props.modelValue.memberStoryImages?.map(img => img.imageUrl).filter(url => url !== null && url !== undefined) as string[] || [];
+  return [...existingImages, ...temporaryLocalImageUrls.value];
+});
+
+// Watch for selectedFiles changes and create local blob URLs
+watch(selectedFiles, (newFiles) => {
+  temporaryLocalImageUrls.value.forEach(url => URL.revokeObjectURL(url)); // Clean up old blobs
+  temporaryLocalImageUrls.value = [];
+
+  if (newFiles && newFiles.length > 0) {
+    newFiles.forEach(file => {
+      temporaryLocalImageUrls.value.push(URL.createObjectURL(file));
+    });
+    // Update modelValue with the first selected file's temporary URLs
+    // This part assumes that modelValue can handle multiple temporary images,
+    // which MemberStoryDto currently doesn't. Will pass the first one for now.
+    updateModelValue({
+      temporaryOriginalImageUrl: temporaryLocalImageUrls.value[0],
+      temporaryResizedImageUrl: temporaryLocalImageUrls.value[0], // Assuming resized can be same as original for display
+    });
+  } else {
+    updateModelValue({
+      temporaryOriginalImageUrl: undefined,
+      temporaryResizedImageUrl: undefined,
+    });
+  }
+}, { deep: true }); // Use deep: true for watching array changes
+
+// Cleanup blob URLs when component is unmounted
+onUnmounted(() => {
+  temporaryLocalImageUrls.value.forEach(url => URL.revokeObjectURL(url));
+});
+
+
+// Simplified useMemberStoryForm (no face detection logic)
 const {
-  showSelectMemberDialog,
-  faceToLabel,
-  aiPerspectiveSuggestions,
-  storyStyles,
-  generatedTitle,
-  generatingStory,
-  storyEditorValid,
-  hasUploadedImage,
   isLoading,
-  canGenerateStory,
-  generateStory,
-  handleFileUpload,
-  openSelectMemberDialog,
-  handleLabelFaceAndCloseDialog,
-  handleRemoveFace,
-  memberStoryStoreFaceRecognition,
+  // handleFileUpload is removed from destructuring, as it's now handled locally via selectedFiles watch
 } = useMemberStoryForm({
   modelValue: computed(() => props.modelValue),
   readonly: props.readonly,
-  memberId: props.memberId,
-  familyId: props.familyId,
+  memberId: props.modelValue.memberId,
+  familyId: props.modelValue.familyId,
   updateModelValue,
-  onStoryGenerated,
 });
 
 defineExpose({
   isValid: computed(() => formValid.value),
-  memoryFaceStore: memberStoryStoreFaceRecognition,
-  generateStory,
-  generatedTitle,
-  storyEditorValid,
 });
 </script>
 
 <style scoped>
-/* Remove stepper-header styles as stepper is removed */
+.overlay {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  cursor: wait;
+}
 </style>

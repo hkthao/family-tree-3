@@ -1,6 +1,6 @@
-using backend.Application.AI.DTOs; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs;
 using backend.Application.Files.UploadFile; // NEW
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Common;

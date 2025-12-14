@@ -2,7 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
-using backend.Application.Files.UploadFile;
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.Families;
 
@@ -33,27 +33,31 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
             try
             {
                 var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
-                var uploadCommand = new UploadFileCommand
+                var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    ImageData = imageData,
+                    FamilyId = entity.Id, // Link media to the newly created Family
+                    File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
-                    Folder = string.Format(UploadConstants.FamilyAvatarFolder, entity.Id), // Use entity.Id now
-                    ContentType = "image/png"
+                    Folder = string.Format(UploadConstants.FamilyAvatarFolder, entity.Id),
+                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType
                 };
 
-                var uploadResult = await _mediator.Send(uploadCommand, cancellationToken);
+                var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
 
                 if (!uploadResult.IsSuccess)
                 {
                     return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
                 }
 
-                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.Url))
+                // CreateFamilyMediaCommand returns a Guid (the ID of the new FamilyMedia record).
+                // We need to fetch the FamilyMedia object to get its FilePath (URL).
+                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value!.Id);
+                if (familyMedia == null || string.IsNullOrEmpty(familyMedia.FilePath))
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                entity.UpdateAvatar(uploadResult.Value.Url); // Update avatar after successful upload
+                entity.UpdateAvatar(familyMedia.FilePath); // Update avatar after successful upload
                 entity.AddDomainEvent(new FamilyCreatedEvent(entity));
                 entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 

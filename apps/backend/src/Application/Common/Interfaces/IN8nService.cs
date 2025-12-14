@@ -1,7 +1,7 @@
-using backend.Application.AI.DTOs; // UPDATED USING
 using backend.Application.AI.DTOs.Embeddings; // NEW USING for Embeddings DTOs
 using backend.Application.AI.Models; // NEW USING
 using backend.Application.Common.Models;
+using backend.Application.Files.DTOs; // UPDATED DTOs PATH
 
 namespace backend.Application.Common.Interfaces;
 

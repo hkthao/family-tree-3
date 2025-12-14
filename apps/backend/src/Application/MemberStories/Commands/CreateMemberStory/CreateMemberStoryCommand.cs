@@ -1,17 +1,21 @@
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
+using backend.Domain.Enums;
 
-namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
+namespace backend.Application.MemberStories.Commands.CreateMemberStory;
 
-public record CreateMemberStoryCommand : IRequest<Result<Guid>> // Updated
+public record CreateMemberStoryCommand : IRequest<Result<Guid>>
 {
     public Guid MemberId { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Story { get; init; } = string.Empty;
-    public string? OriginalImageUrl { get; init; }
-    public string? ResizedImageUrl { get; init; }
-    public string? RawInput { get; init; } // NEW
-    public string? StoryStyle { get; init; } // NEW
-    public string? Perspective { get; init; } // NEW
+    public int? Year { get; init; }
+    public string? TimeRangeDescription { get; init; }
+    public bool IsYearEstimated { get; init; }
+    public LifeStage LifeStage { get; init; }
+    public string? Location { get; init; }
     public List<DetectedFaceDto> DetectedFaces { get; init; } = new List<DetectedFaceDto>();
+    // Property to hold image URLs that will be converted to MemberStoryImage entities
+    public string? TemporaryOriginalImageUrl { get; init; }
+    public string? TemporaryResizedImageUrl { get; init; }
 }

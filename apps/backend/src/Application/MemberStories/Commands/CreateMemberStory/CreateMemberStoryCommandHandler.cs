@@ -1,15 +1,13 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // NEW: For Result<T>
 using backend.Application.Files.Commands.UploadFileFromUrl; // NEW
+using backend.Application.Files.DTOs; // Moved DTOs
 using backend.Application.Members.Specifications; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberStories;
 using backend.Domain.ValueObjects;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Logging;
 using static backend.Domain.Events.MemberStories.MemberStoryCreatedWithFacesEvent;
 namespace backend.Application.MemberStories.Commands.CreateMemberStory;
 
@@ -17,16 +15,12 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IStringLocalizer<CreateMemberStoryCommandHandler> _localizer;
     private readonly IMediator _mediator;
-    private readonly ILogger<CreateMemberStoryCommandHandler> _logger;
-    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberStoryCommandHandler> localizer, IMediator mediator, ILogger<CreateMemberStoryCommandHandler> logger)
+    public CreateMemberStoryCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _localizer = localizer;
         _mediator = mediator;
-        _logger = logger;
     }
     public async Task<Result<Guid>> Handle(CreateMemberStoryCommand request, CancellationToken cancellationToken)
     {
@@ -57,46 +51,49 @@ public class CreateMemberStoryCommandHandler : IRequestHandler<CreateMemberStory
             MemberId = request.MemberId,
             Title = request.Title,
             Story = request.Story,
-            OriginalImageUrl = (string?)request.OriginalImageUrl,
-            ResizedImageUrl = request.ResizedImageUrl,
-            RawInput = request.RawInput,
-            StoryStyle = request.StoryStyle,
-            Perspective = request.Perspective
+            Year = request.Year,
+            TimeRangeDescription = request.TimeRangeDescription,
+            LifeStage = request.LifeStage,
+            Location = request.Location
         };
 
-        if (!string.IsNullOrEmpty(request.OriginalImageUrl) && request.OriginalImageUrl.Contains("/temp/"))
+        MemberStoryImage? primaryImage = null;
+
+        if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl))
         {
-            var originalUploadResult = await UploadImageFromTempUrlAsync(
-                request.OriginalImageUrl,
-                "original_image",
-                familyId,
-                cancellationToken);
-            if (!originalUploadResult.IsSuccess)
+            string originalImageUrl = string.Empty;
+
+            if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl) && request.TemporaryOriginalImageUrl.Contains("/temp/"))
             {
-                return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+                var originalUploadResult = await UploadImageFromTempUrlAsync(
+                    request.TemporaryOriginalImageUrl,
+                    "original_image",
+                    familyId,
+                    cancellationToken);
+                if (!originalUploadResult.IsSuccess)
+                {
+                    return Result<Guid>.Failure(originalUploadResult.Error ?? "Failed to upload original image from temporary URL.", originalUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+                }
+                originalImageUrl = originalUploadResult.Value?.Url ?? string.Empty;
             }
-            if (originalUploadResult.Value != null)
+            else if (!string.IsNullOrEmpty(request.TemporaryOriginalImageUrl))
             {
-                memberStory.OriginalImageUrl = originalUploadResult.Value.Url;
+                originalImageUrl = request.TemporaryOriginalImageUrl;
+            }
+
+
+
+
+            if (!string.IsNullOrEmpty(originalImageUrl))
+            {
+                primaryImage = new MemberStoryImage
+                {
+                    ImageUrl = originalImageUrl,
+                };
+                memberStory.MemberStoryImages.Add(primaryImage);
             }
         }
 
-        if (!string.IsNullOrEmpty(request.ResizedImageUrl) && request.ResizedImageUrl.Contains("/temp/"))
-        {
-            var resizedUploadResult = await UploadImageFromTempUrlAsync(
-                request.ResizedImageUrl,
-                "resized_image",
-                familyId,
-                cancellationToken);
-            if (!resizedUploadResult.IsSuccess)
-            {
-                return Result<Guid>.Failure(resizedUploadResult.Error ?? "Failed to upload resized image from temporary URL.", resizedUploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
-            }
-            if (resizedUploadResult.Value != null)
-            {
-                memberStory.ResizedImageUrl = resizedUploadResult.Value.Url;
-            }
-        }
 
         member.AddStory(memberStory);
         _context.MemberStories.Add(memberStory);

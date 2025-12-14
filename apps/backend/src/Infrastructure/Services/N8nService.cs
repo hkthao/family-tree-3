@@ -1,13 +1,13 @@
-using System.Net.Http.Headers; // For MediaTypeHeaderValue
-using System.Text; // NEW USING
-using System.Text.Json; // NEW USING
-using backend.Application.AI.DTOs; // UPDATED USING
-using backend.Application.AI.DTOs.Embeddings; // NEW USING
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using backend.Application.AI.DTOs;
+using backend.Application.AI.DTOs.Embeddings;
 using backend.Application.AI.Models;
-using backend.Application.Common.Interfaces; // NEW USING
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AI;
 using backend.Application.Common.Models.AppSetting;
+using backend.Application.Files.DTOs;
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -41,7 +41,7 @@ public class N8nService : IN8nService
             }
         };
         return await CallN8nWebhookAsync<object, string>(
-            _n8nSettings.ChatWebhookUrl,
+            _n8nSettings.Chat.ChatWebhookUrl,
             sessionId,
             payload,
             cancellationToken,

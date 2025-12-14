@@ -1,3 +1,4 @@
+using backend.Application.AI.DTOs;
 using backend.Application.Common.Models;
 
 namespace backend.Application.AI.Chat;
@@ -5,7 +6,7 @@ namespace backend.Application.AI.Chat;
 /// <summary>
 /// Lệnh để bắt đầu một cuộc trò chuyện với AI Assistant.
 /// </summary>
-public record ChatWithAssistantCommand : IRequest<Result<string>>
+public record ChatWithAssistantCommand : IRequest<Result<ChatResponse>>
 {
     /// <summary>
     /// ID phiên trò chuyện.
@@ -15,5 +16,10 @@ public record ChatWithAssistantCommand : IRequest<Result<string>>
     /// <summary>
     /// Tin nhắn từ người dùng.
     /// </summary>
-    public string Message { get; init; } = null!;
+    public string ChatInput { get; init; } = null!;
+
+    /// <summary>
+    /// Metadata bổ sung cho cuộc trò chuyện.
+    /// </summary>
+    public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
 }

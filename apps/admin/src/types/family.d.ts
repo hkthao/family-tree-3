@@ -16,6 +16,9 @@ export interface Family {
   familyUsers?: FamilyUser[];
   totalMembers?: number;
   totalGenerations?: number;
+  managerIds: [];
+  viewerIds: [];
+
 }
 
 export interface IFamilyAccess {
@@ -27,8 +30,9 @@ export interface FamilyFilter {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;
   familyId?: string;
-  sortBy?: string; // Column name to sort by
-  sortOrder?: 'asc' | 'desc'; // Sort order
+  page?: number;
+  itemsPerPage?: number;
+  sortBy?: { key: string; order: 'asc' | 'desc' }[];
 }
 
 export interface FamilyUser {
@@ -90,4 +94,10 @@ export interface FamilyExportDto {
   members: MemberExportDto[];
   relationships: RelationshipExportDto[];
   events: EventExportDto[];
+}
+
+export interface GenerateFamilyDataCommand {
+  content: string;
+  sessionId: string;
+  familyId: string;
 }

@@ -27,7 +27,7 @@ public class CreateMembersCommandValidatorTests
     [Fact]
     public void ShouldHaveError_WhenAnyMemberIsInvalid()
     {
-        var invalidMember = new AIMemberDto { FirstName = "", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" };
+        var invalidMember = new AIMemberDto { FirstName = "", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) };
         var command = new CreateMembersCommand(new List<AIMemberDto> { invalidMember });
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("Members[0].FirstName");
@@ -36,7 +36,7 @@ public class CreateMembersCommandValidatorTests
     [Fact]
     public void ShouldNotHaveError_WhenAllMembersAreValid()
     {
-        var validMember = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyName = "Doe" };
+        var validMember = new AIMemberDto { FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1) };
         var command = new CreateMembersCommand(new List<AIMemberDto> { validMember });
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();

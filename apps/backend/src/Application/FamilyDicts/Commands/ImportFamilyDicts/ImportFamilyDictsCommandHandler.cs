@@ -1,11 +1,10 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 
-public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDictsCommand, Result<IEnumerable<Guid>>>
+public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDictsCommand, Result<List<Guid>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -18,11 +17,11 @@ public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDicts
         _authorizationService = authorizationService;
     }
 
-    public async Task<Result<IEnumerable<Guid>>> Handle(ImportFamilyDictsCommand request, CancellationToken cancellationToken)
+    public async Task<Result<List<Guid>>> Handle(ImportFamilyDictsCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.IsAdmin())
         {
-            throw new ForbiddenAccessException("Chỉ quản trị viên mới được phép nhập FamilyDict.");
+            return Result<List<Guid>>.Forbidden("Chỉ quản trị viên mới được phép nhập FamilyDict.");
         }
 
         var importedFamilyDictIds = new List<Guid>();
@@ -46,6 +45,6 @@ public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDicts
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<IEnumerable<Guid>>.Success(importedFamilyDictIds);
+        return Result<List<Guid>>.Success(importedFamilyDictIds);
     }
 }

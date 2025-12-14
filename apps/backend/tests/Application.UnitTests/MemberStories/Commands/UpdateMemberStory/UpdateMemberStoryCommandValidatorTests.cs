@@ -69,40 +69,55 @@ public class UpdateMemberStoryCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenStoryStyleIsNull()
+    public void ShouldHaveError_WhenYearIsOutOfRange()
     {
-        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = null };
+        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = 999 };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.StoryStyle)
-              .WithErrorMessage("Story style is required.");
+        result.ShouldHaveValidationErrorFor(x => x.Year)
+              .WithErrorMessage($"Year must be between 1000 and {DateTime.Now.Year + 1}.");
+
+        command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = DateTime.Now.Year + 2 };
+        result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Year)
+              .WithErrorMessage($"Year must be between 1000 and {DateTime.Now.Year + 1}.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenStoryStyleIsInvalid()
+    public void ShouldNotHaveError_WhenYearIsNull()
     {
-        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = "InvalidStyle" };
+        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Year = null };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.StoryStyle)
-              .WithErrorMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.");
+        result.ShouldNotHaveValidationErrorFor(x => x.Year);
     }
 
     [Fact]
-    public void ShouldHaveError_WhenPerspectiveIsNull()
+    public void ShouldHaveError_WhenTimeRangeDescriptionExceedsMaxLength()
     {
-        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = MemberStoryStyle.Nostalgic.ToString(), Perspective = null };
+        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", TimeRangeDescription = new string('a', 101) };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Perspective)
-              .WithErrorMessage("Perspective is required.");
+        result.ShouldHaveValidationErrorFor(x => x.TimeRangeDescription)
+              .WithErrorMessage("Time range description must not exceed 100 characters.");
     }
 
     [Fact]
-    public void ShouldHaveError_WhenPerspectiveIsInvalid()
+    public void ShouldHaveError_WhenLifeStageIsInvalid()
     {
-        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid Title", Story = "Valid Story", StoryStyle = MemberStoryStyle.Nostalgic.ToString(), Perspective = "InvalidPerspective" };
+        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", LifeStage = (LifeStage)99 };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Perspective)
-              .WithErrorMessage($"Invalid perspective. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryPerspective)))}.");
+        result.ShouldHaveValidationErrorFor(x => x.LifeStage)
+              .WithErrorMessage("Invalid Life Stage.");
     }
+
+    [Fact]
+    public void ShouldHaveError_WhenLocationExceedsMaxLength()
+    {
+        var command = new UpdateMemberStoryCommand { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), Title = "Valid", Story = "Valid", Location = new string('a', 201) };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Location)
+              .WithErrorMessage("Location must not exceed 200 characters.");
+    }
+
+
 
     [Fact]
     public void ShouldNotHaveError_WhenCommandIsValid()
@@ -113,8 +128,10 @@ public class UpdateMemberStoryCommandValidatorTests
             MemberId = Guid.NewGuid(),
             Title = "Valid Title",
             Story = "Valid Story",
-            StoryStyle = MemberStoryStyle.Nostalgic.ToString(),
-            Perspective = MemberStoryPerspective.FirstPerson.ToString()
+            Year = 2000,
+            TimeRangeDescription = "A specific period",
+            LifeStage = LifeStage.Adulthood,
+            Location = "Ho Chi Minh City"
         };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();

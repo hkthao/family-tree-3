@@ -1,9 +1,9 @@
 <template>
   <div data-testid="member-face-list-view">
-    <MemberFaceSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
+    <MemberFaceSearch @update:filters="handleFilterUpdate" />
 
-    <MemberFaceList :items="memberFaceStore.list.items" :total-items="memberFaceStore.list.totalItems"
-      :loading="list.loading" :search="searchQuery" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
+    <MemberFaceList :items="memberFaces" :total-items="totalItems" :loading="queryLoading || isDeleting" :search="searchQuery"
+      :items-per-page="itemsPerPage" :sortBy="sortBy" @update:options="handleListOptionsUpdate" @view="openDetailDrawer"
       @delete="confirmDelete" @create="openAddDrawer()" @update:search="handleSearchUpdate" />
 
     <!-- Add MemberFace Drawer -->
@@ -19,31 +19,25 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, watch, toRefs, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useCrudDrawer } from '@/composables/useCrudDrawer';
-import { useMemberFaceStore } from '@/stores/member-face.store';
+import { useCrudDrawer } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import type { MemberFace, MemberFaceFilter } from '@/types'; // Import MemberFaceFilter
+import type { MemberFace, MemberFaceFilter, ListOptions, FilterOptions } from '@/types';
 import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
-import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue'; // NEW
+import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue';
+import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
+import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
 
 interface MemberFaceListViewProps {
   memberId?: string;
   familyId?: string;
-  hideSearch?: boolean; // NEW
 }
 const props = defineProps<MemberFaceListViewProps>();
 const { t } = useI18n();
-const memberFaceStore = useMemberFaceStore();
-const { list } = storeToRefs(memberFaceStore);
-const { showSnackbar } = useGlobalSnackbar();
-const { showConfirmDialog } = useConfirmDialog();
+
 const {
   addDrawer,
   detailDrawer,
@@ -53,39 +47,52 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>();
 
-const searchQuery = ref(''); // NEW
+const memberFaceListFiltersComposables = useMemberFaceListFilters();
+const {
+  searchQuery,
+  page,
+  itemsPerPage,
+  sortBy,
+  filters, // This is MemberFaceFilter
+} = toRefs(memberFaceListFiltersComposables);
+const {
+  setPage,
+  setItemsPerPage,
+  setSortBy,
+  setSearchQuery,
+  setFilters,
+} = memberFaceListFiltersComposables;
 
-const loadMemberFaces = async () => {
-  // Create a base filter from props (route-based)
-  const baseFilters: MemberFaceFilter = {
-    memberId: props.memberId,
-    familyId: props.familyId,
-  };
+const listOptions = computed<ListOptions>(() => ({
+  page: page.value,
+  itemsPerPage: itemsPerPage.value,
+  sortBy: sortBy.value.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+}));
 
-  // Merge with existing filters from the store, prioritizing store filters
-  // This means if MemberFaceSearch sets memberId, it overrides props.memberId
-  memberFaceStore.list.filters = {
-    ...baseFilters, // Apply initial route filters
-    ...memberFaceStore.list.filters, // Apply user-set filters from search component
-    searchQuery: searchQuery.value, // Ensure text search is included
-  };
-  await memberFaceStore._loadItems();
+// Create a reactive filter object to pass to the query
+const queryFilters = computed<FilterOptions>(() => ({
+  ...filters.value,
+  searchQuery: searchQuery.value,
+}));
+
+const { memberFaces, totalItems, queryLoading, refetch } = useMemberFacesQuery(listOptions, queryFilters);
+const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
+
+const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+  deleteMutation: deleteMemberFaceMutation,
+  successMessageKey: 'memberFace.messages.deleteSuccess',
+  errorMessageKey: 'memberFace.messages.deleteError',
+  confirmationTitleKey: 'confirmDelete.title',
+  confirmationMessageKey: 'memberFace.list.confirmDelete',
+  refetchList: refetch,
+});
+
+const handleFilterUpdate = (newFilters: MemberFaceFilter) => {
+  setFilters(newFilters);
 };
 
-const handleFilterUpdate = (filters: MemberFaceFilter) => {
-  memberFaceStore.list.filters = {
-    ...memberFaceStore.list.filters,
-    ...filters,
-  };
-  memberFaceStore.list.options.page = 1; // Reset page to 1 when filters change
-  loadMemberFaces();
-};
-
-const handleSearchUpdate = (search: string) => { // NEW
-  searchQuery.value = search;
-  memberFaceStore.list.filters.searchQuery = search;
-  memberFaceStore.list.options.page = 1; // Reset page on text search
-  loadMemberFaces();
+const handleSearchUpdate = (search: string) => {
+  setSearchQuery(search);
 };
 
 const handleListOptionsUpdate = (options: {
@@ -93,41 +100,18 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  memberFaceStore.setListOptions(options);
-  loadMemberFaces();
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
 
 const confirmDelete = async (memberFace: MemberFace) => {
-  const confirmed = await showConfirmDialog({
-    title: t('confirmDelete.title'),
-    message: t('memberFace.list.confirmDelete', { faceId: memberFace.faceId }),
-    confirmText: t('common.delete'),
-    cancelText: t('common.cancel'),
-    confirmColor: 'error',
-  });
-  if (confirmed) {
-    await handleDeleteConfirm(memberFace);
-  }
-};
-
-const handleDeleteConfirm = async (memberFace: MemberFace) => {
-  if (memberFace) {
-    await memberFaceStore.deleteItem(memberFace.id);
-    if (memberFaceStore.delete.error) {
-      showSnackbar(
-        memberFaceStore.delete.error.message || t('memberFace.messages.deleteError'),
-        'error',
-      );
-    } else {
-      showSnackbar(t('memberFace.messages.deleteSuccess'), 'success');
-    }
-  }
-  loadMemberFaces();
+  await confirmAndDelete(memberFace.id, memberFace.faceId);
 };
 
 const handleMemberFaceSaved = () => {
   closeAllDrawers();
-  loadMemberFaces();
+  refetch(); // Refetch the list after successful save
 };
 
 const handleMemberFaceClosed = () => {
@@ -139,10 +123,17 @@ const handleDetailClosed = () => {
 };
 
 onMounted(() => {
-  loadMemberFaces();
+  // Initialize filters from props
+  setFilters({
+    memberId: props.memberId,
+    familyId: props.familyId,
+  });
 });
 
-watch([() => props.memberId, () => props.familyId], () => {
-  loadMemberFaces();
+watch([() => props.memberId, () => props.familyId], ([newMemberId, newFamilyId]) => {
+  setFilters({
+    memberId: newMemberId,
+    familyId: newFamilyId,
+  });
 });
 </script>

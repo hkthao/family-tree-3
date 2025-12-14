@@ -13,21 +13,21 @@
       </v-row>
       <div v-if="selectedFamilyId">
         <FaceUploadInput id="tour-face-upload" @file-uploaded="handleFileUpload" />
-        <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
-        <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
+        <v-progress-linear v-if="isDetectingFaces" indeterminate color="primary" class="my-4"></v-progress-linear>
+        <div v-if="uploadedImage && detectedFaces.length > 0" class="mt-4">
           <v-row>
             <v-col cols="12" md="8">
-              <FaceBoundingBoxViewer id="tour-face-viewer" :image-src="faceStore.uploadedImage"
-                :faces="faceStore.detectedFaces" selectable />
+              <FaceBoundingBoxViewer id="tour-face-viewer" :image-src="uploadedImage"
+                :faces="detectedFaces" selectable />
             </v-col>
             <v-col cols="12" md="4">
-              <FaceDetectionSidebar id="tour-face-sidebar" :readOnly="true" :faces="faceStore.detectedFaces" />
+              <FaceDetectionSidebar id="tour-face-sidebar" :readOnly="true" :faces="detectedFaces" />
             </v-col>
           </v-row>
         </div>
-        <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+        <v-alert v-else-if="!isDetectingFaces && !uploadedImage" type="info" class="my-4">{{
           t('face.recognition.uploadPrompt') }}</v-alert>
-        <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+        <v-alert v-else-if="!isDetectingFaces && uploadedImage && detectedFaces.length === 0"
           type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
       </div>
       <v-alert v-else type="info" class="my-4">{{ t('face.selectFamilyToUpload') }}</v-alert>
@@ -36,37 +36,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useFaceStore } from '@/stores/face.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import { useFaceSearch } from '@/composables/face'; // Import the new composable
 
-const { t } = useI18n();
-const faceStore = useFaceStore();
-const { showSnackbar } = useGlobalSnackbar();
+const {
+  selectedFamilyId,
+  uploadedImage,
+  detectedFaces,
+  isDetectingFaces,
+  handleFileUpload,
+  t, // t is now exposed from useFaceSearch
+} = useFaceSearch();
 
-useFaceSearchTour();
-
-const selectedFamilyId = ref<string | undefined>(undefined);
-
-watch(() => faceStore.error, (newError) => {
-  if (newError) {
-    showSnackbar(newError, 'error');
-  }
-});
-
-const handleFileUpload = async (file: File | null) => {
-  if (!file) {
-    faceStore.resetState();
-    return;
-  }
-  if (!selectedFamilyId.value) {
-    showSnackbar(t('face.selectFamilyToUpload'), 'warning');
-    return;
-  }
-  await faceStore.detectFaces(file, selectedFamilyId.value, true); // Assuming 'true' means search for similar faces
-};
+useFaceSearchTour(); // Still use the tour composable directly here
 </script>

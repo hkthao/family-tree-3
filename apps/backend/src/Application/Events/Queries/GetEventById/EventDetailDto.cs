@@ -1,4 +1,5 @@
 using backend.Application.Common.Dtos;
+using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Enums;
 
 namespace backend.Application.Events.Queries.GetEventById;
@@ -16,5 +17,12 @@ public class EventDetailDto : BaseAuditableDto
     public string? Color { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
-    public List<Guid> RelatedMembers { get; set; } = [];
+    public List<MemberListDto> RelatedMembers { get; set; } = [];
+    public List<Guid> RelatedMemberIds
+    {
+        get
+        {
+            return RelatedMembers.Select(e => e.Id).ToList();
+        }
+    }
 }

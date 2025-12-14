@@ -78,6 +78,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
     /// </summary>
     public DbSet<MemberStory> MemberStories => Set<MemberStory>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
+    /// </summary>
+    public DbSet<MemberStoryImage> MemberStoryImages => Set<MemberStoryImage>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
@@ -86,6 +91,31 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
     /// </summary>
     public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.
+    /// </summary>
+    public DbSet<Prompt> Prompts { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
+    /// </summary>
+    public DbSet<FamilyLinkRequest> FamilyLinkRequests => Set<FamilyLinkRequest>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
+    /// </summary>
+    public DbSet<FamilyLink> FamilyLinks => Set<FamilyLink>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyMedia.
+    /// </summary>
+    public DbSet<FamilyMedia> FamilyMedia { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
+    /// </summary>
+    public DbSet<MediaLink> MediaLinks { get; set; } = null!;
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
@@ -161,15 +191,5 @@ public class ApplicationDbContext(
             }
         }
         builder.ApplySnakeCaseNamingConvention();
-        builder.Entity<MemberFace>(mb =>
-        {
-            mb.OwnsOne(mf => mf.BoundingBox);
-            // Configure Embedding to be stored as JSON
-            mb.Property(mf => mf.Embedding)
-              .HasConversion(
-                  v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                  v => JsonSerializer.Deserialize<List<double>>(v, (JsonSerializerOptions?)null) ?? new List<double>()
-              );
-        });
     }
 }

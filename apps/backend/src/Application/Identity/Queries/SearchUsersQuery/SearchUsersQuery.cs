@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Users.Queries;
+namespace backend.Application.Identity.Queries;
 
 public record SearchUsersQuery : PaginatedQuery, IRequest<Result<PaginatedList<UserDto>>>
 {

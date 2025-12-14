@@ -1,4 +1,3 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
@@ -14,8 +13,6 @@ public class ImportFamilyDictsCommandTests : TestBase
         // Set up authenticated user by default for most tests
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        // Default to admin for these command tests, as most successful tests require admin rights
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
     }
 
     [Fact]
@@ -26,6 +23,7 @@ public class ImportFamilyDictsCommandTests : TestBase
         _context.FamilyDicts.RemoveRange(_context.FamilyDicts);
         await _context.SaveChangesAsync();
 
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
         var handler = new ImportFamilyDictsCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new ImportFamilyDictsCommand
         {
@@ -87,9 +85,12 @@ public class ImportFamilyDictsCommandTests : TestBase
             }
         };
 
-        // Act & Assert
-        await FluentActions.Awaiting(() => handler.Handle(command, CancellationToken.None))
-            .Should().ThrowAsync<ForbiddenAccessException>()
-            .WithMessage("Chỉ quản trị viên mới được phép nhập FamilyDict.");
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.StatusCode.Should().Be(403);
+        result.ErrorSource.Should().Be("Authorization");
     }
 }

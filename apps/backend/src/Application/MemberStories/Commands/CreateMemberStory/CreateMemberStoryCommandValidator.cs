@@ -1,8 +1,6 @@
-using backend.Domain.Enums; // NEW
+namespace backend.Application.MemberStories.Commands.CreateMemberStory;
 
-namespace backend.Application.MemberStories.Commands.CreateMemberStory; // Updated
-
-public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberStoryCommand> // Updated
+public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberStoryCommand>
 {
     public CreateMemberStoryCommandValidator()
     {
@@ -17,17 +15,19 @@ public class CreateMemberStoryCommandValidator : AbstractValidator<CreateMemberS
             .NotEmpty().WithMessage("Story content is required.")
             .MaximumLength(4000).WithMessage("Story content must not exceed 4000 characters."); // Arbitrary max length
 
-        RuleFor(v => v.RawInput)
-            .MaximumLength(4000).WithMessage("Raw input must not exceed 4000 characters."); // Arbitrary max length
+        RuleFor(v => v.Year)
+            .InclusiveBetween(1000, DateTime.Now.Year + 1).When(v => v.Year.HasValue)
+            .WithMessage($"Year must be between 1000 and {DateTime.Now.Year + 1}.");
 
-        RuleFor(v => v.StoryStyle)
-            .IsEnumName(typeof(MemberStoryStyle), caseSensitive: false)
-            .WithMessage($"Invalid story style. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryStyle)))}.")
-            .Unless(v => string.IsNullOrEmpty(v.StoryStyle));
+        RuleFor(v => v.TimeRangeDescription)
+            .MaximumLength(100).WithMessage("Time range description must not exceed 100 characters.");
 
-        RuleFor(v => v.Perspective)
-            .IsEnumName(typeof(MemberStoryPerspective), caseSensitive: false)
-            .WithMessage($"Invalid perspective. Valid values are: {string.Join(", ", Enum.GetNames(typeof(MemberStoryPerspective)))}.")
-            .Unless(v => string.IsNullOrEmpty(v.Perspective));
+        RuleFor(v => v.LifeStage)
+            .IsInEnum().WithMessage("Invalid Life Stage.");
+
+        RuleFor(v => v.Location)
+            .MaximumLength(200).WithMessage("Location must not exceed 200 characters.");
+
+
     }
 }

@@ -36,7 +36,7 @@ public class MemberFaceVectorDbSyncOnUpdateHandler : INotificationHandler<Member
                 return;
             }
         }
-        
+
         // Ensure thumbnail is available for payload, if not, try to fetch from ThumbnailUrl
         string? effectiveThumbnailUrl = memberFace.ThumbnailUrl; // Assuming ThumbnailUrl is updated in the MemberFace entity
 

@@ -1,10 +1,10 @@
 <template>
   <div data-testid="member-list-view">
-    <MemberSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
-    <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
+    <MemberSearch @update:filters="handleFilterUpdate" />
+    <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      @ai-biography="navigateToAIBiography" @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
+      @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
     </MemberList>
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
@@ -13,52 +13,72 @@
     </BaseCrudDrawer>
     <!-- Add Member Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
-      <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId"
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId"
         @close="handleMemberClosed" @saved="handleMemberSaved" />
     </BaseCrudDrawer>
     <!-- Detail Member Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
       <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId" @close="handleDetailClosed"
-        @edit-member="openEditDrawer" @generate-biography="handleGenerateBiography" />
+        @edit-member="openEditDrawer" />
     </BaseCrudDrawer>
-    <!-- Biography Drawer -->
-    <BaseCrudDrawer v-model="biographyDrawer" @close="closeAllMemberDrawers">
-      <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
-        @close="closeAllMemberDrawers" />
-    </BaseCrudDrawer>
+
     <!-- AI Create Member Drawer -->
     <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId || ''" @close="aiCreateDrawer = false" />
+      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
     </BaseCrudDrawer>
   </div>
 </template>
 <script setup lang="ts">
-import { useMemberStore } from '@/stores/member.store';
 import { MemberSearch, MemberList } from '@/components/member';
-import { useConfirmDialog } from '@/composables/useConfirmDialog';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import MemberBiographyView from '@/views/member/MemberBiographyView.vue';
-import NLEditorView from '@/views/natural-language/NLEditorView.vue';
-import type { MemberFilter, Member } from '@/types';
+
+import NLEditorView from '@/views/member/NLEditorView.vue';
+import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { storeToRefs } from 'pinia';
-import { nextTick, onMounted, ref, watch } from 'vue';
-import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; 
-import { useCrudDrawer } from '@/composables/useCrudDrawer'; 
-import { removeDiacritics } from '@/utils/string.utils'; 
+import { ref, watch } from 'vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { removeDiacritics } from '@/utils/string.utils';
+import { useMembersQuery, useDeleteMemberMutation, useMemberDataManagement } from '@/composables/member';
+import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
+
 interface MemberListViewProps {
-  familyId?: string;
+  familyId: string;
   readOnly?: boolean;
-  hideSearch?: boolean;
 }
 const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
-const memberStore = useMemberStore();
-const { list } = storeToRefs(memberStore);
-const searchQuery = ref('');
+const queryClient = useQueryClient(); // Initialize useQueryClient
+
+const {
+  searchQuery,
+  paginationOptions,
+  filters,
+  setSearchQuery,
+  setFilters,
+  setPage,
+  setItemsPerPage,
+  setSortBy,
+} = useMemberDataManagement(props.familyId);
+
+const { data: membersData, isLoading: isLoadingMembers, refetch } = useMembersQuery(paginationOptions, filters);
+const members = ref(membersData.value?.items || []);
+const totalItems = ref(membersData.value?.totalItems || 0);
+
+watch(membersData, (newData) => {
+  members.value = newData?.items || [];
+  totalItems.value = newData?.totalItems || 0;
+}, { deep: true });
+
+watch(() => props.familyId, (newFamilyId) => {
+  setFilters({ familyId: newFamilyId });
+  refetch();
+});
+
+const { mutate: deleteMember, isPending: isDeletingMember } = useDeleteMemberMutation();
+
 const {
   addDrawer,
   editDrawer,
@@ -69,96 +89,81 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>(); 
-const biographyDrawer = ref(false);
-const biographyMemberId = ref<string | null>(null);
+
 const aiCreateDrawer = ref(false);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-const navigateToAIBiography = (member: Member) => {
-  handleGenerateBiography(member);
-};
+
 const navigateToAICreateMember = () => {
   aiCreateDrawer.value = true;
 };
-const handleFilterUpdate = async (filters: MemberFilter) => {
-  memberStore.list.filters = { ...filters, searchQuery: searchQuery.value, familyId: props.familyId };
-  await memberStore._loadItems()
+
+const handleFilterUpdate = (newFilters: MemberFilter) => {
+  setFilters(newFilters);
 };
-const handleSearchUpdate = async (search: string) => {
+
+const handleSearchUpdate = (search: string) => {
   const processedSearch = removeDiacritics(search); 
-  searchQuery.value = search; 
-  memberStore.list.filters = { ...memberStore.list.filters, searchQuery: processedSearch, familyId: props.familyId };
-  await memberStore._loadItems();
+  setSearchQuery(processedSearch); // setSearchQuery handles debounce and updates filters
 };
-const handleListOptionsUpdate = async (options: {
+
+const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  await nextTick();
-  memberStore.setListOptions(options);
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
+
 const confirmDelete = async (memberId: string) => {
-  const member = memberStore.list.items.find(m => m.id === memberId);
-  if (!member) {
+  const memberToDelete = members.value.find(m => m.id === memberId);
+  if (!memberToDelete) {
     showSnackbar(t('member.messages.notFound'), 'error');
     return;
   }
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
-    message: t('member.list.confirmDelete', { fullName: member.fullName || '' }),
+    message: t('member.list.confirmDelete', { fullName: memberToDelete.fullName || '' }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     confirmColor: 'error',
   });
   if (confirmed) {
-    await handleDeleteConfirm(member);
+    handleDeleteConfirm(memberToDelete.id);
   }
 };
-const handleDeleteConfirm = async (member: Member) => {
-  if (member) {
-    await memberStore.deleteItem(member.id);
-    if (memberStore.error) {
-      showSnackbar(
-        t('member.messages.deleteError', { error: memberStore.error }),
-        'error',
-      );
-    } else {
-      showSnackbar(
-        t('member.messages.deleteSuccess'),
-        'success',
-      );
-    }
-  }
-  memberStore._loadItems();
+
+const handleDeleteConfirm = (memberId: string) => {
+  deleteMember(memberId, {
+    onSuccess: () => {
+      showSnackbar(t('member.messages.deleteSuccess'), 'success');
+      queryClient.invalidateQueries({ queryKey: ['members', 'list'] }); // Invalidate list to refetch
+    },
+    onError: (error) => {
+      showSnackbar(error.message || t('member.messages.deleteError'), 'error');
+    },
+  });
 };
+
 const handleMemberSaved = () => {
   closeAllMemberDrawers(); 
-  memberStore._loadItems();
+  queryClient.invalidateQueries({ queryKey: ['members', 'list'] }); // Invalidate list to refetch
 };
+
 const handleMemberClosed = () => {
   closeAllMemberDrawers(); 
 };
+
 const handleDetailClosed = () => {
   closeAllMemberDrawers(); 
 };
-const handleGenerateBiography = (member: Member) => {
-  biographyMemberId.value = member.id;
-  closeAllDrawers(); 
-  biographyDrawer.value = true;
-};
+
 const closeAllMemberDrawers = () => {
   closeAllDrawers();
-  biographyDrawer.value = false;
-  biographyMemberId.value = null;
   aiCreateDrawer.value = false;
 };
-onMounted(() => {
-  memberStore.list.filters = { familyId: props.familyId };
-  memberStore._loadItems();
-})
-watch(() => props.familyId, async (newFamilyId) => {
-  memberStore.list.filters = { familyId: newFamilyId };
-  await memberStore._loadItems();
-}, { immediate: false });
+
+// Initial load is handled by useMembersQuery, no need for onMounted load
 </script>
