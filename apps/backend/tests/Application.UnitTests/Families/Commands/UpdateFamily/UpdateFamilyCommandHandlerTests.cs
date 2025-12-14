@@ -9,9 +9,10 @@ using backend.Domain.Entities;
 using backend.Domain.Events.Families;
 using FluentAssertions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using backend.Application.FamilyMedias.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
@@ -44,7 +45,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         var familyMediaId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(familyMediaId));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = familyMediaId, FilePath = expectedAvatarUrl }));
 
         // Mock the FamilyMedia DbSet to return a FamilyMedia object when FindAsync is called
         var mockFamilyMedia = new FamilyMedia { Id = familyMediaId, FilePath = expectedAvatarUrl };
@@ -97,7 +98,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // No AvatarBase64, so mediator should not be called
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed", "Test"));
 
         var command = new UpdateFamilyCommand
         {
@@ -129,7 +130,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // No AvatarBase64, so mediator should not be called
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed", "Test"));
 
         // Act
         var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
@@ -158,7 +159,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // No AvatarBase64, so mediator should not be called
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed", "Test"));
 
         // Act
         var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);

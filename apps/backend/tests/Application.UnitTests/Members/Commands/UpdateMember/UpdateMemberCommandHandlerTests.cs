@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
+using backend.Application.FamilyMedias.DTOs;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
@@ -51,9 +52,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var expectedAvatarUrl = "http://uploaded.example.com/member_avatar.png";
         var familyMediaId = Guid.NewGuid();
 
-        // Mock the mediator to return a successful Guid for CreateFamilyMediaCommand
+        // Mock the mediator to return a successful FamilyMediaDto for CreateFamilyMediaCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(familyMediaId));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = familyMediaId, FilePath = expectedAvatarUrl }));
 
         // Simulate the creation of FamilyMedia in the in-memory database
         // This is done because the handler calls _context.FamilyMedia.FindAsync
@@ -247,7 +248,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         // Update mediator mock to use CreateFamilyMediaCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed", "Test"));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -271,7 +272,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         // Update mediator mock to use CreateFamilyMediaCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Failure("Upload failed", "Test"));
+                     .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed", "Test"));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

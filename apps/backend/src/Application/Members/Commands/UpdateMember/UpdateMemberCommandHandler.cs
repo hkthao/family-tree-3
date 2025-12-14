@@ -69,7 +69,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
                 // CreateFamilyMediaCommand returns a Guid (the ID of the new FamilyMedia record), not an object with a Url.
                 // We need to fetch the FamilyMedia object to get its FilePath (URL).
-                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value);
+                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value!.Id);
                 if (familyMedia == null || string.IsNullOrEmpty(familyMedia.FilePath))
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
