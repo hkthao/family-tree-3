@@ -1,5 +1,5 @@
-import { ref, onMounted, onUnmounted, type Ref } from 'vue';
-import { useUserProfileStore } from '@/stores';
+import { ref, onUnmounted, type Ref, watch } from 'vue'; // Removed onMounted
+import { useProfileSettings } from '@/composables/user/useProfileSettings'; // Added useProfileSettings
 import { NovuUI } from '@novu/js/ui';
 import { dark } from '@novu/js/themes';
 import { useI18n } from 'vue-i18n';
@@ -14,19 +14,22 @@ interface NovuOptions {
 
 export function useNovuInbox(containerRef: Ref<HTMLElement | null>) {
   const { t } = useI18n();
-  const userProfileStore = useUserProfileStore();
+  const { userProfile, isFetchingProfile, fetchError } = useProfileSettings();
   let novuInstance: NovuUI | null = null;
 
   const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');
 
-  const initializeNovu = async () => {
+  const initializeNovu = () => { // Changed to non-async function
     if (!containerRef.value) {
       console.error('Novu inbox container element not found');
       return;
     }
 
-    await userProfileStore.fetchCurrentUserProfile();
-    const subscriberId = userProfileStore.userProfile?.userId;
+    if (!userProfile.value || isFetchingProfile.value) { // Check if profile is available and not fetching
+      return;
+    }
+
+    const subscriberId = userProfile.value?.userId;
 
     if (!subscriberId) {
       console.error('Subscriber ID not found for Novu Inbox initialization.');
@@ -77,8 +80,11 @@ export function useNovuInbox(containerRef: Ref<HTMLElement | null>) {
     }
   };
 
-  onMounted(initializeNovu);
-  onUnmounted(cleanupNovu);
+  watch([userProfile, isFetchingProfile, containerRef], () => { // Watch for userProfile to be available
+    if (userProfile.value && !isFetchingProfile.value && containerRef.value) {
+      initializeNovu();
+    }
+  }, { immediate: true });
 
   return {
     novuInstance,

@@ -15,12 +15,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useUserProfileStore } from '@/stores';
+import { useProfileSettings } from '@/composables/user/useProfileSettings';
 import { Novu } from '@novu/js';
 import NovuInbox from './NovuInbox.vue'
 import { getEnvVariable } from '@/utils/api.util';
 
-const userProfileStore = useUserProfileStore();
+const { userProfile, isFetchingProfile, fetchError } = useProfileSettings();
 const unseenCount = ref(0);
 let unseen_count_changed: (() => void) | null = null;
 let notification_received: (() => void) | null = null;
@@ -39,8 +39,9 @@ const updateUnReadCount = async (novu: Novu) => {
 }
 
 onMounted(async () => {
-  await userProfileStore.fetchCurrentUserProfile();
-  const subscriberId = userProfileStore.userProfile?.userId;
+  // useProfileSettings already handles fetching, so userProfile will be available once loaded.
+  // We can add a watch here if we need to react to userProfile changes, or simply use it when available.
+  const subscriberId = userProfile.value?.userId; // Access directly from userProfile composable
 
   if (!subscriberId) {
     console.warn('Subscriber ID not found. Novu notifications will not be initialized.');

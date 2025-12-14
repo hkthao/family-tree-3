@@ -53,8 +53,9 @@
 
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
-import { ref, computed, onMounted } from 'vue';
-import { useAuthStore, useUserProfileStore } from '@/stores';
+import { ref, computed } from 'vue'; // onMounted is no longer needed
+import { useAuthStore } from '@/stores'; // authStore import
+import { useProfileSettings } from '@/composables/user/useProfileSettings';
 import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;
@@ -71,13 +72,9 @@ const emit = defineEmits(['navigate']);
 const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
 
-const authStore = useAuthStore();
-const userProfileStore = useUserProfileStore();
-const currentUser = computed(() => userProfileStore.userProfile);
-
-onMounted(() => {
-  userProfileStore.fetchCurrentUserProfile();
-});
+const authStore = useAuthStore(); // Re-added authStore
+const { userProfile } = useProfileSettings();
+const currentUser = computed(() => userProfile.value);
 
 const handleMenuItemClick = (route?: string) => {
   if (route) {
@@ -89,7 +86,8 @@ const handleMenuItemClick = (route?: string) => {
 const handleLogoutConfirm = async () => {
   confirmLogoutDialog.value = false;
   await authStore.logout();
-};</script>
+};
+</script>
 
 <style scoped>
 .user-menu-header {

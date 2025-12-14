@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef, computed } from 'vue';
+import { reactive, toRefs, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Prompt } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
@@ -40,11 +40,8 @@ const props = defineProps<{
   readOnly?: boolean;
   initialPromptData?: Prompt;
 }>();
-
 const { t } = useI18n();
 const { isAdmin } = useAuth(); // Assuming only admin can manage prompts
-
-const formRef = ref<HTMLFormElement | null>(null);
 
 const isFormReadOnly = computed(() => {
   return props.readOnly || !isAdmin.value;

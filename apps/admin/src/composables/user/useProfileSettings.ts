@@ -44,14 +44,26 @@ export function useProfileSettings() {
 
   watch(userProfile, (data) => {
     if (data) {
-      formData.firstName = data.firstName || '';
-      formData.lastName = data.lastName || '';
-      formData.email = data.email;
-      formData.phone = data.phone || '';
-      formData.avatar = data.avatar || null;
-      formData.externalId = data.externalId;
+      Object.assign(formData, {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        email: data.email,
+        phone: data.phone || '',
+        avatar: data.avatar || null,
+        externalId: data.externalId,
+      });
+    } else {
+      // Optionally reset formData if userProfile becomes null (e.g., on logout or fetch error)
+      Object.assign(formData, {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        avatar: null,
+        externalId: '',
+      });
     }
-  });
+  }, { immediate: true });
 
   watch(isFetchError, (isError) => {
     if (isError && fetchError.value) {
