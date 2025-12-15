@@ -36,13 +36,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { DetectedFace, MemberFace } from '@/types';
-import { useGlobalSnackbar } from '@/composables';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables/member-face';
+import { useMemberFaceAdd } from '@/composables/member-face/useMemberFaceAdd';
 
 interface MemberFaceAddViewProps {
   memberId?: string; // Optional, might be pre-selected if adding from a member detail page
@@ -53,183 +51,56 @@ const props = defineProps<MemberFaceAddViewProps>();
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
 
-const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = useDetectFacesMutation();
-const { mutateAsync: addMemberFace, isPending: isAddingMemberFace, error: addError } = useAddMemberFaceMutation(); // Use mutateAsync for awaiting in loop
-
-const showSelectMemberDialog = ref(false);
-const faceToLabel = ref<DetectedFace | null>(null);
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
-const selectedFamilyId = ref<string | undefined>(props.familyId);
 
-const uploadedImage = ref<string | null | undefined>(undefined); // Base64 string of the uploaded image
-const detectedFaces = ref<DetectedFace[]>([]);
-const originalImageUrl = ref<string | null>(null);
-
-watch(() => props.familyId, (newFamilyId) => {
-  selectedFamilyId.value = newFamilyId;
+const {
+  isDetectingFaces,
+  isAddingMemberFace,
+  showSelectMemberDialog,
+  faceToLabel,
+  selectedFamilyId,
+  uploadedImage,
+  detectedFaces,
+  canSaveLabels,
+  handleFileUpload: composableHandleFileUpload, // Rename to avoid conflict with local wrapper
+  openSelectMemberDialog,
+  handleLabelFaceAndCloseDialog,
+  handleRemoveFace,
+  saveAllLabeledFaces,
+  closeForm: composableCloseForm, // Rename to avoid conflict with local wrapper
+  resetState: composableResetState, // Rename to avoid conflict with local wrapper
+} = useMemberFaceAdd({
+  memberId: props.memberId,
+  familyId: props.familyId,
+  onSaved: () => emit('saved'),
+  onClosed: () => emit('close'),
+  t, // Pass t function to the composable
 });
 
-// Watch for errors from mutations
-watch(detectError, (newError) => {
-  if (newError) {
-    showSnackbar(newError.message, 'error');
+// Wrapper for handleFileUpload to include resetting the FaceUploadInput component
+const handleFileUpload = async (file: File | File[] | null) => {
+  if (!file) {
+    composableResetState(); // Reset composable state
+    if (faceUploadInputRef.value) {
+      faceUploadInputRef.value.reset(); // Reset the component itself
+    }
+    return;
   }
-});
-watch(addError, (newError) => {
-  if (newError) {
-    showSnackbar(newError.message, 'error');
-  }
-});
+  await composableHandleFileUpload(file);
+};
 
-const resetState = () => {
-  uploadedImage.value = null;
-  detectedFaces.value = [];
-  originalImageUrl.value = null;
-  faceToLabel.value = null;
-  showSelectMemberDialog.value = false;
+// Wrapper for closeForm to also reset FaceUploadInput
+const closeForm = () => {
+  composableCloseForm(); // Call composable's close form logic
   if (faceUploadInputRef.value) {
     faceUploadInputRef.value.reset();
   }
-};
-
-const handleFileUpload = async (file: File | File[] | null) => {
-  if (!file) {
-    resetState(); // If file is null, the input was cleared, so reset everything.
-    return;
-  }
-
-  detectedFaces.value = []; // Always clear detected faces for a new upload
-  originalImageUrl.value = null; // Clear original image URL
-
-  const fileToUpload = Array.isArray(file) ? file[0] : file;
-
-  // Immediately create a local URL for display
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    uploadedImage.value = e.target?.result as string;
-  };
-  reader.readAsDataURL(fileToUpload);
-
-  detectFaces({ imageFile: fileToUpload, familyId: selectedFamilyId.value!, resize: false }, {
-    onSuccess: (data) => {
-      // uploadedImage.value is now set from local blob
-      detectedFaces.value = data.detectedFaces;
-      originalImageUrl.value = data.originalImageUrl;
-    },
-    onError: (error) => {
-      showSnackbar(error.message, 'error');
-      uploadedImage.value = null; // Clear image on error
-      detectedFaces.value = []; // Ensure faces are cleared on error
-    },
-  });
-};
-
-const openSelectMemberDialog = (face: DetectedFace) => {
-  if (face.status === 'recognized') {
-    return;
-  }
-  if (face) {
-    faceToLabel.value = face;
-    showSelectMemberDialog.value = true;
-  }
-};
-
-const handleLabelFaceAndCloseDialog = (updatedFace: DetectedFace) => {
-  const index = detectedFaces.value.findIndex(f => f.id === updatedFace.id);
-  if (index !== -1) {
-    detectedFaces.value.splice(index, 1, updatedFace); // Replace the old face with the updated one
-  }
-  showSelectMemberDialog.value = false;
-  faceToLabel.value = null;
-};
-
-const handleRemoveFace = (faceId: string) => {
-  detectedFaces.value = detectedFaces.value.filter(face => face.id !== faceId);
-};
-
-const canSaveLabels = computed(() => {
-  if (!selectedFamilyId.value) {
-    return false;
-  }
-  const hasFacesToSave = detectedFaces.value.some(face =>
-    (face.status === 'labeled') ||
-    (face.status === 'unrecognized' && face.memberId !== null) ||
-    (face.status === 'recognized' && face.originalMemberId !== face.memberId)
-  );
-
-  const hasUnlabeledFacesLeft = detectedFaces.value.some(face =>
-    face.status === 'unrecognized' && face.memberId === null
-  );
-
-  return hasFacesToSave && !hasUnlabeledFacesLeft;
-});
-
-const saveAllLabeledFaces = async () => {
-  if (!selectedFamilyId.value) {
-    showSnackbar(t('memberFace.messages.noFamilySelected'), 'warning');
-    return;
-  }
-  // Filter out unlabeled faces and transform DetectedFace to MemberFace for creation
-  const facesToSave = detectedFaces.value
-    .filter(face => face.memberId)
-    .map(face => {
-      // Create a new MemberFace object from DetectedFace properties
-      const memberFace: Omit<MemberFace, 'id'> = {
-        memberId: face.memberId!,
-        faceId: face.id, // Use the detected face ID as the backend FaceId
-        boundingBox: face.boundingBox,
-        confidence: face.confidence,
-        thumbnail: face.thumbnail,
-        thumbnailUrl: face.thumbnailUrl,
-        originalImageUrl: originalImageUrl.value, // Use the locally managed original image URL
-        embedding: face.embedding || [],
-        emotion: face.emotion,
-        emotionConfidence: face.emotionConfidence,
-        isVectorDbSynced: false,
-        vectorDbId: undefined,
-        familyId: selectedFamilyId.value!,
-      };
-      return memberFace;
-    });
-
-  if (facesToSave.length === 0) {
-    showSnackbar(t('memberFace.messages.noFacesToSave'), 'warning');
-    return;
-  }
-
-  const results = await Promise.allSettled(
-    facesToSave.map(memberFace => {
-      if (props.memberId) {
-        memberFace.memberId = props.memberId;
-      }
-      return addMemberFace(memberFace);
-    })
-  );
-
-  const successfulSaves = results.filter(result => result.status === 'fulfilled').length;
-  const failedSaves = results.filter(result => result.status === 'rejected').length;
-
-  if (successfulSaves > 0 && failedSaves === 0) {
-    showSnackbar(t('memberFace.messages.addSuccess'), 'success');
-    resetState(); // Reset state after saving
-    emit('saved');
-  } else if (successfulSaves > 0 && failedSaves > 0) {
-    showSnackbar(t('memberFace.messages.partialSaveError'), 'warning');
-  } else {
-    showSnackbar(t('memberFace.messages.saveError'), 'error');
-  }
-};
-
-const closeForm = () => {
-  resetState(); // Clear face detection state on close
-  emit('close');
 };
 
 defineExpose({
   handleFileUpload,
   saveAllLabeledFaces,
   canSaveLabels,
-});
-</script>
+  closeForm, // Expose the wrapped closeForm
+});</script>
