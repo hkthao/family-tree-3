@@ -1,199 +1,225 @@
 
 ---
 
-# 📘 TESTING GUIDELINE FOR VUE 3 (SMALL TEAM)
+## 📌 MÔ TẢ NHIỆM VỤ REFACTOR BACKEND DOMAIN (CHO GEMINI CLI)
 
-## 🎯 Mục tiêu
+### 🎯 Mục tiêu
 
-* Ưu tiên **độ ổn định & regression safety**
-* Tránh viết test dư thừa
-* Tối ưu cho **team nhỏ, deadline nhanh**
-
----
-
-## 1️⃣ Nguyên tắc tổng quát
-
-### 🔹 Triết lý
-
-* **Test logic, không test UI**
-* **Composable & Store là nơi test chính**
-* `.vue` component **chỉ test khi quyết định flow**
-
-### 🔹 KHÔNG theo đuổi
-
-* 100% test coverage
-* Snapshot test UI
-* Test các component chỉ render template
+Refactor domain `Event` để **hỗ trợ lịch dương, lịch âm (VN) và lặp theo năm**, phục vụ UI calendar custom (React Native).
+Giữ đúng tư duy **DDD, Aggregate Root, Value Object**, tránh logic hiển thị trong domain.
 
 ---
 
-## 2️⃣ Quy tắc cho COMPOSABLE
+## 1️⃣ Bối cảnh hiện tại
 
-### ✅ Khi viết test cho composable
+* Backend dùng **C# / .NET / EF Core**
+* Domain có `Event` là **Aggregate Root**
+* Hiện đang lưu:
 
-Composable **BẮT BUỘC** viết test nếu có ít nhất 1 yếu tố:
+  ```csharp
+  DateTime? StartDate;
+  DateTime? EndDate;
+  ```
+* Cách này **KHÔNG phù hợp** cho:
 
-* Logic điều kiện
-* Side effect (API, router, store, timer)
-* Watch / debounce / throttle
-* Dùng lại ở nhiều component
-
----
-
-### 🧪 Test case BẮT BUỘC cho composable
-
-#### 1. Initial state
-
-```ts
-it('init with correct default state', () => {})
-```
-
-#### 2. Happy path (logic chính)
-
-```ts
-it('handles success case correctly', () => {})
-```
-
-#### 3. Error path
-
-```ts
-it('handles error correctly', () => {})
-```
-
-#### 4. Side effect chính
-
-```ts
-expect(api.call).toHaveBeenCalled()
-expect(router.push).toHaveBeenCalled()
-```
-
-> ❌ Không test edge case nhỏ, timing chi tiết, UI state phụ
+  * Lịch âm
+  * Sự kiện lặp theo năm (giỗ, sinh nhật)
+  * Convert âm → dương theo từng năm
 
 ---
 
-## 3️⃣ Quy tắc cho `.vue` COMPONENT
+## 2️⃣ Yêu cầu refactor (bắt buộc)
 
-### ❌ KHÔNG viết test nếu component:
+### 2.1 Loại bỏ khái niệm “ngày hiển thị” khỏi domain
 
-* Chỉ nhận props → render UI
-* Emit event đơn giản
-* Không chứa logic nghiệp vụ
-* Logic đã được tách xuống composable / store
+* ❌ Không dùng `StartDate`, `EndDate` cho event âm
+* ✅ Domain chỉ lưu **ngày gốc (source of truth)**
 
 ---
 
-### ✅ CHỈ viết test `.vue` khi:
+### 2.2 Bổ sung Enum
 
-1. **Component quyết định flow**
+```csharp
+public enum CalendarType
+{
+    Solar = 1,
+    Lunar = 2
+}
 
-   * Page chính
-   * Wizard
-   * Form nhiều bước
-
-2. **Có logic điều kiện quan trọng**
-
-   * Permission
-   * Feature flag
-   * Role-based UI
-
-3. **Có side effect trực tiếp**
-
-   * Gọi API
-   * Router navigation
-   * Store mutation
-
-👉 Test **hành vi**, không test layout.
-
----
-
-## 4️⃣ QUY TRÌNH BẮT BUỘC: REFACTOR TRƯỚC KHI TEST
-
-### ⚠️ Nếu `.vue` có UI phức tạp + logic lẫn nhau
-
-#### KHÔNG viết test trực tiếp
-
-👉 **PHẢI refactor theo bước sau:**
-
-### 🔁 Bước 1: Tách logic ra composable
-
-```ts
-// useFormLogic.ts
-export function useFormLogic() {
-  // state
-  // computed
-  // validation
-  // submit logic
+public enum RepeatRule
+{
+    None = 0,
+    Yearly = 1
 }
 ```
 
-### 🔁 Bước 2: Component chỉ còn UI
+---
 
-```vue
-<script setup>
-const {
-  state,
-  submit,
-  error
-} = useFormLogic()
-</script>
+### 2.3 Tạo Value Object cho ngày ÂM
+
+```csharp
+public class LunarDate : ValueObject
+{
+    public int Day { get; private set; }
+    public int Month { get; private set; }
+    public bool IsLeapMonth { get; private set; }
+
+    private LunarDate() { }
+
+    public LunarDate(int day, int month, bool isLeapMonth)
+    {
+        Day = day;
+        Month = month;
+        IsLeapMonth = isLeapMonth;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Day;
+        yield return Month;
+        yield return IsLeapMonth;
+    }
+}
 ```
 
-### 🔁 Bước 3: Viết test cho composable
-
-* Không viết test cho UI component
-* Component được coi là “glue code”
+* `LunarDate` là **Value Object**
+* EF Core phải map được (owned entity)
 
 ---
 
-## 5️⃣ Cách Gemini nên xử lý khi gặp UI phức tạp
+## 3️⃣ Refactor Event Aggregate Root
 
-### 👉 BẮT BUỘC làm theo thứ tự:
+### 3.1 Nguyên tắc
 
-1. **Phân tích file `.vue`**
-2. Nếu:
-
-   * Logic > UI
-   * Có nhiều `watch`, `computed`, `if/else`
-
-   ➜ **Đề xuất refactor**
-3. Tạo composable mới
-4. Di chuyển logic
-5. Viết test cho composable
-6. Chỉ viết test `.vue` nếu component vẫn quyết định flow
+* Một Event **chỉ có 1 loại lịch**
+* Không được vừa có SolarDate vừa có LunarDate
+* Logic convert **KHÔNG đặt trong Entity**
 
 ---
 
-## 6️⃣ Công cụ & chuẩn test
+### 3.2 Cấu trúc Event sau refactor
 
-* Test runner: **Vitest**
-* Mock bằng `vi.mock`
-* Không snapshot test
-* Không test CSS / DOM chi tiết
+```csharp
+public class Event : BaseAuditableEntity, IAggregateRoot
+{
+    public string Name { get; private set; }
+    public string Code { get; private set; }
+    public string? Description { get; private set; }
 
-### 📁 Structure
+    public CalendarType CalendarType { get; private set; }
 
+    // Chỉ dùng cho Solar event
+    public DateTime? SolarDate { get; private set; }
+
+    // Chỉ dùng cho Lunar event
+    public LunarDate? LunarDate { get; private set; }
+
+    public RepeatRule RepeatRule { get; private set; }
+
+    public EventType Type { get; private set; }
+    public string? Color { get; private set; }
+
+    public Guid? FamilyId { get; private set; }
+    public Family? Family { get; private set; }
+
+    private readonly HashSet<EventMember> _eventMembers = new();
+    public IReadOnlyCollection<EventMember> EventMembers => _eventMembers;
+
+    private Event() { }
+}
 ```
-composables/
-  useX.ts
-  __tests__/
-    useX.spec.ts
+
+---
+
+### 3.3 Factory methods (bắt buộc)
+
+```csharp
+public static Event CreateSolarEvent(
+    string name,
+    string code,
+    EventType type,
+    DateTime solarDate,
+    RepeatRule repeatRule,
+    Guid? familyId
+)
+
+public static Event CreateLunarEvent(
+    string name,
+    string code,
+    EventType type,
+    LunarDate lunarDate,
+    RepeatRule repeatRule,
+    Guid? familyId
+)
 ```
 
----
+* Không cho phép `new Event()` từ bên ngoài
+* Validate:
 
-## 7️⃣ Checklist trước khi viết test (Gemini PHẢI tự hỏi)
-
-* [ ] Đây là logic hay chỉ là UI?
-* [ ] Logic đã tách composable chưa?
-* [ ] Test này có ngăn regression thật không?
-* [ ] Có thể bỏ test `.vue` và chỉ test composable không?
-
-Nếu câu trả lời là **YES** → **KHÔNG viết test component**
+  * Solar → chỉ có SolarDate
+  * Lunar → chỉ có LunarDate
 
 ---
 
-## 8️⃣ Câu chốt tiêu chuẩn
+## 4️⃣ Những thứ KHÔNG được làm
 
-> “Nếu khó test → kiến trúc đang sai → refactor trước, test sau.”
+❌ Không:
+
+* Convert lunar → solar trong Entity
+* Sinh event theo năm trong Entity
+* Thêm logic UI / calendar vào domain
+
+👉 Những việc này thuộc **Application / Domain Service**
 
 ---
+
+## 5️⃣ Chuẩn bị cho bước tiếp theo (chỉ để định hướng)
+
+Sau refactor, backend sẽ có:
+
+* `EventOccurrenceService`:
+
+  * Input: Event + year
+  * Output: danh sách **solar dates để hiển thị**
+* API:
+
+  ```
+  GET /events/calendar?year=YYYY&month=MM
+  ```
+
+(UI chỉ render, không xử lý âm lịch)
+
+---
+
+## 6️⃣ Tiêu chí hoàn thành (Definition of Done)
+
+* Event hỗ trợ:
+
+  * Dương lịch
+  * Âm lịch (ngày + tháng + tháng nhuận)
+  * Lặp theo năm
+* Không còn phụ thuộc vào `StartDate/EndDate`
+* Domain đúng DDD:
+
+  * Aggregate Root
+  * Value Object
+* EF Core mapping hợp lệ
+
+---
+
+## 7️⃣ Lưu ý quan trọng
+
+* Ưu tiên **refactor tối thiểu**, không phá EventMember
+* Giữ nguyên EventType, FamilyId
+* Có thể cần migration DB (ghi chú nếu cần)
+
+---
+
+## 🔥 Ghi chú cho Gemini CLI
+
+> Đây là refactor **domain-level**, không phải UI
+> Hãy ưu tiên tính đúng đắn, khả năng mở rộng cho lịch âm VN
+> Không tối ưu premature, không thêm logic convert
+
+---
+

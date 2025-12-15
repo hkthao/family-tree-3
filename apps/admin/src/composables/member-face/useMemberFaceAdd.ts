@@ -149,32 +149,36 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
       return;
     }
 
-    // Step 2: Upload thumbnails for each detected face
     const thumbnailUploadPromises = detectedFaces.value
-      .filter(face => face.thumbnail && face.memberId) // Only upload if thumbnail exists and face is labeled
+      .filter(face => face.thumbnail && face.memberId)
       .map(async (face) => {
-        if (!face.thumbnail) return; // Should not happen due to filter, but for type safety
-
-        try {
-          const thumbnailFile = dataURLtoFile(face.thumbnail, `thumbnail-${face.id}.png`);
-          const thumbnailMediaResult = await addFamilyMedia({
-            familyId: selectedFamilyId.value!,
-            file: thumbnailFile
-          });
-          face.thumbnailUrl = thumbnailMediaResult.filePath; // Update thumbnailUrl with the permanent URL
-        } catch (error: any) {
-          const errorMessage = options.t('memberFace.messages.uploadThumbnailFailed') + error.message;
-          showSnackbar(errorMessage, 'error');
-          throw error; // Re-throw to be caught by Promise.allSettled later
+        if (!face.thumbnail) {
+          // This case should ideally be caught by the filter, but for type safety
+          throw new Error('Thumbnail not found despite filter.');
         }
+        const thumbnailFile = dataURLtoFile(`data:image/png;base64,${face.thumbnail}`, `thumbnail-${face.id}.png`); const thumbnailMediaResult = await addFamilyMedia({
+          familyId: selectedFamilyId.value!,
+          file: thumbnailFile
+        });
+        return { face, filePath: thumbnailMediaResult.filePath };
       });
 
+    let uploadedThumbnailPaths: { face: DetectedFace; filePath: string }[];
     try {
-      await Promise.allSettled(thumbnailUploadPromises);
-    } catch (error) {
-      const partialUploadErrorMessage = options.t('memberFace.messages.partialThumbnailUploadFailed');
-      showSnackbar(partialUploadErrorMessage, 'warning');
+      uploadedThumbnailPaths = await Promise.all(thumbnailUploadPromises);
+    } catch (error: any) {
+      const errorMessage = options.t('memberFace.messages.uploadThumbnailFailed') + (error.message || error.toString() || options.t('common.unknown'));
+      console.error('Failed to upload one or more thumbnails:', error);
+      showSnackbar(errorMessage, 'error');
+      return; // Stop the entire process
     }
+
+    uploadedThumbnailPaths.forEach(item => {
+      const originalFace = detectedFaces.value.find(f => f.id === item.face.id);
+      if (originalFace) {
+        originalFace.thumbnailUrl = item.filePath;
+      }
+    });
 
     const facesToSave = detectedFaces.value
       .filter(face => face.memberId)
@@ -202,7 +206,7 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
       return;
     }
 
-    const results = await Promise.allSettled(
+    const memberFaceSaveResults = await Promise.allSettled(
       facesToSave.map(memberFace => {
         if (options.memberId) {
           memberFace.memberId = options.memberId;
@@ -211,8 +215,8 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
       })
     );
 
-    const successfulSaves = results.filter(result => result.status === 'fulfilled').length;
-    const failedSaves = results.filter(result => result.status === 'rejected').length;
+    const successfulSaves = memberFaceSaveResults.filter(result => result.status === 'fulfilled').length;
+    const failedSaves = memberFaceSaveResults.filter(result => result.status === 'rejected').length;
 
     if (successfulSaves > 0 && failedSaves === 0) {
       showSnackbar(options.t('memberFace.messages.addSuccess'), 'success');
