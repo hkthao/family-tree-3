@@ -8,6 +8,12 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)
     {
+        // Explicitly set the table name to avoid potential conflicts
+        builder.ToTable("Events");
+
+        // Explicitly define Id as the primary key of Event
+        builder.HasKey(e => e.Id);
+
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(200);
@@ -18,10 +24,6 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 
         builder.Property(e => e.Description)
             .HasMaxLength(1000);
-
-        // Location property removed from Event entity
-        // builder.Property(e => e.Location)
-        //     .HasMaxLength(500);
 
         builder.Property(e => e.Type)
             .IsRequired();
@@ -44,6 +46,9 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             lunarDateBuilder.Property(ld => ld.Day).HasColumnName("LunarDay");
             lunarDateBuilder.Property(ld => ld.Month).HasColumnName("LunarMonth");
             lunarDateBuilder.Property(ld => ld.IsLeapMonth).HasColumnName("LunarIsLeapMonth");
+            // Explicitly map the foreign key shadow property to the same column as the owner's primary key
+            // This should resolve the 'different columns' part of the error.
+            lunarDateBuilder.WithOwner().HasForeignKey("Id"); // The FK shadow property is named 'Id' to match the owner's PK column
         });
 
         // CalendarType and RepeatRule are enums, mapped by default, but explicitly mark as required
