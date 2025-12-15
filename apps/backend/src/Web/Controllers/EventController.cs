@@ -33,7 +33,7 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// </summary>
     /// <param name="id">ID của sự kiện cần lấy.</param>
     /// <returns>Thông tin chi tiết của sự kiện.</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetEventById")]
     public async Task<IActionResult> GetEventById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
