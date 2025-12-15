@@ -370,6 +370,7 @@
   "event.search.reset": "Đặt lại Bộ lọc",
   "event.search.searchQueryPlaceholder": "Tìm kiếm theo tên hoặc mô tả sự kiện...",
   "event.search.startDate": "Ngày bắt đầu",
+  "event.search.calendarType": "Loại lịch",
   "event.search.title": "Tìm kiếm nâng cao",
   "event.search.type": "Loại Sự kiện",
   "event.startDate": "Ngày bắt đầu",

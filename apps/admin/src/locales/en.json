@@ -353,6 +353,7 @@
   "event.search.name": "Event Name",
   "event.search.reset": "Reset Filters",
   "event.search.startDate": "Start Date",
+  "event.search.calendarType": "Calendar Type",
   "event.search.title": "Advanced Search",
   "event.search.type": "Event Type",
   "event.timeline.title": "Event Timeline",

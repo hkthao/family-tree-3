@@ -27,11 +27,11 @@
 
             <v-col cols="12" md="4">
               <v-date-input v-model="filters.minSolarDate" :label="t('event.search.minSolarDate')" optional
-                data-testid="event-search-min-solar-date-input" append-inner-icon="mdi-calendar" />
+                data-testid="event-search-min-solar-date-input" />
             </v-col>
             <v-col cols="12" md="4">
               <v-date-input v-model="filters.maxSolarDate" :label="t('event.search.maxSolarDate')" optional
-                data-testid="event-search-max-solar-date-input" append-inner-icon="mdi-calendar" />
+                data-testid="event-search-max-solar-date-input" />
             </v-col>
             <v-col cols="12" md="4">
               <MemberAutocomplete v-model="filters.memberId" :label="t('event.search.member')" clearable
@@ -44,7 +44,7 @@
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="applyFilters" data-testid="event-search-apply-button">{{
             t('event.search.apply')
-            }}</v-btn>
+          }}</v-btn>
           <v-btn @click="resetFilters" data-testid="event-search-reset-button">{{ t('event.search.reset') }}</v-btn>
         </v-card-actions>
       </div>

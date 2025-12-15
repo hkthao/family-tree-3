@@ -10,16 +10,16 @@
 
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.name" :label="t('event.form.name')" @blur="v$.name.$touch()"
-          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map((e: any) => e.$message as string)"
-          :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
+        <v-text-field v-model="formData.code" :label="t('event.form.code')" :readonly="true" :disabled="true"
+          data-testid="event-code-input"></v-text-field>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.code" :label="t('event.form.code')" :readonly="true" :disabled="true"
-          data-testid="event-code-input"></v-text-field>
+        <v-text-field v-model="formData.name" :label="t('event.form.name')" @blur="v$.name.$touch()"
+          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map((e: any) => e.$message as string)"
+          :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
       </v-col>
     </v-row>
 
