@@ -148,7 +148,7 @@ public static class PromptBuilder
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
         }
-        else if (Enum.TryParse<Domain.Enums.Gender>(member.Gender, out memberGender) && memberGender == Domain.Enums.Gender.Male && !string.IsNullOrEmpty(member.WifeFullName))
+        else if (Enum.TryParse(member.Gender, out memberGender) && memberGender == Domain.Enums.Gender.Male && !string.IsNullOrEmpty(member.WifeFullName))
         {
             promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
         }

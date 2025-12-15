@@ -68,7 +68,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             return Result<FamilyMediaDto>.Failure(uploadResult.Error ?? "File upload failed.", ErrorSources.ExternalServiceError);
         }
 
-        var familyMedia = new backend.Domain.Entities.FamilyMedia
+        var familyMedia = new Domain.Entities.FamilyMedia
         {
             FamilyId = request.FamilyId,
             FileName = request.FileName, // Store original file name

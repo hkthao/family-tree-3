@@ -105,7 +105,7 @@ public interface IApplicationDbContext
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyMedia.
     /// </summary>
-    DbSet<backend.Domain.Entities.FamilyMedia> FamilyMedia { get; }
+    DbSet<FamilyMedia> FamilyMedia { get; }
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.

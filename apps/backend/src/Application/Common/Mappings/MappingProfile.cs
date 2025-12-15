@@ -100,7 +100,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BirthYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfBirth.HasValue ? src.Member.DateOfBirth.Value.Year : (int?)null))
             .ForMember(dest => dest.DeathYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfDeath.HasValue ? src.Member.DateOfDeath.Value.Year : (int?)null));
 
-        CreateMap<backend.Domain.ValueObjects.BoundingBox, backend.Application.MemberFaces.Common.BoundingBoxDto>();
+        _ = CreateMap<Domain.ValueObjects.BoundingBox, BoundingBoxDto>();
 
 
         // PrivacyConfiguration mapping (already exists, ensuring no duplication)
@@ -117,7 +117,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
 
         // FamilyMedia mappings
-        CreateMap<Domain.Entities.FamilyMedia, FamilyMediaDto>()
+        CreateMap<FamilyMedia, FamilyMediaDto>()
             .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.ToString() : null)) // Placeholder, will need a resolver for actual user name
             .ForMember(dest => dest.MediaLinks, opt => opt.MapFrom(src => src.MediaLinks));
 
