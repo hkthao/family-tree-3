@@ -23,7 +23,10 @@ export * from './biography.d';
 export * from './memberFace.d'; 
 export * from './uploaded-file.d';
 export * from './familyMedia.d'; // NEW
-export * from './enums'; // Re-export RefType
+export * from './enums'; // NEW - CalendarType and RepeatRule
+export * from './lunar-date.d'; // NEW - LunarDate interface
+
+// Re-export RefType
 
 // NEWLY ADDED PUBLIC-FACING DTO EXPORTS
 export * from './public-family.d';

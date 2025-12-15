@@ -1,10 +1,21 @@
 import { ref, computed, watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types';
+import type { Event, LunarDate } from '@/types'; // Import LunarDate
+import { CalendarType } from '@/types/enums'; // Import CalendarType
 import { useAuth } from '@/composables';
 import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents';
 
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
+
+// Helper function to convert LunarDate to a rough Solar Date for display purposes
+// This is a simplified conversion and might not be perfectly accurate for all lunar dates
+const getSolarDateFromLunarDate = (lunarDate: LunarDate): Date => {
+  // This is a very rough estimation. A proper conversion would require a more complex algorithm.
+  // For now, we'll assume a fixed offset or just return a placeholder date for the current year.
+  // In a real app, you'd integrate a proper lunar-to-solar calendar conversion library.
+  const currentYear = new Date().getFullYear();
+  return new Date(currentYear, lunarDate.month - 1, lunarDate.day);
+};
 
 export function useEventCalendar(props: { familyId?: string; memberId?: string; readOnly?: boolean }, emit: (event: 'refetchEvents', ...args: any[]) => void) {
   const { t, locale } = useI18n();
@@ -79,17 +90,30 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
   const formattedEvents = computed(() => {
     if (!events.value) return [];
     return events.value
-      .filter((event: Event) => event.startDate)
-      .map((event: Event) => ({
-        title: event.name,
-        start: new Date(event.startDate as Date),
-        end: event.endDate
-          ? new Date(event.endDate)
-          : new Date(event.startDate as Date),
-        color: event.color || 'primary',
-        timed: true,
-        eventObject: event,
-      }));
+      .map((event: Event) => {
+        let eventStart: Date | null = null;
+        let eventEnd: Date | null = null;
+
+        if (event.calendarType === CalendarType.Solar && event.solarDate) {
+          eventStart = new Date(event.solarDate);
+          eventEnd = new Date(event.solarDate); // Assuming single day events for now
+        } else if (event.calendarType === CalendarType.Lunar && event.lunarDate) {
+          eventStart = getSolarDateFromLunarDate(event.lunarDate);
+          eventEnd = getSolarDateFromLunarDate(event.lunarDate); // Assuming single day events for now
+        }
+
+        if (!eventStart) return null; // Skip events without a valid start date
+
+        return {
+          title: event.name,
+          start: eventStart,
+          end: eventEnd,
+          color: event.color || 'primary',
+          timed: true,
+          eventObject: event,
+        };
+      })
+      .filter((e) => e !== null); // Filter out null events
   });
 
   const getEventColor: CalendarEventColorFunction = (event: {

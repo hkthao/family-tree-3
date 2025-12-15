@@ -1,12 +1,13 @@
 import type { Gender } from "./member";
 import type { ListOptions } from "./pagination";
+import type { CalendarType, RepeatRule } from "./enums"; // Import new enums
+import type { LunarDate } from "./lunar-date"; // Import LunarDate
 
 export enum EventType {
   Birth = 0,
   Marriage = 1,
   Death = 2,
-  Migration = 3,
-  Other = 4
+  Other = 3, // Changed from 4 to 3, removed Migration
 }
 
 export interface RelatedMember {
@@ -20,9 +21,6 @@ export interface Event {
   id: string;
   name: string;
   description?: string;
-  startDate: Date | null;
-  endDate?: Date | null;
-  location?: string;
   familyId: string | null;
   familyName?: string;
   familyAvatarUrl?: string;
@@ -30,6 +28,11 @@ export interface Event {
   relatedMemberIds?: string[];
   type: EventType;
   color?: string;
+  // New fields
+  calendarType: CalendarType;
+  solarDate?: Date | null;
+  lunarDate?: LunarDate | null;
+  repeatRule: RepeatRule;
   // color property
   validationErrors?: string[];
 }
@@ -39,8 +42,13 @@ export interface EventFilter extends ListOptions {
   type?: EventType;
   eventType?: EventType;
   familyId?: string | null ;
-  startDate?: Date | null;
-  endDate?: Date | null;
-  location?: string;
-  memberId?: string | null; // Changed from relatedMemberId to memberId
+  // Removed old date and location filters
+  // startDate?: Date | null;
+  // endDate?: Date | null;
+  // location?: string;
+  memberId?: string | null;
+  // New filters for backend
+  minSolarDate?: Date | null;
+  maxSolarDate?: Date | null;
+  calendarType?: CalendarType | null;
 }

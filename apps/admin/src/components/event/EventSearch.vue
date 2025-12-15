@@ -21,12 +21,17 @@
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-date-input v-model="filters.startDate" :label="t('event.search.startDate')" optional
-                data-testid="event-search-start-date-input" append-inner-icon="mdi-calendar" />
+              <v-select v-model="filters.calendarType" :items="calendarTypes" :label="t('event.search.calendarType')"
+                clearable data-testid="event-search-calendar-type-select"></v-select>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-date-input v-model="filters.minSolarDate" :label="t('event.search.minSolarDate')" optional
+                data-testid="event-search-min-solar-date-input" append-inner-icon="mdi-calendar" />
             </v-col>
             <v-col cols="12" md="4">
-              <v-date-input v-model="filters.endDate" :label="t('event.search.endDate')" optional
-                data-testid="event-search-end-date-input" append-inner-icon="mdi-calendar" />
+              <v-date-input v-model="filters.maxSolarDate" :label="t('event.search.maxSolarDate')" optional
+                data-testid="event-search-max-solar-date-input" append-inner-icon="mdi-calendar" />
             </v-col>
             <v-col cols="12" md="4">
               <MemberAutocomplete v-model="filters.memberId" :label="t('event.search.member')" clearable
@@ -50,6 +55,8 @@
 <script setup lang="ts">
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { useEventSearch } from '@/composables/event/useEventSearch';
+import VDateInput from '@/components/common/VDateInput.vue'; // Assuming you have a custom date input
+
 
 const emit = defineEmits(['update:filters']);
 
@@ -58,6 +65,7 @@ const {
   expanded,
   filters,
   eventTypes,
+  calendarTypes, // Expose calendarTypes
   applyFilters,
   resetFilters,
 } = useEventSearch(emit);
