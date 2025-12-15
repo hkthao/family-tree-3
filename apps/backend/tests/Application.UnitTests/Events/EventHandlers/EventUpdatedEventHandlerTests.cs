@@ -35,7 +35,14 @@ public class EventUpdatedEventHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, Guid.NewGuid());
+        var testEvent = Event.CreateSolarEvent(
+            name: "Test Event",
+            code: "EVT-TEST",
+            type: EventType.Other,
+            solarDate: DateTime.UtcNow, // Dummy value
+            repeatRule: RepeatRule.None, // Dummy value
+            familyId: Guid.NewGuid()
+        );
         var notification = new EventUpdatedEvent(testEvent);
 
         _currentUserMock.Setup(u => u.UserId).Returns(userId);
@@ -51,7 +58,14 @@ public class EventUpdatedEventHandlerTests : TestBase
     public async Task Handle_ShouldNotCallServices_WhenUserIdIsEmpty()
     {
         // Arrange
-        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, Guid.NewGuid());
+        var testEvent = Event.CreateSolarEvent(
+            name: "Test Event",
+            code: "EVT-TEST",
+            type: EventType.Other,
+            solarDate: DateTime.UtcNow, // Dummy value
+            repeatRule: RepeatRule.None, // Dummy value
+            familyId: Guid.NewGuid()
+        );
         var notification = new EventUpdatedEvent(testEvent);
 
         _currentUserMock.Setup(u => u.UserId).Returns(Guid.Empty);

@@ -6,6 +6,7 @@ public static class ErrorMessages
     public const string NotFound = "{0} not found.";
     public const string Unauthorized = "User is not authenticated.";
     public const string EventNotFound = "Event with ID {0} not found.";
+    public const string FamilyIdRequired = "FamilyId is required.";
     public const string FamilyNotFound = "Family with ID {0} not found.";
     public const string UserProfileNotFound = "User profile not found.";
     public const string NoAIResponse = "AI did not return a response.";

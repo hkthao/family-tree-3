@@ -46,7 +46,7 @@ public class CreateEventsCommandValidatorTests
     public void ShouldNotHaveError_WhenEventsListIsNotEmptyAndValid()
     {
         // Arrange
-        var validEventDto = new CreateEventDto { Name = "Valid Event", Code = "EVT001", FamilyId = Guid.NewGuid() };
+        var validEventDto = new CreateEventDto { Name = "Valid Event", Code = "EVT001", FamilyId = Guid.NewGuid(), CalendarType = backend.Domain.Enums.CalendarType.Solar, SolarDate = DateTime.Now };
         var command = new CreateEventsCommand([validEventDto]);
         // Act
         var result = _validator.TestValidate(command);
@@ -67,7 +67,7 @@ public class CreateEventsCommandValidatorTests
     {
         // Arrange
         var invalidEventDto = new CreateEventDto { Name = string.Empty, Code = "EVT002", FamilyId = Guid.NewGuid() }; // Invalid name
-        var validEventDto = new CreateEventDto { Name = "Valid Event", Code = "EVT001", FamilyId = Guid.NewGuid() };
+        var validEventDto = new CreateEventDto { Name = "Valid Event", Code = "EVT001", FamilyId = Guid.NewGuid(), CalendarType = backend.Domain.Enums.CalendarType.Solar, SolarDate = DateTime.Now };
 
         var command = new CreateEventsCommand([validEventDto, invalidEventDto]);
         // Act

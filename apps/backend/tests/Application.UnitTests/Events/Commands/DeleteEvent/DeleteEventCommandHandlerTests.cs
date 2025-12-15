@@ -34,8 +34,8 @@ public class DeleteEventCommandHandlerTests : TestBase
         var eventId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var now = DateTime.UtcNow;
-
-        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        var existingEvent = Event.CreateSolarEvent("Test Event", "EVT-TEST", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId);
+        existingEvent.Id = eventId;
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync();
 
@@ -82,7 +82,8 @@ public class DeleteEventCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var eventId = Guid.NewGuid();
-        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        var existingEvent = Event.CreateSolarEvent("Test Event", "EVT-TEST", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId);
+        existingEvent.Id = eventId;
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync();
 

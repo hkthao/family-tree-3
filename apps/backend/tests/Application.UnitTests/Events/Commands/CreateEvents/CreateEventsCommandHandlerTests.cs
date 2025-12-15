@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using backend.Application.Events.Commands.Inputs;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvents;
 
@@ -37,8 +38,8 @@ public class CreateEventsCommandHandlerTests : TestBase
 
         var eventsToCreate = new List<CreateEventDto>
         {
-            new() { Name = "Event 1", FamilyId = familyId1, Type = EventType.Birth, Code = "E1" },
-            new() { Name = "Event 2", FamilyId = familyId2, Type = EventType.Death, Code = "E2" }
+            new() { Name = "Event 1", FamilyId = familyId1, Type = EventType.Birth, Code = "E1", CalendarType = CalendarType.Solar, SolarDate = DateTime.UtcNow.AddDays(1) },
+            new() { Name = "Event 2", FamilyId = familyId2, Type = EventType.Death, Code = "E2", CalendarType = CalendarType.Solar, SolarDate = DateTime.UtcNow.AddDays(2) }
         };
         var command = new CreateEventsCommand(eventsToCreate);
 
@@ -60,7 +61,7 @@ public class CreateEventsCommandHandlerTests : TestBase
         // Arrange
         var eventsToCreate = new List<CreateEventDto>
         {
-            new() { Name = "Event with no family id", Type = EventType.Other, Code = "E1" }
+            new() { Name = "Event with no family id", Type = EventType.Other, Code = "E1", CalendarType = CalendarType.Solar, SolarDate = DateTime.UtcNow, FamilyId = Guid.Empty }
         };
         var command = new CreateEventsCommand(eventsToCreate);
 
@@ -69,8 +70,8 @@ public class CreateEventsCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, eventsToCreate.First().FamilyId));
-        result.ErrorSource.Should().Be(ErrorSources.NotFound);
+        result.Error.Should().Be(ErrorMessages.FamilyIdRequired);
+        result.ErrorSource.Should().Be(ErrorSources.BadRequest);
     }
 
     [Fact]
@@ -88,8 +89,8 @@ public class CreateEventsCommandHandlerTests : TestBase
 
         var eventsToCreate = new List<CreateEventDto>
         {
-            new() { Name = "Event 1", FamilyId = familyId1, Type = EventType.Birth, Code = "E1" },
-            new() { Name = "Event 2", FamilyId = familyId2, Type = EventType.Death, Code = "E2" }
+            new() { Name = "Event 1", FamilyId = familyId1, Type = EventType.Birth, Code = "E1", CalendarType = CalendarType.Solar, SolarDate = DateTime.UtcNow.AddDays(1) },
+            new() { Name = "Event 2", FamilyId = familyId2, Type = EventType.Death, Code = "E2", CalendarType = CalendarType.Solar, SolarDate = DateTime.UtcNow.AddDays(2) }
         };
         var command = new CreateEventsCommand(eventsToCreate);
 

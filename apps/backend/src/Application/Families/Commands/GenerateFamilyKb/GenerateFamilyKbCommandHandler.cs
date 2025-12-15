@@ -4,6 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // For Domain Entities
+using backend.Domain.ValueObjects; // Add this for LunarDate
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.Commands.GenerateFamilyKb
@@ -173,11 +174,25 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             {
                 var eventDetails = new StringBuilder();
                 eventDetails.Append($"Tên sự kiện: {evt.Name}");
-                eventDetails.Append($", Thời gian: {evt.StartDate?.ToShortDateString()}");
-                if (evt.EndDate.HasValue)
+
+                string eventDateDescription = string.Empty;
+                if (evt.CalendarType == CalendarType.Solar && evt.SolarDate.HasValue)
                 {
-                    eventDetails.Append($" - {evt.EndDate.Value.ToShortDateString()}");
+                    eventDateDescription = evt.SolarDate.Value.ToShortDateString();
                 }
+                else if (evt.CalendarType == CalendarType.Lunar && evt.LunarDate != null)
+                {
+                    eventDateDescription = $"{evt.LunarDate.Day}/{@evt.LunarDate.Month}{(@evt.LunarDate.IsLeapMonth ? " (nhuận)" : "")}";
+                }
+                if (!string.IsNullOrEmpty(eventDateDescription))
+                {
+                    eventDetails.Append($", Thời gian: {eventDateDescription}");
+                }
+                if (evt.RepeatRule == RepeatRule.Yearly)
+                {
+                    eventDetails.Append(" (lặp hàng năm)");
+                }
+
                 if (!string.IsNullOrEmpty(evt.Description))
                 {
                     eventDetails.Append($", Mô tả: {evt.Description}");
@@ -323,11 +338,31 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
 
             var textBuilder = new StringBuilder();
             textBuilder.AppendLine($"Tên sự kiện: {@event.Name}");
-            textBuilder.AppendLine($"Ngày diễn ra: {@event.StartDate?.ToShortDateString()} - {@event.EndDate?.ToShortDateString()}");
+
+            string eventDateDescription = string.Empty;
+            if (@event.CalendarType == CalendarType.Solar && @event.SolarDate.HasValue)
+            {
+                eventDateDescription = @event.SolarDate.Value.ToShortDateString();
+            }
+            else if (@event.CalendarType == CalendarType.Lunar && @event.LunarDate != null)
+            {
+                eventDateDescription = $"{@event.LunarDate.Day}/{@event.LunarDate.Month}{(@event.LunarDate.IsLeapMonth ? " (nhuận)" : "")}";
+            }
+            if (!string.IsNullOrEmpty(eventDateDescription))
+            {
+                textBuilder.AppendLine($"Thời gian: {eventDateDescription}");
+            }
+            if (@event.RepeatRule == RepeatRule.Yearly)
+            {
+            textBuilder.AppendLine("Lặp lại hàng năm.");
+            }
+
             textBuilder.AppendLine($"Ai tham gia: {string.Join(", ", relatedMembers.Select(m => m.FullName))}");
             textBuilder.AppendLine($"Ý nghĩa: [TODO: Thêm logic để tóm tắt ý nghĩa sự kiện]");
             textBuilder.AppendLine($"Chi tiết mô tả: {@event.Description}");
 
+            // The EventMetadataDto needs to be updated to reflect the new properties as well.
+            // For now, I will create a simplified version for Metadata
             return new EventEmbeddingsDto
             {
                 FamilyId = familyId,
@@ -336,8 +371,8 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 Metadata = new EventMetadataDto
                 {
                     EventType = @event.Type.ToString(),
-                    Date = @event.StartDate?.ToShortDateString() ?? "",
-                    Location = @event.Location ?? "",
+                    Date = eventDateDescription, // Use the generated dateDescription
+                    Location = "", // Location is removed, can be derived from Description if needed
                     MembersInvolved = relatedMembers.Select(m => m.FullName).ToList()
                 }
             };

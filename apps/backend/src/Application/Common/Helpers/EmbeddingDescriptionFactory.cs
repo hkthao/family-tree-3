@@ -1,4 +1,6 @@
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this
+using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Common.Helpers;
 
@@ -59,16 +61,29 @@ public static class EmbeddingDescriptionFactory
 
     public static (object EntityData, string Description) CreateEventData(Event @event)
     {
-        var description = $"Tên sự kiện: {@event.Name}. Mô tả: {@event.Description}. Địa điểm: {@event.Location}. Ngày bắt đầu: {@event.StartDate?.ToShortDateString()}. Ngày kết thúc: {@event.EndDate?.ToShortDateString()}. Loại: {@event.Type}. ID gia đình: {@event.FamilyId}.";
+        string dateDescription = string.Empty;
+        if (@event.CalendarType == CalendarType.Solar && @event.SolarDate.HasValue)
+        {
+            dateDescription = $"Ngày dương: {@event.SolarDate.Value.ToShortDateString()}";
+        }
+        else if (@event.CalendarType == CalendarType.Lunar && @event.LunarDate != null)
+        {
+            dateDescription = $"Ngày âm: {@event.LunarDate.Day}/{@event.LunarDate.Month}{(@event.LunarDate.IsLeapMonth ? " (nhuận)" : "")}";
+        }
+
+        string repeatRuleDescription = @event.RepeatRule == RepeatRule.Yearly ? " (lặp hàng năm)" : "";
+
+        var description = $"Tên sự kiện: {@event.Name}. Mô tả: {@event.Description}. {dateDescription}{repeatRuleDescription}. Loại: {@event.Type}. ID gia đình: {@event.FamilyId}.";
         var entityData = new
         {
             @event.Id,
             @event.FamilyId,
             @event.Name,
             @event.Description,
-            @event.StartDate,
-            @event.EndDate,
-            @event.Location,
+            @event.CalendarType,
+            @event.SolarDate,
+            @event.LunarDate,
+            @event.RepeatRule,
             @event.Type,
             @event.Color
         };

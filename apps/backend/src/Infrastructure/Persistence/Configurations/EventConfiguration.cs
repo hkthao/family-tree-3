@@ -19,8 +19,9 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.Description)
             .HasMaxLength(1000);
 
-        builder.Property(e => e.Location)
-            .HasMaxLength(500);
+        // Location property removed from Event entity
+        // builder.Property(e => e.Location)
+        //     .HasMaxLength(500);
 
         builder.Property(e => e.Type)
             .IsRequired();
@@ -36,5 +37,20 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .HasForeignKey(e => e.FamilyId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure LunarDate as an owned entity
+        builder.OwnsOne(e => e.LunarDate, lunarDateBuilder =>
+        {
+            lunarDateBuilder.Property(ld => ld.Day).HasColumnName("LunarDay");
+            lunarDateBuilder.Property(ld => ld.Month).HasColumnName("LunarMonth");
+            lunarDateBuilder.Property(ld => ld.IsLeapMonth).HasColumnName("LunarIsLeapMonth");
+        });
+
+        // CalendarType and RepeatRule are enums, mapped by default, but explicitly mark as required
+        builder.Property(e => e.CalendarType)
+            .IsRequired();
+
+        builder.Property(e => e.RepeatRule)
+            .IsRequired();
     }
 }

@@ -2,6 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this
+using backend.Domain.ValueObjects; // Add this
 using backend.Domain.Events.Events;
 
 namespace backend.Application.Events.Commands.CreateEvents;
@@ -17,9 +19,10 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IAuthoriz
 
         foreach (var command in request.Events)
         {
-            if (!command.FamilyId.HasValue)
+            // Perform basic validation before authorization
+            if (!command.FamilyId.HasValue || command.FamilyId.Value == Guid.Empty)
             {
-                return Result<List<Guid>>.Failure(string.Format(ErrorMessages.NotFound, command.FamilyId), ErrorSources.NotFound);
+                return Result<List<Guid>>.Failure(ErrorMessages.FamilyIdRequired, ErrorSources.BadRequest);
             }
 
             // Check authorization for the family
@@ -28,28 +31,76 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IAuthoriz
                 return Result<List<Guid>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
-            var entity = new Event(command.Name, "", command.Type, command.FamilyId); // Code is empty for now, will be generated or set later
-            entity.UpdateEvent(
-                command.Name,
-                entity.Code, // Code is not updated via this command
-                command.Description,
-                command.StartDate,
-                command.EndDate,
-                command.Location,
-                command.Type,
-                entity.Color // Color is not updated via this command
-            );
+            Event entity;
+            string eventCode = command.Code ?? GenerateUniqueCode("EVT");
+
+            // Determine which factory method to use based on CalendarType
+            if (command.CalendarType == CalendarType.Solar)
+            {
+                if (!command.SolarDate.HasValue)
+                {
+                    return Result<List<Guid>>.Failure("Solar event must have a SolarDate.", ErrorSources.BadRequest);
+                }
+                if (command.LunarDate != null)
+                {
+                    return Result<List<Guid>>.Failure("Solar event cannot have a LunarDate.", ErrorSources.BadRequest);
+                }
+                entity = Event.CreateSolarEvent(
+                    command.Name,
+                    eventCode,
+                    command.Type,
+                    command.SolarDate.Value,
+                    command.RepeatRule,
+                    command.FamilyId,
+                    command.Description,
+                    command.Color
+                );
+            }
+            else if (command.CalendarType == CalendarType.Lunar)
+            {
+                if (command.LunarDate == null)
+                {
+                    return Result<List<Guid>>.Failure("Lunar event must have a LunarDate.", ErrorSources.BadRequest);
+                }
+                if (command.SolarDate.HasValue)
+                {
+                    return Result<List<Guid>>.Failure("Lunar event cannot have a SolarDate.", ErrorSources.BadRequest);
+                }
+                var lunarDateVO = new LunarDate(command.LunarDate.Day, command.LunarDate.Month, command.LunarDate.IsLeapMonth);
+                entity = Event.CreateLunarEvent(
+                    command.Name,
+                    eventCode,
+                    command.Type,
+                    lunarDateVO,
+                    command.RepeatRule,
+                    command.FamilyId,
+                    command.Description,
+                    command.Color
+                );
+            }
+            else
+            {
+                return Result<List<Guid>>.Failure("Invalid CalendarType.", ErrorSources.BadRequest);
+            }
 
             // Handle related members
             if (command.RelatedMembers != null && command.RelatedMembers.Any())
             {
-                foreach (var memberId in command.RelatedMembers)
+                foreach (var memberIdString in command.RelatedMembers)
                 {
-                    entity.AddEventMember(Guid.Parse(memberId));
+                    if (Guid.TryParse(memberIdString, out Guid memberId))
+                    {
+                        entity.AddEventMember(memberId);
+                    }
+                    else
+                    {
+                        // Log or handle invalid member ID string if necessary
+                        // For now, we will skip invalid IDs
+                    }
                 }
             }
 
-            entity.AddDomainEvent(new EventCreatedEvent(entity));
+            // Domain event is added within the factory methods now.
             _context.Events.Add(entity);
             createdEventIds.Add(entity.Id);
         }
@@ -57,5 +108,10 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IAuthoriz
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<List<Guid>>.Success(createdEventIds);
+    }
+
+    private string GenerateUniqueCode(string prefix)
+    {
+        return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
     }
 }

@@ -25,16 +25,16 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
             var familyId = Guid.NewGuid();
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Past Event", "EVT1", EventType.Other, familyId, DateTime.UtcNow.AddDays(-10)),
-                new Event("Upcoming Event 1", "EVT2", EventType.Other, familyId, DateTime.UtcNow.AddDays(5)),
-                new Event("Upcoming Event 2", "EVT3", EventType.Other, familyId, DateTime.UtcNow.AddDays(10))
+                Event.CreateSolarEvent("Past Event", "EVT1", EventType.Other, DateTime.UtcNow.AddYears(-10), RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Upcoming Event 1", "EVT2", EventType.Other, DateTime.UtcNow.AddDays(5), RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Upcoming Event 2", "EVT3", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId)
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
             _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Explicitly set admin for this test
 
             var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-            var query = new GetUpcomingEventsQuery { StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(15) };
+            var query = new GetUpcomingEventsQuery { FamilyId = familyId };
 
             // Act
             var result = await handler.Handle(query, CancellationToken.None);
@@ -65,13 +65,13 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
 
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Accessible Event", "EVT1", EventType.Other, accessibleFamily.Id, DateTime.UtcNow.AddDays(5)),
-                new Event("Inaccessible Event", "EVT2", EventType.Other, otherFamilyId, DateTime.UtcNow.AddDays(5)) // Inaccessible family events
+                Event.CreateSolarEvent("Accessible Event", "EVT1", EventType.Other, DateTime.UtcNow.AddDays(5), RepeatRule.None, accessibleFamily.Id),
+                Event.CreateSolarEvent("Inaccessible Event", "EVT2", EventType.Other, DateTime.UtcNow.AddDays(5), RepeatRule.None, otherFamilyId) // Inaccessible family events
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
             var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-            var query = new GetUpcomingEventsQuery { StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(15) };
+            var query = new GetUpcomingEventsQuery { FamilyId = accessibleFamily.Id };
 
             // Act
             var result = await handler.Handle(query, CancellationToken.None);
@@ -97,13 +97,13 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
             var familyId = Guid.NewGuid();
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Upcoming Event 1", "EVT1", EventType.Other, familyId, DateTime.UtcNow.AddDays(5)),
-                new Event("Upcoming Event 2", "EVT2", EventType.Other, familyId, DateTime.UtcNow.AddDays(10))
+                Event.CreateSolarEvent("Upcoming Event 1", "EVT1", EventType.Other, DateTime.UtcNow.AddDays(5), RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Upcoming Event 2", "EVT2", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId)
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
             var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
-            var query = new GetUpcomingEventsQuery { StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(15) };
+            var query = new GetUpcomingEventsQuery { FamilyId = familyId };
 
             // Act
             var result = await handler.Handle(query, CancellationToken.None);

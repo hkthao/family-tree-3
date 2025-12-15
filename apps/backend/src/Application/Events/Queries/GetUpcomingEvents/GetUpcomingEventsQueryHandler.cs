@@ -24,18 +24,17 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
 
         // Apply EventAccessSpecification to filter events based on user's access
         eventsQuery = eventsQuery.WithSpecification(new EventAccessSpecification(_authorizationService.IsAdmin(), _user.UserId));
+        eventsQuery = eventsQuery.WithSpecification(new EventsByFamilyIdSpecification(request.FamilyId));
 
-
-        if (request.FamilyId.HasValue)
-        {
-            eventsQuery = eventsQuery.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
-        }
-
-        // Apply date range filter
-        eventsQuery = eventsQuery.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
+        // TEMP: Add basic date filtering for upcoming events for Solar events until EventOccurrenceService is implemented
+        eventsQuery = eventsQuery.Where(e =>
+            (e.CalendarType == backend.Domain.Enums.CalendarType.Solar && e.SolarDate.HasValue && e.SolarDate.Value > DateTime.UtcNow) ||
+            e.CalendarType == backend.Domain.Enums.CalendarType.Lunar // For lunar, we don't have a simple "upcoming" filter here yet
+        );
 
         var upcomingEvents = await eventsQuery
-            .WithSpecification(new EventOrderByStartDateSpec())
+            // Default ordering until EventOccurrenceService is implemented to provide a derived date for sorting
+            .OrderBy(e => e.Name) // Placeholder: Order by name for now
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

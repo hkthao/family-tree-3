@@ -3,6 +3,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
+using backend.Application.Events.Queries; // Add this for EventDto
 
 namespace backend.Application.Events.Queries.GetPublicUpcomingEvents;
 
@@ -21,19 +22,14 @@ public class GetPublicUpcomingEventsQueryHandler(IApplicationDbContext context, 
             query = query.WithSpecification(new EventsByFamilyIdSpecification(request.FamilyId.Value));
         }
 
-        var now = DateTime.UtcNow;
-        var startDate = request.StartDate ?? now;
-        var endDate = request.EndDate ?? now.AddMonths(3); // Default to next 3 months
-
-        query = query.WithSpecification(new EventsByDateRangeSpecification(startDate, endDate));
-        query = query.WithSpecification(new EventsOrderByStartDateSpecification("asc"));
+        // Removed date range and order by start date specifications as they are no longer valid.
+        // The logic for "upcoming" will be part of the new EventOccurrenceService.
 
         var events = await query
+            .OrderBy(e => e.Name) // Placeholder: Order by name for now
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         return Result<List<EventDto>>.Success(events);
     }
 }
-
-// EventDto is defined in GetPublicEventByIdQuery.cs, so we don't redefine it here.

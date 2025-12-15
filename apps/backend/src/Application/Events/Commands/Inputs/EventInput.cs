@@ -8,9 +8,12 @@ public record class EventInput
     public string Name { get; init; } = null!;
     public string? Code { get; init; }
     public string? Description { get; init; }
-    public DateTime? StartDate { get; init; }
-    public DateTime? EndDate { get; init; }
-    public string? Location { get; init; }
+
+    public CalendarType CalendarType { get; init; }
+    public DateTime? SolarDate { get; init; }
+    public LunarDateInput? LunarDate { get; init; } // Use LunarDateInput for command/input
+    public RepeatRule RepeatRule { get; init; }
+
     public Guid? FamilyId { get; init; }
     public EventType Type { get; init; }
     public string? Color { get; init; }

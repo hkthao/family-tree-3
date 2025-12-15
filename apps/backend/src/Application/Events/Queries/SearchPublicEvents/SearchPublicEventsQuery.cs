@@ -8,6 +8,4 @@ public record SearchPublicEventsQuery : PaginatedQuery, IRequest<Result<Paginate
     public string? SearchTerm { get; init; }
     public Guid? FamilyId { get; init; }
     public EventType? EventType { get; init; }
-    public DateTime? StartDate { get; init; }
-    public DateTime? EndDate { get; init; }
 }

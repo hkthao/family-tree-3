@@ -4,6 +4,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
 using backend.Application.Members.Specifications;
+using backend.Domain.Enums; // Add this
+using backend.Domain.ValueObjects; // Add this
+using backend.Domain.Entities; // Ensure this is present
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
@@ -14,7 +17,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can update events
-        if (!_authorizationService.CanManageFamily(request.FamilyId!.Value))
+        if (request.FamilyId.HasValue && !_authorizationService.CanManageFamily(request.FamilyId.Value))
         {
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
@@ -29,21 +32,58 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             return Result<bool>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound);
         }
 
-        var membersSpec = new MembersByIdsSpec(request.RelatedMemberIds);
-        var relatedMembers = await _context.Members
-            .WithSpecification(membersSpec)
-            .ToListAsync(cancellationToken);
+        // Validation to ensure CalendarType is not changed during update
+        if (entity.CalendarType != request.CalendarType)
+        {
+            return Result<bool>.Failure("CalendarType cannot be changed during event update.", ErrorSources.BadRequest);
+        }
 
-        entity.UpdateEvent(
-            request.Name,
-            entity.Code, // Code is not updated via this command
-            request.Description,
-            request.StartDate,
-            request.EndDate,
-            request.Location,
-            request.Type,
-            request.Color
-        );
+        // Determine which update method to use based on CalendarType
+        if (request.CalendarType == CalendarType.Solar)
+        {
+            if (!request.SolarDate.HasValue)
+            {
+                return Result<bool>.Failure("Solar event must have a SolarDate.", ErrorSources.BadRequest);
+            }
+            if (request.LunarDate != null)
+            {
+                return Result<bool>.Failure("Solar event cannot have a LunarDate.", ErrorSources.BadRequest);
+            }
+            entity.UpdateSolarEvent(
+                request.Name,
+                request.Code ?? entity.Code, // Use existing code if not provided in request
+                request.Description,
+                request.SolarDate.Value,
+                request.RepeatRule,
+                request.Type,
+                request.Color
+            );
+        }
+        else if (request.CalendarType == CalendarType.Lunar)
+        {
+            if (request.LunarDate == null)
+            {
+                return Result<bool>.Failure("Lunar event must have a LunarDate.", ErrorSources.BadRequest);
+            }
+            if (request.SolarDate.HasValue)
+            {
+                return Result<bool>.Failure("Lunar event cannot have a SolarDate.", ErrorSources.BadRequest);
+            }
+            var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
+            entity.UpdateLunarEvent(
+                request.Name,
+                request.Code ?? entity.Code, // Use existing code if not provided in request
+                request.Description,
+                lunarDateVO,
+                request.RepeatRule,
+                request.Type,
+                request.Color
+            );
+        }
+        else
+        {
+            return Result<bool>.Failure("Invalid CalendarType.", ErrorSources.BadRequest);
+        }
 
         // Update related members
         // Remove existing EventMembers from the context
@@ -56,7 +96,8 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             entity.AddEventMember(memberId);
         }
 
-        entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity)); // NEW
+        // Domain event is added within the UpdateSolarEvent/UpdateLunarEvent methods now.
+        // entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
 

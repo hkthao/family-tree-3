@@ -2,6 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this
+using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
@@ -12,22 +14,61 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can create events
-        if (!_authorizationService.CanManageFamily(request.FamilyId!.Value))
+        if (request.FamilyId.HasValue && !_authorizationService.CanManageFamily(request.FamilyId.Value))
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        var entity = new Event(request.Name, request.Code ?? GenerateUniqueCode("EVT"), request.Type, request.FamilyId);
-        entity.UpdateEvent(
-            request.Name,
-            entity.Code, // Code is not updated via this command
-            request.Description,
-            request.StartDate,
-            request.EndDate,
-            request.Location,
-            request.Type,
-            request.Color
-        );
+        Event entity;
+
+        // Determine which factory method to use based on CalendarType
+        if (request.CalendarType == CalendarType.Solar)
+        {
+            if (!request.SolarDate.HasValue)
+            {
+                return Result<Guid>.Failure("Solar event must have a SolarDate.", ErrorSources.BadRequest);
+            }
+            if (request.LunarDate != null)
+            {
+                return Result<Guid>.Failure("Solar event cannot have a LunarDate.", ErrorSources.BadRequest);
+            }
+            entity = Event.CreateSolarEvent(
+                request.Name,
+                request.Code ?? GenerateUniqueCode("EVT"),
+                request.Type,
+                request.SolarDate.Value,
+                request.RepeatRule,
+                request.FamilyId,
+                request.Description,
+                request.Color
+            );
+        }
+        else if (request.CalendarType == CalendarType.Lunar)
+        {
+            if (request.LunarDate == null)
+            {
+                return Result<Guid>.Failure("Lunar event must have a LunarDate.", ErrorSources.BadRequest);
+            }
+            if (request.SolarDate.HasValue)
+            {
+                return Result<Guid>.Failure("Lunar event cannot have a SolarDate.", ErrorSources.BadRequest);
+            }
+            var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
+            entity = Event.CreateLunarEvent(
+                request.Name,
+                request.Code ?? GenerateUniqueCode("EVT"),
+                request.Type,
+                lunarDateVO,
+                request.RepeatRule,
+                request.FamilyId,
+                request.Description,
+                request.Color
+            );
+        }
+        else
+        {
+            return Result<Guid>.Failure("Invalid CalendarType.", ErrorSources.BadRequest);
+        }
 
         foreach (var memberId in request.RelatedMemberIds)
         {

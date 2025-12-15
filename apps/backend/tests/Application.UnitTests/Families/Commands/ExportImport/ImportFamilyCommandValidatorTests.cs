@@ -35,7 +35,7 @@ public class ImportFamilyCommandValidatorTests
     [Fact]
     public void ShouldHaveError_WhenFamilyCodeIsEmpty()
     {
-        var familyData = new FamilyExportDto { Name = "Test Family", Code = "", Visibility = "Private" };
+        var familyData = new FamilyExportDto { Name = "Test Family", Code = string.Empty, Visibility = "Private" };
         var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Code");
@@ -167,7 +167,7 @@ public class ImportFamilyCommandValidatorTests
             Visibility = "Private",
             Events = new List<EventExportDto>
             {
-                new EventExportDto { Name = "", Code = "EVT1", Type = EventType.Birth, StartDate = DateTime.Now }
+                new EventExportDto { Name = "", Code = "EVT1", Type = EventType.Birth }
             }
         };
         var command = new ImportFamilyCommand { FamilyData = familyData };
@@ -185,11 +185,40 @@ public class ImportFamilyCommandValidatorTests
             Visibility = "Private",
             Events = new List<EventExportDto>
             {
-                new EventExportDto { Name = "Birth", Code = "", Type = EventType.Birth, StartDate = DateTime.Now }
+                new EventExportDto { Name = "Birth", Code = "", Type = EventType.Birth }
             }
         };
         var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Events[0].Code");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Type của EventExportDto không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một EventExportDto với Type không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính Type.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Type của EventExportDto phải là một giá trị hợp lệ của enum.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenEventTypeIsInvalid()
+    {
+        // Arrange
+        var familyData = new FamilyExportDto
+        {
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
+            Events = new List<EventExportDto>
+            {
+                new EventExportDto { Name = "Invalid Type Event", Code = "EVT-INV", Type = (EventType)99 } // Invalid enum value
+            }
+        };
+        var command = new ImportFamilyCommand { FamilyData = familyData };
+        // Act
+        var result = _validator.TestValidate(command);
+        // Assert
+        result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Events[0].Type");
     }
 }

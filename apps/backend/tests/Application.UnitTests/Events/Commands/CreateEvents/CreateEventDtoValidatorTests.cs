@@ -1,6 +1,8 @@
 using backend.Application.Events.Commands.CreateEvents;
 using FluentValidation.TestHelper;
 using Xunit;
+using backend.Domain.Enums;
+using backend.Application.Events.Commands.Inputs;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvents;
 
@@ -171,93 +173,279 @@ public class CreateEventDtoValidatorTests
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh lỗi khi EndDate trước StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi CalendarType không hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventDto với EndDate trước StartDate.
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType không hợp lệ.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính EndDate với thông báo lỗi "Ngày kết thúc không được trước ngày bắt đầu.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate không được phép trước StartDate.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính CalendarType.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: CalendarType phải là một giá trị hợp lệ của enum.
     /// </summary>
     [Fact]
-    public void ShouldHaveError_WhenEndDateIsBeforeStartDate()
+    public void ShouldHaveError_WhenCalendarTypeIsInvalid()
     {
         // Arrange
-        var dto = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = (CalendarType)99, // Invalid enum value
+            SolarDate = DateTime.Now
+        };
         // Act
         var result = _validator.TestValidate(dto);
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.EndDate)
-              .WithErrorMessage("Ngày kết thúc không được trước ngày bắt đầu.");
+        result.ShouldHaveValidationErrorFor(x => x.CalendarType)
+              .WithErrorMessage("Invalid CalendarType.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi EndDate sau StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi RepeatRule không hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventDto với EndDate sau StartDate.
+    ///    - Arrange: Tạo một CreateEventDto với RepeatRule không hợp lệ.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate sau StartDate là hợp lệ.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính RepeatRule.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: RepeatRule phải là một giá trị hợp lệ của enum.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenEndDateIsAfterStartDate()
+    public void ShouldHaveError_WhenRepeatRuleIsInvalid()
     {
         // Arrange
-        var dto = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1) };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            RepeatRule = (RepeatRule)99 // Invalid enum value
+        };
         // Act
         var result = _validator.TestValidate(dto);
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.RepeatRule)
+              .WithErrorMessage("Invalid RepeatRule.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi EndDate bằng StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Solar không có SolarDate.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventDto với EndDate bằng StartDate.
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Solar nhưng SolarDate là null.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate bằng StartDate là hợp lệ.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Solar yêu cầu SolarDate.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenEndDateIsSameAsStartDate()
+    public void ShouldHaveError_WhenSolarEventHasNoSolarDate()
     {
         // Arrange
-        var dto = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = null // Missing SolarDate
+        };
         // Act
         var result = _validator.TestValidate(dto);
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.SolarDate)
+              .WithErrorMessage("Solar event must have a SolarDate.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi StartDate hoặc EndDate là null.
+    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi sự kiện Solar có SolarDate hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo các CreateEventDto với StartDate hoặc EndDate là null.
-    ///    - Act: Gọi phương thức TestValidate của validator cho từng dto.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: StartDate hoặc EndDate có thể là null.
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Solar và SolarDate hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: SolarDate hợp lệ không gây lỗi.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenStartDateOrEndDateIsNull()
+    public void ShouldNotHaveError_WhenSolarEventHasValidSolarDate()
     {
         // Arrange
-        var dto1 = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = null, EndDate = DateTime.Now };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            RepeatRule = RepeatRule.None
+        };
         // Act
-        var result1 = _validator.TestValidate(dto1);
+        var result = _validator.TestValidate(dto);
         // Assert
-        result1.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldNotHaveValidationErrorFor(x => x.SolarDate);
+    }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Solar có LunarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Solar nhưng có LunarDate.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Solar không được có LunarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenSolarEventHasLunarDate()
+    {
         // Arrange
-        var dto2 = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = null };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            LunarDate = new LunarDateInput { Day = 1, Month = 1, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
         // Act
-        var result2 = _validator.TestValidate(dto2);
+        var result = _validator.TestValidate(dto);
         // Assert
-        result2.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate)
+              .WithErrorMessage("Solar event cannot have a LunarDate.");
+    }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Lunar không có LunarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Lunar nhưng LunarDate là null.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar yêu cầu LunarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarEventHasNoLunarDate()
+    {
         // Arrange
-        var dto3 = new CreateEventDto { Name = "Valid Name", Code = "CODE", FamilyId = Guid.NewGuid(), StartDate = null, EndDate = null };
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = null // Missing LunarDate
+        };
         // Act
-        var result3 = _validator.TestValidate(dto3);
+        var result = _validator.TestValidate(dto);
         // Assert
-        result3.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate)
+              .WithErrorMessage("Lunar event must have a LunarDate.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi sự kiện Lunar có LunarDate hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Lunar và LunarDate hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: LunarDate hợp lệ không gây lỗi.
+    /// </summary>
+    [Fact]
+    public void ShouldNotHaveError_WhenLunarEventHasValidLunarDate()
+    {
+        // Arrange
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(dto);
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.LunarDate);
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Lunar có SolarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Lunar nhưng có SolarDate.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar không được có SolarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarEventHasSolarDate()
+    {
+        // Arrange
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            SolarDate = DateTime.Now,
+            LunarDate = new LunarDateInput { Day = 1, Month = 1, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(dto);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.SolarDate)
+              .WithErrorMessage("Lunar event cannot have a SolarDate.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Day của LunarDate không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Lunar và LunarDate có Day không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.Day.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Day của LunarDate phải nằm trong khoảng 1-30.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarDateDayIsInvalid()
+    {
+        // Arrange
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 31, Month = 1, IsLeapMonth = false }, // Invalid Day
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(dto);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate!.Day)
+              .WithErrorMessage("Lunar day must be between 1 and 30.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Month của LunarDate không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventDto với CalendarType là Lunar và LunarDate có Month không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.Month.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Month của LunarDate phải nằm trong khoảng 1-12.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarDateMonthIsInvalid()
+    {
+        // Arrange
+        var dto = new CreateEventDto
+        {
+            Name = "Valid Name",
+            Code = "CODE",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 1, Month = 13, IsLeapMonth = false }, // Invalid Month
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(dto);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate!.Month)
+              .WithErrorMessage("Lunar month must be between 1 and 12.");
     }
 }
