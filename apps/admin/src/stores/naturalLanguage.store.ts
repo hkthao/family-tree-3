@@ -4,7 +4,6 @@ import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
 import { type Member, type Event, type Gender, type Result, type Relationship } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
 import { CalendarType, RepeatRule } from '@/types/enums'; // Import CalendarType, RepeatRule
-import type { LunarDate } from '@/types/lunar-date'; // Import LunarDate
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
@@ -136,6 +135,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
         const newEvent: Omit<Event, 'id'> = {
           name: eventData.description, // Using description as name
+          code: '', // Thêm trường code
           description: eventData.description,
           familyId: this.familyId,
           type: eventData.type,

@@ -54,7 +54,7 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
             return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger, 201, nameof(GetEventById), new Dictionary<string, Guid> { { "id", (Guid)result.Value! } });
+        return result.ToActionResult(this, _logger, 201, nameof(GetEventById), new { id = result.Value! });
     }
 
     /// <summary>

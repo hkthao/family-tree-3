@@ -10,6 +10,7 @@ export function useEventRules(state: { [key: string]: Ref<any> }) {
   const rules = computed(() => {
     return {
       name: { required: helpers.withMessage(() => t('common.validations.required'), required) },
+      code: {}, // Mã không bắt buộc
       type: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       calendarType: { required: helpers.withMessage(() => t('common.validations.required'), required) },

@@ -17,22 +17,30 @@
     </v-row>
 
     <v-row>
+      <v-col cols="12">
+        <v-text-field v-model="formData.code" :label="t('event.form.code')" :readonly="true" :disabled="true"
+          data-testid="event-code-input"></v-text-field>
+      </v-col>
+    </v-row>
+
+    <v-row>
       <v-col cols="12" md="4">
-        <v-select v-model="formData.type" :items="eventTypes" :label="t('event.form.type')" @blur="v$.type.$touch()"
-          @input="v$.type.$touch()" :error-messages="v$.type.$errors.map((e: any) => e.$message as string)"
-          :readonly="props.readOnly" data-testid="event-type-select"></v-select>
+        <v-select v-model="formData.type" :items="eventOptionTypes" :label="t('event.form.type')"
+          @blur="v$.type.$touch()" @input="v$.type.$touch()"
+          :error-messages="v$.type.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+          data-testid="event-type-select"></v-select>
       </v-col>
       <v-col cols="12" md="4">
         <v-select v-model="formData.calendarType" :items="calendarTypes" :label="t('event.form.calendarType')"
           @blur="v$.calendarType.$touch()" @update:modelValue="v$.calendarType.$touch()"
           :error-messages="v$.calendarType.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          data-testid="event-calendar-type-select"></v-select>
+          :disabled="props.readOnly" data-testid="event-calendar-type-select"></v-select>
       </v-col>
       <v-col cols="12" md="4">
         <v-select v-model="formData.repeatRule" :items="repeatRules" :label="t('event.form.repeatRule')"
           @blur="v$.repeatRule.$touch()" @update:modelValue="v$.repeatRule.$touch()"
           :error-messages="v$.repeatRule.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          data-testid="event-repeat-rule-select"></v-select>
+          :disabled="props.readOnly" data-testid="event-repeat-rule-select"></v-select>
       </v-col>
     </v-row>
 
@@ -40,7 +48,7 @@
       <v-col cols="12">
         <v-date-input v-model="formData.solarDate" :label="t('event.form.solarDate')" @blur="v$.solarDate.$touch()"
           @input="v$.solarDate.$touch()" :error-messages="v$.solarDate.$errors.map((e: any) => e.$message as string)"
-          :readonly="props.readOnly" prepend-icon="" format="dd/MM/yyyy"
+          :readonly="props.readOnly" prepend-icon="" dateFormat="dd/MM/yyyy"
           data-testid="event-solar-date-input" />
       </v-col>
     </v-row>
@@ -118,11 +126,12 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
     ? cloneDeep(props.initialEventData)
     : {
         name: '',
+        code: '', // Gán trực tiếp rỗng khi không có initialEventData
         type: EventType.Other,
         familyId: props.familyId || null,
         calendarType: CalendarType.Solar, // Default to Solar
         solarDate: null,
-        lunarDate: { day: 0, month: 0, isLeapMonth: false } as LunarDate, // Initialize lunarDate with 0
+        lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate, // Initialize lunarDate with 1
         repeatRule: RepeatRule.None, // Default to None
         description: '',
         color: '#1976D2',
@@ -133,10 +142,11 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
 // Adjust Vuelidate state to match rules structure for lunarDate
 const state = reactive({
   name: toRef(formData, 'name'),
+  code: toRef(formData, 'code'),
   type: toRef(formData, 'type'),
   familyId: toRef(formData, 'familyId'),
-  calendarType: toRef(formData, 'calendarType'),
   solarDate: toRef(formData, 'solarDate'),
+  calendarType: toRef(formData, 'calendarType'),
   // lunarDate needs to be an object for Vuelidate with day/month properties
   lunarDate: reactive({
     day: toRef(formData.lunarDate!, 'day'),
@@ -147,7 +157,7 @@ const state = reactive({
   relatedMemberIds: toRef(formData, 'relatedMemberIds'),
 });
 
-const eventTypes = [
+const eventOptionTypes = [
   { title: t('event.type.birth'), value: EventType.Birth },
   { title: t('event.type.marriage'), value: EventType.Marriage },
   { title: t('event.type.death'), value: EventType.Death },
@@ -174,11 +184,18 @@ const v$ = useVuelidate(rules, state);
 
 // Expose form validation and data for parent component
 const validate = async () => {
-  return await v$.value.$validate();
+  const isValid = await v$.value.$validate();
+  return isValid;
 };
 
 const getFormData = () => {
-  return formData;
+  const data = cloneDeep(formData);
+  if (data.calendarType === CalendarType.Solar) {
+    data.lunarDate = null;
+  } else if (data.calendarType === CalendarType.Lunar) {
+    data.solarDate = null;
+  }
+  return data;
 };
 
 
