@@ -1,4 +1,4 @@
-using backend.Application.Events;
+using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
 using backend.Application.Families.Dtos;
