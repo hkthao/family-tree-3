@@ -34,7 +34,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             }
             entity = Event.CreateSolarEvent(
                 request.Name,
-                request.Code ?? GenerateUniqueCode("EVT"),
+                GenerateUniqueCode("EVT"),
                 request.Type,
                 request.SolarDate.Value,
                 request.RepeatRule,
@@ -56,7 +56,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
             entity = Event.CreateLunarEvent(
                 request.Name,
-                request.Code ?? GenerateUniqueCode("EVT"),
+                GenerateUniqueCode("EVT"),
                 request.Type,
                 lunarDateVO,
                 request.RepeatRule,

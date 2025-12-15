@@ -1,4 +1,4 @@
-import { ref, reactive, watch, toRefs } from 'vue';
+import { reactive, watch, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import type { MemberFace } from '@/types';

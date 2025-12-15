@@ -41,7 +41,7 @@ export function useEventListComposable(props: {
   const headers = computed<DataTableHeader[]>(() => [
     {
       title: t('event.list.headers.date'),
-      key: 'startDate',
+      key: 'date',
       width: '120px',
       align: 'center',
     },
@@ -65,12 +65,6 @@ export function useEventListComposable(props: {
       width: 'auto',
       align: 'start',
       sortable: false,
-    },
-    {
-      title: t('event.list.headers.location'),
-      key: 'location',
-      width: '150px',
-      align: 'start',
     },
     {
       title: t('event.list.headers.actions'),

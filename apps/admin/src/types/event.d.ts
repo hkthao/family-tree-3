@@ -20,6 +20,7 @@ export interface RelatedMember {
 export interface Event {
   id: string;
   name: string;
+  code: string;
   description?: string;
   familyId: string | null;
   familyName?: string;

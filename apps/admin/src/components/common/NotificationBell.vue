@@ -20,7 +20,7 @@ import { Novu } from '@novu/js';
 import NovuInbox from './NovuInbox.vue'
 import { getEnvVariable } from '@/utils/api.util';
 
-const { userProfile, isFetchingProfile, fetchError } = useProfileSettings();
+const { userProfile } = useProfileSettings();
 const unseenCount = ref(0);
 let unseen_count_changed: (() => void) | null = null;
 let notification_received: (() => void) | null = null;

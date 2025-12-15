@@ -2,7 +2,6 @@ import { ref, unref } from 'vue';
 import type { Ref } from 'vue';
 import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
-import type { FamilyMedia } from '@/types';
 
 interface FamilyMediaFormData {
   file?: File;

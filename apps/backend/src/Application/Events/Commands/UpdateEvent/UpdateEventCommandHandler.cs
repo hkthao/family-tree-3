@@ -3,10 +3,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
-using backend.Application.Members.Specifications;
 using backend.Domain.Enums; // Add this
 using backend.Domain.ValueObjects; // Add this
-using backend.Domain.Entities; // Ensure this is present
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
@@ -51,7 +49,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             }
             entity.UpdateSolarEvent(
                 request.Name,
-                request.Code ?? entity.Code, // Use existing code if not provided in request
+                entity.Code, // Use existing code if not provided in request
                 request.Description,
                 request.SolarDate.Value,
                 request.RepeatRule,
@@ -72,7 +70,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
             entity.UpdateLunarEvent(
                 request.Name,
-                request.Code ?? entity.Code, // Use existing code if not provided in request
+                entity.Code,
                 request.Description,
                 lunarDateVO,
                 request.RepeatRule,

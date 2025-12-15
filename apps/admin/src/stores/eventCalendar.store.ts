@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
-import type { Event, EventFilter, Member, RelatedMember } from '@/types';
-import { Gender } from '@/types'; // Import Member and RelatedMember
+import type { Event, EventFilter } from '@/types';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination'; // Import DEFAULT_ITEMS_PER_PAGE
 import { CalendarType } from '@/types/enums'; // Import CalendarType
 

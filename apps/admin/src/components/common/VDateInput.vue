@@ -48,7 +48,7 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  format: {
+  dateFormat: {
     type: String,
     default: 'dd/MM/yyyy',
   },
@@ -94,7 +94,7 @@ watch(() => props.modelValue, (newVal) => {
 
 const formattedDate = computed(() => {
   if (internalDate.value) {
-    return format(internalDate.value, props.format);
+    return format(internalDate.value, props.dateFormat);
   }
   return '';
 });

@@ -10,11 +10,6 @@ public class EventDto
     public string Code { get; set; } = null!;
     public string? Description { get; set; }
 
-    // Removed old date and location properties
-    // public DateTime? StartDate { get; set; }
-    // public DateTime? EndDate { get; set; }
-    // public string? Location { get; set; }
-
     // New date and calendar properties
     public CalendarType CalendarType { get; set; }
     public DateTime? SolarDate { get; set; }

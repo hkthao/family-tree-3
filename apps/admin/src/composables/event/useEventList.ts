@@ -1,6 +1,6 @@
 import { onMounted, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event, EventFilter } from '@/types';
+import type { EventFilter } from '@/types';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import { useEventListFilters, useEventsQuery, useDeleteEventMutation } from '@/composables/event';
 
@@ -59,17 +59,17 @@ export function useEventList(props: { familyId: string; readOnly?: boolean }, _e
     setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
   };
 
-  const confirmDelete = async (event: Event) => {
+  const confirmDelete = async (eventId: string, eventName?: string) => {
     const confirmed = await showConfirmDialog({
       title: t('confirmDelete.title'),
-      message: t('event.list.confirmDelete', { name: event.name || '' }),
+      message: t('event.list.confirmDelete', { name: eventName || '' }),
       confirmText: t('common.delete'),
       cancelText: t('common.cancel'),
       confirmColor: 'error',
     });
 
     if (confirmed) {
-      deleteEvent(event.id!, {
+      deleteEvent(eventId, {
         onSuccess: () => {
           showSnackbar(
             t('event.messages.deleteSuccess'),

@@ -56,6 +56,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
 
+        // LunarDate
+        CreateMap<backend.Domain.ValueObjects.LunarDate, backend.Application.Events.Queries.LunarDateDto>();
+
         //Relationship
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()

@@ -1,8 +1,6 @@
-import { ref, unref } from 'vue';
-import type { Ref } from 'vue';
+import { ref } from 'vue';
 import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
-import type { MemberFace } from '@/types'; // Assuming this type exists
 
 interface UseMemberFaceDeletionOptions {
   deleteMutation: (id: string) => Promise<any>;
