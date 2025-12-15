@@ -28,7 +28,7 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
 
         // Apply individual specifications
         query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
-        // Removed EventDateRangeSpecification usage as it's no longer valid
+        query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate)); // Add new date range specification
         query = query.WithSpecification(new EventTypeSpecification(request.Type));
         query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
