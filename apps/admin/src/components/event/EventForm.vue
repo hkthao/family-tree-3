@@ -40,23 +40,23 @@
       <v-col cols="12">
         <v-date-input v-model="formData.solarDate" :label="t('event.form.solarDate')" @blur="v$.solarDate.$touch()"
           @input="v$.solarDate.$touch()" :error-messages="v$.solarDate.$errors.map((e: any) => e.$message as string)"
-          :readonly="props.readOnly" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
+          :readonly="props.readOnly" prepend-icon="" format="dd/MM/yyyy"
           data-testid="event-solar-date-input" />
       </v-col>
     </v-row>
 
     <v-row v-if="formData.calendarType === CalendarType.Lunar && formData.lunarDate">
       <v-col cols="12" md="4">
-        <v-text-field v-model.number="formData.lunarDate.day" :label="t('event.form.lunarDay')"
-          @blur="v$.lunarDate.day.$touch()" @input="v$.lunarDate.day.$touch()"
+        <v-select v-model.number="formData.lunarDate.day" :items="lunarDays" :label="t('event.form.lunarDay')"
+          @blur="v$.lunarDate.day.$touch()" @update:modelValue="v$.lunarDate.day.$touch()"
           :error-messages="v$.lunarDate.day.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          type="number" data-testid="event-lunar-day-input"></v-text-field>
+          data-testid="event-lunar-day-input"></v-select>
       </v-col>
       <v-col cols="12" md="4">
-        <v-text-field v-model.number="formData.lunarDate.month" :label="t('event.form.lunarMonth')"
-          @blur="v$.lunarDate.month.$touch()" @input="v$.lunarDate.month.$touch()"
+        <v-select v-model.number="formData.lunarDate.month" :items="lunarMonths" :label="t('event.form.lunarMonth')"
+          @blur="v$.lunarDate.month.$touch()" @update:modelValue="v$.lunarDate.month.$touch()"
           :error-messages="v$.lunarDate.month.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          type="number" data-testid="event-lunar-month-input"></v-text-field>
+          data-testid="event-lunar-month-input"></v-select>
       </v-col>
       <v-col cols="12" md="4" class="d-flex align-center">
         <v-checkbox v-model="formData.lunarDate.isLeapMonth" :label="t('event.form.isLeapMonth')"
@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, toRef } from 'vue';
+import { reactive, toRefs, toRef, computed } from 'vue'; // Import computed
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types'; // Import Event type
 import type { LunarDate } from '@/types/lunar-date'; // Import LunarDate type from its specific file
@@ -163,6 +163,10 @@ const repeatRules = [
   { title: t('event.repeatRule.none'), value: RepeatRule.None },
   { title: t('event.repeatRule.yearly'), value: RepeatRule.Yearly },
 ];
+
+// Computed properties for lunar day and month select options
+const lunarDays = computed(() => Array.from({ length: 30 }, (_, i) => i + 1));
+const lunarMonths = computed(() => Array.from({ length: 12 }, (_, i) => i + 1));
 
 const rules = useEventRules(toRefs(state));
 
