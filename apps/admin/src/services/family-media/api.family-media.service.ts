@@ -27,13 +27,13 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
     return await this.api.get<FamilyMedia>(`/family-media/${id}`);
   }
 
-  async create(familyId: string, file: File, description?: string): Promise<Result<string>> {
+  async create(familyId: string, file: File, description?: string): Promise<Result<FamilyMedia>> {
     const formData = new FormData();
     formData.append('File', file);
     if (description) {
       formData.append('Description', description);
     }
-    return await this.api.post<string>(`/family-media/${familyId}`, formData, {
+    return await this.api.post<FamilyMedia>(`/family-media/${familyId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

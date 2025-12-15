@@ -768,6 +768,8 @@
   "memberFace.messages.partialSaveError": "Some faces could not be saved.",
   "memberFace.messages.saveError": "Error saving member face.",
   "memberFace.messages.saveErrorForFace": "Error saving face {faceId}: {error}",
+  "memberFace.messages.uploadedImageDescription": "Image uploaded from face recognition",
+  "memberFace.messages.uploadThumbnailFailed": "Thumbnail upload failed:",
   "memberFace.messages.updateSuccess": "Member Face updated successfully!",
   "memberFace.validation.boundingBoxRequired": "Bounding Box property is required.",
   "memberFace.validation.confidenceRequired": "Confidence is required.",

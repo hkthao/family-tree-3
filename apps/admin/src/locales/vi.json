@@ -890,6 +890,8 @@
   "memberFace.messages.partialSaveError": "Một số khuôn mặt không thể lưu.",
   "memberFace.messages.saveError": "Lỗi khi lưu khuôn mặt thành viên.",
   "memberFace.messages.saveErrorForFace": "Lỗi khi lưu khuôn mặt {faceId}: {error}",
+  "memberFace.messages.uploadedImageDescription": "Hình ảnh được tải lên từ tính năng nhận diện khuôn mặt",
+  "memberFace.messages.uploadThumbnailFailed": "Tải lên ảnh thu nhỏ thất bại:",
   "memberFace.messages.updateSuccess": "Cập nhật Khuôn mặt Thành viên thành công!",
   "memberFace.search.title": "Tìm kiếm Khuôn mặt",
   "memberFace.validation.boundingBoxRequired": "Thuộc tính hộp giới hạn là bắt buộc.",

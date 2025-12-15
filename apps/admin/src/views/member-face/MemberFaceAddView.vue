@@ -3,7 +3,7 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('memberFace.form.addTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="isDetectingFaces || isAddingMemberFace" indeterminate color="primary"
+    <v-progress-linear v-if="isDetectingFaces || isSaving" indeterminate color="primary"
       class="my-4"></v-progress-linear>
     <v-card-text>
       <FamilyAutocomplete v-model="selectedFamilyId" :label="t('memberFace.form.family')" class="mb-4"
@@ -26,7 +26,7 @@
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces" :loading="isAddingMemberFace">
+      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveAllLabeledFaces" :loading="isSaving">
         {{ t('face.recognition.saveAllLabeledFacesButton') }}
       </v-btn>
     </v-card-actions>
@@ -57,6 +57,7 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 const {
   isDetectingFaces,
   isAddingMemberFace,
+  isSaving, // Add isSaving here
   showSelectMemberDialog,
   faceToLabel,
   selectedFamilyId,

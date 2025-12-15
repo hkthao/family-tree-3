@@ -1,3 +1,4 @@
+import type { FamilyMedia } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
 import { ApiFamilyMediaService } from '@/services/family-media/api.family-media.service';
@@ -13,8 +14,8 @@ const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(api
  */
 export function useAddFamilyMediaMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ familyId, file, description }: { familyId: string; file: File; description?: string }) => {
+  return useMutation<FamilyMedia, Error, { familyId: string; file: File; description?: string }>({
+    mutationFn: async ({ familyId, file, description }) => {
       const response = await apiFamilyMediaService.create(familyId, file, description);
       if (response.ok) {
         return response.value;
