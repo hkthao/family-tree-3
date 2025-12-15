@@ -1,3 +1,4 @@
+using backend.Application.Common.Dtos;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
@@ -23,6 +24,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects;
 
 namespace backend.Application.Common.Mappings;
 
@@ -50,14 +52,22 @@ public class MappingProfile : Profile
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.Member)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null))
+            .ForMember(dest => dest.CalendarType, opt => opt.MapFrom(src => src.CalendarType))
+            .ForMember(dest => dest.SolarDate, opt => opt.MapFrom(src => src.SolarDate))
+            .ForMember(dest => dest.LunarDate, opt => opt.MapFrom(src => src.LunarDate)) // AutoMapper will use the LunarDate mapping
+            .ForMember(dest => dest.RepeatRule, opt => opt.MapFrom(src => src.RepeatRule));
         CreateMap<Event, EventDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.Member)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null))
+            .ForMember(dest => dest.CalendarType, opt => opt.MapFrom(src => src.CalendarType))
+            .ForMember(dest => dest.SolarDate, opt => opt.MapFrom(src => src.SolarDate))
+            .ForMember(dest => dest.LunarDate, opt => opt.MapFrom(src => src.LunarDate))
+            .ForMember(dest => dest.RepeatRule, opt => opt.MapFrom(src => src.RepeatRule));
 
         // LunarDate
-        CreateMap<backend.Domain.ValueObjects.LunarDate, backend.Application.Events.Queries.LunarDateDto>();
+        CreateMap<LunarDate, LunarDateDto>();
 
         //Relationship
         CreateMap<Relationship, RelationshipDto>();

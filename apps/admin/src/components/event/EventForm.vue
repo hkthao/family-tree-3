@@ -53,23 +53,25 @@
       </v-col>
     </v-row>
 
-    <v-row v-if="formData.calendarType === CalendarType.Lunar && formData.lunarDate">
-      <v-col cols="12" md="4">
-        <v-select v-model.number="formData.lunarDate.day" :items="lunarDays" :label="t('event.form.lunarDay')"
-          @blur="v$.lunarDate.day.$touch()" @update:modelValue="v$.lunarDate.day.$touch()"
-          :error-messages="v$.lunarDate.day.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          data-testid="event-lunar-day-input"></v-select>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-select v-model.number="formData.lunarDate.month" :items="lunarMonths" :label="t('event.form.lunarMonth')"
-          @blur="v$.lunarDate.month.$touch()" @update:modelValue="v$.lunarDate.month.$touch()"
-          :error-messages="v$.lunarDate.month.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
-          data-testid="event-lunar-month-input"></v-select>
-      </v-col>
-      <v-col cols="12" md="4" class="d-flex align-center">
-        <v-checkbox v-model="formData.lunarDate.isLeapMonth" :label="t('event.form.isLeapMonth')"
-          :readonly="props.readOnly" data-testid="event-lunar-is-leap-month-input"></v-checkbox>
-      </v-col>
+    <v-row v-if="formData.calendarType === CalendarType.Lunar">
+      <template v-if="formData.lunarDate">
+        <v-col cols="12" md="4">
+          <v-select v-model.number="formData.lunarDate.day" :items="lunarDays" :label="t('event.form.lunarDay')"
+            @blur="v$.lunarDate.day.$touch()" @update:modelValue="v$.lunarDate.day.$touch()"
+            :error-messages="v$.lunarDate.day.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+            data-testid="event-lunar-day-input"></v-select>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-select v-model.number="formData.lunarDate.month" :items="lunarMonths" :label="t('event.form.lunarMonth')"
+            @blur="v$.lunarDate.month.$touch()" @update:modelValue="v$.lunarDate.month.$touch()"
+            :error-messages="v$.lunarDate.month.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+            data-testid="event-lunar-month-input"></v-select>
+        </v-col>
+        <v-col cols="12" md="4" class="d-flex align-center">
+          <v-checkbox v-model="formData.lunarDate.isLeapMonth" :label="t('event.form.isLeapMonth')"
+            :readonly="props.readOnly" data-testid="event-lunar-is-leap-month-input"></v-checkbox>
+        </v-col>
+      </template>
     </v-row>
 
     <v-row>
@@ -123,16 +125,19 @@ const { t } = useI18n();
 
 const formData = reactive<Omit<Event, 'id'> | Event>(
   props.initialEventData
-    ? cloneDeep(props.initialEventData)
+    ? {
+        ...cloneDeep(props.initialEventData),
+        lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
+      }
     : {
         name: '',
-        code: '', // Gán trực tiếp rỗng khi không có initialEventData
+        code: '',
         type: EventType.Other,
         familyId: props.familyId || null,
-        calendarType: CalendarType.Solar, // Default to Solar
+        calendarType: CalendarType.Solar,
         solarDate: null,
-        lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate, // Initialize lunarDate with 1
-        repeatRule: RepeatRule.None, // Default to None
+        lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
+        repeatRule: RepeatRule.None,
         description: '',
         color: '#1976D2',
         relatedMemberIds: [],
@@ -149,9 +154,9 @@ const state = reactive({
   calendarType: toRef(formData, 'calendarType'),
   // lunarDate needs to be an object for Vuelidate with day/month properties
   lunarDate: reactive({
-    day: toRef(formData.lunarDate!, 'day'),
-    month: toRef(formData.lunarDate!, 'month'),
-    isLeapMonth: toRef(formData.lunarDate!, 'isLeapMonth'),
+    day: toRef(formData.lunarDate as LunarDate, 'day'),
+    month: toRef(formData.lunarDate as LunarDate, 'month'),
+    isLeapMonth: toRef(formData.lunarDate as LunarDate, 'isLeapMonth'),
   }),
   repeatRule: toRef(formData, 'repeatRule'),
   relatedMemberIds: toRef(formData, 'relatedMemberIds'),

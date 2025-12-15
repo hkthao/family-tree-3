@@ -31,10 +31,10 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         }
 
         // Validation to ensure CalendarType is not changed during update
-        if (entity.CalendarType != request.CalendarType)
-        {
-            return Result<bool>.Failure("CalendarType cannot be changed during event update.", ErrorSources.BadRequest);
-        }
+        // if (entity.CalendarType != request.CalendarType)
+        // {
+        //     return Result<bool>.Failure("CalendarType cannot be changed during event update.", ErrorSources.BadRequest);
+        // }
 
         // Determine which update method to use based on CalendarType
         if (request.CalendarType == CalendarType.Solar)

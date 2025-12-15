@@ -40,7 +40,6 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'saved']);
 
 const {
-  t,
   eventListSearchQuery,
   filters,
   events,

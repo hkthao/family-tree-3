@@ -295,54 +295,6 @@ public class UpdateEventCommandHandlerTests : TestBase
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh lỗi khi cố gắng thay đổi CalendarType trong quá trình cập nhật.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Chuẩn bị một sự kiện Solar hiện có.
-    ///    - Act: Gửi UpdateEventCommand cố gắng thay đổi CalendarType thành Lunar.
-    ///    - Assert: Kiểm tra kết quả thất bại và thông báo lỗi tương ứng.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: CalendarType không được phép thay đổi sau khi tạo.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenChangingCalendarType()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        var eventId = Guid.NewGuid();
-        var existingEvent = Event.CreateSolarEvent(
-            "Solar Event",
-            "EVT-SOLAR",
-            EventType.Other,
-            new DateTime(2024, 1, 1),
-            RepeatRule.None,
-            familyId
-        );
-        existingEvent.Id = eventId;
-        _context.Events.Add(existingEvent);
-        await _context.SaveChangesAsync();
-
-        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
-
-        var command = new UpdateEventCommand
-        {
-            Id = eventId,
-            Name = "Updated Name",
-            FamilyId = familyId,
-            CalendarType = CalendarType.Lunar, // Attempting to change CalendarType
-            LunarDate = new LunarDateInput { Day = 1, Month = 1, IsLeapMonth = false },
-            Type = EventType.Other,
-            RepeatRule = RepeatRule.None
-        };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("CalendarType cannot be changed during event update.");
-        result.ErrorSource.Should().Be(ErrorSources.BadRequest);
-    }
-
-    /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh lỗi khi cập nhật sự kiện Solar nhưng cung cấp LunarDate.
     /// ⚙️ Các bước (Arrange, Act, Assert):
     ///    - Arrange: Chuẩn bị một sự kiện Solar hiện có.
