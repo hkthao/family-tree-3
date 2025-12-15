@@ -299,6 +299,7 @@
   "event.form.family": "Family",
   "event.form.location": "Location",
   "event.form.name": "Event Name",
+  "event.form.code": "Code",
   "event.form.relatedMembers": "Related Members",
   "event.form.startDate": "Start Date",
   "event.form.title": "Event Form",

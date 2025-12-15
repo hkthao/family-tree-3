@@ -322,6 +322,7 @@
   "event.form.family": "Gia đình/Dòng họ",
   "event.form.location": "Địa điểm",
   "event.form.name": "Tên Sự kiện",
+  "event.form.code": "Mã",
   "event.form.relatedMembers": "Thành viên liên quan",
   "event.form.startDate": "Ngày bắt đầu",
   "event.form.title": "Biểu mẫu Sự kiện",
