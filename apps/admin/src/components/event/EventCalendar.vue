@@ -25,26 +25,38 @@
         </v-tooltip>
       </v-btn>
     </v-toolbar>
-        <div>
-          <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 200px;">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    <div>
+      <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 200px;">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </div>
+      <div v-else-if="!formattedEvents || formattedEvents.length === 0" class="d-flex justify-center align-center"
+        style="min-height: 200px;">
+        <v-alert type="info" dense>{{ t('event.calendar.noEvents') }}</v-alert>
+      </div>
+      <v-calendar v-else class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
+        :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
+        :weekdays="weekdays">
+        <template #day-label="{ date, day }">
+          <div class="d-flex flex-column align-center">
+            <div class="text-solar-day">{{ day }}</div>
+            <div class="text-lunar-day text-grey-darken-1">
+              <!-- Placeholder for Lunar Date -->
+              {{ getLunarDateForSolarDay(new Date(date)) }}
+            </div>
           </div>
-          <div v-else-if="!formattedEvents || formattedEvents.length === 0" class="d-flex justify-center align-center" style="min-height: 200px;">
-            <v-alert type="info" dense>{{ t('event.calendar.noEvents') }}</v-alert>
+        </template>
+        <template #event="{ event }">
+          <div class="px-2">
+            <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
+              {{ event.title }}
+            </div>
+            <div class="v-event-description">
+              {{ event.eventObject.description }}
+            </div>
           </div>
-          <v-calendar v-else class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
-            :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
-            :weekdays="weekdays">
-            <template #event="{ event }">
-              <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
-                {{ event.title }}
-              </div>
-              <div class="v-event-description">
-                {{ event.eventObject.description }}
-              </div>
-            </template>
-          </v-calendar>
-        </div>
+        </template>
+      </v-calendar>
+    </div>
 
     <BaseCrudDrawer v-model="editDrawer" v-if="canEditEvent" @close="handleEventClosed">
       <EventEditView v-if="selectedEventId && editDrawer" :event-id="selectedEventId" @close="handleEventClosed"
@@ -105,5 +117,24 @@ const {
   handleDetailClosed,
   handleDetailEdit,
   loading,
+  getLunarDateForSolarDay,
 } = useEventCalendar(props, emit);
 </script>
+
+<style>
+.text-solar-day {
+  font-size: 20px;
+}
+
+.text-lunar-day{
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  font-size: 0.9em;
+}
+
+.v-calendar.v-calendar-events .v-calendar-weekly__day {
+  padding: 5px;
+  min-height: 100px;
+}
+</style>

@@ -4,17 +4,28 @@ import type { Event, LunarDate } from '@/types'; // Import LunarDate
 import { CalendarType } from '@/types/enums'; // Import CalendarType
 import { useAuth } from '@/composables';
 import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents';
+import { Solar, Lunar } from 'lunar-javascript'; // Import lunar-javascript library
 
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
 
-// Helper function to convert LunarDate to a rough Solar Date for display purposes
-// This is a simplified conversion and might not be perfectly accurate for all lunar dates
+// Helper function to convert LunarDate to a Solar Date using lunar-javascript library.
+// NOTE: The LunarDate interface (src/types/lunar-date.d.ts) does not currently include a 'year' property.
+// For accurate conversion, a year is crucial for lunar-to-solar calculation.
+// As a workaround, the current solar year is used as the lunar year for conversion.
+// This means the conversion is accurate for lunar events in the *current solar year* only.
+// If historical or future lunar events are needed, the LunarDate interface must be updated to include a 'year'.
 const getSolarDateFromLunarDate = (lunarDate: LunarDate): Date => {
-  // This is a very rough estimation. A proper conversion would require a more complex algorithm.
-  // For now, we'll assume a fixed offset or just return a placeholder date for the current year.
-  // In a real app, you'd integrate a proper lunar-to-solar calendar conversion library.
-  const currentYear = new Date().getFullYear();
-  return new Date(currentYear, lunarDate.month - 1, lunarDate.day);
+  try {
+    const currentSolarYear = new Date().getFullYear();
+    const lunar = Lunar.fromYmd(currentSolarYear, lunarDate.month, lunarDate.day, lunarDate.isLeapMonth);
+    const solar = lunar.getSolar();
+    return new Date(solar.year, solar.month - 1, solar.day);
+  } catch (e) {
+    console.error('Error during lunar to solar conversion using lunar-javascript:', e);
+    // Fallback to the old rough estimation if conversion fails
+    const currentYear = new Date().getFullYear();
+    return new Date(currentYear, lunarDate.month - 1, lunarDate.day);
+  }
 };
 
 export function useEventCalendar(props: { familyId?: string; memberId?: string; readOnly?: boolean }, emit: (event: 'refetchEvents', ...args: any[]) => void) {
@@ -172,7 +183,23 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     { immediate: true },
   );
 
-  return {
+  const getLunarDateForSolarDay = (solarDate: Date): string => {
+    if (!(solarDate instanceof Date) || isNaN(solarDate.getTime())) {
+      return 'Ngày không hợp lệ (Âm)';
+    }
+
+    try {
+      const year = solarDate.getFullYear();
+      const month = solarDate.getMonth() + 1; // getMonth() is 0-indexed
+      const day = solarDate.getDate();
+      const solar = Solar.fromYmd(year, month, day); // Corrected usage
+      const lunar = Lunar.fromSolar(solar); // Corrected conversion method
+      return `${lunar.getDay()}/${lunar.getMonth()}`;
+    } catch (e) {
+      console.error('Error during solar to lunar conversion:', e);
+      return 'Lỗi chuyển đổi (Âm)';
+    }
+  }; return {
     t,
     locale,
     canAddEvent,
@@ -201,5 +228,6 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     handleDetailClosed,
     handleDetailEdit,
     loading,
+    getLunarDateForSolarDay,
   };
 }
