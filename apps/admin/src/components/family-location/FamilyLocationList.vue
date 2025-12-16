@@ -11,20 +11,17 @@
     class="elevation-1"
   >
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title>{{ t('familyLocation.list.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          dark
-          class="mb-2"
-          @click="emit('create')"
-          data-testid="create-family-location-button"
-          v-if="!props.readOnly"
-        >
-          {{ t('familyLocation.list.add') }}
-        </v-btn>
-      </v-toolbar>
+      <ListToolbar
+        :title="t('familyLocation.list.title')"
+        :search="props.search"
+        :create-button-tooltip="t('familyLocation.list.add')"
+        :search-placeholder="t('common.search')"
+        create-button-test-id="create-family-location-button"
+        search-input-test-id="family-location-search-input"
+        @update:search="emit('update:search', $event)"
+        @create="emit('create')"
+        v-if="!props.readOnly"
+      />
     </template>
     <template #item.actions="{ item }">
       <div class="d-flex ga-2">
@@ -64,6 +61,7 @@ import { useI18n } from 'vue-i18n';
 import type { FamilyLocation } from '@/types';
 import { LocationAccuracy, LocationSource, LocationType } from '@/types';
 import { computed } from 'vue';
+import ListToolbar from '@/components/common/ListToolbar.vue';
 
 interface FamilyLocationListProps {
   items: FamilyLocation[];
