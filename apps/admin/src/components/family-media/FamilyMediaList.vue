@@ -12,35 +12,16 @@
     fixed-header
   >
     <template #top>
-      <slot name="top">
-        <v-toolbar flat>
-          <v-toolbar-title>{{ t('familyMedia.list.title') }}</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn
-            v-if="canPerformActions"
-            color="primary"
-            icon
-            @click="emit('create')"
-            data-testid="add-new-family-media-button"
-          >
-            <v-tooltip :text="t('familyMedia.list.createButton')">
-              <template v-slot:activator="{ props }">
-                <v-icon v-bind="props">mdi-plus</v-icon>
-              </template>
-            </v-tooltip>
-          </v-btn>
-          <v-text-field
-            v-model="debouncedSearch"
-            :label="t('common.search')"
-            append-inner-icon="mdi-magnify"
-            single-line
-            hide-details
-            clearable
-            class="mr-2"
-            data-test-id="family-media-list-search-input"
-          ></v-text-field>
-        </v-toolbar>
-      </slot>
+      <ListToolbar
+        :title="t('familyMedia.list.title')"
+        :create-button-tooltip="t('familyMedia.list.createButton')"
+        create-button-test-id="add-new-family-media-button"
+        :hide-create-button="!allowAdd"
+        :search-query="searchQuery"
+        :search-label="t('common.search')"
+        @update:search="searchQuery = $event"
+        @create="emit('create')"
+      />
     </template>
       <template v-slot:item.thumbnailPath="{ item }">
         <v-img v-if="item.thumbnailPath" :src="item.thumbnailPath" max-height="50" max-width="50" class="my-2"></v-img>
@@ -59,7 +40,7 @@
         {{ formatDate(item.created) }}
       </template>
       <template #item.actions="{ item }">
-      <div v-if="canPerformActions">
+      <div v-if="allowDelete">
         <v-icon
           small
           @click="emit('delete', item.id)"
@@ -82,46 +63,39 @@ import type { DataTableHeader } from 'vuetify';
 import { MediaType } from '@/types/enums';
 import { formatDate, formatBytes } from '@/utils/format.utils';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { useAuth } from '@/composables';
 
 interface FamilyMediaListProps {
   items: FamilyMedia[];
   totalItems: number;
   loading: boolean;
   search?: string;
-  readOnly?: boolean;
+  allowAdd?: boolean;
+  allowEdit?: boolean;
+  allowDelete?: boolean;
 }
 
 const props = defineProps<FamilyMediaListProps>();
 const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search']);
 const { t } = useI18n();
-const { isAdmin } = useAuth();
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
-const canPerformActions = computed(() => {
-  return !props.readOnly && isAdmin.value;
-});
+const searchQuery = ref(props.search || '');
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-const searchQuery = ref(props.search);
-let debounceTimer: ReturnType<typeof setTimeout>;
-
-const debouncedSearch = computed({
-  get() {
-    return searchQuery.value;
-  },
-  set(newValue: string) {
-    searchQuery.value = newValue;
+watch(searchQuery, (newValue) => {
+  if (debounceTimer) {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      emit('update:search', newValue);
-    }, 300);
-  },
+  }
+  debounceTimer = setTimeout(() => {
+    emit('update:search', newValue);
+    debounceTimer = null; // Clear the timer ID after execution
+  }, 300);
 });
 
 watch(() => props.search, (newSearch) => {
   if (newSearch !== searchQuery.value) {
-    searchQuery.value = newSearch;
+    searchQuery.value = newSearch ?? '';
   }
 });
 
@@ -134,7 +108,7 @@ const headers = computed<DataTableHeader[]>(() => {
     { title: t('familyMedia.list.headers.created'), key: 'created', width: '150px' },
   ];
 
-  if (canPerformActions.value) {
+  if (props.allowAdd || props.allowEdit || props.allowDelete) {
     baseHeaders.push({
       title: t('familyMedia.list.headers.actions'),
       key: 'actions',

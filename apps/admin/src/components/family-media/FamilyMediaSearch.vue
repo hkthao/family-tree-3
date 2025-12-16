@@ -65,10 +65,16 @@ const filters = ref<FamilyMediaFilter>({
 const mediaTypes = computed(() => {
   return Object.keys(MediaType)
     .filter(key => isNaN(Number(key))) // Filter out numeric keys from enum
-    .map(key => ({
-      title: t(`common.mediaType.${key}`),
-      value: MediaType[key as keyof typeof MediaType],
-    }));
+    .map(key => {
+      // Ensure consistent handling of "All" for media types
+      if (key === 'None') { // Assuming 'None' is a valid option to display all
+        return { title: t('common.allMediaTypes'), value: undefined };
+      }
+      return {
+        title: t(`common.mediaType.${key}`),
+        value: MediaType[key as keyof typeof MediaType],
+      };
+    });
 });
 
 watch(

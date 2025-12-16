@@ -4,12 +4,13 @@
     <FamilyLocationList :items="familyLocations" :total-items="totalItems"
       :loading="isLoadingFamilyLocations || isDeletingFamilyLocation" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      :family-id="props.familyId"> </FamilyLocationList>
+      :family-id="props.familyId" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete">
+    </FamilyLocationList>
 
     <!-- Add Family Location Drawer -->
-    <BaseCrudDrawer v-model="addDrawer" @close="handleClosed">
+    <BaseCrudDrawer v-if="allowAdd" v-model="addDrawer" @close="handleClosed">
       <FamilyLocationAddView ref="familyLocationAddViewRef" v-if="addDrawer" :family-id="props.familyId"
-        @close="handleClosed" @saved="handleAdded" />
+        @close="handleClosed" @saved="handleAdded" :allow-save="allowAdd" />
     </BaseCrudDrawer>
 
     <!-- Detail Family Location Drawer -->
@@ -19,7 +20,7 @@
     </BaseCrudDrawer>
 
     <!-- Edit Family Location Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" @close="handleClosed">
+    <BaseCrudDrawer v-if="allowEdit" v-model="editDrawer" @close="handleClosed">
       <FamilyLocationEditView ref="familyLocationEditViewRef" v-if="selectedItemId && editDrawer"
         :family-location-id="selectedItemId" @close="handleClosed" @saved="handleEdited" />
     </BaseCrudDrawer>
@@ -28,7 +29,7 @@
 
 <script setup lang="ts">
 import type { FamilyLocation } from '@/types';
-import { ref, watch, toRef } from 'vue';
+import { ref, watch, toRef, computed } from 'vue';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import FamilyLocationSearch from '@/components/family-location/FamilyLocationSearch.vue';
 import FamilyLocationList from '@/components/family-location/FamilyLocationList.vue';
@@ -38,6 +39,7 @@ import {
   useFamilyLocationDataManagement,
   type FamilyLocationSearchCriteria,
 } from '@/composables/family-location';
+import { useAuth } from '@/composables'; // Import useAuth
 import { useI18n } from 'vue-i18n';
 
 // Import drawer related components
@@ -54,6 +56,12 @@ interface FamilyLocationListViewProps {
 const props = defineProps<FamilyLocationListViewProps>();
 const emit = defineEmits(['viewFamilyLocation', 'editFamilyLocation', 'createFamilyLocation', 'familyLocationDeleted']);
 const { t } = useI18n();
+
+const { isAdmin, isFamilyManager } = useAuth();
+
+const allowAdd = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowEdit = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowDelete = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
 
 const {
   filters,

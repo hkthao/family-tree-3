@@ -3,51 +3,37 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('familyLocation.form.editTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="isLoadingFamilyLocation || isUpdatingFamilyLocation" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="isLoadingFamilyLocation || isUpdatingFamilyLocation" indeterminate
+      color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLocationForm
-        ref="familyLocationFormRef"
-        v-if="familyLocation"
-        :initial-family-location-data="familyLocation"
-        :family-id="familyLocation.familyId"
-      />
+      <FamilyLocationForm ref="familyLocationFormRef" v-if="familyLocation"
+        :initial-family-location-data="familyLocation" :family-id="familyLocation.familyId" />
       <v-alert v-else-if="familyLocationError" type="error" class="mt-4">{{
         familyLocationError.message || t('familyLocation.messages.notFound')
-      }}</v-alert>
+        }}</v-alert>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn
-        color="info"
-        data-testid="button-select-from-map"
-        @click="handleOpenMapPicker"
-        :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation"
-      >
+      <v-btn color="info" data-testid="button-select-from-map" @click="handleOpenMapPicker"
+        :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">
         {{ t('familyLocation.form.chooseFromMap') }}
       </v-btn>
       <v-btn color="grey" @click="closeForm" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
         t('common.cancel')
-      }}</v-btn>
-      <v-btn
-        color="primary"
-        @click="handleUpdateFamilyLocation"
-        data-testid="save-family-location-button"
-        :loading="isUpdatingFamilyLocation"
-        :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation"
-        >{{ t('common.save') }}</v-btn
-      >
+        }}</v-btn>
+      <v-btn color="primary" @click="handleUpdateFamilyLocation" data-testid="save-family-location-button"
+        :loading="isUpdatingFamilyLocation" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
+          t('common.save') }}</v-btn>
     </v-card-actions>
+    <!-- Map Picker Drawer -->
+    <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
+      <MapView v-if="mapDrawer"
+        :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
+        @confirm-selection="handleMapCoordinatesSelected" @close="closeMapDrawer" />
+    </BaseCrudDrawer>
   </v-card>
 
-  <!-- Map Picker Drawer -->
-  <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
-    <MapView
-      v-if="mapDrawer"
-      :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
-      @confirm-selection="handleMapCoordinatesSelected"
-      @close="closeMapDrawer"
-    />
-  </BaseCrudDrawer>
+
 </template>
 
 <script setup lang="ts">
@@ -137,3 +123,10 @@ const handleMapCoordinatesSelected = (payload: { coordinates: { latitude: number
 
 
 </script>
+<style>
+.map-drawer {
+  top: 0px !important;
+  bottom: 0px !important;
+  height: auto !important;
+}
+</style>

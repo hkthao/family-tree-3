@@ -8,6 +8,7 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
   const itemsPerPage = ref(defaultItemsPerPage);
   const sortBy = ref<ListOptions['sortBy']>([]);
   const filters = ref<FamilyMediaFilter>({
+    searchQuery: undefined,
     mediaType: undefined,
   });
 

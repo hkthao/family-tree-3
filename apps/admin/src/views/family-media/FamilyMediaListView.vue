@@ -2,8 +2,9 @@
   <div data-testid="family-media-list-view">
     <FamilyMediaSearch @update:filters="handleFilterUpdate" />
     <FamilyMediaList :items="familyMediaList" :total-items="totalItems" :loading="isLoading || isDeleting"
-      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @delete="confirmDelete"
-      @create="openAddDrawer()" />
+      :search="filters.searchQuery"
+      @update:options="handleListOptionsUpdate" @update:search="handleSearchUpdate" @view="openDetailDrawer"
+      @delete="confirmDelete" @create="openAddDrawer()" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete" />
 
     <!-- Add/Edit/Detail Drawers (similar to MemberListView) -->
     <!-- Detail Family Media Drawer -->
@@ -12,10 +13,8 @@
         :family-media-id="selectedItemId" @close="handleDetailClosed" />
     </BaseCrudDrawer>
 
-
-
     <!-- Add Family Media Drawer -->
-    <BaseCrudDrawer v-model="addDrawer" @close="handleMediaClosed">
+    <BaseCrudDrawer v-if="allowAdd" v-model="addDrawer" @close="handleMediaClosed">
       <FamilyMediaAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMediaClosed"
         @saved="handleMediaSaved" />
     </BaseCrudDrawer>
@@ -23,10 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, toRef } from 'vue';
+import { nextTick, toRef, computed } from 'vue';
 import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables/family-media';
+import { useAuth } from '@/composables'; // Import useAuth
 // Components
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';
 import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
@@ -38,6 +38,11 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 const props = defineProps<{
   familyId: string;
 }>();
+
+const { isAdmin, isFamilyManager } = useAuth();
+const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(props.familyId));
+const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(props.familyId)); // Edit currently not implemented for media, but for future proofing
+const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(props.familyId));
 
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaListFiltersComposable = useFamilyMediaListFilters(familyIdRef);
@@ -65,6 +70,10 @@ const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
   } = useCrudDrawer<string>();
 const handleFilterUpdate = (newFilters: FamilyMediaFilter) => {
   setFilters(newFilters);
+};
+
+const handleSearchUpdate = (newSearchQuery: string) => {
+  setFilters({ ...filters.value, searchQuery: newSearchQuery });
 };
 
 const handleListOptionsUpdate = async (options: ListOptions) => {

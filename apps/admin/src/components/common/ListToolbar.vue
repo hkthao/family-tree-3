@@ -4,6 +4,7 @@
     <v-spacer></v-spacer>
 
     <v-btn
+      v-if="!hideCreateButton"
       color="primary"
       icon
       @click="emit('create')"
@@ -17,19 +18,36 @@
       </v-tooltip>
     </v-btn>
 
+    <v-text-field
+      v-if="!hideSearch"
+      :model-value="searchQuery"
+      @update:model-value="emit('update:search', $event)"
+      :label="searchLabel"
+      :placeholder="$t('common.search')"
+      append-inner-icon="mdi-magnify"
+      single-line
+      hide-details
+      clearable
+      class="mr-2"
+      data-test-id="list-toolbar-search-input"
+    ></v-text-field>
   </v-toolbar>
 </template>
 
 <script setup lang="ts">
 
 
-const { title, createButtonTooltip, createButtonTestId } = defineProps<{
+const { title, createButtonTooltip, createButtonTestId, hideCreateButton, searchQuery, searchLabel, hideSearch } = defineProps<{
   title: string;
   createButtonTooltip: string;
   createButtonTestId: string;
+  hideCreateButton?: boolean;
+  searchQuery?: string;
+  searchLabel?: string;
+  hideSearch?: boolean;
 }>();
 
-const emit = defineEmits(['create']);
+const emit = defineEmits(['create', 'update:search']);
 </script>
 
 <style scoped></style>

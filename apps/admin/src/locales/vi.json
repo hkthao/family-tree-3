@@ -711,6 +711,7 @@
   "familyMedia.messages.updateSuccess": "Cập nhật media thành công!",
   "familyMedia.messages.uploadSuccess": "Tải lên media thành công!",
   "familyMedia.search.apply": "Áp dụng Bộ lọc",
+
   "familyMedia.search.mediaTypeLabel": "Lọc theo Loại Media",
   "familyMedia.search.searchQueryLabel": "Tìm kiếm theo Tên tệp hoặc Mô tả",
   "familyMedia.search.title": "Tìm kiếm nâng cao",
@@ -719,6 +720,7 @@
   "familyMedia.viewer.unsupportedMediaType": "Loại media không được hỗ trợ.",
   "familyMedia.viewer.videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
   "familyMedia.viewer.viewDocument": "Xem tài liệu",
+  "common.allMediaTypes": "Tất cả loại media",
   "familyTree.addChild": "Thêm con",
   "familyTree.addFather": "Thêm cha",
   "familyTree.addMember": "Thêm thành viên",

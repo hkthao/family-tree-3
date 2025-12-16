@@ -7,7 +7,8 @@
         :create-button-tooltip="t('familyLocation.list.add')"
         create-button-test-id="create-family-location-button"
         @create="emit('create')"
-        :hide-create-button="!props.allowAdd" />
+        :hide-create-button="!props.allowAdd"
+        :hide-search="true" />
     </template>
     <template #item.name="{ item }">
       <span class="text-primary cursor-pointer text-decoration-underline" @click="emit('view', item.id)">

@@ -9,29 +9,26 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn
-        color="info"
-        data-testid="button-select-from-map"
-        @click="handleOpenMapPicker"
-        :disabled="isAddingFamilyLocation"
-      >
+      <v-btn color="info" data-testid="button-select-from-map" @click="handleOpenMapPicker"
+        :disabled="isAddingFamilyLocation">
         {{ t('familyLocation.form.chooseFromMap') }}
       </v-btn>
-      <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isAddingFamilyLocation">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleAddFamilyLocation" data-testid="save-family-location-button" :loading="isAddingFamilyLocation" :disabled="isAddingFamilyLocation">{{
-        t('common.save') }}</v-btn>
+      <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isAddingFamilyLocation">{{
+        t('common.cancel') }}</v-btn>
+      <v-btn color="primary" @click="handleAddFamilyLocation" data-testid="save-family-location-button"
+        :loading="isAddingFamilyLocation" :disabled="isAddingFamilyLocation">{{
+          t('common.save') }}</v-btn>
     </v-card-actions>
+
+    <!-- Map Picker Drawer -->
+    <BaseCrudDrawer class="map-drawer" v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'"
+      @close="closeMapDrawer">
+      <MapView v-if="mapDrawer"
+        :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
+        @confirm-selection="handleMapCoordinatesSelected" @close="closeMapDrawer" />
+    </BaseCrudDrawer>
   </v-card>
 
-  <!-- Map Picker Drawer -->
-  <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
-    <MapView
-      v-if="mapDrawer"
-      :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
-      @confirm-selection="handleMapCoordinatesSelected"
-      @close="closeMapDrawer"
-    />
-  </BaseCrudDrawer>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -107,3 +104,10 @@ const handleMapCoordinatesSelected = (payload: { coordinates: { latitude: number
 
 
 </script>
+<style>
+.map-drawer {
+  top: 0px !important;
+  bottom: 0px !important;
+  height: auto !important;
+}
+</style>

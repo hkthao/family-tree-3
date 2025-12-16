@@ -110,18 +110,7 @@ import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
-import { useAuth } from '@/composables';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-
-const { isAdmin, isFamilyManager } = useAuth();
-
-const canCreateGlobal = computed(() => {
-  return !props.readOnly && isAdmin.value;
-});
-
-const canPerformItemActions = (item: Member) => {
-  return !props.readOnly && (isAdmin.value || isFamilyManager.value(item.familyId));
-};
 
 const props = defineProps<{
   items: Member[];

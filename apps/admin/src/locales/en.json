@@ -629,6 +629,7 @@
   "familyMedia.viewer.unsupportedMediaType": "Unsupported media type.",
   "familyMedia.viewer.videoNotSupported": "Your browser does not support the video tag.",
   "familyMedia.viewer.viewDocument": "View Document",
+  "common.allMediaTypes": "All Media Types",
   "familyTree.birthYear": "Birth Year",
   "familyTree.deathYear": "Death Year",
   "familyTree.errors.familyIdMissing": "Family ID is missing from the URL.",
