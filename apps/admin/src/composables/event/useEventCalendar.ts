@@ -211,7 +211,6 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
   }, { immediate: true });
 
   const getLunarDateForSolarDay = (solarDate: Date): string => {
-    console.log('getLunarDateForSolarDay input:', solarDate);
     if (!(solarDate instanceof Date) || isNaN(solarDate.getTime())) {
       console.error('Invalid solarDate input to getLunarDateForSolarDay:', solarDate);
       return 'Ngày không hợp lệ (Âm)';
