@@ -54,7 +54,7 @@ import { toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStoryQuery } from '@/composables/memberStory';
 import { useGlobalSnackbar } from '@/composables';
-import type { MemberStoryDto } from '@/types/memberStory';
+
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import MemberStoryForm from '@/components/member-story/MemberStoryForm.vue'; // Import MemberStoryForm
 

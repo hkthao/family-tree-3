@@ -204,10 +204,10 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     editDrawer.value = true;
   };
 
-  watch(events, (newValue) => {
+  watch(events, (_newValue) => {
   }, { immediate: true });
 
-  watch(formattedEvents, (newValue) => {
+  watch(formattedEvents, (_newValue) => {
   }, { immediate: true });
 
   const getLunarDateForSolarDay = (solarDate: Date): string => {

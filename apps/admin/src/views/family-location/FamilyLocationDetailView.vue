@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRef } from 'vue';
+import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';

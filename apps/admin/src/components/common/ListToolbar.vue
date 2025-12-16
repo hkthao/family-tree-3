@@ -16,51 +16,20 @@
         </template>
       </v-tooltip>
     </v-btn>
-    <v-text-field
-      v-model="internalSearch"
-      :label="searchPlaceholder"
-      :data-test-id="searchInputTestId"
-      append-inner-icon="mdi-magnify"
-      single-line
-      hide-details
-      clearable
-      class="mr-2"
-    ></v-text-field>
+
   </v-toolbar>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 
-const props = defineProps<{
-  search: string;
+
+const { title, createButtonTooltip, createButtonTestId } = defineProps<{
   title: string;
   createButtonTooltip: string;
-  searchPlaceholder: string;
   createButtonTestId: string;
-  searchInputTestId: string;
 }>();
 
-const emit = defineEmits(['update:search', 'create']);
-
-
-const internalSearch = ref(props.search);
-
-watch(
-  () => internalSearch.value,
-  (newValue) => {
-    emit('update:search', newValue ?? '');
-  },
-);
-
-watch(
-  () => props.search,
-  (newSearch) => {
-    if (newSearch !== internalSearch.value) {
-      internalSearch.value = newSearch;
-    }
-  },
-);
+const emit = defineEmits(['create']);
 </script>
 
 <style scoped></style>

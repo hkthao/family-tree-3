@@ -1,11 +1,10 @@
 <template>
   <div data-testid="family-location-list-view">
-    <FamilyLocationSearch @update:search="handleSearchUpdate" />
+    <FamilyLocationSearch @update:filters="handleFilterUpdate" />
     <FamilyLocationList
       :items="familyLocations"
       :total-items="totalItems"
       :loading="isLoadingFamilyLocations || isDeletingFamilyLocation"
-      :search="searchQuery"
       @update:options="handleListOptionsUpdate"
       @view="$emit('viewFamilyLocation', $event)"
       @edit="$emit('editFamilyLocation', $event)"
@@ -19,9 +18,7 @@
 
 <script setup lang="ts">
 import type { FamilyLocation } from '@/types';
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useQueryClient } from '@tanstack/vue-query';
+import { ref, watch, toRef } from 'vue';
 import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import FamilyLocationSearch from '@/components/family-location/FamilyLocationSearch.vue';
 import FamilyLocationList from '@/components/family-location/FamilyLocationList.vue';
@@ -29,7 +26,10 @@ import {
   useFamilyLocationsQuery,
   useDeleteFamilyLocationMutation,
   useFamilyLocationDataManagement,
+  type FamilyLocationSearchCriteria, // Import the new interface from the composables
 } from '@/composables/family-location';
+import { useI18n } from 'vue-i18n';
+// Removed redundant type import
 
 interface FamilyLocationListViewProps {
   familyId: string;
@@ -39,18 +39,15 @@ interface FamilyLocationListViewProps {
 const props = defineProps<FamilyLocationListViewProps>();
 const emit = defineEmits(['viewFamilyLocation', 'editFamilyLocation', 'createFamilyLocation', 'familyLocationDeleted']);
 const { t } = useI18n();
-const queryClient = useQueryClient();
 
 const {
-  searchQuery,
-  paginationOptions,
   filters,
-  setSearchQuery,
+  paginationOptions,
   setFilters,
   setPage,
   setItemsPerPage,
   setSortBy,
-} = useFamilyLocationDataManagement(props.familyId);
+} = useFamilyLocationDataManagement(toRef(props, 'familyId'));
 
 const { data: familyLocationsData, isLoading: isLoadingFamilyLocations, refetch } = useFamilyLocationsQuery(paginationOptions, filters);
 const familyLocations = ref(familyLocationsData.value?.items || []);
@@ -71,8 +68,12 @@ const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = us
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-const handleSearchUpdate = (search: string) => {
-  setSearchQuery(search);
+const handleFilterUpdate = (criteria: FamilyLocationSearchCriteria) => {
+  setFilters({
+    ...filters, // Keep existing filters
+    locationType: criteria.locationType,
+    locationSource: criteria.locationSource,
+  });
 };
 
 const handleListOptionsUpdate = (options: {

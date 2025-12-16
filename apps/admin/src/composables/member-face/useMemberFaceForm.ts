@@ -1,5 +1,4 @@
 import { reactive, watch, toRefs } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import type { MemberFace } from '@/types';
 import { useMemberFaceFormRules } from '@/validations/memberFace.validation';
@@ -11,7 +10,7 @@ interface UseMemberFaceFormOptions {
 
 export function useMemberFaceForm(options: UseMemberFaceFormOptions) {
   const { initialMemberFaceData, memberId } = options;
-  const { t } = useI18n();
+
 
   const defaultFormData = (): MemberFace => ({
     id: '',

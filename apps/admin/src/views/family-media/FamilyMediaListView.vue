@@ -2,7 +2,7 @@
   <div data-testid="family-media-list-view">
     <FamilyMediaSearch @update:filters="handleFilterUpdate" />
     <FamilyMediaList :items="familyMediaList" :total-items="totalItems" :loading="isLoading || isDeleting"
-      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
+      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @delete="confirmDelete"
       @create="openAddDrawer()" />
 
     <!-- Add/Edit/Detail Drawers (similar to MemberListView) -->
@@ -12,11 +12,7 @@
         :family-media-id="selectedItemId" @close="handleDetailClosed" />
     </BaseCrudDrawer>
 
-    <!-- Edit Family Media Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" @close="handleMediaClosed">
-      <FamilyMediaEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId"
-        :family-media-id="selectedItemId" @close="handleMediaClosed" @saved="handleMediaSaved" />
-    </BaseCrudDrawer>
+
 
     <!-- Add Family Media Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMediaClosed">
@@ -28,7 +24,6 @@
 
 <script setup lang="ts">
 import { nextTick, toRef } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables/family-media';
@@ -36,7 +31,7 @@ import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaLi
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';
 import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
 import FamilyMediaAddView from '@/views/family-media/FamilyMediaAddView.vue';
-import FamilyMediaEditView from '@/views/family-media/FamilyMediaEditView.vue';
+
 import FamilyMediaDetailView from '@/views/family-media/FamilyMediaDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 
@@ -44,7 +39,6 @@ const props = defineProps<{
   familyId: string;
 }>();
 
-const { t } = useI18n();
 const familyIdRef = toRef(props, 'familyId');
 
 const familyMediaListFiltersComposable = useFamilyMediaListFilters();
@@ -63,17 +57,14 @@ const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
   refetchList: refetch,
 });
 
-const {
-  addDrawer,
-  editDrawer,
-  detailDrawer,
-  selectedItemId,
-  openAddDrawer,
-  openEditDrawer,
-  openDetailDrawer,
-  closeAllDrawers,
-} = useCrudDrawer<string>();
-
+  const {
+    addDrawer,
+    detailDrawer,
+    selectedItemId,
+    openAddDrawer,
+    openDetailDrawer,
+    closeAllDrawers,
+  } = useCrudDrawer<string>();
 const handleFilterUpdate = (newFilters: FamilyMediaFilter) => {
   setFilters(newFilters);
 };

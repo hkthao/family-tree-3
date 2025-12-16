@@ -1,27 +1,12 @@
 <template>
-  <v-data-table-server
-    :headers="headers"
-    :items="props.items"
-    :items-length="props.totalItems"
-    :loading="props.loading"
-    :search="props.search"
-    item-value="id"
-    @update:options="props.readOnly ? null : emit('update:options', $event)"
-    data-testid="family-location-list"
-    class="elevation-1"
-  >
+  <v-data-table-server :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading"
+    item-value="id" @update:options="props.readOnly ? null : emit('update:options', $event)"
+    data-testid="family-location-list" class="elevation-1">
     <template #top>
-      <ListToolbar
-        :title="t('familyLocation.list.title')"
-        :search="props.search"
+      <ListToolbar :title="t('familyLocation.list.title')"
         :create-button-tooltip="t('familyLocation.list.add')"
-        :search-placeholder="t('common.search')"
         create-button-test-id="create-family-location-button"
-        search-input-test-id="family-location-search-input"
-        @update:search="emit('update:search', $event)"
-        @create="emit('create')"
-        v-if="!props.readOnly"
-      />
+        @create="emit('create')" />
     </template>
     <template #item.actions="{ item }">
       <div class="d-flex ga-2">
@@ -29,25 +14,11 @@
           <v-icon>mdi-eye</v-icon>
           <v-tooltip activator="parent" location="top">{{ t('common.view') }}</v-tooltip>
         </v-btn>
-        <v-btn
-          icon
-          size="small"
-          variant="tonal"
-          color="primary"
-          @click="emit('edit', item.id)"
-          v-if="!props.readOnly"
-        >
+        <v-btn icon size="small" variant="tonal" color="primary" @click="emit('edit', item.id)" v-if="!props.readOnly">
           <v-icon>mdi-pencil</v-icon>
           <v-tooltip activator="parent" location="top">{{ t('common.edit') }}</v-tooltip>
         </v-btn>
-        <v-btn
-          icon
-          size="small"
-          variant="tonal"
-          color="error"
-          @click="emit('delete', item.id)"
-          v-if="!props.readOnly"
-        >
+        <v-btn icon size="small" variant="tonal" color="error" @click="emit('delete', item.id)" v-if="!props.readOnly">
           <v-icon>mdi-delete</v-icon>
           <v-tooltip activator="parent" location="top">{{ t('common.delete') }}</v-tooltip>
         </v-btn>
@@ -67,7 +38,6 @@ interface FamilyLocationListProps {
   items: FamilyLocation[];
   totalItems: number;
   loading: boolean;
-  search: string;
   readOnly?: boolean;
 }
 

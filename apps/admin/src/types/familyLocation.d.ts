@@ -36,5 +36,6 @@ export interface FamilyLocationList extends PaginatedList<FamilyLocation> {}
 
 export interface FamilyLocationFilter extends PaginationFilter {
   familyId?: string;
-  searchQuery?: string;
+  locationType?: LocationType;
+  locationSource?: LocationSource;
 }

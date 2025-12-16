@@ -2,9 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
 import { ref, type Ref, nextTick } from 'vue';
 import { useFaceSearch } from '@/composables/face/useFaceSearch';
-import { useI18n } from 'vue-i18n';
-import { useGlobalSnackbar } from '@/composables';
-import { useDetectFacesMutation } from '@/composables/member-face';
 import type { DetectedFace } from '@/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/vue-query';
 

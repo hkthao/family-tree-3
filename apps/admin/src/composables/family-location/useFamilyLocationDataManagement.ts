@@ -1,16 +1,17 @@
-import { ref, reactive, watch, unref } from 'vue';
+import { reactive, watch, unref } from 'vue';
 import type { Ref } from 'vue';
-import type { FamilyLocationFilter, ListOptions } from '@/types'; // Import ListOptions
-import { removeDiacritics } from '@/utils/string.utils';
-import { useDebounceFn } from '@vueuse/core';
+import type { FamilyLocationFilter, ListOptions, LocationType, LocationSource } from '@/types';
+
+export interface FamilyLocationSearchCriteria {
+  locationType?: LocationType;
+  locationSource?: LocationSource;
+}
 
 export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined> | string) => {
-  const searchQuery = ref('');
   const filters = reactive<FamilyLocationFilter>({
     familyId: unref(familyId),
-    searchQuery: '',
   });
-  const paginationOptions = reactive<ListOptions>({ // Changed type to ListOptions
+  const paginationOptions = reactive<ListOptions>({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
@@ -24,16 +25,6 @@ export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined
     },
     { immediate: true },
   );
-
-  const debouncedSetSearchQuery = useDebounceFn((value: string) => {
-    filters.searchQuery = value;
-    paginationOptions.page = 1; // Reset to first page on new search
-  }, 300);
-
-  const setSearchQuery = (query: string) => {
-    searchQuery.value = query;
-    debouncedSetSearchQuery(removeDiacritics(query));
-  };
 
   const setFilters = (newFilters: FamilyLocationFilter) => {
     Object.assign(filters, newFilters);
@@ -53,10 +44,8 @@ export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined
   };
 
   return {
-    searchQuery,
     filters,
     paginationOptions,
-    setSearchQuery,
     setFilters,
     setPage,
     setItemsPerPage,

@@ -35,8 +35,8 @@ const promptFormRef = ref<InstanceType<typeof PromptForm> | null>(null);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 
-const { data: prompt, isLoading: isQueryLoading, isError: isQueryError, error: queryError } = usePromptQuery(toRef(props, 'promptId'));
-const { mutate: updatePrompt, isPending: isUpdatingPrompt, error: mutationError } = useUpdatePromptMutation();
+const { data: prompt, isLoading: isQueryLoading } = usePromptQuery(toRef(props, 'promptId'));
+const { mutate: updatePrompt, isPending: isUpdatingPrompt } = useUpdatePromptMutation();
 
 
 

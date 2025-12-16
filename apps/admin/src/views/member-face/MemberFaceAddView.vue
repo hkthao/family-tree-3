@@ -56,7 +56,6 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 
 const {
   isDetectingFaces,
-  isAddingMemberFace,
   isSaving, // Add isSaving here
   showSelectMemberDialog,
   faceToLabel,

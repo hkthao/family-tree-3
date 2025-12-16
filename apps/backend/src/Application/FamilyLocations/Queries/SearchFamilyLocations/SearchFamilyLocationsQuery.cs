@@ -8,12 +8,16 @@ using backend.Application.FamilyLocations.Specifications;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
+using backend.Domain.Enums;
+
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 
 public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyLocationListDto>>>
 {
     public Guid? FamilyId { get; init; }
     public string? SearchQuery { get; init; }
+    public LocationType? LocationType { get; init; }
+    public LocationSource? Source { get; init; }
 }
 
 public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationListDto>>>
@@ -29,6 +33,8 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
 
         query = query.WithSpecification(new FamilyLocationByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new FamilyLocationSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new FamilyLocationByLocationTypeSpecification(request.LocationType));
+        query = query.WithSpecification(new FamilyLocationBySourceSpecification(request.Source));
         query = query.WithSpecification(new FamilyLocationOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedList = await query

@@ -15,8 +15,8 @@ const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(api
 export function useAddFamilyMediaMutation() {
   const queryClient = useQueryClient();
   return useMutation<FamilyMedia, Error, { familyId: string; file: File; description?: string }>({
-    mutationFn: async ({ familyId, file, description }) => {
-      const response = await apiFamilyMediaService.create(familyId, file, description);
+    mutationFn: async (input: { familyId: string; file: File; description?: string }) => {
+      const response = await apiFamilyMediaService.create(input.familyId, input.file, input.description);
       if (response.ok) {
         return response.value;
       }
@@ -29,31 +29,7 @@ export function useAddFamilyMediaMutation() {
   });
 }
 
-/**
- * Composible để cập nhật Family Media.
- * TODO: Implement backend API for updating family media metadata.
- * @returns useMutation hook cho việc cập nhật media.
- */
-export function useUpdateFamilyMediaMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ familyId, mediaId, description }: { familyId: string; mediaId: string; description?: string }) => {
-      // TODO: Implement the actual API call to update family media metadata
-      // The current ApiFamilyMediaService does not have a dedicated 'update' method for metadata.
-      // This is a placeholder and assumes an update endpoint exists or will be created.
-      console.warn('useUpdateFamilyMediaMutation: Actual API call for update is not implemented yet.');
-      console.log(`Simulating update for media ${mediaId} in family ${familyId} with description: ${description}`);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return 'Simulated update success'; // Return a successful value
-    },
-    onSuccess: () => {
-      // Invalidate relevant queries to refetch data after updating
-      queryClient.invalidateQueries({ queryKey: queryKeys.familyMedia.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.familyMedia.all });
-    },
-  });
-}
+
 
 /**
  * Composible để xóa Family Media.
@@ -62,7 +38,7 @@ export function useUpdateFamilyMediaMutation() {
 export function useDeleteFamilyMediaMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ familyId, id }: { familyId: string; id: string }) => {
+    mutationFn: async ({ id }: { familyId: string; id: string }) => {
       const response = await apiFamilyMediaService.delete(id);
       if (response.ok) {
         return response.value;

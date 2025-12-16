@@ -20,7 +20,6 @@
 </template>
 <script setup lang="ts">
 import { onMounted, watch, toRefs, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useCrudDrawer } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace, MemberFaceFilter, ListOptions, FilterOptions } from '@/types';
@@ -36,8 +35,6 @@ interface MemberFaceListViewProps {
   familyId?: string;
 }
 const props = defineProps<MemberFaceListViewProps>();
-const { t } = useI18n();
-
 const {
   addDrawer,
   detailDrawer,

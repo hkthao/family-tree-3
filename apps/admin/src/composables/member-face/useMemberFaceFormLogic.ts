@@ -26,7 +26,7 @@ interface UseMemberFaceFormLogicOptions {
 }
 
 export function useMemberFaceFormLogic(options: UseMemberFaceFormLogicOptions) {
-  const { mutation, successMessageKey, errorMessageKey, formRef, onSuccess, onError, transformData, isUpdate = false } = options;
+  const { mutation, successMessageKey, errorMessageKey, formRef, onSuccess, onError, transformData } = options;
   const { showSnackbar } = useGlobalSnackbar();
   const { t } = useI18n();
 
