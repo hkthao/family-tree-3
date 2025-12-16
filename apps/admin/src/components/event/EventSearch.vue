@@ -26,12 +26,12 @@
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-date-input v-model="filters.minSolarDate" :label="t('event.search.minSolarDate')" optional
-                data-testid="event-search-min-solar-date-input" />
+              <v-date-input v-model="filters.startDate" :label="t('event.search.startDate')" optional
+                data-testid="event-search-start-date-input" />
             </v-col>
             <v-col cols="12" md="4">
-              <v-date-input v-model="filters.maxSolarDate" :label="t('event.search.maxSolarDate')" optional
-                data-testid="event-search-max-solar-date-input" />
+              <v-date-input v-model="filters.endDate" :label="t('event.search.endDate')" optional
+                data-testid="event-search-end-date-input" />
             </v-col>
             <v-col cols="12" md="4">
               <MemberAutocomplete v-model="filters.memberId" :label="t('event.search.member')" clearable

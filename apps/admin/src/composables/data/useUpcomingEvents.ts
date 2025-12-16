@@ -1,14 +1,16 @@
 import { computed, unref, type Ref, type ComputedRef } from 'vue';
-import { useEventsQuery } from '@/composables/event/useEventsQuery'; // Use the existing generic query
-import type { EventFilter } from '@/types'; // Import EventFilter
+import { useEventsQuery } from '@/composables/event/useEventsQuery';
+import type { EventFilter } from '@/types';
 
-export function useUpcomingEvents(_familyId: Ref<string | undefined> | ComputedRef<string | undefined>) {
-  const upcomingEventsFilter = computed<EventFilter>(() => ({
-    familyId: unref(_familyId),
-    minSolarDate: new Date(), // Filter for events from today onwards
-    itemsPerPage: 100, // Fetch a reasonable number of upcoming events
-    sortBy: [{ key: 'solarDate', order: 'asc' }], // Correct sortBy type
-  }));
+export function useUpcomingEvents(baseFilter: Ref<EventFilter> | ComputedRef<EventFilter>) {
+  const upcomingEventsFilter = computed<EventFilter>(() => {
+    const currentBaseFilter = unref(baseFilter);
+    return {
+      ...currentBaseFilter,
+      itemsPerPage: 100, // Fetch a reasonable number of upcoming events
+      sortBy: [{ key: 'solarDate', order: 'asc' }], // Correct sortBy type
+    };
+  });
 
   const {
     events: upcomingEvents, // Rename 'events' to 'upcomingEvents' for consistency

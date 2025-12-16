@@ -53,7 +53,7 @@ const selectedFamilyId = ref<string | null>(null);
 const familyIdForQueries = computed(() => selectedFamilyId.value || undefined);
 
 const { dashboardStats, isLoading: isLoadingStats } = useDashboardStats(familyIdForQueries);
-const { upcomingEvents, isLoading: isLoadingEvents } = useUpcomingEvents(familyIdForQueries);
+const { upcomingEvents, isLoading: isLoadingEvents } = useUpcomingEvents(computed(() => ({ familyId: familyIdForQueries.value })));
 const { activities: recentActivities, isLoading: isLoadingRecentActivities } = useRecentActivities(familyIdForQueries);
 </script>
 

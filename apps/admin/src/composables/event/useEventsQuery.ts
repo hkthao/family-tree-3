@@ -24,15 +24,14 @@ export function useEventsQuery(filters: Ref<EventFilter>) {
         searchQuery: currentFilters.searchQuery,
         familyId: currentFilters.familyId,
         type: currentFilters.type,
-        // Removed old date and location filters
-        // startDate: currentFilters.startDate,
-        // endDate: currentFilters.endDate,
-        // location: currentFilters.location,
         memberId: currentFilters.memberId,
-        // New filters for backend
-        minSolarDate: currentFilters.minSolarDate,
-        maxSolarDate: currentFilters.maxSolarDate,
+        startDate: currentFilters.startDate,
+        endDate: currentFilters.endDate,
         calendarType: currentFilters.calendarType,
+        lunarStartDay: currentFilters.lunarStartDay,
+        lunarStartMonth: currentFilters.lunarStartMonth,
+        lunarEndDay: currentFilters.lunarEndDay,
+        lunarEndMonth: currentFilters.lunarEndMonth,
       };
 
       const response = await apiEventService.search(listOptions, filterOptions);

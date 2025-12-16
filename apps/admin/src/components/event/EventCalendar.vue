@@ -99,7 +99,6 @@ const {
   detailDrawer,
   selectedEventId,
   isDatePickerOpen,
-  calendarRef,
   calendarType,
   calendarTitle,
   prev,

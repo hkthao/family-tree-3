@@ -1,5 +1,6 @@
-import { ref, computed, watch, toRef } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import dayjs from 'dayjs'; // Import dayjs
 import type { Event, LunarDate } from '@/types'; // Import LunarDate
 import { CalendarType } from '@/types/enums'; // Import CalendarType
 import { useAuth } from '@/composables';
@@ -14,17 +15,15 @@ type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
 // As a workaround, the current solar year is used as the lunar year for conversion.
 // This means the conversion is accurate for lunar events in the *current solar year* only.
 // If historical or future lunar events are needed, the LunarDate interface must be updated to include a 'year'.
-const getSolarDateFromLunarDate = (lunarDate: LunarDate): Date => {
+const getSolarDateFromLunarDate = (year: number, lunarDate: LunarDate): Date => {
   try {
-    const currentSolarYear = new Date().getFullYear();
-    const lunar = Lunar.fromYmd(currentSolarYear, lunarDate.month, lunarDate.day, lunarDate.isLeapMonth);
+    const lunar = Lunar.fromYmd(year, lunarDate.month, lunarDate.day);
     const solar = lunar.getSolar();
-    return new Date(solar.year, solar.month - 1, solar.day);
+    const resultDate = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay());
+    return resultDate;
   } catch (e) {
     console.error('Error during lunar to solar conversion using lunar-javascript:', e);
-    // Fallback to the old rough estimation if conversion fails
-    const currentYear = new Date().getFullYear();
-    return new Date(currentYear, lunarDate.month - 1, lunarDate.day);
+    return new Date(year, lunarDate.month - 1, lunarDate.day);
   }
 };
 
@@ -32,7 +31,52 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
   const { t, locale } = useI18n();
   const { isAdmin, isFamilyManager } = useAuth();
 
-  const { upcomingEvents: events, isLoading: loading, refetch: refetchEvents } = useUpcomingEvents(toRef(props, 'familyId'));
+  const selectedDate = ref(new Date());
+
+  const lunarDateRangeFilters = computed(() => {
+    const startOfMonth = dayjs(selectedDate.value).startOf('month');
+    const endOfMonth = dayjs(selectedDate.value).endOf('month');
+
+    const startSolar = Solar.fromYmd(startOfMonth.year(), startOfMonth.month() + 1, startOfMonth.date());
+    const endSolar = Solar.fromYmd(endOfMonth.year(), endOfMonth.month() + 1, endOfMonth.date());
+
+    const startLunar = startSolar.getLunar();
+    const endLunar = endSolar.getLunar();
+
+    const lunarStartDay = 1;
+    const lunarStartMonth = startLunar.getMonth();
+    let lunarEndDay = endLunar.getDay();
+    const lunarEndMonth = endLunar.getMonth();
+
+    if (lunarEndMonth > lunarStartMonth) {
+      lunarEndDay = 30;
+    }
+
+    return {
+      lunarStartDay,
+      lunarStartMonth,
+      lunarEndDay,
+      lunarEndMonth,
+    };
+  });
+
+  const eventFilter = computed(() => {
+    const startOfMonth = dayjs(selectedDate.value).startOf('month').toDate();
+    const endOfMonth = dayjs(selectedDate.value).endOf('month').toDate();
+
+    return {
+      familyId: props.familyId,
+      startDate: startOfMonth,
+      endDate: endOfMonth,
+      lunarStartDay: lunarDateRangeFilters.value.lunarStartDay,
+      lunarStartMonth: lunarDateRangeFilters.value.lunarStartMonth,
+      lunarEndDay: lunarDateRangeFilters.value.lunarEndDay,
+      lunarEndMonth: lunarDateRangeFilters.value.lunarEndMonth,
+      memberId: props.memberId,
+    };
+  });
+
+  const { upcomingEvents: events, isLoading: loading, refetch: refetchEvents } = useUpcomingEvents(eventFilter);
 
   const canAddEvent = computed(() => {
     return !props.readOnly && (isAdmin.value || isFamilyManager.value);
@@ -44,7 +88,8 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
 
   const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]);
 
-  const selectedDate = ref(new Date());
+
+
   const editDrawer = ref(false);
   const addDrawer = ref(false);
   const detailDrawer = ref(false);
@@ -57,7 +102,7 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     next: () => void;
     value: Date;
   } | null>(null);
-  const calendarType: 'month' = 'month';
+  const calendarType = 'month' as const;
 
   const calendarTitle = computed(() => {
     if (calendarRef.value) {
@@ -90,18 +135,18 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
       .map((event: Event) => {
         let eventStart: Date | null = null;
         let eventEnd: Date | null = null;
-
         if (event.calendarType === CalendarType.Solar && event.solarDate) {
           eventStart = new Date(event.solarDate);
           eventEnd = new Date(event.solarDate); // Assuming single day events for now
         } else if (event.calendarType === CalendarType.Lunar && event.lunarDate) {
-          eventStart = getSolarDateFromLunarDate(event.lunarDate);
-          eventEnd = getSolarDateFromLunarDate(event.lunarDate); // Assuming single day events for now
+          const year = selectedDate.value.getFullYear();
+          eventStart = getSolarDateFromLunarDate(year, event.lunarDate);
+          eventEnd = getSolarDateFromLunarDate(year, event.lunarDate); // Assuming single day events for now
         }
 
         if (!eventStart) return null; // Skip events without a valid start date
 
-        return {
+        const formattedEvent = {
           title: event.name,
           start: eventStart,
           end: eventEnd,
@@ -109,6 +154,7 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
           timed: true,
           eventObject: event,
         };
+        return formattedEvent;
       })
       .filter((e) => e !== null); // Filter out null events
   });
@@ -158,16 +204,16 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     editDrawer.value = true;
   };
 
-  watch(
-    selectedDate,
-    (_newDate) => {
-      // Logic here for calendar view changes if needed, but not data fetching
-    },
-    { immediate: true },
-  );
+  watch(events, (newValue) => {
+  }, { immediate: true });
+
+  watch(formattedEvents, (newValue) => {
+  }, { immediate: true });
 
   const getLunarDateForSolarDay = (solarDate: Date): string => {
+    console.log('getLunarDateForSolarDay input:', solarDate);
     if (!(solarDate instanceof Date) || isNaN(solarDate.getTime())) {
+      console.error('Invalid solarDate input to getLunarDateForSolarDay:', solarDate);
       return 'Ngày không hợp lệ (Âm)';
     }
 
