@@ -23,7 +23,7 @@
     <!-- Map Picker Drawer -->
     <BaseCrudDrawer class="map-drawer" v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'"
       @close="closeMapDrawer">
-      <MapView v-if="mapDrawer"
+      <FamilyMapPicker v-if="mapDrawer"
         :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
         @confirm-selection="handleMapCoordinatesSelected" @close="closeMapDrawer" />
     </BaseCrudDrawer>
@@ -37,7 +37,7 @@ import { FamilyLocationForm } from '@/components/family-location';
 import type { FamilyLocation } from '@/types';
 import { useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import { useAddFamilyLocationMutation } from '@/composables/family-location';
-import MapView from '@/views/map/MapView.vue';
+import FamilyMapPicker from './FamilyMapPicker.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 
 interface FamilyLocationAddViewProps {

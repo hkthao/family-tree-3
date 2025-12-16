@@ -100,7 +100,7 @@ const locationAccuracyOptions = computed(() => [
 ]);
 
 const locationSourceOptions = computed(() => [
-  { title: t('familyLocation.source.userSelected'), value: LocationSource.UserSelected },
+  { title: t('familyLocation.source.userselected'), value: LocationSource.UserSelected },
   { title: t('familyLocation.source.geocoded'), value: LocationSource.Geocoded },
 ]);
 
