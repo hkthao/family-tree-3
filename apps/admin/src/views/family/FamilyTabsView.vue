@@ -50,6 +50,10 @@
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: Family Location Tab -->
+        <v-window-item value="locations">
+          <FamilyLocationListView :family-id="familyId" :read-only="readOnlyValue" />
+        </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
@@ -81,6 +85,7 @@ import EventListView from '@/views/event/EventListView.vue';
 import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
+import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
@@ -128,6 +133,7 @@ const allTabDefinitions = computed(() => [
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
+  { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean }, // NEW
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));

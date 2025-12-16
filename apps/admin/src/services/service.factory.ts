@@ -37,6 +37,10 @@ import { ApiFamilyLinkRequestService } from './familyLinkRequest/api.familyLinkR
 import type { IFamilyMediaService } from './family-media/family-media.service.interface';
 import { ApiFamilyMediaService } from './family-media/api.family-media.service';
 
+// NEW: Imports for FamilyLocationService
+import type { IFamilyLocationService } from './family-location/family-location.service.interface';
+import { ApiFamilyLocationService } from './family-location/api.family-location.service';
+
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
@@ -57,6 +61,7 @@ export interface AppServices {
   familyLink: IFamilyLinkService;
   familyLinkRequest: IFamilyLinkRequestService;
   familyMedia: IFamilyMediaService; // NEW: Add FamilyMediaService
+  familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -134,5 +139,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyMediaService(apiClient)
         : testServices?.familyMedia || new ApiFamilyMediaService(apiClient),
+    familyLocation: // NEW: Assign FamilyLocationService
+      mode === 'real'
+        ? new ApiFamilyLocationService(apiClient)
+        : testServices?.familyLocation || new ApiFamilyLocationService(apiClient),
   };
 }

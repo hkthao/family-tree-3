@@ -1,10 +1,7 @@
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Queries;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using backend.Web.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
 using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
@@ -38,7 +35,7 @@ public class FamilyLocationsController(IMediator mediator, ILogger<FamilyLocatio
     /// </summary>
     /// <param name="query">Các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Danh sách FamilyLocation được phân trang.</returns>
-    [HttpGet]
+    [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> SearchFamilyLocations([FromQuery] SearchFamilyLocationsQuery query)
     {
