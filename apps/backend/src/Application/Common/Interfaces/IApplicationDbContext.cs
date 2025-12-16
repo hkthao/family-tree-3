@@ -45,6 +45,11 @@ public interface IApplicationDbContext
     DbSet<UserPreference> UserPreferences { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLocation.
+    /// </summary>
+    DbSet<FamilyLocation> FamilyLocations { get; }
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
     DbSet<EventMember> EventMembers { get; }
