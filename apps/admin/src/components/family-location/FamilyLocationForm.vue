@@ -120,9 +120,15 @@ const setCoordinates = (latitude: number, longitude: number) => {
   form.source = LocationSource.UserSelected; // Set source to UserSelected when coordinates are chosen from map
 };
 
+const setAddress = (address: string) => {
+  form.address = address;
+  form.source = LocationSource.UserSelected; // Also set source to UserSelected when address is chosen from map
+};
+
 defineExpose({
   validate,
   getFormData,
-  setCoordinates, // Expose setCoordinates
+  setCoordinates,
+  setAddress, // Expose setAddress
 });
 </script>

@@ -527,6 +527,7 @@
   "map.searchSuccess": "Search successful!",
   "map.searchNoResults": "No results found.",
   "map.searchError": "An error occurred while searching for the location.",
+  "map.suggestionFetchError": "An error occurred while fetching suggestions.",
   "map.search.placeholder": "Search for a location...",
   "familyDict.import.errors.invalidFileType": "Invalid file type. Please select a JSON file.",
   "familyDict.import.errors.invalidJson": "Invalid JSON format. Please ensure the file is a valid JSON.",

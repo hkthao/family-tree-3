@@ -7,8 +7,23 @@
       <v-alert v-if="!mapboxAccessToken" type="warning" prominent class="mb-4">
         {{ t('map.noAccessTokenWarning') }}
       </v-alert>
-      <v-text-field v-model="searchQuery" :label="t('map.searchLocation')" outlined clearable
-        @keydown.enter="searchLocation" class="mb-4"></v-text-field>
+      <v-autocomplete
+        v-model:search="searchQuery"
+        v-model="selectedItem"
+        :label="t('map.searchLocation')"
+        :items="suggestions"
+        :loading="loadingSuggestions"
+        item-title="place_name"
+        return-object
+        clearable
+        outlined
+        hide-no-data
+        hide-details
+        :placeholder="t('map.search.placeholder')"
+        @update:search="fetchSuggestions"
+        @update:modelValue="selectSuggestion"
+        class="mb-4"
+      ></v-autocomplete>
       <MapPicker v-if="mapboxAccessToken" :mapbox-access-token="mapboxAccessToken"
         :initial-center="selectedCoordinates.latitude && selectedCoordinates.longitude ? [selectedCoordinates.longitude, selectedCoordinates.latitude] : undefined"
         @update:coordinates="handleCoordinatesUpdate" />
@@ -30,6 +45,10 @@
         @click="copyCoordinates">
         {{ t('map.copyCoordinates') }}
       </v-btn>
+      <v-btn color="success" :disabled="!selectedCoordinates.latitude || !selectedCoordinates.longitude"
+        @click="confirmSelection">
+        {{ t('common.confirm') }}
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -41,46 +60,79 @@ import MapPicker from '@/components/map/MapPicker.vue';
 import { useGlobalSnackbar } from '@/composables';
 import { getEnvVariable } from '@/utils/api.util';
 
+const emit = defineEmits(['confirm-selection']);
+
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 const mapboxAccessToken = ref(getEnvVariable('VITE_MAPBOX_ACCESS_TOKEN'));
 const searchQuery = ref('');
 const searchResultCoordinates = ref<{ latitude: number; longitude: number }>({ latitude: 0, longitude: 0 });
 const selectedCoordinates = ref({ latitude: 0, longitude: 0 });
+const suggestions = ref<any[]>([]); // To store autocomplete suggestions
+const loadingSuggestions = ref(false); // Loading indicator for suggestions
+const selectedItem = ref(null);
+
+let abortController: AbortController | null = null; // To cancel previous fetch requests
 
 const handleCoordinatesUpdate = (coords: { longitude: number; latitude: number }) => {
   selectedCoordinates.value = coords;
 };
 
-const searchLocation = async () => {
-  if (!searchQuery.value) {
-    showSnackbar(t('map.searchQueryEmpty'), 'warning');
+const confirmSelection = () => {
+  emit('confirm-selection', {
+    coordinates: selectedCoordinates.value,
+    location: selectedItem.value ? (selectedItem.value as any).place_name : ''
+  });
+};
+
+const fetchSuggestions = async (query: string) => {
+  if (abortController) {
+    abortController.abort(); // Cancel previous request
+  }
+  if (!query) {
+    suggestions.value = [];
     return;
   }
-  if (!mapboxAccessToken.value) {
-    showSnackbar(t('map.noAccessTokenWarning'), 'error');
-    return;
-  }
+
+  loadingSuggestions.value = true;
+  abortController = new AbortController();
+  const signal = abortController.signal;
 
   try {
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        searchQuery.value
-      )}.json?access_token=${mapboxAccessToken.value}`
+        query
+      )}.json?access_token=${mapboxAccessToken.value}&autocomplete=true`, { signal }
     );
     const data = await response.json();
 
-    if (data.features && data.features.length > 0) {
-      const [longitude, latitude] = data.features[0].center;
-      searchResultCoordinates.value = { latitude, longitude };
-      selectedCoordinates.value = { latitude, longitude }; // Update selectedCoordinates as well
-      showSnackbar(t('map.searchSuccess'), 'success');
-    } else {
-      showSnackbar(t('map.searchNoResults'), 'info');
+    if (data.features) {
+      suggestions.value = data.features;
     }
-  } catch (error) {
-    console.error('Error searching for location:', error);
-    showSnackbar(t('map.searchError'), 'error');
+  } catch (error: any) {
+    if (error.name !== 'AbortError') {
+      console.error('Error fetching suggestions:', error);
+      showSnackbar(t('map.suggestionFetchError'), 'error');
+    }
+  } finally {
+    loadingSuggestions.value = false;
+  }
+};
+
+const selectSuggestion = (selectedFeature: any) => {
+  if (!selectedFeature) {
+    selectedCoordinates.value = { latitude: 0, longitude: 0 };
+    searchResultCoordinates.value = { latitude: 0, longitude: 0 };
+    return;
+  }
+  if (selectedFeature && selectedFeature.center) {
+    const [longitude, latitude] = selectedFeature.center;
+    searchResultCoordinates.value = { latitude, longitude };
+    selectedCoordinates.value = { latitude, longitude };
+    showSnackbar(t('map.searchSuccess'), 'success');
+  } else {
+    console.warn('selectSuggestion received an invalid feature:', selectedFeature);
+    showSnackbar(t('map.searchNoResults'), 'info'); // Or a more specific error
   }
 };
 

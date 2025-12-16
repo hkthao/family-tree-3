@@ -22,26 +22,47 @@
         t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
+
+  <!-- Map Picker Drawer -->
+  <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
+    <MapView
+      v-if="mapDrawer"
+      :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
+      @confirm-selection="handleMapCoordinatesSelected"
+      @close="closeMapDrawer"
+    />
+  </BaseCrudDrawer>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
 import type { FamilyLocation } from '@/types';
-import { useGlobalSnackbar } from '@/composables';
+import { useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import { useAddFamilyLocationMutation } from '@/composables/family-location';
+import MapView from '@/views/map/MapView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 
 interface FamilyLocationAddViewProps {
   familyId: string;
 }
 const props = defineProps<FamilyLocationAddViewProps>();
-const emit = defineEmits(['close', 'saved', 'open-map-picker']); // Add open-map-picker emit
+const emit = defineEmits(['close', 'saved']);
 
 const familyLocationFormRef = ref<InstanceType<typeof FamilyLocationForm> | null>(null);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 
 const { mutate: addFamilyLocation, isPending: isAddingFamilyLocation } = useAddFamilyLocationMutation();
+
+// Map Drawer related logic
+const {
+  addDrawer: mapDrawer, // Use alias for map drawer
+  openAddDrawer: openMapDrawer,
+  closeAllDrawers: closeMapDrawer,
+} = useCrudDrawer<string>();
+
+const initialMapCoordinates = ref<{ latitude?: number; longitude?: number }>({});
 
 const handleAddFamilyLocation = async () => {
   if (!familyLocationFormRef.value) return;
@@ -68,22 +89,21 @@ const closeForm = () => {
 };
 
 const handleOpenMapPicker = () => {
-  // Get current coordinates from the form to pre-fill the map picker
   const currentFormData = familyLocationFormRef.value?.getFormData();
-  emit('open-map-picker', {
+  initialMapCoordinates.value = {
     latitude: currentFormData?.latitude,
     longitude: currentFormData?.longitude,
-  });
+  };
+  openMapDrawer();
 };
 
-// Function to set coordinates received from the map picker
-const setCoordinates = (coords: { latitude: number; longitude: number }) => {
+const handleMapCoordinatesSelected = (payload: { coordinates: { latitude: number; longitude: number; }, location: string }) => {
   if (familyLocationFormRef.value) {
-    familyLocationFormRef.value.setCoordinates(coords.latitude, coords.longitude);
+    familyLocationFormRef.value.setCoordinates(payload.coordinates.latitude, payload.coordinates.longitude);
+    familyLocationFormRef.value.setAddress(payload.location);
   }
+  closeMapDrawer();
 };
 
-defineExpose({
-  setCoordinates, // Expose setCoordinates so parent can call it
-});
+
 </script>
