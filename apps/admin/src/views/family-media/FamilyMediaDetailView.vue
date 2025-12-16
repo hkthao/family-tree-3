@@ -33,7 +33,7 @@ const { t } = useI18n();
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaIdRef = toRef(props, 'familyMediaId');
 
-const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyIdRef, familyMediaIdRef);
+const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyMediaIdRef);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
 const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({

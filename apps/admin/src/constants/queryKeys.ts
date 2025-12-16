@@ -32,8 +32,8 @@ export const queryKeys = {
   },
   familyMedia: {
     all: ['familyMedia'] as const,
-    list: (familyId: string, filters?: FamilyMediaFilter, page?: number, itemsPerPage?: number, sortBy?: ListOptions['sortBy']) => [...queryKeys.familyMedia.all, 'list', familyId, filters, page, itemsPerPage, sortBy] as const,
-    detail: (familyId: string, mediaId: string) => [...queryKeys.familyMedia.all, 'detail', familyId, mediaId] as const,
+    list: (filters?: FamilyMediaFilter, page?: number, itemsPerPage?: number, sortBy?: ListOptions['sortBy']) => [...queryKeys.familyMedia.all, 'list', filters, page, itemsPerPage, sortBy] as const,
+    detail: (mediaId: string) => [...queryKeys.familyMedia.all, 'detail', mediaId] as const,
   },
   familyDicts: {
     all: ['familyDicts'] as const,

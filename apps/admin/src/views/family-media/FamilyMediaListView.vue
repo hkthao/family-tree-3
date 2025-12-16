@@ -40,11 +40,9 @@ const props = defineProps<{
 }>();
 
 const familyIdRef = toRef(props, 'familyId');
-
-const familyMediaListFiltersComposable = useFamilyMediaListFilters();
+const familyMediaListFiltersComposable = useFamilyMediaListFilters(familyIdRef);
 const { filters, listOptions, setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
-
-const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(familyIdRef, filters, listOptions);
+const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(filters, listOptions);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
 const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({

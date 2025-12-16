@@ -10,28 +10,23 @@ const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(api
 
 /**
  * Composible để lấy danh sách Family Media có phân trang.
- * @param familyId Ref<string | undefined> - ID của gia đình.
  * @param filters Ref<FamilyMediaFilter> - Các bộ lọc cho danh sách media.
  * @param listOptions Ref<ListOptions> - Các tùy chọn phân trang và sắp xếp.
  */
-export function useFamilyMediaListQuery(familyId: Ref<string | undefined>, filters: Ref<FamilyMediaFilter>, listOptions: Ref<ListOptions>) {
+export function useFamilyMediaListQuery(filters: Ref<FamilyMediaFilter>, listOptions: Ref<ListOptions>) {
+
   const query = useQuery<Paginated<FamilyMedia>, Error>({
-    queryKey: computed(() => (unref(familyId) ? queryKeys.familyMedia.list(
-      unref(familyId)!,
+    queryKey: computed(() => (unref(listOptions).itemsPerPage !== -1 ? queryKeys.familyMedia.list(
       unref(filters),
       unref(listOptions).page,
       unref(listOptions).itemsPerPage,
       unref(listOptions).sortBy
     ) : [])),
     queryFn: async () => {
-      const id = unref(familyId);
       const currentFilters = unref(filters);
       const currentListOptions = unref(listOptions);
-      if (!id) {
-        throw new Error('Family ID is required for fetching family media list');
-      }
       const response = await apiFamilyMediaService.search(
-        id,
+        currentFilters.familyId!,
         currentFilters,
         currentListOptions.page,
         currentListOptions.itemsPerPage,
@@ -42,7 +37,7 @@ export function useFamilyMediaListQuery(familyId: Ref<string | undefined>, filte
       }
       throw response.error;
     },
-    enabled: computed(() => !!unref(familyId)),
+    enabled: computed(() => unref(listOptions).itemsPerPage !== -1),
     staleTime: 1000 * 60, // 1 minute
   });
 
@@ -65,22 +60,17 @@ export function useFamilyMediaListQuery(familyId: Ref<string | undefined>, filte
  * @param familyId Ref<string | undefined> - ID của gia đình.
  * @param familyMediaId Ref<string | undefined> - ID của media item.
  */
-export function useFamilyMediaQuery(familyId: Ref<string | undefined>, familyMediaId: Ref<string | undefined>) {
+export function useFamilyMediaQuery(familyMediaId: Ref<string | undefined>) {
   const query = useQuery<FamilyMedia, Error>({
-    queryKey: computed(() => (unref(familyId) && unref(familyMediaId) ? queryKeys.familyMedia.detail(unref(familyId)!, unref(familyMediaId)!) : [])),
+    queryKey: computed(() => (unref(familyMediaId) ? queryKeys.familyMedia.detail(unref(familyMediaId)!) : [])),
     queryFn: async () => {
-      const fId = unref(familyId);
-      const fmId = unref(familyMediaId);
-      if (!fId || !fmId) {
-        throw new Error('Family ID and Family Media ID are required');
-      }
-      const response = await apiFamilyMediaService.getById(fmId);
+      const response = await apiFamilyMediaService.getById(familyMediaId.value!);
       if (response.ok) {
         return response.value;
       }
       throw response.error;
     },
-    enabled: computed(() => !!unref(familyId) && !!unref(familyMediaId)),
+    enabled: computed(() => !!unref(familyMediaId)),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

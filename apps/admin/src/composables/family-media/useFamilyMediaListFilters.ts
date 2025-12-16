@@ -1,7 +1,7 @@
-import { ref, computed } from 'vue';
+import { ref, computed, unref, type Ref, watch } from 'vue';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 
-export function useFamilyMediaListFilters() {
+export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
   const defaultItemsPerPage = 10;
 
   const page = ref(1);
@@ -10,6 +10,12 @@ export function useFamilyMediaListFilters() {
   const filters = ref<FamilyMediaFilter>({
     mediaType: undefined,
   });
+
+  // Watch for changes in the passed familyId and update the internal filters accordingly
+  watch(familyId, (newFamilyId) => {
+    filters.value.familyId = newFamilyId;
+    page.value = 1; // Reset to first page when familyId changes
+  }, { immediate: true }); // immediate: true to run once on setup
 
   const listOptions = computed<ListOptions>(() => ({
     page: page.value,
@@ -31,7 +37,10 @@ export function useFamilyMediaListFilters() {
   };
 
   const setFilters = (newFilters: FamilyMediaFilter) => {
-    filters.value = { ...newFilters };
+    filters.value = {
+      ...newFilters,
+      familyId: unref(familyId), // Always ensure familyId from prop is used
+    };
     page.value = 1; // Reset to first page when filters change
   };
 
