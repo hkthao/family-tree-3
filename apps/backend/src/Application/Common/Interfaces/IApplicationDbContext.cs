@@ -43,10 +43,6 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserPreference.
     /// </summary>
     DbSet<UserPreference> UserPreferences { get; }
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
-    /// </summary>
-    DbSet<FileMetadata> FileMetadata { get; }
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
