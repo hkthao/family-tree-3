@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { useEventSearch } from '@/composables/event/useEventSearch';
-import VDateInput from '@/components/common/VDateInput.vue'; // Assuming you have a custom date input
+import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
 
 
 const emit = defineEmits(['update:filters']);

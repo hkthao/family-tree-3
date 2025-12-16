@@ -110,8 +110,8 @@ import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { cloneDeep } from 'lodash';
-import VDateInput from '@/components/common/VDateInput.vue'; // Assuming you have a custom date input
-import VColorInput from '@/components/common/VColorInput.vue'; // Assuming you have a custom color input
+import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
+import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
 
 interface EventFormProps {
   readOnly?: boolean;
