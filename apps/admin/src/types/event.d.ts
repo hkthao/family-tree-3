@@ -43,13 +43,12 @@ export interface EventFilter extends ListOptions {
   type?: EventType;
   eventType?: EventType;
   familyId?: string | null ;
-  // Removed old date and location filters
-  // startDate?: Date | null;
-  // endDate?: Date | null;
-  // location?: string;
   memberId?: string | null;
-  // New filters for backend
-  minSolarDate?: Date | null;
-  maxSolarDate?: Date | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
   calendarType?: CalendarType | null;
+  lunarStartDay?: number;
+  lunarStartMonth?: number;
+  lunarEndDay?: number;
+  lunarEndMonth?: number;
 }

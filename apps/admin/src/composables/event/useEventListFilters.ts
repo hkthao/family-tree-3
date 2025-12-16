@@ -35,8 +35,8 @@ export function useEventListFilters() {
     if (newFilters.sortBy !== undefined) filters.value.sortBy = newFilters.sortBy;
     if (newFilters.searchQuery !== undefined) filters.value.searchQuery = newFilters.searchQuery;
     if (newFilters.familyId !== undefined) filters.value.familyId = newFilters.familyId; // Add familyId specific filter
-    if (newFilters.minSolarDate !== undefined) filters.value.minSolarDate = newFilters.minSolarDate;
-    if (newFilters.maxSolarDate !== undefined) filters.value.maxSolarDate = newFilters.maxSolarDate;
+    if (newFilters.startDate !== undefined) filters.value.startDate = newFilters.startDate;
+    if (newFilters.endDate !== undefined) filters.value.endDate = newFilters.endDate;
     if (newFilters.calendarType !== undefined) filters.value.calendarType = newFilters.calendarType;
   };
 

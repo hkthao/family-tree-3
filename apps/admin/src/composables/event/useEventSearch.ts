@@ -12,8 +12,8 @@ export function useEventSearch(emit: (event: 'update:filters', ...args: any[]) =
   const filters = ref<EventFilter>({ // Use EventFilter, not Omit
     type: undefined,
     memberId: null,
-    minSolarDate: undefined, // New filter
-    maxSolarDate: undefined, // New filter
+    startDate: undefined,
+    endDate: undefined,
     calendarType: undefined, // New filter
   });
 
@@ -45,8 +45,8 @@ export function useEventSearch(emit: (event: 'update:filters', ...args: any[]) =
     filters.value = {
       type: undefined,
       memberId: null,
-      minSolarDate: undefined,
-      maxSolarDate: undefined,
+      startDate: undefined,
+      endDate: undefined,
       calendarType: undefined,
     };
     emit('update:filters', filters.value);
