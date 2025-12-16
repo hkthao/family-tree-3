@@ -57,21 +57,7 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     next: () => void;
     value: Date;
   } | null>(null);
-  const calendarType = ref<
-    | 'month'
-    | 'week'
-    | 'day'
-    | '4day'
-    | 'category'
-    | 'custom-daily'
-    | 'custom-weekly'
-  >('month');
-  const calendarTypes = computed(() => [
-    { title: t('event.calendar.viewMode.month'), value: 'month' },
-    { title: t('event.calendar.viewMode.week'), value: 'week' },
-    { title: t('event.calendar.viewMode.day'), value: 'day' },
-    { title: t('event.calendar.viewMode.4day'), value: '4day' },
-  ]);
+  const calendarType: 'month' = 'month';
 
   const calendarTitle = computed(() => {
     if (calendarRef.value) {
@@ -135,11 +121,8 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
 
   const showEventDetails = (eventSlotScope: Event) => {
     selectedEventId.value = eventSlotScope.id;
-    if (canEditEvent.value) {
-      editDrawer.value = true;
-    } else {
-      detailDrawer.value = true;
-    }
+    // Since calendarType is now fixed to 'month', always open detail drawer
+    detailDrawer.value = true;
   };
 
   const handleEventSaved = () => {
@@ -213,7 +196,6 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
     isDatePickerOpen,
     calendarRef,
     calendarType,
-    calendarTypes,
     calendarTitle,
     prev,
     next,

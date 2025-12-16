@@ -15,8 +15,7 @@
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
-        :label="t('event.calendar.viewMode')" hide-details :readonly="props.readOnly"></v-select>
+
       <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
         <v-tooltip :text="t('event.list.action.create')">
           <template v-slot:activator="{ props }">
@@ -102,7 +101,6 @@ const {
   isDatePickerOpen,
   calendarRef,
   calendarType,
-  calendarTypes,
   calendarTitle,
   prev,
   next,
