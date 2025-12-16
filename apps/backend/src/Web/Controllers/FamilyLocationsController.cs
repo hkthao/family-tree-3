@@ -1,5 +1,6 @@
 using backend.Application.Common.Models;
-using backend.Application.FamilyLocations.Queries;
+using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
+using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;

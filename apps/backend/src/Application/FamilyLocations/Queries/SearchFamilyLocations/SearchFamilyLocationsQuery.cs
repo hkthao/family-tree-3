@@ -8,7 +8,7 @@ using backend.Application.FamilyLocations.Specifications;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.FamilyLocations.Queries;
+namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 
 public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyLocationListDto>>>
 {

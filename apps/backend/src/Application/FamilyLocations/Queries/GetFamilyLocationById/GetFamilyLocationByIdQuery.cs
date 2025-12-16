@@ -3,7 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.FamilyLocations.Queries;
+namespace backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 
 public record GetFamilyLocationByIdQuery(Guid Id) : IRequest<Result<FamilyLocationDto>>;
 
