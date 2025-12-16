@@ -1,20 +1,11 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events;
-using FluentValidation;
+using AutoMapper; // Explicitly add AutoMapper
+using MediatR; // Explicitly add MediatR
+using Microsoft.EntityFrameworkCore; // Explicitly add
 
-namespace backend.Application.FamilyLocations.Commands;
-
-public record DeleteFamilyLocationCommand(Guid Id) : IRequest<Result>;
-
-public class DeleteFamilyLocationCommandValidator : AbstractValidator<DeleteFamilyLocationCommand>
-{
-    public DeleteFamilyLocationCommandValidator()
-    {
-        RuleFor(v => v.Id)
-            .NotEmpty().WithMessage("Id is required.");
-    }
-}
+namespace backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
 
 public class DeleteFamilyLocationCommandHandler(IApplicationDbContext context) : IRequestHandler<DeleteFamilyLocationCommand, Result>
 {
