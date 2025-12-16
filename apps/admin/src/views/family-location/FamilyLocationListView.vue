@@ -6,30 +6,65 @@
       :total-items="totalItems"
       :loading="isLoadingFamilyLocations || isDeletingFamilyLocation"
       @update:options="handleListOptionsUpdate"
-      @view="$emit('viewFamilyLocation', $event)"
-      @edit="$emit('editFamilyLocation', $event)"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
       @delete="confirmDelete"
-      @create="$emit('createFamilyLocation')"
+      @create="openAddDrawer()"
       :read-only="props.readOnly"
     >
     </FamilyLocationList>
+
+    <!-- Add Family Location Drawer -->
+    <BaseCrudDrawer v-model="addDrawer" @close="handleClosed">
+      <FamilyLocationAddView
+        v-if="addDrawer"
+        :family-id="props.familyId"
+        @close="handleClosed"
+        @saved="handleAdded"
+      />
+    </BaseCrudDrawer>
+
+    <!-- Detail Family Location Drawer -->
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleClosed">
+      <FamilyLocationDetailView
+        v-if="selectedItemId && detailDrawer"
+        :family-location-id="selectedItemId"
+        @close="handleClosed"
+        @edit-family-location="openEditDrawer"
+      />
+    </BaseCrudDrawer>
+
+    <!-- Edit Family Location Drawer -->
+    <BaseCrudDrawer v-model="editDrawer" @close="handleClosed">
+      <FamilyLocationEditView
+        v-if="selectedItemId && editDrawer"
+        :family-location-id="selectedItemId"
+        @close="handleClosed"
+        @saved="handleEdited"
+      />
+    </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FamilyLocation } from '@/types';
 import { ref, watch, toRef } from 'vue';
-import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import FamilyLocationSearch from '@/components/family-location/FamilyLocationSearch.vue';
 import FamilyLocationList from '@/components/family-location/FamilyLocationList.vue';
 import {
   useFamilyLocationsQuery,
   useDeleteFamilyLocationMutation,
   useFamilyLocationDataManagement,
-  type FamilyLocationSearchCriteria, // Import the new interface from the composables
+  type FamilyLocationSearchCriteria,
 } from '@/composables/family-location';
 import { useI18n } from 'vue-i18n';
-// Removed redundant type import
+
+// Import drawer related components
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import FamilyLocationAddView from '@/views/family-location/FamilyLocationAddView.vue';
+import FamilyLocationDetailView from '@/views/family-location/FamilyLocationDetailView.vue';
+import FamilyLocationEditView from '@/views/family-location/FamilyLocationEditView.vue';
 
 interface FamilyLocationListViewProps {
   familyId: string;
@@ -68,9 +103,36 @@ const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = us
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
+// Drawer related logic
+const {
+  addDrawer,
+  detailDrawer,
+  editDrawer,
+  selectedItemId,
+  openAddDrawer,
+  openDetailDrawer,
+  openEditDrawer,
+  closeAllDrawers,
+} = useCrudDrawer<string>();
+
+const handleAdded = () => {
+  closeAllDrawers();
+  refetch(); // Refetch the list after add
+};
+
+const handleEdited = () => {
+  closeAllDrawers();
+  refetch(); // Refetch the list after edit
+};
+
+const handleClosed = () => {
+  closeAllDrawers();
+};
+
+
 const handleFilterUpdate = (criteria: FamilyLocationSearchCriteria) => {
   setFilters({
-    ...filters, // Keep existing filters
+    ...filters,
     locationType: criteria.locationType,
     locationSource: criteria.locationSource,
   });
@@ -108,7 +170,9 @@ const handleDeleteConfirm = (familyLocationId: string) => {
   deleteFamilyLocation(familyLocationId, {
     onSuccess: () => {
       showSnackbar(t('familyLocation.messages.deleteSuccess'), 'success');
-      emit('familyLocationDeleted');
+      emit('familyLocationDeleted'); // This should trigger refetch in parent if needed
+      closeAllDrawers(); // Close any open drawers after delete
+      refetch(); // Refetch the list after delete
     },
     onError: (error) => {
       showSnackbar(error.message || t('familyLocation.messages.deleteError'), 'error');

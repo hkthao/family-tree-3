@@ -1,83 +1,41 @@
 <template>
-  <v-form ref="formRef" @submit.prevent class="family-location-form">
+  <v-form ref="formRef" @submit.prevent>
     <v-row>
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="form.name"
-          :label="t('familyLocation.form.name')"
-          :rules="[v => !!v || t('common.validations.required')]"
-          required
-          data-testid="name"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-select
-          v-model="form.locationType"
-          :items="locationTypeOptions"
+      <v-col cols="12" md="12">
+        <v-select v-model="form.locationType" :items="locationTypeOptions"
           :label="t('familyLocation.form.locationType')"
-          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]"
-          required
-          data-testid="location-type"
-          item-title="title"
-          item-value="value"
-        ></v-select>
+          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]" required
+          data-testid="location-type" item-title="title" item-value="value"></v-select>
+      </v-col>
+      <v-col cols="12" md="12">
+        <v-text-field v-model="form.name" :label="t('familyLocation.form.name')"
+          :rules="[v => !!v || t('common.validations.required')]" required data-testid="name"></v-text-field>
       </v-col>
       <v-col cols="12">
-        <v-textarea
-          v-model="form.description"
-          :label="t('familyLocation.form.description')"
-          rows="2"
-          data-testid="description"
-        ></v-textarea>
+        <v-textarea v-model="form.description" :label="t('familyLocation.form.description')" rows="2"
+          data-testid="description"></v-textarea>
       </v-col>
       <v-col cols="12">
-        <v-text-field
-          v-model="form.address"
-          :label="t('familyLocation.form.address')"
-          data-testid="address"
-        ></v-text-field>
+        <v-text-field v-model="form.address" :label="t('familyLocation.form.address')"
+          data-testid="address"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model.number="form.latitude"
-          :label="t('familyLocation.form.latitude')"
-          type="number"
-          step="any"
-          data-testid="latitude"
-        ></v-text-field>
+        <v-text-field v-model.number="form.latitude" :label="t('familyLocation.form.latitude')" type="number" step="any"
+          data-testid="latitude"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model.number="form.longitude"
-          :label="t('familyLocation.form.longitude')"
-          type="number"
-          step="any"
-          data-testid="longitude"
-        ></v-text-field>
+        <v-text-field v-model.number="form.longitude" :label="t('familyLocation.form.longitude')" type="number"
+          step="any" data-testid="longitude"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select
-          v-model="form.accuracy"
-          :items="locationAccuracyOptions"
-          :label="t('familyLocation.form.accuracy')"
-          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]"
-          required
-          data-testid="accuracy"
-          item-title="title"
-          item-value="value"
-        ></v-select>
+        <v-select v-model="form.accuracy" :items="locationAccuracyOptions" :label="t('familyLocation.form.accuracy')"
+          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]" required
+          data-testid="accuracy" item-title="title" item-value="value"></v-select>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select
-          v-model="form.source"
-          :items="locationSourceOptions"
-          :label="t('familyLocation.form.source')"
-          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]"
-          required
-          data-testid="source"
-          item-title="title"
-          item-value="value"
-        ></v-select>
+        <v-select v-model="form.source" :items="locationSourceOptions" :label="t('familyLocation.form.source')"
+          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]" required
+          data-testid="source" item-title="title" item-value="value"></v-select>
       </v-col>
     </v-row>
   </v-form>
@@ -161,9 +119,3 @@ defineExpose({
   getFormData,
 });
 </script>
-
-<style scoped>
-.family-location-form {
-  padding: 16px;
-}
-</style>
