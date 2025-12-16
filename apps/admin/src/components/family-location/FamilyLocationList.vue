@@ -72,7 +72,7 @@ interface FamilyLocationListProps {
 }
 
 const props = defineProps<FamilyLocationListProps>();
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'update:search']);
 const { t } = useI18n();
 
 const headers = computed(() => [
