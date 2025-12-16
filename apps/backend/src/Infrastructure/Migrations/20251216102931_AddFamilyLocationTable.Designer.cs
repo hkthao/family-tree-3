@@ -11,8 +11,8 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251216064538_AddLocationAccuracyAndSourceToFamilyLocation")]
-    partial class AddLocationAccuracyAndSourceToFamilyLocation
+    [Migration("20251216102931_AddFamilyLocationTable")]
+    partial class AddFamilyLocationTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -430,12 +430,15 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
 
-                    b.Property<int>("Accuracy")
-                        .HasColumnType("int")
+                    b.Property<string>("Accuracy")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("accuracy");
 
                     b.Property<string>("Address")
-                        .HasColumnType("longtext")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("address");
 
                     b.Property<DateTime>("Created")
@@ -455,7 +458,8 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("deleted_date");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
                         .HasColumnName("description");
 
                     b.Property<Guid>("FamilyId")
@@ -478,8 +482,10 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("double")
                         .HasColumnName("latitude");
 
-                    b.Property<int>("LocationType")
-                        .HasColumnType("int")
+                    b.Property<string>("LocationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("location_type");
 
                     b.Property<double?>("Longitude")
@@ -488,11 +494,14 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("name");
 
-                    b.Property<int>("Source")
-                        .HasColumnType("int")
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("source");
 
                     b.HasKey("Id")
@@ -1731,7 +1740,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasOne("backend.Domain.Entities.Family", "Family")
                         .WithMany()
                         .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_family_locations_families_family_id");
 

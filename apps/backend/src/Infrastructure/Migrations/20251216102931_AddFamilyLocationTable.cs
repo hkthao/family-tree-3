@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace backend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLocationAccuracyAndSourceToFamilyLocation : Migration
+    public partial class AddFamilyLocationTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,17 +29,20 @@ namespace backend.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    name = table.Column<string>(type: "longtext", nullable: false)
+                    name = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    description = table.Column<string>(type: "longtext", nullable: true)
+                    description = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     latitude = table.Column<double>(type: "double", nullable: true),
                     longitude = table.Column<double>(type: "double", nullable: true),
-                    address = table.Column<string>(type: "longtext", nullable: true)
+                    address = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    location_type = table.Column<int>(type: "int", nullable: false),
-                    accuracy = table.Column<int>(type: "int", nullable: false),
-                    source = table.Column<int>(type: "int", nullable: false),
+                    location_type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    accuracy = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    source = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -59,7 +62,7 @@ namespace backend.Infrastructure.Migrations
                         column: x => x.family_id,
                         principalTable: "families",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 

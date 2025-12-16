@@ -30,6 +30,7 @@ public class FamilyLocationOrderingSpecification : Specification<FamilyLocation>
                     else
                         Query.OrderBy(l => l.Accuracy);
                     break;
+
                 case "source":
                     if (sortOrder?.ToLower() == "desc")
                         Query.OrderByDescending(l => l.Source);
