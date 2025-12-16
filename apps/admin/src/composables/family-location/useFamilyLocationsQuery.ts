@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
 import type { FamilyLocationFilter, ListOptions, FilterOptions } from '@/types';
-import { unref } from 'vue';
+import { unref, type Ref } from 'vue';
 
 export const useFamilyLocationsQuery = (
-  paginationOptions: ListOptions,
-  filters: FamilyLocationFilter, // Changed from Ref<FamilyLocationFilter>
+  paginationOptions: Ref<ListOptions>,
+  filters: Ref<FamilyLocationFilter>,
 ) => {
   const { familyLocation: familyLocationService } = useServices();
   return useQuery({
@@ -22,8 +22,8 @@ export const useFamilyLocationsQuery = (
 
       const filterOptions: FilterOptions = {
         familyId: familyId,
-        locationType: filters.locationType,
-        locationSource: filters.locationSource,
+        locationType: unref(filters).locationType,
+        locationSource: unref(filters).locationSource,
       };
 
       const response = await familyLocationService.search(listOptions, filterOptions);

@@ -786,6 +786,8 @@
   "login.rememberMe": "Ghi nhớ đăng nhập",
   "logout.message": "Vui lòng chờ trong giây lát...",
   "logout.title": "Đang đăng xuất...",
+  "map.viewTitle": "Bản đồ",
+  "map.allFamilyLocations": "Tất cả Địa điểm Gia đình",
   "map.title": "Chọn Tọa độ Bản đồ",
   "map.noAccessTokenWarning": "Mã truy cập Mapbox chưa được cấu hình. Vui lòng thêm VITE_MAPBOX_ACCESS_TOKEN vào .env.",
   "map.latitudeLabel": "Vĩ độ",

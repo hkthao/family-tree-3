@@ -1,5 +1,4 @@
-import { reactive, watch, unref } from 'vue';
-import type { Ref } from 'vue';
+import { ref, watch, unref, type Ref } from 'vue';
 import type { FamilyLocationFilter, ListOptions, LocationType, LocationSource } from '@/types';
 
 export interface FamilyLocationSearchCriteria {
@@ -8,10 +7,10 @@ export interface FamilyLocationSearchCriteria {
 }
 
 export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined> | string) => {
-  const filters = reactive<FamilyLocationFilter>({
+  const filters = ref<FamilyLocationFilter>({
     familyId: unref(familyId),
   });
-  const paginationOptions = reactive<ListOptions>({
+  const paginationOptions = ref<ListOptions>({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
@@ -21,26 +20,26 @@ export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined
   watch(
     () => unref(familyId),
     (newFamilyId) => {
-      filters.familyId = newFamilyId;
+      filters.value.familyId = newFamilyId;
     },
     { immediate: true },
   );
 
   const setFilters = (newFilters: FamilyLocationFilter) => {
-    Object.assign(filters, newFilters);
-    paginationOptions.page = 1; // Reset to first page on new filters
+    Object.assign(filters.value, newFilters);
+    paginationOptions.value.page = 1; // Reset to first page on new filters
   };
 
   const setPage = (page: number) => {
-    paginationOptions.page = page;
+    paginationOptions.value.page = page;
   };
 
   const setItemsPerPage = (itemsPerPage: number) => {
-    paginationOptions.itemsPerPage = itemsPerPage;
+    paginationOptions.value.itemsPerPage = itemsPerPage;
   };
 
   const setSortBy = (sortBy: Array<{ key: string; order: 'asc' | 'desc' }>) => {
-    paginationOptions.sortBy = sortBy;
+    paginationOptions.value.sortBy = sortBy;
   };
 
   return {

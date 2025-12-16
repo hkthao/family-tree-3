@@ -54,6 +54,9 @@
           <FamilyLocationListView :family-id="familyId" :allow-add="allowAdd" :allow-edit="allowEdit"
             :allow-delete="allowDelete" />
         </v-window-item>
+        <v-window-item value="map">
+          <FamilyMapView :family-id="familyId" />
+        </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
@@ -82,6 +85,7 @@ import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
 import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
+import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
@@ -132,7 +136,8 @@ const allTabDefinitions = computed(() => [
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
-  { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean }, // NEW
+  { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
+  { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));

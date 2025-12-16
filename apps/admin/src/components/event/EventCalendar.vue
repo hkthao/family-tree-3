@@ -121,6 +121,7 @@ const {
 
 <style>
 .text-solar-day {
+  margin-top: 5px;
   font-size: 20px;
 }
 
@@ -128,7 +129,7 @@ const {
   position: absolute;
   right: 0px;
   top: 0px;
-  font-size: 0.9em;
+  font-size: 0.8em;
 }
 
 .v-calendar.v-calendar-events .v-calendar-weekly__day {

@@ -516,6 +516,8 @@
   "familyLocation.source.geocoded": "Geocoded",
   "familyLocation.source.userselected": "User Selected",
   "familyLocation.form.chooseFromMap": "Choose from Map",
+  "map.viewTitle": "Map View",
+  "map.allFamilyLocations": "All Family Locations",
   "map.title": "Choose Map Coordinates",
   "map.noAccessTokenWarning": "Mapbox access token is not configured. Please add VITE_MAPBOX_ACCESS_TOKEN to .env.",
   "map.latitudeLabel": "Latitude",
