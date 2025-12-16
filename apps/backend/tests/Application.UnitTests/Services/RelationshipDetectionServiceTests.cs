@@ -1,6 +1,6 @@
-using backend.Application.AI.DTOs; // Added
-using backend.Application.Common.Interfaces; // Added
-using backend.Application.Common.Models; // Added
+using backend.Application.AI.DTOs;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -8,6 +8,8 @@ using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using MediatR; // Add this
+using Microsoft.Extensions.Logging; // Add this
 using Moq;
 using Xunit;
 
@@ -23,14 +25,24 @@ public class RelationshipDetectionServiceTests : TestBase
     private readonly RelationshipDetectionService _service;
     private readonly Mock<IRelationshipGraph> _mockRelationshipGraph;
     private readonly Mock<IAiGenerateService> _mockAiGenerateService;
-    private readonly Mock<IRelationshipRuleEngine> _mockRelationshipRuleEngine; // Added
+    private readonly Mock<IRelationshipRuleEngine> _mockRelationshipRuleEngine;
+    private readonly Mock<IMediator> _mockMediator; // New mock for IMediator
+    private readonly Mock<ILogger<RelationshipDetectionService>> _mockLogger; // New mock for ILogger
 
     public RelationshipDetectionServiceTests()
     {
         _mockRelationshipGraph = new Mock<IRelationshipGraph>();
         _mockAiGenerateService = new Mock<IAiGenerateService>();
-        _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>(); // Initialized
-        _service = new RelationshipDetectionService(_context, _mockRelationshipGraph.Object, _mockAiGenerateService.Object, _mockRelationshipRuleEngine.Object); // Updated constructor
+        _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>();
+        _mockMediator = new Mock<IMediator>(); // Initialize IMediator mock
+        _mockLogger = new Mock<ILogger<RelationshipDetectionService>>(); // Initialize ILogger mock
+        _service = new RelationshipDetectionService(
+            _context,
+            _mockRelationshipGraph.Object,
+            _mockAiGenerateService.Object,
+            _mockRelationshipRuleEngine.Object,
+            _mockMediator.Object, // Pass mediator mock
+            _mockLogger.Object); // Pass logger mock
     }
 
     /// <summary>

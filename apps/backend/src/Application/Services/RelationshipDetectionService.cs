@@ -8,19 +8,32 @@ using backend.Domain.ValueObjects;
 
 namespace backend.Application.Services;
 
+using backend.Application.Prompts.Queries.GetPromptById; // Add this
+using MediatR; // Add this using directive
+
+// ... other using directives
+
+using Microsoft.Extensions.Logging; // Add this using directive
+
+// ... other using directives
+
 public class RelationshipDetectionService : IRelationshipDetectionService
 {
     private readonly IApplicationDbContext _context;
     private readonly IRelationshipGraph _relationshipGraph;
     private readonly IAiGenerateService _aiGenerateService;
-    private readonly IRelationshipRuleEngine _ruleEngine; // Reintroduce IRelationshipRuleEngine
+    private readonly IRelationshipRuleEngine _ruleEngine;
+    private readonly IMediator _mediator;
+    private readonly ILogger<RelationshipDetectionService> _logger; // Inject ILogger
 
-    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IRelationshipRuleEngine ruleEngine) // Update constructor
+    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IRelationshipRuleEngine ruleEngine, IMediator mediator, ILogger<RelationshipDetectionService> logger)
     {
         _context = context;
         _relationshipGraph = relationshipGraph;
         _aiGenerateService = aiGenerateService;
-        _ruleEngine = ruleEngine; // Initialize ruleEngine
+        _ruleEngine = ruleEngine;
+        _mediator = mediator;
+        _logger = logger; // Initialize _logger
     }
 
     public async Task<RelationshipDetectionResult> DetectRelationshipAsync(Guid familyId, Guid memberAId, Guid memberBId, CancellationToken cancellationToken)
@@ -115,9 +128,25 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         // Fallback to AI call if local rules couldn't determine both relationships
         if (pathToB.NodeIds.Any() || pathToA.NodeIds.Any())
         {
+            const string RELATIONSHIP_AI_SYSTEM_PROMPT_CODE = "RELATIONSHIP_AI_SYSTEM_PROMPT";
+            string systemPromptContent = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp. Thông tin về giới tính của các thành viên (ví dụ: 'Tên (nam)' hoặc 'Tên (nữ)') đã được thêm vào mô tả để hỗ trợ suy luận. Hãy suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên, và cung cấp một mô tả NGẮN GỌN, SÚC TÍCH về mối quan hệ của A với B và B với A bằng ngôn ngữ tự nhiên. Tránh liệt kê lại chi tiết đường dẫn trừ khi cần thiết để làm rõ. Kết quả phải là một đối tượng JSON có một trường: 'InferredRelationship', chứa chuỗi mô tả này. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' trong chuỗi. Ví dụ JSON: { \"InferredRelationship\": \"A là cha của B và B là con của A.\" }"; // Fallback default
+
+            var promptQuery = new GetPromptByIdQuery { Code = RELATIONSHIP_AI_SYSTEM_PROMPT_CODE };
+            var promptResult = await _mediator.Send(promptQuery, cancellationToken);
+
+            if (promptResult.IsSuccess && promptResult.Value != null)
+            {
+                systemPromptContent = promptResult.Value.Content;
+                _logger.LogInformation("Successfully fetched system prompt '{PromptCode}' from database.", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE);
+            }
+            else
+            {
+                _logger.LogWarning("Could not fetch system prompt '{PromptCode}' from database. Falling back to default. Error: {Error}", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE, promptResult.Error);
+            }
+
             var aiRequest = new GenerateRequest
             {
-                SystemPrompt = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp. Hãy suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên, và cung cấp một mô tả NGẮN GỌN, SÚC TÍCH về mối quan hệ của A với B và B với A bằng ngôn ngữ tự nhiên. Tránh liệt kê lại chi tiết đường dẫn trừ khi cần thiết để làm rõ. Kết quả phải là một đối tượng JSON có một trường: 'InferredRelationship', chứa chuỗi mô tả này. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' trong chuỗi. Ví dụ JSON: { \"InferredRelationship\": \"A là cha của B và B là con của A.\" }",
+                SystemPrompt = systemPromptContent,
                 ChatInput = combinedPromptBuilder.ToString(),
                 SessionId = Guid.NewGuid().ToString(),
                 Metadata = new Dictionary<string, object>
@@ -151,6 +180,26 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         };
     }
 
+        // New helper method to get Vietnamese gender term
+    private string GetVietnameseGenderTerm(string? genderString)
+    {
+        if (string.IsNullOrWhiteSpace(genderString))
+        {
+            return "";
+        }
+
+        if (Enum.TryParse<Gender>(genderString, true, out var gender))
+        {
+            return gender switch
+            {
+                Gender.Male => "(nam)",
+                Gender.Female => "(nữ)",
+                _ => ""
+            };
+        }
+        return "";
+    }
+
     // New helper method for concise path description
     private string _DescribePathInNaturalLanguageConcise(RelationshipPath path, IReadOnlyDictionary<Guid, Member> allMembers)
     {
@@ -166,8 +215,12 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             var sourceMember = allMembers.GetValueOrDefault(path.Edges[i].SourceMemberId);
             var targetMember = allMembers.GetValueOrDefault(path.Edges[i].TargetMemberId);
 
-            string sourceName = sourceMember?.FullName ?? $"Thành viên không rõ ({path.Edges[i].SourceMemberId})";
-            string targetName = targetMember?.FullName ?? $"Thành viên không rõ ({path.Edges[i].TargetMemberId})";
+            string sourceName = $"{sourceMember?.FullName} {GetVietnameseGenderTerm(sourceMember?.Gender)}".Trim();
+            string targetName = $"{targetMember?.FullName} {GetVietnameseGenderTerm(targetMember?.Gender)}".Trim();
+
+            // Ensure we handle cases where sourceMember or targetMember might be null after trimming
+            if (string.IsNullOrWhiteSpace(sourceName)) sourceName = $"Thành viên không rõ ({path.Edges[i].SourceMemberId})";
+            if (string.IsNullOrWhiteSpace(targetName)) targetName = $"Thành viên không rõ ({path.Edges[i].TargetMemberId})";
 
             descriptionBuilder.Append($"{sourceName} là {GetVietnameseRelationshipTerm(path.Edges[i].Type)} của {targetName}");
             if (i < path.Edges.Count - 1)
