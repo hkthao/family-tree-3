@@ -234,6 +234,7 @@
   "common.validations.email": "Invalid email address.",
   "common.validations.maxLength": "Cannot exceed {max} characters.",
   "common.validations.required": "Required.",
+  "common.errors.noPermission": "You do not have permission to perform this action.",
   "common.viewDetails": "View Details",
   "confirmDelete.message": "Are you sure you want to delete {name}?",
   "confirmDelete.title": "Confirm Deletion",

@@ -6,14 +6,14 @@
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('ai-create')">
+        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('ai-create')">
           <v-tooltip :text="t('member.list.action.aiCreate')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')"
+        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')"
           data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
@@ -76,19 +76,19 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <div v-if="canPerformActions">
+      <div class="d-flex ga-2" v-if="props.allowEdit || props.allowDelete">
         <v-tooltip :text="t('member.list.action.edit')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)"
-              data-testid="edit-member-button" aria-label="Edit">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="editMember(item)"
+              data-testid="edit-member-button" aria-label="Edit" v-if="props.allowEdit">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
         <v-tooltip :text="t('member.list.action.delete')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)"
-              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="confirmDelete(item)"
+              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete" v-if="props.allowDelete">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
@@ -115,17 +115,24 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const { isAdmin, isFamilyManager } = useAuth();
 
+const canCreateGlobal = computed(() => {
+  return !props.readOnly && isAdmin.value;
+});
+
+const canPerformItemActions = (item: Member) => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value(item.familyId));
+};
+
 const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
   search?: string; 
   readOnly?: boolean; 
+  allowAdd?: boolean;
+  allowEdit?: boolean;
+  allowDelete?: boolean;
 }>();
-
-const canPerformActions = computed(() => {
-  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
-});
 
 const emit = defineEmits([
   'update:options',
@@ -215,7 +222,7 @@ const headers = computed<DataTableHeader[]>(() => {
     },
   ];
 
-  if (canPerformActions.value) {
+  if (props.allowEdit || props.allowDelete) {
     baseHeaders.push({
       title: t('member.list.headers.actions'),
       key: 'actions',

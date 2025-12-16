@@ -19,20 +19,19 @@
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyDetailView :family-id="familyId" :read-only="readOnlyValue"
-            @open-edit-drawer="handleOpenEditDrawer" />
+          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer" />
         </v-window-item>
         <v-window-item value="timeline">
-          <EventTimeline :family-id="familyId" :read-only="readOnlyValue" />
+          <EventTimeline :family-id="familyId" />
         </v-window-item>
         <v-window-item value="calendar">
           <EventCalendar :family-id="familyId" />
         </v-window-item>
         <v-window-item value="events">
-          <EventListView :family-id="familyId" :read-only="readOnlyValue" />
+          <EventListView :family-id="familyId" />
         </v-window-item>
         <v-window-item value="member-stories">
-          <MemberStoryListView :family-id="familyId" :read-only="readOnlyValue" />
+          <MemberStoryListView :family-id="familyId" />
         </v-window-item>
         <v-window-item value="family-tree">
           <TreeChart :family-id="familyId" />
@@ -52,20 +51,17 @@
         </v-window-item>
         <!-- NEW: Family Location Tab -->
         <v-window-item value="locations">
-          <FamilyLocationListView :family-id="familyId" :read-only="readOnlyValue" />
+          <FamilyLocationListView :family-id="familyId" :allow-add="allowAdd" :allow-edit="allowEdit"
+            :allow-delete="allowDelete" />
         </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
 
   <!-- Edit Family Drawer -->
-  <BaseCrudDrawer :model-value="showEditDrawer" @update:model-value="showEditDrawer = $event" @close="handleCloseEditDrawer">
-    <FamilyEditView
-      v-if="familyId"
-      :family-id="familyId"
-      @close="handleCloseEditDrawer"
-      @saved="handleFamilySaved"
-    />
+  <BaseCrudDrawer :model-value="showEditDrawer" @update:model-value="showEditDrawer = $event"
+    @close="handleCloseEditDrawer">
+    <FamilyEditView v-if="familyId" :family-id="familyId" @close="handleCloseEditDrawer" @saved="handleFamilySaved" />
   </BaseCrudDrawer>
 
 
@@ -95,7 +91,10 @@ const { isAdmin, isFamilyManager } = useAuth();
 const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);
-const readOnlyValue = true;
+
+const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
 
 const showEditDrawer = ref(false);
 

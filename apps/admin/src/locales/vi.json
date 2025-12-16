@@ -244,6 +244,7 @@
   "common.validations.email": "Email không hợp lệ.",
   "common.validations.maxLength": "Không được vượt quá {max} ký tự.",
   "common.validations.required": "Bắt buộc.",
+  "common.errors.noPermission": "Bạn không có quyền thực hiện hành động này.",
   "common.viewDetails": "Xem chi tiết",
   "confirmDelete.message": "Bạn có chắc muốn xoá {name} không?",
   "confirmDelete.title": "Xác nhận Xóa",

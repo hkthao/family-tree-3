@@ -4,17 +4,20 @@
     <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
+      @ai-create="navigateToAICreateMember" :read-only="props.readOnly"
+      :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete">
     </MemberList>
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
       <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId" @close="handleMemberClosed"
-        @saved="handleMemberSaved" />
+        @saved="handleMemberSaved"
+        :allow-save="allowEdit" />
     </BaseCrudDrawer>
     <!-- Add Member Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
       <MemberAddView v-if="addDrawer" :family-id="props.familyId"
-        @close="handleMemberClosed" @saved="handleMemberSaved" />
+        @close="handleMemberClosed" @saved="handleMemberSaved"
+        :allow-save="allowAdd" />
     </BaseCrudDrawer>
     <!-- Detail Member Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
@@ -24,7 +27,7 @@
 
     <!-- AI Create Member Drawer -->
     <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
+      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" :allow-save="allowAdd" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -34,15 +37,15 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-
 import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { removeDiacritics } from '@/utils/string.utils';
 import { useMembersQuery, useDeleteMemberMutation, useMemberDataManagement } from '@/composables/member';
 import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
+import { useAuth } from '@/composables'; // Import useAuth
 
 interface MemberListViewProps {
   familyId: string;
@@ -51,6 +54,11 @@ interface MemberListViewProps {
 const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const queryClient = useQueryClient(); // Initialize useQueryClient
+const { isAdmin, isFamilyManager } = useAuth();
+
+const allowAdd = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowEdit = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowDelete = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
 
 const {
   searchQuery,

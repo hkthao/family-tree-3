@@ -1,49 +1,27 @@
 <template>
   <div data-testid="family-location-list-view">
     <FamilyLocationSearch @update:filters="handleFilterUpdate" />
-    <FamilyLocationList
-      :items="familyLocations"
-      :total-items="totalItems"
-      :loading="isLoadingFamilyLocations || isDeletingFamilyLocation"
-      @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer"
-      @edit="openEditDrawer"
-      @delete="confirmDelete"
-      @create="openAddDrawer()"
-      :read-only="props.readOnly"
-    >
-    </FamilyLocationList>
+    <FamilyLocationList :items="familyLocations" :total-items="totalItems"
+      :loading="isLoadingFamilyLocations || isDeletingFamilyLocation" @update:options="handleListOptionsUpdate"
+      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
+      :family-id="props.familyId"> </FamilyLocationList>
 
     <!-- Add Family Location Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleClosed">
-      <FamilyLocationAddView
-        ref="familyLocationAddViewRef"
-        v-if="addDrawer"
-        :family-id="props.familyId"
-        @close="handleClosed"
-        @saved="handleAdded"
-      />
+      <FamilyLocationAddView ref="familyLocationAddViewRef" v-if="addDrawer" :family-id="props.familyId"
+        @close="handleClosed" @saved="handleAdded" />
     </BaseCrudDrawer>
 
     <!-- Detail Family Location Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleClosed">
-      <FamilyLocationDetailView
-        v-if="selectedItemId && detailDrawer"
-        :family-location-id="selectedItemId"
-        @close="handleClosed"
-        @edit-family-location="openEditDrawer"
-      />
+      <FamilyLocationDetailView v-if="selectedItemId && detailDrawer" :family-location-id="selectedItemId"
+        @close="handleClosed" @edit-family-location="openEditDrawer" />
     </BaseCrudDrawer>
 
     <!-- Edit Family Location Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleClosed">
-      <FamilyLocationEditView
-        ref="familyLocationEditViewRef"
-        v-if="selectedItemId && editDrawer"
-        :family-location-id="selectedItemId"
-        @close="handleClosed"
-        @saved="handleEdited"
-      />
+      <FamilyLocationEditView ref="familyLocationEditViewRef" v-if="selectedItemId && editDrawer"
+        :family-location-id="selectedItemId" @close="handleClosed" @saved="handleEdited" />
     </BaseCrudDrawer>
   </div>
 </template>
