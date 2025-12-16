@@ -17,6 +17,14 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
+      <v-btn
+        color="info"
+        data-testid="button-select-from-map"
+        @click="handleOpenMapPicker"
+        :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation"
+      >
+        {{ t('familyLocation.form.chooseFromMap') }}
+      </v-btn>
       <v-btn color="grey" @click="closeForm" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
         t('common.cancel')
       }}</v-btn>
@@ -45,7 +53,7 @@ interface FamilyLocationEditViewProps {
 }
 
 const props = defineProps<FamilyLocationEditViewProps>();
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits(['close', 'saved', 'open-map-picker']); // Add open-map-picker emit
 
 const familyLocationFormRef = ref<InstanceType<typeof FamilyLocationForm> | null>(null);
 
@@ -88,4 +96,24 @@ const handleUpdateFamilyLocation = async () => {
 const closeForm = () => {
   emit('close');
 };
+
+const handleOpenMapPicker = () => {
+  // Get current coordinates from the form to pre-fill the map picker
+  const currentFormData = familyLocationFormRef.value?.getFormData();
+  emit('open-map-picker', {
+    latitude: currentFormData?.latitude,
+    longitude: currentFormData?.longitude,
+  });
+};
+
+// Function to set coordinates received from the map picker
+const setCoordinates = (coords: { latitude: number; longitude: number }) => {
+  if (familyLocationFormRef.value) {
+    familyLocationFormRef.value.setCoordinates(coords.latitude, coords.longitude);
+  }
+};
+
+defineExpose({
+  setCoordinates, // Expose setCoordinates so parent can call it
+});
 </script>

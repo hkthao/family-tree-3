@@ -9,6 +9,14 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
+      <v-btn
+        color="info"
+        data-testid="button-select-from-map"
+        @click="handleOpenMapPicker"
+        :disabled="isAddingFamilyLocation"
+      >
+        {{ t('familyLocation.form.chooseFromMap') }}
+      </v-btn>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isAddingFamilyLocation">{{ t('common.cancel') }}</v-btn>
       <v-btn color="primary" @click="handleAddFamilyLocation" data-testid="save-family-location-button" :loading="isAddingFamilyLocation" :disabled="isAddingFamilyLocation">{{
         t('common.save') }}</v-btn>
@@ -18,16 +26,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { FamilyLocationForm } from '@/components/family-location'; // Assuming index.ts re-exports it
+import { FamilyLocationForm } from '@/components/family-location';
 import type { FamilyLocation } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddFamilyLocationMutation } from '@/composables/family-location'; // Import new composable
+import { useAddFamilyLocationMutation } from '@/composables/family-location';
 
 interface FamilyLocationAddViewProps {
   familyId: string;
 }
 const props = defineProps<FamilyLocationAddViewProps>();
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits(['close', 'saved', 'open-map-picker']); // Add open-map-picker emit
 
 const familyLocationFormRef = ref<InstanceType<typeof FamilyLocationForm> | null>(null);
 const { t } = useI18n();
@@ -58,4 +66,24 @@ const handleAddFamilyLocation = async () => {
 const closeForm = () => {
   emit('close');
 };
+
+const handleOpenMapPicker = () => {
+  // Get current coordinates from the form to pre-fill the map picker
+  const currentFormData = familyLocationFormRef.value?.getFormData();
+  emit('open-map-picker', {
+    latitude: currentFormData?.latitude,
+    longitude: currentFormData?.longitude,
+  });
+};
+
+// Function to set coordinates received from the map picker
+const setCoordinates = (coords: { latitude: number; longitude: number }) => {
+  if (familyLocationFormRef.value) {
+    familyLocationFormRef.value.setCoordinates(coords.latitude, coords.longitude);
+  }
+};
+
+defineExpose({
+  setCoordinates, // Expose setCoordinates so parent can call it
+});
 </script>

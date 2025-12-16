@@ -114,8 +114,15 @@ const getFormData = (): FamilyLocation => {
   return { ...form };
 };
 
+const setCoordinates = (latitude: number, longitude: number) => {
+  form.latitude = latitude;
+  form.longitude = longitude;
+  form.source = LocationSource.UserSelected; // Set source to UserSelected when coordinates are chosen from map
+};
+
 defineExpose({
   validate,
   getFormData,
+  setCoordinates, // Expose setCoordinates
 });
 </script>

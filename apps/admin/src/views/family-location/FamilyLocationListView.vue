@@ -14,13 +14,25 @@
     >
     </FamilyLocationList>
 
+    <!-- Map Picker Drawer -->
+    <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
+      <MapView
+        v-if="mapDrawer"
+        :initial-coordinates="initialMapCoordinates"
+        @update:coordinates="handleMapCoordinatesSelected"
+        @close="closeMapDrawer"
+      />
+    </BaseCrudDrawer>
+
     <!-- Add Family Location Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleClosed">
       <FamilyLocationAddView
+        ref="familyLocationAddViewRef"
         v-if="addDrawer"
         :family-id="props.familyId"
         @close="handleClosed"
         @saved="handleAdded"
+        @open-map-picker="handleOpenMapPicker"
       />
     </BaseCrudDrawer>
 
@@ -37,10 +49,12 @@
     <!-- Edit Family Location Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleClosed">
       <FamilyLocationEditView
+        ref="familyLocationEditViewRef"
         v-if="selectedItemId && editDrawer"
         :family-location-id="selectedItemId"
         @close="handleClosed"
         @saved="handleEdited"
+        @open-map-picker="handleOpenMapPicker"
       />
     </BaseCrudDrawer>
   </div>
@@ -65,6 +79,7 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import FamilyLocationAddView from '@/views/family-location/FamilyLocationAddView.vue';
 import FamilyLocationDetailView from '@/views/family-location/FamilyLocationDetailView.vue';
 import FamilyLocationEditView from '@/views/family-location/FamilyLocationEditView.vue';
+import MapView from '@/views/map/MapView.vue'; // Import MapView
 
 interface FamilyLocationListViewProps {
   familyId: string;
@@ -103,7 +118,7 @@ const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = us
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-// Drawer related logic
+// CRUD Drawer related logic for Add, Detail, Edit
 const {
   addDrawer,
   detailDrawer,
@@ -114,6 +129,35 @@ const {
   openEditDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
+
+// Map Drawer related logic
+const {
+  addDrawer: mapDrawer, // Use alias for map drawer
+  openAddDrawer: openMapDrawer,
+  closeAllDrawers: closeMapDrawer,
+} = useCrudDrawer<string>();
+
+const initialMapCoordinates = ref<{ latitude?: number; longitude?: number }>({});
+
+// Refs for the Add/Edit views to call their exposed methods
+const familyLocationAddViewRef = ref<InstanceType<typeof FamilyLocationAddView> | null>(null);
+const familyLocationEditViewRef = ref<InstanceType<typeof FamilyLocationEditView> | null>(null);
+
+
+const handleOpenMapPicker = (coordinates: { latitude?: number; longitude?: number }) => {
+  initialMapCoordinates.value = coordinates;
+  openMapDrawer();
+};
+
+const handleMapCoordinatesSelected = (coords: { latitude: number; longitude: number }) => {
+  if (addDrawer.value && familyLocationAddViewRef.value) {
+    familyLocationAddViewRef.value.setCoordinates(coords);
+  } else if (editDrawer.value && familyLocationEditViewRef.value) {
+    familyLocationEditViewRef.value.setCoordinates(coords);
+  }
+  closeMapDrawer();
+};
+
 
 const handleAdded = () => {
   closeAllDrawers();
