@@ -16,7 +16,7 @@
 
     <!-- Map Picker Drawer -->
     <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
-      <MapView
+       <MapView
         v-if="mapDrawer"
         :initial-coordinates="initialMapCoordinates"
         @update:coordinates="handleMapCoordinatesSelected"
