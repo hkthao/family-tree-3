@@ -1,12 +1,14 @@
 <template>
   <v-card :elevation="0">
-    <v-card-title class="text-center">
-      <span class="text-h5">{{ t('map.title') }}</span>
+    <v-card-title class="text-center text-uppercase">
+      {{ t('map.title') }}
     </v-card-title>
     <v-card-text>
       <v-alert v-if="!mapboxAccessToken" type="warning" prominent class="mb-4">
         {{ t('map.noAccessTokenWarning') }}
       </v-alert>
+      <v-text-field v-model="searchQuery" :label="t('map.searchLocation')" outlined clearable
+        @keydown.enter="searchLocation" class="mb-4"></v-text-field>
       <MapPicker v-if="mapboxAccessToken" :mapbox-access-token="mapboxAccessToken"
         :initial-center="selectedCoordinates.latitude && selectedCoordinates.longitude ? [selectedCoordinates.longitude, selectedCoordinates.latitude] : undefined"
         @update:coordinates="handleCoordinatesUpdate" />
@@ -42,10 +44,46 @@ import { getEnvVariable } from '@/utils/api.util';
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 const mapboxAccessToken = ref(getEnvVariable('VITE_MAPBOX_ACCESS_TOKEN'));
+const searchQuery = ref('');
+const searchResultCoordinates = ref<{ latitude: number; longitude: number }>({ latitude: 0, longitude: 0 });
 const selectedCoordinates = ref({ latitude: 0, longitude: 0 });
+
 const handleCoordinatesUpdate = (coords: { longitude: number; latitude: number }) => {
   selectedCoordinates.value = coords;
 };
+
+const searchLocation = async () => {
+  if (!searchQuery.value) {
+    showSnackbar(t('map.searchQueryEmpty'), 'warning');
+    return;
+  }
+  if (!mapboxAccessToken.value) {
+    showSnackbar(t('map.noAccessTokenWarning'), 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+        searchQuery.value
+      )}.json?access_token=${mapboxAccessToken.value}`
+    );
+    const data = await response.json();
+
+    if (data.features && data.features.length > 0) {
+      const [longitude, latitude] = data.features[0].center;
+      searchResultCoordinates.value = { latitude, longitude };
+      selectedCoordinates.value = { latitude, longitude }; // Update selectedCoordinates as well
+      showSnackbar(t('map.searchSuccess'), 'success');
+    } else {
+      showSnackbar(t('map.searchNoResults'), 'info');
+    }
+  } catch (error) {
+    console.error('Error searching for location:', error);
+    showSnackbar(t('map.searchError'), 'error');
+  }
+};
+
 const copyCoordinates = async () => {
   const coordsText = `${selectedCoordinates.value.latitude}, ${selectedCoordinates.value.longitude}`;
   try {

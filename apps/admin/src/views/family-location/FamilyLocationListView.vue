@@ -150,6 +150,8 @@ const handleOpenMapPicker = (coordinates: { latitude?: number; longitude?: numbe
 };
 
 const handleMapCoordinatesSelected = (coords: { latitude: number; longitude: number }) => {
+  console.log(coords);
+  
   if (addDrawer.value && familyLocationAddViewRef.value) {
     familyLocationAddViewRef.value.setCoordinates(coords);
   } else if (editDrawer.value && familyLocationEditViewRef.value) {
