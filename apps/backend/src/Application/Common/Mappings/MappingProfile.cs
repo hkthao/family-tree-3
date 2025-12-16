@@ -10,6 +10,8 @@ using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyLinks.Queries;
+using backend.Application.FamilyLocations; // Added for FamilyLocationDto and FamilyLocationListDto
+using backend.Application.FamilyLocations.Commands; // Added for CreateFamilyLocationCommand and UpdateFamilyLocationCommand
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
@@ -150,5 +152,11 @@ public class MappingProfile : Profile
 
         // Mapping for MemberStoryImage to MemberStoryImageDto
         CreateMap<MemberStoryImage, MemberStoryImageDto>();
+
+        // FamilyLocation mappings
+        CreateMap<FamilyLocation, FamilyLocationDto>();
+        CreateMap<FamilyLocation, FamilyLocationListDto>();
+        CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
+        CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
     }
 }
