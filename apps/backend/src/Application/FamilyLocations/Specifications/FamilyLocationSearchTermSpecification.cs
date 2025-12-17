@@ -9,9 +9,11 @@ public class FamilyLocationSearchTermSpecification : Specification<FamilyLocatio
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            Query.Where(l => l.Name.Contains(searchTerm) ||
-                             (l.Description != null && l.Description.Contains(searchTerm)) ||
-                             (l.Address != null && l.Address.Contains(searchTerm)));
+            var lowerSearchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+
+            Query.Where(l => l.Name.ToLower().Contains(lowerSearchTerm) || // Convert Name to lowercase
+                             (l.Description != null && l.Description.ToLower().Contains(lowerSearchTerm)) || // Convert Description to lowercase
+                             (l.Address != null && l.Address.ToLower().Contains(lowerSearchTerm))); // Convert Address to lowercase
         }
     }
 }
