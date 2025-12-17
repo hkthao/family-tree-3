@@ -1,16 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/vue-query';
+import { QueryClient, QueryClientProvider, VUE_QUERY_CLIENT } from '@tanstack/vue-query';
 import { useMemoryItemEdit } from '@/composables/memory-item/useMemoryItemEdit';
 import type { MemoryItem } from '@/types';
 import type { MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
 import { ref as vueRef, computed } from 'vue';
+import { ServicesInjectionKey } from '@/plugins/services.plugin'; // Import ServicesInjectionKey
+import type { IMemoryItemService } from '@/services/memory-item/memory-item.service.interface'; // Import IMemoryItemService
 
 // Mock dependencies
 const mockT = vi.fn((key: string) => key);
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(() => ({
     t: mockT,
+  })),
+  createI18n: vi.fn(() => ({ // Mock createI18n
+    install: vi.fn(), // Provide a mock install function
   })),
 }));
 
@@ -22,18 +27,24 @@ vi.mock('@/composables', () => ({
 }));
 
 // Mock functions from @/composables/memory-item
+const mockUseMemoryItemQuerySpy = vi.fn();
+const mockUseUpdateMemoryItemMutationSpy = vi.fn();
+const mockUpdateMemoryItemMutateSpy = vi.fn();
+const mockUpdateMemoryItemIsPending = vueRef(false);
+const mockQueryReturnValue = vueRef({ data: null, isLoading: false, error: null });
+
 vi.mock('@/composables/memory-item', () => ({
-  useMemoryItemQuery: vi.fn(),
-  useUpdateMemoryItemMutation: vi.fn(),
+  useMemoryItemQuery: mockUseMemoryItemQuerySpy.mockImplementation(() => mockQueryReturnValue.value),
+  useUpdateMemoryItemMutation: vi.fn(() => ({
+    mutate: mockUpdateMemoryItemMutateSpy,
+    isPending: mockUpdateMemoryItemIsPending,
+  })),
 }));
 
-let mockUseMemoryItemQuerySpy: ReturnType<typeof vi.fn>;
-let mockUseUpdateMemoryItemMutationSpy: ReturnType<typeof vi.fn>;
-let mockUpdateMemoryItemMutateSpy: ReturnType<typeof vi.fn>;
-let mockUpdateMemoryItemIsPending: ReturnType<typeof vueRef>;
-let mockQueryReturnValue: ReturnType<typeof vueRef>;
-
 const queryClient = new QueryClient();
+
+let mockMemoryItemService: IMemoryItemService; // Declare mockMemoryItemService
+let mockAppServices: { memoryItem: IMemoryItemService }; // Declare mockAppServices
 
 function mountComposable(
   familyId: string = 'test-family-id',
@@ -50,7 +61,11 @@ function mountComposable(
     },
   }, {
     global: {
-      plugins: [[QueryClientProvider, { client: queryClient }]],
+      // plugins: [[QueryClientProvider, { client: queryClient }]], // Remove QueryClientProvider from plugins
+      provide: {
+        [ServicesInjectionKey as symbol]: mockAppServices, // Provide mock AppServices
+        [VUE_QUERY_CLIENT]: queryClient, // Provide queryClient directly using the correct injection key
+      },
     },
   });
   return composable!;
@@ -64,6 +79,23 @@ describe('useMemoryItemEdit', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
+    // Define mock MemoryItemService
+    mockMemoryItemService = {
+      getById: vi.fn(),
+      search: vi.fn(),
+      add: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      getByIds: vi.fn(),
+    };
+
+    // Define mock AppServices
+    mockAppServices = {
+      memoryItem: mockMemoryItemService,
+      // Add other services if useMemoryItemEdit or its dependencies require them
+      // For now, only memoryItem is directly relevant to the current error.
+    } as any;
+
     mockFormRef = vueRef<MemoryItemFormExpose | null>({
       validate: vi.fn(() => Promise.resolve(true)),
       getFormData: vi.fn(() => ({
@@ -76,23 +108,11 @@ describe('useMemoryItemEdit', () => {
     mockOnSaveSuccess = vi.fn();
     mockOnCancel = vi.fn();
 
-    const memoryItemModule = await import('@/composables/memory-item');
-
-    mockUseMemoryItemQuerySpy = vi.spyOn(memoryItemModule, 'useMemoryItemQuery');
-    mockUseUpdateMemoryItemMutationSpy = vi.spyOn(memoryItemModule, 'useUpdateMemoryItemMutation');
-
-    mockQueryReturnValue = vueRef({ data: null, isLoading: false, error: null });
-    mockUpdateMemoryItemIsPending = vueRef(false);
-    mockUpdateMemoryItemMutateSpy = vi.fn();
-
-    mockUseMemoryItemQuerySpy.mockImplementation(() => {
-      return mockQueryReturnValue.value;
-    });
-
-    mockUseUpdateMemoryItemMutationSpy.mockImplementation(() => ({
-      mutate: mockUpdateMemoryItemMutateSpy,
-      isPending: mockUpdateMemoryItemIsPending,
-    }));
+    // Clear and reset global mocks
+    mockUseMemoryItemQuerySpy.mockClear();
+    mockUpdateMemoryItemMutateSpy.mockClear();
+    mockUpdateMemoryItemIsPending.value = false;
+    mockQueryReturnValue.value = { data: null, isLoading: false, error: null };
   });
 
   it('should initialize with default values and fetch memory item', () => {
