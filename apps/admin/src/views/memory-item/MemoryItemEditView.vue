@@ -10,7 +10,7 @@
         ref="memoryItemFormRef"
         v-if="memoryItem"
         :initial-memory-item-data="memoryItem"
-        :family-id="_familyId"
+        :family-id="props.familyId"
         :read-only="false"
       />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
@@ -35,19 +35,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type PropType } from 'vue';
+import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
-import type { MemoryItem } from '@/types';
-import { useGlobalSnackbar } from '@/composables';
-import { useMemoryItemQuery, useUpdateMemoryItemMutation } from '@/composables/memory-item';
+import MemoryItemForm, { type MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
 
-interface MemoryItemFormExposed {
-  validate: () => Promise<boolean>;
-  getFormData: () => MemoryItem;
-}
+import { useMemoryItemEdit } from '@/composables/memory-item/useMemoryItemEdit';
 
-const { familyId: _familyId, memoryItemId: _memoryItemId } = defineProps({
+const props = defineProps({
   familyId: {
     type: String as PropType<string>,
     required: true,
@@ -60,52 +54,21 @@ const { familyId: _familyId, memoryItemId: _memoryItemId } = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
-const memoryItemFormRef = ref<MemoryItemFormExposed | null>(null);
+const memoryItemFormRef: Ref<MemoryItemFormExpose | null> = ref(null);
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
 
-const { data: memoryItem, isLoading: isLoadingMemoryItem } = useMemoryItemQuery(
-  _familyId,
-  _memoryItemId,
-);
-const { mutate: updateMemoryItem, isPending: isUpdatingMemoryItem } = useUpdateMemoryItemMutation();
-const isLoading = computed(() => isLoadingMemoryItem.value);
-
-const handleUpdateItem = async () => {
-  if (!memoryItemFormRef.value) return;
-  const isValid = await memoryItemFormRef.value.validate();
-  if (!isValid) return;
-
-  const itemData = memoryItemFormRef.value.getFormData();
-  if (!itemData.id) {
-    showSnackbar(
-      t('memoryItem.messages.saveError'),
-      'error',
-    );
-    return;
-  }
-
-  updateMemoryItem(itemData, {
-    onSuccess: () => {
-      showSnackbar(
-        t('memoryItem.messages.updateSuccess'),
-        'success',
-      );
-      emit('saved');
-    },
-    onError: (error) => {
-      showSnackbar(
-        error.message || t('memoryItem.messages.saveError'),
-        'error',
-      );
-    },
-  });
-};
-
-const closeForm = () => {
-  emit('close');
-};
+const { memoryItem, isLoading, isUpdatingMemoryItem, handleUpdateItem, closeForm } = useMemoryItemEdit({
+  familyId: props.familyId,
+  memoryItemId: props.memoryItemId,
+  onSaveSuccess: () => {
+    emit('saved');
+  },
+  onCancel: () => {
+    emit('close');
+  },
+  formRef: memoryItemFormRef,
+});
 </script>
 
 <style scoped></style>
