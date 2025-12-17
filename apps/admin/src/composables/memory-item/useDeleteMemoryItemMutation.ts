@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
-import { useServices } from '@/plugins/services.plugin'; // Correct import
+import { useServices } from '@/plugins/services.plugin';
 
 export const useDeleteMemoryItemMutation = () => {
-  const services = useServices(); // Correct way to access services
+  const services = useServices();
   const { showSnackbar } = useGlobalSnackbar();
   const { t } = useI18n();
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { familyId: string; id: string }>({
-    mutationFn: async ({ familyId, id }) => {
-      const result = await services.memoryItem.deleteMemoryItem(familyId, id);
+    mutationFn: async ({ id }) => {
+      const result = await services.memoryItem.delete(id);
       if (result.ok) {
         return result.value;
       }
@@ -20,10 +20,12 @@ export const useDeleteMemoryItemMutation = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['family', variables.familyId, 'memory-items'],
+        queryKey: ['memory-items', { familyId: variables.familyId }],
       });
-      // Optionally, invalidate detail query for the deleted item
-      // queryClient.invalidateQueries({ queryKey: ['family', variables.familyId, 'memory-item', variables.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['memory-items', variables.id],
+        exact: true
+      });
     },
   });
 };

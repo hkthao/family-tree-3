@@ -2,37 +2,33 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem } from '@/types';
-import { useServices } from '@/plugins/services.plugin'; // Correct import
+import { useServices } from '@/plugins/services.plugin';
 
 export const useUpdateMemoryItemMutation = () => {
-  const services = useServices(); // Correct way to access services
+  const services = useServices();
   const { showSnackbar } = useGlobalSnackbar();
   const { t } = useI18n();
   const queryClient = useQueryClient();
 
-  return useMutation<MemoryItem, Error, Omit<MemoryItem, 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>>({
+  return useMutation<MemoryItem, Error, MemoryItem>({
     mutationFn: async (updatedMemoryItem) => {
       if (!updatedMemoryItem.familyId) {
         throw new Error(t('memoryItem.messages.noFamilyId'));
       }
-      const result = await services.memoryItem.updateMemoryItem(
-        updatedMemoryItem.familyId,
-        updatedMemoryItem,
-      );
+      const result = await services.memoryItem.update(updatedMemoryItem);
       if (result.ok) {
         return result.value;
       }
       showSnackbar(result.error?.message || t('memoryItem.messages.saveError'), 'error');
       throw result.error;
     },
-    onSuccess: (data, variables) => {
-      // Invalidate list query
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ['family', variables.familyId, 'memory-items'],
+        queryKey: ['memory-items', { familyId: data.familyId }],
       });
-      // Invalidate detail query for the updated item
       queryClient.invalidateQueries({
-        queryKey: ['family', variables.familyId, 'memory-item', variables.id],
+        queryKey: ['memory-items', data.id],
+        exact: true
       });
     },
   });

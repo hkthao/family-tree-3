@@ -1,7 +1,5 @@
-import type { MemoryItem, ListOptions, Paginated } from '@/types'; // Changed PaginatedList to Paginated
-import type { Result } from '@/types/result.d';
-import type { EmotionalTag } from '@/types/enums';
-import type { ApiError } from '@/types/apiError.d'; // Import ApiError
+import type { MemoryItem, ListOptions, Paginated, Result, ApiError, EmotionalTag } from '@/types';
+import type { ICrudService } from '@/services/common/crud.service.interface';
 
 export interface MemoryItemFilter {
   searchTerm?: string;
@@ -11,14 +9,9 @@ export interface MemoryItemFilter {
   memberId?: string;
 }
 
-export interface IMemoryItemService {
-  searchMemoryItems(
-    familyId: string,
-    options: ListOptions,
-    filters: MemoryItemFilter,
-  ): Promise<Result<Paginated<MemoryItem>, ApiError>>; // Added type arguments to Result
-  getMemoryItemById(familyId: string, id: string): Promise<Result<MemoryItem, ApiError>>; // Added type arguments to Result
-  createMemoryItem(familyId: string, memoryItem: Omit<MemoryItem, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy' | 'media' | 'persons'> & { media?: { mediaType: number, url: string }[], persons?: { memberId: string }[] }): Promise<Result<string, ApiError>>; // Added type arguments to Result
-  updateMemoryItem(familyId: string, memoryItem: Omit<MemoryItem, 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>): Promise<Result<MemoryItem, ApiError>>; // Added type arguments to Result
-  deleteMemoryItem(familyId: string, id: string): Promise<Result<void, ApiError>>; // Added type arguments to Result
+export interface IMemoryItemService extends ICrudService<MemoryItem> {
+  // `ICrudService` already provides search, getById, add, update, delete, getByIds
+  // If specific search functionality with MemoryItemFilter is needed, it would be added here
+  // but for now, we're strictly following the user's instruction to be like family-location
+  // which implies no additional methods beyond ICrudService.
 }

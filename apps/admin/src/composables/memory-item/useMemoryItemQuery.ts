@@ -1,32 +1,29 @@
-import { type Ref, computed } from 'vue'; // Added computed
+import { type Ref, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem } from '@/types';
-import { useServices } from '@/plugins/services.plugin'; // Correct import
+import { useServices } from '@/plugins/services.plugin';
 
 export const useMemoryItemQuery = (
-  familyId: Ref<string | undefined>,
+  familyId: Ref<string | undefined>, // Keep familyId in signature for context if needed elsewhere
   memoryItemId: Ref<string | undefined>,
 ) => {
-  const services = useServices(); // Correct way to access services
+  const services = useServices();
   const { showSnackbar } = useGlobalSnackbar();
   const { t } = useI18n();
 
   const query = useQuery<MemoryItem, Error>({
-    queryKey: ['family', familyId, 'memory-item', memoryItemId],
+    queryKey: ['memory-items', memoryItemId],
     queryFn: async () => {
-      if (!familyId.value) {
-        throw new Error(t('memoryItem.messages.noFamilyId'));
-      }
       if (!memoryItemId.value) {
         throw new Error(t('memoryItem.messages.noMemoryItemId'));
       }
-      const result = await services.memoryItem.getMemoryItemById(
-        familyId.value,
-        memoryItemId.value,
-      );
+      const result = await services.memoryItem.getById(memoryItemId.value);
       if (result.ok) {
+        if (!result.value) {
+          throw new Error(t('common.messages.notFound', { item: t('memoryItem.title') }));
+        }
         return result.value;
       }
       showSnackbar(
@@ -35,7 +32,7 @@ export const useMemoryItemQuery = (
       );
       throw result.error;
     },
-    enabled: computed(() => !!familyId.value && !!memoryItemId.value),
+    enabled: computed(() => !!memoryItemId.value),
   });
 
   return query;
