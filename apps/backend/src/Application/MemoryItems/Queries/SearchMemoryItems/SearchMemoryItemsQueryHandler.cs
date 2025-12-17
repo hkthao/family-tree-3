@@ -1,11 +1,7 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemoryItems.DTOs;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.MemoryItems.Queries.SearchMemoryItems;
 
@@ -56,15 +52,24 @@ public class SearchMemoryItemsQueryHandler : IRequestHandler<SearchMemoryItemsQu
             query = query.Where(mi => mi.MemoryPersons.Any(mp => mp.MemberId == request.MemberId.Value));
         }
 
-        query = request.OrderBy switch
+        if (request.SortBy == "happenedAtAsc")
         {
-            "happenedAtAsc" => query.OrderBy(mi => mi.HappenedAt),
-            "titleAsc" => query.OrderBy(mi => mi.Title),
-            "titleDesc" => query.OrderByDescending(mi => mi.Title),
-            _ => query.OrderByDescending(mi => mi.HappenedAt)
-        };
+            query = query.OrderBy(mi => mi.HappenedAt);
+        }
+        else if (request.SortBy == "titleAsc")
+        {
+            query = query.OrderBy(mi => mi.Title);
+        }
+        else if (request.SortBy == "titleDesc")
+        {
+            query = query.OrderByDescending(mi => mi.Title);
+        }
+        else
+        {
+            query = query.OrderByDescending(mi => mi.HappenedAt); // Default order
+        }
 
         return await query.ProjectTo<MemoryItemDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }
