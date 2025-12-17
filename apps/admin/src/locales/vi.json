@@ -712,6 +712,7 @@
   "familyMedia.messages.uploadSuccess": "Tải lên media thành công!",
   "familyMedia.search.apply": "Áp dụng Bộ lọc",
   "memoryItem.title": "Tủ ký ức",
+  "memoryItem.detail.title": "Chi tiết kỷ niệm",
   "memoryItem.list.title": "Danh sách kỷ niệm",
   "memoryItem.list.add": "Thêm kỷ niệm mới",
   "memoryItem.list.col.title": "Tiêu đề",
