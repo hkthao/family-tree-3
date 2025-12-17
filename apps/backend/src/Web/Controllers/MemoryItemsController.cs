@@ -88,7 +88,7 @@ public class MemoryItemsController : ControllerBase
         return result.ToActionResult(this, _logger);
     }
 
-    [HttpGet]
+    [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<MemoryItemDto>>> SearchMemoryItems([FromQuery] SearchMemoryItemsQuery query)
     {

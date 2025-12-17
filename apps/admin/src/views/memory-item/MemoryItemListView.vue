@@ -1,30 +1,20 @@
 <template>
   <div data-testid="memory-item-list-view">
-    <v-card class="mb-4">
-      <ListToolbar
-        :title="t('memoryItem.list.title')"
-        :create-button-tooltip="t('memoryItem.list.add')"
-        create-button-test-id="add-memory-item-button"
-        :search-query="filters.searchTerm"
-        :search-label="t('common.search')"
-        @create="openAddDrawer()"
-        @update:search="handleSearchUpdate"
-      />
-      <v-card-text>
-        <v-data-table-server :items="memoryItems" :items-length="totalItems" :loading="isLoadingMemoryItems"
-          :items-per-page="paginationOptions.itemsPerPage" :page="paginationOptions.page"
-          :headers="headers" @update:options="handleListOptionsUpdate">
-          <template v-slot:item.happenedAt="{ item }">
-            {{ item.happenedAt ? formatDate(item.happenedAt) : '' }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="openDetailDrawer(item.id)">mdi-eye</v-icon>
-            <v-icon small class="mr-2" @click="openEditDrawer(item.id)">mdi-pencil</v-icon>
-            <v-icon small @click="confirmDelete(item.id)">mdi-delete</v-icon>
-          </template>
-        </v-data-table-server>
-      </v-card-text>
-    </v-card>
+    <ListToolbar :title="t('memoryItem.list.title')" :create-button-tooltip="t('memoryItem.list.add')"
+      create-button-test-id="add-memory-item-button" :search-query="filters.searchTerm"
+      :search-label="t('common.search')" @create="openAddDrawer()" @update:search="handleSearchUpdate" />
+    <v-data-table-server :items="memoryItems" :items-length="totalItems" :loading="isLoadingMemoryItems"
+      :items-per-page="paginationOptions.itemsPerPage" :page="paginationOptions.page" :headers="headers"
+      @update:options="handleListOptionsUpdate">
+      <template v-slot:item.happenedAt="{ item }">
+        {{ item.happenedAt ? formatDate(item.happenedAt) : '' }}
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon small class="mr-2" @click="openDetailDrawer(item.id)">mdi-eye</v-icon>
+        <v-icon small class="mr-2" @click="openEditDrawer(item.id)">mdi-pencil</v-icon>
+        <v-icon small @click="confirmDelete(item.id)">mdi-delete</v-icon>
+      </template>
+    </v-data-table-server>
 
     <!-- Add Memory Item Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemoryItemClosed">
@@ -34,14 +24,14 @@
 
     <!-- Edit Memory Item Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemoryItemClosed">
-      <MemoryItemEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId" :memory-item-id="selectedItemId"
-        @close="handleMemoryItemClosed" @saved="handleMemoryItemSaved" />
+      <MemoryItemEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId"
+        :memory-item-id="selectedItemId" @close="handleMemoryItemClosed" @saved="handleMemoryItemSaved" />
     </BaseCrudDrawer>
 
     <!-- Detail Memory Item Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleMemoryItemClosed">
-      <MemoryItemDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId" :memory-item-id="selectedItemId"
-        @close="handleMemoryItemClosed" />
+      <MemoryItemDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId"
+        :memory-item-id="selectedItemId" @close="handleMemoryItemClosed" />
     </BaseCrudDrawer>
   </div>
 </template>

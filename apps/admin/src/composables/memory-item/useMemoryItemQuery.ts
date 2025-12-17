@@ -6,12 +6,16 @@ import type { MemoryItem } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 
 export const useMemoryItemQuery = (
-  familyId: Ref<string | undefined>, // Keep familyId in signature for context if needed elsewhere
-  memoryItemId: Ref<string | undefined>,
+  familyIdParam: Ref<string | undefined> | string,
+  memoryItemIdParam: Ref<string | undefined> | string,
 ) => {
   const services = useServices();
   const { showSnackbar } = useGlobalSnackbar();
   const { t } = useI18n();
+
+  // Convert params to refs if they are not already
+  // familyId is no longer used internally, so no need to create a computed ref for it
+  const memoryItemId = computed(() => (typeof memoryItemIdParam === 'string' ? memoryItemIdParam : memoryItemIdParam.value));
 
   const query = useQuery<MemoryItem, Error>({
     queryKey: ['memory-items', memoryItemId],
