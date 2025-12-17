@@ -1,5 +1,3 @@
-using AutoMapper;
-
 namespace backend.Application.Common.Mappings;
 
 public interface IMapTo<T>

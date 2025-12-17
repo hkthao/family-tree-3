@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // Add this
-using backend.Domain.Events.Events;
 using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Events.Commands.CreateEvents;

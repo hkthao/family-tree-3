@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
 
 public class UpdateFamilyLocationCommandValidator : AbstractValidator<UpdateFamilyLocationCommand>

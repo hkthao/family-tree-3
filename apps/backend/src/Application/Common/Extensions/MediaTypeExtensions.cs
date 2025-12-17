@@ -1,4 +1,3 @@
-using System.IO;
 using backend.Domain.Enums;
 
 namespace backend.Application.Common.Extensions;

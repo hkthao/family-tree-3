@@ -1,6 +1,5 @@
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using MediatR;
 
 namespace backend.Application.MemoryItems.Commands.CreateMemoryItem;
 

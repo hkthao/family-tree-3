@@ -1,7 +1,5 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore; // Add this import
-using AutoMapper; // Add this using statement
-using AutoMapper.QueryableExtensions; // For ProjectTo
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common; // For MemberFaceDto and BoundingBoxDto

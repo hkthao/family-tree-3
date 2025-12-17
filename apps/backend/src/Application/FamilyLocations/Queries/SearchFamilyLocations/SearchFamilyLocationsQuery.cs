@@ -1,13 +1,9 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Specifications;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 

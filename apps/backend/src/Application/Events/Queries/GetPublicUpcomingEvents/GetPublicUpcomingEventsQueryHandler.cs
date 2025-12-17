@@ -2,7 +2,6 @@ using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Events.Queries; // Add this for EventDto
 using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetPublicUpcomingEvents;

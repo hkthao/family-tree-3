@@ -1,5 +1,3 @@
-using backend.Application.Identity.Queries;
-
 namespace backend.Application.Identity.Queries;
 
 public class UsersSearchResultDto

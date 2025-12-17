@@ -1,5 +1,3 @@
-using System.IO; // Required for MemoryStream
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;

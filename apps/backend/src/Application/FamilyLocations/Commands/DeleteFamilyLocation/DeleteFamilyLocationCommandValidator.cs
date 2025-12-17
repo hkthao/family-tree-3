@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
 
 public class DeleteFamilyLocationCommandValidator : AbstractValidator<DeleteFamilyLocationCommand>

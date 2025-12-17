@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
 
 public class CreateFamilyLocationCommandValidator : AbstractValidator<CreateFamilyLocationCommand>

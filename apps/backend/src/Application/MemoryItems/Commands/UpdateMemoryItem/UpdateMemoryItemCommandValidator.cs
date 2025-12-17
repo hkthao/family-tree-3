@@ -1,6 +1,3 @@
-using backend.Domain.Enums;
-using FluentValidation;
-
 namespace backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 
 public class UpdateMemoryItemCommandValidator : AbstractValidator<UpdateMemoryItemCommand>

@@ -1,4 +1,3 @@
-using backend.Application.Events.Commands.Inputs; // Add this
 using backend.Domain.Enums; // Add this
 
 namespace backend.Application.Events.Commands.UpdateEvent;
