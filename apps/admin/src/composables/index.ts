@@ -29,5 +29,5 @@ export * from './event/useEventsQuery';
 export * from './event/useAddEventMutation';
 export * from './event/useUpdateEventMutation';
 export * from './event/useDeleteEventMutation';
-export * from './memberStory'; // NEW: MemberStory Composables
+
 export * from './prompt'; // NEW: Prompt Composables

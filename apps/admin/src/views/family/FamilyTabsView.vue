@@ -30,9 +30,7 @@
         <v-window-item value="events">
           <EventListView :family-id="familyId" />
         </v-window-item>
-        <v-window-item value="member-stories">
-          <MemberStoryListView :family-id="familyId" />
-        </v-window-item>
+
         <v-window-item value="family-tree">
           <TreeChart :family-id="familyId" />
         </v-window-item>
@@ -81,7 +79,7 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
-import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
+
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
 import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
@@ -131,7 +129,7 @@ const allTabDefinitions = computed(() => [
   { value: 'members', text: t('family.members.title'), condition: true as boolean },
   { value: 'family-tree', text: t('family.tree.title'), condition: true as boolean },
   { value: 'face-recognition', text: t('face.face_data'), condition: canViewFaceDataTab.value as boolean },
-  { value: 'member-stories', text: t('memberStory.list.title'), condition: true as boolean },
+
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },

@@ -30,7 +30,7 @@ export { default as MemberAddView } from './member/MemberAddView.vue';
 export { default as MemberDetailView } from './member/MemberDetailView.vue';
 export { default as MemberEditView } from './member/MemberEditView.vue';
 export { default as MemberListView } from './member/MemberListView.vue';
-export { MemberStoryListView, MemberStoryAddView, MemberStoryDetailView } from './member-story'; // Updated: Export Member Story Studio related Views
+
 // Export pages from misc
 export { default as NotFoundView } from './misc/NotFoundView.vue';
 
