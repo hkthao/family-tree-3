@@ -62,7 +62,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         };
 
         // Mock thumbnail upload service
- // Return a mocked URL
+        // Return a mocked URL
 
         // Mock mediator for SearchMemberFaceQuery
         _mediatorMock.Setup(m => m.Send(

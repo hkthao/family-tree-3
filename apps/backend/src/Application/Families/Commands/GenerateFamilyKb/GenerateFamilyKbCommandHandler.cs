@@ -347,7 +347,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             }
             if (@event.RepeatRule == RepeatRule.Yearly)
             {
-            textBuilder.AppendLine("Lặp lại hàng năm.");
+                textBuilder.AppendLine("Lặp lại hàng năm.");
             }
 
             textBuilder.AppendLine($"Ai tham gia: {string.Join(", ", relatedMembers.Select(m => m.FullName))}");

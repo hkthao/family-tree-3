@@ -1,16 +1,16 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Events.Commands.Inputs;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using backend.Application.Events.Commands.Inputs;
-using backend.Domain.ValueObjects;
 
 namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 

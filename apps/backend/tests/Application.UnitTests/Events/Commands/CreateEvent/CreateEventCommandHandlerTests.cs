@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.CreateEvent;
+using backend.Application.Events.Commands.Inputs;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
@@ -9,7 +10,6 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
 using Xunit;
-using backend.Application.Events.Commands.Inputs;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 

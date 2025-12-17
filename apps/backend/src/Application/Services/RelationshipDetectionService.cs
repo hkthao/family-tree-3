@@ -1,11 +1,11 @@
 using System.Text;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
+using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
-using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using Microsoft.Extensions.Logging; // Add this using directive
 
 namespace backend.Application.Services;
@@ -173,7 +173,7 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         };
     }
 
-        // New helper method to get Vietnamese gender term
+    // New helper method to get Vietnamese gender term
     private string GetVietnameseGenderTerm(string? genderString)
     {
         if (string.IsNullOrWhiteSpace(genderString))

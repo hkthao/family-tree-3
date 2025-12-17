@@ -5,10 +5,9 @@ using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Specifications;
+using backend.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-
-using backend.Domain.Enums;
 
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 

@@ -1,8 +1,8 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Application.Prompts.DTOs; // Corrected using directive
+using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

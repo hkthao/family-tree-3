@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Application.Events.Commands.Inputs; // Add this
+using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.CreateEvents;
 
@@ -38,7 +38,8 @@ public class CreateEventDtoValidator : AbstractValidator<CreateEventDto>
         {
             RuleFor(v => v.LunarDate)
                 .NotNull().WithMessage("Lunar event must have a LunarDate.")
-                .ChildRules(ld => {
+                .ChildRules(ld =>
+                {
                     ld.RuleFor(x => x!.Day)
                         .InclusiveBetween(1, 30).WithMessage("Lunar day must be between 1 and 30.");
                     ld.RuleFor(x => x!.Month)

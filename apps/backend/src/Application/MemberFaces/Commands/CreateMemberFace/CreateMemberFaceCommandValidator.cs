@@ -13,7 +13,7 @@ public class CreateMemberFaceCommandValidator : AbstractValidator<CreateMemberFa
         RuleFor(v => v.Embedding)
             .NotNull().WithMessage("Embedding cannot be null.")
             .Must(list => list != null && list.Any()).WithMessage("Embedding cannot be empty.");
-            
+
         RuleFor(v => v.BoundingBox)
             .NotNull().WithMessage("BoundingBox cannot be null.");
     }

@@ -1,8 +1,8 @@
+using AutoMapper; // Explicitly add AutoMapper
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Events;
-using AutoMapper; // Explicitly add AutoMapper
 using MediatR; // Explicitly add MediatR
 
 namespace backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;

@@ -1,8 +1,8 @@
 using backend.Application.Events.Commands.CreateEvents;
+using backend.Application.Events.Commands.Inputs;
+using backend.Domain.Enums;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Domain.Enums;
-using backend.Application.Events.Commands.Inputs;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvents;
 

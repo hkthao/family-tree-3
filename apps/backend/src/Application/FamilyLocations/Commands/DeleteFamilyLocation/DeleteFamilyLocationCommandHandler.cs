@@ -1,7 +1,7 @@
+using AutoMapper; // Explicitly add AutoMapper
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events;
-using AutoMapper; // Explicitly add AutoMapper
 using MediatR; // Explicitly add MediatR
 using Microsoft.EntityFrameworkCore; // Explicitly add
 

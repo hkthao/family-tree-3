@@ -1,11 +1,11 @@
 using backend.Application.Common.Models;
+using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
+using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
+using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
 using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
-using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
-using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 

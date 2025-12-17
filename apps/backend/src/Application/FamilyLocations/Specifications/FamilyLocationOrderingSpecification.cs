@@ -1,6 +1,6 @@
+using System.Linq.Expressions;
 using Ardalis.Specification;
 using backend.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace backend.Application.FamilyLocations.Specifications;
 
