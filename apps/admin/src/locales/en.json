@@ -636,6 +636,7 @@
   "memoryItem.messages.noFamilyId": "No Family ID.",
   "memoryItem.messages.noMemoryItemId": "No Memory Item ID.",
   "memoryItem.messages.loadError": "Failed to load memory item.",
+  "memoryItem.messages.addSuccess": "Memory item added successfully!",
   "memoryItem.messages.saveError": "Failed to save memory item.",
   "memoryItem.messages.deleteError": "Failed to delete memory item.",
   "memoryItem.messages.deleteSuccess": "Memory item deleted successfully!",
