@@ -57,6 +57,7 @@ const mapMarkers = computed(() => {
       lat: loc.latitude!,
       title: loc.name,
       description: loc.description,
+      locationType: loc.locationType, // Added locationType
     }));
   return markers;
 });
