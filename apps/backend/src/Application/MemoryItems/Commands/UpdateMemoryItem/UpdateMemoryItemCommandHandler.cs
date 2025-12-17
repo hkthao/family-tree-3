@@ -43,16 +43,23 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
             }
         }
         // Handle MemoryPersons updates
-        var currentPersonIds = entity.MemoryPersons.Select(mp => mp.MemberId).ToList();
+        var existingMemoryPersons = await _context.MemoryPersons
+            .Where(mp => mp.MemoryItemId == entity.Id)
+            .ToListAsync(cancellationToken);
+
+        var existingPersonIds = existingMemoryPersons.Select(mp => mp.MemberId).ToHashSet();
+
         // Remove MemoryPersons no longer in the request
-        var personsToRemove = entity.MemoryPersons
+        var personsToRemove = existingMemoryPersons
             .Where(mp => !request.PersonIds.Contains(mp.MemberId))
             .ToList();
         _context.MemoryPersons.RemoveRange(personsToRemove);
+
         // Add new MemoryPersons
         var personsToAddIds = request.PersonIds
-            .Where(personId => !currentPersonIds.Contains(personId))
+            .Where(personId => !existingPersonIds.Contains(personId))
             .ToList();
+
         foreach (var personId in personsToAddIds)
         {
             _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personId));
