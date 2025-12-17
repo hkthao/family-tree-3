@@ -97,6 +97,21 @@ public interface IApplicationDbContext
     DbSet<MediaLink> MediaLinks { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryItem.
+    /// </summary>
+    DbSet<MemoryItem> MemoryItems { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryMedia.
+    /// </summary>
+    DbSet<MemoryMedia> MemoryMedia { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
+    /// </summary>
+    DbSet<MemoryPerson> MemoryPersons { get; }
+
+    /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.
     /// </summary>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>

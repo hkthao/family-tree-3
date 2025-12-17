@@ -100,6 +100,21 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
     /// </summary>
     public DbSet<MediaLink> MediaLinks { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryItem.
+    /// </summary>
+    public DbSet<MemoryItem> MemoryItems => Set<MemoryItem>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryMedia.
+    /// </summary>
+    public DbSet<MemoryMedia> MemoryMedia => Set<MemoryMedia>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
+    /// </summary>
+    public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi

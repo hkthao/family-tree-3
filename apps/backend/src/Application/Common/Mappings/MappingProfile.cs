@@ -15,6 +15,9 @@ using backend.Application.FamilyLocations.Commands.CreateFamilyLocation; // Adde
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation; // Added for UpdateFamilyLocationCommand
 using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation; // Added for DeleteFamilyLocationCommand
 using backend.Application.FamilyMedias.DTOs;
+using backend.Application.MemoryItems.DTOs; // Added
+using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
+using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.MemberFaces.Common;
@@ -145,5 +148,35 @@ public class MappingProfile : Profile
         CreateMap<FamilyLocation, FamilyLocationListDto>();
         CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
         CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
+
+        // MemoryItem mappings
+        CreateMap<MemoryItem, MemoryItemDto>()
+            .ForMember(dest => dest.Media, opt => opt.MapFrom(src => src.MemoryMedia))
+            .ForMember(dest => dest.Persons, opt => opt.MapFrom(src => src.MemoryPersons));
+        CreateMap<MemoryMedia, MemoryMediaDto>();
+        CreateMap<MemoryPerson, MemoryPersonDto>()
+            .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null));
+
+        // Commands to Entities
+        CreateMap<CreateMemoryItemCommand, MemoryItem>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryPersons, opt => opt.Ignore());
+        CreateMap<UpdateMemoryItemCommand, MemoryItem>()
+            .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryPersons, opt => opt.Ignore());
+        CreateMap<CreateMemoryMediaCommandDto, MemoryMedia>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
+        CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
+        CreateMap<CreateMemoryPersonCommandDto, MemoryPerson>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore())
+            .ForMember(dest => dest.Member, opt => opt.Ignore());
+        CreateMap<UpdateMemoryPersonCommandDto, MemoryPerson>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore())
+            .ForMember(dest => dest.Member, opt => opt.Ignore());
     }
 }
