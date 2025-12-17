@@ -1,225 +1,74 @@
+# 📌 BACKEND IMPLEMENTATION SPEC
+
+## Feature: **TỦ KỶ VẬT (MEMORY CABINET)**
+
+### 1. Mục tiêu
+
+Xây dựng backend cho tính năng **Tủ Kỷ Vật**, cho phép người dùng lưu giữ các kỷ niệm (kỷ vật) gắn với **cá nhân / gia đình / dòng họ**, có thể chứa **nội dung + media + người liên quan**, và hiển thị theo thời gian.
 
 ---
 
-## 📌 MÔ TẢ NHIỆM VỤ REFACTOR BACKEND DOMAIN (CHO GEMINI CLI)
+## 2. Phạm vi (Scope – KHÔNG làm ngoài phạm vi này)
 
-### 🎯 Mục tiêu
-
-Refactor domain `Event` để **hỗ trợ lịch dương, lịch âm (VN) và lặp theo năm**, phục vụ UI calendar custom (React Native).
-Giữ đúng tư duy **DDD, Aggregate Root, Value Object**, tránh logic hiển thị trong domain.
-
----
-
-## 1️⃣ Bối cảnh hiện tại
-
-* Backend dùng **C# / .NET / EF Core**
-* Domain có `Event` là **Aggregate Root**
-* Hiện đang lưu:
-
-  ```csharp
-  DateTime? StartDate;
-  DateTime? EndDate;
-  ```
-* Cách này **KHÔNG phù hợp** cho:
-
-  * Lịch âm
-  * Sự kiện lặp theo năm (giỗ, sinh nhật)
-  * Convert âm → dương theo từng năm
+* CRUD Memory Item
+* Upload & quản lý media
+* Gắn người vào kỷ vật
 
 ---
 
-## 2️⃣ Yêu cầu refactor (bắt buộc)
+## 3. Khái niệm chính
 
-### 2.1 Loại bỏ khái niệm “ngày hiển thị” khỏi domain
+### Memory Item (Kỷ vật)
 
-* ❌ Không dùng `StartDate`, `EndDate` cho event âm
-* ✅ Domain chỉ lưu **ngày gốc (source of truth)**
-
----
-
-### 2.2 Bổ sung Enum
-
-```csharp
-public enum CalendarType
-{
-    Solar = 1,
-    Lunar = 2
-}
-
-public enum RepeatRule
-{
-    None = 0,
-    Yearly = 1
-}
-```
+> Một kỷ niệm hoặc vật kỷ niệm có ý nghĩa, có thể là câu chuyện, hình ảnh, sự kiện, hoặc vật thể.
 
 ---
 
-### 2.3 Tạo Value Object cho ngày ÂM
+## 4. Database Design
 
-```csharp
-public class LunarDate : ValueObject
-{
-    public int Day { get; private set; }
-    public int Month { get; private set; }
-    public bool IsLeapMonth { get; private set; }
+### 4.1 `memory_items`
 
-    private LunarDate() { }
+| Field         | Type     | Description                 |        |       |          |          |
+| ------------- | -------- | --------------------------- | ------ | ----- | -------- | -------- |
+| id            | UUID     | Primary key                 |        |       |          |          |
+| family_id     | UUID     |                             |        |       |          |          |
+| title         | string   | Tên kỷ vật                  |        |       |          |          |
+| description   | text     | Nội dung chi tiết           |        |       |          |          |
+| happened_at   | datetime | Thời điểm xảy ra (nullable) |        |       |          |          |
+| emotional_tag | enum     | `happy                      | sad    | proud | memorial | neutral` |
+---
 
-    public LunarDate(int day, int month, bool isLeapMonth)
-    {
-        Day = day;
-        Month = month;
-        IsLeapMonth = isLeapMonth;
-    }
+### 4.2 `memory_media`
 
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Day;
-        yield return Month;
-        yield return IsLeapMonth;
-    }
-}
-```
-
-* `LunarDate` là **Value Object**
-* EF Core phải map được (owned entity)
+| Field          | Type         |       |       |            |
+| -------------- | ------------ | ----- | ----- | ---------- |
+| id             | UUID         |       |       |            |
+| memory_item_id | UUID (FK)    |       |       |            |
+| type           | enum (`image | video | audio | document`) |
+| url            | string       |       |       |            |
 
 ---
 
-## 3️⃣ Refactor Event Aggregate Root
+### 4.3 `memory_persons`
 
-### 3.1 Nguyên tắc
-
-* Một Event **chỉ có 1 loại lịch**
-* Không được vừa có SolarDate vừa có LunarDate
-* Logic convert **KHÔNG đặt trong Entity**
-
----
-
-### 3.2 Cấu trúc Event sau refactor
-
-```csharp
-public class Event : BaseAuditableEntity, IAggregateRoot
-{
-    public string Name { get; private set; }
-    public string Code { get; private set; }
-    public string? Description { get; private set; }
-
-    public CalendarType CalendarType { get; private set; }
-
-    // Chỉ dùng cho Solar event
-    public DateTime? SolarDate { get; private set; }
-
-    // Chỉ dùng cho Lunar event
-    public LunarDate? LunarDate { get; private set; }
-
-    public RepeatRule RepeatRule { get; private set; }
-
-    public EventType Type { get; private set; }
-    public string? Color { get; private set; }
-
-    public Guid? FamilyId { get; private set; }
-    public Family? Family { get; private set; }
-
-    private readonly HashSet<EventMember> _eventMembers = new();
-    public IReadOnlyCollection<EventMember> EventMembers => _eventMembers;
-
-    private Event() { }
-}
-```
+| Field          | Type         |           |           |
+| -------------- | ------------ | --------- | --------- |
+| memory_item_id | UUID         |           |           |
+| memeber_id     | UUID         |           |           |
 
 ---
 
-### 3.3 Factory methods (bắt buộc)
+## 7. Validation Rules
 
-```csharp
-public static Event CreateSolarEvent(
-    string name,
-    string code,
-    EventType type,
-    DateTime solarDate,
-    RepeatRule repeatRule,
-    Guid? familyId
-)
-
-public static Event CreateLunarEvent(
-    string name,
-    string code,
-    EventType type,
-    LunarDate lunarDate,
-    RepeatRule repeatRule,
-    Guid? familyId
-)
-```
-
-* Không cho phép `new Event()` từ bên ngoài
-* Validate:
-
-  * Solar → chỉ có SolarDate
-  * Lunar → chỉ có LunarDate
+* `title` bắt buộc
+* `happenedAt` ≤ current date
 
 ---
 
-## 4️⃣ Những thứ KHÔNG được làm
+## 8. Coding Requirements
 
-❌ Không:
-
-* Convert lunar → solar trong Entity
-* Sinh event theo năm trong Entity
-* Thêm logic UI / calendar vào domain
-
-👉 Những việc này thuộc **Application / Domain Service**
-
+* Clean Architecture / Layered Architecture
+* DTO rõ ràng
+* Enum mapping chặt chẽ
+* Soft delete
 ---
-
-## 5️⃣ Chuẩn bị cho bước tiếp theo (chỉ để định hướng)
-
-Sau refactor, backend sẽ có:
-
-* `EventOccurrenceService`:
-
-  * Input: Event + year
-  * Output: danh sách **solar dates để hiển thị**
-* API:
-
-  ```
-  GET /events/calendar?year=YYYY&month=MM
-  ```
-
-(UI chỉ render, không xử lý âm lịch)
-
----
-
-## 6️⃣ Tiêu chí hoàn thành (Definition of Done)
-
-* Event hỗ trợ:
-
-  * Dương lịch
-  * Âm lịch (ngày + tháng + tháng nhuận)
-  * Lặp theo năm
-* Không còn phụ thuộc vào `StartDate/EndDate`
-* Domain đúng DDD:
-
-  * Aggregate Root
-  * Value Object
-* EF Core mapping hợp lệ
-
----
-
-## 7️⃣ Lưu ý quan trọng
-
-* Ưu tiên **refactor tối thiểu**, không phá EventMember
-* Giữ nguyên EventType, FamilyId
-* Có thể cần migration DB (ghi chú nếu cần)
-
----
-
-## 🔥 Ghi chú cho Gemini CLI
-
-> Đây là refactor **domain-level**, không phải UI
-> Hãy ưu tiên tính đúng đắn, khả năng mở rộng cho lịch âm VN
-> Không tối ưu premature, không thêm logic convert
-
----
-
