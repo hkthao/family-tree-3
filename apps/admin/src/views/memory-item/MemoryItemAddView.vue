@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
+import MemoryItemForm, { type MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
 import type { MemoryItem } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddMemoryItemMutation } from '@/composables/memory-item';
@@ -34,7 +34,7 @@ const { familyId } = defineProps({
   },
 });
 
-const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
+const memoryItemFormRef = ref<MemoryItemFormExpose | null>(null);
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();

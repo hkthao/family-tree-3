@@ -18,7 +18,7 @@ public class GetMemoryItemDetailQueryHandler : IRequestHandler<GetMemoryItemDeta
     public async Task<Result<MemoryItemDto>> Handle(GetMemoryItemDetailQuery request, CancellationToken cancellationToken)
     {
         var dto = await _context.MemoryItems
-            .Where(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId && !mi.IsDeleted)
+            .Where(mi => mi.Id == request.Id && !mi.IsDeleted)
             .Include(mi => mi.MemoryMedia)
             .Include(mi => mi.MemoryPersons)
                 .ThenInclude(mp => mp.Member) // Include Member details for MemoryPersonDto

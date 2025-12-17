@@ -19,12 +19,7 @@ export interface MemoryItem {
   description?: string;
   happenedAt?: Date;
   emotionalTag: EmotionalTag;
-
-  media: MemoryMedia[];
+  medias: MemoryMedia[];
   persons: MemoryPerson[];
-
-  created: Date;
-  createdBy?: string;
-  lastModified?: Date;
-  lastModifiedBy?: string;
+  deletedMediaIds?: string[];
 }

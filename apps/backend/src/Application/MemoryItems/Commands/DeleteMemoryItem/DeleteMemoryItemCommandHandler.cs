@@ -19,7 +19,7 @@ public class DeleteMemoryItemCommandHandler : IRequestHandler<DeleteMemoryItemCo
     public async Task<Result> Handle(DeleteMemoryItemCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.MemoryItems
-            .FirstOrDefaultAsync(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId, cancellationToken);
+            .FirstOrDefaultAsync(mi => mi.Id == request.Id, cancellationToken);
 
         if (entity == null)
         {

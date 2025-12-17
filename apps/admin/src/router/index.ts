@@ -23,7 +23,6 @@ import { miscRoutes } from './features/misc.routes'; // New
 import { chatRoutes } from './features/chat.routes'; // New
 import { promptRoutes } from './features/prompt.routes'; // New
 import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
-import { mapRoutes } from './features/map.routes'; // NEW: Import map routes
 
 const router = createRouter({
   history: createWebHistory(getEnvVariable('BASE_URL')),
@@ -46,7 +45,6 @@ const router = createRouter({
         ...chatRoutes, // New
         ...promptRoutes, // New
         ...relationshipDetectionRoutes, // NEW
-        ...mapRoutes, // NEW: Add map routes
       ],
     },
     ...publicRoutes, // Replaced
