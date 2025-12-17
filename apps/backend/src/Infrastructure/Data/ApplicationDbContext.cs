@@ -139,13 +139,13 @@ public class ApplicationDbContext(
                         break;
                 }
             }
-            if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
-            {
-                softDeleteEntity.IsDeleted = true;
-                softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
-                softDeleteEntity.DeletedDate = _dateTime.Now;
-                entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
-            }
+            // if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
+            // {
+            //     softDeleteEntity.IsDeleted = true;
+            //     softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
+            //     softDeleteEntity.DeletedDate = _dateTime.Now;
+            //     entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
+            // }
         }
         var result = await base.SaveChangesAsync(cancellationToken);
 
@@ -184,8 +184,8 @@ public class ApplicationDbContext(
                 {
                     property.SetValueConverter(
                         new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
-                            v => v.ToUniversalTime(),
-                            v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
+                            (DateTime v) => v.ToUniversalTime(),
+                            (DateTime v) => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
                 }
             }
         }

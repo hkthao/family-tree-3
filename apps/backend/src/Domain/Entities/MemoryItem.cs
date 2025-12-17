@@ -54,4 +54,12 @@ public class MemoryItem : BaseAuditableEntity, ISoftDelete
     {
         _memoryMedia.Remove(media);
     }
+
+    public void AddPerson(MemoryPerson person)
+    {
+        if (!_memoryPersons.Any(mp => mp.MemberId == person.MemberId))
+        {
+            _memoryPersons.Add(person);
+        }
+    }
 }
