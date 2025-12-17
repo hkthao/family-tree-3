@@ -1,19 +1,19 @@
 <template>
   <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
-      <v-col cols="12" v-if="form.medias && form.medias.length > 0">
+      <v-col cols="12" v-if="mediaManagement.memoryMedia.value && mediaManagement.memoryMedia.value.length > 0">
         <v-carousel cycle hide-delimiter-background :continuous="false" hide-delimiters>
-          <v-carousel-item v-for="(media, index) in form.medias" :key="media.id || index">
+          <v-carousel-item v-for="(media, index) in mediaManagement.memoryMedia.value" :key="media.id || index">
             <div>
               <v-img :src="media.url" cover class="carousel-image"></v-img>
               <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete" color="error" size="small"
-                @click="removeMedia(media)"></v-btn>
+                @click="mediaManagement.removeMedia(media)"></v-btn>
             </div>
           </v-carousel-item>
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.mediaFile')" v-model="uploadedFiles" :accept="acceptedMimeTypes"
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="mediaManagement.uploadedFiles.value" :accept="mediaManagement.acceptedMimeTypes.value"
           data-testid="memory-item-file-upload" multiple
           :rules="[(v: File[]) => (v || []).length <= 5 || t('memoryItem.validations.maxFiles', { max: 5 })]"
           :disabled="props.readOnly"></VFileUpload>
@@ -49,29 +49,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive, nextTick, type ComputedRef } from 'vue';
+import { ref, computed, reactive, watch, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
-import type { MemoryItem as BaseMemoryItem, MemoryMedia as BaseMemoryMedia, MemoryPerson } from '@/types';
+import type { MemoryItem } from '@/types';
 import { EmotionalTag } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables/memory/useMemoryMediaForm';
 
-// Local interface to extend MemoryItem with the local MemoryMedia type
-interface LocalMemoryMedia extends BaseMemoryMedia {
-  isNew?: boolean;
-  file?: File;
-}
 
-interface LocalMemoryItem extends Omit<BaseMemoryItem, 'persons' | 'medias'> {
+interface LocalMemoryItem extends Omit<MemoryItem, 'persons' | 'memoryMedia' | 'deletedMediaIds'> {
   personIds: string[]; // Use personIds for autocomplete
-  deletedMediaIds?: string[];
-  medias: LocalMemoryMedia[];
 }
 
 interface MemoryItemFormProps {
-  initialMemoryItemData?: BaseMemoryItem;
+  initialMemoryItemData?: MemoryItem;
   familyId: string;
   readOnly?: boolean;
 }
@@ -81,9 +75,6 @@ const props = defineProps<MemoryItemFormProps>();
 const formRef = ref<VForm | null>(null);
 const { t } = useI18n();
 
-const uploadedFiles = ref<File[]>([]);
-const deletedMediaIds = ref<string[]>([]);
-
 const defaultNewMemoryItem: LocalMemoryItem = {
   id: '',
   familyId: props.familyId,
@@ -92,8 +83,7 @@ const defaultNewMemoryItem: LocalMemoryItem = {
   happenedAt: undefined,
   emotionalTag: EmotionalTag.Neutral,
   personIds: [],
-  medias: [],
-  deletedMediaIds: [],
+  memoryPersons: [],
 };
 
 // Initialize form with local type
@@ -101,42 +91,31 @@ const form = reactive<LocalMemoryItem>(
   props.initialMemoryItemData
     ? {
       ...props.initialMemoryItemData,
-      personIds: props.initialMemoryItemData.persons ? props.initialMemoryItemData.persons.map(p => p.memberId) : [],
-      medias: props.initialMemoryItemData.medias || [], // Use existing medias
-      deletedMediaIds: [],
+      personIds: props.initialMemoryItemData.memoryPersons ? props.initialMemoryItemData.memoryPersons.map(p => p.memberId) : [],
     }
     : { ...defaultNewMemoryItem },
 );
 
-watch(uploadedFiles, (newFiles) => {
-  if (newFiles.length === 0) return;
-  newFiles.forEach(file => {
-    form.medias.push({
-      id: `new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Temporary ID for new files
-      memoryItemId: form.id,
-      url: URL.createObjectURL(file), // Create a temporary URL for preview
-      isNew: true,
-      file: file,
-    });
-  });
-  // Clear the file input after processing in the next tick to avoid recursive updates
-  nextTick(() => {
-    uploadedFiles.value = [];
-  });
+const mediaManagement = useMemoryMediaForm({
+  initialMedia: props.initialMemoryItemData?.memoryMedia || [],
+  memoryItemId: form.id,
+  readOnly: props.readOnly || false,
 });
+
 
 watch(() => props.initialMemoryItemData, (newData) => {
   if (newData) {
     Object.assign(form, {
       ...newData,
-      personIds: newData.persons ? newData.persons.map(p => p.memberId) : [],
-      medias: newData.medias || [],
-      deletedMediaIds: [],
+      personIds: newData.memoryPersons ? newData.memoryPersons.map(p => p.memberId) : [],
     });
-    deletedMediaIds.value = []; // Reset deleted media IDs on data change
+    // Update media in composable
+    mediaManagement.memoryMedia.value = [...(newData.memoryMedia || [])];
+    mediaManagement.deletedMediaIds.value = []; // Reset deleted media IDs on data change
   } else {
     Object.assign(form, { ...defaultNewMemoryItem });
-    deletedMediaIds.value = []; // Reset deleted media IDs on data change
+    mediaManagement.memoryMedia.value = [];
+    mediaManagement.deletedMediaIds.value = []; // Reset deleted media IDs on data change
   }
 });
 
@@ -148,73 +127,39 @@ const emotionalTagOptions = computed(() => [
   { title: t('memoryItem.emotionalTag.neutral'), value: EmotionalTag.Neutral },
 ]);
 
-
-
-const acceptedMimeTypes = computed(() => {
-  return [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/bmp',
-    'image/webp',
-    'image/svg+xml',
-  ].join(',');
-});
-
 const validate = async () => {
   if (!formRef.value) return false;
   const { valid } = await formRef.value.validate();
   return valid;
 };
 
-const getFormData = (): BaseMemoryItem => {
-  const existingMedias: BaseMemoryMedia[] = form.medias.filter(media => !media.isNew);
-  const persons: MemoryPerson[] = form.personIds.map(memberId => ({
-    memberId: memberId,
-    memberName: undefined, // memberName is not available in the form
-  }));
-
-  const dataToReturn: BaseMemoryItem = {
+const getFormData = (): MemoryItem => {
+  const existingMedias: LocalMemoryMedia[] = mediaManagement.memoryMedia.value.filter(media => !media.isNew);
+  const dataToReturn: MemoryItem = {
     id: form.id,
     familyId: form.familyId,
     title: form.title,
     description: form.description,
     happenedAt: form.happenedAt,
     emotionalTag: form.emotionalTag,
-    medias: existingMedias,
-    persons: persons,
-    deletedMediaIds: deletedMediaIds.value,
+    memoryMedia: existingMedias,
+    personIds: form.personIds,
+    deletedMediaIds: mediaManagement.deletedMediaIds.value,
+    memoryPersons: []
   };
   return dataToReturn;
 };
 
-const newlyUploadedFiles = computed(() => {
-  return form.medias.filter(media => media.isNew && media.file).map(media => media.file as File);
-});
-
-const removeMedia = (mediaToDelete: LocalMemoryMedia) => {
-  if (!props.readOnly) {
-    if (!mediaToDelete.isNew && mediaToDelete.id) {
-      deletedMediaIds.value.push(mediaToDelete.id);
-    }
-    form.medias = form.medias.filter(media => media.id !== mediaToDelete.id);
-    // Revoke object URL for temporary files
-    if (mediaToDelete.isNew && mediaToDelete.url) {
-      URL.revokeObjectURL(mediaToDelete.url);
-    }
-  }
-};
-
 export interface MemoryItemFormExpose {
   validate: () => Promise<boolean>;
-  getFormData: () => BaseMemoryItem;
+  getFormData: () => MemoryItem;
   newlyUploadedFiles: ComputedRef<File[]>;
 }
 
 defineExpose<MemoryItemFormExpose>({
   validate,
   getFormData,
-  newlyUploadedFiles,
+  newlyUploadedFiles: mediaManagement.newlyUploadedFiles,
 });
 </script>
 

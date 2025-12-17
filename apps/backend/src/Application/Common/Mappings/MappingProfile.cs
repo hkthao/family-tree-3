@@ -150,8 +150,8 @@ public class MappingProfile : Profile
 
         // MemoryItem mappings
         CreateMap<MemoryItem, MemoryItemDto>()
-            .ForMember(dest => dest.Media, opt => opt.MapFrom(src => src.MemoryMedia))
-            .ForMember(dest => dest.Persons, opt => opt.MapFrom(src => src.MemoryPersons));
+            .ForMember(dest => dest.MemoryMedia, opt => opt.MapFrom(src => src.MemoryMedia))
+            .ForMember(dest => dest.MemoryPersons, opt => opt.MapFrom(src => src.MemoryPersons));
         CreateMap<MemoryMedia, MemoryMediaDto>();
         CreateMap<MemoryPerson, MemoryPersonDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null));

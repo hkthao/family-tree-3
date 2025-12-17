@@ -1,4 +1,4 @@
-import { EmotionalTag, MediaType } from './enums';
+import { EmotionalTag } from './enums';
 
 export interface MemoryMedia {
   id: string;
@@ -18,7 +18,8 @@ export interface MemoryItem {
   description?: string;
   happenedAt?: Date;
   emotionalTag: EmotionalTag;
-  medias: MemoryMedia[];
-  persons: MemoryPerson[];
+  memoryMedia: MemoryMedia[];
+  memoryPersons: MemoryPerson[];
+  personIds: string[];
   deletedMediaIds?: string[];
 }

@@ -10,6 +10,6 @@ public class MemoryItemDto
     public string? Description { get; set; }
     public DateTime? HappenedAt { get; set; }
     public EmotionalTag EmotionalTag { get; set; }
-    public ICollection<MemoryMediaDto> Media { get; set; } = [];
-    public ICollection<MemoryPersonDto> Persons { get; set; } = [];
+    public ICollection<MemoryMediaDto> MemoryMedia { get; set; } = [];
+    public ICollection<MemoryPersonDto> MemoryPersons { get; set; } = [];
 }

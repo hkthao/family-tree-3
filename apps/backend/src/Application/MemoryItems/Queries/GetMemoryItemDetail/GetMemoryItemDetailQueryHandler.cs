@@ -21,7 +21,7 @@ public class GetMemoryItemDetailQueryHandler : IRequestHandler<GetMemoryItemDeta
             .Where(mi => mi.Id == request.Id && !mi.IsDeleted)
             .Include(mi => mi.MemoryMedia)
             .Include(mi => mi.MemoryPersons)
-                .ThenInclude(mp => mp.Member) // Include Member details for MemoryPersonDto
+            .ThenInclude(mp => mp.Member) // Include Member details for MemoryPersonDto
             .ProjectTo<MemoryItemDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
