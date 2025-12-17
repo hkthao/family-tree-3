@@ -63,6 +63,7 @@ import type { DataTableHeader } from 'vuetify';
 import { MediaType } from '@/types/enums';
 import { formatDate, formatBytes } from '@/utils/format.utils';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import ListToolbar from '@/components/common/ListToolbar.vue';
 
 interface FamilyMediaListProps {
   items: FamilyMedia[];
