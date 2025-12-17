@@ -5,17 +5,10 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
-
-namespace backend.Application.Services;
-
 using backend.Application.Prompts.Queries.GetPromptById; // Add this
-using MediatR; // Add this using directive
-
-// ... other using directives
-
 using Microsoft.Extensions.Logging; // Add this using directive
 
-// ... other using directives
+namespace backend.Application.Services;
 
 public class RelationshipDetectionService : IRelationshipDetectionService
 {

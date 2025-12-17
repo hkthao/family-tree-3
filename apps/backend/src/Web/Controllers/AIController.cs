@@ -1,6 +1,5 @@
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands;
-using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,18 +41,6 @@ public class AIController : ControllerBase
     /// <returns>Tiểu sử đã tạo.</returns>
     [HttpPost("biography")]
     public async Task<IActionResult> GenerateBiography([FromBody] GenerateBiographyCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger);
-    }
-
-    /// <summary>
-    /// Tạo câu chuyện bằng AI.
-    /// </summary>
-    /// <param name="command">Lệnh chứa thông tin cần thiết để tạo câu chuyện.</param>
-    /// <returns>Câu chuyện đã tạo.</returns>
-    [HttpPost("generate-story")]
-    public async Task<IActionResult> GenerateStory([FromBody] GenerateStoryCommand command)
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);

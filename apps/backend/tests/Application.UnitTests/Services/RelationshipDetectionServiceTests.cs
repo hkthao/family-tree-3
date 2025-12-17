@@ -1,6 +1,8 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Prompts.Queries.GetPromptById; // Add this
+using backend.Application.Prompts.DTOs; // Corrected using directive
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -35,6 +37,8 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockAiGenerateService = new Mock<IAiGenerateService>();
         _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>();
         _mockMediator = new Mock<IMediator>(); // Initialize IMediator mock
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetPromptByIdQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Default AI System Prompt for testing" }));
         _mockLogger = new Mock<ILogger<RelationshipDetectionService>>(); // Initialize ILogger mock
         _service = new RelationshipDetectionService(
             _context,

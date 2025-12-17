@@ -67,26 +67,9 @@ public interface IApplicationDbContext
     DbSet<FamilyDict> FamilyDicts { get; }
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
-    /// </summary>
-    DbSet<MemberStory> MemberStories { get; }
-
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
-    /// </summary>
-    DbSet<MemberStoryImage> MemberStoryImages { get; }
-
-    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
     DbSet<MemberFace> MemberFaces { get; }
-
-
-
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
-    /// </summary>
-    DbSet<PdfTemplate> PdfTemplates { get; }
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.

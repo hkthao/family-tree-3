@@ -45,9 +45,6 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 case KbRecordType.Event:
                     embeddingsDto = await GenerateEventEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
                     break;
-                case KbRecordType.Story:
-                    embeddingsDto = await GenerateStoryEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
-                    break;
                 default:
                     _logger.LogWarning("Unsupported KB Record Type: {RecordType}", request.RecordType);
                     return Result<string>.Failure($"Unsupported KB Record Type: {request.RecordType}");
@@ -247,11 +244,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                                        .AsNoTracking()
                                        .ToListAsync(cancellationToken);
 
-            var stories = await _context.MemberStories
-                                        .Include(s => s.Member) // Include Member to access FamilyId
-                                        .Where(s => s.Member.FamilyId == familyGuid)
-                                        .AsNoTracking()
-                                        .ToListAsync(cancellationToken);
+
 
             // Fetch Manager Name
             var managerName = "Không rõ";
@@ -378,44 +371,6 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             };
         }
 
-        private async Task<StoryEmbeddingsDto?> GenerateStoryEmbeddingsDto(string familyId, string storyId, CancellationToken cancellationToken)
-        {
-            var storyGuid = Guid.Parse(storyId);
-            var familyGuid = Guid.Parse(familyId);
 
-            var story = await _context.MemberStories
-                                      .Include(s => s.Member) // Include the main member for the story
-                                      .Where(s => s.Id == storyGuid && s.Member.FamilyId == familyGuid)
-                                      .AsNoTracking()
-                                      .FirstOrDefaultAsync(cancellationToken);
-
-            if (story == null)
-            {
-                _logger.LogWarning("Story with ID {StoryId} not found in family {FamilyId}.", storyId, familyId);
-                return null;
-            }
-
-            var mainCharacter = story.Member;
-
-            var textBuilder = new StringBuilder();
-            textBuilder.AppendLine($"Tiêu đề câu chuyện: {story.Title}");
-            textBuilder.AppendLine($"Nhân vật chính: {mainCharacter?.FullName ?? "Không rõ"}");
-            textBuilder.AppendLine($"Bối cảnh: [TODO: Thêm logic để tóm tắt bối cảnh câu chuyện]");
-            textBuilder.AppendLine($"Cốt truyện: {story.Story}");
-            textBuilder.AppendLine($"Ý nghĩa và cảm xúc: [TODO: Thêm logic để tóm tắt ý nghĩa và cảm xúc]");
-
-            return new StoryEmbeddingsDto
-            {
-                FamilyId = familyId,
-                RecordId = story.Id.ToString(), // Convert Guid to string for RecordId
-                Text = textBuilder.ToString(),
-                Metadata = new StoryMetadataDto
-                {
-                    Title = story.Title,
-                    Summary = story.Story, // Using Story property as summary
-                    Characters = mainCharacter != null ? new List<string> { mainCharacter.FullName } : new List<string>() // Only main character for now
-                }
-            };
-        }
     }
 }

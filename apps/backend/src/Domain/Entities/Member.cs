@@ -142,7 +142,7 @@ public class Member : BaseAuditableEntity
     public ICollection<Relationship> TargetRelationships { get; set; } = new List<Relationship>();
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 
-    public ICollection<MemberStory> MemberStories { get; private set; } = new List<MemberStory>();
+
     public ICollection<MemberFace> MemberFaces { get; private set; } = new List<MemberFace>(); // NEW
 
     public Member() { }
@@ -156,20 +156,7 @@ public class Member : BaseAuditableEntity
         IsDeceased = isDeceased;
     }
 
-    // New methods to manage MemberStory
-    public void AddStory(MemberStory story)
-    {
-        if (story.MemberId != Id)
-        {
-            throw new InvalidOperationException("MemberStory must belong to this Member.");
-        }
-        MemberStories.Add(story);
-    }
 
-    public void RemoveStory(MemberStory story)
-    {
-        MemberStories.Remove(story);
-    }
 
     // New method to manage MemberFace
     public void AddFace(MemberFace face)

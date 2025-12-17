@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions; // Add using directive for Regex
 using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
-using backend.Application.MemberStories.Commands.GenerateStory; // Updated
 using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
@@ -112,76 +111,6 @@ public static class PromptBuilder
         {
             promptBuilder.AppendLine("Không sử dụng bất kỳ tiểu sử hiện có nào từ cơ sở dữ liệu. Tạo một tiểu sử mới dựa trên các chi tiết và lời nhắc của người dùng.");
         }
-
-        return promptBuilder.ToString();
-    }
-
-    /// <summary>
-    /// Xây dựng prompt cho AI Agent để tạo câu chuyện về một thành viên gia đình.
-    /// </summary>
-    /// <param name="request">Lệnh tạo câu chuyện chứa thông tin yêu cầu.</param>
-    /// <param name="member">Thông tin chi tiết về thành viên.</param>
-    /// <param name="family">Thông tin chi tiết về gia đình.</param>
-    /// <returns>Chuỗi prompt (user message) cho AI Agent.</returns>
-    public static string BuildStoryGenerationPrompt(
-        GenerateStoryCommand request,
-        Member member,
-        Family? family)
-    {
-        var promptBuilder = new StringBuilder();
-        promptBuilder.AppendLine($"Tạo một câu chuyện về thành viên gia đình sau với phong cách: {request.Style} Độ dài câu chuyện khoảng {request.MaxWords} từ. Ngôn ngữ đầu ra: Tiếng Việt.");
-        promptBuilder.AppendLine("\nThông tin thành viên:");
-        promptBuilder.AppendLine($"- Tên đầy đủ: {member.FullName}");
-        promptBuilder.AppendLine($"- Ngày sinh: {member.DateOfBirth?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Ngày mất: {member.DateOfDeath?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? "N/A"}");
-        promptBuilder.AppendLine($"- Giới tính: {member.Gender ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Nơi sinh: {member.PlaceOfBirth ?? "Không rõ"}");
-        promptBuilder.AppendLine($"- Nghề nghiệp: {member.Occupation ?? "Không rõ"}");
-
-        if (family != null)
-        {
-            promptBuilder.AppendLine($"- Gia đình: {family.Name}");
-        }
-
-        // Check for husband/wife based on gender and available spouse info
-        if (Enum.TryParse<Domain.Enums.Gender>(member.Gender, out var memberGender) && memberGender == Domain.Enums.Gender.Female && !string.IsNullOrEmpty(member.HusbandFullName))
-        {
-            promptBuilder.AppendLine($"- Vợ/chồng (Chồng): {member.HusbandFullName}");
-        }
-        else if (Enum.TryParse(member.Gender, out memberGender) && memberGender == Domain.Enums.Gender.Male && !string.IsNullOrEmpty(member.WifeFullName))
-        {
-            promptBuilder.AppendLine($"- Vợ/chồng (Vợ): {member.WifeFullName}");
-        }
-
-        if (!string.IsNullOrEmpty(request.Perspective))
-        {
-            promptBuilder.AppendLine($"Góc nhìn bài viết: {request.Perspective}");
-        }
-
-        if (!string.IsNullOrEmpty(request.RawText))
-        {
-            promptBuilder.AppendLine("Thông tin bổ sung từ người dùng:");
-            promptBuilder.AppendLine(request.RawText);
-        }
-
-        if (!string.IsNullOrEmpty(request.ResizedImageUrl) || (request.PhotoPersons != null && request.PhotoPersons.Any()))
-        {
-            promptBuilder.AppendLine("\nKết quả phân tích ảnh liên quan:");
-            if (!string.IsNullOrEmpty(request.ResizedImageUrl))
-            {
-                promptBuilder.AppendLine($"- URL ảnh đã điều chỉnh kích thước: {request.ResizedImageUrl}");
-            }
-            if (request.PhotoPersons != null && request.PhotoPersons.Any())
-            {
-                promptBuilder.AppendLine("- Người trong ảnh:");
-                foreach (var person in request.PhotoPersons)
-                {
-                    promptBuilder.AppendLine($"  - {person.Name} (Cảm xúc: {person.Emotion}, Độ tự tin: {person.Confidence:P}, Quan hệ: {person.RelationPrompt})");
-                }
-            }
-        }
-
-        promptBuilder.AppendLine("\nTuân thủ các quy tắc đã được đặt ra trong system prompt để tạo ra câu chuyện.");
 
         return promptBuilder.ToString();
     }

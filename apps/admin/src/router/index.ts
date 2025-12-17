@@ -20,7 +20,6 @@ import { dashboardRoutes } from './features/dashboard.routes'; // New
 import { infoPagesRoutes } from './features/info-pages.routes'; // New
 import { publicRoutes } from './features/public.routes'; // New
 import { miscRoutes } from './features/misc.routes'; // New
-import { memberStoryRoutes } from './features/member-story.routes'; // Updated
 import { chatRoutes } from './features/chat.routes'; // New
 import { promptRoutes } from './features/prompt.routes'; // New
 import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
@@ -37,7 +36,6 @@ const router = createRouter({
       children: [
         ...dashboardRoutes, // Replaced
         ...memberRoutes,
-        ...memberStoryRoutes, // Updated
         ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,

@@ -72,22 +72,9 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
-    /// </summary>
-    public DbSet<MemberStory> MemberStories => Set<MemberStory>();
-
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
-    /// </summary>
-    public DbSet<MemberStoryImage> MemberStoryImages => Set<MemberStoryImage>();
-    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
     public DbSet<MemberFace> MemberFaces => Set<MemberFace>();
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
-    /// </summary>
-    public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.

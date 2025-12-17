@@ -21,8 +21,6 @@ using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.MemberStories.DTOs;
-using backend.Application.PdfTemplates.Dtos;
 using backend.Application.PrivacyConfigurations.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
@@ -104,8 +102,7 @@ public class MappingProfile : Profile
         CreateMap<Event, EventExportDto>()
             .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
 
-        // PdfTemplate DTO
-        CreateMap<PdfTemplate, PdfTemplateDto>();
+
 
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? (src.Member.LastName + " " + src.Member.FirstName).Trim() : null))
@@ -141,19 +138,7 @@ public class MappingProfile : Profile
         CreateMap<MediaLink, MediaLinkDto>()
             .ForMember(dest => dest.RefName, opt => opt.Ignore()); // Placeholder, will need a resolver to get name from Member/MemberStory
 
-        CreateMap<MemberStory, MemberStoryDto>()
-           .ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.Member.FamilyId))
-           .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member.FullName ?? string.Empty))
-           .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member.AvatarUrl))
-           .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member.Gender))
-           .ForMember(dest => dest.MemberStoryImages, opt => opt.MapFrom(src => src.MemberStoryImages.Select(img => new MemberStoryImageDto
-           {
-               Id = img.Id,
-               ImageUrl = img.ImageUrl
-           }).ToList()));
 
-        // Mapping for MemberStoryImage to MemberStoryImageDto
-        CreateMap<MemberStoryImage, MemberStoryImageDto>();
 
         // FamilyLocation mappings
         CreateMap<FamilyLocation, FamilyLocationDto>();
