@@ -3,7 +3,6 @@ import { EmotionalTag, MediaType } from './enums';
 export interface MemoryMedia {
   id: string;
   memoryItemId: string;
-  mediaType: MediaType; // Corrected from MemoryMediaType to MediaType
   url: string;
 }
 

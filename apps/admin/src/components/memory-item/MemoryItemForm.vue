@@ -5,9 +5,7 @@
         <v-carousel cycle hide-delimiter-background :continuous="false" hide-delimiters>
           <v-carousel-item v-for="(media, index) in form.medias" :key="media.id || index">
             <div>
-              <v-img v-if="media.mediaType === MediaType.Image" :src="media.url" cover class="carousel-image"></v-img>
-              <video v-else-if="media.mediaType === MediaType.Video" :src="media.url" controls
-                class="carousel-video"></video>
+              <v-img :src="media.url" cover class="carousel-image"></v-img>
               <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete" color="error" size="small"
                 @click="removeMedia(media)"></v-btn>
             </div>
@@ -55,7 +53,7 @@ import { ref, computed, watch, reactive, nextTick, type ComputedRef } from 'vue'
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
 import type { MemoryItem as BaseMemoryItem, MemoryMedia as BaseMemoryMedia, MemoryPerson } from '@/types';
-import { EmotionalTag, MediaType } from '@/types';
+import { EmotionalTag } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
@@ -113,11 +111,9 @@ const form = reactive<LocalMemoryItem>(
 watch(uploadedFiles, (newFiles) => {
   if (newFiles.length === 0) return;
   newFiles.forEach(file => {
-    const mediaType = MediaType.Image; // Only images are allowed now
     form.medias.push({
       id: `new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Temporary ID for new files
       memoryItemId: form.id,
-      mediaType: mediaType,
       url: URL.createObjectURL(file), // Create a temporary URL for preview
       isNew: true,
       file: file,
