@@ -7,7 +7,7 @@ namespace backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 public record UpdateMemoryItemCommand : IRequest<Result>
 {
     public Guid Id { get; init; }
-    public Guid FamilyId { get; init; } // FamilyId is needed for permission checks
+    public Guid FamilyId { get; set; }
     public string Title { get; init; } = string.Empty;
     public string? Description { get; init; }
     public DateTime? HappenedAt { get; init; }

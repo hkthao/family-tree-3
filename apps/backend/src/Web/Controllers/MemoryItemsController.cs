@@ -11,66 +11,94 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Web.Controllers;
 
 [Authorize]
-public class MemoryItemsController : ApiControllerBase
+[ApiController] // Add this
+[Route("api/memory-items")] // Add this
+public class MemoryItemsController : ControllerBase
 {
-    [HttpPost("family/{familyId}/memory-items")]
+    private readonly IMediator _mediator; // Add this
+    private readonly ILogger<MemoryItemsController> _logger; // Add this
+
+    public MemoryItemsController(IMediator mediator, ILogger<MemoryItemsController> logger) // Add constructor
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Result<Guid>>> CreateMemoryItem(Guid familyId, CreateMemoryItemCommand command)
+    public async Task<IActionResult> CreateMemoryItem(CreateMemoryItemCommand command)
     {
-        if (familyId != command.FamilyId)
+        var familyIdString = HttpContext.GetRouteValue("familyId")?.ToString();
+        if (!Guid.TryParse(familyIdString, out var familyId))
         {
-            return BadRequest(Result<Guid>.Failure("Family ID in route must match Family ID in body."));
+            return BadRequest(Result<Guid>.Failure("Invalid Family ID in route."));
         }
-        var result = await Mediator.Send(command);
-        return result.ToActionResult();
+        command.FamilyId = familyId;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 
-    [HttpPut("family/{familyId}/memory-items/{id}")]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Result>> UpdateMemoryItem(Guid familyId, Guid id, UpdateMemoryItemCommand command)
+    public async Task<IActionResult> UpdateMemoryItem(Guid id, UpdateMemoryItemCommand command)
     {
+        var familyIdString = HttpContext.GetRouteValue("familyId")?.ToString();
+        if (!Guid.TryParse(familyIdString, out var familyId))
+        {
+            return BadRequest(Result.Failure("Invalid Family ID in route."));
+        }
+
         if (id != command.Id)
         {
             return BadRequest(Result.Failure("Memory Item ID in route must match Memory Item ID in body."));
         }
-        if (familyId != command.FamilyId)
-        {
-            return BadRequest(Result.Failure("Family ID in route must match Family ID in body."));
-        }
-        var result = await Mediator.Send(command);
-        return result.ToActionResult();
+        command.FamilyId = familyId; // Assign FamilyId from route
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 
-    [HttpDelete("family/{familyId}/memory-items/{id}")]
+    [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Result>> DeleteMemoryItem(Guid familyId, Guid id)
+    public async Task<IActionResult> DeleteMemoryItem(Guid id)
     {
-        var result = await Mediator.Send(new DeleteMemoryItemCommand { Id = id, FamilyId = familyId });
-        return result.ToActionResult();
+        var familyIdString = HttpContext.GetRouteValue("familyId")?.ToString();
+        if (!Guid.TryParse(familyIdString, out var familyId))
+        {
+            return BadRequest(Result.Failure("Invalid Family ID in route."));
+        }
+        var result = await _mediator.Send(new DeleteMemoryItemCommand { Id = id, FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
     }
 
-    [HttpGet("family/{familyId}/memory-items/{id}")]
+    [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Result<MemoryItemDto>>> GetMemoryItemDetail(Guid familyId, Guid id)
+    public async Task<IActionResult> GetMemoryItemDetail(Guid id)
     {
-        var result = await Mediator.Send(new GetMemoryItemDetailQuery { Id = id, FamilyId = familyId });
-        return result.ToActionResult();
+        var familyIdString = HttpContext.GetRouteValue("familyId")?.ToString();
+        if (!Guid.TryParse(familyIdString, out var familyId))
+        {
+            return BadRequest(Result.Failure("Invalid Family ID in route."));
+        }
+        var result = await _mediator.Send(new GetMemoryItemDetailQuery { Id = id, FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
     }
 
-    [HttpGet("family/{familyId}/memory-items")]
+    [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<MemoryItemDto>>> SearchMemoryItems(Guid familyId, [FromQuery] SearchMemoryItemsQuery query)
+    public async Task<ActionResult<PaginatedList<MemoryItemDto>>> SearchMemoryItems([FromQuery] SearchMemoryItemsQuery query)
     {
-        if (familyId != query.FamilyId)
+        var familyIdString = HttpContext.GetRouteValue("familyId")?.ToString();
+        if (!Guid.TryParse(familyIdString, out var familyId))
         {
-            return BadRequest(Result<PaginatedList<MemoryItemDto>>.Failure("Family ID in route must match Family ID in query."));
+            return BadRequest(Result<PaginatedList<MemoryItemDto>>.Failure("Invalid Family ID in route."));
         }
-        return await Mediator.Send(query);
+        query.FamilyId = familyId; // Assign FamilyId from route
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 }
