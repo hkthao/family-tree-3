@@ -23,6 +23,8 @@ export * from './user/useUserSearch';
 export * from './novu/useNovuInbox';
 export * from './family/useFamilyDataManagement';
 
+export * from './memory-item'; // NEW: MemoryItem Composables
+
 // Event Composables
 export * from './event/useEventQuery';
 export * from './event/useEventsQuery';

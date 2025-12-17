@@ -41,6 +41,10 @@ import { ApiFamilyMediaService } from './family-media/api.family-media.service';
 import type { IFamilyLocationService } from './family-location/family-location.service.interface';
 import { ApiFamilyLocationService } from './family-location/api.family-location.service';
 
+// NEW: Imports for MemoryItemService
+import type { IMemoryItemService } from './memory-item/memory-item.service.interface';
+import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
+
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
@@ -62,6 +66,7 @@ export interface AppServices {
   familyLinkRequest: IFamilyLinkRequestService;
   familyMedia: IFamilyMediaService; // NEW: Add FamilyMediaService
   familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
+  memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -140,5 +145,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyLocationService(apiClient)
         : testServices?.familyLocation || new ApiFamilyLocationService(apiClient),
+    memoryItem: // NEW: Assign MemoryItemService
+      mode === 'real'
+        ? new ApiMemoryItemService(apiClient)
+        : testServices?.memoryItem || new ApiMemoryItemService(apiClient),
   };
 }

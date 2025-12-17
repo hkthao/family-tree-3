@@ -10,6 +10,14 @@ export enum RepeatRule {
   Yearly = 1,
 }
 
+export enum EmotionalTag {
+  Happy = 0,
+  Sad = 1,
+  Proud = 2,
+  Memorial = 3,
+  Neutral = 4,
+}
+
 export enum MediaType {
   Image = 0,
   Video = 1,
