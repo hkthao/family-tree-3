@@ -1,22 +1,15 @@
 <template>
   <div data-testid="memory-item-list-view">
     <v-card class="mb-4">
-      <v-card-title class="d-flex align-center">
-        <span>{{ t('memoryItem.list.title') }}</span>
-        <v-spacer></v-spacer>
-        <v-text-field
-          :model-value="filters.searchTerm"
-          :label="t('common.search')"
-          density="compact"
-          hide-details
-          variant="solo-filled"
-          flat
-          @update:model-value="handleSearchUpdate"
-        ></v-text-field>
-        <v-btn color="primary" class="ml-4" @click="openAddDrawer()">
-          {{ t('memoryItem.list.add') }}
-        </v-btn>
-      </v-card-title>
+      <ListToolbar
+        :title="t('memoryItem.list.title')"
+        :create-button-tooltip="t('memoryItem.list.add')"
+        create-button-test-id="add-memory-item-button"
+        :search-query="filters.searchTerm"
+        :search-label="t('common.search')"
+        @create="openAddDrawer()"
+        @update:search="handleSearchUpdate"
+      />
       <v-card-text>
         <v-data-table-server :items="memoryItems" :items-length="totalItems" :loading="isLoadingMemoryItems"
           :items-per-page="paginationOptions.itemsPerPage" :page="paginationOptions.page"
@@ -61,9 +54,10 @@ import { useMemoryItemDataManagement, useMemoryItemsQuery, useDeleteMemoryItemMu
 import { useQueryClient } from '@tanstack/vue-query';
 import type { MemoryItem } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import MemoryItemAddView from './MemoryItemAddView.vue'; // Assuming this component exists
-import MemoryItemEditView from './MemoryItemEditView.vue'; // Assuming this component exists
-import MemoryItemDetailView from './MemoryItemDetailView.vue'; // Assuming this component exists
+import ListToolbar from '@/components/common/ListToolbar.vue';
+import MemoryItemAddView from './MemoryItemAddView.vue';
+import MemoryItemEditView from './MemoryItemEditView.vue';
+import MemoryItemDetailView from './MemoryItemDetailView.vue';
 import dayjs from 'dayjs';
 
 interface MemoryItemListViewProps {
@@ -84,7 +78,7 @@ const {
   setSortBy,
 } = useMemoryItemDataManagement(computed(() => props.familyId));
 
-const { data: memoryItemsData, isLoading: isLoadingMemoryItems, refetch } = useMemoryItemsQuery(
+const { data: memoryItemsData, isLoading: isLoadingMemoryItems } = useMemoryItemsQuery(
   computed(() => props.familyId),
   paginationOptions,
   filters
@@ -120,7 +114,7 @@ const headers = ref([
 ]);
 
 const handleSearchUpdate = (value: string | null) => {
-  filters.value.searchTerm = value || ''; // Update searchTerm directly in filters
+  filters.value.searchTerm = value || '';
 };
 
 const handleListOptionsUpdate = (options: {
@@ -179,5 +173,4 @@ const formatDate = (dateString: string | Date) => {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

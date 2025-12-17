@@ -1,4 +1,4 @@
-import type { MemoryItem, ListOptions, Paginated, Result, ApiError, EmotionalTag } from '@/types';
+import type { MemoryItem, EmotionalTag } from '@/types';
 import type { ICrudService } from '@/services/common/crud.service.interface';
 
 export interface MemoryItemFilter {

@@ -114,7 +114,7 @@
 import { ref, computed, watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
-import type { MemoryItem, MemoryMedia, MemoryPerson } from '@/types';
+import type { MemoryItem } from '@/types';
 import { EmotionalTag, MediaType } from '@/types/enums';
 
 interface MemoryItemFormProps {
