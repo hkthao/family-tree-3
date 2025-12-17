@@ -16,11 +16,6 @@ public class MemoryMediaConfiguration : IEntityTypeConfiguration<MemoryMedia>
         builder.Property(mm => mm.MemoryItemId)
             .IsRequired();
 
-        builder.Property(mm => mm.MediaType)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(50); // Adjust max length as needed
-
         builder.Property(mm => mm.Url)
             .HasMaxLength(1000)
             .IsRequired();

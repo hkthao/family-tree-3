@@ -76,7 +76,7 @@ const headers = computed<DataTableHeader[]>(() => {
   ];
 
   if (props.allowEdit || props.allowDelete) {
-    baseHeaders.push({ title: t('common.actions'), key: 'actions', sortable: false });
+    baseHeaders.push({ title: t('common.actions'), key: 'actions', sortable: false, width: '120px' });
   }
 
   return baseHeaders;

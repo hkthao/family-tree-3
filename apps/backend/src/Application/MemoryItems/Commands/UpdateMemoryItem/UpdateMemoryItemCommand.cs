@@ -11,19 +11,13 @@ public record UpdateMemoryItemCommand : IRequest<Result>
     public string? Description { get; init; }
     public DateTime? HappenedAt { get; init; }
     public EmotionalTag EmotionalTag { get; init; } = EmotionalTag.Neutral;
-
-    public ICollection<UpdateMemoryMediaCommandDto> Media { get; init; } = new List<UpdateMemoryMediaCommandDto>();
-    public ICollection<UpdateMemoryPersonCommandDto> Persons { get; init; } = new List<UpdateMemoryPersonCommandDto>();
+    public ICollection<Guid> DeletedMediaIds { get; init; } = [];
+    public ICollection<UpdateMemoryMediaCommandDto> Media { get; init; } = [];
+    public ICollection<Guid> PersonIds { get; init; } = [];
 }
 
 public record UpdateMemoryMediaCommandDto
 {
     public Guid? Id { get; init; } // Null for new media, value for existing media
-    public MemoryMediaType MediaType { get; init; }
     public string Url { get; init; } = string.Empty;
-}
-
-public record UpdateMemoryPersonCommandDto
-{
-    public Guid MemberId { get; init; }
 }

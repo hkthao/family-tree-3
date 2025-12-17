@@ -169,13 +169,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
         CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
-        CreateMap<CreateMemoryPersonCommandDto, MemoryPerson>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore())
-            .ForMember(dest => dest.Member, opt => opt.Ignore());
-        CreateMap<UpdateMemoryPersonCommandDto, MemoryPerson>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore())
-            .ForMember(dest => dest.Member, opt => opt.Ignore());
+
     }
 }

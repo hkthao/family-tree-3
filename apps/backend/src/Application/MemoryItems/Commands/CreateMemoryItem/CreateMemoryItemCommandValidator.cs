@@ -17,36 +17,8 @@ public class CreateMemoryItemCommandValidator : AbstractValidator<CreateMemoryIt
         RuleFor(v => v.EmotionalTag)
             .IsInEnum().WithMessage("Invalid EmotionalTag value.");
 
-        RuleForEach(v => v.Media).SetValidator(new CreateMemoryMediaCommandDtoValidator());
-        RuleForEach(v => v.Persons).SetValidator(new CreateMemoryPersonCommandDtoValidator());
-    }
-}
-
-public class CreateMemoryMediaCommandDtoValidator : AbstractValidator<CreateMemoryMediaCommandDto>
-{
-    public CreateMemoryMediaCommandDtoValidator()
-    {
-        RuleFor(v => v.MediaType)
-            .IsInEnum().WithMessage("Invalid MediaType value.");
-
-        RuleFor(v => v.Url)
-            .NotEmpty().WithMessage("Media URL is required.")
-            .MaximumLength(1000).WithMessage("Media URL must not exceed 1000 characters.")
-            .Must(BeAValidUrl).WithMessage("Media URL must be a valid URL.");
-    }
-
-    private bool BeAValidUrl(string url)
-    {
-        return Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult) &&
-               (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-    }
-}
-
-public class CreateMemoryPersonCommandDtoValidator : AbstractValidator<CreateMemoryPersonCommandDto>
-{
-    public CreateMemoryPersonCommandDtoValidator()
-    {
-        RuleFor(v => v.MemberId)
-            .NotEmpty().WithMessage("MemberId is required for associated persons.");
+        RuleFor(v => v.PersonIds)
+            .NotNull().WithMessage("PersonIds cannot be null.")
+            .ForEach(x => x.NotEmpty().WithMessage("Each PersonId must not be empty."));
     }
 }

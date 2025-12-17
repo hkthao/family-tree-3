@@ -33,51 +33,27 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
         );
 
         // Handle Media updates
-        var existingMediaIds = entity.MemoryMedia.Select(m => m.Id).ToHashSet();
-        var requestMediaIds = request.Media.Where(m => m.Id.HasValue).Select(m => m.Id!.Value).ToHashSet();
-
-        // Remove media not in request
-        foreach (var media in entity.MemoryMedia.Where(m => !requestMediaIds.Contains(m.Id)).ToList())
-        {
-            _context.MemoryMedia.Remove(media);
-        }
+        var deleteItems = await _context.MemoryMedia
+            .Where(mm => request.DeletedMediaIds.Contains(mm.Id) && mm.MemoryItem.FamilyId == request.FamilyId)
+            .ToListAsync(cancellationToken);
+        if (deleteItems.Count != 0)
+            _context.MemoryMedia.RemoveRange(deleteItems);
 
         // Add or update media
         foreach (var mediaDto in request.Media)
         {
-            if (mediaDto.Id.HasValue)
+            var existingMedia = entity.MemoryMedia.FirstOrDefault(m => m.Id == mediaDto.Id);
+            if (existingMedia == null)
             {
-                var existingMedia = entity.MemoryMedia.FirstOrDefault(m => m.Id == mediaDto.Id);
-                existingMedia?.Update(mediaDto.MediaType, mediaDto.Url);
-            }
-            else
-            {
-                entity.AddMedia(new MemoryMedia(entity.Id, mediaDto.MediaType, mediaDto.Url));
+                entity.AddMedia(new MemoryMedia(entity.Id, mediaDto.Url));
             }
         }
 
-        // Handle Persons updates
-        var existingPersonMemberIds = entity.MemoryPersons.Select(mp => mp.MemberId).ToHashSet();
-        var requestPersonMemberIds = request.Persons.Select(mp => mp.MemberId).ToHashSet();
-
-        // Remove persons not in request
-        foreach (var person in entity.MemoryPersons.Where(mp => !requestPersonMemberIds.Contains(mp.MemberId)).ToList())
+        _context.MemoryPersons.RemoveRange(entity.MemoryPersons);
+        foreach (var personId in request.PersonIds)
         {
-            _context.MemoryPersons.Remove(person);
+            _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personId));
         }
-
-        // Add persons not currently associated
-        foreach (var personDto in request.Persons.Where(mp => !existingPersonMemberIds.Contains(mp.MemberId)))
-        {
-            // Check if member exists in the specified family
-            var memberExists = await _context.Members.AnyAsync(m => m.Id == personDto.MemberId && m.FamilyId == request.FamilyId, cancellationToken);
-            if (!memberExists)
-            {
-                return Result.Failure($"Member with ID {personDto.MemberId} not found in family {request.FamilyId}.");
-            }
-            _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personDto.MemberId));
-        }
-
 
         await _context.SaveChangesAsync(cancellationToken);
 

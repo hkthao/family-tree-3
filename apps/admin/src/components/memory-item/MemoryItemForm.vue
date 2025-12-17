@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formRef" @submit.prevent>
+  <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
       <v-col cols="12" v-if="form.medias && form.medias.length > 0">
         <v-carousel cycle hide-delimiter-background :continuous="false" hide-delimiters>
@@ -8,13 +8,13 @@
               <v-img v-if="media.mediaType === MediaType.Image" :src="media.url" cover class="carousel-image"></v-img>
               <video v-else-if="media.mediaType === MediaType.Video" :src="media.url" controls
                 class="carousel-video"></video>
-              <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete"  color="error"
-                size="small" @click="removeMedia(media)"></v-btn>
+              <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete" color="error" size="small"
+                @click="removeMedia(media)"></v-btn>
             </div>
           </v-carousel-item>
         </v-carousel>
       </v-col>
-      <v-col cols="12">
+      <v-col v-if="!props.readOnly" cols="12">
         <VFileUpload :label="t('memoryItem.form.mediaFile')" v-model="uploadedFiles" :accept="acceptedMimeTypes"
           data-testid="memory-item-file-upload" multiple
           :rules="[(v: File[]) => (v || []).length <= 5 || t('memoryItem.validations.maxFiles', { max: 5 })]"
@@ -42,10 +42,10 @@
           :readonly="props.readOnly"></v-select>
       </v-col>
       <v-col cols="12">
-        <MemberAutocomplete v-model="form.personIds" :family-id="props.familyId" :label="t('memoryItem.form.persons')"
-          multiple :read-only="props.readOnly" data-testid="memory-item-persons"></MemberAutocomplete>
+        <MemberAutocomplete :disabled="props.readOnly" v-model="form.personIds" :family-id="props.familyId"
+          :label="t('memoryItem.form.persons')" multiple :read-only="props.readOnly" data-testid="memory-item-persons">
+        </MemberAutocomplete>
       </v-col>
-
     </v-row>
   </v-form>
 </template>

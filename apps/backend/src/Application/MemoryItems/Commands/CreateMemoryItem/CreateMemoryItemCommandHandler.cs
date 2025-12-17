@@ -32,19 +32,18 @@ public class CreateMemoryItemCommandHandler : IRequestHandler<CreateMemoryItemCo
 
         foreach (var mediaDto in request.Media)
         {
-            entity.AddMedia(new MemoryMedia(entity.Id, mediaDto.MediaType, mediaDto.Url));
+            entity.AddMedia(new MemoryMedia(entity.Id, mediaDto.Url));
         }
 
-        foreach (var personDto in request.Persons)
+        var deleteItems = await _context.MemoryMedia
+            .Where(mm => request.DeletedMediaIds.Contains(mm.Id) && mm.MemoryItem.FamilyId == request.FamilyId)
+            .ToListAsync(cancellationToken);
+        if (deleteItems.Count != 0)
+            _context.MemoryMedia.RemoveRange(deleteItems);
+
+        foreach (var personId in request.PersonIds)
         {
-            // Check if member exists in the specified family
-            var memberExists = await _context.Members.AnyAsync(m => m.Id == personDto.MemberId && m.FamilyId == request.FamilyId, cancellationToken);
-            if (!memberExists)
-            {
-                return Result<Guid>.Failure($"Member with ID {personDto.MemberId} not found in family {request.FamilyId}.");
-            }
-            // MemoryPerson does not have an Id property of its own, it's a join entity
-            _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personDto.MemberId));
+            _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personId));
         }
 
         _context.MemoryItems.Add(entity);

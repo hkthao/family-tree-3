@@ -21,7 +21,6 @@ public class UpdateMemoryItemCommandValidator : AbstractValidator<UpdateMemoryIt
             .IsInEnum().WithMessage("Invalid EmotionalTag value.");
 
         RuleForEach(v => v.Media).SetValidator(new UpdateMemoryMediaCommandDtoValidator());
-        RuleForEach(v => v.Persons).SetValidator(new UpdateMemoryPersonCommandDtoValidator());
     }
 }
 
@@ -31,9 +30,6 @@ public class UpdateMemoryMediaCommandDtoValidator : AbstractValidator<UpdateMemo
     {
         RuleFor(v => v.Id)
             .Must(id => !id.HasValue || id.Value != Guid.Empty).WithMessage("Media ID must be a valid GUID if provided.");
-
-        RuleFor(v => v.MediaType)
-            .IsInEnum().WithMessage("Invalid MediaType value.");
 
         RuleFor(v => v.Url)
             .NotEmpty().WithMessage("Media URL is required.")
@@ -45,14 +41,5 @@ public class UpdateMemoryMediaCommandDtoValidator : AbstractValidator<UpdateMemo
     {
         return Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult) &&
                (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-    }
-}
-
-public class UpdateMemoryPersonCommandDtoValidator : AbstractValidator<UpdateMemoryPersonCommandDto>
-{
-    public UpdateMemoryPersonCommandDtoValidator()
-    {
-        RuleFor(v => v.MemberId)
-            .NotEmpty().WithMessage("MemberId is required for associated persons.");
     }
 }

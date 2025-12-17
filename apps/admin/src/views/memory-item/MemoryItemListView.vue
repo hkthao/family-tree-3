@@ -1,20 +1,19 @@
 <template>
   <div data-testid="memory-item-list-view">
-    <ListToolbar :title="t('memoryItem.list.title')" :create-button-tooltip="t('memoryItem.list.add')"
-      create-button-test-id="add-memory-item-button" :search-query="filters.searchTerm"
-      :search-label="t('common.search')" @create="openAddDrawer()" @update:search="handleSearchUpdate" />
-    <v-data-table-server :items="memoryItems" :items-length="totalItems" :loading="isLoadingMemoryItems"
-      :items-per-page="paginationOptions.itemsPerPage" :page="paginationOptions.page" :headers="headers"
-      @update:options="handleListOptionsUpdate">
-      <template v-slot:item.happenedAt="{ item }">
-        {{ item.happenedAt ? formatDate(item.happenedAt) : '' }}
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="openDetailDrawer(item.id)">mdi-eye</v-icon>
-        <v-icon small class="mr-2" @click="openEditDrawer(item.id)">mdi-pencil</v-icon>
-        <v-icon small @click="confirmDelete(item.id)">mdi-delete</v-icon>
-      </template>
-    </v-data-table-server>
+    <MemoryItemList
+      :items="memoryItems"
+      :total-items="totalItems"
+      :loading="isLoadingMemoryItems"
+      :family-id="props.familyId"
+      @update:options="handleListOptionsUpdate"
+      @create="openAddDrawer()"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
+      @delete="confirmDelete"
+      :allow-add="true"
+      :allow-edit="true"
+      :allow-delete="true"
+    />
 
     <!-- Add Memory Item Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemoryItemClosed">
@@ -44,11 +43,10 @@ import { useMemoryItemDataManagement, useMemoryItemsQuery, useDeleteMemoryItemMu
 import { useQueryClient } from '@tanstack/vue-query';
 import type { MemoryItem } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import ListToolbar from '@/components/common/ListToolbar.vue';
+import MemoryItemList from '@/components/memory-item/MemoryItemList.vue';
 import MemoryItemAddView from './MemoryItemAddView.vue';
 import MemoryItemEditView from './MemoryItemEditView.vue';
 import MemoryItemDetailView from './MemoryItemDetailView.vue';
-import dayjs from 'dayjs';
 
 interface MemoryItemListViewProps {
   familyId: string;
@@ -94,18 +92,6 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
-
-const headers = ref([
-  { title: t('memoryItem.list.col.title'), key: 'title' },
-  { title: t('memoryItem.list.col.description'), key: 'description' },
-  { title: t('memoryItem.list.col.happenedAt'), key: 'happenedAt' },
-  { title: t('memoryItem.list.col.emotionalTag'), key: 'emotionalTag' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
-]);
-
-const handleSearchUpdate = (value: string | null) => {
-  filters.value.searchTerm = value || '';
-};
 
 const handleListOptionsUpdate = (options: {
   page: number;
@@ -158,9 +144,6 @@ const handleMemoryItemClosed = () => {
   closeAllDrawers();
 };
 
-const formatDate = (dateString: string | Date) => {
-  return dayjs(dateString).format('DD/MM/YYYY');
-};
 </script>
 
 <style scoped></style>
