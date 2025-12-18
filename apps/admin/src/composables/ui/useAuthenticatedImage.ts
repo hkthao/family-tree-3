@@ -12,11 +12,13 @@ export function useAuthenticatedImage(initialSrc: string | null) {
       return;
     }
 
-    // Check if it's a data URL or a non-authenticated URL
-    if (imageUrl.startsWith('data:') || !imageUrl.includes('/api/upload/preview/')) {
+    // If it's a data URL, display it directly.
+    if (imageUrl.startsWith('data:')) {
       displaySrc.value = imageUrl;
       return;
     }
+
+    // For any other URL, attempt to fetch with authentication header.
 
     try {
       const token = authStore.getAccessToken;
