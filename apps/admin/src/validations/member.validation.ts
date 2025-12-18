@@ -1,15 +1,16 @@
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
+import type { Member } from '@/types';
 
-export function useMemberRules(state: { dateOfBirth: any; dateOfDeath: any }) {
+export function useMemberRules(formData: Omit<Member, 'id'> | Member) {
   const { t } = useI18n();
   const rulesVuetify = useRules();
 
   const dateOfDeathAfterBirth = (value: string | Date | null) => {
     if (!value) return true;
-    const dateOfDeath = state.dateOfDeath;
-    const dateOfBirth = state.dateOfBirth;
+    const dateOfDeath = formData.dateOfDeath;
+    const dateOfBirth = formData.dateOfBirth;
     if (!dateOfDeath || !dateOfBirth) return true;
     return new Date(dateOfDeath) > new Date(dateOfBirth) || t('validation.dateOfDeathAfterBirth');
   };

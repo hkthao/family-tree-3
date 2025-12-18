@@ -1,6 +1,5 @@
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
 import { useGlobalSnackbar } from '@/composables';
 import { useUserProfile } from '@/composables';
@@ -8,10 +7,13 @@ import type { UpdateUserProfileDto, UserProfile } from '@/types';
 import { useMutation } from '@tanstack/vue-query';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
+import type { VForm } from 'vuetify/components';
 
 export function useProfileSettings() {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
+
+  const formRef = ref<VForm | null>(null);
 
   // Use the new useUserProfile composable
   const { userProfile, isFetchingProfile, isFetchError, fetchError, queryClient } = useUserProfile();
@@ -64,8 +66,7 @@ export function useProfileSettings() {
   const initialAvatarDisplay = computed(() => formData.avatar);
 
   // Validation
-  const rules = useProfileSettingsRules();
-  const v$ = useVuelidate(rules, formData);
+  const validationRules = useProfileSettingsRules();
 
   // ... rest of the code ...
   // Update User Profile Mutation
@@ -98,8 +99,12 @@ export function useProfileSettings() {
 
   // Save Profile function
   const saveProfile = async () => {
-    const isValid = await v$.value.$validate();
-    if (!isValid) {
+    if (!formRef.value) {
+      showSnackbar(t('userSettings.profile.validationError'), 'error');
+      return;
+    }
+    const { valid } = await formRef.value.validate();
+    if (!valid) {
       showSnackbar(t('userSettings.profile.validationError'), 'error');
       return;
     }
@@ -125,7 +130,7 @@ export function useProfileSettings() {
 
   return {
     formData,
-    v$,
+    formRef,
     initialAvatarDisplay,
     isFetchingProfile,
     isSavingProfile,
@@ -133,5 +138,6 @@ export function useProfileSettings() {
     userProfile,
     isFetchError,
     fetchError,
+    validationRules,
   };
 }

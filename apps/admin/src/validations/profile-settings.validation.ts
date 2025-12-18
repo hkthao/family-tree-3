@@ -9,7 +9,7 @@ export function useProfileSettingsRules() {
       lastName: [rulesVuetify.required()],
       email: [
         rulesVuetify.required(),
-        rulesVuetify.email,
+        rulesVuetify.email(),
       ],
     };
   });

@@ -1,7 +1,6 @@
-import { reactive, toRefs, ref, toRef, computed } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import type { Member } from '@/types';
 import { Gender } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
 import { useMemberRules } from '@/validations/member.validation';
 import { useAuth } from '@/composables/auth/useAuth';
 import { getAvatarUrl } from '@/utils/avatar.utils';
@@ -56,32 +55,14 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
       },
   );
 
-  const state = reactive({
-    lastName: toRef(formData, 'lastName'),
-    firstName: toRef(formData, 'firstName'),
-    dateOfBirth: toRef(formData, 'dateOfBirth'),
-    dateOfDeath: toRef(formData, 'dateOfDeath'),
-    familyId: toRef(formData, 'familyId'),
-    fatherId: toRef(formData, 'fatherId'),
-    motherId: toRef(formData, 'motherId'),
-    husbandId: toRef(formData, 'husbandId'),
-    wifeId: toRef(formData, 'wifeId'),
-    isRoot: toRef(formData, 'isRoot'),
-    isDeceased: toRef(formData, 'isDeceased'),
-    order: toRef(formData, 'order'),
-    phone: toRef(formData, 'phone'),
-    email: toRef(formData, 'email'),
-    address: toRef(formData, 'address'),
-    avatarBase64: toRef(formData, 'avatarBase64'),
-  });
-
-  const rules = useMemberRules(toRefs(state));
-
-  const v$ = useVuelidate(rules, state);
+  const rules = useMemberRules(formData);
 
   const validate = async () => {
-    const result = await v$.value.$validate();
-    return result;
+    if (!formRef.value) {
+      return false;
+    }
+    const { valid } = await formRef.value.validate();
+    return valid;
   };
 
   const getFormData = () => {
@@ -97,7 +78,6 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
   return {
     formRef,
     formData,
-    v$,
     isFormReadOnly,
     initialAvatarDisplay,
     validate,

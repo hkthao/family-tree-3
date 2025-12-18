@@ -29,3 +29,8 @@ vi.mock('vue-i18n', () => ({
     t: vi.fn((key: string) => key),
   })),
 }));
+
+// Mock @novu/js/ui globally
+vi.mock('@novu/js/ui', () => ({
+  NovuUI: vi.fn(), // Mock the NovuUI export
+}));

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formRef" @submit.prevent="saveProfile">
+  <v-form ref="localFormRef" @submit.prevent="saveProfile">
     <!-- Loading State -->
     <div v-if="isFetchingProfile" class="text-center pa-4">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -25,18 +25,15 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.firstName" :label="t('userSettings.profile.firstName')"
-            @blur="v$.firstName.$touch()" @input="v$.firstName.$touch()"
-            :error-messages="v$.firstName.$errors.map(e => e.$message as string)"></v-text-field>
+            :rules="validationRules.firstName"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.lastName" :label="t('userSettings.profile.lastName')"
-            @blur="v$.lastName.$touch()" @input="v$.lastName.$touch()"
-            :error-messages="v$.lastName.$errors.map(e => e.$message as string)"></v-text-field>
+            :rules="validationRules.lastName"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')" @blur="v$.email.$touch()"
-            @input="v$.email.$touch()" :disabled="true"
-            :error-messages="v$.email.$errors.map(e => e.$message as string)" />
+          <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')" :disabled="true"
+            :rules="validationRules.email" />
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.phone" :label="t('userSettings.profile.phone')"></v-text-field>
@@ -56,22 +53,32 @@
 </template>
 
 <script setup lang="ts">
-
 import { useI18n } from 'vue-i18n';
 import { AvatarInput } from '@/components/common';
 import { useProfileSettings } from '@/composables';
+import { ref, watch } from 'vue';
+import type { VForm } from 'vuetify/components';
 
 const { t } = useI18n();
 
+const localFormRef = ref<VForm | null>(null);
+
 const {
   formData,
-  v$,
+  formRef,
   initialAvatarDisplay,
   isFetchingProfile,
   isSavingProfile,
   saveProfile,
   userProfile,
   fetchError,
+  validationRules,
 } = useProfileSettings();
 
+// Assign the local form ref to the composable's formRef
+watch(localFormRef, (newValue) => {
+  if (newValue) {
+    formRef.value = newValue;
+  }
+});
 </script>

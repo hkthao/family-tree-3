@@ -2,12 +2,12 @@ import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
 
-export function useRelationshipRules(state: { sourceMemberId: any; targetMemberId: any }) {
+export function useRelationshipRules(formData: { sourceMemberId: any; targetMemberId: any }) {
   const { t } = useI18n();
   const rulesVuetify = useRules();
 
   const notSameAs = (value: any) => {
-    return value !== state.targetMemberId || t('relationship.validation.notSame');
+    return value !== formData.targetMemberId || t('relationship.validation.notSame');
   };
 
   const rules = computed(() => {
@@ -22,5 +22,5 @@ export function useRelationshipRules(state: { sourceMemberId: any; targetMemberI
     };
   });
 
-  return rules;
+  return { rules };
 }

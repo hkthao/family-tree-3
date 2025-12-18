@@ -1,10 +1,9 @@
-import { ref, computed, reactive, watch, toRef } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
 import type { MemoryItem } from '@/types';
 import { EmotionalTag } from '@/types';
 import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables/memory-item/memory-media/useMemoryMediaForm';
-import { useVuelidate } from '@vuelidate/core';
 import { useMemoryItemRules } from '@/validations/memoryItem.validation';
 
 
@@ -23,18 +22,17 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   const formRef = ref<VForm | null>(null);
   const { t } = useI18n();
 
-  const defaultNewMemoryItem: LocalMemoryItem = {
-    id: '',
-    familyId: options.familyId,
-    title: '',
-    description: undefined,
-    happenedAt: undefined,
-    emotionalTag: EmotionalTag.Neutral,
-    personIds: [],
-    memoryPersons: [],
-    uploadedFiles: [],
-  };
-
+      const defaultNewMemoryItem: LocalMemoryItem = {
+        id: '',
+        familyId: options.familyId,
+        title: '',
+        description: undefined,
+        happenedAt: undefined,
+        emotionalTag: EmotionalTag.Neutral,
+        personIds: [],
+        memoryPersons: [],
+        uploadedFiles: [],
+      };
   const form = reactive<LocalMemoryItem>(
     options.initialMemoryItemData
       ? {
@@ -56,15 +54,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     form.uploadedFiles = newFiles;
   });
 
-  const stateForValidation = reactive({
-    title: toRef(form, 'title'),
-    emotionalTag: toRef(form, 'emotionalTag'),
-    uploadedFiles: toRef(form, 'uploadedFiles'),
-  });
-
   const { rules } = useMemoryItemRules();
-  const v$ = useVuelidate(rules, stateForValidation);
-
 
   watch(() => options.initialMemoryItemData, (newData) => {
     if (newData) {
@@ -91,8 +81,11 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   ]);
 
   const validate = async () => {
-    const result = await v$.value.$validate();
-    return result;
+    if (!formRef.value) {
+      return false;
+    }
+    const { valid } = await formRef.value.validate();
+    return valid;
   };
 
   const getFormData = (): MemoryItem => {
@@ -115,7 +108,6 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   return {
     formRef,
     form,
-    v$,
     emotionalTagOptions,
     mediaManagement,
     validate,

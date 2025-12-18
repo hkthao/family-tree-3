@@ -120,6 +120,7 @@ export * from './member-face/logic/useMemberFaceDeletion';
 export * from './member-face/queries/useMemberFaceDetailQuery';
 export * from './member-face/queries/useMemberFacesQuery';
 export * from './member/useMemberFormComposable';
+export * from './relationship/useRelationshipForm';
 export * from './map/useMapbox';
 export * from './map/useMultiMarkers';
 
