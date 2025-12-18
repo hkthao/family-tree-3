@@ -8,8 +8,29 @@ export interface MapMarker {
   lat: number;
   title?: string;
   description?: string;
+  address?: string; // Add address field
   locationType: LocationType;
 }
+
+// Function to get icon based on location type
+const getLocationTypeIcon = (type: LocationType): string => {
+  switch (type) {
+    case LocationType.Grave:
+      return 'mdi-grave-stone';
+    case LocationType.Homeland:
+      return 'mdi-home-map-marker';
+    case LocationType.AncestralHall:
+      return 'mdi-temple-hindu';
+    case LocationType.Cemetery:
+      return 'mdi-cemetery';
+    case LocationType.EventLocation:
+      return 'mdi-map-marker-account';
+    case LocationType.Other:
+      return 'mdi-map-marker';
+    default:
+      return 'mdi-map-marker';
+  }
+};
 
 interface UseMultiMarkersOptions {
   mapInstance: Ref<mapboxgl.Map | null>;
@@ -75,9 +96,19 @@ export function useMultiMarkers(options: UseMultiMarkersOptions) {
                 marker.setLngLat([loc.lng!, loc.lat!])
                   .addTo(options.mapInstance.value);
               }
-      if (loc.title || loc.description) {
-        const descriptionHtml = `<h3 style="color: #333333;">${loc.title || ''}</h3><p style="color: #333333;">${loc.description || ''}</p>`;
-        marker.setPopup(new mapboxgl.Popup().setHTML(descriptionHtml));
+      if (loc.title || loc.description || loc.address || loc.lng || loc.lat) {
+        const popupContent = `
+          <div style="font-family: Arial, sans-serif; padding: 10px; max-width: 250px;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+              <i class="mdi ${getLocationTypeIcon(loc.locationType)}" style="font-size: 20px; color: #424242; margin-right: 8px;"></i>
+              <strong style="font-size: 16px; color: #333333;">${loc.title || 'Địa điểm không tên'}</strong>
+            </div>
+            ${loc.address ? `<p style="font-size: 13px; color: #555555; margin-bottom: 5px;">Địa chỉ: ${loc.address}</p>` : ''}
+            ${loc.description ? `<p style="font-size: 13px; color: #555555; margin-bottom: 5px;">Mô tả: ${loc.description}</p>` : ''}
+            <p style="font-size: 12px; color: #777777; margin-top: 5px;">Kinh độ: ${loc.lng?.toFixed(4)}, Vĩ độ: ${loc.lat?.toFixed(4)}</p>
+          </div>
+        `;
+        marker.setPopup(new mapboxgl.Popup().setHTML(popupContent));
       }
 
       return marker;

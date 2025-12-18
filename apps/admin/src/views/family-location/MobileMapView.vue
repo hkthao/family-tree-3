@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getEnvVariable } from '@/utils/api.util';
-import MultiMarkerMap from './MultiMarkerMap.vue';
+import MultiMarkerMap from '@/components/map/MultiMarkerMap.vue';
 import type { MapMarker } from '@/composables/map/useMultiMarkers';
 import { LocationType } from '@/types/familyLocation.d';
 
@@ -24,7 +24,7 @@ interface FamilyLocationData {
   id: string;
   latitude: number;
   longitude: number;
-  title: string;
+  name: string;
   description?: string;
   locationType?: LocationType; // Add locationType
 }
@@ -37,7 +37,7 @@ onMounted(() => {
       id: loc.id,
       lng: loc.longitude,
       lat: loc.latitude,
-      title: loc.title,
+      title: loc.name,
       description: loc.description,
       locationType: loc.locationType || LocationType.Other,
     }));

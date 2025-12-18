@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { FaqPage, SupportLegalPage } from '@/views';
 import PublicFamilyTreeViewer from '@/views/PublicFamilyTreeViewer.vue'; // Direct import due to lazy loading syntax
-import MobileMapView from '@/components/map/MobileMapView.vue'; // Import MobileMapView
+import MobileMapView from '@/views/family-location/MobileMapView.vue'; // Import MobileMapView
 
 export const publicRoutes: RouteRecordRaw[] = [
   {
