@@ -74,6 +74,7 @@ export * from './family-media/filters/useFamilyMediaListFilters';
 export * from './family-media/mutations/useFamilyMediaMutations';
 export * from './family-media/logic/useFamilyMediaDeletion';
 export * from './family-media/logic/useFamilyMediaFormLogic';
+export * from './family-media/useFamilyMediaForm';
 export * from './family-media/queries/useFamilyMediaQueries';
 export * from './tour/useOnboardingTour';
 export * from './tour/useFamilyTour';

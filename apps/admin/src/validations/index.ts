@@ -7,3 +7,4 @@ export * from './member.validation';
 export * from './memberFace.validation';
 export * from './prompt.validation';
 export * from './relationship.validation';
+export * from './familyMedia.validation';
