@@ -100,18 +100,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, toRef, computed } from 'vue'; // Import computed
+import { computed } from 'vue'; // Import computed
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types'; // Import Event type
-import type { LunarDate } from '@/types/lunar-date'; // Import LunarDate type from its specific file
-import { EventType } from '@/types'; // EventType is still from '@/types'
-import { CalendarType, RepeatRule } from '@/types/enums'; // Import enums from enums.ts
-import { useVuelidate } from '@vuelidate/core';
-import { useEventRules } from '@/validations/event.validation';
+import { CalendarType } from '@/types/enums'; // Import enums from enums.ts
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { cloneDeep } from 'lodash';
 import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
 import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
+import { useEventForm } from '@/composables/forms/useEventForm';
 
 interface EventFormProps {
   readOnly?: boolean;
@@ -123,86 +119,18 @@ const props = defineProps<EventFormProps>();
 
 const { t } = useI18n();
 
-const formData = reactive<Omit<Event, 'id'> | Event>(
-  props.initialEventData
-    ? {
-        ...cloneDeep(props.initialEventData),
-        lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
-      }
-    : {
-        name: '',
-        code: '',
-        type: EventType.Other,
-        familyId: props.familyId || null,
-        calendarType: CalendarType.Solar,
-        solarDate: null,
-        lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
-        repeatRule: RepeatRule.None,
-        description: '',
-        color: '#1976D2',
-        relatedMemberIds: [],
-      },
-);
-
-// Adjust Vuelidate state to match rules structure for lunarDate
-const state = reactive({
-  name: toRef(formData, 'name'),
-  code: toRef(formData, 'code'),
-  type: toRef(formData, 'type'),
-  familyId: toRef(formData, 'familyId'),
-  solarDate: toRef(formData, 'solarDate'),
-  calendarType: toRef(formData, 'calendarType'),
-  // lunarDate needs to be an object for Vuelidate with day/month properties
-  lunarDate: reactive({
-    day: toRef(formData.lunarDate as LunarDate, 'day'),
-    month: toRef(formData.lunarDate as LunarDate, 'month'),
-    isLeapMonth: toRef(formData.lunarDate as LunarDate, 'isLeapMonth'),
-  }),
-  repeatRule: toRef(formData, 'repeatRule'),
-  relatedMemberIds: toRef(formData, 'relatedMemberIds'),
-});
-
-const eventOptionTypes = [
-  { title: t('event.type.birth'), value: EventType.Birth },
-  { title: t('event.type.marriage'), value: EventType.Marriage },
-  { title: t('event.type.death'), value: EventType.Death },
-  { title: t('event.type.other'), value: EventType.Other }, // Removed Migration
-];
-
-const calendarTypes = [
-  { title: t('event.calendarType.solar'), value: CalendarType.Solar },
-  { title: t('event.calendarType.lunar'), value: CalendarType.Lunar },
-];
-
-const repeatRules = [
-  { title: t('event.repeatRule.none'), value: RepeatRule.None },
-  { title: t('event.repeatRule.yearly'), value: RepeatRule.Yearly },
-];
-
-// Computed properties for lunar day and month select options
-const lunarDays = computed(() => Array.from({ length: 30 }, (_, i) => i + 1));
-const lunarMonths = computed(() => Array.from({ length: 12 }, (_, i) => i + 1));
-
-const rules = useEventRules(toRefs(state));
-
-const v$ = useVuelidate(rules, state);
-
-// Expose form validation and data for parent component
-const validate = async () => {
-  const isValid = await v$.value.$validate();
-  return isValid;
-};
-
-const getFormData = () => {
-  const data = cloneDeep(formData);
-  if (data.calendarType === CalendarType.Solar) {
-    data.lunarDate = null;
-  } else if (data.calendarType === CalendarType.Lunar) {
-    data.solarDate = null;
-  }
-  return data;
-};
-
+const {
+  formRef,
+  formData,
+  v$,
+  eventOptionTypes,
+  calendarTypes,
+  repeatRules,
+  lunarDays,
+  lunarMonths,
+  validate,
+  getFormData,
+} = useEventForm(props);
 
 defineExpose({
   validate,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, computed, type PropType } from 'vue';
+import { watch, type PropType } from 'vue';
 import { VAutocomplete } from 'vuetify/components';
-import { useI18n } from 'vue-i18n';
+import { useRemoteAutocomplete } from '@/composables/ui/useRemoteAutocomplete';
 
 interface Item {
   [key: string]: any;
@@ -60,71 +60,21 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const { t } = useI18n();
-
-const loading = ref(false);
-const remoteItems = ref<Item[]>([]);
-const searchText = ref('');
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-const hasBeenFocused = ref(false); // Track if the input has been focused
-
-const handleFocus = () => {
-  // If not focused before and search text is empty, trigger initial fetch
-  if (!hasBeenFocused.value && !searchText.value) {
-    fetchRemoteItems('');
-    hasBeenFocused.value = true;
-  }
-};
-
-const internalNoDataText = computed(() => t('common.no_data'));
-
-const getItemTitle = (item: Item): string => {
-  if (typeof props.itemTitle === 'function') {
-    return props.itemTitle(item);
-  }
-  return item[props.itemTitle] !== undefined ? String(item[props.itemTitle]) : '';
-};
-
-const getItemValue = (item: Item): any => {
-  if (typeof props.itemValue === 'function') {
-    return props.itemValue(item);
-  }
-  return item[props.itemValue];
-};
-
-const fetchRemoteItems = async (query: string) => {
-  if (!query) {
-    remoteItems.value = [];
-    return;
-  }
-  loading.value = true;
-  try {
-    const result = await props.fetchItems(query);
-    remoteItems.value = result.map(item => ({
-      ...item,
-      title: getItemTitle(item),
-      value: getItemValue(item),
-    }));
-  } catch (error) {
-    console.error('Error fetching remote items:', error);
-    remoteItems.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
-
-watch(
+const {
+  loading,
+  remoteItems,
   searchText,
-  (newSearchText) => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-    debounceTimer = setTimeout(() => {
-      fetchRemoteItems(newSearchText);
-    }, props.debounceTime);
-  },
-  { immediate: false }
-);
+  internalNoDataText,
+  getItemTitle,
+  getItemValue,
+  handleFocus,
+} = useRemoteAutocomplete({
+  fetchItems: props.fetchItems,
+  itemTitle: props.itemTitle,
+  itemValue: props.itemValue,
+  debounceTime: props.debounceTime,
+});
+
 
 watch(
   () => props.modelValue,
