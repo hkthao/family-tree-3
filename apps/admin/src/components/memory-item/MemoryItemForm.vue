@@ -2,7 +2,7 @@
   <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
       <v-col cols="12" v-if="memoryMedia && memoryMedia.length > 0">
-        <v-carousel cycle hide-delimiter-background :continuous="false" hide-delimiters>
+        <v-carousel :key="memoryMedia.length" cycle hide-delimiter-background :continuous="false" hide-delimiters>
           <v-carousel-item v-for="(media, index) in memoryMedia" :key="media.id || index">
             <div>
               <v-img :src="media.url" cover class="carousel-image"></v-img>
@@ -89,7 +89,7 @@ export interface MemoryItemFormExpose {
   validate: () => Promise<boolean>;
   getFormData: () => MemoryItem;
   newlyUploadedFiles: ComputedRef<File[]>;
-  memoryMedia: Ref<LocalMemoryMedia[]>;
+  memoryMedia: Ref<LocalMemoryMedia[]>; // Changed from Ref<LocalMemoryMedia[]>
   uploadedFiles: Ref<File[]>;
   deletedMediaIds: Ref<string[]>;
   removeMedia: (mediaToDelete: LocalMemoryMedia) => void;

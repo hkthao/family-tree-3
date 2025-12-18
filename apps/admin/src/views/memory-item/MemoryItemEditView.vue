@@ -27,17 +27,17 @@
         color="primary"
         data-testid="button-save"
         @click="handleUpdateItem"
-        :loading="isUpdatingMemoryItem"
-        :disabled="isLoading || isUpdatingMemoryItem"
+        :loading="isUpdatingMemoryItem || isUploadingMedia"
+        :disabled="isLoading || isUpdatingMemoryItem || isUploadingMedia"
       >{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, type Ref } from 'vue';
+import { ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import MemoryItemForm, { type MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
+import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 
 import { useMemoryItemEdit } from '@/composables';
 
@@ -54,11 +54,11 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
-const memoryItemFormRef: Ref<MemoryItemFormExpose | null> = ref(null);
+const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
 
 const { t } = useI18n();
 
-const { memoryItem, isLoading, isUpdatingMemoryItem, handleUpdateItem, closeForm } = useMemoryItemEdit({
+const { memoryItem, isLoading, isUpdatingMemoryItem, isUploadingMedia, handleUpdateItem, closeForm } = useMemoryItemEdit({
   familyId: props.familyId,
   memoryItemId: props.memoryItemId,
   onSaveSuccess: () => {
