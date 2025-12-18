@@ -1,7 +1,7 @@
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddEventMutation } from '@/composables/event';
+import { useAddEventMutation } from '@/composables';
 
 export function useEventAdd(emit: (event: 'saved' | 'close', ...args: any[]) => void) {
   const { t } = useI18n();

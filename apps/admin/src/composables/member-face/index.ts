@@ -1,9 +1,9 @@
 // Export all member-face related composables from here
-export * from './useMemberFaceListFilters';
-export * from './useMemberFacesQuery';
-export * from './useMemberFaceDetailQuery';
-export * from './useDeleteMemberFaceMutation';
-export * from './useUpdateMemberFaceMutation';
-export * from './useMemberFaceFormLogic';
-export * from './useMemberFaceDeletion';
-export * from './mutations';
+export * from './filters/useMemberFaceListFilters';
+export * from './queries/useMemberFacesQuery';
+export * from './queries/useMemberFaceDetailQuery';
+export * from './mutations/useDeleteMemberFaceMutation';
+export * from './mutations/useUpdateMemberFaceMutation';
+export * from './logic/useMemberFaceFormLogic';
+export * from './logic/useMemberFaceDeletion';
+export * from './mutations/mutations';

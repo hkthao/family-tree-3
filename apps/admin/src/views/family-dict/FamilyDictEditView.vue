@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useFamilyDictQuery, useUpdateFamilyDictMutation } from '@/composables/family-dict';
+import { useFamilyDictQuery, useUpdateFamilyDictMutation } from '@/composables';
 
 interface FamilyDictEditViewProps {
   familyDictId: string;

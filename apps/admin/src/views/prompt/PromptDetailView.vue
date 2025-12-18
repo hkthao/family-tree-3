@@ -23,7 +23,7 @@ import { toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
-import { usePromptQuery, useDeletePromptMutation } from '@/composables/prompt';
+import { usePromptQuery, useDeletePromptMutation } from '@/composables';
 
 interface PromptDetailViewProps {
   promptId: string;

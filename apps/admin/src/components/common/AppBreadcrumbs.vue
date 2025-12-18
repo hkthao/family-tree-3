@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppBreadcrumbs } from '@/composables/ui/useAppBreadcrumbs';
+import { useAppBreadcrumbs } from '@/composables';
 
 const { breadcrumbs } = useAppBreadcrumbs();
 </script>

@@ -43,7 +43,7 @@ import { useI18n } from 'vue-i18n';
 import { ref, watch, computed } from 'vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { removeDiacritics } from '@/utils/string.utils';
-import { useMembersQuery, useDeleteMemberMutation, useMemberDataManagement } from '@/composables/member';
+import { useMembersQuery, useDeleteMemberMutation, useMemberDataManagement } from '@/composables';
 import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
 import { useAuth } from '@/composables'; // Import useAuth
 

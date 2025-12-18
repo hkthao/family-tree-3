@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useN8nChat } from '@/composables/chat/useN8nChat'; // Import the new composable
+import { useN8nChat } from '@/composables';
 
 const chatOpen = ref(false);
 const selectedFamilyId = ref<string | undefined>(undefined);

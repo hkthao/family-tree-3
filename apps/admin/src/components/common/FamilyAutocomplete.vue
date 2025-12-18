@@ -30,7 +30,7 @@
 import type { Family } from '@/types';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
-import { useFamilyAutocompleteData } from '@/composables/autocomplete/useFamilyAutocompleteData';
+import { useFamilyAutocompleteData } from '@/composables';
 
 interface FamilyAutocompleteProps {
   modelValue: string | string[] | undefined | null;

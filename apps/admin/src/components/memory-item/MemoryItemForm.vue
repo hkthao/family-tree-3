@@ -57,7 +57,7 @@ import { EmotionalTag } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables/memory/useMemoryMediaForm';
+import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables';
 
 
 interface LocalMemoryItem extends Omit<MemoryItem, 'persons' | 'memoryMedia' | 'deletedMediaIds'> {

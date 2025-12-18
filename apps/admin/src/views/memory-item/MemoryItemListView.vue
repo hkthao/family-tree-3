@@ -39,7 +39,7 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar } from '@/composables';
-import { useMemoryItemDataManagement, useMemoryItemsQuery, useDeleteMemoryItemMutation } from '@/composables/memory-item';
+import { useMemoryItemDataManagement, useMemoryItemsQuery, useDeleteMemoryItemMutation } from '@/composables';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { MemoryItem } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';

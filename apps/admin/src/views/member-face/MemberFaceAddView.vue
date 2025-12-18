@@ -40,7 +40,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useMemberFaceAdd } from '@/composables/member-face/useMemberFaceAdd';
+import { useMemberFaceAdd } from '@/composables';
 
 interface MemberFaceAddViewProps {
   memberId?: string; // Optional, might be pre-selected if adding from a member detail page

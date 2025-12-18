@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
-import { QueryClient, QueryClientProvider, VUE_QUERY_CLIENT } from '@tanstack/vue-query';
+import { QueryClient, VUE_QUERY_CLIENT } from '@tanstack/vue-query';
 import { useMemoryItemEdit } from '@/composables/memory-item/useMemoryItemEdit';
 import type { MemoryItem } from '@/types';
 import type { MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
@@ -28,7 +28,6 @@ vi.mock('@/composables', () => ({
 
 // Mock functions from @/composables/memory-item
 const mockUseMemoryItemQuerySpy = vi.fn();
-const mockUseUpdateMemoryItemMutationSpy = vi.fn();
 const mockUpdateMemoryItemMutateSpy = vi.fn();
 const mockUpdateMemoryItemIsPending = vueRef(false);
 const mockQueryReturnValue = vueRef({ data: null, isLoading: false, error: null });

@@ -27,8 +27,7 @@ import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
 import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue';
-import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
-import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
+import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation, useMemberFaceDeletion } from '@/composables';
 
 interface MemberFaceListViewProps {
   memberId?: string;

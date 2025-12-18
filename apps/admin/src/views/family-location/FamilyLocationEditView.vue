@@ -42,7 +42,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location'; // Assuming index.ts re-exports it
 import type { FamilyLocation } from '@/types';
 import { useGlobalSnackbar, useCrudDrawer } from '@/composables';
-import { useFamilyLocationQuery, useUpdateFamilyLocationMutation } from '@/composables/family-location';
+import { useFamilyLocationQuery, useUpdateFamilyLocationMutation } from '@/composables';
 import FamilyMapPicker from './FamilyMapPicker.vue'; // Import FamilyMapPicker
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
 

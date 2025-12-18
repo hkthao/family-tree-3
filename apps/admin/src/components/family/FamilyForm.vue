@@ -46,7 +46,7 @@ import { ref } from 'vue';
 import type { Family } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
-import { useFamilyForm } from '@/composables/family/useFamilyForm'; // Import the new composable
+import { useFamilyForm } from '@/composables';
 
 const props = defineProps<{
   data?: Family;

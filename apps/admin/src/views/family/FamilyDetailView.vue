@@ -25,7 +25,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { FamilyForm } from '@/components/family';
 import { useAuth } from '@/composables';
-import { useFamilyQuery } from '@/composables/family';
+import { useFamilyQuery } from '@/composables';
 
 const { t } = useI18n();
 const router = useRouter();

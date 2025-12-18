@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useNovuInbox } from '@/composables/novu/useNovuInbox';
+import { useNovuInbox } from '@/composables';
 
 const novuInbox = ref<HTMLElement | null>(null);
 

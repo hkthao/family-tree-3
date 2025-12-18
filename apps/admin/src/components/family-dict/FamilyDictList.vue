@@ -123,7 +123,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
-import { useFamilyDictList } from '@/composables/list/useFamilyDictList';
+import { useFamilyDictList } from '@/composables';
 
 const props = defineProps<{
   items: FamilyDict[];

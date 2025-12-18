@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
-import { useEventSearch } from '@/composables/event/useEventSearch';
+import { useEventSearch } from '@/composables';
 import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
 
 

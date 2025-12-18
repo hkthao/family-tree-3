@@ -29,7 +29,7 @@ import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserPreferences } from '@/composables/data/useUserPreferences'; // Added useUserPreferences
+import { useUserPreferences } from '@/composables';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';

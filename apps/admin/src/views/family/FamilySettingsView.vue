@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useFamilyDataManagement } from '@/composables/family/useFamilyDataManagement';
+import { useFamilyDataManagement } from '@/composables';
 import PrivacySettings from '@/components/family/PrivacySettings.vue'; // Import the new component
 
 const { t } = useI18n();

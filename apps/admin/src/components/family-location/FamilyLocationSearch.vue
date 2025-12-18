@@ -54,7 +54,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { LocationType, LocationSource } from '@/types';
-import type { FamilyLocationSearchCriteria } from '@/composables/family-location/useFamilyLocationDataManagement';
+import type { FamilyLocationSearchCriteria } from '@/composables';
 
 const emit = defineEmits<{
   (e: 'update:filters', value: FamilyLocationSearchCriteria): void;

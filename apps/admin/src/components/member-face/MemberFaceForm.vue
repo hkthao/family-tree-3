@@ -70,7 +70,7 @@
 import { useI18n } from 'vue-i18n';
 import type { ErrorObject } from '@vuelidate/core';
 import type { MemberFace } from '@/types';
-import { useMemberFaceForm } from '@/composables/member-face/useMemberFaceForm';
+import { useMemberFaceForm } from '@/composables';
 
 interface MemberFaceFormProps {
   initialMemberFaceData?: MemberFace;

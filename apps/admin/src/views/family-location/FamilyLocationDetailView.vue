@@ -43,7 +43,7 @@ import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
-import { useFamilyLocationQuery, useDeleteFamilyLocationMutation } from '@/composables/family-location';
+import { useFamilyLocationQuery, useDeleteFamilyLocationMutation } from '@/composables';
 
 interface FamilyLocationDetailViewProps {
   familyLocationId: string;

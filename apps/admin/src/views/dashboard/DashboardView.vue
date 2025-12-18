@@ -41,9 +41,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables';
-import { useDashboardStats } from '@/composables/data/useDashboardStats';
-import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents';
-import { useRecentActivities } from '@/composables/data/useRecentActivities';
+import { useDashboardStats , useUpcomingEvents, useRecentActivities } from '@/composables';
 
 const { t } = useI18n();
 useOnboardingTour();

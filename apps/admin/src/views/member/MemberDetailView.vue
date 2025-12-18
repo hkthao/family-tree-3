@@ -40,7 +40,7 @@ import { ref, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
-import { useMemberQuery, useDeleteMemberMutation } from '@/composables/member'; // Import new composables
+import { useMemberQuery, useDeleteMemberMutation } from '@/composables';
 
 interface MemberDetailViewProps {
   memberId: string;

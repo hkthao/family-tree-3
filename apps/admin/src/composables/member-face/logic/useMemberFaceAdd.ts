@@ -1,8 +1,8 @@
 import { ref, computed, watch } from 'vue';
 import type { DetectedFace, MemberFace } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables/member-face/mutations';
-import { useAddFamilyMediaMutation } from '@/composables/family-media';
+import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables';
+import { useAddFamilyMediaMutation } from '@/composables';
 import { dataURLtoFile } from '@/utils/file'; // Import the new utility
 
 interface UseMemberFaceAddOptions {

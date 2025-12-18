@@ -100,14 +100,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'; // Import computed
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types'; // Import Event type
 import { CalendarType } from '@/types/enums'; // Import enums from enums.ts
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
 import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
-import { useEventForm } from '@/composables/forms/useEventForm';
+import { useEventForm } from '@/composables';
 
 interface EventFormProps {
   readOnly?: boolean;

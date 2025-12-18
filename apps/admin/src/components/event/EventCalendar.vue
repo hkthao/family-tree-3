@@ -77,7 +77,7 @@ import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useEventCalendar } from '@/composables/event/useEventCalendar';
+import { useEventCalendar } from '@/composables';
 
 const props = defineProps<{
   familyId?: string;

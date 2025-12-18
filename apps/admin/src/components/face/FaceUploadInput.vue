@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
-import { useFaceUploadInput } from '@/composables/face/useFaceUploadInput';
+import { useFaceUploadInput } from '@/composables';
 
 const props = defineProps({
   label: String,

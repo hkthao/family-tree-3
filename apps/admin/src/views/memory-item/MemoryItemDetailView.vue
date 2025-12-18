@@ -31,7 +31,7 @@
 import { type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
-import { useMemoryItemDetail } from '@/composables/memory-item/useMemoryItemDetail';
+import { useMemoryItemDetail } from '@/composables';
 
 const props = defineProps({
   familyId: {

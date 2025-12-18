@@ -1,4 +1,4 @@
-import { useMemoryItemQuery } from '@/composables/memory-item';
+import { useMemoryItemQuery } from '@/composables';
 
 interface UseMemoryItemDetailOptions {
   familyId: string;

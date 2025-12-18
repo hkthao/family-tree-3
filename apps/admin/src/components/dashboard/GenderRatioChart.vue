@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import VueApexCharts from 'vue3-apexcharts';
-import { useGenderRatioChart } from '@/composables/charts/useGenderRatioChart';
+import { useGenderRatioChart } from '@/composables';
 
 const { t } = useI18n();
 

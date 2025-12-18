@@ -2,7 +2,7 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import type { FamilyDict } from '@/types';
-import { useImportFamilyDictMutation } from '@/composables/family-dict';
+import { useImportFamilyDictMutation } from '@/composables';
 
 export function useFamilyDictImport(showDialogProp: boolean, emit: (event: 'update:show' | 'imported', ...args: any[]) => void) {
   const { t } = useI18n();

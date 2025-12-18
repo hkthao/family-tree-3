@@ -33,7 +33,7 @@ import type { FamilyFilter, Family } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useRouter } from 'vue-router';
 import FamilyAddView from './FamilyAddView.vue';
-import { useFamilyListFilters, useFamiliesQuery, useDeleteFamilyMutation } from '@/composables/family';
+import { useFamilyListFilters, useFamiliesQuery, useDeleteFamilyMutation } from '@/composables';
 
 const router = useRouter();
 const { t } = useI18n();

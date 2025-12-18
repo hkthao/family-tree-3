@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
-import { useFamilyDictImport } from '@/composables/forms/useFamilyDictImport';
+import { useFamilyDictImport } from '@/composables';
 
 
 const props = defineProps<{

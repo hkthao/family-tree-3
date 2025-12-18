@@ -2,7 +2,8 @@ import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useEventQuery, useUpdateEventMutation } from '@/composables/event';
+import { useEventQuery } from '@/composables';
+import { useUpdateEventMutation } from '@/composables';
 import { useQueryClient } from '@tanstack/vue-query';
 
 export function useEventEdit(

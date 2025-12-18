@@ -25,7 +25,7 @@ import { useI18n } from 'vue-i18n';
 import MultiMarkerMap from '@/components/map/MultiMarkerMap.vue';
 import { useGlobalSnackbar } from '@/composables';
 import { getEnvVariable } from '@/utils/api.util';
-import { useFamilyLocationsQuery } from '@/composables/family-location';
+import { useFamilyLocationsQuery } from '@/composables';
 import type { FamilyLocation, ListOptions, FamilyLocationFilter } from '@/types';
 
 const { t } = useI18n();

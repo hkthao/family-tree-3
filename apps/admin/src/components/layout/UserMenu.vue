@@ -55,7 +55,7 @@
 import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed } from 'vue'; // onMounted is no longer needed
 import { useAuthStore } from '@/stores'; // authStore import
-import { useProfileSettings } from '@/composables/user/useProfileSettings';
+import { useProfileSettings } from '@/composables';
 import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;

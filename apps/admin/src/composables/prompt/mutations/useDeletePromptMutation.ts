@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables/utils/useServices';
+import { useServices } from '@/composables';
 import type { IPromptService } from '@/services/prompt/prompt.service.interface';
 
 export function useDeletePromptMutation() {

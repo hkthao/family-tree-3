@@ -73,7 +73,7 @@
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
-import { useEventTimeline } from '@/composables/event/useEventTimeline';
+import { useEventTimeline } from '@/composables';
 import { CalendarType } from '@/types/enums'; // Import CalendarType
 
 const props = defineProps<{

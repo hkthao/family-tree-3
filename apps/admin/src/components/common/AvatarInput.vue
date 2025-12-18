@@ -63,7 +63,7 @@ import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import { useGlobalSnackbar } from '@/composables';
-import { useAvatarCropper } from '@/composables/ui/useAvatarCropper';
+import { useAvatarCropper } from '@/composables';
 
 const props = defineProps({
   modelValue: { type: String as PropType<string | null | undefined>, default: null },

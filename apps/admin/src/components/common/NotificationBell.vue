@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import NovuInbox from './NovuInbox.vue';
-import { useNovuNotificationBell } from '@/composables/novu/useNovuNotificationBell';
+import { useNovuNotificationBell } from '@/composables';
 
 const { unseenCount } = useNovuNotificationBell();
 </script>

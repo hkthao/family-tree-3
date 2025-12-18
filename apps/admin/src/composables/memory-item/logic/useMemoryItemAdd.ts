@@ -1,8 +1,8 @@
 import { ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddMemoryItemMutation } from '@/composables/memory-item';
-import { useAddFamilyMediaMutation } from '@/composables/family-media/useFamilyMediaMutations';
+import { useAddMemoryItemMutation } from '@/composables';
+import { useAddFamilyMediaMutation } from '@/composables';
 import type { MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
 import type { MemoryItem, FamilyMedia, MemoryMedia } from '@/types';
 

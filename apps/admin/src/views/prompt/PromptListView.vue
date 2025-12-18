@@ -35,8 +35,8 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import type { Prompt } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, reactive, computed } from 'vue';
-import { usePromptsQuery, useDeletePromptMutation } from '@/composables/prompt';
-import type { PromptListOptions } from '@/composables/prompt/usePromptsQuery';
+import { usePromptsQuery, useDeletePromptMutation } from '@/composables';
+import type { PromptListOptions } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import PromptAddView from './PromptAddView.vue';
 import PromptEditView from './PromptEditView.vue';

@@ -82,7 +82,7 @@
 import type { Event } from '@/types';
 import FamilyName from '@/components/common/FamilyName.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
-import { useEventListComposable } from '@/composables/event/useEventListComposable';
+import { useEventListComposable } from '@/composables';
 import { CalendarType } from '@/types/enums'; // Import CalendarType enum
 
 const props = defineProps<{

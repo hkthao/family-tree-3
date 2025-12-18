@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useFamilyDictSearch } from '@/composables/search/useFamilyDictSearch';
+import { useFamilyDictSearch } from '@/composables';
 
 const emit = defineEmits(['update:filters']);
 

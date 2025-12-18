@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
 import type { Prompt } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { usePromptQuery, useUpdatePromptMutation } from '@/composables/prompt';
+import { usePromptQuery, useUpdatePromptMutation } from '@/composables';
 
 interface PromptEditViewProps {
   promptId: string;

@@ -1,5 +1,5 @@
 import { computed, unref, type Ref, type ComputedRef } from 'vue';
-import { useEventsQuery } from '@/composables/event/useEventsQuery';
+import { useEventsQuery } from '@/composables';
 import type { EventFilter } from '@/types';
 
 export function useUpcomingEvents(baseFilter: Ref<EventFilter> | ComputedRef<EventFilter>) {

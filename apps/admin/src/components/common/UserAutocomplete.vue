@@ -13,7 +13,7 @@ import type { UserDto } from '@/types';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
-import { useUserByIdsQuery } from '@/composables/user/useUserByIdsQuery';
+import { useUserByIdsQuery } from '@/composables';
 
 // Instantiate the service for direct use
 const userService = new ApiUserService(apiClient);

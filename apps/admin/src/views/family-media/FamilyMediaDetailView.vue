@@ -18,8 +18,7 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useFamilyMediaQuery, useDeleteFamilyMediaMutation } from '@/composables/family-media';
-import { useFamilyMediaDeletion } from '@/composables/family-media/useFamilyMediaDeletion';
+import { useFamilyMediaQuery, useDeleteFamilyMediaMutation, useFamilyMediaDeletion } from '@/composables';
 
 interface FamilyMediaDetailViewProps {
   familyId: string;

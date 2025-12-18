@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useProfileSettings } from '@/composables/user/useProfileSettings';
+import { useProfileSettings } from '@/composables';
 import { Novu } from '@novu/js';
 import { getEnvVariable } from '@/utils/api.util';
 

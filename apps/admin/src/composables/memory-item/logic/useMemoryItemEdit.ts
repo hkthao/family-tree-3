@@ -1,7 +1,7 @@
-import { ref, computed, type Ref } from 'vue';
+import { computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
-import { useMemoryItemQuery, useUpdateMemoryItemMutation } from '@/composables/memory-item';
+import { useMemoryItemQuery, useUpdateMemoryItemMutation } from '@/composables';
 import type { MemoryItem } from '@/types';
 
 interface MemoryItemFormExposed {

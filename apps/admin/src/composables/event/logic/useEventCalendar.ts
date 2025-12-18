@@ -4,7 +4,7 @@ import dayjs from 'dayjs'; // Import dayjs
 import type { Event, LunarDate } from '@/types'; // Import LunarDate
 import { CalendarType } from '@/types/enums'; // Import CalendarType
 import { useAuth } from '@/composables';
-import { useUpcomingEvents } from '@/composables/data/useUpcomingEvents';
+import { useUpcomingEvents } from '@/composables';
 import { Solar, Lunar } from 'lunar-javascript'; // Import lunar-javascript library
 
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;

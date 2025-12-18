@@ -25,7 +25,7 @@
 import { nextTick, toRef, computed } from 'vue';
 import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
-import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables/family-media';
+import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables';
 import { useAuth } from '@/composables'; // Import useAuth
 // Components
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';

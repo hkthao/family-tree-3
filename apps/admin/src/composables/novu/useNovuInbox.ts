@@ -1,5 +1,5 @@
 import { ref, type Ref, watch } from 'vue'; // Removed onMounted
-import { useProfileSettings } from '@/composables/user/useProfileSettings'; // Added useProfileSettings
+import { useProfileSettings } from '@/composables';
 import { NovuUI } from '@novu/js/ui';
 import { dark } from '@novu/js/themes';
 import { useI18n } from 'vue-i18n';

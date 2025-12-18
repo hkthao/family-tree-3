@@ -38,7 +38,7 @@ import {
   useDeleteFamilyLocationMutation,
   useFamilyLocationDataManagement,
   type FamilyLocationSearchCriteria,
-} from '@/composables/family-location';
+} from '@/composables';
 import { useAuth } from '@/composables'; // Import useAuth
 import { useI18n } from 'vue-i18n';
 

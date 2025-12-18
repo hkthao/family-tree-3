@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import VueApexCharts from 'vue3-apexcharts';
-import { useMembersPerGenerationChart } from '@/composables/charts/useMembersPerGenerationChart';
+import { useMembersPerGenerationChart } from '@/composables';
 
 const { t } = useI18n();
 

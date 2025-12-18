@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthenticatedImage } from '@/composables/ui/useAuthenticatedImage';
+import { useAuthenticatedImage } from '@/composables';
 
 const props = defineProps({
   src: { type: String, default: null },

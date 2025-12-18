@@ -2,7 +2,9 @@ import { onMounted, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/types';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
-import { useEventListFilters, useEventsQuery, useDeleteEventMutation } from '@/composables/event';
+import { useEventListFilters } from '@/composables';
+import { useEventsQuery } from '@/composables';
+import { useDeleteEventMutation } from '@/composables';
 
 export function useEventList(props: { familyId: string; readOnly?: boolean }, _emit: (event: 'saved' | 'close', ...args: any[]) => void) {
   const { t } = useI18n();

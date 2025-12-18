@@ -36,7 +36,7 @@
 import type { Member } from '@/types';
 import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
 import { getAvatarUrl } from '@/utils/avatar.utils';
-import { useMemberAutocompleteData } from '@/composables/autocomplete/useMemberAutocompleteData';
+import { useMemberAutocompleteData } from '@/composables';
 
 interface MemberAutocompleteProps {
   modelValue: string | string[] | undefined | null;
