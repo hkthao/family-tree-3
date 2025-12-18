@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import { FaqPage, SupportLegalPage } from '@/views';
 import PublicFamilyTreeViewer from '@/views/PublicFamilyTreeViewer.vue'; // Direct import due to lazy loading syntax
 import MobileMapView from '@/views/family-location/MobileMapView.vue'; // Import MobileMapView
+import MobileMapPickerView from '@/views/family-location/MobileMapPickerView.vue'; // Import MobileMapView
 
 export const publicRoutes: RouteRecordRaw[] = [
   {
@@ -26,6 +27,12 @@ export const publicRoutes: RouteRecordRaw[] = [
     path: '/public/mobile/map',
     name: 'MobileMap',
     component: MobileMapView,
+    meta: { requiresAuth: false }, // Public route does not require authentication
+  },
+  {
+    path: '/public/mobile/map-picker',
+    name: 'MobileMapPicker',
+    component: MobileMapPickerView,
     meta: { requiresAuth: false }, // Public route does not require authentication
   },
 ];
