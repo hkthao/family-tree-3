@@ -744,6 +744,7 @@
   "memoryItem.form.description": "Mô tả",
   "memoryItem.form.happenedAt": "Xảy ra vào",
   "memoryItem.form.emotionalTag": "Thẻ cảm xúc",
+  "memoryItem.form.memoryMediaFile": "Tệp đa phương tiện",
   "memoryItem.form.mediaFile": "Tệp đa phương tiện",
   "memoryItem.emotionalTag.happy": "Vui vẻ",
   "memoryItem.emotionalTag.sad": "Buồn bã",
