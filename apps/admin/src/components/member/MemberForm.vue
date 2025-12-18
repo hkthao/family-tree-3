@@ -14,7 +14,7 @@
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
           @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
-          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" 
+          :rules="validationRules.familyId"
           :multiple="false" :disabled="true" data-testid="member-family-select" />
       </v-col>
     </v-row>
@@ -22,12 +22,12 @@
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
-          @input="v$.lastName.$touch()" :error-messages="v$.lastName.$errors.map(e => e.$message as string)"
+          @input="v$.lastName.$touch()" :rules="validationRules.lastName"
           :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-last-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.firstName" :label="t('member.form.firstName')" @blur="v$.firstName.$touch()"
-          @input="v$.firstName.$touch()" :error-messages="v$.firstName.$errors.map(e => e.$message as string)"
+          @input="v$.firstName.$touch()" :rules="validationRules.firstName"
           :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-first-name-input"></v-text-field>
       </v-col>
       <v-col cols="12">
@@ -43,13 +43,13 @@
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
           @blur="v$.dateOfBirth.$touch()" @input="v$.dateOfBirth.$touch()"
-          :error-messages="v$.dateOfBirth.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
+          :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
           @blur="v$.dateOfDeath.$touch()" @input="v$.dateOfDeath.$touch()"
-          :error-messages="v$.dateOfDeath.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
+          :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar" />
       </v-col>
     </v-row>
@@ -102,7 +102,7 @@
      <!-- Thông tin Cha Mẹ -->
     <v-row>
        <v-col cols="12" md="12">
-        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
+        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :rules="validationRules.order" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
@@ -155,6 +155,7 @@ const {
   validate,
   getFormData,
   getAvatarUrl,
+  validationRules,
 } = useMemberFormComposable({
   readOnly: props.readOnly,
   initialMemberData: props.initialMemberData,

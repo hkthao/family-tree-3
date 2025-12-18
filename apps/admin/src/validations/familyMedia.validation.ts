@@ -6,7 +6,7 @@ export function useFamilyMediaRules() {
 
   const rules = computed(() => {
     return {
-      file: [rulesVuetify.required],
+      file: [rulesVuetify.required()],
     };
   });
 

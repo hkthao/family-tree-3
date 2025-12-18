@@ -63,6 +63,7 @@ export * from './memory-item/logic/useMemoryItemEdit';
 export * from './memory-item/logic/useMemoryItemAdd';
 export * from './memory-item/queries/useMemoryItemsQuery';
 export * from './memory-item/queries/useMemoryItemQuery';
+export * from './memory-item/useMemoryItemForm';
 export * from './novu/useNovuInbox';
 export * from './novu/useNovuNotificationBell';
 export * from './prompt/mutations/useUpdatePromptMutation';

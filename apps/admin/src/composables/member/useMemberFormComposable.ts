@@ -1,5 +1,4 @@
 import { reactive, toRefs, ref, toRef, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import { Gender } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
@@ -15,7 +14,6 @@ interface UseMemberFormOptions {
 }
 
 export function useMemberFormComposable(options: UseMemberFormOptions) {
-  const { t } = useI18n();
   const { isAdmin, isFamilyManager } = useAuth();
 
   const formRef = ref<HTMLFormElement | null>(null);
@@ -104,6 +102,7 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
     initialAvatarDisplay,
     validate,
     getFormData,
-    getAvatarUrl, // Make sure getAvatarUrl is accessible
+    getAvatarUrl,
+    validationRules: rules, // Expose the rules
   };
 }

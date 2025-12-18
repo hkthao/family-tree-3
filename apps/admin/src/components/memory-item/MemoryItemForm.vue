@@ -13,16 +13,14 @@
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="mediaManagement.uploadedFiles.value" :accept="mediaManagement.acceptedMimeTypes.value"
-          data-testid="memory-item-file-upload" multiple
-          :rules="[(v: File[]) => (v || []).length <= 5 || t('memoryItem.validations.maxFiles', { max: 5 })]"
-          :disabled="props.readOnly"></VFileUpload>
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="mediaManagement.uploadedFiles.value"
+          :accept="mediaManagement.acceptedMimeTypes.value" data-testid="memory-item-file-upload" multiple
+          :rules="validationRules.uploadedFiles" :disabled="props.readOnly"></VFileUpload>
       </v-col>
 
       <v-col cols="12">
-        <v-text-field v-model="form.title" :label="t('memoryItem.form.title')"
-          :rules="[v => !!v || t('common.validations.required')]" required data-testid="memory-item-title"
-          :readonly="props.readOnly"></v-text-field>
+        <v-text-field v-model="form.title" :label="t('memoryItem.form.title')" :rules="validationRules.title" required
+          data-testid="memory-item-title" :readonly="props.readOnly"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-textarea v-model="form.description" :label="t('memoryItem.form.description')" rows="3"
@@ -35,9 +33,8 @@
       </v-col>
       <v-col cols="12" md="6">
         <v-select v-model="form.emotionalTag" :items="emotionalTagOptions" :label="t('memoryItem.form.emotionalTag')"
-          :rules="[v => v !== null && v !== undefined || t('common.validations.required')]" required
-          data-testid="memory-item-emotional-tag" item-title="title" item-value="value"
-          :readonly="props.readOnly"></v-select>
+          :rules="validationRules.emotionalTag" required data-testid="memory-item-emotional-tag" item-title="title"
+          item-value="value" :readonly="props.readOnly"></v-select>
       </v-col>
       <v-col cols="12">
         <MemberAutocomplete :disabled="props.readOnly" v-model="form.personIds" :family-id="props.familyId"
@@ -49,20 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, type ComputedRef } from 'vue';
+import { type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { VForm } from 'vuetify/components';
 import type { MemoryItem } from '@/types';
-import { EmotionalTag } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables';
-
-
-interface LocalMemoryItem extends Omit<MemoryItem, 'persons' | 'memoryMedia' | 'deletedMediaIds'> {
-  personIds: string[]; // Use personIds for autocomplete
-}
+import { useMemoryItemForm } from '@/composables/memory-item/useMemoryItemForm';
 
 interface MemoryItemFormProps {
   initialMemoryItemData?: MemoryItem;
@@ -72,83 +62,21 @@ interface MemoryItemFormProps {
 
 const props = defineProps<MemoryItemFormProps>();
 
-const formRef = ref<VForm | null>(null);
 const { t } = useI18n();
 
-const defaultNewMemoryItem: LocalMemoryItem = {
-  id: '',
+const {
+  form,
+  emotionalTagOptions,
+  mediaManagement,
+  validate,
+  getFormData,
+  newlyUploadedFiles,
+  validationRules,
+} = useMemoryItemForm({
+  initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
-  title: '',
-  description: undefined,
-  happenedAt: undefined,
-  emotionalTag: EmotionalTag.Neutral,
-  personIds: [],
-  memoryPersons: [],
-};
-
-// Initialize form with local type
-const form = reactive<LocalMemoryItem>(
-  props.initialMemoryItemData
-    ? {
-      ...props.initialMemoryItemData,
-      personIds: props.initialMemoryItemData.memoryPersons ? props.initialMemoryItemData.memoryPersons.map(p => p.memberId) : [],
-    }
-    : { ...defaultNewMemoryItem },
-);
-
-const mediaManagement = useMemoryMediaForm({
-  initialMedia: props.initialMemoryItemData?.memoryMedia || [],
-  memoryItemId: form.id,
-  readOnly: props.readOnly || false,
+  readOnly: props.readOnly,
 });
-
-
-watch(() => props.initialMemoryItemData, (newData) => {
-  if (newData) {
-    Object.assign(form, {
-      ...newData,
-      personIds: newData.memoryPersons ? newData.memoryPersons.map(p => p.memberId) : [],
-    });
-    // Update media in composable
-    mediaManagement.memoryMedia.value = [...(newData.memoryMedia || [])];
-    mediaManagement.deletedMediaIds.value = []; // Reset deleted media IDs on data change
-  } else {
-    Object.assign(form, { ...defaultNewMemoryItem });
-    mediaManagement.memoryMedia.value = [];
-    mediaManagement.deletedMediaIds.value = []; // Reset deleted media IDs on data change
-  }
-});
-
-const emotionalTagOptions = computed(() => [
-  { title: t('memoryItem.emotionalTag.happy'), value: EmotionalTag.Happy },
-  { title: t('memoryItem.emotionalTag.sad'), value: EmotionalTag.Sad },
-  { title: t('memoryItem.emotionalTag.proud'), value: EmotionalTag.Proud },
-  { title: t('memoryItem.emotionalTag.memorial'), value: EmotionalTag.Memorial },
-  { title: t('memoryItem.emotionalTag.neutral'), value: EmotionalTag.Neutral },
-]);
-
-const validate = async () => {
-  if (!formRef.value) return false;
-  const { valid } = await formRef.value.validate();
-  return valid;
-};
-
-const getFormData = (): MemoryItem => {
-  const existingMedias: LocalMemoryMedia[] = mediaManagement.memoryMedia.value.filter(media => !media.isNew);
-  const dataToReturn: MemoryItem = {
-    id: form.id,
-    familyId: form.familyId,
-    title: form.title,
-    description: form.description,
-    happenedAt: form.happenedAt,
-    emotionalTag: form.emotionalTag,
-    memoryMedia: existingMedias,
-    personIds: form.personIds,
-    deletedMediaIds: mediaManagement.deletedMediaIds.value,
-    memoryPersons: []
-  };
-  return dataToReturn;
-};
 
 export interface MemoryItemFormExpose {
   validate: () => Promise<boolean>;
@@ -159,7 +87,7 @@ export interface MemoryItemFormExpose {
 defineExpose<MemoryItemFormExpose>({
   validate,
   getFormData,
-  newlyUploadedFiles: mediaManagement.newlyUploadedFiles,
+  newlyUploadedFiles,
 });
 </script>
 
