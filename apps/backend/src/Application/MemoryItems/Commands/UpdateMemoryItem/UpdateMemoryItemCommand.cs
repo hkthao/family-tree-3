@@ -12,7 +12,7 @@ public record UpdateMemoryItemCommand : IRequest<Result>
     public DateTime? HappenedAt { get; init; }
     public EmotionalTag EmotionalTag { get; init; } = EmotionalTag.Neutral;
     public ICollection<Guid> DeletedMediaIds { get; init; } = [];
-    public ICollection<UpdateMemoryMediaCommandDto> Media { get; init; } = [];
+    public ICollection<UpdateMemoryMediaCommandDto> MemoryMedia { get; init; } = [];
     public ICollection<Guid> PersonIds { get; init; } = [];
 }
 

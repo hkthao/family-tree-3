@@ -10,7 +10,7 @@ public record CreateMemoryItemCommand : IRequest<Result<Guid>>
     public string? Description { get; init; }
     public DateTime? HappenedAt { get; init; }
     public EmotionalTag EmotionalTag { get; init; } = EmotionalTag.Neutral;
-    public ICollection<CreateMemoryMediaCommandDto> Media { get; init; } = [];
+    public ICollection<CreateMemoryMediaCommandDto> MemoryMedia { get; init; } = [];
     public ICollection<Guid> PersonIds { get; init; } = [];
     public ICollection<Guid> DeletedMediaIds { get; init; } = [];
 }

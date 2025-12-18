@@ -30,7 +30,7 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
         if (deleteItems.Count != 0)
             _context.MemoryMedia.RemoveRange(deleteItems);
         // Add or update media
-        foreach (var mediaDto in request.Media)
+        foreach (var mediaDto in request.MemoryMedia)
         {
             var existingMedia = entity.MemoryMedia.FirstOrDefault(m => m.Id == mediaDto.Id);
             if (existingMedia == null)

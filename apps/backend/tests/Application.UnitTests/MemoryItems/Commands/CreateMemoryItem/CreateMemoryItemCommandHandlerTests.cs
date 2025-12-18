@@ -40,7 +40,7 @@ public class CreateMemoryItemCommandHandlerTests : TestBase
             Description = "A description for the test memory item.",
             HappenedAt = DateTime.Now.AddDays(-10),
             EmotionalTag = EmotionalTag.Happy,
-            Media = new List<CreateMemoryMediaCommandDto>
+            MemoryMedia = new List<CreateMemoryMediaCommandDto>
             {
                 new() { Id = Guid.NewGuid(), Url = "http://example.com/photo1.jpg" },
                 new() { Id = Guid.NewGuid(), Url = "http://example.com/photo2.jpg" }
@@ -108,7 +108,7 @@ public class CreateMemoryItemCommandHandlerTests : TestBase
             Description = "This memory item has no media or associated persons.",
             HappenedAt = DateTime.Now.AddDays(-5),
             EmotionalTag = EmotionalTag.Neutral,
-            Media = new List<CreateMemoryMediaCommandDto>(), // Empty media
+            MemoryMedia = new List<CreateMemoryMediaCommandDto>(), // Empty media
             PersonIds = new List<Guid>() // Empty persons
         };
 

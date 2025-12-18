@@ -30,7 +30,7 @@ public class CreateMemoryItemCommandHandler : IRequestHandler<CreateMemoryItemCo
             request.EmotionalTag
         );
 
-        foreach (var mediaDto in request.Media)
+        foreach (var mediaDto in request.MemoryMedia)
         {
             entity.AddMedia(new MemoryMedia(entity.Id, mediaDto.Url));
         }

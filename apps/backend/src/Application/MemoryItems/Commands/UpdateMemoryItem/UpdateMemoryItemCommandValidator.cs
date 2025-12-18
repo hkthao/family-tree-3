@@ -20,7 +20,7 @@ public class UpdateMemoryItemCommandValidator : AbstractValidator<UpdateMemoryIt
         RuleFor(v => v.EmotionalTag)
             .IsInEnum().WithMessage("Invalid EmotionalTag value.");
 
-        RuleForEach(v => v.Media).SetValidator(new UpdateMemoryMediaCommandDtoValidator());
+        RuleForEach(v => v.MemoryMedia).SetValidator(new UpdateMemoryMediaCommandDtoValidator());
     }
 }
 

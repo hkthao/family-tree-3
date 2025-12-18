@@ -53,7 +53,7 @@ public class UpdateMemoryItemCommandHandlerTests : TestBase
             HappenedAt = DateTime.Now.AddDays(-5),
             EmotionalTag = EmotionalTag.Sad,
             DeletedMediaIds = [media1Id], // Delete one media item
-            Media =
+            MemoryMedia =
             [
                 new() { Id = media2Id, Url = "http://updatedmedia.com/2.jpg" }, // Update existing media
                 new() { Url = "http://newmedia.com/3.jpg" } // Add new media
@@ -136,7 +136,7 @@ public class UpdateMemoryItemCommandHandlerTests : TestBase
             HappenedAt = DateTime.Now.AddDays(-5),
             EmotionalTag = EmotionalTag.Neutral,
             DeletedMediaIds = new List<Guid>(),
-            Media = new List<UpdateMemoryMediaCommandDto>(),
+            MemoryMedia = new List<UpdateMemoryMediaCommandDto>(),
             PersonIds = new List<Guid>()
         };
 
