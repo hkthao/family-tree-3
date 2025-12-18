@@ -23,7 +23,7 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
 using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
 using backend.Application.MemoryItems.DTOs; // Added
-using backend.Application.PrivacyConfigurations.Queries;
+using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;

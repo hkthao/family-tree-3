@@ -3,7 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
-namespace backend.Application.PrivacyConfigurations.Commands;
+namespace backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 
 public class UpdatePrivacyConfigurationCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdatePrivacyConfigurationCommand, Result<Unit>>
 {

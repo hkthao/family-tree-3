@@ -1,4 +1,4 @@
-namespace backend.Application.PrivacyConfigurations.Queries;
+namespace backend.Application.Families.Queries.GetPrivacyConfiguration;
 
 public class PrivacyConfigurationDto
 {

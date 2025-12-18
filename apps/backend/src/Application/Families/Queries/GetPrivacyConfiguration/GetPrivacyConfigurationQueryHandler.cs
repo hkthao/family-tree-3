@@ -3,7 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
-namespace backend.Application.PrivacyConfigurations.Queries;
+namespace backend.Application.Families.Queries.GetPrivacyConfiguration;
 
 public class GetPrivacyConfigurationQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<GetPrivacyConfigurationQuery, Result<PrivacyConfigurationDto>>
 {

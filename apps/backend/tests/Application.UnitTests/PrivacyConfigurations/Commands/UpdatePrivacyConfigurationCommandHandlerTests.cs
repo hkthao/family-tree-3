@@ -1,6 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.PrivacyConfigurations.Commands;
+using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
