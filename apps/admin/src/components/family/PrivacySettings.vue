@@ -55,9 +55,7 @@ const {
   privacyConfiguration,
   isLoading,
   isUpdating,
-  error,
   updatePrivacySettings,
-  initialPublicProperties, // To handle revert on error
 } = usePrivacyConfiguration(toRef(props, 'familyId')); // Pass familyId as a ref
 
 const selectedProperties = ref<string[]>([]);

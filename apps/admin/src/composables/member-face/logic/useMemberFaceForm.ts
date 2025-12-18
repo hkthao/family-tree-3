@@ -1,4 +1,4 @@
-import { reactive, watch, ref, type Ref } from 'vue';
+import { reactive, watch, type Ref } from 'vue';
 import type { MemberFace } from '@/types';
 import { useMemberFaceFormRules } from '@/validations/memberFace.validation';
 import type { VForm } from 'vuetify/components';

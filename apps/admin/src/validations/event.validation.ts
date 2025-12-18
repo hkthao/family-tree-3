@@ -17,7 +17,7 @@ interface EventFormState {
   relatedMemberIds: string[] | undefined;
 }
 
-export function useEventRules(state: EventFormState) {
+export function useEventRules(_state: EventFormState) {
   const { t } = useI18n();
   const rulesVuetify = useRules();
 

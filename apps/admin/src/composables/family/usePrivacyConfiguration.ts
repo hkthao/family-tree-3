@@ -1,4 +1,4 @@
-import { ref, watch, computed, unref, type MaybeRef } from 'vue';
+import { ref, computed, unref, type MaybeRef } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/composables';
@@ -13,7 +13,7 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
   const initialPublicProperties = ref<string[]>([]);
 
   // Fetch privacy configuration
-  const { data: privacyConfiguration, isLoading, isError, error } = useQuery<PrivacyConfiguration, Error>({
+  const { data: privacyConfiguration, isLoading, error } = useQuery<PrivacyConfiguration, Error>({
     queryKey: [queryKeys.privacyConfiguration.detail(unref(familyId))],
     queryFn: async () => {
       const currentFamilyId = unref(familyId);
@@ -50,7 +50,7 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
       });
       initialPublicProperties.value = variables.publicMemberProperties;
     },
-    onError: (err) => {
+    onError: (_err) => {
       // Revert to initial state on error
       queryClient.setQueryData([queryKeys.privacyConfiguration.detail(unref(familyId))], (oldData: PrivacyConfiguration | undefined) => {
         if (oldData) {

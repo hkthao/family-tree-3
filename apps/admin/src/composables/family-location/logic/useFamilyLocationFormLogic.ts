@@ -1,4 +1,4 @@
-import { ref, computed, watch, reactive } from 'vue';
+import { computed, watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyLocation } from '@/types';
 import { LocationAccuracy, LocationSource, LocationType } from '@/types';

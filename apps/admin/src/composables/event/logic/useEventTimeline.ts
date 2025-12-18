@@ -3,13 +3,13 @@ import { formatDate } from '@/utils/dateUtils';
 import { useI18n } from 'vue-i18n';
 import type { Event, ListOptions, EventFilter } from '@/types';
 import { useServices } from '@/composables';
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { useQuery } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 
 export function useEventTimeline(props: { familyId?: string; memberId?: string; readOnly?: boolean }) {
   const { t } = useI18n();
   const { event: eventService } = useServices(); // Renamed to avoid conflict
-  const queryClient = useQueryClient();
+  
 
   const selectedEventId = ref<string | null>(null);
   const detailDrawer = ref(false);
@@ -24,7 +24,7 @@ export function useEventTimeline(props: { familyId?: string; memberId?: string; 
   });
 
   // Fetch events using useQuery
-  const { data, isLoading, isError, error, refetch } = useQuery<{ items: Event[]; totalPages: number; totalCount: number }, Error>({
+  const { data, isLoading, error, refetch } = useQuery<{ items: Event[]; totalPages: number; totalCount: number }, Error>({
     queryKey: [queryKeys.events.list(filters.value), currentPage.value, itemsPerPage.value, sortBy.value],
     queryFn: async () => {
       const currentFilters = {

@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, toRef, computed } from 'vue';
+import { reactive, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Prompt } from '@/types';
 import { useVuelidate } from '@vuelidate/core';

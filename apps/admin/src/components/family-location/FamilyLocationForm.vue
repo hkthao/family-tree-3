@@ -55,7 +55,7 @@ interface FamilyLocationFormProps {
 const props = defineProps<FamilyLocationFormProps>();
 const formRef = ref<VForm | null>(null);
 const { t } = useI18n();
-const { form, locationTypeOptions, locationAccuracyOptions, locationSourceOptions, defaultForm } = useFamilyLocationFormLogic(props);
+const { form, locationTypeOptions, locationAccuracyOptions, locationSourceOptions } = useFamilyLocationFormLogic(props);
 const rules = useFamilyLocationValidationRules();
 const { getFormData, setCoordinates, setAddress } = useFamilyLocationFormActions({ form });
 async function validate() {

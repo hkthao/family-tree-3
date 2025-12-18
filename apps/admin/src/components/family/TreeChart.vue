@@ -78,8 +78,6 @@ const chartMode = ref('hierarchical');
 const {
   members,
   relationships,
-  isLoading,
-  error,
   selectedRootMemberId,
   fetchTreeData,
 } = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
