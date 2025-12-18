@@ -132,16 +132,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
-import { Gender } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
-import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useAuth } from '@/composables';
-import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
+import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -150,86 +145,21 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { isAdmin, isFamilyManager } = useAuth();
 
-const formRef = ref<HTMLFormElement | null>(null);
-
-const isFormReadOnly = computed(() => {
-  return props.readOnly || !(isAdmin.value || isFamilyManager.value);
+const {
+  formRef,
+  formData,
+  v$,
+  isFormReadOnly,
+  initialAvatarDisplay,
+  validate,
+  getFormData,
+  getAvatarUrl,
+} = useMemberFormComposable({
+  readOnly: props.readOnly,
+  initialMemberData: props.initialMemberData,
+  familyId: props.familyId,
 });
-
-// Computed property to pass the initial avatar URL to AvatarInput
-const initialAvatarDisplay = computed(() => {
-  return formData.avatarBase64 || formData.avatarUrl;
-});
-
-const formData = reactive<Omit<Member, 'id'> | Member>(
-  props.initialMemberData
-    ? {
-      ...props.initialMemberData,
-      fatherId: props.initialMemberData.fatherId,
-      motherId: props.initialMemberData.motherId,
-      husbandId: props.initialMemberData.husbandId,
-      wifeId: props.initialMemberData.wifeId,
-      isRoot: props.initialMemberData.isRoot, // Add isRoot here
-      isDeceased: props.initialMemberData.isDeceased, // Add isDeceased here
-      phone: props.initialMemberData.phone,
-      email: props.initialMemberData.email,
-      address: props.initialMemberData.address,
-    }
-    : {
-      lastName: '',
-      firstName: '',
-      dateOfBirth: undefined,
-      gender: Gender.Male,
-      familyId: props.familyId || '', // Initialize familyId from prop, ensure it's a string
-      fatherId: undefined, // Initialize fatherId
-      motherId: undefined, // Initialize motherId
-      husbandId: undefined, // Initialize husbandId
-      wifeId: undefined, // Initialize wifeId
-      isRoot: false, // Initialize isRoot for new members
-      isDeceased: false, // Initialize isDeceased for new members
-      order: undefined, // Initialize order for new members
-      phone: undefined,
-      email: undefined,
-      address: undefined,
-      avatarBase64: null, // NEW FIELD
-    },
-);
-
-const state = reactive({
-  lastName: toRef(formData, 'lastName'),
-  firstName: toRef(formData, 'firstName'),
-  dateOfBirth: toRef(formData, 'dateOfBirth'),
-  dateOfDeath: toRef(formData, 'dateOfDeath'),
-  familyId: toRef(formData, 'familyId'),
-  fatherId: toRef(formData, 'fatherId'), // Add fatherId to state
-  motherId: toRef(formData, 'motherId'), // Add motherId to state
-  husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
-  wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
-  isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
-  isDeceased: toRef(formData, 'isDeceased'), // Add isDeceased to state
-  order: toRef(formData, 'order'), // Add order to state
-  phone: toRef(formData, 'phone'),
-  email: toRef(formData, 'email'),
-  address: toRef(formData, 'address'),
-  avatarBase64: toRef(formData, 'avatarBase64'), // Add avatarBase64 to state
-});
-
-const rules = useMemberRules(toRefs(state));
-
-const v$ = useVuelidate(rules, state);
-
-// Expose form validation and data for parent component
-const validate = async () => {
-  const result = await v$.value.$validate();
-  return result;
-};
-
-const getFormData = () => {
-  return formData;
-};
-
 
 defineExpose({
   validate,

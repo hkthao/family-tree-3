@@ -3,9 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useMapbox } from '@/composables/map/useMapbox';
 
 const props = defineProps<{
   mapboxAccessToken: string;
@@ -16,26 +17,19 @@ const props = defineProps<{
 const emit = defineEmits(['update:coordinates']);
 
 const mapContainer = ref<HTMLElement | null>(null);
-let mapInstance: mapboxgl.Map | null = null; // Use a plain variable for the map instance
 const marker = ref<mapboxgl.Marker | null>(null);
 
+const { mapInstance } = useMapbox({
+  mapboxAccessToken: props.mapboxAccessToken,
+  initialCenter: props.initialCenter,
+  initialZoom: props.initialZoom,
+  mapContainer: mapContainer,
+});
+
 onMounted(() => {
-  if (!props.mapboxAccessToken) {
-    console.error('Mapbox access token is not provided.');
-    return;
-  }
-  mapboxgl.accessToken = props.mapboxAccessToken;
-
-  if (mapContainer.value) {
-    mapInstance = new mapboxgl.Map({ // Assign to mapInstance
-      container: mapContainer.value,
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: props.initialCenter || [106.6297, 10.8231],
-      zoom: props.initialZoom || 10,
-    });
-
-    mapInstance.on('load', () => { // Use mapInstance directly
-      mapInstance?.on('click', (e) => { // Use mapInstance directly
+  watch(mapInstance, (newMapInstance) => {
+    if (newMapInstance) {
+      newMapInstance.on('click', (e) => {
         const { lng, lat } = e.lngLat;
         updateMarker([lng, lat]);
         emit('update:coordinates', { longitude: lng, latitude: lat });
@@ -44,27 +38,23 @@ onMounted(() => {
       if (props.initialCenter) {
         updateMarker(props.initialCenter);
       }
-    });
-  }
-});
-
-onUnmounted(() => {
-  mapInstance?.remove(); // Use mapInstance
+    }
+  }, { immediate: true });
 });
 
 const updateMarker = (coordinates: [number, number]) => {
-  if (!mapInstance) return; // Ensure mapInstance is available
+  if (!mapInstance.value) return;
   if (marker.value) {
     marker.value.setLngLat(coordinates);
-  } else {
-    marker.value = new mapboxgl.Marker().setLngLat(coordinates).addTo(mapInstance); // Use mapInstance
+  } else if (mapInstance.value) { // Add null check here
+    marker.value = new mapboxgl.Marker().setLngLat(coordinates).addTo(mapInstance.value as any);
   }
 };
 
 watch(() => props.initialCenter, (newCenter) => {
-  if (mapInstance && newCenter) { // Use mapInstance
+  if (mapInstance.value && newCenter) {
     updateMarker(newCenter);
-    mapInstance.flyTo({ center: newCenter, zoom: mapInstance.getZoom() }); // Use mapInstance
+    mapInstance.value.flyTo({ center: newCenter, zoom: mapInstance.value.getZoom() });
   }
 }, { deep: true });
 

@@ -118,5 +118,8 @@ export * from './member-face/logic/useMemberFaceAdd';
 export * from './member-face/logic/useMemberFaceDeletion';
 export * from './member-face/queries/useMemberFaceDetailQuery';
 export * from './member-face/queries/useMemberFacesQuery';
+export * from './member/useMemberFormComposable';
+export * from './map/useMapbox';
+export * from './map/useMultiMarkers';
 
 export * from '../validations/family-location.validation';
