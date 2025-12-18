@@ -4,7 +4,6 @@ import type { Event } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
 import { EventType } from '@/types';
 import { CalendarType, RepeatRule } from '@/types/enums';
-import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
 import { cloneDeep } from 'lodash';
 
@@ -75,13 +74,11 @@ export function useEventForm(props: EventFormProps) {
   const lunarDays = computed(() => Array.from({ length: 30 }, (_, i) => i + 1));
   const lunarMonths = computed(() => Array.from({ length: 12 }, (_, i) => i + 1));
 
-  const rules = useEventRules(toRefs(state));
-
-  const v$ = useVuelidate(rules, state);
+  const rules = useEventRules(state);
 
   const validate = async () => {
-    const isValid = await v$.value.$validate();
-    return isValid;
+    const { valid } = await formRef.value.validate();
+    return valid;
   };
 
   const getFormData = () => {
@@ -97,7 +94,7 @@ export function useEventForm(props: EventFormProps) {
   return {
     formRef,
     formData,
-    v$,
+    rules,
     eventOptionTypes,
     calendarTypes,
     repeatRules,

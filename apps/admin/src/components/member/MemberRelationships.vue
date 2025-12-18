@@ -4,7 +4,7 @@
       <v-data-table
         :headers="headers"
         :items="formattedRelationships"
-        :loading="relationshipStore.list.loading"
+        :loading="isLoading"
         :no-data-text="t('common.noData')"
       >
         <template v-slot:item.formattedRelationship="{ item }">
@@ -16,15 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { useMemberRelationships } from '@/composables/member/useMemberRelationships'; // Import the new composable
 
 const props = defineProps<{
   memberId: string;
+  familyId: string; // Add familyId prop
 }>();
 
 const emit = defineEmits([
@@ -32,7 +32,7 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const relationshipStore = useRelationshipStore();
+const { relationships: filteredRelationships, isLoading } = useMemberRelationships(props.memberId, props.familyId);
 
 const headers = computed(() => [
   { title: t('relationship.list.headers.relationship'), key: 'formattedRelationship', sortable: true, align: 'start' as const },
@@ -49,24 +49,7 @@ const formattedRelationships = computed(() => {
   }));
 });
 
-const filteredRelationships = computed(() => {
-  if (!props.memberId) return [];
-  return relationshipStore.list.items.filter(
-    (rel: Relationship) =>
-      rel.sourceMemberId === props.memberId || rel.targetMemberId === props.memberId
-  );
-});
 
-onMounted(async () => {
-  // Fetch all relationships by setting a high itemsPerPage value.
-  // This is a workaround. A dedicated API endpoint would be better.
-  await relationshipStore.setItemsPerPage(1000);
-});
-
-onUnmounted(() => {
-  // Reset itemsPerPage to default to not affect other components
-  relationshipStore.setItemsPerPage(DEFAULT_ITEMS_PER_PAGE);
-});
 
 const handleRelationshipClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement;

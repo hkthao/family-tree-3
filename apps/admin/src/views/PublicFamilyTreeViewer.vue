@@ -44,17 +44,17 @@
 import { ref, onMounted, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { usePublicFamilyStore } from '@/stores/publicFamily.store';
-import { usePublicMemberStore } from '@/stores/publicMember.store';
-import { usePublicRelationshipStore } from '@/stores/publicRelationship.store';
+// import { usePublicFamilyStore } from '@/stores/publicFamily.store';
+// import { usePublicMemberStore } from '@/stores/publicMember.store';
+// import { usePublicRelationshipStore } from '@/stores/publicRelationship.store';
 import { useHierarchicalTreeChart } from '@/composables';
 import type { Family, Member, Relationship } from '@/types';
 
 const route = useRoute();
 const { t } = useI18n();
-const publicFamilyStore = usePublicFamilyStore();
-const publicMemberStore = usePublicMemberStore();
-const publicRelationshipStore = usePublicRelationshipStore();
+// const publicFamilyStore = usePublicFamilyStore();
+// const publicMemberStore = usePublicMemberStore();
+// const publicRelationshipStore = usePublicRelationshipStore();
 
 const family = ref<Family | null>(null);
 const members = ref<Member[]>([]);
@@ -100,31 +100,31 @@ const fetchData = async () => {
     currentRootId.value = routeRootId || null;
 
     // Fetch family details
-    const fetchedFamily = await publicFamilyStore.getPublicFamilyById(routeFamilyId);
-    if (!fetchedFamily) {
-      error.value = t('familyTree.errors.familyNotFound');
-      return;
-    }
-    family.value = fetchedFamily;
+    // const fetchedFamily = await publicFamilyStore.getPublicFamilyById(routeFamilyId);
+    // if (!fetchedFamily) {
+    //   error.value = t('familyTree.errors.familyNotFound');
+    //   return;
+    // }
+    // family.value = fetchedFamily;
 
 
     // Fetch members
-    const fetchedMembers = await publicMemberStore.getPublicMembersByFamilyId(routeFamilyId);
-    if (!fetchedMembers) {
-      error.value = t('familyTree.errors.membersNotFound');
-      return;
-    }
-    members.value = fetchedMembers;
+    // const fetchedMembers = await publicMemberStore.getPublicMembersByFamilyId(routeFamilyId);
+    // if (!fetchedMembers) {
+    //   error.value = t('familyTree.errors.membersNotFound');
+    //   return;
+    // }
+    // members.value = fetchedMembers;
 
 
 
     // Fetch relationships
-    const fetchedRelationships = await publicRelationshipStore.getPublicRelationshipsByFamilyId(routeFamilyId);
-    if (!fetchedRelationships) {
-      error.value = t('familyTree.errors.relationshipsNotFound'); // Assuming a new error message
-      return;
-    }
-    relationships.value = fetchedRelationships;
+    // const fetchedRelationships = await publicRelationshipStore.getPublicRelationshipsByFamilyId(routeFamilyId);
+    // if (!fetchedRelationships) {
+    //   error.value = t('familyTree.errors.relationshipsNotFound'); // Assuming a new error message
+    //   return;
+    // }
+    // relationships.value = fetchedRelationships;
 
 
     // After fetching data, render the chart

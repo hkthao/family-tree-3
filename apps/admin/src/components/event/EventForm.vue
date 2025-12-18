@@ -2,8 +2,8 @@
   <v-form class="mt-3" ref="formRef" :disabled="props.readOnly">
     <v-row>
       <v-col cols="12">
-        <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
-          @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map((e: any) => e.$message as string)"
+        <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')"
+          :rules="rules.familyId"
           :read-only="props.readOnly" :multiple="false" :disabled="true" data-testid="event-family-autocomplete" />
       </v-col>
     </v-row>
@@ -17,8 +17,8 @@
 
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.name" :label="t('event.form.name')" @blur="v$.name.$touch()"
-          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map((e: any) => e.$message as string)"
+        <v-text-field v-model="formData.name" :label="t('event.form.name')"
+          :rules="rules.name"
           :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
       </v-col>
     </v-row>
@@ -26,28 +26,28 @@
     <v-row>
       <v-col cols="12" md="4">
         <v-select v-model="formData.type" :items="eventOptionTypes" :label="t('event.form.type')"
-          @blur="v$.type.$touch()" @input="v$.type.$touch()"
-          :error-messages="v$.type.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+          :rules="rules.type"
+          :readonly="props.readOnly"
           data-testid="event-type-select"></v-select>
       </v-col>
       <v-col cols="12" md="4">
         <v-select v-model="formData.calendarType" :items="calendarTypes" :label="t('event.form.calendarType')"
-          @blur="v$.calendarType.$touch()" @update:modelValue="v$.calendarType.$touch()"
-          :error-messages="v$.calendarType.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+          :rules="rules.calendarType"
+          :readonly="props.readOnly"
           :disabled="props.readOnly" data-testid="event-calendar-type-select"></v-select>
       </v-col>
       <v-col cols="12" md="4">
         <v-select v-model="formData.repeatRule" :items="repeatRules" :label="t('event.form.repeatRule')"
-          @blur="v$.repeatRule.$touch()" @update:modelValue="v$.repeatRule.$touch()"
-          :error-messages="v$.repeatRule.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+          :rules="rules.repeatRule"
+          :readonly="props.readOnly"
           :disabled="props.readOnly" data-testid="event-repeat-rule-select"></v-select>
       </v-col>
     </v-row>
 
     <v-row v-if="formData.calendarType === CalendarType.Solar">
       <v-col cols="12">
-        <v-date-input v-model="formData.solarDate" :label="t('event.form.solarDate')" @blur="v$.solarDate.$touch()"
-          @input="v$.solarDate.$touch()" :error-messages="v$.solarDate.$errors.map((e: any) => e.$message as string)"
+        <v-date-input v-model="formData.solarDate" :label="t('event.form.solarDate')"
+          :rules="rules.solarDate"
           :readonly="props.readOnly" prepend-icon="" dateFormat="dd/MM/yyyy"
           data-testid="event-solar-date-input" />
       </v-col>
@@ -57,14 +57,14 @@
       <template v-if="formData.lunarDate">
         <v-col cols="12" md="4">
           <v-select v-model.number="formData.lunarDate.day" :items="lunarDays" :label="t('event.form.lunarDay')"
-            @blur="v$.lunarDate.day.$touch()" @update:modelValue="v$.lunarDate.day.$touch()"
-            :error-messages="v$.lunarDate.day.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+            :rules="rules.lunarDate.day"
+            :readonly="props.readOnly"
             data-testid="event-lunar-day-input"></v-select>
         </v-col>
         <v-col cols="12" md="4">
           <v-select v-model.number="formData.lunarDate.month" :items="lunarMonths" :label="t('event.form.lunarMonth')"
-            @blur="v$.lunarDate.month.$touch()" @update:modelValue="v$.lunarDate.month.$touch()"
-            :error-messages="v$.lunarDate.month.$errors.map((e: any) => e.$message as string)" :readonly="props.readOnly"
+            :rules="rules.lunarDate.month"
+            :readonly="props.readOnly"
             data-testid="event-lunar-month-input"></v-select>
         </v-col>
         <v-col cols="12" md="4" class="d-flex align-center">
@@ -121,7 +121,7 @@ const { t } = useI18n();
 const {
   formRef,
   formData,
-  v$,
+  rules,
   eventOptionTypes,
   calendarTypes,
   repeatRules,

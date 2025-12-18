@@ -1,4 +1,7 @@
 export * from './logic/useFamilyLocationDataManagement';
+export * from './logic/useFamilyLocationFormLogic';
+export * from '../../validations/family-location.validation';
+export * from './logic/useFamilyLocationFormActions';
 export * from './queries/useFamilyLocationQuery';
 export * from './queries/useFamilyLocationsQuery';
 export * from './mutations/useAddFamilyLocationMutation';

@@ -4,8 +4,6 @@ import {
   type Family,
   type IFamilyAccess,
   type FamilyExportDto,
-  type GenerateFamilyDataCommand,
-  type AnalyzedDataDto,
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
@@ -53,9 +51,5 @@ export class ApiFamilyService extends ApiCrudService<Family> implements IFamilyS
   async updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void>> {
     const payload = { familyId, publicMemberProperties };
     return this.http.put<void>(`/family/${familyId}/privacy-configuration`, payload);
-  }
-
-  async generateFamilyData(command: GenerateFamilyDataCommand): Promise<Result<AnalyzedDataDto>> {
-    return this.http.post<AnalyzedDataDto>(`/family/generate-data`, command);
   }
 }

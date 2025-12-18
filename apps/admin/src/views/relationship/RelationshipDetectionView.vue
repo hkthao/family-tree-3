@@ -59,71 +59,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useRelationshipDetectionStore } from '@/stores/relationshipDetection.store';
-
-// Define the expected structure of RelationshipDetectionResult from the backend
-interface RelationshipDetectionResult {
-  description: string;
-  path: string[]; // Assuming GUIDs are converted to strings for display
-  edges: string[];
-}
+import { useRelationshipDetector } from '@/composables/relationship/useRelationshipDetector';
 
 const { t } = useI18n();
-const relationshipDetectionStore = useRelationshipDetectionStore();
-const selectedFamilyId = ref<string | undefined>(undefined);
-const selectedMemberAId = ref<string | undefined>(undefined);
-const selectedMemberBId = ref<string | undefined>(undefined);
-const result = ref<RelationshipDetectionResult | null>(null); // Use the defined interface
-const loading = ref(false);
-const error = ref<string | null>(null);
-
-// Reset members when family changes
-watch(selectedFamilyId, () => {
-  selectedMemberAId.value = undefined;
-  selectedMemberBId.value = undefined;
-  result.value = null;
-  error.value = null;
-});
-
-    const detectRelationship = async () => {
-      if (!selectedFamilyId.value || !selectedMemberAId.value || !selectedMemberBId.value) {
-        error.value = t('relationshipDetection.selectFamilyAndMembersError');
-        return;
-      }
-
-      loading.value = true;
-      error.value = null;
-      result.value = null;
-
-      try {
-        const detectionResult = await relationshipDetectionStore.detectRelationship(
-          selectedFamilyId.value,
-          selectedMemberAId.value,
-          selectedMemberBId.value
-        );
-
-        if (detectionResult) {
-          result.value = detectionResult;
-          // Only check description if result.value is not null
-          if (result.value && (result.value.description === 'unknown' || result.value.description === t('relationshipDetection.noRelationshipFound'))) {
-            error.value = t('relationshipDetection.noRelationshipFound');
-            result.value = null; // Clear result if unknown or no relationship found
-          }
-        } else {
-          // If detectionResult is null, it means no relationship was found or an error occurred in the store
-          error.value = t('relationshipDetection.noRelationshipFound');
-          result.value = null;
-        }
-      } catch (err: any) {
-        error.value = err.message || t('relationshipDetection.genericError');
-      } finally {
-        loading.value = false;
-      }
-    };</script>
+const {
+  selectedFamilyId,
+  selectedMemberAId,
+  selectedMemberBId,
+  result,
+  loading,
+  error,
+  detectRelationship,
+} = useRelationshipDetector();
+</script>
 
 <style scoped>
 /* Add any specific styles here if needed */

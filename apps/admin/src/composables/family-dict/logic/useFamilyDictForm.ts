@@ -2,7 +2,6 @@ import { reactive, toRefs, toRef, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
 import { useFamilyDictRules } from '@/validations/family-dict.validation';
 import { useAuth } from '@/composables';
 
@@ -62,13 +61,11 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
     }),
   });
 
-  const rules = useFamilyDictRules(toRefs(state));
-
-  const v$ = useVuelidate(rules, state);
+  const rules = useFamilyDictRules(state);
 
   const validate = async () => {
-    const result = await v$.value.$validate();
-    return result;
+    const { valid } = await formRef.value.validate();
+    return valid;
   };
 
   const getFormData = () => {
@@ -81,7 +78,7 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
     familyDictTypes,
     familyDictLineages,
     formData,
-    v$,
+    rules,
     validate,
     getFormData,
   };

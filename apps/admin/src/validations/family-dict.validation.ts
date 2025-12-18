@@ -1,20 +1,30 @@
-import { useI18n } from 'vue-i18n';
-import { required, helpers } from '@vuelidate/validators';
 import { computed, type Ref } from 'vue';
+import { useRules } from 'vuetify/labs/rules';
+import { useI18n } from 'vue-i18n';
+import type { FamilyDictType, FamilyDictLineage, NamesByRegion } from '@/types';
 
-export function useFamilyDictRules(_state: { [key: string]: Ref<any> }) {
+interface FamilyDictFormState {
+  name: string;
+  type: FamilyDictType;
+  description: string;
+  lineage: FamilyDictLineage;
+  namesByRegion: NamesByRegion;
+}
+
+export function useFamilyDictRules(_state: FamilyDictFormState) {
   const { t } = useI18n();
+  const rulesVuetify = useRules();
 
   const rules = computed(() => {
     return {
-      name: { required: helpers.withMessage(() => t('familyDict.form.rules.nameRequired'), required) },
-      type: { required: helpers.withMessage(() => t('familyDict.form.rules.typeRequired'), required) },
-      description: { required: helpers.withMessage(() => t('familyDict.form.rules.descriptionRequired'), required) },
-      lineage: { required: helpers.withMessage(() => t('familyDict.form.rules.lineageRequired'), required) },
+      name: [rulesVuetify.required(t('familyDict.form.rules.nameRequired'))],
+      type: [rulesVuetify.required(t('familyDict.form.rules.typeRequired'))],
+      description: [rulesVuetify.required(t('familyDict.form.rules.descriptionRequired'))],
+      lineage: [rulesVuetify.required(t('familyDict.form.rules.lineageRequired'))],
       namesByRegion: {
-        north: { required: helpers.withMessage(() => t('familyDict.form.rules.northRequired'), required) },
-        central: { required: helpers.withMessage(() => t('familyDict.form.rules.centralRequired'), required) },
-        south: { required: helpers.withMessage(() => t('familyDict.form.rules.southRequired'), required) },
+        north: [rulesVuetify.required(t('familyDict.form.rules.northRequired'))],
+        central: [rulesVuetify.required(t('familyDict.form.rules.centralRequired'))],
+        south: [rulesVuetify.required(t('familyDict.form.rules.southRequired'))],
       },
     };
   });

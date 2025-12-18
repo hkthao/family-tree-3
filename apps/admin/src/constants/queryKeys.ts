@@ -24,6 +24,16 @@ export const queryKeys = {
     all: ['families'] as const,
     list: (filters?: FamilyFilter) => [...queryKeys.families.all, 'list', filters] as const,
     detail: (familyId: string) => [...queryKeys.families.all, 'detail', familyId] as const,
+    membersByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'members'] as const,
+    relationshipsByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'relationships'] as const,
+    memberRelationshipsByMemberId: (memberId: string) => [...queryKeys.families.all, memberId, 'relationships'] as const,
+  },
+  members: {
+    all: ['members'] as const,
+    detail: (memberId: string) => [...queryKeys.members.all, 'detail', memberId] as const,
+  },
+  privacyConfiguration: {
+    detail: (familyId: string) => ['privacyConfiguration', familyId] as const,
   },
   memberFaces: {
     all: ['memberFaces'] as const,

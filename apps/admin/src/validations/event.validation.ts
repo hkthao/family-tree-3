@@ -1,44 +1,39 @@
-import { useI18n } from 'vue-i18n';
-import { required, helpers, between, requiredIf } from '@vuelidate/validators';
 import { computed } from 'vue';
-import type { Ref } from 'vue';
-import { CalendarType } from '@/types/enums';
+import { CalendarType, RepeatRule } from '@/types/enums';
+import { EventType } from '@/types';
+import { useRules } from 'vuetify/labs/rules';
+import { useI18n } from 'vue-i18n';
+import type { LunarDate } from '@/types/lunar-date';
 
-export function useEventRules(state: { [key: string]: Ref<any> }) {
+interface EventFormState {
+  name: string;
+  code: string;
+  type: EventType;
+  familyId: string | null | undefined;
+  solarDate: Date | null | undefined;
+  calendarType: CalendarType;
+  lunarDate: LunarDate;
+  repeatRule: RepeatRule;
+  relatedMemberIds: string[] | undefined;
+}
+
+export function useEventRules(state: EventFormState) {
   const { t } = useI18n();
+  const rulesVuetify = useRules();
 
   const rules = computed(() => {
     return {
-      name: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      code: {}, // Mã không bắt buộc
-      type: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      calendarType: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      repeatRule: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-
-      solarDate: {
-        required: helpers.withMessage(
-          () => t('common.validations.required'),
-          requiredIf(() => state.calendarType.value === CalendarType.Solar),
-        ),
-      },
-
+      name: [rulesVuetify.required(t('event.validation.nameRequired'))],
+      code: [],
+      type: [rulesVuetify.required(t('event.validation.typeRequired'))],
+      familyId: [rulesVuetify.required(t('event.validation.familyIdRequired'))],
+      calendarType: [rulesVuetify.required(t('event.validation.calendarTypeRequired'))],
+      repeatRule: [rulesVuetify.required(t('event.validation.repeatRuleRequired'))],
+      solarDate: [rulesVuetify.required(t('event.validation.lunarDayRequired'))],
       lunarDate: {
-        day: {
-          required: helpers.withMessage(
-            () => t('common.validations.required'),
-            requiredIf(() => state.calendarType.value === CalendarType.Lunar),
-          ),
-          between: helpers.withMessage(() => t('event.validation.lunarDayBetween'), between(1, 30)),
-        },
-        month: {
-          required: helpers.withMessage(
-            () => t('common.validations.required'),
-            requiredIf(() => state.calendarType.value === CalendarType.Lunar),
-          ),
-          between: helpers.withMessage(() => t('event.validation.lunarMonthBetween'), between(1, 12)),
-        },
-        isLeapMonth: {}, // No specific validation for this boolean
+        day: [rulesVuetify.required(t('event.validation.lunarDayRequired'))],
+        month: [rulesVuetify.required(t('event.validation.lunarMonthRequired'))],
+        isLeapMonth: [],
       },
     };
   });

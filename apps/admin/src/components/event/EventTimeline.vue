@@ -48,7 +48,7 @@
     </v-timeline-item>
   </v-timeline>
   <v-alert
-    v-if="list.totalItems === 0 && !list.loading"
+    v-if="list.totalCount === 0 && !list.loading"
     type="info"
     class="mt-4"
     variant="tonal"
@@ -56,7 +56,7 @@
     {{ t('event.timeline.noEvents') }}
   </v-alert>
   <v-pagination
-    v-if="list.totalItems > 0"
+    v-if="list.totalCount > 0"
     v-model="list.currentPage"
     :length="paginationLength"
     @update:model-value="handlePageChange"

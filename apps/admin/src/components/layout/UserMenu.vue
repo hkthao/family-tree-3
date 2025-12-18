@@ -1,5 +1,5 @@
 <template>
-  <v-menu offset-y :placement="placement" :close-on-content-click="false" v-model="menuOpen">
+  <v-menu v-if="currentUser" offset-y :placement="placement" :close-on-content-click="false" v-model="menuOpen">
     <template v-slot:activator="{ props: activatorProps }">
       <AvatarDisplay :src="currentUser?.avatar" :size="36" class="cursor-pointer" :aria-label="$t('userMenu.ariaLabel')"
         aria-haspopup="true" :aria-expanded="menuOpen" v-bind="activatorProps" />
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
-import { ref, computed } from 'vue'; // onMounted is no longer needed
+import { ref, computed, watch } from 'vue'; // onMounted is no longer needed
 import { useAuthStore } from '@/stores'; // authStore import
 import { useProfileSettings } from '@/composables';
 import { AvatarDisplay } from '@/components/common';

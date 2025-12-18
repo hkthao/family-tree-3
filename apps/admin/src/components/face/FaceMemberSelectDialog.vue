@@ -17,8 +17,10 @@
               <v-img :src="faceThumbnailSrc" alt="Detected Face"></v-img>
             </v-avatar>
             <div>
+            <div v-if="selectedMemberDetails">
               <div class="text-subtitle-1">{{ selectedMemberDetails.fullName }}</div>
               <div class="text-caption text-medium-emphasis">{{ selectedMemberDetails.birthDeathYears }}</div>
+            </div>
             </div>
           </div>
         </v-card>
