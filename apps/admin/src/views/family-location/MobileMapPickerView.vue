@@ -52,6 +52,7 @@ import { useI18n } from 'vue-i18n';
 import MapPicker from '@/components/map/MapPicker.vue';
 import { useGlobalSnackbar } from '@/composables';
 import { getEnvVariable } from '@/utils/api.util';
+import { useMobileWebViewMessenger } from '@/composables/utils/useMobileWebViewMessenger'; // Import the new composable
 
 const emit = defineEmits(['confirm-selection']);
 
@@ -67,9 +68,7 @@ const selectedItem = ref(null);
 
 let abortController: AbortController | null = null; // To cancel previous fetch requests
 
-const isReactNativeWebView = () => {
-  return typeof window !== 'undefined' && (window as any).ReactNativeWebView;
-};
+const { postMapSelectionMessage } = useMobileWebViewMessenger(); // Use the new composable
 
 const handleCoordinatesUpdate = (coords: { longitude: number; latitude: number }) => {
   selectedCoordinates.value = coords;
@@ -81,9 +80,7 @@ const confirmSelection = () => {
     location: selectedItem.value ? (selectedItem.value as any).place_name : ''
   };
 
-  if (isReactNativeWebView()) {
-    (window as any).ReactNativeWebView.postMessage(JSON.stringify(data));
-  }
+  postMapSelectionMessage(data); // Use the composable function
   emit('confirm-selection', data);
 };
 
