@@ -1,6 +1,5 @@
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
-import { EmotionalTag } from '@/types';
 
 export function useMemoryItemRules() {
   const rulesVuetify = useRules();

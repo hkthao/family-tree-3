@@ -53,7 +53,6 @@ export * from './user/logic/useUserProfile';
 export * from './user/queries/useUserByIdsQuery';
 export * from './user/search/useUserAutocompleteSearch';
 export * from './user/search/useUserSearch';
-export * from './memory-item/memory-media/useMemoryMediaForm';
 export * from './memory-item/mutations/useAddMemoryItemMutation';
 export * from './memory-item/mutations/useDeleteMemoryItemMutation';
 export * from './memory-item/mutations/useUpdateMemoryItemMutation';

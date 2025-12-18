@@ -3,14 +3,20 @@ import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddMemoryItemMutation } from '@/composables';
 import { useAddFamilyMediaMutation } from '@/composables';
-import type { MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
 import type { MemoryItem, FamilyMedia, MemoryMedia } from '@/types';
+
+// Define the interface for the exposed methods/properties of MemoryItemForm.vue
+interface IMemoryItemFormInstance {
+  validate: () => Promise<boolean>;
+  getFormData: () => MemoryItem;
+  newlyUploadedFiles: File[]; // Corrected: Assume Vue unwraps ComputedRef when exposed
+}
 
 interface UseMemoryItemAddOptions {
   familyId: string;
   onSaveSuccess: () => void; // Callback for successful save
   onCancel: () => void;      // Callback for cancel
-  formRef: Ref<MemoryItemFormExpose | null>; // Pass the ref from the component
+  formRef: Ref<IMemoryItemFormInstance | null>; // Pass the ref from the component
 }
 
 export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
@@ -24,12 +30,16 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
   const { mutateAsync: addFamilyMedia } = useAddFamilyMediaMutation();
 
   const handleAddItem = async () => {
-    if (!formRef.value) return;
+    if (!formRef.value || typeof formRef.value.validate !== 'function') {
+      console.error('Form reference or its validate method is not available.');
+      return;
+    }
+
     const isValid = await formRef.value.validate();
     if (!isValid) return;
 
     const itemData = formRef.value.getFormData();
-    const newlyUploadedFiles = formRef.value.newlyUploadedFiles.value;
+    const newlyUploadedFiles = formRef.value.newlyUploadedFiles;
 
     const uploadedMedia: FamilyMedia[] = [];
 

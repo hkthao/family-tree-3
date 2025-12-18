@@ -20,9 +20,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, type Ref } from 'vue';
+import { ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import MemoryItemForm, { type MemoryItemFormExpose } from '@/components/memory-item/MemoryItemForm.vue';
+import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemAdd } from '@/composables';
 
 const props = defineProps({
@@ -32,10 +32,12 @@ const props = defineProps({
   },
 });
 
-const memoryItemFormRef: Ref<MemoryItemFormExpose | null> = ref(null);
+const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
+
+console.log(memoryItemFormRef.value);
 
 const { isAddingMemoryItem, isUploadingMedia, handleAddItem, closeForm } = useMemoryItemAdd({
   familyId: props.familyId,

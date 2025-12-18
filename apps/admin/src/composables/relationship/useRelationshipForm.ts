@@ -1,5 +1,4 @@
 import { reactive, toRefs, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { Relationship } from '@/types';
 import { RelationshipType } from '@/types';
 import { useRelationshipRules } from '@/validations/relationship.validation';
@@ -11,7 +10,7 @@ interface UseRelationshipFormOptions {
 }
 
 export function useRelationshipForm(options: UseRelationshipFormOptions) {
-  const { t } = useI18n();
+
 
   const formRef = ref();
 

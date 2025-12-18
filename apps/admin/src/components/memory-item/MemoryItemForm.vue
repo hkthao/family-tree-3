@@ -1,20 +1,20 @@
 <template>
   <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
-      <v-col cols="12" v-if="mediaManagement.memoryMedia.value && mediaManagement.memoryMedia.value.length > 0">
+      <v-col cols="12" v-if="memoryMedia && memoryMedia.length > 0">
         <v-carousel cycle hide-delimiter-background :continuous="false" hide-delimiters>
-          <v-carousel-item v-for="(media, index) in mediaManagement.memoryMedia.value" :key="media.id || index">
+          <v-carousel-item v-for="(media, index) in memoryMedia" :key="media.id || index">
             <div>
               <v-img :src="media.url" cover class="carousel-image"></v-img>
               <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete" color="error" size="small"
-                @click="mediaManagement.removeMedia(media)"></v-btn>
+                @click="removeMedia(media)"></v-btn>
             </div>
           </v-carousel-item>
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="mediaManagement.uploadedFiles.value"
-          :accept="mediaManagement.acceptedMimeTypes.value" data-testid="memory-item-file-upload" multiple
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="uploadedFiles"
+          :accept="acceptedMimeTypes" data-testid="memory-item-file-upload" multiple
           :rules="validationRules.uploadedFiles" :disabled="props.readOnly"></VFileUpload>
       </v-col>
 
@@ -46,13 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { type ComputedRef } from 'vue';
+import { type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemoryItemForm } from '@/composables/memory-item/useMemoryItemForm';
+import type { LocalMemoryMedia } from '@/composables/memory-item/useMemoryItemForm'; // Type-only import
 
 interface MemoryItemFormProps {
   initialMemoryItemData?: MemoryItem;
@@ -67,11 +68,17 @@ const { t } = useI18n();
 const {
   form,
   emotionalTagOptions,
-  mediaManagement,
   validate,
   getFormData,
-  newlyUploadedFiles,
   validationRules,
+  formRef, // Capture the formRef returned by useMemoryItemForm
+  // Directly destructure media management properties
+  memoryMedia,
+  uploadedFiles,
+  deletedMediaIds,
+  removeMedia,
+  newlyUploadedFiles,
+  acceptedMimeTypes,
 } = useMemoryItemForm({
   initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
@@ -82,12 +89,22 @@ export interface MemoryItemFormExpose {
   validate: () => Promise<boolean>;
   getFormData: () => MemoryItem;
   newlyUploadedFiles: ComputedRef<File[]>;
+  memoryMedia: Ref<LocalMemoryMedia[]>;
+  uploadedFiles: Ref<File[]>;
+  deletedMediaIds: Ref<string[]>;
+  removeMedia: (mediaToDelete: LocalMemoryMedia) => void;
+  acceptedMimeTypes: ComputedRef<string>;
 }
 
 defineExpose<MemoryItemFormExpose>({
   validate,
   getFormData,
   newlyUploadedFiles,
+  memoryMedia,
+  uploadedFiles,
+  deletedMediaIds,
+  removeMedia,
+  acceptedMimeTypes,
 });
 </script>
 

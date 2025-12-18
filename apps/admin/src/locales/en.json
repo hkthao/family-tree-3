@@ -661,6 +661,7 @@
   "memoryItem.form.happenedAt": "Happened At",
   "memoryItem.form.emotionalTag": "Emotional Tag",
   "memoryItem.form.mediaFile": "Media File",
+  "memoryItem.form.memoryMediaFile": "Memory Media File",
   "memoryItem.emotionalTag.happy": "Happy",
   "memoryItem.emotionalTag.sad": "Sad",
   "memoryItem.emotionalTag.proud": "Proud",

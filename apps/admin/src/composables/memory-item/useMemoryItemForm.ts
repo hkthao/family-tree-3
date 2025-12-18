@@ -1,11 +1,15 @@
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { VForm } from 'vuetify/components';
-import type { MemoryItem } from '@/types';
+import type { MemoryItem, MemoryMedia as BaseMemoryMedia } from '@/types';
 import { EmotionalTag } from '@/types';
-import { useMemoryMediaForm, type LocalMemoryMedia } from '@/composables/memory-item/memory-media/useMemoryMediaForm';
+// Removed useMemoryMediaForm import
 import { useMemoryItemRules } from '@/validations/memoryItem.validation';
+import type { VForm } from 'vuetify/components';
 
+export interface LocalMemoryMedia extends BaseMemoryMedia {
+  isNew?: boolean;
+  file?: File;
+}
 
 interface LocalMemoryItem extends Omit<MemoryItem, 'persons' | 'memoryMedia' | 'deletedMediaIds'> {
   personIds: string[]; // Use personIds for autocomplete
@@ -22,17 +26,67 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   const formRef = ref<VForm | null>(null);
   const { t } = useI18n();
 
-      const defaultNewMemoryItem: LocalMemoryItem = {
-        id: '',
-        familyId: options.familyId,
-        title: '',
-        description: undefined,
-        happenedAt: undefined,
-        emotionalTag: EmotionalTag.Neutral,
-        personIds: [],
-        memoryPersons: [],
-        uploadedFiles: [],
-      };
+  const internalMemoryMedia = ref<LocalMemoryMedia[]>([...(options.initialMemoryItemData?.memoryMedia || [])]);
+  const uploadedFiles = ref<File[]>([]);
+  const deletedMediaIds = ref<string[]>([]);
+
+  // Watch uploadedFiles from VFileUpload and process them
+  watch(uploadedFiles, (newFiles) => {
+    if (newFiles.length === 0) return;
+    newFiles.forEach(file => {
+      internalMemoryMedia.value.push({
+        id: `new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Temporary ID for new files
+        memoryItemId: options.initialMemoryItemData?.id || '', // Use initial ID or empty
+        url: URL.createObjectURL(file), // Create a temporary URL for preview
+        isNew: true,
+        file: file,
+      });
+    });
+    // Clear the file input after processing in the next tick to avoid recursive updates
+    nextTick(() => {
+      uploadedFiles.value = [];
+    });
+  });
+
+  const removeMedia = (mediaToDelete: LocalMemoryMedia) => {
+    if (!options.readOnly) {
+      if (!mediaToDelete.isNew && mediaToDelete.id) {
+        deletedMediaIds.value.push(mediaToDelete.id);
+      }
+      internalMemoryMedia.value = internalMemoryMedia.value.filter(media => media.id !== mediaToDelete.id);
+      // Revoke object URL for temporary files
+      if (mediaToDelete.isNew && mediaToDelete.url) {
+        URL.revokeObjectURL(mediaToDelete.url);
+      }
+    }
+  };
+
+  const newlyUploadedFiles = computed(() => {
+    return internalMemoryMedia.value.filter(media => media.isNew && media.file).map(media => media.file as File);
+  });
+
+  const acceptedMimeTypes = computed(() => {
+    return [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/bmp',
+      'image/webp',
+      'image/svg+xml',
+    ].join(',');
+  });
+
+  const defaultNewMemoryItem: LocalMemoryItem = {
+    id: '',
+    familyId: options.familyId,
+    title: '',
+    description: undefined,
+    happenedAt: undefined,
+    emotionalTag: EmotionalTag.Neutral,
+    personIds: [],
+    memoryPersons: [],
+    uploadedFiles: [],
+  };
   const form = reactive<LocalMemoryItem>(
     options.initialMemoryItemData
       ? {
@@ -43,16 +97,6 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
       : { ...defaultNewMemoryItem },
   );
 
-  const mediaManagement = useMemoryMediaForm({
-    initialMedia: options.initialMemoryItemData?.memoryMedia || [],
-    memoryItemId: form.id,
-    readOnly: options.readOnly || false,
-  });
-
-  // Watch uploadedFiles from mediaManagement and assign to form.uploadedFiles
-  watch(mediaManagement.uploadedFiles, (newFiles) => {
-    form.uploadedFiles = newFiles;
-  });
 
   const { rules } = useMemoryItemRules();
 
@@ -63,12 +107,12 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
         personIds: newData.memoryPersons ? newData.memoryPersons.map(p => p.memberId) : [],
         uploadedFiles: [],
       });
-      mediaManagement.memoryMedia.value = [...(newData.memoryMedia || [])];
-      mediaManagement.deletedMediaIds.value = [];
+      internalMemoryMedia.value = [...(newData.memoryMedia || [])]; // Directly assign to internalMedia
+      deletedMediaIds.value = []; // Directly assign to deletedMediaIds
     } else {
       Object.assign(form, { ...defaultNewMemoryItem });
-      mediaManagement.memoryMedia.value = [];
-      mediaManagement.deletedMediaIds.value = [];
+      internalMemoryMedia.value = [];
+      deletedMediaIds.value = [];
     }
   });
 
@@ -82,14 +126,19 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
 
   const validate = async () => {
     if (!formRef.value) {
+      console.error('formRef.value is null in useMemoryItemForm.validate()');
       return false;
     }
-    const { valid } = await formRef.value.validate();
+    const formInstance = formRef.value as VForm;
+    const { valid, errors } = await formInstance.validate();
+    if (!valid) {
+      console.error('Validation failed for the following fields:', errors);
+    }
     return valid;
   };
 
   const getFormData = (): MemoryItem => {
-    const existingMedias: LocalMemoryMedia[] = mediaManagement.memoryMedia.value.filter(media => !media.isNew);
+    const existingMedias: LocalMemoryMedia[] = internalMemoryMedia.value.filter(media => !media.isNew);
     const dataToReturn: MemoryItem = {
       id: form.id,
       familyId: form.familyId,
@@ -99,21 +148,26 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
       emotionalTag: form.emotionalTag,
       memoryMedia: existingMedias,
       personIds: form.personIds,
-      deletedMediaIds: mediaManagement.deletedMediaIds.value,
+      deletedMediaIds: deletedMediaIds.value, // Direct usage
       memoryPersons: []
     };
     return dataToReturn;
   };
 
   return {
-    formRef,
+    formRef, // Expose the formRef for the component to bind to
     form,
     emotionalTagOptions,
-    mediaManagement,
+    // mediaManagement is removed
     validate,
     getFormData,
-    newlyUploadedFiles: mediaManagement.newlyUploadedFiles,
-    // Expose the rules from useMemoryItemRules
+    // Expose media management properties directly
+    memoryMedia: internalMemoryMedia,
+    uploadedFiles,
+    deletedMediaIds,
+    removeMedia,
+    newlyUploadedFiles,
+    acceptedMimeTypes,
     validationRules: rules,
   };
 }
