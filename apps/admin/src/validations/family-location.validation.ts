@@ -1,6 +1,5 @@
 import { useRules } from 'vuetify/labs/rules';
 import { useI18n } from 'vue-i18n';
-import type { FamilyLocation } from '@/types';
 
 export const useFamilyLocationValidationRules = () => {
   const { t } = useI18n();

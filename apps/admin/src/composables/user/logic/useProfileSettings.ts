@@ -3,19 +3,20 @@ import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
 import { useGlobalSnackbar } from '@/composables';
+import { useUserProfile } from '@/composables';
 import type { UpdateUserProfileDto, UserProfile } from '@/types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
-
-const PROFILE_QUERY_KEY = ['userProfile'];
 
 export function useProfileSettings() {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
-  const queryClient = useQueryClient();
 
-  // Initialize userService
+  // Use the new useUserProfile composable
+  const { userProfile, isFetchingProfile, isFetchError, fetchError, queryClient } = useUserProfile();
+
+  // Initialize userService for update operations (fetch is now handled by useUserProfile)
   const userService = new ApiUserService(apiClient);
 
   // Form Data
@@ -29,19 +30,6 @@ export function useProfileSettings() {
     externalId: '',
   });
 
-  // Fetch User Profile
-  const { isLoading: isFetchingProfile, data: userProfile, isError: isFetchError, error: fetchError } = useQuery<UserProfile, Error>({
-    queryKey: PROFILE_QUERY_KEY,
-    queryFn: async () => {
-      const result = await userService.getCurrentUserProfile();
-      if (result.ok) {
-        return result.value;
-      } else {
-        throw new Error(result.error?.message || t('userSettings.profile.fetchError'));
-      }
-    },
-  });
-
   watch(userProfile, (data) => {
     if (data) {
       Object.assign(formData, {
@@ -53,7 +41,6 @@ export function useProfileSettings() {
         externalId: data.externalId,
       });
     } else {
-      // Optionally reset formData if userProfile becomes null (e.g., on logout or fetch error)
       Object.assign(formData, {
         firstName: '',
         lastName: '',
@@ -65,25 +52,22 @@ export function useProfileSettings() {
     }
   }, { immediate: true });
 
-  watch(isFetchError, (isError) => {
-    if (isError && fetchError.value) {
-      showSnackbar(fetchError.value.message, 'error');
-    }
+  // Generated Full Name
+  const generatedFullName = computed(() => {
+    const parts = [];
+    if (formData.firstName) parts.push(formData.firstName);
+    if (formData.lastName) parts.push(formData.lastName);
+    return parts.join(' ');
   });
+
+  // Initial Avatar Display
+  const initialAvatarDisplay = computed(() => formData.avatar);
 
   // Validation
   const rules = useProfileSettingsRules();
   const v$ = useVuelidate(rules, formData);
 
-  // Computed properties
-  const generatedFullName = computed(() => {
-    return `${formData.firstName} ${formData.lastName}`.trim();
-  });
-
-  const initialAvatarDisplay = computed(() => {
-    return formData.avatarBase64 || formData.avatar;
-  });
-
+  // ... rest of the code ...
   // Update User Profile Mutation
   const { mutateAsync: updateProfile, isPending: isSavingProfile, isSuccess: isUpdateSuccess, isError: isUpdateError, error: updateError } = useMutation<UserProfile, Error, UpdateUserProfileDto>({
     mutationFn: async (updatedProfileDto: UpdateUserProfileDto) => {
@@ -98,7 +82,7 @@ export function useProfileSettings() {
 
   watch(isUpdateSuccess, (success) => {
     if (success && userProfile.value) { // Ensure userProfile.value is available for updating cache
-      queryClient.setQueryData(PROFILE_QUERY_KEY, userProfile.value); // Update cache with the latest data
+      queryClient.setQueryData(['userProfile'], userProfile.value); // Update cache with the latest data
       showSnackbar(t('userSettings.profile.saveSuccess'), 'success');
       // Update local avatar immediately if saved
       formData.avatar = userProfile.value.avatar || null;

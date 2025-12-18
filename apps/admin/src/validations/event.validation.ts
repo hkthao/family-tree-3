@@ -1,8 +1,8 @@
 import { computed } from 'vue';
-import { CalendarType, RepeatRule } from '@/types/enums';
-import { EventType } from '@/types';
 import { useRules } from 'vuetify/labs/rules';
 import { useI18n } from 'vue-i18n';
+import { CalendarType, type RepeatRule } from '@/types/enums';
+import type { EventType } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
 
 interface EventFormState {
@@ -29,7 +29,7 @@ export function useEventRules(state: EventFormState) {
       familyId: [rulesVuetify.required(t('event.validation.familyIdRequired'))],
       calendarType: [rulesVuetify.required(t('event.validation.calendarTypeRequired'))],
       repeatRule: [rulesVuetify.required(t('event.validation.repeatRuleRequired'))],
-      solarDate: [rulesVuetify.required(t('event.validation.lunarDayRequired'))],
+      solarDate: [rulesVuetify.required(t('event.validation.solarDateRequired'))],
       lunarDate: {
         day: [rulesVuetify.required(t('event.validation.lunarDayRequired'))],
         month: [rulesVuetify.required(t('event.validation.lunarMonthRequired'))],

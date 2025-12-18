@@ -1,43 +1,34 @@
 <template>
-  <v-form ref="form" @submit.prevent>
+  <v-form ref="formRef" @submit.prevent>
       <v-row>
         <v-col cols="12" md="6">
           <v-text-field v-model="state.memberId" :label="t('memberFace.form.memberId')"
-            :readonly="readOnly || !!props.memberId"
-            :error-messages="v$.memberId.$errors.map((e: ErrorObject) => e.$message as string)" @blur="v$.memberId.$touch()"
-            @input="v$.memberId.$touch()" data-testid="memberFace-memberId"></v-text-field>
+            :readonly="readOnly || !!props.memberId" :rules="rules.memberId"
+            data-testid="memberFace-memberId"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="state.faceId" :label="t('memberFace.form.faceId')" :readonly="readOnly"
-            :error-messages="v$.faceId.$errors.map((e: ErrorObject) => e.$message as string)" @blur="v$.faceId.$touch()"
-            @input="v$.faceId.$touch()" data-testid="memberFace-faceId"></v-text-field>
+            data-testid="memberFace-faceId"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field v-model.number="state.boundingBox.x" :label="t('memberFace.form.boundingBoxX')"
-            :readonly="readOnly" type="number" :error-messages="v$.boundingBox.x.$errors.map((e: ErrorObject) => e.$message as string)"
-            @blur="v$.boundingBox.x.$touch()" @input="v$.boundingBox.x.$touch()"></v-text-field>
+            :readonly="readOnly" type="number"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field v-model.number="state.boundingBox.y" :label="t('memberFace.form.boundingBoxY')"
-            :readonly="readOnly" type="number" :error-messages="v$.boundingBox.y.$errors.map((e: ErrorObject) => e.$message as string)"
-            @blur="v$.boundingBox.y.$touch()" @input="v$.boundingBox.y.$touch()"></v-text-field>
+            :readonly="readOnly" type="number"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field v-model.number="state.boundingBox.width" :label="t('memberFace.form.boundingBoxWidth')"
-            :readonly="readOnly" type="number"
-            :error-messages="v$.boundingBox.width.$errors.map((e: ErrorObject) => e.$message as string)"
-            @blur="v$.boundingBox.width.$touch()" @input="v$.boundingBox.width.$touch()"></v-text-field>
+            :readonly="readOnly" type="number"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field v-model.number="state.boundingBox.height" :label="t('memberFace.form.boundingBoxHeight')"
-            :readonly="readOnly" type="number"
-            :error-messages="v$.boundingBox.height.$errors.map((e: ErrorObject) => e.$message as string)"
-            @blur="v$.boundingBox.height.$touch()" @input="v$.boundingBox.height.$touch()"></v-text-field>
+            :readonly="readOnly" type="number"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model.number="state.confidence" :label="t('memberFace.form.confidence')" :readonly="readOnly"
-            type="number" step="0.01" :error-messages="v$.confidence.$errors.map((e: ErrorObject) => e.$message as string)"
-            @blur="v$.confidence.$touch()" @input="v$.confidence.$touch()"></v-text-field>
+            type="number" step="0.01"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="state.thumbnailUrl" :label="t('memberFace.form.thumbnailUrl')" :readonly="readOnly"
@@ -68,9 +59,10 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { ErrorObject } from '@vuelidate/core';
 import type { MemberFace } from '@/types';
 import { useMemberFaceForm } from '@/composables';
+import { ref } from 'vue';
+import type { VForm } from 'vuetify/components';
 
 interface MemberFaceFormProps {
   initialMemberFaceData?: MemberFace;
@@ -81,10 +73,15 @@ interface MemberFaceFormProps {
 const props = defineProps<MemberFaceFormProps>();
 const { t } = useI18n();
 
-const { state, v$, validate, getFormData } = useMemberFaceForm({
-  initialMemberFaceData: props.initialMemberFaceData,
-  memberId: props.memberId,
-});
+const formRef = ref<VForm | null>(null);
+
+const { state, validate, getFormData, rules } = useMemberFaceForm(
+  {
+    initialMemberFaceData: props.initialMemberFaceData,
+    memberId: props.memberId,
+  },
+  formRef
+);
 
 defineExpose({
   validate,

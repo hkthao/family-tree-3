@@ -32,7 +32,6 @@
     "@tiptap/suggestion": "^3.10.4",
     "@tiptap/vue-3": "^3.10.4",
     "@vuelidate/core": "^2.0.3",
-    "@vuelidate/validators": "^2.0.4",
     "apexcharts": "^5.3.5",
     "axios": "^1.7.2",
     "d3": "^7.9.0",

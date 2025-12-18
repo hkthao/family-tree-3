@@ -1,18 +1,18 @@
 import { useI18n } from 'vue-i18n';
-import { required, email, helpers } from '@vuelidate/validators';
 import { computed } from 'vue';
+import { useRules } from 'vuetify/labs/rules';
 
 export function useProfileSettingsRules() {
   const { t } = useI18n();
-
+  const rulesVuetify = useRules()
   const rules = computed(() => {
     return {
-      firstName: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      lastName: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      email: {
-        required: helpers.withMessage(() => t('common.validations.required'), required),
-        email: helpers.withMessage(() => t('common.validations.email'), email),
-      },
+      firstName: [rulesVuetify.required(t('common.validations.required'))],
+      lastName: [rulesVuetify.required(t('common.validations.required'))],
+      email: [
+        rulesVuetify.required(t('common.validations.required')),
+        rulesVuetify.email(t('common.validations.email')),
+      ],
     };
   });
 

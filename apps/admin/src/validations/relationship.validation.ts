@@ -1,24 +1,24 @@
 import { useI18n } from 'vue-i18n';
-import { required, helpers } from '@vuelidate/validators';
 import { computed } from 'vue';
-import type { Ref } from 'vue';
+import { useRules } from 'vuetify/labs/rules';
 
-export function useRelationshipRules(state: { [key: string]: Ref<any> }) {
+export function useRelationshipRules(state: { sourceMemberId: any; targetMemberId: any }) {
   const { t } = useI18n();
+  const rulesVuetify = useRules();
 
   const notSameAs = (value: any) => {
-    return value !== state.targetMemberId.value;
+    return value !== state.targetMemberId || t('relationship.validation.notSame');
   };
 
   const rules = computed(() => {
     return {
-      sourceMemberId: {
-        required: helpers.withMessage(() => t('common.validations.required'), required),
-        notSameAs: helpers.withMessage(() => t('relationship.validation.notSame'), notSameAs),
-      },
-      targetMemberId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      type: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
+      sourceMemberId: [
+        rulesVuetify.required(t('common.validations.required')),
+        notSameAs,
+      ],
+      targetMemberId: [rulesVuetify.required(t('common.validations.required'))],
+      type: [rulesVuetify.required(t('common.validations.required'))],
+      familyId: [rulesVuetify.required(t('common.validations.required'))],
     };
   });
 

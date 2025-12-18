@@ -7,8 +7,7 @@
     </div>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
-          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)" required
+        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" :rules="rules.name" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -43,6 +42,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { VForm } from 'vuetify/components';
 import type { Family } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
@@ -54,13 +54,12 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['submit', 'cancel']);
 
-const formRef = ref<HTMLFormElement | null>(null);
+const formRef = ref<VForm | null>(null);
 
 const {
   t,
   formData,
   initialAvatarDisplay,
-  v$,
   managers,
   viewers,
   visibilityItems,
@@ -68,7 +67,8 @@ const {
   validate,
   getFormData,
   getFamilyAvatarUrl,
-} = useFamilyForm(props, emit);
+  rules,
+} = useFamilyForm(props, emit, formRef);
 
 defineExpose({
   validate,

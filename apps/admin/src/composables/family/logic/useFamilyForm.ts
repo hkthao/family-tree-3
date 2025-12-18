@@ -1,12 +1,12 @@
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
 import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
+import type { VForm } from 'vuetify/components';
 
-export function useFamilyForm(props: { data?: Family; readOnly?: boolean }, emit: (event: 'submit', data: Family | Omit<Family, 'id'>) => void) {
+export function useFamilyForm(props: { data?: Family; readOnly?: boolean }, emit: (event: 'submit', data: Family | Omit<Family, 'id'>) => void, formRef: Ref<VForm | null>) {
   const { t } = useI18n();
 
   const formData = reactive<Family | Omit<Family, 'id'>>(
@@ -38,7 +38,6 @@ export function useFamilyForm(props: { data?: Family; readOnly?: boolean }, emit
   );
 
   const rules = useFamilyRules();
-  const v$ = useVuelidate(rules, formData);
 
   const familyUsers = ref<FamilyUser[]>(props.data?.familyUsers || []);
   const Manager = 0;
@@ -70,16 +69,15 @@ export function useFamilyForm(props: { data?: Family; readOnly?: boolean }, emit
     { title: t('family.form.visibility.public'), value: FamilyVisibility.Public },
   ]);
 
-  const submitForm = async () => {
-    const result = await v$.value.$validate();
-    if (result) {
-      emit('submit', formData);
-    }
+  const validate = async () => {
+    return (await formRef.value?.validate())?.valid || false;
   };
 
-  const validate = async () => {
-    const result = await v$.value.$validate();
-    return result;
+  const submitForm = async () => {
+    const isValid = await validate();
+    if (isValid) {
+      emit('submit', formData);
+    }
   };
 
   const getFormData = () => {
@@ -92,14 +90,14 @@ export function useFamilyForm(props: { data?: Family; readOnly?: boolean }, emit
     t,
     formData,
     initialAvatarDisplay,
-    v$,
-    familyUsers, // Expose familyUsers if needed for parent to manipulate directly
+    familyUsers,
     managers,
     viewers,
     visibilityItems,
     submitForm,
     validate,
     getFormData,
-    getFamilyAvatarUrl, // Expose utility function
+    getFamilyAvatarUrl,
+    rules, // Expose rules for the template
   };
 }

@@ -67,7 +67,7 @@ const state = reactive({
   description: toRef(formData, 'description'),
 });
 
-const rules = usePromptRules(toRefs(state));
+const rules = usePromptRules();
 
 const v$ = useVuelidate(rules, state);
 

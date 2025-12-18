@@ -1,13 +1,14 @@
 import { useI18n } from 'vue-i18n';
-import { required, helpers } from '@vuelidate/validators';
 import { computed } from 'vue';
+import { useRules } from 'vuetify/labs/rules';
 
 export function useFamilyRules() {
   const { t } = useI18n();
+  const rulesVuetify = useRules();
 
   const rules = computed(() => {
     return {
-      name: { required: helpers.withMessage(() => t('common.validations.required'), required) },
+      name: [rulesVuetify.required(t('common.validations.required'))],
     };
   });
 

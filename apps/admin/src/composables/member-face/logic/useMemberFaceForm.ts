@@ -1,16 +1,15 @@
-import { reactive, watch, toRefs } from 'vue';
-import { useVuelidate } from '@vuelidate/core';
+import { reactive, watch, ref, type Ref } from 'vue';
 import type { MemberFace } from '@/types';
 import { useMemberFaceFormRules } from '@/validations/memberFace.validation';
+import type { VForm } from 'vuetify/components';
 
 interface UseMemberFaceFormOptions {
   initialMemberFaceData?: MemberFace;
   memberId?: string;
 }
 
-export function useMemberFaceForm(options: UseMemberFaceFormOptions) {
+export function useMemberFaceForm(options: UseMemberFaceFormOptions, formRef: Ref<VForm | null>) {
   const { initialMemberFaceData, memberId } = options;
-
 
   const defaultFormData = (): MemberFace => ({
     id: '',
@@ -40,22 +39,22 @@ export function useMemberFaceForm(options: UseMemberFaceFormOptions) {
   });
 
   const rules = useMemberFaceFormRules();
-  const v$ = useVuelidate(rules, toRefs(state));
 
   const validate = async () => {
-    const result = await v$.value.$validate();
-    return result;
+    return (await formRef.value?.validate())?.valid || false;
   };
 
   const getFormData = (): MemberFace => {
     // Handle embedding string to array conversion if necessary, as per the original component
-    if (typeof state.embedding === 'string') {
+    if (typeof state.embedding === 'string' && state.embedding.trim() !== '') {
       try {
         state.embedding = JSON.parse(state.embedding);
       } catch (e) {
         console.error('Failed to parse embedding string:', e);
         state.embedding = [];
       }
+    } else if (state.embedding === '') {
+      state.embedding = [];
     }
     return { ...state };
   };
@@ -75,7 +74,7 @@ export function useMemberFaceForm(options: UseMemberFaceFormOptions) {
 
   // Watch for embedding changes to stringify if it's an array for display in textarea
   watch(() => state.embedding, (newVal) => {
-    if (Array.isArray(newVal)) {
+    if (Array.isArray(newVal) && (state.embedding as any) !== JSON.stringify(newVal)) {
       // Check if it's an array of numbers or empty
       if (newVal.length === 0 || typeof newVal[0] === 'number') {
         (state.embedding as any) = JSON.stringify(newVal);
@@ -85,8 +84,8 @@ export function useMemberFaceForm(options: UseMemberFaceFormOptions) {
 
   return {
     state,
-    v$,
     validate,
     getFormData,
+    rules, // Expose rules for the template
   };
 }

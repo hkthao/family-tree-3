@@ -1,4 +1,4 @@
-import { computed, type Ref } from 'vue';
+import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDictType, FamilyDictLineage, NamesByRegion } from '@/types';

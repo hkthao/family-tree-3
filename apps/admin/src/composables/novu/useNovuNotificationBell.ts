@@ -1,10 +1,10 @@
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useProfileSettings } from '@/composables';
+import { useUserProfile } from '@/composables'; // Use useUserProfile instead of useProfileSettings
 import { Novu } from '@novu/js';
 import { getEnvVariable } from '@/utils/api.util';
 
 export function useNovuNotificationBell() {
-  const { userProfile } = useProfileSettings();
+  const { userProfile } = useUserProfile();
   const unseenCount = ref(0);
   let novuClient: Novu | null = null;
   let unseen_count_changed: (() => void) | null = null;
