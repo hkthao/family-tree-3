@@ -23,10 +23,10 @@ export function useMemberRules(state: { dateOfBirth: any; dateOfDeath: any }) {
 
   const rules = computed(() => {
     return {
-      lastName: [rulesVuetify.required(t('common.validations.required'))],
-      firstName: [rulesVuetify.required(t('common.validations.required'))],
+      lastName: [rulesVuetify.required()],
+      firstName: [rulesVuetify.required()],
       dateOfBirth: [],
-      familyId: [rulesVuetify.required(t('common.validations.required'))],
+      familyId: [rulesVuetify.required()],
       dateOfDeath: [dateOfDeathAfterBirth],
       order: [isPositive],
     };

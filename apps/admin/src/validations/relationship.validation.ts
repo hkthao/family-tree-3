@@ -13,12 +13,12 @@ export function useRelationshipRules(state: { sourceMemberId: any; targetMemberI
   const rules = computed(() => {
     return {
       sourceMemberId: [
-        rulesVuetify.required(t('common.validations.required')),
+        rulesVuetify.required(),
         notSameAs,
       ],
-      targetMemberId: [rulesVuetify.required(t('common.validations.required'))],
-      type: [rulesVuetify.required(t('common.validations.required'))],
-      familyId: [rulesVuetify.required(t('common.validations.required'))],
+      targetMemberId: [rulesVuetify.required()],
+      type: [rulesVuetify.required()],
+      familyId: [rulesVuetify.required()],
     };
   });
 

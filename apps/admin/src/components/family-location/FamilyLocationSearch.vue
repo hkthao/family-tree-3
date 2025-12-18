@@ -69,15 +69,11 @@ const filters = ref<FamilyLocationSearchCriteria>({
   locationSource: undefined,
 });
 
-const pascalToCamelCase = (str: string) => {
-  return str.charAt(0).toLowerCase() + str.slice(1);
-};
-
 const locationTypeOptions = computed(() => {
   return Object.keys(LocationType)
     .filter((key) => isNaN(Number(key)))
     .map((type) => ({
-      title: t(`familyLocation.locationType.${pascalToCamelCase(String(type))}`),
+      title: t(`familyLocation.locationType.${String(type).toLocaleLowerCase()}`),
       value: LocationType[type as keyof typeof LocationType],
     }));
 });
@@ -86,7 +82,7 @@ const locationSourceOptions = computed(() => {
   return Object.keys(LocationSource)
     .filter((key) => isNaN(Number(key)))
     .map((source) => ({
-      title: t(`familyLocation.source.${pascalToCamelCase(String(source))}`),
+      title: t(`familyLocation.source.${String(source).toLocaleLowerCase()}`),
       value: LocationSource[source as keyof typeof LocationSource],
     }));
 });

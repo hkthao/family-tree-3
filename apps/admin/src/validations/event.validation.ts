@@ -1,6 +1,5 @@
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
-import { useI18n } from 'vue-i18n';
 import { CalendarType, type RepeatRule } from '@/types/enums';
 import type { EventType } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
@@ -18,21 +17,20 @@ interface EventFormState {
 }
 
 export function useEventRules(_state: EventFormState) {
-  const { t } = useI18n();
   const rulesVuetify = useRules();
 
   const rules = computed(() => {
     return {
-      name: [rulesVuetify.required(t('event.validation.nameRequired'))],
+      name: [rulesVuetify.required()],
       code: [],
-      type: [rulesVuetify.required(t('event.validation.typeRequired'))],
-      familyId: [rulesVuetify.required(t('event.validation.familyIdRequired'))],
-      calendarType: [rulesVuetify.required(t('event.validation.calendarTypeRequired'))],
-      repeatRule: [rulesVuetify.required(t('event.validation.repeatRuleRequired'))],
-      solarDate: [rulesVuetify.required(t('event.validation.solarDateRequired'))],
+      type: [rulesVuetify.required()],
+      familyId: [rulesVuetify.required()],
+      calendarType: [rulesVuetify.required()],
+      repeatRule: [rulesVuetify.required()],
+      solarDate: [rulesVuetify.required()],
       lunarDate: {
-        day: [rulesVuetify.required(t('event.validation.lunarDayRequired'))],
-        month: [rulesVuetify.required(t('event.validation.lunarMonthRequired'))],
+        day: [rulesVuetify.required()],
+        month: [rulesVuetify.required()],
         isLeapMonth: [],
       },
     };

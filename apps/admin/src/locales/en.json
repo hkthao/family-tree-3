@@ -666,8 +666,7 @@
   "memoryItem.emotionalTag.proud": "Proud",
   "memoryItem.emotionalTag.memorial": "Memorial",
   "memoryItem.emotionalTag.neutral": "Neutral",
-  "memoryItem.validations.maxFiles": "You can select up to {max} files."
-,
+  "memoryItem.validations.maxFiles": "You can select up to {max} files.",
   "familyMedia.upload.uploadButton": "Upload",
   "familyMedia.viewer.audioNotSupported": "Your browser does not support the audio element.",
   "familyMedia.viewer.unsupportedMediaType": "Unsupported media type.",
@@ -1191,5 +1190,10 @@
   "version.info.commitId": "Commit ID:",
   "version.info.environment": "Environment:",
   "version.info.frontendVersion": "Frontend Version:",
-  "version.title": "App Version"
+  "version.title": "App Version",
+  "familyLocation": {
+    "search": {
+      "reset": "Reset Filters"
+    }
+  }
 }
