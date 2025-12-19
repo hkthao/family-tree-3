@@ -30,13 +30,13 @@
 import { ref, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
-import type { Family } from '@/types';
+import type { FamilyUpdateDto, FamilyAddDto } from '@/types'; // Updated import
 import { useGlobalSnackbar } from '@/composables';
 import { useFamilyQuery, useUpdateFamilyMutation } from '@/composables';
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;
-  getFormData: () => Family | Omit<Family, 'id'>;
+  getFormData: () => FamilyAddDto | FamilyUpdateDto; // Updated return type
 }
 
 interface FamilyEditViewProps {
@@ -60,14 +60,10 @@ const handleUpdateItem = async () => {
   const isValid = await familyFormRef.value.validate();
   if (!isValid) return;
 
-  const itemData = familyFormRef.value.getFormData() as Family;
-  if (!itemData.id) {
-    showSnackbar(
-      t('family.management.messages.saveError'),
-      'error',
-    );
-    return;
-  }
+  const itemData = familyFormRef.value.getFormData() as FamilyUpdateDto;
+  // No need for if (!itemData.id) check as FamilyUpdateDto will always have an id
+
+
 
   updateFamily(itemData, {
     onSuccess: () => {

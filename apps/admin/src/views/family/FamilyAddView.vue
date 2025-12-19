@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
-import type { Family } from '@/types';
+import type { FamilyAddDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddFamilyMutation } from '@/composables';
 
@@ -40,7 +40,7 @@ const handleAddItem = async () => {
   const isValid = await familyFormRef.value.validate();
   if (!isValid) return;
   const itemData = familyFormRef.value.getFormData();
-  addFamily(itemData as Omit<Family, 'id'>, {
+  addFamily(itemData as FamilyAddDto, {
     onSuccess: () => {
       showSnackbar(
         t('family.management.messages.addSuccess'),
