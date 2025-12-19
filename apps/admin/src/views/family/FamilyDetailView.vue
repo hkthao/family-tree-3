@@ -29,7 +29,7 @@ import { useFamilyQuery } from '@/composables';
 
 const { t } = useI18n();
 const router = useRouter();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 
 const props = defineProps<{
   familyId: string;
@@ -42,7 +42,7 @@ const familyIdRef = toRef(props, 'familyId');
 const { family: familyData, isLoading, error } = useFamilyQuery(familyIdRef);
 
 const canManageFamily = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(props.familyId);
 });
 
 const openEditDrawer = () => {

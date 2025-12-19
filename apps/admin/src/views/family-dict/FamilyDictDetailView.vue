@@ -31,7 +31,7 @@ const emit = defineEmits(['close', 'family-dict-deleted', 'edit-family-dict']);
 
 const { t } = useI18n();
 const { showConfirmDialog } = useConfirmDialog();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
 const { familyDictId } = toRefs(props);
@@ -39,7 +39,7 @@ const { familyDict, loading } = useFamilyDictQuery(familyDictId);
 const { mutate: deleteFamilyDict, isPending: isDeletingFamilyDict } = useDeleteFamilyDictMutation();
 
 const canEditOrDelete = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value;
 });
 
 const handleClose = () => {

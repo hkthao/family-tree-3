@@ -94,14 +94,14 @@ import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state, actions } = useAuth();
 const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);
 
-const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
-const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
-const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowAdd = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
+const allowEdit = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
+const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
 
 const showEditDrawer = ref(false);
 
@@ -119,10 +119,10 @@ const handleFamilySaved = () => {
 };
 
 const canViewFaceDataTab = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(familyId.value);
 });
 const canManageFamily = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(familyId.value);
 });
 interface TabItem {
   value: string;

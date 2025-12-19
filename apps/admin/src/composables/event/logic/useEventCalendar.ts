@@ -29,7 +29,7 @@ const getSolarDateFromLunarDate = (year: number, lunarDate: LunarDate): Date => 
 
 export function useEventCalendar(props: { familyId?: string; memberId?: string; readOnly?: boolean }, emit: (event: 'refetchEvents', ...args: any[]) => void) {
   const { t, locale } = useI18n();
-  const { isAdmin, isFamilyManager } = useAuth();
+  const { state } = useAuth();
 
   const selectedDate = ref(new Date());
 
@@ -79,11 +79,11 @@ export function useEventCalendar(props: { familyId?: string; memberId?: string; 
   const { upcomingEvents: events, isLoading: loading, refetch: refetchEvents } = useUpcomingEvents(eventFilter);
 
   const canAddEvent = computed(() => {
-    return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+    return !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId || ''));
   });
 
   const canEditEvent = computed(() => {
-    return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+    return !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId || ''));
   });
 
   const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]);

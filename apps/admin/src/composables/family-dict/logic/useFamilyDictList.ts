@@ -17,10 +17,10 @@ interface FamilyDictListProps {
 
 export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
   const { t } = useI18n();
-  const { isAdmin } = useAuth();
+  const { state } = useAuth();
 
   const canPerformActions = computed(() => {
-    return !props.readOnly && isAdmin.value;
+    return !props.readOnly && state.isAdmin.value;
   });
 
   const searchQuery = ref(props.search);

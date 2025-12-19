@@ -12,11 +12,11 @@ interface FamilyDictFormProps {
 
 export function useFamilyDictForm(props: FamilyDictFormProps) {
   const { t } = useI18n();
-  const { isAdmin, isFamilyManager } = useAuth();
+  const { state: authState } = useAuth(); // Renamed to authState
   const formRef = ref<any>(null);
 
   const isFormReadOnly = computed(() => {
-    return props.readOnly || !(isAdmin.value || isFamilyManager.value);
+    return props.readOnly || !(authState.isAdmin.value || authState.isFamilyManager.value);
   });
 
   const familyDictTypes = computed(() => [
@@ -49,7 +49,7 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
       },
   );
 
-  const state = reactive({
+  const formLocalState = reactive({ // Renamed to formLocalState
     name: toRef(formData, 'name'),
     type: toRef(formData, 'type'),
     description: toRef(formData, 'description'),
@@ -61,7 +61,7 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
     }),
   });
 
-  const rules = useFamilyDictRules(state);
+  const rules = useFamilyDictRules(formLocalState); // Passed formLocalState
 
   const validate = async () => {
     const { valid } = await formRef.value.validate();

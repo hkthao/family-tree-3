@@ -39,10 +39,10 @@ const props = defineProps<{
   familyId: string;
 }>();
 
-const { isAdmin, isFamilyManager } = useAuth();
-const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(props.familyId));
-const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(props.familyId)); // Edit currently not implemented for media, but for future proofing
-const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(props.familyId));
+const { state } = useAuth(); // Import useAuth
+const allowAdd = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId));
+const allowEdit = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId)); // Edit currently not implemented for media, but for future proofing
+const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId));
 
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaListFiltersComposable = useFamilyMediaListFilters(familyIdRef);

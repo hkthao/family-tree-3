@@ -34,14 +34,14 @@ const emit = defineEmits(['close', 'prompt-deleted', 'edit-prompt']);
 
 const { t } = useI18n();
 const { showConfirmDialog } = useConfirmDialog();
-const { isAdmin } = useAuth();
+const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
 const { data: prompt, isLoading, isError, error } = usePromptQuery(toRef(props, 'promptId'));
 const { mutateAsync: deletePrompt, isPending: isDeletingPrompt } = useDeletePromptMutation();
 
 const canEditOrDelete = computed(() => {
-  return isAdmin.value;
+  return state.isAdmin.value;
 });
 
 

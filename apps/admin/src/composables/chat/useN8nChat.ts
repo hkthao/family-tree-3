@@ -5,7 +5,7 @@ import '@n8n/chat/style.css';
 import { getEnvVariable } from '@/utils/api.util';
 
 import { useAccessToken } from '../auth/useAccessToken';
-import { useUserPreferences } from '../data/useUserPreferences';
+import { useUserPreferences } from '../user/useUserPreferences';
 
 export function useN8nChat(selectedFamilyId: Ref<string | undefined> | ComputedRef<string | undefined>, chatOpen: Ref<boolean>) {
   const { t } = useI18n();

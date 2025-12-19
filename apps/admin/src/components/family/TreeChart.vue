@@ -82,14 +82,14 @@ const {
   fetchTreeData,
 } = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
 
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 
 const canAddMember = computed(() => {
-  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+  return !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId));
 });
 
 const canEditMember = computed(() => {
-  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+  return !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId));
 });
 
 const addMemberDrawer = ref(false);

@@ -54,11 +54,11 @@ interface MemberListViewProps {
 const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const queryClient = useQueryClient(); // Initialize useQueryClient
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth(); // Import useAuth
 
-const allowAdd = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowEdit = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowDelete = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowAdd = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 
 const {
   searchQuery,

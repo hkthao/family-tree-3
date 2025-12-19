@@ -35,12 +35,12 @@ const props = defineProps<{
   initialPromptData?: Prompt;
 }>();
 const { t } = useI18n();
-const { isAdmin } = useAuth(); // Assuming only admin can manage prompts
+const { state } = useAuth(); // Destructure state from useAuth()
 
 const formRef = ref();
 
 const isFormReadOnly = computed(() => {
-  return props.readOnly || !isAdmin.value;
+  return props.readOnly || !state.isAdmin.value;
 });
 
 const formData = reactive<Omit<Prompt, 'id'> | Prompt>(
