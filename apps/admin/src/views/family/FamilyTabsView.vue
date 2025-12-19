@@ -94,7 +94,7 @@ import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
-const { state, actions } = useAuth();
+const { state } = useAuth();
 const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);

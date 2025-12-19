@@ -78,10 +78,10 @@ const chartProps = reactive({
   rootId: currentRootId,
 });
 
-const { chartContainer, renderChart } = useHierarchicalTreeChart(
+const { chartContainer } = useHierarchicalTreeChart(
   chartProps,
   dummyEmit,
-  t
+  { t }
 );
 
 const fetchData = async () => {
@@ -126,10 +126,6 @@ const fetchData = async () => {
     // }
     // relationships.value = fetchedRelationships;
 
-
-    // After fetching data, render the chart
-    renderChart(members.value);
-
   } catch (err) {
     console.error('Error fetching public family tree data:', err);
     error.value = t('familyTree.errors.fetchData');
@@ -150,15 +146,7 @@ watch(
   { deep: true }
 );
 
-watch(
-  () => members.value,
-  (newMembers) => {
-    if (!loading.value && !error.value) {
-      renderChart(newMembers);
-    }
-  },
-  { deep: true }
-);
+
 
 // No need for an extra watch here, as useHierarchicalTreeChart already watches its props.
 // The reactive `chartProps` object ensures reactivity.
