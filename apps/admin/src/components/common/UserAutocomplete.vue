@@ -1,21 +1,19 @@
 <template>
-  <CustomRemoteAutocomplete v-bind="$attrs" v-model="internalValue" @update:model-value="handleUpdateModelValue"
-    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple" item-title="email"
-    item-value="id" :fetch-items="fetchItems" :loading="isLoadingPreload" :disabled="disabled" :return-object="true"
-    density="compact"
-    :hide-no-data="true" :hide-details="hideDetails" chips :closable-chips="!disabled">
-  </CustomRemoteAutocomplete>
+  <v-autocomplete v-bind="$attrs" v-model="internalValue" v-model:search="search" :items="items" :loading="loading"
+    @update:model-value="handleUpdateModelValue" :label="label" :rules="rules" :readonly="readOnly"
+    :clearable="clearable" :multiple="multiple" item-title="email" item-value="id" :disabled="disabled"
+    density="compact" :return-object="true" :hide-details="hideDetails" chips :closable-chips="!disabled"
+    :custom-filter="() => true">
+  </v-autocomplete>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
 import type { UserDto } from '@/types';
 import { ApiUserService } from '@/services/user/api.user.service';
 import apiClient from '@/plugins/axios';
-import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
-import { useUserByIdsQuery } from '@/composables';
 
-// Instantiate the service for direct use
 const userService = new ApiUserService(apiClient);
 
 interface UserAutocompleteProps {
@@ -28,16 +26,22 @@ interface UserAutocompleteProps {
   disabled?: boolean;
   hideChips?: boolean;
   hideDetails?: boolean;
+  debounceTime?: number;
 }
 
-const props = defineProps<UserAutocompleteProps>();
+const props = withDefaults(defineProps<UserAutocompleteProps>(), {
+  debounceTime: 300,
+});
 
 const emit = defineEmits(['update:modelValue']);
 
-// Logic for preloading selected item(s) when modelValue is an ID(s)
 const internalValue = ref<UserDto | UserDto[] | null>(null);
+const search = ref('');
+const debouncedSearchTerm = ref('');
 
-const userIdsToPreload = computed(() => {
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+const modelValueIds = computed(() => {
   if (props.multiple && Array.isArray(props.modelValue)) {
     return props.modelValue as string[];
   } else if (!props.multiple && typeof props.modelValue === 'string') {
@@ -46,22 +50,57 @@ const userIdsToPreload = computed(() => {
   return [];
 });
 
-const { users: preloadedUsersData, isLoading: isLoadingPreload } = useUserByIdsQuery(userIdsToPreload);
+const { data: preloadedUsers, isLoading: isLoadingPreload } = useQuery<UserDto[], Error>({
+  queryKey: ['users', 'ids', modelValueIds],
+  queryFn: async () => {
+    if (!modelValueIds.value || modelValueIds.value.length === 0) {
+      return [];
+    }
+    const result = await userService.getByIds(modelValueIds.value);
+    if (result.ok) {
+      return result.value;
+    }
+    console.error('Error preloading users:', result.error);
+    throw result.error;
+  },
+  enabled: computed(() => modelValueIds.value.length > 0),
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
 
-watch(preloadedUsersData, (newUsers) => {
+watch(preloadedUsers, (newUsers) => {
   if (props.multiple) {
-    internalValue.value = newUsers;
+    internalValue.value = newUsers || [];
   } else {
-    internalValue.value = newUsers[0] || null;
+    internalValue.value = (newUsers && newUsers.length > 0) ? newUsers[0] : null;
   }
 }, { immediate: true });
 
-watch(() => props.modelValue, (newModelValue) => {
-  if (!newModelValue) {
-    internalValue.value = null;
-  }
+const { data: searchResults, isLoading: isLoadingSearch } = useQuery<UserDto[], Error>({
+  queryKey: ['users', 'search', debouncedSearchTerm],
+  queryFn: async () => {
+    const result = await userService.search(debouncedSearchTerm.value, 1, 10);
+    if (result.ok) {
+      return result.value.items;
+    }
+    console.error('Error fetching users:', result.error);
+    throw result.error;
+  },
+  enabled: computed(() => !!debouncedSearchTerm.value),
+  staleTime: 1000 * 30, // 30 seconds
 });
 
+const items = computed(() => searchResults.value || []);
+
+const loading = computed(() => isLoadingPreload.value || isLoadingSearch.value);
+
+watch(search, (newSearchTerm) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    debouncedSearchTerm.value = newSearchTerm;
+  }, props.debounceTime);
+});
 
 const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
   if (props.multiple) {
@@ -71,18 +110,5 @@ const handleUpdateModelValue = (value: UserDto | UserDto[] | null) => {
     const id = value ? (value as UserDto).id : undefined;
     emit('update:modelValue', id);
   }
-};
-
-const fetchItems = async (query: string): Promise<UserDto[]> => {
-  if (!query) {
-    return [];
-  }
-
-  const result = await userService.search(query, 1, 10);
-  if (result.ok) {
-    return result.value.items;
-  }
-  console.error('Error fetching users:', result.error);
-  return [];
 };
 </script>
