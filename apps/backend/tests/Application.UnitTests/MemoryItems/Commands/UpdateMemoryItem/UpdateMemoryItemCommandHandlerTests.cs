@@ -1,4 +1,3 @@
-using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

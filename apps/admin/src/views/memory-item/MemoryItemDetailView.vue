@@ -12,11 +12,8 @@
         <v-alert type="error" :text="error?.message || t('memoryItem.detail.errorLoading')"></v-alert>
       </div>
       <div v-else-if="memoryItem">
-                  <MemoryItemForm
-                    :initial-memory-item-data="memoryItem"
-                    :family-id="props.familyId"
-                    :read-only="true"
-                  />      </div>
+        <MemoryItemForm :initial-memory-item-data="memoryItem" :family-id="props.familyId" :read-only="true" />
+      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="gray" @click="closeView" data-testid="button-close">

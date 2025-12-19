@@ -4,14 +4,14 @@ using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
+using backend.Application.Families.Commands.UpdatePrivacyConfiguration; // New using
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetPrivacyConfiguration; // New using
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
-using backend.Application.Families.Commands.UpdatePrivacyConfiguration; // New using
-using backend.Application.Families.Queries.GetPrivacyConfiguration; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

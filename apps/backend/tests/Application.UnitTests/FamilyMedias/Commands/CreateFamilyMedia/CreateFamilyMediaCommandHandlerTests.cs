@@ -2,17 +2,12 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
-using backend.Application.FamilyMedias.DTOs;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.FamilyMedias.Commands.CreateFamilyMedia;

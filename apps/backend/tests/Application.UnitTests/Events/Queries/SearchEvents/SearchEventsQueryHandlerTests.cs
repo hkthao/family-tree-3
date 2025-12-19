@@ -2,7 +2,6 @@ using backend.Application.Events.Queries.SearchEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Domain.ValueObjects; // Add this
 using FluentAssertions;
 using Xunit;
 

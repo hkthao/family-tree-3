@@ -1,17 +1,9 @@
-using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Constants; // Added for ErrorSources
-using backend.Domain.Common; // Added for BaseEvent
 
 namespace backend.Application.UnitTests.FamilyLocations.Queries.SearchFamilyLocations;
 
@@ -54,7 +46,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         {
             if (await _context.Families.FindAsync(loc.FamilyId) == null)
             {
-                await _context.Families.AddAsync(CreateTestFamily(loc.FamilyId, $"Family{loc.FamilyId.ToString().Substring(0,4)}", $"F{loc.FamilyId.ToString().Substring(0,4)}"));
+                await _context.Families.AddAsync(CreateTestFamily(loc.FamilyId, $"Family{loc.FamilyId.ToString().Substring(0, 4)}", $"F{loc.FamilyId.ToString().Substring(0, 4)}"));
             }
             await _context.FamilyLocations.AddAsync(loc);
         }

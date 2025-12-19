@@ -1,5 +1,4 @@
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

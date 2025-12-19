@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mime;
 using backend.Web.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +8,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Xunit;
 
 namespace Web.UnitTests;
 

@@ -1,6 +1,3 @@
-using backend.Domain.Common;
-using backend.Domain.Enums;
-
 namespace backend.Domain.Entities;
 
 public class MemoryMedia : BaseEntity
@@ -9,7 +6,7 @@ public class MemoryMedia : BaseEntity
     public Guid MemoryItemId { get; private set; }
     public string Url { get; private set; } = string.Empty;
     public virtual MemoryItem MemoryItem { get; private set; } = null!;
-    
+
     public MemoryMedia(Guid memoryItemId, string url)
     {
         MemoryItemId = memoryItemId;

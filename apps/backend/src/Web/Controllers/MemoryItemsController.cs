@@ -57,7 +57,7 @@ public class MemoryItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMemoryItemDetail(Guid id)
     {
-        var result = await _mediator.Send(new GetMemoryItemDetailQuery { Id = id});
+        var result = await _mediator.Send(new GetMemoryItemDetailQuery { Id = id });
         return result.ToActionResult(this, _logger);
     }
 

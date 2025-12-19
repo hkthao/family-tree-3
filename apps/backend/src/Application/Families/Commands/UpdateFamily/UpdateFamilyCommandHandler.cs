@@ -6,8 +6,6 @@ using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Families;
-using backend.Domain.ValueObjects; // NEW
-using backend.Domain.Entities;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 

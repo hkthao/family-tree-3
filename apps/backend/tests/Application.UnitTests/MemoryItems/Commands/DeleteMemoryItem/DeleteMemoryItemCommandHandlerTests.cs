@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.DeleteMemoryItem;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
