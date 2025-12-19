@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { type PropType } from 'vue';
 import type { DetectedFace } from '@/types';
-import { useFaceBoundingBoxViewer } from '@/composables/face/useFaceBoundingBoxViewer';
+import { useFaceBoundingBoxViewer } from '@/composables';
 
 const props = defineProps({
   imageSrc: { type: String, required: true },

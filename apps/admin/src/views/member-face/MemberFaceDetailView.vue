@@ -55,8 +55,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
-import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
+import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation, useMemberFaceDeletion } from '@/composables';
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;

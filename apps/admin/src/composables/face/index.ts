@@ -1,1 +1,1 @@
-export * from './useFaceSearch';
+export * from './logic/useFaceSearch';

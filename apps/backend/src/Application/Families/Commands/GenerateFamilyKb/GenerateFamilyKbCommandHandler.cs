@@ -44,9 +44,6 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 case KbRecordType.Event:
                     embeddingsDto = await GenerateEventEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
                     break;
-                case KbRecordType.Story:
-                    embeddingsDto = await GenerateStoryEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
-                    break;
                 default:
                     _logger.LogWarning("Unsupported KB Record Type: {RecordType}", request.RecordType);
                     return Result<string>.Failure($"Unsupported KB Record Type: {request.RecordType}");
@@ -173,11 +170,25 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             {
                 var eventDetails = new StringBuilder();
                 eventDetails.Append($"Tên sự kiện: {evt.Name}");
-                eventDetails.Append($", Thời gian: {evt.StartDate?.ToShortDateString()}");
-                if (evt.EndDate.HasValue)
+
+                string eventDateDescription = string.Empty;
+                if (evt.CalendarType == CalendarType.Solar && evt.SolarDate.HasValue)
                 {
-                    eventDetails.Append($" - {evt.EndDate.Value.ToShortDateString()}");
+                    eventDateDescription = evt.SolarDate.Value.ToShortDateString();
                 }
+                else if (evt.CalendarType == CalendarType.Lunar && evt.LunarDate != null)
+                {
+                    eventDateDescription = $"{evt.LunarDate.Day}/{@evt.LunarDate.Month}{(@evt.LunarDate.IsLeapMonth ? " (nhuận)" : "")}";
+                }
+                if (!string.IsNullOrEmpty(eventDateDescription))
+                {
+                    eventDetails.Append($", Thời gian: {eventDateDescription}");
+                }
+                if (evt.RepeatRule == RepeatRule.Yearly)
+                {
+                    eventDetails.Append(" (lặp hàng năm)");
+                }
+
                 if (!string.IsNullOrEmpty(evt.Description))
                 {
                     eventDetails.Append($", Mô tả: {evt.Description}");
@@ -232,11 +243,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                                        .AsNoTracking()
                                        .ToListAsync(cancellationToken);
 
-            var stories = await _context.MemberStories
-                                        .Include(s => s.Member) // Include Member to access FamilyId
-                                        .Where(s => s.Member.FamilyId == familyGuid)
-                                        .AsNoTracking()
-                                        .ToListAsync(cancellationToken);
+
 
             // Fetch Manager Name
             var managerName = "Không rõ";
@@ -323,11 +330,31 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
 
             var textBuilder = new StringBuilder();
             textBuilder.AppendLine($"Tên sự kiện: {@event.Name}");
-            textBuilder.AppendLine($"Ngày diễn ra: {@event.StartDate?.ToShortDateString()} - {@event.EndDate?.ToShortDateString()}");
+
+            string eventDateDescription = string.Empty;
+            if (@event.CalendarType == CalendarType.Solar && @event.SolarDate.HasValue)
+            {
+                eventDateDescription = @event.SolarDate.Value.ToShortDateString();
+            }
+            else if (@event.CalendarType == CalendarType.Lunar && @event.LunarDate != null)
+            {
+                eventDateDescription = $"{@event.LunarDate.Day}/{@event.LunarDate.Month}{(@event.LunarDate.IsLeapMonth ? " (nhuận)" : "")}";
+            }
+            if (!string.IsNullOrEmpty(eventDateDescription))
+            {
+                textBuilder.AppendLine($"Thời gian: {eventDateDescription}");
+            }
+            if (@event.RepeatRule == RepeatRule.Yearly)
+            {
+                textBuilder.AppendLine("Lặp lại hàng năm.");
+            }
+
             textBuilder.AppendLine($"Ai tham gia: {string.Join(", ", relatedMembers.Select(m => m.FullName))}");
             textBuilder.AppendLine($"Ý nghĩa: [TODO: Thêm logic để tóm tắt ý nghĩa sự kiện]");
             textBuilder.AppendLine($"Chi tiết mô tả: {@event.Description}");
 
+            // The EventMetadataDto needs to be updated to reflect the new properties as well.
+            // For now, I will create a simplified version for Metadata
             return new EventEmbeddingsDto
             {
                 FamilyId = familyId,
@@ -336,51 +363,13 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
                 Metadata = new EventMetadataDto
                 {
                     EventType = @event.Type.ToString(),
-                    Date = @event.StartDate?.ToShortDateString() ?? "",
-                    Location = @event.Location ?? "",
+                    Date = eventDateDescription, // Use the generated dateDescription
+                    Location = "", // Location is removed, can be derived from Description if needed
                     MembersInvolved = relatedMembers.Select(m => m.FullName).ToList()
                 }
             };
         }
 
-        private async Task<StoryEmbeddingsDto?> GenerateStoryEmbeddingsDto(string familyId, string storyId, CancellationToken cancellationToken)
-        {
-            var storyGuid = Guid.Parse(storyId);
-            var familyGuid = Guid.Parse(familyId);
 
-            var story = await _context.MemberStories
-                                      .Include(s => s.Member) // Include the main member for the story
-                                      .Where(s => s.Id == storyGuid && s.Member.FamilyId == familyGuid)
-                                      .AsNoTracking()
-                                      .FirstOrDefaultAsync(cancellationToken);
-
-            if (story == null)
-            {
-                _logger.LogWarning("Story with ID {StoryId} not found in family {FamilyId}.", storyId, familyId);
-                return null;
-            }
-
-            var mainCharacter = story.Member;
-
-            var textBuilder = new StringBuilder();
-            textBuilder.AppendLine($"Tiêu đề câu chuyện: {story.Title}");
-            textBuilder.AppendLine($"Nhân vật chính: {mainCharacter?.FullName ?? "Không rõ"}");
-            textBuilder.AppendLine($"Bối cảnh: [TODO: Thêm logic để tóm tắt bối cảnh câu chuyện]");
-            textBuilder.AppendLine($"Cốt truyện: {story.Story}");
-            textBuilder.AppendLine($"Ý nghĩa và cảm xúc: [TODO: Thêm logic để tóm tắt ý nghĩa và cảm xúc]");
-
-            return new StoryEmbeddingsDto
-            {
-                FamilyId = familyId,
-                RecordId = story.Id.ToString(), // Convert Guid to string for RecordId
-                Text = textBuilder.ToString(),
-                Metadata = new StoryMetadataDto
-                {
-                    Title = story.Title,
-                    Summary = story.Story, // Using Story property as summary
-                    Characters = mainCharacter != null ? new List<string> { mainCharacter.FullName } : new List<string>() // Only main character for now
-                }
-            };
-        }
     }
 }

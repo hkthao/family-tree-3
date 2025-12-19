@@ -5,8 +5,6 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
-using backend.Domain.Enums;
-using backend.Domain.Events.Families;
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Localization;
 

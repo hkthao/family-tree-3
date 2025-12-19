@@ -23,9 +23,9 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
         {
             // Arrange
             var familyId = Guid.NewGuid();
-            var event1 = new Event("Event 1", "EVT1", EventType.Birth, familyId);
-            var event2 = new Event("Event 2", "EVT2", EventType.Death, familyId);
-            var event3 = new Event("Event 3", "EVT3", EventType.Marriage, familyId);
+            var event1 = Event.CreateSolarEvent("Event 1", "EVT1", EventType.Birth, DateTime.UtcNow.AddDays(-10), RepeatRule.None, familyId);
+            var event2 = Event.CreateSolarEvent("Event 2", "EVT2", EventType.Death, DateTime.UtcNow.AddDays(-5), RepeatRule.None, familyId);
+            var event3 = Event.CreateSolarEvent("Event 3", "EVT3", EventType.Marriage, DateTime.UtcNow.AddDays(0), RepeatRule.None, familyId);
             _context.Events.AddRange(event1, event2, event3);
             await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -87,7 +87,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
             _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Not admin, but it won't be checked
 
             var familyId = Guid.NewGuid();
-            var event1 = new Event("Event 1", "EVT1", EventType.Birth, familyId);
+            var event1 = Event.CreateSolarEvent("Event 1", "EVT1", EventType.Birth, DateTime.UtcNow.AddDays(5), RepeatRule.None, familyId);
             _context.Events.Add(event1);
             await _context.SaveChangesAsync(CancellationToken.None);
 

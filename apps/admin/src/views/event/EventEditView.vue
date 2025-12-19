@@ -22,7 +22,7 @@
 import { ref } from 'vue';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
-import { useEventEdit } from '@/composables/event/useEventEdit'; // Import useEventEdit
+import { useEventEdit } from '@/composables'; // Import useEventEdit
 
 interface EventFormExposed {
   validate: () => Promise<boolean>;

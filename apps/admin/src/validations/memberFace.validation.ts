@@ -1,13 +1,10 @@
-import { required, helpers } from '@vuelidate/validators';
-import i18n from '@/plugins/i18n';
-
-const { t } = i18n.global;
+import { useRules } from 'vuetify/labs/rules';
 
 export function useMemberFaceFormRules() {
+  const rulesVuetify = useRules();
+
   const memberFaceRules = {
-    memberId: {
-      required: helpers.withMessage(t('memberFace.validation.memberIdRequired'), required),
-    },
+    memberId: [rulesVuetify.required()],
   };
 
   return memberFaceRules;

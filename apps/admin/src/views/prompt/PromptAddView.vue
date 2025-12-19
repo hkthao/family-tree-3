@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
 import type { Prompt } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useCreatePromptMutation } from '@/composables/prompt';
+import { useCreatePromptMutation } from '@/composables';
 
 const emit = defineEmits(['close', 'saved']);
 const promptFormRef = ref<InstanceType<typeof PromptForm> | null>(null);

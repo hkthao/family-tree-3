@@ -88,7 +88,7 @@ import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import ListToolbar from '@/components/common/ListToolbar.vue';
-import { useDebouncedSearch } from '@/composables/family';
+import { useDebouncedSearch } from '@/composables';
 
 const props = defineProps<{
   items: Family[];

@@ -20,8 +20,8 @@ import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface';
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service';
-import type { IMemberStoryService } from './memberStory/memberStory.service.interface';
-import { ApiMemberStoryService } from './memberStory/api.memberStory.service';
+
+
 import type { IAiService } from './ai/ai.service.interface';
 import { ApiAiService } from './ai/api.ai.service';
 import type { IMemberFaceService } from './member-face/member-face.service.interface';
@@ -37,6 +37,14 @@ import { ApiFamilyLinkRequestService } from './familyLinkRequest/api.familyLinkR
 import type { IFamilyMediaService } from './family-media/family-media.service.interface';
 import { ApiFamilyMediaService } from './family-media/api.family-media.service';
 
+// NEW: Imports for FamilyLocationService
+import type { IFamilyLocationService } from './family-location/family-location.service.interface';
+import { ApiFamilyLocationService } from './family-location/api.family-location.service';
+
+// NEW: Imports for MemoryItemService
+import type { IMemoryItemService } from './memory-item/memory-item.service.interface';
+import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
+
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
@@ -50,13 +58,15 @@ export interface AppServices {
   chat: IChatService;
   user: IUserService;
   familyDict: IFamilyDictService;
-  memberStory: IMemberStoryService;
+
   ai: IAiService;
   memberFace: IMemberFaceService;
   prompt: IPromptService;
   familyLink: IFamilyLinkService;
   familyLinkRequest: IFamilyLinkRequestService;
   familyMedia: IFamilyMediaService; // NEW: Add FamilyMediaService
+  familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
+  memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
 }
 import apiClient from '@/plugins/axios';
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
@@ -106,10 +116,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyDictService(apiClient)
         : testServices?.familyDict || new ApiFamilyDictService(apiClient),
-    memberStory:
-      mode === 'real'
-        ? new ApiMemberStoryService(apiClient)
-        : testServices?.memberStory || new ApiMemberStoryService(apiClient),
+
     ai:
       mode === 'real'
         ? new ApiAiService(apiClient)
@@ -134,5 +141,13 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyMediaService(apiClient)
         : testServices?.familyMedia || new ApiFamilyMediaService(apiClient),
+    familyLocation: // NEW: Assign FamilyLocationService
+      mode === 'real'
+        ? new ApiFamilyLocationService(apiClient)
+        : testServices?.familyLocation || new ApiFamilyLocationService(apiClient),
+    memoryItem: // NEW: Assign MemoryItemService
+      mode === 'real'
+        ? new ApiMemoryItemService(apiClient)
+        : testServices?.memoryItem || new ApiMemoryItemService(apiClient),
   };
 }

@@ -56,7 +56,7 @@ export interface MemberFace {
   thumbnailUrl?: string;
   thumbnail?: string; // NEW: Add thumbnail (base64)
   originalImageUrl?: string | null;
-  embedding: number[]; 
+  embedding: number[] | string; 
   emotion?: string;
   emotionConfidence?: number;
   isVectorDbSynced: boolean;

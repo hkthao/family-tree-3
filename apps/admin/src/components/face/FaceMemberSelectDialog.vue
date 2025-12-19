@@ -17,8 +17,10 @@
               <v-img :src="faceThumbnailSrc" alt="Detected Face"></v-img>
             </v-avatar>
             <div>
+            <div v-if="selectedMemberDetails">
               <div class="text-subtitle-1">{{ selectedMemberDetails.fullName }}</div>
               <div class="text-caption text-medium-emphasis">{{ selectedMemberDetails.birthDeathYears }}</div>
+            </div>
             </div>
           </div>
         </v-card>
@@ -35,7 +37,7 @@
 <script setup lang="ts">
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { DetectedFace, Member } from '@/types';
-import { useFaceMemberSelectDialog } from '@/composables/face/useFaceMemberSelectDialog';
+import { useFaceMemberSelectDialog } from '@/composables';
 
 const props = defineProps({
   show: { type: Boolean, required: true },

@@ -24,6 +24,16 @@ export const queryKeys = {
     all: ['families'] as const,
     list: (filters?: FamilyFilter) => [...queryKeys.families.all, 'list', filters] as const,
     detail: (familyId: string) => [...queryKeys.families.all, 'detail', familyId] as const,
+    membersByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'members'] as const,
+    relationshipsByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'relationships'] as const,
+    memberRelationshipsByMemberId: (memberId: string) => [...queryKeys.families.all, memberId, 'relationships'] as const,
+  },
+  members: {
+    all: ['members'] as const,
+    detail: (memberId: string) => [...queryKeys.members.all, 'detail', memberId] as const,
+  },
+  privacyConfiguration: {
+    detail: (familyId: string) => ['privacyConfiguration', familyId] as const,
   },
   memberFaces: {
     all: ['memberFaces'] as const,
@@ -32,8 +42,8 @@ export const queryKeys = {
   },
   familyMedia: {
     all: ['familyMedia'] as const,
-    list: (familyId: string, filters?: FamilyMediaFilter, page?: number, itemsPerPage?: number, sortBy?: ListOptions['sortBy']) => [...queryKeys.familyMedia.all, 'list', familyId, filters, page, itemsPerPage, sortBy] as const,
-    detail: (familyId: string, mediaId: string) => [...queryKeys.familyMedia.all, 'detail', familyId, mediaId] as const,
+    list: (filters?: FamilyMediaFilter, page?: number, itemsPerPage?: number, sortBy?: ListOptions['sortBy']) => [...queryKeys.familyMedia.all, 'list', filters, page, itemsPerPage, sortBy] as const,
+    detail: (mediaId: string) => [...queryKeys.familyMedia.all, 'detail', mediaId] as const,
   },
   familyDicts: {
     all: ['familyDicts'] as const,

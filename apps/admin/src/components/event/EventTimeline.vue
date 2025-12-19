@@ -9,7 +9,15 @@
       class="cursor-pointer"
     >
       <template v-slot:opposite>
-        {{ formatDate(event.startDate) }}
+        <template v-if="event.calendarType === CalendarType.Solar && event.solarDate">
+          {{ formatDate(event.solarDate) }}
+        </template>
+        <template v-else-if="event.calendarType === CalendarType.Lunar && event.lunarDate">
+          {{ t('event.lunarDateDisplay', { day: event.lunarDate.day, month: event.lunarDate.month, isLeapMonth: event.lunarDate.isLeapMonth }) }}
+        </template>
+        <template v-else>
+          -
+        </template>
       </template>
       <v-card :color="event.color || 'primary'" variant="tonal" class="pa-0">
         <v-card-title class="d-flex align-center">
@@ -20,9 +28,12 @@
           </v-btn>
         </v-card-title>
         <v-card-text class="py-1">
+          <!-- Location property removed -->
+          <!--
           <div v-if="event.location" class="text-body-2 text-grey-darken-1">
             <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
           </div>
+          -->
           <div v-if="event.relatedMembers && event.relatedMembers.length > 0" class="mt-1">
             <MemberName
               v-for="member in event.relatedMembers"
@@ -37,7 +48,7 @@
     </v-timeline-item>
   </v-timeline>
   <v-alert
-    v-if="list.totalItems === 0 && !list.loading"
+    v-if="list.totalCount === 0 && !list.loading"
     type="info"
     class="mt-4"
     variant="tonal"
@@ -45,7 +56,7 @@
     {{ t('event.timeline.noEvents') }}
   </v-alert>
   <v-pagination
-    v-if="list.totalItems > 0"
+    v-if="list.totalCount > 0"
     v-model="list.currentPage"
     :length="paginationLength"
     @update:model-value="handlePageChange"
@@ -62,7 +73,8 @@
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
-import { useEventTimeline } from '@/composables/event/useEventTimeline';
+import { useEventTimeline } from '@/composables';
+import { CalendarType } from '@/types/enums'; // Import CalendarType
 
 const props = defineProps<{
   familyId?: string;

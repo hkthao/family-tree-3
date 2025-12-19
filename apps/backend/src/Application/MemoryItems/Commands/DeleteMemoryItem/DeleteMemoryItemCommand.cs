@@ -1,0 +1,8 @@
+using backend.Application.Common.Models;
+
+namespace backend.Application.MemoryItems.Commands.DeleteMemoryItem;
+
+public record DeleteMemoryItemCommand : IRequest<Result>
+{
+    public Guid Id { get; init; }
+}

@@ -1,199 +1,74 @@
+# 📌 BACKEND IMPLEMENTATION SPEC
+
+## Feature: **TỦ KỶ VẬT (MEMORY CABINET)**
+
+### 1. Mục tiêu
+
+Xây dựng backend cho tính năng **Tủ Kỷ Vật**, cho phép người dùng lưu giữ các kỷ niệm (kỷ vật) gắn với **cá nhân / gia đình / dòng họ**, có thể chứa **nội dung + media + người liên quan**, và hiển thị theo thời gian.
 
 ---
 
-# 📘 TESTING GUIDELINE FOR VUE 3 (SMALL TEAM)
+## 2. Phạm vi (Scope – KHÔNG làm ngoài phạm vi này)
 
-## 🎯 Mục tiêu
-
-* Ưu tiên **độ ổn định & regression safety**
-* Tránh viết test dư thừa
-* Tối ưu cho **team nhỏ, deadline nhanh**
+* CRUD Memory Item
+* Upload & quản lý media
+* Gắn người vào kỷ vật
 
 ---
 
-## 1️⃣ Nguyên tắc tổng quát
+## 3. Khái niệm chính
 
-### 🔹 Triết lý
+### Memory Item (Kỷ vật)
 
-* **Test logic, không test UI**
-* **Composable & Store là nơi test chính**
-* `.vue` component **chỉ test khi quyết định flow**
-
-### 🔹 KHÔNG theo đuổi
-
-* 100% test coverage
-* Snapshot test UI
-* Test các component chỉ render template
+> Một kỷ niệm hoặc vật kỷ niệm có ý nghĩa, có thể là câu chuyện, hình ảnh, sự kiện, hoặc vật thể.
 
 ---
 
-## 2️⃣ Quy tắc cho COMPOSABLE
+## 4. Database Design
 
-### ✅ Khi viết test cho composable
+### 4.1 `memory_items`
 
-Composable **BẮT BUỘC** viết test nếu có ít nhất 1 yếu tố:
+| Field         | Type     | Description                 |        |       |          |          |
+| ------------- | -------- | --------------------------- | ------ | ----- | -------- | -------- |
+| id            | UUID     | Primary key                 |        |       |          |          |
+| family_id     | UUID     |                             |        |       |          |          |
+| title         | string   | Tên kỷ vật                  |        |       |          |          |
+| description   | text     | Nội dung chi tiết           |        |       |          |          |
+| happened_at   | datetime | Thời điểm xảy ra (nullable) |        |       |          |          |
+| emotional_tag | enum     | `happy                      | sad    | proud | memorial | neutral` |
+---
 
-* Logic điều kiện
-* Side effect (API, router, store, timer)
-* Watch / debounce / throttle
-* Dùng lại ở nhiều component
+### 4.2 `memory_media`
+
+| Field          | Type         |       |       |            |
+| -------------- | ------------ | ----- | ----- | ---------- |
+| id             | UUID         |       |       |            |
+| memory_item_id | UUID (FK)    |       |       |            |
+| type           | enum (`image | video | audio | document`) |
+| url            | string       |       |       |            |
 
 ---
 
-### 🧪 Test case BẮT BUỘC cho composable
+### 4.3 `memory_persons`
 
-#### 1. Initial state
-
-```ts
-it('init with correct default state', () => {})
-```
-
-#### 2. Happy path (logic chính)
-
-```ts
-it('handles success case correctly', () => {})
-```
-
-#### 3. Error path
-
-```ts
-it('handles error correctly', () => {})
-```
-
-#### 4. Side effect chính
-
-```ts
-expect(api.call).toHaveBeenCalled()
-expect(router.push).toHaveBeenCalled()
-```
-
-> ❌ Không test edge case nhỏ, timing chi tiết, UI state phụ
+| Field          | Type         |           |           |
+| -------------- | ------------ | --------- | --------- |
+| memory_item_id | UUID         |           |           |
+| memeber_id     | UUID         |           |           |
 
 ---
 
-## 3️⃣ Quy tắc cho `.vue` COMPONENT
+## 7. Validation Rules
 
-### ❌ KHÔNG viết test nếu component:
-
-* Chỉ nhận props → render UI
-* Emit event đơn giản
-* Không chứa logic nghiệp vụ
-* Logic đã được tách xuống composable / store
+* `title` bắt buộc
+* `happenedAt` ≤ current date
 
 ---
 
-### ✅ CHỈ viết test `.vue` khi:
+## 8. Coding Requirements
 
-1. **Component quyết định flow**
-
-   * Page chính
-   * Wizard
-   * Form nhiều bước
-
-2. **Có logic điều kiện quan trọng**
-
-   * Permission
-   * Feature flag
-   * Role-based UI
-
-3. **Có side effect trực tiếp**
-
-   * Gọi API
-   * Router navigation
-   * Store mutation
-
-👉 Test **hành vi**, không test layout.
-
----
-
-## 4️⃣ QUY TRÌNH BẮT BUỘC: REFACTOR TRƯỚC KHI TEST
-
-### ⚠️ Nếu `.vue` có UI phức tạp + logic lẫn nhau
-
-#### KHÔNG viết test trực tiếp
-
-👉 **PHẢI refactor theo bước sau:**
-
-### 🔁 Bước 1: Tách logic ra composable
-
-```ts
-// useFormLogic.ts
-export function useFormLogic() {
-  // state
-  // computed
-  // validation
-  // submit logic
-}
-```
-
-### 🔁 Bước 2: Component chỉ còn UI
-
-```vue
-<script setup>
-const {
-  state,
-  submit,
-  error
-} = useFormLogic()
-</script>
-```
-
-### 🔁 Bước 3: Viết test cho composable
-
-* Không viết test cho UI component
-* Component được coi là “glue code”
-
----
-
-## 5️⃣ Cách Gemini nên xử lý khi gặp UI phức tạp
-
-### 👉 BẮT BUỘC làm theo thứ tự:
-
-1. **Phân tích file `.vue`**
-2. Nếu:
-
-   * Logic > UI
-   * Có nhiều `watch`, `computed`, `if/else`
-
-   ➜ **Đề xuất refactor**
-3. Tạo composable mới
-4. Di chuyển logic
-5. Viết test cho composable
-6. Chỉ viết test `.vue` nếu component vẫn quyết định flow
-
----
-
-## 6️⃣ Công cụ & chuẩn test
-
-* Test runner: **Vitest**
-* Mock bằng `vi.mock`
-* Không snapshot test
-* Không test CSS / DOM chi tiết
-
-### 📁 Structure
-
-```
-composables/
-  useX.ts
-  __tests__/
-    useX.spec.ts
-```
-
----
-
-## 7️⃣ Checklist trước khi viết test (Gemini PHẢI tự hỏi)
-
-* [ ] Đây là logic hay chỉ là UI?
-* [ ] Logic đã tách composable chưa?
-* [ ] Test này có ngăn regression thật không?
-* [ ] Có thể bỏ test `.vue` và chỉ test composable không?
-
-Nếu câu trả lời là **YES** → **KHÔNG viết test component**
-
----
-
-## 8️⃣ Câu chốt tiêu chuẩn
-
-> “Nếu khó test → kiến trúc đang sai → refactor trước, test sau.”
-
+* Clean Architecture / Layered Architecture
+* DTO rõ ràng
+* Enum mapping chặt chẽ
+* Soft delete
 ---

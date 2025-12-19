@@ -33,7 +33,7 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// </summary>
     /// <param name="id">ID của sự kiện cần lấy.</param>
     /// <returns>Thông tin chi tiết của sự kiện.</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetEventById")]
     public async Task<IActionResult> GetEventById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
@@ -54,7 +54,7 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
             return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
         }
         var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger, 201, nameof(GetEventById), new { id = result.Value });
+        return result.ToActionResult(this, _logger, 201, nameof(GetEventById), new { id = result.Value! });
     }
 
     /// <summary>
@@ -106,13 +106,11 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// <param name="familyId">Tùy chọn: Lọc sự kiện theo ID gia đình.</param>
     /// <returns>Danh sách các sự kiện sắp tới.</returns>
     [HttpGet("upcoming")]
-    public async Task<IActionResult> GetUpcomingEvents([FromQuery] Guid? familyId = null)
+    public async Task<IActionResult> GetUpcomingEvents([FromQuery] Guid familyId)
     {
         var query = new Application.Events.Queries.GetUpcomingEvents.GetUpcomingEventsQuery
         {
             FamilyId = familyId,
-            StartDate = DateTime.UtcNow.Date,
-            EndDate = DateTime.UtcNow.Date.AddDays(30)
         };
         var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);

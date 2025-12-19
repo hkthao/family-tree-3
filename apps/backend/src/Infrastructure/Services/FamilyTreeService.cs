@@ -2,6 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects; // Add this
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
@@ -48,12 +49,29 @@ public class FamilyTreeService : IFamilyTreeService
             if (birthEvent != null)
             {
                 // Update existing birth event
-                birthEvent.UpdateEvent(birthEvent.Name, birthEvent.Code, birthEvent.Description, birthDateTime, birthEvent.EndDate, birthEvent.Location, birthEvent.Type, birthEvent.Color);
+                // Use UpdateSolarEvent
+                birthEvent.UpdateSolarEvent(
+                    birthEvent.Name,
+                    birthEvent.Code,
+                    birthEvent.Description,
+                    birthDateTime, // New SolarDate
+                    RepeatRule.Yearly, // Birthdays are yearly
+                    birthEvent.Type,
+                    birthEvent.Color
+                );
             }
             else
             {
                 // Create new birth event
-                var newBirthEvent = new Event(_localizer["Birth of {0}", memberFullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, familyId, birthDateTime);
+                // Use CreateSolarEvent
+                var newBirthEvent = Event.CreateSolarEvent(
+                    _localizer["Birth of {0}", memberFullName],
+                    $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}",
+                    EventType.Birth,
+                    birthDateTime, // SolarDate
+                    RepeatRule.Yearly, // Birthdays are yearly
+                    familyId
+                );
                 newBirthEvent.AddEventMember(memberId);
                 _context.Events.Add(newBirthEvent);
             }
@@ -71,12 +89,29 @@ public class FamilyTreeService : IFamilyTreeService
             if (deathEvent != null)
             {
                 // Update existing death event
-                deathEvent.UpdateEvent(deathEvent.Name, deathEvent.Code, deathEvent.Description, deathDateTime, deathEvent.EndDate, deathEvent.Location, deathEvent.Type, deathEvent.Color);
+                // Use UpdateSolarEvent
+                deathEvent.UpdateSolarEvent(
+                    deathEvent.Name,
+                    deathEvent.Code,
+                    deathEvent.Description,
+                    deathDateTime, // New SolarDate
+                    RepeatRule.Yearly, // Death anniversaries are yearly
+                    deathEvent.Type,
+                    deathEvent.Color
+                );
             }
             else
             {
                 // Create new death event
-                var newDeathEvent = new Event(_localizer["Death of {0}", memberFullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, familyId, deathDateTime);
+                // Use CreateSolarEvent
+                var newDeathEvent = Event.CreateSolarEvent(
+                    _localizer["Death of {0}", memberFullName],
+                    $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}",
+                    EventType.Death,
+                    deathDateTime, // SolarDate
+                    RepeatRule.Yearly, // Death anniversaries are yearly
+                    familyId
+                );
                 newDeathEvent.AddEventMember(memberId);
                 _context.Events.Add(newDeathEvent);
             }

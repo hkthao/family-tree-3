@@ -18,8 +18,7 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useFamilyMediaQuery, useDeleteFamilyMediaMutation } from '@/composables/family-media';
-import { useFamilyMediaDeletion } from '@/composables/family-media/useFamilyMediaDeletion';
+import { useFamilyMediaQuery, useDeleteFamilyMediaMutation, useFamilyMediaDeletion } from '@/composables';
 
 interface FamilyMediaDetailViewProps {
   familyId: string;
@@ -33,7 +32,7 @@ const { t } = useI18n();
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaIdRef = toRef(props, 'familyMediaId');
 
-const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyIdRef, familyMediaIdRef);
+const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyMediaIdRef);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
 const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({

@@ -7,16 +7,21 @@ namespace backend.Application.Events.Queries.GetEventById;
 public class EventDetailDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
+    public string? Code { get; set; }
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public string? Location { get; set; }
     public Guid? FamilyId { get; set; }
     public EventType Type { get; set; }
     public string? Color { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
+
+    // New fields from Event domain entity
+    public CalendarType CalendarType { get; set; }
+    public DateTime? SolarDate { get; set; }
+    public LunarDateDto? LunarDate { get; set; } // Use the new DTO
+    public RepeatRule RepeatRule { get; set; }
+
     public List<MemberListDto> RelatedMembers { get; set; } = [];
     public List<Guid> RelatedMemberIds
     {

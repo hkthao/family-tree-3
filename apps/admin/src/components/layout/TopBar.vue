@@ -18,7 +18,7 @@
     </div>
   </v-app-bar>
   <!-- Chat Widget Component -->
-  <N8nChatWidget v-model="showChatWidget"/>
+  <N8nChatWidget v-model="showChatWidget" />
 </template>
 
 <script setup lang="ts">
@@ -29,7 +29,7 @@ import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserPreferences } from '@/composables/data/useUserPreferences'; // Added useUserPreferences
+import { useUserPreferences } from '@/composables';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
@@ -65,7 +65,7 @@ const toggleTheme = () => {
 
 watch(() => preferences.value?.theme, (newTheme) => { // Used userPreferenceStore
   if (newTheme !== undefined) { // Check for undefined as userPreference might not be loaded yet
-    theme.global.name.value = getThemeCode(newTheme);
+    theme.change(getThemeCode(newTheme));
   }
 }, { immediate: true });
 

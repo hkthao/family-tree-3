@@ -10,8 +10,7 @@ public class EventsBySearchTermSpecification : Specification<Event>
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             Query.Where(e => (e.Name != null && e.Name.Contains(searchTerm)) ||
-                             (e.Description != null && e.Description.Contains(searchTerm)) ||
-                             (e.Location != null && e.Location.Contains(searchTerm)));
+                             (e.Description != null && e.Description.Contains(searchTerm)));
         }
     }
 }

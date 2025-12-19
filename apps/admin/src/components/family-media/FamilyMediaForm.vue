@@ -3,7 +3,7 @@
     <v-row>
       <v-col v-if="!readOnly" cols="12">
         <VFileUpload v-model="file" :label="t('familyMedia.form.fileLabel')" prepend-icon="mdi-camera"
-          accept="image/*,video/*,audio/*,application/pdf" show-size :rules="readOnly ? [] : [rules.required]"
+          accept="image/*,video/*,audio/*,application/pdf" show-size :rules="readOnly ? [] : formRules.file"
           :disabled="readOnly"></VFileUpload>
       </v-col>
       <v-col cols="12">
@@ -30,11 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
-import { VFileUpload } from 'vuetify/labs/VFileUpload'
+import { VFileUpload } from 'vuetify/labs/VFileUpload';
+import { useFamilyMediaForm } from '@/composables/family-media/useFamilyMediaForm';
 
 interface FamilyMediaFormProps {
   initialMedia?: FamilyMedia;
@@ -45,52 +45,16 @@ const props = defineProps<FamilyMediaFormProps>();
 defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
-const formRef = ref<HTMLFormElement | null>(null);
-const file = ref<File | undefined>(undefined);
-const description = ref<string | undefined>(undefined);
-
-const rules = {
-  required: (value: any) => !!value || t('common.required'),
-};
-
-const getFormData = () => {
-  return {
-    file: file.value,
-    description: description.value,
-  };
-};
-
-const validate = async () => {
-  if (formRef.value) {
-    const { valid } = await formRef.value.validate();
-    return valid;
-  }
-  return false;
-};
-
-const resetValidation = () => {
-  if (formRef.value) {
-    formRef.value.resetValidation();
-  }
-};
-
-const resetForm = () => {
-  file.value = undefined;
-  description.value = undefined;
-  resetValidation();
-};
-
-onMounted(() => {
-  if (props.initialMedia) {
-    description.value = props.initialMedia.description;
-  }
-});
-
-watch(() => props.initialMedia, (newVal) => {
-  if (newVal) {
-    description.value = newVal.description;
-  }
-}, { deep: true });
+const {
+  formRef,
+  file,
+  description,
+  formRules,
+  getFormData,
+  validate,
+  resetValidation,
+  resetForm,
+} = useFamilyMediaForm(props.initialMedia);
 
 defineExpose({
   getFormData,

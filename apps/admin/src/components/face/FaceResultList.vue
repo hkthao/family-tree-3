@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import type { SearchResult } from '@/types';
-import { useFaceResultList } from '@/composables/face/useFaceResultList';
+import { useFaceResultList } from '@/composables';
 
 const props = defineProps({
   results: { type: Array as () => SearchResult[], default: () => [] },

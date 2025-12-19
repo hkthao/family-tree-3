@@ -2,6 +2,7 @@ using backend.Application.Events.Queries.SearchEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects; // Add this
 using FluentAssertions;
 using Xunit;
 
@@ -25,9 +26,9 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             var familyId = Guid.NewGuid();
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Event 1", "EVT1", EventType.Birth, familyId),
-                new Event("Event 2", "EVT2", EventType.Death, familyId),
-                new Event("Event 3", "EVT3", EventType.Marriage, familyId)
+                Event.CreateSolarEvent("Event 1", "EVT1", EventType.Birth, DateTime.UtcNow.Date, RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Event 2", "EVT2", EventType.Death, DateTime.UtcNow.Date.AddDays(1), RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Event 3", "EVT3", EventType.Marriage, DateTime.UtcNow.Date.AddDays(2), RepeatRule.None, familyId)
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -54,9 +55,9 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             var familyId = Guid.NewGuid();
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Birthday Party", "EVT1", EventType.Birth, familyId),
-                new Event("Wedding Anniversary", "EVT2", EventType.Marriage, familyId),
-                new Event("Funeral", "EVT3", EventType.Death, familyId)
+                Event.CreateSolarEvent("Birthday Party", "EVT1", EventType.Birth, DateTime.UtcNow.Date, RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Wedding Anniversary", "EVT2", EventType.Marriage, DateTime.UtcNow.Date.AddDays(1), RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Funeral", "EVT3", EventType.Death, DateTime.UtcNow.Date.AddDays(2), RepeatRule.None, familyId)
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -87,8 +88,8 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             var familyId = Guid.NewGuid();
             _context.Events.AddRange(new List<Event>
             {
-                new Event("Event 1", "EVT1", EventType.Birth, familyId),
-                new Event("Event 2", "EVT2", EventType.Death, familyId)
+                Event.CreateSolarEvent("Event 1", "EVT1", EventType.Birth, DateTime.UtcNow.Date, RepeatRule.None, familyId),
+                Event.CreateSolarEvent("Event 2", "EVT2", EventType.Death, DateTime.UtcNow.Date.AddDays(1), RepeatRule.None, familyId)
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 

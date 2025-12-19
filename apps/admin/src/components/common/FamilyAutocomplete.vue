@@ -1,20 +1,22 @@
 <template>
-  <CustomRemoteAutocomplete
+  <v-autocomplete
     v-bind="$attrs"
     v-model="internalValue"
+    v-model:search="search"
+    :items="items"
+    :loading="loading"
     @update:model-value="handleUpdateModelValue"
     :label="label"
     :rules="rules"
-    :read-only="readOnly"
+    :readonly="readOnly"
     :clearable="clearable"
     :multiple="multiple"
     item-title="name"
     item-value="id"
-    :fetch-items="fetchItems"
-    :loading="isLoadingPreload"
     :disabled="disabled"
     density="compact"
     :return-object="true"
+    :custom-filter="()=> true"
   >
     <template #item="{ props: itemProps, item }">
       <v-list-item v-bind="itemProps" :subtitle="item.raw.address">
@@ -23,19 +25,17 @@
         </template>
       </v-list-item>
     </template>
-  </CustomRemoteAutocomplete>
+  </v-autocomplete>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-
+import { ref, watch, computed } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
 import type { Family } from '@/types';
-import CustomRemoteAutocomplete from './CustomRemoteAutocomplete.vue';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import { ApiFamilyService } from '@/services/family/api.family.service';
 import apiClient from '@/plugins/axios';
 
-// Instantiate the service for direct use when preloading by ID and for fetchItems
 const familyService = new ApiFamilyService(apiClient);
 
 interface FamilyAutocompleteProps {
@@ -46,50 +46,97 @@ interface FamilyAutocompleteProps {
   clearable?: boolean;
   multiple?: boolean;
   disabled?: boolean;
+  debounceTime?: number;
 }
 
-const props = defineProps<FamilyAutocompleteProps>();
+const props = withDefaults(defineProps<FamilyAutocompleteProps>(), {
+  debounceTime: 300,
+});
 
 const emit = defineEmits(['update:modelValue']);
 
-// Logic for preloading selected item(s) when modelValue is an ID(s)
-const preloadedFamilies = ref<Family[]>([]);
 const internalValue = ref<Family | Family[] | null>(null);
-const isLoadingPreload = ref(false); // New loading state for preloading
+const search = ref('');
+const debouncedSearchTerm = ref('');
 
-const fetchFamilyByIds = async (ids: string[]) => {
-  if (!ids || ids.length === 0) {
-    preloadedFamilies.value = [];
-    return;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Convert modelValue to an array of IDs for queryKey
+const modelValueIds = computed(() => {
+  if (props.multiple && Array.isArray(props.modelValue)) {
+    return props.modelValue as string[];
+  } else if (!props.multiple && typeof props.modelValue === 'string') {
+    return [props.modelValue as string];
   }
-  isLoadingPreload.value = true;
-  try {
-    const result = await familyService.getByIds(ids);
+  return [];
+});
+
+// Query for preloading selected families by their IDs
+const { data: preloadedFamilies, isLoading: isLoadingPreload } = useQuery<Family[], Error>({
+  queryKey: ['families', 'ids', modelValueIds],
+  queryFn: async () => {
+    if (!modelValueIds.value || modelValueIds.value.length === 0) {
+      return [];
+    }
+    const result = await familyService.getByIds(modelValueIds.value);
     if (result.ok) {
-      preloadedFamilies.value = result.value;
-    } else {
-      console.error('Error preloading families:', result.error);
-      preloadedFamilies.value = [];
+      return result.value;
     }
-  } finally {
-    isLoadingPreload.value = false;
-  }
-};
+    console.error('Error preloading families:', result.error);
+    throw result.error;
+  },
+  enabled: computed(() => modelValueIds.value.length > 0),
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
 
-watch(() => props.modelValue, async (newModelValue) => {
-  if (newModelValue) {
-    if (props.multiple && Array.isArray(newModelValue)) {
-      await fetchFamilyByIds(newModelValue as string[]);
-      internalValue.value = preloadedFamilies.value;
-    } else if (!props.multiple && typeof newModelValue === 'string') {
-      await fetchFamilyByIds([newModelValue as string]);
-      internalValue.value = preloadedFamilies.value[0] || null;
-    }
+// Watch for changes in preloadedFamilies and update internalValue
+watch(preloadedFamilies, (newFamilies) => {
+  if (props.multiple) {
+    internalValue.value = newFamilies || [];
   } else {
-    internalValue.value = null;
+    internalValue.value = (newFamilies && newFamilies.length > 0) ? newFamilies[0] : null;
   }
 }, { immediate: true });
 
+// Query for searching families based on input
+const { data: searchResults, isLoading: isLoadingSearch } = useQuery<Family[], Error>({
+  queryKey: ['families', 'search', debouncedSearchTerm],
+  queryFn: async () => {
+    const filters: { [key: string]: any } = {};
+    if (debouncedSearchTerm.value) {
+      filters.searchQuery = debouncedSearchTerm.value;
+    }
+
+    if (!debouncedSearchTerm.value) {
+      return [];
+    }
+
+    const result = await familyService.search({ page: 1, itemsPerPage: 10 }, filters);
+    if (result.ok) {
+      return result.value.items;
+    }
+    console.error('Error fetching families:', result.error);
+    throw result.error;
+  },
+  enabled: computed(() => !!debouncedSearchTerm.value),
+  staleTime: 1000 * 30, // 30 seconds
+});
+
+// Update items for v-autocomplete from search results
+const items = computed(() => searchResults.value || []);
+
+// Combined loading state for v-autocomplete
+const loading = computed(() => isLoadingPreload.value || isLoadingSearch.value);
+
+// Debounce search input
+watch(search, (newSearchTerm) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    debouncedSearchTerm.value = newSearchTerm;
+  }, props.debounceTime);
+});
 
 const handleUpdateModelValue = (value: Family | Family[] | null) => {
   if (props.multiple) {
@@ -99,14 +146,5 @@ const handleUpdateModelValue = (value: Family | Family[] | null) => {
     const id = value ? (value as Family).id : undefined;
     emit('update:modelValue', id);
   }
-};
-
-const fetchItems = async (query: string): Promise<Family[]> => {
-  const result = await familyService.search({ page: 1, itemsPerPage: 10 }, { name: query });
-  if (result.ok) {
-    return result.value.items;
-  }
-  console.error('Error fetching families:', result.error);
-  return [];
 };
 </script>

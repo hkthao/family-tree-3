@@ -1,4 +1,5 @@
 
+using backend.Infrastructure.Data;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
@@ -44,12 +45,14 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
-        var deletedMember = await _context.Members.FindAsync(memberId);
+
+        // Use a fresh context to verify the deletion
+        await using var verificationContext = new ApplicationDbContext(_dbContextOptions, _mockDomainEventDispatcher.Object, _currentUserMock.Object, _dateTimeMock.Object);
+        var deletedMember = await verificationContext.Members.FindAsync(memberId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        deletedMember.Should().NotBeNull();
-        deletedMember!.IsDeleted.Should().BeTrue();
+        deletedMember.Should().BeNull();
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is Domain.Events.Members.MemberDeletedEvent) &&
             events.Any(e => e is Domain.Events.Families.FamilyStatsUpdatedEvent) // FamilyStatsUpdatedEvent is also raised

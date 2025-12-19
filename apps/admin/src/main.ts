@@ -10,6 +10,7 @@ import './styles/n8n-chat.scss'; // n8n chat custom variables
 import 'vuetify/styles';
 import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
+import { createRulesPlugin } from 'vuetify/labs/rules'
 
 import servicesPlugin, { ServicesPlugin } from './plugins/services.plugin'; // Import both default and named export
 import { setAuthService } from '@/services/auth/authService';
@@ -20,6 +21,8 @@ import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const app = createApp(App);
+
+app.use(createRulesPlugin({}, vuetify.locale))
 
 app.component('member-auto-complete', MemberAutocomplete);
 app.component('family-auto-complete', FamilyAutocomplete);

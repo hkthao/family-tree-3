@@ -1,4 +1,5 @@
 
+using backend.Infrastructure.Data;
 using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.UnitTests.Common;
@@ -46,9 +47,11 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeTrue();
-        var deletedRelationship = await _context.Relationships.FindAsync(relationship.Id);
-        deletedRelationship.Should().NotBeNull(); // Check that it's not null for soft delete
-        deletedRelationship!.IsDeleted.Should().BeTrue(); // Assert soft delete
+
+        // Use a fresh context to verify the deletion
+        await using var verificationContext = new ApplicationDbContext(_dbContextOptions, _mockDomainEventDispatcher.Object, _currentUserMock.Object, _dateTimeMock.Object);
+        var deletedRelationship = await verificationContext.Relationships.FindAsync(relationship.Id);
+        deletedRelationship.Should().BeNull();
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is Domain.Events.Relationships.RelationshipDeletedEvent)
         )), Times.Once);

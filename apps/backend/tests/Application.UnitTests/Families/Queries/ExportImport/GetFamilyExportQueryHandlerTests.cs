@@ -40,7 +40,7 @@ public class GetFamilyExportQueryHandlerTests : TestBase
         var relationship = new Relationship(familyId, member1.Id, member2.Id, RelationshipType.Husband, 1);
         relationship.Id = Guid.NewGuid();
 
-        var event1 = new Event("Wedding", "WEDDING", EventType.Marriage, familyId, DateTime.Now.AddYears(-5));
+        var event1 = Event.CreateSolarEvent("Wedding", "WEDDING", EventType.Marriage, DateTime.Now.AddYears(-5), RepeatRule.Yearly, familyId);
         event1.Id = Guid.NewGuid();
         event1.AddEventMember(member1.Id);
         event1.AddEventMember(member2.Id);
@@ -87,7 +87,19 @@ public class GetFamilyExportQueryHandlerTests : TestBase
             },
             Events = new List<EventExportDto>
             {
-                new EventExportDto { Id = event1.Id, Name = event1.Name, Type = event1.Type, RelatedMembers = event1.EventMembers.Select(em => em.MemberId).ToList() }
+                new EventExportDto
+                {
+                    Id = event1.Id,
+                    Name = event1.Name,
+                    Code = event1.Code,
+                    Type = event1.Type,
+                    Description = event1.Description,
+                    CalendarType = event1.CalendarType,
+                    SolarDate = event1.SolarDate,
+                    LunarDate = null, // Solar event, so lunar date is null
+                    RepeatRule = event1.RepeatRule,
+                    RelatedMembers = event1.EventMembers.Select(em => em.MemberId).ToList()
+                }
             }
         };
 

@@ -7,7 +7,6 @@ using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Families;
 using backend.Domain.ValueObjects; // NEW
-using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 

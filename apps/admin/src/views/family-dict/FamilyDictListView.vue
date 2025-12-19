@@ -45,7 +45,7 @@ import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
 import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
 import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import { useFamilyDictListFilters, useFamilyDictsQuery, useDeleteFamilyDictMutation } from '@/composables/family-dict';
+import { useFamilyDictListFilters, useFamilyDictsQuery, useDeleteFamilyDictMutation } from '@/composables';
 
 interface FamilyDictListViewProps {
   readOnly?: boolean;

@@ -13,21 +13,20 @@
     <v-row>
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
-          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
-          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" 
+          :rules="validationRules.familyId"
           :multiple="false" :disabled="true" data-testid="member-family-select" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
-          @input="v$.lastName.$touch()" :error-messages="v$.lastName.$errors.map(e => e.$message as string)"
+        <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')"
+          :rules="validationRules.lastName"
           :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-last-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="formData.firstName" :label="t('member.form.firstName')" @blur="v$.firstName.$touch()"
-          @input="v$.firstName.$touch()" :error-messages="v$.firstName.$errors.map(e => e.$message as string)"
+        <v-text-field v-model="formData.firstName" :label="t('member.form.firstName')"
+          :rules="validationRules.firstName"
           :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-first-name-input"></v-text-field>
       </v-col>
       <v-col cols="12">
@@ -42,14 +41,12 @@
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
-          @blur="v$.dateOfBirth.$touch()" @input="v$.dateOfBirth.$touch()"
-          :error-messages="v$.dateOfBirth.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
+          :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
-          @blur="v$.dateOfDeath.$touch()" @input="v$.dateOfDeath.$touch()"
-          :error-messages="v$.dateOfDeath.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
+          :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar" />
       </v-col>
     </v-row>
@@ -102,7 +99,7 @@
      <!-- Thông tin Cha Mẹ -->
     <v-row>
        <v-col cols="12" md="12">
-        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
+        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :rules="validationRules.order" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
@@ -132,16 +129,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
-import { Gender } from '@/types';
-import { useVuelidate } from '@vuelidate/core';
-import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import { useAuth } from '@/composables';
-import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
+import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -150,90 +142,24 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { isAdmin, isFamilyManager } = useAuth();
 
-const formRef = ref<HTMLFormElement | null>(null);
-
-const isFormReadOnly = computed(() => {
-  return props.readOnly || !(isAdmin.value || isFamilyManager.value);
+const {
+  formRef,
+  formData,
+  isFormReadOnly,
+  initialAvatarDisplay,
+  validate,
+  getFormData,
+  getAvatarUrl,
+  validationRules,
+} = useMemberFormComposable({
+  readOnly: props.readOnly,
+  initialMemberData: props.initialMemberData,
+  familyId: props.familyId,
 });
-
-// Computed property to pass the initial avatar URL to AvatarInput
-const initialAvatarDisplay = computed(() => {
-  return formData.avatarBase64 || formData.avatarUrl;
-});
-
-const formData = reactive<Omit<Member, 'id'> | Member>(
-  props.initialMemberData
-    ? {
-      ...props.initialMemberData,
-      fatherId: props.initialMemberData.fatherId,
-      motherId: props.initialMemberData.motherId,
-      husbandId: props.initialMemberData.husbandId,
-      wifeId: props.initialMemberData.wifeId,
-      isRoot: props.initialMemberData.isRoot, // Add isRoot here
-      isDeceased: props.initialMemberData.isDeceased, // Add isDeceased here
-      phone: props.initialMemberData.phone,
-      email: props.initialMemberData.email,
-      address: props.initialMemberData.address,
-    }
-    : {
-      lastName: '',
-      firstName: '',
-      dateOfBirth: undefined,
-      gender: Gender.Male,
-      familyId: props.familyId || '', // Initialize familyId from prop, ensure it's a string
-      fatherId: undefined, // Initialize fatherId
-      motherId: undefined, // Initialize motherId
-      husbandId: undefined, // Initialize husbandId
-      wifeId: undefined, // Initialize wifeId
-      isRoot: false, // Initialize isRoot for new members
-      isDeceased: false, // Initialize isDeceased for new members
-      order: undefined, // Initialize order for new members
-      phone: undefined,
-      email: undefined,
-      address: undefined,
-      avatarBase64: null, // NEW FIELD
-    },
-);
-
-const state = reactive({
-  lastName: toRef(formData, 'lastName'),
-  firstName: toRef(formData, 'firstName'),
-  dateOfBirth: toRef(formData, 'dateOfBirth'),
-  dateOfDeath: toRef(formData, 'dateOfDeath'),
-  familyId: toRef(formData, 'familyId'),
-  fatherId: toRef(formData, 'fatherId'), // Add fatherId to state
-  motherId: toRef(formData, 'motherId'), // Add motherId to state
-  husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
-  wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
-  isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
-  isDeceased: toRef(formData, 'isDeceased'), // Add isDeceased to state
-  order: toRef(formData, 'order'), // Add order to state
-  phone: toRef(formData, 'phone'),
-  email: toRef(formData, 'email'),
-  address: toRef(formData, 'address'),
-  avatarBase64: toRef(formData, 'avatarBase64'), // Add avatarBase64 to state
-});
-
-const rules = useMemberRules(toRefs(state));
-
-const v$ = useVuelidate(rules, state);
-
-// Expose form validation and data for parent component
-const validate = async () => {
-  const result = await v$.value.$validate();
-  return result;
-};
-
-const getFormData = () => {
-  return formData;
-};
-
 
 defineExpose({
   validate,
   getFormData,
-  v$,
 });
 </script>

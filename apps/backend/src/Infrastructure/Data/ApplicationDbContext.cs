@@ -54,14 +54,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserPreference.
     /// </summary>
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLocation.
     /// </summary>
-    public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FileUsage.
-    /// </summary>
-    public DbSet<FileUsage> FileUsages => Set<FileUsage>();
+    public DbSet<FamilyLocation> FamilyLocations => Set<FamilyLocation>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
@@ -75,22 +72,9 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStory.
-    /// </summary>
-    public DbSet<MemberStory> MemberStories => Set<MemberStory>();
-
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể MemberStoryImage.
-    /// </summary>
-    public DbSet<MemberStoryImage> MemberStoryImages => Set<MemberStoryImage>();
-    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemberFace.
     /// </summary>
     public DbSet<MemberFace> MemberFaces => Set<MemberFace>();
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể PdfTemplate.
-    /// </summary>
-    public DbSet<PdfTemplate> PdfTemplates => Set<PdfTemplate>();
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Prompt.
@@ -116,6 +100,21 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.
     /// </summary>
     public DbSet<MediaLink> MediaLinks { get; set; } = null!;
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryItem.
+    /// </summary>
+    public DbSet<MemoryItem> MemoryItems => Set<MemoryItem>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryMedia.
+    /// </summary>
+    public DbSet<MemoryMedia> MemoryMedia => Set<MemoryMedia>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
+    /// </summary>
+    public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
@@ -140,13 +139,13 @@ public class ApplicationDbContext(
                         break;
                 }
             }
-            if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
-            {
-                softDeleteEntity.IsDeleted = true;
-                softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
-                softDeleteEntity.DeletedDate = _dateTime.Now;
-                entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
-            }
+            // if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
+            // {
+            //     softDeleteEntity.IsDeleted = true;
+            //     softDeleteEntity.DeletedBy = _currentUser.UserId.ToString();
+            //     softDeleteEntity.DeletedDate = _dateTime.Now;
+            //     entry.State = EntityState.Modified; // Chuyển trạng thái về Modified để EF Core không xóa vật lý
+            // }
         }
         var result = await base.SaveChangesAsync(cancellationToken);
 
@@ -185,8 +184,8 @@ public class ApplicationDbContext(
                 {
                     property.SetValueConverter(
                         new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
-                            v => v.ToUniversalTime(),
-                            v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
+                            (DateTime v) => v.ToUniversalTime(),
+                            (DateTime v) => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
                 }
             }
         }

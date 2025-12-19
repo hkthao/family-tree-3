@@ -24,7 +24,8 @@ public class GetEventByIdQueryHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = Guid.NewGuid() }; // Ensure Id is set for entity tracking
+        var testEvent = Event.CreateSolarEvent("Test Event", "EVT-TEST", EventType.Other, DateTime.UtcNow.AddDays(-10), RepeatRule.None, familyId);
+        testEvent.Id = Guid.NewGuid(); // Ensure Id is set for entity tracking
         _context.Events.Add(testEvent);
         await _context.SaveChangesAsync();
 
@@ -96,7 +97,8 @@ public class GetEventByIdQueryHandlerTests : TestBase
 
 
         // Create an event in an inaccessible family
-        var inaccessibleEvent = new Event("Inaccessible Event", "EVT-INACCESSIBLE", EventType.Other, inaccessibleFamilyId) { Id = Guid.NewGuid() };
+        var inaccessibleEvent = Event.CreateSolarEvent("Inaccessible Event", "EVT-INACCESSIBLE", EventType.Other, DateTime.UtcNow.AddDays(5), RepeatRule.None, inaccessibleFamilyId);
+        inaccessibleEvent.Id = Guid.NewGuid();
         _context.Events.Add(inaccessibleEvent);
 
         await _context.SaveChangesAsync();

@@ -10,6 +10,6 @@ export interface IFamilyMediaService {
     sortBy?: { key: string; order: string }[],
   ): Promise<Result<Paginated<FamilyMedia>>>;
   getById(id: string): Promise<Result<FamilyMedia>>;
-  create(familyId: string, file: File, description?: string): Promise<Result<string>>; 
+  create(familyId: string, file: File, description?: string): Promise<Result<FamilyMedia>>; 
   delete(id: string): Promise<Result<boolean>>;
 }

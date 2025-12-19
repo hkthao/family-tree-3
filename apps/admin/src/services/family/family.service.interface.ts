@@ -1,6 +1,6 @@
-import type { AnalyzedDataDto, ApiError, Family, PrivacyConfiguration, Result } from "@/types";
+import type { ApiError, Family, PrivacyConfiguration, Result } from "@/types";
 import type { ICrudService } from "../common/crud.service.interface";
-import type { FamilyExportDto, IFamilyAccess, GenerateFamilyDataCommand } from '@/types/family';
+import type { FamilyExportDto, IFamilyAccess } from '@/types/family';
 
 export interface IFamilyService extends ICrudService<Family> {
   addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>>;
@@ -10,6 +10,5 @@ export interface IFamilyService extends ICrudService<Family> {
   getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>>;
   updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>>;
   getUserFamilyAccess(): Promise<Result<IFamilyAccess[], ApiError>> ;
-  generateFamilyData(command: GenerateFamilyDataCommand): Promise<Result<AnalyzedDataDto, ApiError>>;
 }
 

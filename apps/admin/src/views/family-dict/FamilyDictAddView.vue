@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddFamilyDictMutation } from '@/composables/family-dict';
+import { useAddFamilyDictMutation } from '@/composables';
 
 const emit = defineEmits(['close', 'saved']);
 

@@ -33,7 +33,14 @@ public class EventDeletedEventHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var testEvent = new Event("Test Event", "EVT-TEST", EventType.Other, Guid.NewGuid());
+        var testEvent = Event.CreateSolarEvent(
+            name: "Test Event",
+            code: "EVT-TEST",
+            type: EventType.Other,
+            solarDate: DateTime.UtcNow, // Dummy value
+            repeatRule: RepeatRule.None, // Dummy value
+            familyId: Guid.NewGuid()
+        );
         var notification = new EventDeletedEvent(testEvent);
 
         _currentUserMock.Setup(u => u.UserId).Returns(userId);

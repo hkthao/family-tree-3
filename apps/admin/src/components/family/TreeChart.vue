@@ -25,8 +25,6 @@
         </v-btn>
       </template>
     </v-tooltip>
-    <!-- <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
-      prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field> -->
     <MemberAutocomplete v-model="selectedRootMemberId" :label="t('family.tree.filterByRootMember')"
       :family-id="props.familyId" clearable hide-details hide-chips class="mr-4" style="max-width: 250px;" />
   </v-toolbar>
@@ -59,24 +57,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/family';
-import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
-import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useAuth } from '@/composables';
+import { useTreeVisualization } from '@/composables/family/useTreeVisualization'; // Import the new composable
 
 const props = defineProps({
   familyId: { type: String, default: null },
-  initialMemberId: { type: String, default: null }, // New prop for initial member ID
+  initialMemberId: { type: String, default: null },
   readOnly: { type: Boolean, default: false },
 });
 const { t } = useI18n();
-const chartMode = ref('hierarchical'); // Default view
-const treeVisualizationStore = useTreeVisualizationStore();
+const chartMode = ref('hierarchical');
+
+const {
+  members,
+  relationships,
+  selectedRootMemberId,
+  fetchTreeData,
+} = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
+
 const { isAdmin, isFamilyManager } = useAuth();
 
 const canAddMember = computed(() => {
@@ -87,37 +92,23 @@ const canEditMember = computed(() => {
   return !props.readOnly && (isAdmin.value || isFamilyManager.value);
 });
 
-const addMemberDrawer = ref(false); // Control visibility of the add member drawer
-const selectedMemberId = ref<string | null>(null); // New ref for selected member ID
-const memberDetailDrawer = ref(false); // New ref for member detail drawer visibility
-const editMemberDrawer = ref(false); // New ref for member edit drawer visibility
-const initialRelationshipData = ref<any | null>(null); // New ref for initial relationship data
-const selectedRootMemberId = ref<string | null>(null); // New ref for selected root member ID
-
-// New computed properties for members and relationships from the store
-const members = computed(() => treeVisualizationStore.getFilteredMembers(props.familyId));
-const relationships = computed(() => treeVisualizationStore.getFilteredRelationships(props.familyId));
-
-// New initialize function to fetch data
-const initialize = async (familyId: string, initialMemberId: string | null) => {
-  if (familyId) {
-    await treeVisualizationStore.fetchTreeData(familyId, initialMemberId || undefined);
-  }
-};
+const addMemberDrawer = ref(false);
+const selectedMemberId = ref<string | null>(null);
+const memberDetailDrawer = ref(false);
+const editMemberDrawer = ref(false);
+const initialRelationshipData = ref<any | null>(null);
 
 const handleAddMember = () => {
-  initialRelationshipData.value = null; // Clear any previous relationship data
+  initialRelationshipData.value = null;
   addMemberDrawer.value = true;
 };
 const handleMemberAdded = () => {
   addMemberDrawer.value = false;
-  // Refresh tree data after a new member is added
   if (props.familyId) {
-    treeVisualizationStore.fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId);
   }
 };
 
-// New handler for showing member detail drawer
 const handleShowMemberDetailDrawer = (memberId: string) => {
   if (canEditMember.value) {
     selectedMemberId.value = memberId;
@@ -128,7 +119,7 @@ const handleShowMemberDetailDrawer = (memberId: string) => {
 const handleMemberDeleted = () => {
   memberDetailDrawer.value = false;
   if (props.familyId) {
-    treeVisualizationStore.fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId);
   }
 };
 
@@ -138,38 +129,36 @@ const handleAddMemberWithRelationship = (data: any) => {
   addMemberDrawer.value = true;
 };
 
-// New handler for editing a member
 const handleEditMember = (memberId: string) => {
   if (canEditMember.value) {
     selectedMemberId.value = memberId;
-    memberDetailDrawer.value = false; // Close detail drawer
-    editMemberDrawer.value = true; // Open edit drawer
+    memberDetailDrawer.value = false;
+    editMemberDrawer.value = true;
   }
 };
 
 const handleMemberEdited = () => {
   editMemberDrawer.value = false;
   if (props.familyId) {
-    treeVisualizationStore.fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId);
   }
 };
 
 const handleRefresh = () => {
   if (props.familyId) {
-    treeVisualizationStore.fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId);
   }
 };
 
-// Call initialize on mounted
-onMounted(async () => {
+// Initialize and watch for changes
+onMounted(() => {
   if (props.familyId) {
-    await initialize(props.familyId, props.initialMemberId);
+    fetchTreeData(props.familyId, props.initialMemberId ?? undefined);
   }
 });
 
-// Watch for familyId and initialMemberId changes and re-initialize
-watch([() => props.familyId, () => props.initialMemberId], async ([newFamilyId, newInitialMemberId]) => {
+watch([() => props.familyId, () => props.initialMemberId], ([newFamilyId, newInitialMemberId]) => {
   if (newFamilyId) {
-    await initialize(newFamilyId, newInitialMemberId);
+    fetchTreeData(newFamilyId, newInitialMemberId ?? undefined);
   }
-});    </script>
+});</script>

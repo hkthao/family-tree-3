@@ -4,6 +4,7 @@
     <v-spacer></v-spacer>
 
     <v-btn
+      v-if="!hideCreateButton"
       color="primary"
       icon
       @click="emit('create')"
@@ -16,51 +17,37 @@
         </template>
       </v-tooltip>
     </v-btn>
+
     <v-text-field
-      v-model="internalSearch"
-      :label="searchPlaceholder"
-      :data-test-id="searchInputTestId"
+      v-if="!hideSearch"
+      :model-value="searchQuery"
+      @update:model-value="emit('update:search', $event)"
+      :label="searchLabel"
+      :placeholder="$t('common.search')"
       append-inner-icon="mdi-magnify"
       single-line
       hide-details
       clearable
       class="mr-2"
+      data-test-id="list-toolbar-search-input"
     ></v-text-field>
   </v-toolbar>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 
-const props = defineProps<{
-  search: string;
+
+const { title, createButtonTooltip, createButtonTestId, hideCreateButton, searchQuery, searchLabel, hideSearch } = defineProps<{
   title: string;
   createButtonTooltip: string;
-  searchPlaceholder: string;
   createButtonTestId: string;
-  searchInputTestId: string;
+  hideCreateButton?: boolean;
+  searchQuery?: string;
+  searchLabel?: string;
+  hideSearch?: boolean;
 }>();
 
-const emit = defineEmits(['update:search', 'create']);
-
-
-const internalSearch = ref(props.search);
-
-watch(
-  () => internalSearch.value,
-  (newValue) => {
-    emit('update:search', newValue ?? '');
-  },
-);
-
-watch(
-  () => props.search,
-  (newSearch) => {
-    if (newSearch !== internalSearch.value) {
-      internalSearch.value = newSearch;
-    }
-  },
-);
+const emit = defineEmits(['create', 'update:search']);
 </script>
 
 <style scoped></style>

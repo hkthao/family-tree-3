@@ -2,6 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this
+using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.ExportImport.Commands;
 
@@ -134,25 +136,59 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
         // 4. Create new Event entities, using new member IDs for related members
         foreach (var eventDto in request.FamilyData.Events)
         {
-            var newEvent = new Event(
-                eventDto.Name,
-                eventDto.Code ?? GenerateUniqueCode("EVT"),
-                eventDto.Type,
-                familyToUpdate.Id // Assign to the new family
-            );
+            System.Console.WriteLine($"ImportFamilyCommandHandler Debug: Processing Event DTO. CalendarType: {eventDto.CalendarType} ({(int)eventDto.CalendarType}). Type: {eventDto.CalendarType.GetType().FullName}");
+            Event newEvent;
+            string eventCode = eventDto.Code ?? GenerateUniqueCode("EVT");
 
-            newEvent.UpdateEvent(
-                eventDto.Name,
-                newEvent.Code, // Use the code generated or provided
-                eventDto.Description,
-                eventDto.StartDate,
-                eventDto.EndDate,
-                eventDto.Location,
-                eventDto.Type,
-                eventDto.Color
-            );
+            if (eventDto.CalendarType == CalendarType.Solar)
+            {
+                if (!eventDto.SolarDate.HasValue)
+                {
+                    return Result<Guid>.Failure("Solar event must have a SolarDate in import data.", ErrorSources.Validation);
+                }
+                if (eventDto.LunarDate != null)
+                {
+                    return Result<Guid>.Failure("Solar event cannot have a LunarDate in import data.", ErrorSources.Validation);
+                }
+                newEvent = Event.CreateSolarEvent(
+                    eventDto.Name,
+                    eventCode,
+                    eventDto.Type,
+                    eventDto.SolarDate.Value,
+                    eventDto.RepeatRule,
+                    familyToUpdate.Id,
+                    eventDto.Description,
+                    eventDto.Color
+                );
+            }
+            else if (eventDto.CalendarType == CalendarType.Lunar)
+            {
+                if (eventDto.LunarDate == null)
+                {
+                    return Result<Guid>.Failure("Lunar event must have a LunarDate in import data.", ErrorSources.Validation);
+                }
+                if (eventDto.SolarDate.HasValue)
+                {
+                    return Result<Guid>.Failure("Lunar event cannot have a SolarDate in import data.", ErrorSources.Validation);
+                }
+                var lunarDateVO = new LunarDate(eventDto.LunarDate.Day, eventDto.LunarDate.Month, eventDto.LunarDate.IsLeapMonth);
+                newEvent = Event.CreateLunarEvent(
+                    eventDto.Name,
+                    eventCode,
+                    eventDto.Type,
+                    lunarDateVO,
+                    eventDto.RepeatRule,
+                    familyToUpdate.Id,
+                    eventDto.Description,
+                    eventDto.Color
+                );
+            }
+            else
+            {
+                return Result<Guid>.Failure("Invalid CalendarType in import data.", ErrorSources.Validation);
+            }
 
-            newEvent.Id = Guid.NewGuid();
+            newEvent.Id = Guid.NewGuid(); // Assign a new ID for the imported event
             newEvent.Created = _dateTime.Now;
             newEvent.CreatedBy = _currentUser.UserId.ToString();
             newEvent.LastModified = _dateTime.Now;

@@ -39,7 +39,7 @@
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import { useFaceSearch } from '@/composables/face'; // Import the new composable
+import { useFaceSearch } from '@/composables';
 
 const {
   selectedFamilyId,

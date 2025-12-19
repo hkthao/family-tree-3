@@ -1,3 +1,5 @@
+using backend.Domain.Enums;
+
 namespace backend.Application.Events.Commands.CreateEvents;
 
 public class CreateEventDtoValidator : AbstractValidator<CreateEventDto>
@@ -16,9 +18,34 @@ public class CreateEventDtoValidator : AbstractValidator<CreateEventDto>
             .NotEmpty().WithMessage("ID gia đình không được để trống.")
             .Must(id => id != Guid.Empty).WithMessage("ID gia đình không được để trống.");
 
-        RuleFor(x => x.EndDate)
-            .GreaterThanOrEqualTo(x => x.StartDate)
-            .When(x => x.StartDate.HasValue && x.EndDate.HasValue)
-            .WithMessage("Ngày kết thúc không được trước ngày bắt đầu.");
+        RuleFor(v => v.CalendarType)
+            .IsInEnum().WithMessage("Invalid CalendarType.");
+
+        RuleFor(v => v.RepeatRule)
+            .IsInEnum().WithMessage("Invalid RepeatRule.");
+
+        // Conditional validation for Solar and Lunar dates
+        When(v => v.CalendarType == CalendarType.Solar, () =>
+        {
+            RuleFor(v => v.SolarDate)
+                .NotNull().WithMessage("Solar event must have a SolarDate.");
+            RuleFor(v => v.LunarDate)
+                .Null().WithMessage("Solar event cannot have a LunarDate.");
+        });
+
+        When(v => v.CalendarType == CalendarType.Lunar, () =>
+        {
+            RuleFor(v => v.LunarDate)
+                .NotNull().WithMessage("Lunar event must have a LunarDate.")
+                .ChildRules(ld =>
+                {
+                    ld.RuleFor(x => x!.Day)
+                        .InclusiveBetween(1, 30).WithMessage("Lunar day must be between 1 and 30.");
+                    ld.RuleFor(x => x!.Month)
+                        .InclusiveBetween(1, 12).WithMessage("Lunar month must be between 1 and 12.");
+                });
+            RuleFor(v => v.SolarDate)
+                .Null().WithMessage("Lunar event cannot have a SolarDate.");
+        });
     }
 }

@@ -25,7 +25,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddFamilyMutation } from '@/composables/family';
+import { useAddFamilyMutation } from '@/composables';
 
 const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);
 

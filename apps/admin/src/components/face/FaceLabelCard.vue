@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import type { DetectedFace, Member } from '@/types';
-import { useFaceLabelCard } from '@/composables/face/useFaceLabelCard';
+import { useFaceLabelCard } from '@/composables';
 
 const props = defineProps({
   face: { type: Object as () => DetectedFace, required: true },

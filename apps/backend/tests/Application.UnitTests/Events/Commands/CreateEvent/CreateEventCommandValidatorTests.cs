@@ -1,4 +1,6 @@
 using backend.Application.Events.Commands.CreateEvent;
+using backend.Application.Events.Commands.Inputs;
+using backend.Domain.Enums;
 using FluentValidation.TestHelper;
 using Xunit;
 
@@ -191,45 +193,6 @@ public class CreateEventCommandValidatorTests
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Location vượt quá 200 ký tự.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventCommand với Location vượt quá 200 ký tự.
-    ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính Location với thông báo lỗi "Location must not exceed 200 characters.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Location có giới hạn độ dài tối đa là 200 ký tự.
-    /// </summary>
-    [Fact]
-    public void ShouldHaveError_WhenLocationExceedsMaxLength()
-    {
-        // Arrange
-        var command = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), Location = new string('a', 201) };
-        // Act
-        var result = _validator.TestValidate(command);
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Location)
-              .WithErrorMessage("Location must not exceed 200 characters.");
-    }
-
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi Location hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventCommand với Location hợp lệ.
-    ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính Location.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Location hợp lệ không nên gây ra lỗi xác thực.
-    /// </summary>
-    [Fact]
-    public void ShouldNotHaveError_WhenLocationIsValid()
-    {
-        // Arrange
-        var command = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), Location = "Valid location" };
-        // Act
-        var result = _validator.TestValidate(command);
-        // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.Location);
-    }
-
-    /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh lỗi khi Color vượt quá 20 ký tự.
     /// ⚙️ Các bước (Arrange, Act, Assert):
     ///    - Arrange: Tạo một CreateEventCommand với Color vượt quá 20 ký tự.
@@ -269,93 +232,269 @@ public class CreateEventCommandValidatorTests
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh lỗi khi EndDate trước StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi CalendarType không hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventCommand với EndDate trước StartDate.
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType không hợp lệ.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính EndDate với thông báo lỗi "EndDate cannot be before StartDate.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate không được phép trước StartDate.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính CalendarType.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: CalendarType phải là một giá trị hợp lệ của enum.
     /// </summary>
     [Fact]
-    public void ShouldHaveError_WhenEndDateIsBeforeStartDate()
+    public void ShouldHaveError_WhenCalendarTypeIsInvalid()
     {
         // Arrange
-        var command = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = (CalendarType)99, // Invalid enum value
+            SolarDate = DateTime.Now
+        };
         // Act
         var result = _validator.TestValidate(command);
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.EndDate)
-              .WithErrorMessage("EndDate cannot be before StartDate.");
+        result.ShouldHaveValidationErrorFor(x => x.CalendarType)
+              .WithErrorMessage("Invalid CalendarType.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi EndDate sau StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi RepeatRule không hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventCommand với EndDate sau StartDate.
+    ///    - Arrange: Tạo một CreateEventCommand với RepeatRule không hợp lệ.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate sau StartDate là hợp lệ.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính RepeatRule.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: RepeatRule phải là một giá trị hợp lệ của enum.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenEndDateIsAfterStartDate()
+    public void ShouldHaveError_WhenRepeatRuleIsInvalid()
     {
         // Arrange
-        var command = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(1) };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            RepeatRule = (RepeatRule)99 // Invalid enum value
+        };
         // Act
         var result = _validator.TestValidate(command);
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.RepeatRule)
+              .WithErrorMessage("Invalid RepeatRule.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi EndDate bằng StartDate.
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Solar không có SolarDate.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một CreateEventCommand với EndDate bằng StartDate.
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Solar nhưng SolarDate là null.
     ///    - Act: Gọi phương thức TestValidate của validator.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: EndDate bằng StartDate là hợp lệ.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Solar yêu cầu SolarDate.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenEndDateIsSameAsStartDate()
+    public void ShouldHaveError_WhenSolarEventHasNoSolarDate()
     {
         // Arrange
-        var command = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = null // Missing SolarDate
+        };
         // Act
         var result = _validator.TestValidate(command);
         // Assert
-        result.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.SolarDate)
+              .WithErrorMessage("Solar event must have a SolarDate.");
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi StartDate hoặc EndDate là null.
+    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi sự kiện Solar có SolarDate hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo các CreateEventCommand với StartDate hoặc EndDate là null.
-    ///    - Act: Gọi phương thức TestValidate của validator cho từng command.
-    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính EndDate.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: StartDate hoặc EndDate có thể là null.
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Solar và SolarDate hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: SolarDate hợp lệ không gây lỗi.
     /// </summary>
     [Fact]
-    public void ShouldNotHaveError_WhenStartDateOrEndDateIsNull()
+    public void ShouldNotHaveError_WhenSolarEventHasValidSolarDate()
     {
         // Arrange
-        var command1 = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = null, EndDate = DateTime.Now };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            RepeatRule = RepeatRule.None
+        };
         // Act
-        var result1 = _validator.TestValidate(command1);
+        var result = _validator.TestValidate(command);
         // Assert
-        result1.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldNotHaveValidationErrorFor(x => x.SolarDate);
+    }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Solar có LunarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Solar nhưng có LunarDate.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Solar không được có LunarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenSolarEventHasLunarDate()
+    {
         // Arrange
-        var command2 = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = null };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Solar,
+            SolarDate = DateTime.Now,
+            LunarDate = new LunarDateInput { Day = 1, Month = 1, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
         // Act
-        var result2 = _validator.TestValidate(command2);
+        var result = _validator.TestValidate(command);
         // Assert
-        result2.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate)
+              .WithErrorMessage("Solar event cannot have a LunarDate.");
+    }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Lunar không có LunarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Lunar nhưng LunarDate là null.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar yêu cầu LunarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarEventHasNoLunarDate()
+    {
         // Arrange
-        var command3 = new CreateEventCommand { Name = "Valid Name", FamilyId = Guid.NewGuid(), StartDate = null, EndDate = null };
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = null // Missing LunarDate
+        };
         // Act
-        var result3 = _validator.TestValidate(command3);
+        var result = _validator.TestValidate(command);
         // Assert
-        result3.ShouldNotHaveValidationErrorFor(x => x.EndDate);
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate)
+              .WithErrorMessage("Lunar event must have a LunarDate.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi sự kiện Lunar có LunarDate hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Lunar và LunarDate hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính LunarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: LunarDate hợp lệ không gây lỗi.
+    /// </summary>
+    [Fact]
+    public void ShouldNotHaveError_WhenLunarEventHasValidLunarDate()
+    {
+        // Arrange
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(command);
+        // Assert
+        result.ShouldNotHaveValidationErrorFor(x => x.LunarDate);
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Lunar có SolarDate.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Lunar nhưng có SolarDate.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính SolarDate.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar không được có SolarDate.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarEventHasSolarDate()
+    {
+        // Arrange
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            SolarDate = DateTime.Now,
+            LunarDate = new LunarDateInput { Day = 1, Month = 1, IsLeapMonth = false },
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(command);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.SolarDate)
+              .WithErrorMessage("Lunar event cannot have a SolarDate.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Day của LunarDate không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Lunar và LunarDate có Day không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.Day.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Day của LunarDate phải nằm trong khoảng 1-30.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarDateDayIsInvalid()
+    {
+        // Arrange
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 31, Month = 1, IsLeapMonth = false }, // Invalid Day
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(command);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate!.Day)
+              .WithErrorMessage("Lunar day must be between 1 and 30.");
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Month của LunarDate không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateEventCommand với CalendarType là Lunar và LunarDate có Month không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính LunarDate.Month.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Month của LunarDate phải nằm trong khoảng 1-12.
+    /// </summary>
+    [Fact]
+    public void ShouldHaveError_WhenLunarDateMonthIsInvalid()
+    {
+        // Arrange
+        var command = new CreateEventCommand
+        {
+            Name = "Valid Name",
+            FamilyId = Guid.NewGuid(),
+            CalendarType = CalendarType.Lunar,
+            LunarDate = new LunarDateInput { Day = 1, Month = 13, IsLeapMonth = false }, // Invalid Month
+            RepeatRule = RepeatRule.None
+        };
+        // Act
+        var result = _validator.TestValidate(command);
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LunarDate!.Month)
+              .WithErrorMessage("Lunar month must be between 1 and 12.");
     }
 }

@@ -22,7 +22,7 @@ import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useMemberQuery, useUpdateMemberMutation } from '@/composables/member'; // Import new composables
+import { useMemberQuery, useUpdateMemberMutation } from '@/composables';
 
 interface MemberEditViewProps {
   memberId: string;

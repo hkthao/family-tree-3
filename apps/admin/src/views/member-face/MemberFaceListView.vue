@@ -20,7 +20,6 @@
 </template>
 <script setup lang="ts">
 import { onMounted, watch, toRefs, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useCrudDrawer } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace, MemberFaceFilter, ListOptions, FilterOptions } from '@/types';
@@ -28,16 +27,13 @@ import MemberFaceList from '@/components/member-face/MemberFaceList.vue';
 import MemberFaceAddView from '@/views/member-face/MemberFaceAddView.vue';
 import MemberFaceDetailView from '@/views/member-face/MemberFaceDetailView.vue';
 import MemberFaceSearch from '@/components/member-face/MemberFaceSearch.vue';
-import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation } from '@/composables/member-face';
-import { useMemberFaceDeletion } from '@/composables/member-face/useMemberFaceDeletion';
+import { useMemberFaceListFilters, useMemberFacesQuery, useDeleteMemberFaceMutation, useMemberFaceDeletion } from '@/composables';
 
 interface MemberFaceListViewProps {
   memberId?: string;
   familyId?: string;
 }
 const props = defineProps<MemberFaceListViewProps>();
-const { t } = useI18n();
-
 const {
   addDrawer,
   detailDrawer,

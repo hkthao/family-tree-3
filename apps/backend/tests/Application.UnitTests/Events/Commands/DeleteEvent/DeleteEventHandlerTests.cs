@@ -1,9 +1,8 @@
-
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Common; // NEW
+using backend.Domain.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -36,7 +35,8 @@ public class DeleteEventHandlerTests : TestBase
         var userId = Guid.NewGuid();
         var now = DateTime.UtcNow;
 
-        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        var existingEvent = Event.CreateSolarEvent("Test Event", "EVT-TEST", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId);
+        existingEvent.Id = eventId;
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync();
 
@@ -83,7 +83,8 @@ public class DeleteEventHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var eventId = Guid.NewGuid();
-        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        var existingEvent = Event.CreateSolarEvent("Test Event", "EVT-TEST", EventType.Other, DateTime.UtcNow.AddDays(10), RepeatRule.None, familyId);
+        existingEvent.Id = eventId;
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync();
 

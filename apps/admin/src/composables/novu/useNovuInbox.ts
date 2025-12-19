@@ -1,5 +1,5 @@
-import { ref, onUnmounted, type Ref, watch } from 'vue'; // Removed onMounted
-import { useProfileSettings } from '@/composables/user/useProfileSettings'; // Added useProfileSettings
+import { ref, type Ref, watch } from 'vue'; // Removed onMounted
+import { useProfileSettings } from '@/composables';
 import { NovuUI } from '@novu/js/ui';
 import { dark } from '@novu/js/themes';
 import { useI18n } from 'vue-i18n';
@@ -14,7 +14,7 @@ interface NovuOptions {
 
 export function useNovuInbox(containerRef: Ref<HTMLElement | null>) {
   const { t } = useI18n();
-  const { userProfile, isFetchingProfile, fetchError } = useProfileSettings();
+  const { userProfile, isFetchingProfile } = useProfileSettings();
   let novuInstance: NovuUI | null = null;
 
   const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');
@@ -70,15 +70,7 @@ export function useNovuInbox(containerRef: Ref<HTMLElement | null>) {
     }
   };
 
-  const cleanupNovu = () => {
-    if (novuInstance && containerRef.value) {
-      try {
-        novuInstance.unmountComponent(containerRef.value);
-      } catch (error) {
-        console.error('Failed to unmount Novu inbox:', error);
-      }
-    }
-  };
+
 
   watch([userProfile, isFetchingProfile, containerRef], () => { // Watch for userProfile to be available
     if (userProfile.value && !isFetchingProfile.value && containerRef.value) {

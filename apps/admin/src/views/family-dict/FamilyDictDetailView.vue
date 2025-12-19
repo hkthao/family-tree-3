@@ -20,7 +20,7 @@ import { computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyDictForm } from '@/components/family-dict';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
-import { useFamilyDictQuery, useDeleteFamilyDictMutation } from '@/composables/family-dict';
+import { useFamilyDictQuery, useDeleteFamilyDictMutation } from '@/composables';
 
 interface FamilyDictDetailViewProps {
   familyDictId: string;

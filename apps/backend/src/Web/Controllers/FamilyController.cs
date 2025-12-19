@@ -10,8 +10,8 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
-using backend.Application.PrivacyConfigurations.Commands; // New using
-using backend.Application.PrivacyConfigurations.Queries; // New using
+using backend.Application.Families.Commands.UpdatePrivacyConfiguration; // New using
+using backend.Application.Families.Queries.GetPrivacyConfiguration; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

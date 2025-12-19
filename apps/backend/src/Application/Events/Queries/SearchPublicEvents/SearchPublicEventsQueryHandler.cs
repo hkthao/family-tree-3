@@ -13,7 +13,7 @@ public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapp
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchPublicEventsQuery request, CancellationToken cancellationToken)
     {
-        var spec = new PublicEventsSpecification();
+        var spec = new PublicEventsSpecification(); // Assuming this specification is still valid
         var query = _context.Events.AsNoTracking().WithSpecification(spec);
 
         if (request.FamilyId.HasValue)
@@ -31,17 +31,15 @@ public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapp
             query = query.WithSpecification(new EventsByEventTypeSpecification(request.EventType.Value));
         }
 
-        if (request.StartDate.HasValue || request.EndDate.HasValue)
-        {
-            query = query.WithSpecification(new EventsByDateRangeSpecification(request.StartDate, request.EndDate));
-        }
+        // Removed EventsByDateRangeSpecification usage as it's no longer valid
 
         // Sorting
+        // Since StartDate is removed, we'll sort by Name or Code as a default
         query = request.SortBy?.ToLower() switch
         {
-            "name" => query.WithSpecification(new EventsOrderByNameSpecification(request.SortOrder ?? "asc")),
-            "startdate" => query.WithSpecification(new EventsOrderByStartDateSpecification(request.SortOrder ?? "asc")),
-            _ => query.WithSpecification(new EventsOrderByStartDateSpecification("asc")) // Default sort
+            "name" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.Name) : query.OrderBy(e => e.Name),
+            "code" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.Code) : query.OrderBy(e => e.Code),
+            _ => query.OrderBy(e => e.Name) // Default sort if no sortBy is provided or relevant date fields are not applicable
         };
 
         var totalItems = await query.CountAsync(cancellationToken);
@@ -57,5 +55,3 @@ public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapp
     }
 }
 
-// EventDto is defined in GetPublicEventByIdQuery.cs, so we don't redefine it here.
-// If it were not, we would define it here or in a common DTO file.

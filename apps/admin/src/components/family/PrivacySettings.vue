@@ -28,7 +28,7 @@
       <v-spacer></v-spacer>
       <v-btn
         color="primary"
-        :loading="privacyConfigurationStore.loading"
+        :loading="isLoading || isUpdating"
         @click="savePrivacySettings"
         data-testid="save-privacy-settings-button"
       >
@@ -39,18 +39,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, watch, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { usePrivacyConfigurationStore } from '@/stores/privacy-configuration.store';
 import { useGlobalSnackbar } from '@/composables';
+import { usePrivacyConfiguration } from '@/composables/family/usePrivacyConfiguration'; // Import the new composable
 
 const props = defineProps<{
   familyId: string;
 }>();
 
 const { t } = useI18n();
-const privacyConfigurationStore = usePrivacyConfigurationStore();
 const { showSnackbar } = useGlobalSnackbar();
+
+const {
+  privacyConfiguration,
+  isLoading,
+  isUpdating,
+  updatePrivacySettings,
+} = usePrivacyConfiguration(toRef(props, 'familyId')); // Pass familyId as a ref
 
 const selectedProperties = ref<string[]>([]);
 const formRef = ref<HTMLFormElement | null>(null);
@@ -64,7 +70,7 @@ const memberProperties = computed(() => [
   { text: t('member.form.dateOfBirth'), value: 'DateOfBirth' },
   { text: t('member.form.dateOfDeath'), value: 'DateOfDeath' },
   { text: t('member.form.placeOfBirth'), value: 'PlaceOfBirth' },
-  { text: t('member.form.placeOfDeath'), value: 'PlaceOfDeath' },
+  { text: t('member.form.placeOfDeath'), value: 'PlaceOfBirth' },
   { text: t('member.form.phone'), value: 'Phone' },
   { text: t('member.form.email'), value: 'Email' },
   { text: t('member.form.address'), value: 'Address' },
@@ -76,34 +82,25 @@ const memberProperties = computed(() => [
   { text: t('member.form.wifeFullName'), value: 'WifeFullName' },
 ]);
 
-const fetchPrivacySettings = async () => {
-  if (props.familyId) {
-    const result = await privacyConfigurationStore.fetchPrivacyConfiguration(props.familyId);
-    if (result.ok && result.value) {
-      selectedProperties.value = result.value.publicMemberProperties;
-    } else {
-      // If no config exists, default to all properties being public
-      selectedProperties.value = memberProperties.value.map(p => p.value);
-    }
+// Watch for changes in privacyConfiguration fetched by the composable
+watch(privacyConfiguration, (newConfig) => {
+  if (newConfig) {
+    selectedProperties.value = newConfig.publicMemberProperties;
+  } else {
+    // If no config exists, default to all properties being public
+    selectedProperties.value = memberProperties.value.map(p => p.value);
   }
-};
+}, { immediate: true }); // Immediate to set initial value
 
 const savePrivacySettings = async () => {
-  const result = await privacyConfigurationStore.updatePrivacyConfiguration(
-    props.familyId,
-    selectedProperties.value,
-  );
-  if (result.ok) {
+  try {
+    await updatePrivacySettings(selectedProperties.value);
     showSnackbar(t('family.privacy.saveSuccess'), 'success');
-  } else {
+  } catch (err: any) {
     showSnackbar(t('family.privacy.saveError'), 'error');
-    console.error('Error saving privacy settings:', result.error);
+    console.error('Error saving privacy settings:', err);
   }
 };
-
-onMounted(fetchPrivacySettings);
-
-watch(() => props.familyId, fetchPrivacySettings);
 </script>
 
 <style scoped>

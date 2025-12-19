@@ -27,7 +27,7 @@
 import { watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EventForm } from '@/components/event';
-import { useEventQuery } from '@/composables/event'; // Import useEventQuery
+import { useEventQuery } from '@/composables'; // Import useEventQuery
 
 interface EventDetailViewProps {
   eventId: string;

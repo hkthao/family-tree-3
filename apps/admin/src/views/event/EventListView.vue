@@ -30,7 +30,7 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
-import { useEventList } from '@/composables/event/useEventList'; // Import the new composable
+import { useEventList } from '@/composables'; // Import the new composable
 
 const props = defineProps<{
   familyId: string;
@@ -40,7 +40,6 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'saved']);
 
 const {
-  t,
   eventListSearchQuery,
   filters,
   events,

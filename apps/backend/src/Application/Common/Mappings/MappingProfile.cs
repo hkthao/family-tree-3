@@ -1,4 +1,5 @@
-using backend.Application.Events;
+using backend.Application.Common.Dtos;
+using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
 using backend.Application.Families.Dtos;
@@ -9,6 +10,9 @@ using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyLinks.Queries;
+using backend.Application.FamilyLocations; // Added for FamilyLocationDto and FamilyLocationListDto
+using backend.Application.FamilyLocations.Commands.CreateFamilyLocation; // Added for CreateFamilyLocationCommand
+using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation; // Added for UpdateFamilyLocationCommand
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
@@ -16,13 +20,15 @@ using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.MemberStories.DTOs;
-using backend.Application.PdfTemplates.Dtos;
-using backend.Application.PrivacyConfigurations.Queries;
+using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
+using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
+using backend.Application.MemoryItems.DTOs; // Added
+using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects;
 
 namespace backend.Application.Common.Mappings;
 
@@ -50,11 +56,22 @@ public class MappingProfile : Profile
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.Member)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null))
+            .ForMember(dest => dest.CalendarType, opt => opt.MapFrom(src => src.CalendarType))
+            .ForMember(dest => dest.SolarDate, opt => opt.MapFrom(src => src.SolarDate))
+            .ForMember(dest => dest.LunarDate, opt => opt.MapFrom(src => src.LunarDate)) // AutoMapper will use the LunarDate mapping
+            .ForMember(dest => dest.RepeatRule, opt => opt.MapFrom(src => src.RepeatRule));
         CreateMap<Event, EventDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.Member)))
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
+            .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null))
+            .ForMember(dest => dest.CalendarType, opt => opt.MapFrom(src => src.CalendarType))
+            .ForMember(dest => dest.SolarDate, opt => opt.MapFrom(src => src.SolarDate))
+            .ForMember(dest => dest.LunarDate, opt => opt.MapFrom(src => src.LunarDate))
+            .ForMember(dest => dest.RepeatRule, opt => opt.MapFrom(src => src.RepeatRule));
+
+        // LunarDate
+        CreateMap<LunarDate, LunarDateDto>();
 
         //Relationship
         CreateMap<Relationship, RelationshipDto>();
@@ -87,8 +104,7 @@ public class MappingProfile : Profile
         CreateMap<Event, EventExportDto>()
             .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
 
-        // PdfTemplate DTO
-        CreateMap<PdfTemplate, PdfTemplateDto>();
+
 
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? (src.Member.LastName + " " + src.Member.FirstName).Trim() : null))
@@ -100,7 +116,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BirthYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfBirth.HasValue ? src.Member.DateOfBirth.Value.Year : (int?)null))
             .ForMember(dest => dest.DeathYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfDeath.HasValue ? src.Member.DateOfDeath.Value.Year : (int?)null));
 
-        CreateMap<backend.Domain.ValueObjects.BoundingBox, backend.Application.MemberFaces.Common.BoundingBoxDto>();
+        _ = CreateMap<Domain.ValueObjects.BoundingBox, BoundingBoxDto>();
 
 
         // PrivacyConfiguration mapping (already exists, ensuring no duplication)
@@ -117,25 +133,42 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
 
         // FamilyMedia mappings
-        CreateMap<Domain.Entities.FamilyMedia, FamilyMediaDto>()
+        CreateMap<FamilyMedia, FamilyMediaDto>()
             .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.ToString() : null)) // Placeholder, will need a resolver for actual user name
             .ForMember(dest => dest.MediaLinks, opt => opt.MapFrom(src => src.MediaLinks));
 
         CreateMap<MediaLink, MediaLinkDto>()
             .ForMember(dest => dest.RefName, opt => opt.Ignore()); // Placeholder, will need a resolver to get name from Member/MemberStory
 
-        CreateMap<MemberStory, MemberStoryDto>()
-           .ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.Member.FamilyId))
-           .ForMember(dest => dest.MemberFullName, opt => opt.MapFrom(src => src.Member.FullName ?? string.Empty))
-           .ForMember(dest => dest.MemberAvatarUrl, opt => opt.MapFrom(src => src.Member.AvatarUrl))
-           .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member.Gender))
-           .ForMember(dest => dest.MemberStoryImages, opt => opt.MapFrom(src => src.MemberStoryImages.Select(img => new MemberStoryImageDto
-           {
-               Id = img.Id,
-               ImageUrl = img.ImageUrl
-           }).ToList()));
 
-        // Mapping for MemberStoryImage to MemberStoryImageDto
-        CreateMap<MemberStoryImage, MemberStoryImageDto>();
+
+        // FamilyLocation mappings
+        CreateMap<FamilyLocation, FamilyLocationDto>();
+        CreateMap<FamilyLocation, FamilyLocationListDto>();
+        CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
+        CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
+
+        // MemoryItem mappings
+        CreateMap<MemoryItem, MemoryItemDto>()
+            .ForMember(dest => dest.MemoryMedia, opt => opt.MapFrom(src => src.MemoryMedia))
+            .ForMember(dest => dest.MemoryPersons, opt => opt.MapFrom(src => src.MemoryPersons));
+        CreateMap<MemoryMedia, MemoryMediaDto>();
+        CreateMap<MemoryPerson, MemoryPersonDto>()
+            .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null));
+
+        // Commands to Entities
+        CreateMap<CreateMemoryItemCommand, MemoryItem>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryPersons, opt => opt.Ignore());
+        CreateMap<UpdateMemoryItemCommand, MemoryItem>()
+            .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryPersons, opt => opt.Ignore());
+        CreateMap<CreateMemoryMediaCommandDto, MemoryMedia>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
+        CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
+            .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
+
     }
 }

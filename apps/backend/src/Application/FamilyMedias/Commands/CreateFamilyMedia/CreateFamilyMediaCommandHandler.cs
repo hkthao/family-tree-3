@@ -1,11 +1,9 @@
-using System.IO; // Required for MemoryStream
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
-using AutoMapper;
 using backend.Application.FamilyMedias.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
@@ -68,7 +66,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             return Result<FamilyMediaDto>.Failure(uploadResult.Error ?? "File upload failed.", ErrorSources.ExternalServiceError);
         }
 
-        var familyMedia = new backend.Domain.Entities.FamilyMedia
+        var familyMedia = new Domain.Entities.FamilyMedia
         {
             FamilyId = request.FamilyId,
             FileName = request.FileName, // Store original file name

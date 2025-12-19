@@ -46,7 +46,7 @@
 import type { DetectedFace } from '@/types';
 import { type PropType } from 'vue';
 import MemberFaceDisplay from '../common/MemberFaceDisplay.vue'; // NEW IMPORT
-import { useFaceDetectionSidebar } from '@/composables/face/useFaceDetectionSidebar';
+import { useFaceDetectionSidebar } from '@/composables';
 
 const props = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },

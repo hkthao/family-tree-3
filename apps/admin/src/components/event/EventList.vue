@@ -19,8 +19,16 @@
     </template>
 
     <!-- Date column -->
-    <template #item.startDate="{ item }">
-      {{ formatDate(item.startDate) }}
+    <template #item.date="{ item }">
+      <template v-if="item.calendarType === CalendarType.Solar && item.solarDate">
+        {{ formatDate(item.solarDate) }}
+      </template>
+      <template v-else-if="item.calendarType === CalendarType.Lunar && item.lunarDate">
+        {{ t('event.lunarDateDisplay', { day: item.lunarDate.day, month: item.lunarDate.month, isLeapMonth: item.lunarDate.isLeapMonth }) }}
+      </template>
+      <template v-else>
+        -
+      </template>
     </template>
 
     <!-- Event Name column -->
@@ -55,10 +63,9 @@
         </template>
       </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
-        <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
-            data-testid="delete-event-button">
-            <v-icon>mdi-delete</v-icon>
+                    <template v-slot:activator="{ props }">
+                  <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
+                    data-testid="delete-event-button">            <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
@@ -75,7 +82,8 @@
 import type { Event } from '@/types';
 import FamilyName from '@/components/common/FamilyName.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
-import { useEventListComposable } from '@/composables/event/useEventListComposable';
+import { useEventListComposable } from '@/composables';
+import { CalendarType } from '@/types/enums'; // Import CalendarType enum
 
 const props = defineProps<{
   events: Event[];

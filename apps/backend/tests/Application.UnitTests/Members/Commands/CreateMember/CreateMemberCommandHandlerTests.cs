@@ -2,6 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
+using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common;
@@ -11,7 +12,6 @@ using MediatR;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
-using backend.Application.FamilyMedias.DTOs;
 // Remove Microsoft.EntityFrameworkCore as DbSet is not mocked anymore for _context
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;

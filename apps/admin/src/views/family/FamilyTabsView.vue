@@ -19,21 +19,18 @@
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyDetailView :family-id="familyId" :read-only="readOnlyValue"
-            @open-edit-drawer="handleOpenEditDrawer" />
+          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer" />
         </v-window-item>
         <v-window-item value="timeline">
-          <EventTimeline :family-id="familyId" :read-only="readOnlyValue" />
+          <EventTimeline :family-id="familyId" />
         </v-window-item>
         <v-window-item value="calendar">
           <EventCalendar :family-id="familyId" />
         </v-window-item>
         <v-window-item value="events">
-          <EventListView :family-id="familyId" :read-only="readOnlyValue" />
+          <EventListView :family-id="familyId" />
         </v-window-item>
-        <v-window-item value="member-stories">
-          <MemberStoryListView :family-id="familyId" :read-only="readOnlyValue" />
-        </v-window-item>
+
         <v-window-item value="family-tree">
           <TreeChart :family-id="familyId" />
         </v-window-item>
@@ -47,21 +44,29 @@
         <v-window-item value="family-media">
           <FamilyMediaListView :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: Memory Item Tab -->
+        <v-window-item value="memory-items">
+          <MemoryItemListView :family-id="familyId" />
+        </v-window-item>
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
+        </v-window-item>
+        <!-- NEW: Family Location Tab -->
+        <v-window-item value="locations">
+          <FamilyLocationListView :family-id="familyId" :allow-add="allowAdd" :allow-edit="allowEdit"
+            :allow-delete="allowDelete" />
+        </v-window-item>
+        <v-window-item value="map">
+          <FamilyMapView :family-id="familyId" />
         </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
 
   <!-- Edit Family Drawer -->
-  <BaseCrudDrawer :model-value="showEditDrawer" @update:model-value="showEditDrawer = $event" @close="handleCloseEditDrawer">
-    <FamilyEditView
-      v-if="familyId"
-      :family-id="familyId"
-      @close="handleCloseEditDrawer"
-      @saved="handleFamilySaved"
-    />
+  <BaseCrudDrawer :model-value="showEditDrawer" @update:model-value="showEditDrawer = $event"
+    @close="handleCloseEditDrawer">
+    <FamilyEditView v-if="familyId" :family-id="familyId" @close="handleCloseEditDrawer" @saved="handleFamilySaved" />
   </BaseCrudDrawer>
 
 
@@ -78,9 +83,12 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
-import MemberStoryListView from '@/views/member-story/MemberStoryListView.vue';
+
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
+import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
+import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
+import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
@@ -90,7 +98,10 @@ const { isAdmin, isFamilyManager } = useAuth();
 const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);
-const readOnlyValue = true;
+
+const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
 
 const showEditDrawer = ref(false);
 
@@ -123,11 +134,14 @@ const allTabDefinitions = computed(() => [
   { value: 'members', text: t('family.members.title'), condition: true as boolean },
   { value: 'family-tree', text: t('family.tree.title'), condition: true as boolean },
   { value: 'face-recognition', text: t('face.face_data'), condition: canViewFaceDataTab.value as boolean },
-  { value: 'member-stories', text: t('memberStory.list.title'), condition: true as boolean },
+
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
+  { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
+  { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
+  { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));

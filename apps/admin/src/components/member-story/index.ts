@@ -1,1 +1,0 @@
-export { default as MemberStoryForm } from './MemberStoryForm.vue';

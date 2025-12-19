@@ -28,13 +28,19 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
 
         // Apply individual specifications
         query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
-        query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
+        query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate, request.LunarStartDay, request.LunarStartMonth, request.LunarEndDay, request.LunarEndMonth));
         query = query.WithSpecification(new EventTypeSpecification(request.Type));
         query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
 
-        // Apply ordering specification
-        query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
+        // Sorting
+        // Since StartDate is removed, we'll sort by Name or Code as a default
+        query = request.SortBy?.ToLower() switch
+        {
+            "name" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.Name) : query.OrderBy(e => e.Name),
+            "code" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.Code) : query.OrderBy(e => e.Code),
+            _ => query.OrderBy(e => e.Name) // Default sort if no sortBy is provided or relevant date fields are not applicable
+        };
 
         var paginatedList = await query
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)

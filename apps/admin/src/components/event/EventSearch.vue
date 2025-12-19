@@ -21,12 +21,17 @@
             </v-col>
 
             <v-col cols="12" md="4">
+              <v-select v-model="filters.calendarType" :items="calendarTypes" :label="t('event.search.calendarType')"
+                clearable data-testid="event-search-calendar-type-select"></v-select>
+            </v-col>
+
+            <v-col cols="12" md="4">
               <v-date-input v-model="filters.startDate" :label="t('event.search.startDate')" optional
-                data-testid="event-search-start-date-input" append-inner-icon="mdi-calendar" />
+                data-testid="event-search-start-date-input" />
             </v-col>
             <v-col cols="12" md="4">
               <v-date-input v-model="filters.endDate" :label="t('event.search.endDate')" optional
-                data-testid="event-search-end-date-input" append-inner-icon="mdi-calendar" />
+                data-testid="event-search-end-date-input" />
             </v-col>
             <v-col cols="12" md="4">
               <MemberAutocomplete v-model="filters.memberId" :label="t('event.search.member')" clearable
@@ -39,7 +44,7 @@
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="applyFilters" data-testid="event-search-apply-button">{{
             t('event.search.apply')
-            }}</v-btn>
+          }}</v-btn>
           <v-btn @click="resetFilters" data-testid="event-search-reset-button">{{ t('event.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
@@ -49,7 +54,9 @@
 
 <script setup lang="ts">
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
-import { useEventSearch } from '@/composables/event/useEventSearch';
+import { useEventSearch } from '@/composables';
+import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
+
 
 const emit = defineEmits(['update:filters']);
 
@@ -58,6 +65,7 @@ const {
   expanded,
   filters,
   eventTypes,
+  calendarTypes, // Expose calendarTypes
   applyFilters,
   resetFilters,
 } = useEventSearch(emit);

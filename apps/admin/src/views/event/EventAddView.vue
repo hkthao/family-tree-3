@@ -24,7 +24,7 @@
 import { ref } from 'vue';
 import type { Event } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
-import { useEventAdd } from '@/composables/event/useEventAdd'; // Import useEventAdd
+import { useEventAdd } from '@/composables'; // Import useEventAdd
 
 interface EventAddViewProps {
   familyId?: string;

@@ -30,7 +30,7 @@ export { default as MemberAddView } from './member/MemberAddView.vue';
 export { default as MemberDetailView } from './member/MemberDetailView.vue';
 export { default as MemberEditView } from './member/MemberEditView.vue';
 export { default as MemberListView } from './member/MemberListView.vue';
-export { MemberStoryListView, MemberStoryAddView, MemberStoryDetailView } from './member-story'; // Updated: Export Member Story Studio related Views
+
 // Export pages from misc
 export { default as NotFoundView } from './misc/NotFoundView.vue';
 
@@ -48,9 +48,6 @@ export { default as FamilyDictAddView } from './family-dict/FamilyDictAddView.vu
 export { default as FamilyDictDetailView } from './family-dict/FamilyDictDetailView.vue';
 export { default as FamilyDictEditView } from './family-dict/FamilyDictEditView.vue';
 export { default as FamilyDictListView } from './family-dict/FamilyDictListView.vue';
-
-// Export pages from family-link
-export { default as FamilyLinkListView } from './family-link/FamilyLinkListView.vue';
 
 // Export MainRouterView (if it's intended to be used as a view component)
 export { default as MainRouterView } from './MainRouterView.vue';

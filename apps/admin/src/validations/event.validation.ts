@@ -1,25 +1,38 @@
-import { useI18n } from 'vue-i18n';
-import { required, helpers } from '@vuelidate/validators';
 import { computed } from 'vue';
-import type { Ref } from 'vue';
+import { useRules } from 'vuetify/labs/rules';
+import { CalendarType, type RepeatRule } from '@/types/enums';
+import type { EventType } from '@/types';
+import type { LunarDate } from '@/types/lunar-date';
 
-export function useEventRules(state: { [key: string]: Ref<any> }) {
-  const { t } = useI18n();
+interface EventFormState {
+  name: string;
+  code: string;
+  type: EventType;
+  familyId: string | null | undefined;
+  solarDate: Date | null | undefined;
+  calendarType: CalendarType;
+  lunarDate: LunarDate;
+  repeatRule: RepeatRule;
+  relatedMemberIds: string[] | undefined;
+}
 
-  const endDateAfterStartDate = (value: string | null) => {
-    if (!value || !state.startDate.value) return true;
-    const endDate = new Date(value);
-    const startDate = new Date(state.startDate.value);
-    return endDate >= startDate;
-  };
+export function useEventRules(_state: EventFormState) {
+  const rulesVuetify = useRules();
 
   const rules = computed(() => {
     return {
-      name: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      type: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      startDate: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      endDate: { endDateAfterStartDate: helpers.withMessage(() => t('event.validation.endDateAfterStartDate'), endDateAfterStartDate) },
+      name: [rulesVuetify.required()],
+      code: [],
+      type: [rulesVuetify.required()],
+      familyId: [rulesVuetify.required()],
+      calendarType: [rulesVuetify.required()],
+      repeatRule: [rulesVuetify.required()],
+      solarDate: [rulesVuetify.required()],
+      lunarDate: {
+        day: [rulesVuetify.required()],
+        month: [rulesVuetify.required()],
+        isLeapMonth: [],
+      },
     };
   });
 

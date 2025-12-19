@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { useAddMemberMutation } from '@/composables/member'; // Import new composable
+import { useAddMemberMutation } from '@/composables';
 interface MemberAddViewProps {
   familyId: string | null;
 }

@@ -20,8 +20,7 @@
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyMediaForm } from '@/components/family-media';
-import { useAddFamilyMediaMutation } from '@/composables/family-media';
-import { useFamilyMediaFormLogic } from '@/composables/family-media/useFamilyMediaFormLogic';
+import { useAddFamilyMediaMutation, useFamilyMediaFormLogic } from '@/composables';
 
 interface FamilyMediaAddViewProps {
   familyId: string;
