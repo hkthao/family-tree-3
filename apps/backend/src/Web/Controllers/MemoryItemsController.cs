@@ -39,6 +39,11 @@ public class MemoryItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMemoryItem(Guid id, UpdateMemoryItemCommand command)
     {
+        if (id != command.Id)
+        {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemoryItemCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest();
+        }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);
     }

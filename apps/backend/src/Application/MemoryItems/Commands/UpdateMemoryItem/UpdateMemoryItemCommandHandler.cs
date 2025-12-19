@@ -32,15 +32,9 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
         // Add or update media
         foreach (var mediaDto in request.MemoryMedia)
         {
-            var existingMedia = entity.MemoryMedia.FirstOrDefault(m => m.Id == mediaDto.Id);
+            var existingMedia = _context.MemoryMedia.FirstOrDefault(m => m.Url == mediaDto.Url);
             if (existingMedia == null)
-            {
                 _context.MemoryMedia.Add(new MemoryMedia(entity.Id, mediaDto.Url));
-            }
-            else
-            {
-                existingMedia.Update(mediaDto.Url);
-            }
         }
         // Handle MemoryPersons updates
         var existingMemoryPersons = await _context.MemoryPersons
