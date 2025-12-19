@@ -16,9 +16,36 @@ export interface Family {
   familyUsers?: FamilyUser[];
   totalMembers?: number;
   totalGenerations?: number;
-  managerIds: [];
-  viewerIds: [];
+  managerIds: string[]; // Changed to string[]
+  viewerIds: string[]; // Changed to string[]
 
+}
+
+export interface FamilyAddDto {
+  name: string;
+  code?: string;
+  description?: string;
+  avatarUrl?: string;
+  avatarBase64?: string | null;
+  address?: string;
+  visibility?: FamilyVisibility;
+  managerIds: string[];
+  viewerIds: string[];
+}
+
+export interface FamilyUpdateDto {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  avatarUrl?: string;
+  avatarBase64?: string | null;
+  address?: string;
+  visibility?: FamilyVisibility;
+  managerIds: string[];
+  viewerIds: string[];
+  deletedManagerIds: string[]; // New field
+  deletedViewerIds: string[]; // New field
 }
 
 export interface IFamilyAccess {

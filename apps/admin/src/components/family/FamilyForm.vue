@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
+  <v-form ref="formRef" :disabled="props.readOnly">
     <AvatarInput v-if="!props.readOnly" v-model="formData.avatarBase64" :size="96"
       :initial-avatar="initialAvatarDisplay" />
     <div v-else class="d-flex justify-center mb-4">
@@ -30,11 +30,11 @@
     <v-row>
       <v-col cols="12">
         <UserAutocomplete v-model="managers" multiple :disabled="props.readOnly" hideDetails
-          :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
+          :label="t('family.permissions.managers')" data-testid="family-managers-select" :loading="isLoadingUsers"></UserAutocomplete>
       </v-col>
       <v-col cols="12">
         <UserAutocomplete v-model="viewers" multiple :disabled="props.readOnly" hideDetails
-          :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
+          :label="t('family.permissions.viewers')" data-testid="family-viewers-select" :loading="isLoadingUsers"></UserAutocomplete>
       </v-col>
     </v-row>
   </v-form>
@@ -43,16 +43,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { VForm } from 'vuetify/components';
-import type { Family } from '@/types';
+import type { Family } from '@/types'; // Updated import
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useFamilyForm } from '@/composables';
 
 const props = defineProps<{
-  data?: Family;
+  data?: Family; // Keep Family type for incoming data from API
   readOnly?: boolean;
 }>();
-const emit = defineEmits(['submit', 'cancel']);
+// Removed emit from props, as it's handled internally now.
+defineEmits(['submit']);
 
 const formRef = ref<VForm | null>(null);
 
@@ -63,15 +64,17 @@ const {
   managers,
   viewers,
   visibilityItems,
-  submitForm,
   validate,
   getFormData,
   getFamilyAvatarUrl,
   rules,
-} = useFamilyForm(props, emit, formRef);
+  isLoadingUsers, // NEW
+} = useFamilyForm(props, formRef);
 
 defineExpose({
   validate,
   getFormData,
 });
+
+
 </script>

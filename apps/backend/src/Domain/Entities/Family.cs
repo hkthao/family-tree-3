@@ -70,6 +70,11 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         return familyUser;
     }
 
+    public void ClearFamilyUsers()
+    {
+        _familyUsers.Clear();
+    }
+
     public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code)
     {
         Name = name;

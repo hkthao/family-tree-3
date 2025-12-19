@@ -61,9 +61,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             AvatarBase64 = avatarBase64,
             Visibility = "Private",
             ManagerIds = new List<Guid>(), // No changes to managers in this specific test
-            ViewerIds = new List<Guid>(), // No changes to viewers in this specific test
-            DeletedManagerIds = new List<Guid>(), // No deletions in this specific test
-            DeletedViewerIds = new List<Guid>() // No deletions in this specific test
+            ViewerIds = new List<Guid>() // No changes to viewers in this specific test
         };
 
         // Act
@@ -110,9 +108,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             Name = "New Name",
             Visibility = "Private",
             ManagerIds = new List<Guid>(),
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ViewerIds = new List<Guid>()
         };
 
         // Act
@@ -134,13 +130,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Arrange
         var command = new UpdateFamilyCommand
         {
-            Id = Guid.NewGuid(),
-            Name = "Any Name",
-            Visibility = "Public",
             ManagerIds = new List<Guid>(),
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ViewerIds = new List<Guid>()
         };
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
         _authorizationServiceMock.Setup(x => x.CanManageFamily(command.Id)).Returns(true);
@@ -175,9 +166,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             Name = "New Name",
             Visibility = "Private",
             ManagerIds = new List<Guid>(),
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ViewerIds = new List<Guid>()
         };
 
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
@@ -218,10 +207,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         {
             Id = familyId,
             Name = "Updated Name",
-            ManagerIds = new List<Guid> { managerToAdd }, // Only add new manager
-            ViewerIds = new List<Guid> { viewerToAdd },
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ManagerIds = new List<Guid> { managerToAdd, creatorId }, // New manager to add, and keep creator
+            ViewerIds = new List<Guid> { viewerToAdd } // New viewer to add
         };
 
         // Act
@@ -234,9 +221,9 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         updatedFamily.Should().NotBeNull();
-        updatedFamily!.FamilyUsers.Should().HaveCount(3); // Creator, new manager, new viewer
+        updatedFamily!.FamilyUsers.Should().HaveCount(3); // Creator (Manager), new manager, new viewer
         updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
-        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ManagerIds.First() && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == managerToAdd && fu.Role == Domain.Enums.FamilyRole.Manager);
         updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerToAdd && fu.Role == Domain.Enums.FamilyRole.Viewer);
     }
 
@@ -260,10 +247,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         {
             Id = familyId,
             Name = "Updated Name",
-            ManagerIds = new List<Guid>(), // Creator is already manager, not adding it again
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(), // userToRemove was a Viewer, so not a manager
-            DeletedViewerIds = new List<Guid> { userToRemove }
+            ManagerIds = new List<Guid> { creatorId }, // Keep creator as manager
+            ViewerIds = new List<Guid>()  // Do not include userToRemove
         };
 
         // Act
@@ -276,9 +261,9 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         updatedFamily.Should().NotBeNull();
-        updatedFamily!.FamilyUsers.Should().HaveCount(2); // User is NOT actually removed by the current handler logic
+        updatedFamily!.FamilyUsers.Should().HaveCount(1); // Only creator should remain
         updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
-        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == userToRemove && fu.Role == Domain.Enums.FamilyRole.Viewer); // User still exists
+        updatedFamily.FamilyUsers.Should().NotContain(fu => fu.UserId == userToRemove); // userToRemove should be gone
     }
 
     [Fact]
@@ -300,10 +285,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         {
             Id = familyId,
             Name = "Updated Name",
-            ManagerIds = new List<Guid> { userToUpdate }, // Add userToUpdate as manager
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ManagerIds = new List<Guid> { userToUpdate, creatorId }, // Add userToUpdate as manager, keep creator
+            ViewerIds = new List<Guid>()
         };
 
         // Act
@@ -341,10 +324,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         {
             Id = familyId,
             Name = "Updated Name",
-            ManagerIds = new List<Guid>(), // No new managers to add, existing ones are already there
-            ViewerIds = new List<Guid>(),
-            DeletedManagerIds = new List<Guid>(),
-            DeletedViewerIds = new List<Guid>()
+            ManagerIds = new List<Guid> { creatorId, existingManagerId }, // Include both to ensure they are kept
+            ViewerIds = new List<Guid>()
         };
 
         // Act

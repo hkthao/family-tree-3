@@ -7,6 +7,7 @@ using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Families;
 using backend.Domain.ValueObjects; // NEW
+using backend.Domain.Entities;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -88,28 +89,26 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         );
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
 
-        var managerIds = request.ManagerIds.Where(e => !request.DeletedManagerIds.Contains(e)).ToList();
-        var viewerIds = request.ViewerIds.Where(e => !request.DeletedViewerIds.Contains(e)).ToList();
+        // --- Update FamilyUsers ---
+        // Clear all existing family users
+        var familyUsersToRemove = _context.FamilyUsers.Where(fu => fu.FamilyId == entity.Id).ToList();
+        _context.FamilyUsers.RemoveRange(familyUsersToRemove);
+        entity.ClearFamilyUsers(); // Clear the collection in the aggregate root
 
-        foreach (var managerId in request.ManagerIds)
+        // Add Managers
+        foreach (var managerId in request.ManagerIds.Distinct())
         {
             entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
         }
 
         // Add Viewers
-        foreach (var viewerId in request.ViewerIds)
+        foreach (var viewerId in request.ViewerIds.Distinct())
         {
-            entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
-        }
-
-        // Remove deleted users that were not re-added/updated
-        foreach (var userId in request.ManagerIds)
-        {
-            if (!managerIds.Contains(userId))
+            // Ensure a user isn't added as both manager and viewer.
+            // If they are a manager, they implicitly have viewer permissions.
+            if (!request.ManagerIds.Contains(viewerId))
             {
-                var removedUser = entity.RemoveFamilyUser(userId);
-                if (removedUser != null)
-                    _context.FamilyUsers.Remove(removedUser);
+                entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
             }
         }
         // --- End Update FamilyUsers ---
