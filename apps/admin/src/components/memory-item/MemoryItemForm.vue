@@ -13,9 +13,9 @@
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="uploadedFiles"
-          :accept="acceptedMimeTypes" data-testid="memory-item-file-upload" multiple
-          :rules="validationRules.uploadedFiles" :disabled="props.readOnly"></VFileUpload>
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="uploadedFiles" :accept="acceptedMimeTypes"
+          data-testid="memory-item-file-upload" multiple :rules="validationRules.uploadedFiles"
+          :disabled="props.readOnly"></VFileUpload>
       </v-col>
 
       <v-col cols="12">
@@ -121,9 +121,9 @@ defineExpose<MemoryItemFormExpose>({
 .carousel-image,
 .carousel-video {
   max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
   border-radius: 5px;
+  height: 500px;
 }
 
 .carousel-delete-btn {

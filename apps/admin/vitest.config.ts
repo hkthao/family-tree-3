@@ -31,9 +31,9 @@ export default mergeConfig(
       },
     },
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
-    },
+              alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+                '@tests': fileURLToPath(new URL('./tests/unit', import.meta.url)),
+              },    },
   }),
 );
