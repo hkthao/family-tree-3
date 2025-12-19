@@ -170,7 +170,7 @@ public class UpdateFamilyCommandValidatorTests
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = null! };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
-              .WithErrorMessage("Visibility cannot be null.");
+              .WithErrorMessage("Visibility is required.");
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class UpdateFamilyCommandValidatorTests
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = string.Empty };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
-              .WithErrorMessage("Visibility cannot be empty.");
+              .WithErrorMessage("Visibility is required.");
     }
 
     [Fact]

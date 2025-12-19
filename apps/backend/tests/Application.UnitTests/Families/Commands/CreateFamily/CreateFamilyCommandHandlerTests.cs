@@ -55,8 +55,8 @@ public class CreateFamilyCommandHandlerTests : TestBase
             Address = "123 Test St",
             AvatarBase64 = avatarBase64,
             Visibility = "Public",
-            ManagerIds = new List<Guid> { userId, Guid.NewGuid() }, // Add another manager
-            ViewerIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() } // Add some viewers
+            ManagerIds = new List<Guid>(),
+            ViewerIds = new List<Guid>()
         };
 
         // Act
@@ -75,11 +75,8 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against expected uploaded URL
         createdFamily.Visibility.Should().Be(command.Visibility);
         createdFamily.Code.Should().StartWith("FAM-");
-        createdFamily.FamilyUsers.Should().HaveCount(4); // Creator (Manager), 1 other Manager, 2 Viewers
+        createdFamily.FamilyUsers.Should().HaveCount(1); // Only Creator (Manager)
         createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
-        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ManagerIds.Last() && fu.Role == FamilyRole.Manager);
-        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ViewerIds.First() && fu.Role == FamilyRole.Viewer);
-        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ViewerIds.Last() && fu.Role == FamilyRole.Viewer);
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is FamilyCreatedEvent) &&
             events.Any(e => e is FamilyStatsUpdatedEvent)

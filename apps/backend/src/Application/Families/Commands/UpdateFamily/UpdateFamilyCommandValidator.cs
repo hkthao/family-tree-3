@@ -31,8 +31,8 @@ public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyComman
             .When(v => !string.IsNullOrEmpty(v.AvatarBase64));
 
         RuleFor(v => v.Visibility)
-            .NotNull().WithMessage("Visibility cannot be null.")
-            .NotEmpty().WithMessage("Visibility cannot be empty.")
+            .NotNull().WithMessage("Visibility is required.")
+            .NotEmpty().WithMessage("Visibility is required.")
             .Must(BeAValidVisibility).WithMessage("Visibility must be 'Public' or 'Private'.");
     }
     private bool BeAValidBase64StringOrEmpty(string? base64String)

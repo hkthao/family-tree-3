@@ -28,13 +28,9 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
         _context.Families.Add(entity);
         await _context.SaveChangesAsync(cancellationToken); // Save to get entity.Id
 
-        // Add Managers
         foreach (var managerId in request.ManagerIds)
         {
-            if (managerId != _user.UserId) // The creator is already added as a manager in Family.Create
-            {
-                entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
-            }
+            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
         }
 
         // Add Viewers

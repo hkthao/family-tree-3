@@ -88,29 +88,30 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         );
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
 
-        // --- Update FamilyUsers ---
-        var newFamilyUserUpdateInfos = new List<FamilyUserUpdateInfo>();
+        var managerIds = request.ManagerIds.Where(e => !request.DeletedManagerIds.Contains(e)).ToList();
+        var viewerIds = request.ViewerIds.Where(e => !request.DeletedViewerIds.Contains(e)).ToList();
 
-        // Add Managers
         foreach (var managerId in request.ManagerIds)
         {
-            newFamilyUserUpdateInfos.Add(new FamilyUserUpdateInfo(managerId, Domain.Enums.FamilyRole.Manager));
+            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
         }
 
         // Add Viewers
         foreach (var viewerId in request.ViewerIds)
         {
-            newFamilyUserUpdateInfos.Add(new FamilyUserUpdateInfo(viewerId, Domain.Enums.FamilyRole.Viewer));
+            entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
         }
 
-        // Remove deleted users
-        foreach (var userId in request.DeletedUserIds)
+        // Remove deleted users that were not re-added/updated
+        foreach (var userId in request.ManagerIds)
         {
-            entity.RemoveFamilyUser(userId);
+            if (!managerIds.Contains(userId))
+            {
+                var removedUser = entity.RemoveFamilyUser(userId);
+                if (removedUser != null)
+                    _context.FamilyUsers.Remove(removedUser);
+            }
         }
-
-        // Update the family users based on the new roles
-        entity.UpdateFamilyUsers(newFamilyUserUpdateInfos);
         // --- End Update FamilyUsers ---
 
         entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
