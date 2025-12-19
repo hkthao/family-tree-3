@@ -28,6 +28,24 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
         _context.Families.Add(entity);
         await _context.SaveChangesAsync(cancellationToken); // Save to get entity.Id
 
+        // Add Managers
+        foreach (var managerId in request.ManagerIds)
+        {
+            if (managerId != _user.UserId) // The creator is already added as a manager in Family.Create
+            {
+                entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
+            }
+        }
+
+        // Add Viewers
+        foreach (var viewerId in request.ViewerIds)
+        {
+            entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
+        }
+
+        entity.AddDomainEvent(new FamilyCreatedEvent(entity));
+        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
+
         if (!string.IsNullOrEmpty(request.AvatarBase64))
         {
             try
@@ -58,10 +76,6 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 }
 
                 entity.UpdateAvatar(familyMedia.FilePath); // Update avatar after successful upload
-                entity.AddDomainEvent(new FamilyCreatedEvent(entity));
-                entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
-
-                await _context.SaveChangesAsync(cancellationToken); // Save avatar URL
             }
             catch (FormatException)
             {
@@ -72,6 +86,8 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
             }
         }
+
+        await _context.SaveChangesAsync(cancellationToken); // Save avatar URL and family users
 
         return Result<Guid>.Success(entity.Id);
     }

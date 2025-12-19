@@ -54,7 +54,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
             Description = "A family for testing",
             Address = "123 Test St",
             AvatarBase64 = avatarBase64,
-            Visibility = "Public"
+            Visibility = "Public",
+            ManagerIds = new List<Guid> { userId, Guid.NewGuid() }, // Add another manager
+            ViewerIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() } // Add some viewers
         };
 
         // Act
@@ -73,7 +75,11 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against expected uploaded URL
         createdFamily.Visibility.Should().Be(command.Visibility);
         createdFamily.Code.Should().StartWith("FAM-");
-        createdFamily.FamilyUsers.Should().ContainSingle(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().HaveCount(4); // Creator (Manager), 1 other Manager, 2 Viewers
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ManagerIds.Last() && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ViewerIds.First() && fu.Role == FamilyRole.Viewer);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == command.ViewerIds.Last() && fu.Role == FamilyRole.Viewer);
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is FamilyCreatedEvent) &&
             events.Any(e => e is FamilyStatsUpdatedEvent)
@@ -108,5 +114,100 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily!.Code.Should().NotBeNullOrEmpty();
         createdFamily.Code.Should().StartWith("FAM-");
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify upload was NOT called
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCreateFamilyWithOnlyAdditionalManagersAndCreator_WhenManagerIdsAreProvided()
+    {
+        // Arrange
+        var creatorUserId = Guid.NewGuid();
+        _currentUserMock.Setup(x => x.UserId).Returns(creatorUserId);
+
+        var additionalManagerId = Guid.NewGuid();
+
+        var command = new CreateFamilyCommand
+        {
+            Name = "Family with Managers",
+            Visibility = "Private",
+            ManagerIds = new List<Guid> { additionalManagerId }
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == result.Value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        createdFamily.Should().NotBeNull();
+        createdFamily!.FamilyUsers.Should().HaveCount(2); // Creator + additional Manager
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorUserId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == additionalManagerId && fu.Role == FamilyRole.Manager);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCreateFamilyWithOnlyViewersAndCreator_WhenViewerIdsAreProvided()
+    {
+        // Arrange
+        var creatorUserId = Guid.NewGuid();
+        _currentUserMock.Setup(x => x.UserId).Returns(creatorUserId);
+
+        var viewerId = Guid.NewGuid();
+
+        var command = new CreateFamilyCommand
+        {
+            Name = "Family with Viewers",
+            Visibility = "Private",
+            ViewerIds = new List<Guid> { viewerId }
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == result.Value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        createdFamily.Should().NotBeNull();
+        createdFamily!.FamilyUsers.Should().HaveCount(2); // Creator (Manager) + Viewer
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorUserId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerId && fu.Role == FamilyRole.Viewer);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCreateFamilyWithManagersViewersAndCreator_WhenBothAreProvided()
+    {
+        // Arrange
+        var creatorUserId = Guid.NewGuid();
+        _currentUserMock.Setup(x => x.UserId).Returns(creatorUserId);
+
+        var additionalManagerId = Guid.NewGuid();
+        var viewerId1 = Guid.NewGuid();
+        var viewerId2 = Guid.NewGuid();
+
+        var command = new CreateFamilyCommand
+        {
+            Name = "Family with Managers and Viewers",
+            Visibility = "Private",
+            ManagerIds = new List<Guid> { additionalManagerId },
+            ViewerIds = new List<Guid> { viewerId1, viewerId2 }
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == result.Value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        createdFamily.Should().NotBeNull();
+        createdFamily!.FamilyUsers.Should().HaveCount(4); // Creator (Manager) + additional Manager + 2 Viewers
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorUserId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == additionalManagerId && fu.Role == FamilyRole.Manager);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerId1 && fu.Role == FamilyRole.Viewer);
+        createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerId2 && fu.Role == FamilyRole.Viewer);
     }
 }

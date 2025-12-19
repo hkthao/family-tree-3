@@ -60,7 +60,9 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             Address = "New Address",
             AvatarBase64 = avatarBase64,
             Visibility = "Private",
-            Code = "NEW"
+            ManagerIds = new List<Guid>(), // No changes to managers in this specific test
+            ViewerIds = new List<Guid>(), // No changes to viewers in this specific test
+            DeletedUserIds = new List<Guid>() // No deletions in this specific test
         };
 
         // Act
@@ -76,6 +78,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.AvatarUrl.Should().Be(expectedAvatarUrl);
         updatedFamily.Visibility.Should().Be(command.Visibility);
+        updatedFamily.Code.Should().Be(existingFamily.Code); // Code should not change
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
             events.Any(e => e is FamilyUpdatedEvent) &&
             events.Any(e => e is FamilyStatsUpdatedEvent)
@@ -104,7 +107,10 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         {
             Id = familyId,
             Name = "New Name",
-            Visibility = "Private"
+            Visibility = "Private",
+            ManagerIds = new List<Guid>(),
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid>()
         };
 
         // Act
@@ -124,7 +130,15 @@ public class UpdateFamilyCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenFamilyNotFound()
     {
         // Arrange
-        var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Any Name", Visibility = "Public" };
+        var command = new UpdateFamilyCommand
+        {
+            Id = Guid.NewGuid(),
+            Name = "Any Name",
+            Visibility = "Public",
+            ManagerIds = new List<Guid>(),
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid>()
+        };
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
         _authorizationServiceMock.Setup(x => x.CanManageFamily(command.Id)).Returns(true);
 
@@ -138,7 +152,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, command.Id));
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Family with ID {command.Id}"));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -152,7 +166,15 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync();
 
-        var command = new UpdateFamilyCommand { Id = familyId, Name = "New Name", Visibility = "Private" };
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "New Name",
+            Visibility = "Private",
+            ManagerIds = new List<Guid>(),
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid>()
+        };
 
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
@@ -170,5 +192,166 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         result.Error.Should().Be(ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAddManagerAndViewer()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var managerToAdd = Guid.NewGuid();
+        var viewerToAdd = Guid.NewGuid();
+
+        var existingFamily = Family.Create("Test Family", "TEST", null, null, "Public", creatorId);
+        existingFamily.Id = familyId;
+        _context.Families.Add(existingFamily);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "Updated Name",
+            ManagerIds = new List<Guid> { creatorId, managerToAdd }, // Creator is still manager, add new manager
+            ViewerIds = new List<Guid> { viewerToAdd },
+            DeletedUserIds = new List<Guid>()
+        };
+
+        // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == familyId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.FamilyUsers.Should().HaveCount(3); // Creator, new manager, new viewer
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == managerToAdd && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerToAdd && fu.Role == Domain.Enums.FamilyRole.Viewer);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldRemoveUser()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var userToRemove = Guid.NewGuid();
+
+        var existingFamily = Family.Create("Test Family", "TEST", null, null, "Public", creatorId);
+        existingFamily.Id = familyId;
+        existingFamily.AddFamilyUser(userToRemove, Domain.Enums.FamilyRole.Viewer); // Add user to be removed
+        _context.Families.Add(existingFamily);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "Updated Name",
+            ManagerIds = new List<Guid> { creatorId },
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid> { userToRemove }
+        };
+
+        // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == familyId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.FamilyUsers.Should().HaveCount(1); // Only creator should remain
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().NotContain(fu => fu.UserId == userToRemove);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUpdateUserRole()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var userToUpdate = Guid.NewGuid();
+
+        var existingFamily = Family.Create("Test Family", "TEST", null, null, "Public", creatorId);
+        existingFamily.Id = familyId;
+        existingFamily.AddFamilyUser(userToUpdate, Domain.Enums.FamilyRole.Viewer); // Add user as viewer
+        _context.Families.Add(existingFamily);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "Updated Name",
+            ManagerIds = new List<Guid> { creatorId, userToUpdate }, // Change userToUpdate to manager
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid>()
+        };
+
+        // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == familyId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.FamilyUsers.Should().HaveCount(2); // Creator, updated user
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == userToUpdate && fu.Role == Domain.Enums.FamilyRole.Manager);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldNotAddDuplicateUsersIfAlreadyExisting()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var existingManagerId = Guid.NewGuid();
+
+        var existingFamily = Family.Create("Test Family", "TEST", null, null, "Public", creatorId);
+        existingFamily.Id = familyId;
+        existingFamily.AddFamilyUser(existingManagerId, Domain.Enums.FamilyRole.Manager); // Add an existing manager
+        _context.Families.Add(existingFamily);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "Updated Name",
+            ManagerIds = new List<Guid> { creatorId, existingManagerId }, // Try to add existing manager again
+            ViewerIds = new List<Guid>(),
+            DeletedUserIds = new List<Guid>()
+        };
+
+        // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == familyId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.FamilyUsers.Should().HaveCount(2); // Creator and existing manager
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == creatorId && fu.Role == Domain.Enums.FamilyRole.Manager);
+        updatedFamily.FamilyUsers.Should().Contain(fu => fu.UserId == existingManagerId && fu.Role == Domain.Enums.FamilyRole.Manager);
     }
 }

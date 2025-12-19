@@ -89,10 +89,28 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
 
         // --- Update FamilyUsers ---
-        var familyUserUpdateInfos = request.FamilyUsers
-            .Select(fu => new FamilyUserUpdateInfo(fu.UserId, fu.Role))
-            .ToList();
-        entity.UpdateFamilyUsers(familyUserUpdateInfos);
+        var newFamilyUserUpdateInfos = new List<FamilyUserUpdateInfo>();
+
+        // Add Managers
+        foreach (var managerId in request.ManagerIds)
+        {
+            newFamilyUserUpdateInfos.Add(new FamilyUserUpdateInfo(managerId, Domain.Enums.FamilyRole.Manager));
+        }
+
+        // Add Viewers
+        foreach (var viewerId in request.ViewerIds)
+        {
+            newFamilyUserUpdateInfos.Add(new FamilyUserUpdateInfo(viewerId, Domain.Enums.FamilyRole.Viewer));
+        }
+
+        // Remove deleted users
+        foreach (var userId in request.DeletedUserIds)
+        {
+            entity.RemoveFamilyUser(userId);
+        }
+
+        // Update the family users based on the new roles
+        entity.UpdateFamilyUsers(newFamilyUserUpdateInfos);
         // --- End Update FamilyUsers ---
 
         entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
