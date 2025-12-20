@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFaceMemberSelectDialog } from '@/composables/face/logic/useFaceMemberSelectDialog';
 import { useQuery } from '@tanstack/vue-query';
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick, reactive } from 'vue';
 import type { DetectedFace, Member, Result, ApiError } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
@@ -9,7 +9,45 @@ import type { Composer } from 'vue-i18n';
 
 // Mock the external dependencies
 vi.mock('@tanstack/vue-query', () => ({
-  useQuery: vi.fn(),
+  useQuery: vi.fn((options) => {
+    const queryResult = {
+      data: ref(options?.initialData || options?.placeholderData),
+      isLoading: ref(false),
+      isError: ref(false),
+      error: ref(null),
+      isFetching: ref(false),
+      refetch: vi.fn(),
+    };
+    return queryResult;
+  }),
+  useMutation: vi.fn((options) => {
+      const isPending = ref(false);
+      const error = ref(null);
+      const mutate = vi.fn(async (variables, callbacks) => {
+          isPending.value = true;
+          try {
+              const data = await options.mutationFn(variables);
+              callbacks?.onSuccess?.(data, variables, null);
+              return data;
+          } catch (err) {
+              error.value = err;
+              callbacks?.onError?.(err, variables, null);
+              throw err;
+          } finally {
+              isPending.value = false;
+          }
+      });
+      return {
+          mutate,
+          isPending,
+          error,
+      };
+  }),
+  useQueryClient: vi.fn(() => ({
+    invalidateQueries: vi.fn(),
+    setQueryData: vi.fn(),
+    getQueryData: vi.fn(),
+  })),
 }));
 
 // Mock useI18n
@@ -55,10 +93,7 @@ describe('useFaceMemberSelectDialog', () => {
     disableSaveValidation: false,
   };
 
-  const mockEmit = {
-    'update:show': vi.fn(),
-    'label-face': vi.fn(),
-  };
+  const mockEmit = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -82,7 +117,7 @@ describe('useFaceMemberSelectDialog', () => {
       memberId: 'member2',
       relationPrompt: 'Mother',
     };
-    const props = { ...mockProps, selectedFace: null as any }; // Start with null
+    const props = reactive({ ...mockProps, selectedFace: null as any }); // Start with null
     
     // Create composable
     const { state } = useFaceMemberSelectDialog(props, mockEmit as any, {
@@ -95,7 +130,7 @@ describe('useFaceMemberSelectDialog', () => {
     props.selectedFace = newFace;
 
     // Await next tick to allow watcher to run
-    await new Promise(resolve => setTimeout(resolve, 0)); 
+    await nextTick(); 
 
     expect(state.selectedMemberId.value).toBe('member2');
     expect(state.internalRelationPrompt.value).toBe('Mother');
@@ -201,8 +236,8 @@ describe('useFaceMemberSelectDialog', () => {
     });
     actions.handleSave();
 
-    expect(mockEmit['label-face']).toHaveBeenCalledWith(updatedFace);
-    expect(mockEmit['update:show']).toHaveBeenCalledWith(false);
+    expect(mockEmit).toHaveBeenCalledWith('label-face', updatedFace);
+    expect(mockEmit).toHaveBeenCalledWith('update:show', false);
   });
 
   it('should not emit on handleSave if selectedFace or selectedMemberId is missing', () => {
@@ -226,8 +261,8 @@ describe('useFaceMemberSelectDialog', () => {
     });
     actions.handleSave();
 
-    expect(mockEmit['label-face']).not.toHaveBeenCalled();
-    expect(mockEmit['update:show']).not.toHaveBeenCalled();
+    expect(mockEmit).not.toHaveBeenCalledWith('label-face', expect.anything());
+    expect(mockEmit).not.toHaveBeenCalledWith('update:show', expect.anything());
   });
 
   it('should set enabled to true when selectedMemberId is defined', () => {

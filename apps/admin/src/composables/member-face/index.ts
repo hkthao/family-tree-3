@@ -1,9 +1,11 @@
-// Export all member-face related composables from here
+// src/composables/member-face/index.ts
 export * from './filters/useMemberFaceListFilters';
-export * from './queries/useMemberFacesQuery';
-export * from './queries/useMemberFaceDetailQuery';
+export * from './logic/useMemberFaceAdd';
+export * from './logic/useMemberFaceDeletion';
+export * from './logic/useMemberFaceForm';
+export * from './logic/useMemberFaceFormLogic';
+export * from './mutations/useAddMemberFaceMutation';
 export * from './mutations/useDeleteMemberFaceMutation';
 export * from './mutations/useUpdateMemberFaceMutation';
-export * from './logic/useMemberFaceFormLogic';
-export * from './logic/useMemberFaceDeletion';
-export * from './mutations/mutations';
+export * from './queries/useMemberFaceDetailQuery';
+export * from './queries/useMemberFacesQuery';

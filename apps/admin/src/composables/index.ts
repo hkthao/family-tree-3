@@ -16,13 +16,7 @@ export * from './ui/useAvatarCropper';
 
 
 export * from './chat/useN8nChat';
-export * from './face/logic/useFaceResultList';
-export * from './face/logic/useFaceSearch';
-export * from './face/logic/useFaceMemberSelectDialog';
-export * from './face/logic/useFaceUploadInput';
-export * from './face/logic/useFaceLabelCard';
-export * from './face/logic/useFaceDetectionSidebar';
-export * from './face/logic/useFaceBoundingBoxViewer';
+export * from './face'; // Add this specific export
 export * from './auth/useAuth';
 export * from './auth/useAccessToken';
 export * from './member/mutations/useAddMemberMutation';
@@ -108,16 +102,7 @@ export * from './family-dict/logic/useFamilyDictSearch';
 export * from './family-dict/logic/useFamilyDictForm';
 export * from './family-dict/queries/useFamilyDictsQuery';
 export * from './family-dict/queries/useFamilyDictQuery';
-export * from './member-face/filters/useMemberFaceListFilters';
-export * from './member-face/mutations/useDeleteMemberFaceMutation';
-export * from './member-face/mutations/mutations';
-export * from './member-face/mutations/useUpdateMemberFaceMutation';
-export * from './member-face/logic/useMemberFaceFormLogic';
-export * from './member-face/logic/useMemberFaceForm';
-export * from './member-face/logic/useMemberFaceAdd';
-export * from './member-face/logic/useMemberFaceDeletion';
-export * from './member-face/queries/useMemberFaceDetailQuery';
-export * from './member-face/queries/useMemberFacesQuery';
+export * from './member-face';
 export * from './member/useMemberFormComposable';
 export * from './relationship/useRelationshipForm';
 export * from './map/useMapbox';

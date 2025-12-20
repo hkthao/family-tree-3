@@ -42,12 +42,8 @@ import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useFaceSearch } from '@/composables';
 
 const {
-  selectedFamilyId,
-  uploadedImage,
-  detectedFaces,
-  isDetectingFaces,
-  handleFileUpload,
-  t, // t is now exposed from useFaceSearch
+  state: { selectedFamilyId, uploadedImage, detectedFaces, originalImageUrl, isDetectingFaces, t },
+  actions: { handleFileUpload, resetState },
 } = useFaceSearch();
 
 useFaceSearchTour(); // Still use the tour composable directly here
