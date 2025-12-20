@@ -1,18 +1,18 @@
 <template>
-  <div v-if="state.isLoading">
+  <div v-if="isLoading">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
     {{ t('common.loading') }}
   </div>
-  <div v-else-if="state.error">
-    <v-alert type="error" :text="state.error.value?.message || t('family.detail.errorLoading')"></v-alert>
+  <div v-else-if="error">
+    <v-alert type="error" :text="error?.message || t('family.detail.errorLoading')"></v-alert>
   </div>
-  <div v-else-if="state.familyData">
-    <FamilyForm :data="state.familyData.value" :read-only="props.readOnly" :title="t('family.detail.title')" />
+  <div v-else-if="familyData">
+    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" />
     <v-card-actions class="justify-end pa-0">
       <v-btn color="gray" @click="actions.closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="state.canManageFamily">
+      <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -33,5 +33,5 @@ const props = defineProps<{
 
 const emit = defineEmits(['openEditDrawer']);
 
-const { state, actions } = useFamilyDetail(props, emit);
+const { familyData, isLoading, error, canManageFamily, actions } = useFamilyDetail(props, emit);
 </script>

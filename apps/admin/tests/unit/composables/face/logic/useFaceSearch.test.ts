@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFaceSearch } from '@/composables/face/logic/useFaceSearch';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import type { Composer } from 'vue-i18n';
 import type { UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
 import type { UseDetectFacesMutationReturn } from '@/composables/face/mutations/useDetectFacesMutation';
@@ -12,9 +12,6 @@ const mockUseGlobalSnackbar: () => UseGlobalSnackbarReturn = () => ({
   showSnackbar: mockShowSnackbar,
 });
 
-const mockI18nGlobal = {
-  t: vi.fn((key: string) => key),
-};
 const mockUseI18n: () => Composer = () => ({
   t: vi.fn((key: string) => key),
 }) as Composer;

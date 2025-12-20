@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useAddMemberFaceMutation } from '@/composables/member-face/mutations/useAddMemberFaceMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
-import type { MemberFace, ApiError } from '@/types';
+import type { MemberFace } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
 
 // Mock the external dependencies

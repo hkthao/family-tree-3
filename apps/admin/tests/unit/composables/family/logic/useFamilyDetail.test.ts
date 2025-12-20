@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 
 // Mock dependencies
 const mockT = vi.fn((key: string) => key);
