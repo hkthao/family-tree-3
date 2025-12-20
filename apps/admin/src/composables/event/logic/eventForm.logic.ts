@@ -100,6 +100,12 @@ export function getLunarMonths(): number[] {
  */
 export function processEventFormDataForSave(formData: Event): Event {
   const data = cloneDeep(formData);
+
+  // If solarDate is a string, convert it back to a Date object
+  if (typeof data.solarDate === 'string') {
+    data.solarDate = new Date(data.solarDate);
+  }
+
   if (data.calendarType === CalendarType.Solar) {
     data.lunarDate = null;
   } else if (data.calendarType === CalendarType.Lunar) {

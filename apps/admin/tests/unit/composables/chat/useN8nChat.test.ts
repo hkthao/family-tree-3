@@ -1,6 +1,6 @@
 // tests/unit/composables/chat/useN8nChat.test.ts
-import { describe, it, expect, vi, beforeEach, type SpyInstance } from 'vitest';
-import { ref } from 'vue';
+import { describe, it, expect, vi, beforeEach, afterEach, type SpyInstance } from 'vitest';
+import { ref, type Ref, type ComputedRef } from 'vue';
 import { useN8nChat } from '@/composables/chat/useN8nChat';
 import { useI18n } from 'vue-i18n';
 import { useAccessToken } from '@/composables/auth/useAccessToken';
@@ -14,26 +14,46 @@ vi.mock('@/composables/auth/useAccessToken');
 vi.mock('@/composables/user/useUserPreferences');
 vi.mock('@/utils/api.util'); // Mock the module for getEnvVariable
 
+// New ref to control the isMounted state of the mock adapter
+const mockIsMountedRef = ref(false);
+
 // Mock the N8nChatAdapter
 const mockN8nChatAdapter: N8nChatAdapter = {
-  mount: vi.fn(),
-  unmount: vi.fn(),
-  isMounted: vi.fn(() => false),
+  mount: vi.fn(() => {
+    mockIsMountedRef.value = true; // Simulate chat being mounted
+  }),
+  unmount: vi.fn(() => {
+    mockIsMountedRef.value = false; // Simulate chat being unmounted
+  }),
+  isMounted: vi.fn(() => mockIsMountedRef.value), // Now it's a function that returns the ref's value
 };
 
 describe('useN8nChat', () => {
-  let mockAccessToken: SpyInstance;
-  let mockPreferences: SpyInstance;
+  let mockAccessToken: Ref<string | undefined>;
+  let mockPreferences: Ref<any>; // Changed type to Ref<any> for flexibility
   let mockGetEnvVariable: SpyInstance;
   let mockT: SpyInstance;
 
   const WEBHOOK_URL = 'http://test-webhook.com';
 
   beforeEach(() => {
+    vi.useFakeTimers(); // Enable fake timers
     vi.clearAllMocks();
 
-    mockAccessToken = vi.mocked(useAccessToken).mockReturnValue({ accessToken: ref('test-token') }).accessToken;
-    mockPreferences = vi.mocked(useUserPreferences).mockReturnValue({ preferences: ref({}), currentChatLanguage: ref('en') }).preferences;
+    // Reset the mockIsMountedRef for each test
+    mockIsMountedRef.value = false;
+
+    // Correctly mock useAccessToken to return a ref directly
+    // This assumes useAccessToken returns an object with accessToken as a ref
+    const accessTokenRef = ref('test-token');
+    vi.mocked(useAccessToken).mockReturnValue({ accessToken: accessTokenRef });
+    mockAccessToken = accessTokenRef;
+
+    const preferencesRef = ref({});
+    const currentChatLanguageRef = ref('en');
+    vi.mocked(useUserPreferences).mockReturnValue({ preferences: preferencesRef, currentChatLanguage: currentChatLanguageRef });
+    mockPreferences = preferencesRef; // Correctly get the ref
+
     mockGetEnvVariable = vi.mocked(apiUtil.getEnvVariable).mockReturnValue(WEBHOOK_URL);
 
     mockT = vi.fn((key) => key);
@@ -42,8 +62,10 @@ describe('useN8nChat', () => {
     // Reset adapter mocks for each test
     mockN8nChatAdapter.mount.mockClear();
     mockN8nChatAdapter.unmount.mockClear();
-    mockN8nChatAdapter.isMounted.mockClear();
-    mockN8nChatAdapter.isMounted.mockReturnValue(false); // Default to not mounted
+  });
+
+  afterEach(() => {
+    vi.useRealTimers(); // Restore real timers after each test
   });
 
   it('should initialize chat when chatOpen is true, access token and preferences are available', async () => {
@@ -51,6 +73,7 @@ describe('useN8nChat', () => {
     const chatOpen = ref(true);
 
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
+    await vi.runOnlyPendingTimersAsync(); // Allow watchers to run immediately
 
     expect(mockGetEnvVariable).toHaveBeenCalledWith('VITE_N8N_CHAT_WEBHOOK_URL');
     expect(mockAccessToken.value).toBe('test-token');
@@ -72,7 +95,8 @@ describe('useN8nChat', () => {
 
     // Initial mount
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
-    mockN8nChatAdapter.isMounted.mockReturnValue(true); // Simulate chat being mounted
+    await vi.runOnlyPendingTimersAsync(); // Run initial watchers
+    mockIsMountedRef.value = true; // Simulate chat being mounted after initializeChat
 
     chatOpen.value = false; // Trigger unmount
     await vi.runOnlyPendingTimersAsync(); // Allow watchers to run
@@ -87,6 +111,7 @@ describe('useN8nChat', () => {
     const chatOpen = ref(true);
 
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
+    await vi.runOnlyPendingTimersAsync(); // Run initial watchers
 
     expect(mockN8nChatAdapter.mount).not.toHaveBeenCalled();
   });
@@ -98,6 +123,7 @@ describe('useN8nChat', () => {
     const chatOpen = ref(true);
 
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
+    await vi.runOnlyPendingTimersAsync(); // Run initial watchers
 
     expect(mockN8nChatAdapter.mount).not.toHaveBeenCalled();
   });
@@ -107,32 +133,32 @@ describe('useN8nChat', () => {
     const chatOpen = ref(true);
 
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
+    await vi.runOnlyPendingTimersAsync(); // Run initial watchers
 
     // Initial call to mount would have metadata: { familyId: 'initial-family' }
     expect(mockN8nChatAdapter.mount).toHaveBeenCalledWith(expect.objectContaining({
       metadata: { familyId: 'initial-family' },
     }));
 
-    // Reset mock for subsequent calls
-    mockN8nChatAdapter.mount.mockClear();
+    mockN8nChatAdapter.mount.mockClear(); // Clear initial mount call
+    mockIsMountedRef.value = true; // Simulate chat being mounted after initial call
 
     selectedFamilyId.value = 'new-family';
-    // No direct re-mount on metadata change, but internal metadata object is updated
-    // The adapter needs to re-mount for changes to take effect in the widget
-    // This test ensures the reactive metadata object *within* the composable updates
-    // The responsibility of re-initializing the chat with new metadata lies within the composable logic (not explicitly handled here)
-    // For now, we verify the internal metadata object updates via the adapter call
+    await vi.runOnlyPendingTimersAsync(); // Allow watchers to run for reactive updates
 
-    // Trigger re-initialization manually for testing purpose or confirm that the watcher logic works
-    // For this test, we verify the metadata object itself updates.
-    // If the widget supported dynamic metadata updates without full re-initialization,
-    // we would test that functionality directly.
+    // The composable should handle updating the metadata by destroying and remounting
+    expect(mockN8nChatAdapter.mount).toHaveBeenCalledTimes(1); // Expect one more mount call
     expect(mockN8nChatAdapter.mount).toHaveBeenCalledWith(expect.objectContaining({
+      webhookUrl: WEBHOOK_URL,
+      accessToken: 'test-token',
+      targetSelector: '#n8n-chat-target',
       metadata: { familyId: 'new-family' },
+      defaultLanguage: 'en',
+      i18n: expect.any(Object), // Expect the i18n object generated by logic
     }));
   });
 
-  it('should toggle chatOpen state', () => {
+  it('should toggle chatOpen state', async () => {
     const selectedFamilyId = ref(undefined);
     const chatOpen = ref(false);
 
@@ -140,45 +166,42 @@ describe('useN8nChat', () => {
     expect(chatOpen.value).toBe(false);
 
     actions.toggleChat();
+    await vi.runOnlyPendingTimersAsync(); // Allow watchers to run
     expect(chatOpen.value).toBe(true);
 
     actions.toggleChat();
+    await vi.runOnlyPendingTimersAsync(); // Allow watchers to run
     expect(chatOpen.value).toBe(false);
   });
 
-  it('should return isChatReady computed property based on adapter', () => {
+  it('should return isChatReady computed property based on adapter', async () => {
     const selectedFamilyId = ref(undefined);
     const chatOpen = ref(false);
 
     const { state } = useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
     expect(state.isChatReady.value).toBe(false);
 
-    mockN8nChatAdapter.isMounted.mockReturnValue(true);
+    // Simulate the adapter becoming mounted
+    mockIsMountedRef.value = true;
+    await vi.runOnlyPendingTimersAsync(); // Allow reactive effects to propagate
+
     expect(state.isChatReady.value).toBe(true);
   });
 
-  it('should destroy chat on unmount', () => {
+  it('should destroy chat on unmount', async () => {
     const selectedFamilyId = ref('family123');
     const chatOpen = ref(true);
 
     // Initial mount
     useN8nChat(selectedFamilyId, chatOpen, { n8nChatAdapter: mockN8nChatAdapter });
-    mockN8nChatAdapter.isMounted.mockReturnValue(true);
+    await vi.runOnlyPendingTimersAsync(); // Run initial watchers
+    mockIsMountedRef.value = true; // Simulate chat being mounted
 
-    // Call onUnmounted manually (Vitest handles this automatically during component unmount)
-    // In a real Vue test, this would be triggered by unmounting the component using the composable.
-    // For direct composable testing, we simulate the lifecycle.
-
-    // Correct way to test onUnmounted in composables is by having a wrapper component or directly calling the cleanup logic
-
-    // A simpler way to test the onUnmounted effect for composables is to trigger the effect directly
-    // This would typically involve a wrapper component in Vitest for composables, but for direct function call,
-    // we rely on the `onUnmounted` callback being registered.
-    // However, the current setup of useN8nChat calls destroyChat directly in onUnmounted.
-    // The watch for chatOpen becoming false also calls destroyChat.
-
-    // Let's re-trigger the watch with chatOpen = false
+    // Simulate unmounting. In a real Vue component, this would be handled by Vue's lifecycle.
+    // For a composable tested directly, we ensure the watchers react to changes.
     chatOpen.value = false;
+    await vi.runOnlyPendingTimersAsync(); // Ensure watchers fire
+
     expect(mockN8nChatAdapter.unmount).toHaveBeenCalledTimes(1);
   });
 });
