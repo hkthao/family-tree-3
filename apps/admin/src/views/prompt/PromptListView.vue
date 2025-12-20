@@ -85,7 +85,7 @@ const handleSearchUpdate = (search: string) => {
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[];
+  sortBy: { key: string; order: 'asc' | 'desc' }[];
 }) => {
   listOptions.page = options.page;
   listOptions.itemsPerPage = options.itemsPerPage;
