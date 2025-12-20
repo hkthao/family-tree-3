@@ -1,0 +1,159 @@
+import { computed, toRefs } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer, useFamilyTour } from '@/composables';
+import type { FamilyFilter, Family } from '@/types';
+import { useFamilyListFilters, useFamiliesQuery, useDeleteFamilyMutation } from '@/composables';
+
+interface UseFamilyListDeps {
+  useI18n: typeof useI18n;
+  useRouter: typeof useRouter;
+  useConfirmDialog: typeof useConfirmDialog;
+  useGlobalSnackbar: typeof useGlobalSnackbar;
+  useFamilyTour: typeof useFamilyTour;
+  useFamilyListFilters: typeof useFamilyListFilters;
+  useFamiliesQuery: typeof useFamiliesQuery;
+  useDeleteFamilyMutation: typeof useDeleteFamilyMutation;
+  useCrudDrawer: typeof useCrudDrawer;
+}
+
+const defaultDeps: UseFamilyListDeps = {
+  useI18n,
+  useRouter,
+  useConfirmDialog,
+  useGlobalSnackbar,
+  useFamilyTour,
+  useFamilyListFilters,
+  useFamiliesQuery,
+  useDeleteFamilyMutation,
+  useCrudDrawer,
+};
+
+export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
+  const {
+    useI18n,
+    useRouter,
+    useConfirmDialog,
+    useGlobalSnackbar,
+    useFamilyTour,
+    useFamilyListFilters,
+    useFamiliesQuery,
+    useDeleteFamilyMutation,
+    useCrudDrawer,
+  } = deps;
+
+  const router = useRouter();
+  const { t } = useI18n();
+
+  const { showConfirmDialog } = useConfirmDialog();
+  const { showSnackbar } = useGlobalSnackbar();
+  useFamilyTour();
+
+  const familyListFiltersComposables = useFamilyListFilters();
+  const {
+    searchQuery: familyListSearchQuery,
+    itemsPerPage,
+    sortBy,
+    filters,
+  } = toRefs(familyListFiltersComposables);
+
+  const {
+    setPage,
+    setItemsPerPage,
+    setSortBy,
+    setSearchQuery,
+    setFilters,
+  } = familyListFiltersComposables;
+
+  const { families, totalItems, loading, refetch } = useFamiliesQuery(filters);
+  const { mutate: deleteFamily } = useDeleteFamilyMutation();
+
+  const {
+    addDrawer,
+    openAddDrawer,
+    closeAllDrawers,
+  } = useCrudDrawer<string>();
+
+  const handleFilterUpdate = (newFilters: FamilyFilter) => {
+    setFilters(newFilters);
+  };
+
+  const navigateToFamilyDetail = (item: Family) => {
+    router.push({ name: 'FamilyDetail', params: { id: item.id } });
+  };
+
+  const handleSearchUpdate = (search: string) => {
+    setSearchQuery(search);
+  };
+
+  const handleListOptionsUpdate = (options: {
+    page: number;
+    itemsPerPage: number;
+    sortBy: { key: string; order: string }[];
+  }) => {
+    setPage(options.page);
+    setItemsPerPage(options.itemsPerPage);
+    setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
+  };
+
+  const confirmDelete = async (family: Family) => {
+    const confirmed = await showConfirmDialog({
+      title: t('confirmDelete.title'),
+      message: t('confirmDelete.message', { name: family.name || '' }),
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      confirmColor: 'error',
+    });
+
+    if (confirmed) {
+      deleteFamily(family.id, {
+        onSuccess: () => {
+          showSnackbar(
+            t('family.management.messages.deleteSuccess'),
+            'success',
+          );
+          refetch(); // Refetch the list after successful deletion
+        },
+        onError: () => {
+          showSnackbar(
+            t('family.management.messages.deleteError'),
+            'error',
+          );
+        },
+      });
+    }
+  };
+
+  const handleFamilyAddClosed = () => {
+    closeAllDrawers(); // Close the drawer on cancel
+    refetch(); // Refetch the list in case a family was added
+  };
+
+  return {
+    state: {
+      familyListSearchQuery,
+      itemsPerPage,
+      sortBy,
+      filters,
+      families,
+      totalItems,
+      loading,
+      addDrawer,
+    },
+    actions: {
+      handleFilterUpdate,
+      navigateToFamilyDetail,
+      handleSearchUpdate,
+      handleListOptionsUpdate,
+      confirmDelete,
+      openAddDrawer,
+      handleFamilyAddClosed,
+      setItemsPerPage, // Added
+      setPage, // Added
+      setSortBy, // Added
+      setSearchQuery, // Added
+      setFilters, // Added
+    },
+    t, // Pass t directly for template
+  };
+}

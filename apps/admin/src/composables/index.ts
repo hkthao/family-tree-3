@@ -38,6 +38,7 @@ export * from './family/logic/useFamilyDataManagement';
 export * from './family/logic/useFamilyAdd';
 export * from './family/logic/useFamilyDetail';
 export * from './family/logic/useFamilyEdit';
+export * from './family/logic/useFamilyList';
 export * from './family/queries/useFamiliesQuery';
 export * from './family/queries/useFamilyQuery';
 export * from './family/search/useFamilySearch';
