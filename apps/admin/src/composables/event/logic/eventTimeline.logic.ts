@@ -32,10 +32,7 @@ export function mapFiltersToQueryOptions(
     startDate: currentFilters.startDate,
     endDate: currentFilters.endDate,
     calendarType: currentFilters.calendarType,
-    lunarStartDay: currentFilters.lunarStartDay,
-    lunarStartMonth: currentFilters.lunarStartMonth,
-    lunarEndDay: currentFilters.lunarEndDay,
-    lunarEndMonth: currentFilters.lunarEndMonth,
+    lunarMonthRange: currentFilters.lunarMonthRange,
   };
 
   return { listOptions, filterOptions };
@@ -48,7 +45,12 @@ export function mapFiltersToQueryOptions(
  */
 export function sortEventsBySolarDateDesc(data: Paginated<Event>): Paginated<Event> {
   const sortedItems = [...data.items].sort((a, b) => {
-    if (!a.solarDate || !b.solarDate) return 0;
+    // Events with null/undefined solarDate should come last
+    if (!a.solarDate && !b.solarDate) return 0; // Both are null, preserve original order
+    if (!a.solarDate) return 1; // a is null, b comes first
+    if (!b.solarDate) return -1; // b is null, a comes first
+
+    // Otherwise, sort by solarDate in descending order
     return new Date(b.solarDate).getTime() - new Date(a.solarDate).getTime();
   });
   return { ...data, items: sortedItems };

@@ -32,10 +32,7 @@ export function useEventsQuery(
         startDate: currentFilters.startDate,
         endDate: currentFilters.endDate,
         calendarType: currentFilters.calendarType,
-        lunarStartDay: currentFilters.lunarStartDay,
-        lunarStartMonth: currentFilters.lunarStartMonth,
-        lunarEndDay: currentFilters.lunarEndDay,
-        lunarEndMonth: currentFilters.lunarEndMonth,
+        lunarMonthRange: currentFilters.lunarMonthRange, // Updated to new property
       };
 
       const response = await eventService.search(listOptions, filterOptions); // Use injected service
