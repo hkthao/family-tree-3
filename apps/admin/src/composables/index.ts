@@ -35,6 +35,7 @@ export * from './family/mutations/useDeleteFamilyMutation';
 export * from './family/logic/useFamilyForm';
 export * from './family/logic/useDebouncedSearch';
 export * from './family/logic/useFamilyDataManagement';
+export * from './family/logic/useFamilyAdd';
 export * from './family/queries/useFamiliesQuery';
 export * from './family/queries/useFamilyQuery';
 export * from './family/search/useFamilySearch';
