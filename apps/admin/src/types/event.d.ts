@@ -47,9 +47,6 @@ export interface EventFilter extends ListOptions {
   startDate?: Date | null;
   endDate?: Date | null;
   calendarType?: CalendarType | null;
-  lunarStartDay?: number;
-  lunarStartMonth?: number;
-  lunarEndDay?: number;
-  lunarEndMonth?: number;
+  lunarMonthRange?: number[]; // New property
 }
 

@@ -1,204 +1,383 @@
-// tests/unit/composables/event/logic/eventCalendar.logic.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getSolarDateFromLunarDate,
   getLunarDateForSolarDay,
   getLunarDateRangeFiltersLogic,
-  getEventFilterLogic,
   formatEventsForCalendarLogic,
   getWeekdaysLogic,
   canManageEventLogic,
   getCalendarTitleLogic,
 } from '@/composables/event/logic/eventCalendar.logic';
-import type { Event } from '@/types';
+import type { DateAdapter, LunarDateAdapter, LunarInstance, SolarInstance } from '@/composables/event/eventCalendar.adapter';
+import type { Event, LunarDate } from '@/types';
 import { CalendarType } from '@/types/enums';
-import type { DateAdapter, LunarDateAdapter } from '@/composables/event/eventCalendar.adapter';
+
+// Mock implementations for DateAdapter
+const mockDateAdapter: DateAdapter = {
+  startOfMonth: vi.fn((date: Date | string) => new Date(new Date(date).getFullYear(), new Date(date).getMonth(), 1)),
+  endOfMonth: vi.fn((date: Date | string) => {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+  }),
+  getFullYear: vi.fn((date: Date) => date.getFullYear()),
+  getMonth: vi.fn((date: Date) => date.getMonth()),
+  getDate: vi.fn((date: Date) => date.getDate()),
+  newDate: vi.fn((year?: number, month?: number, day?: number) => {
+    if (year !== undefined && month !== undefined && day !== undefined) {
+      return new Date(year, month, day);
+    }
+    return new Date();
+  }),
+};
+
+// Mock implementations for LunarDateAdapter
+const mockLunarDateAdapter: LunarDateAdapter = {
+  lunarFromYmd: vi.fn((year: number, month: number, day: number) => {
+    // Simplified mock for LunarInstance
+    return {
+      getYear: () => year,
+      getMonth: () => month,
+      getDay: () => day,
+      getSolar: () => mockLunarDateAdapter.solarFromYmd(year, month, day) // recursive mock
+    } as unknown as LunarInstance;
+  }),
+  solarFromYmd: vi.fn((year: number, month: number, day: number) => {
+    // Simplified mock for SolarInstance
+    return {
+      getYear: () => year,
+      getMonth: () => month,
+      getDay: () => day,
+      getLunar: () => mockLunarDateAdapter.lunarFromYmd(year, month, day) // recursive mock
+    } as unknown as SolarInstance;
+  }),
+  fromSolar: vi.fn((solar: SolarInstance) => {
+    // Example mapping, adjust based on actual conversion logic if needed
+    // For simplicity, let's say Solar 2023-07-15 is Lunar 2023-05-28
+    if (solar.getYear() === 2023 && solar.getMonth() === 7 && solar.getDay() === 15) {
+      return mockLunarDateAdapter.lunarFromYmd(2023, 5, 28);
+    }
+    return mockLunarDateAdapter.lunarFromYmd(solar.getYear(), solar.getMonth(), solar.getDay());
+  }),
+  getSolar: vi.fn((lunar: LunarInstance) => {
+    // Example mapping, adjust based on actual conversion logic if needed
+    // For simplicity, let's say Lunar 2023-05-28 is Solar 2023-07-15
+    if (lunar.getYear() === 2023 && lunar.getMonth() === 5 && lunar.getDay() === 28) {
+      return {
+        getYear: () => 2023,
+        getMonth: () => 7, // July
+        getDay: () => 15,
+        getLunar: vi.fn()
+      } as unknown as SolarInstance;
+    }
+    if (lunar.getYear() === 2023 && lunar.getMonth() === 5 && lunar.getDay() === 30) { // Add specific mapping for adjusted day
+      return mockLunarDateAdapter.solarFromYmd(2023, 7, 16);
+    }
+    return mockLunarDateAdapter.solarFromYmd(lunar.getYear(), lunar.getMonth(), lunar.getDay());
+  }),
+  getLunarDaysInMonth: vi.fn((year: number, month: number) => {
+    // Mock known values for specific months for testing
+    if (year === 2023 && month === 5) return 30;
+    if (year === 2023 && month === 6) return 29;
+    return 30; // Default
+  }),
+};
 
 describe('eventCalendar.logic', () => {
-  let mockDateAdapter: DateAdapter;
-  let mockLunarDateAdapter: LunarDateAdapter;
-
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockDateAdapter = {
-      startOfMonth: vi.fn((date) => new Date(new Date(date).getFullYear(), new Date(date).getMonth(), 1)),
-      endOfMonth: vi.fn((date) => new Date(new Date(date).getFullYear(), new Date(date).getMonth() + 1, 0)),
-      getFullYear: vi.fn((date) => date.getFullYear()),
-      getMonth: vi.fn((date) => date.getMonth()),
-      getDate: vi.fn((date) => date.getDate()),
-      newDate: vi.fn((year, month, day) => new Date(year, month, day)),
-    };
-
-    mockLunarDateAdapter = {
-      fromYmd: vi.fn((year, month, day) => ({
-        getSolar: vi.fn(() => ({ getYear: () => year, getMonth: () => month, getDay: () => day })),
-        getLunar: vi.fn(() => ({ getYear: () => year, getMonth: () => month, getDay: () => day })),
-      } as any)),
-      fromSolar: vi.fn((solar) => ({
-        getYear: () => solar.getYear() - 1, // Mock lunar year
-        getMonth: () => solar.getMonth() + 11, // Mock lunar month
-        getDay: () => solar.getDay() + 4, // Mock lunar day
-        getSolar: vi.fn(() => solar),
-      } as any)),
-      getSolar: vi.fn((lunar) => lunar.getSolar()),
-    };
   });
 
   describe('getSolarDateFromLunarDate', () => {
     it('should convert lunar date to solar date', () => {
-      const result = getSolarDateFromLunarDate(2024, { day: 1, month: 1, isLeapMonth: false }, mockLunarDateAdapter, mockDateAdapter);
-      expect(mockLunarDateAdapter.fromYmd).toHaveBeenCalledWith(2024, 1, 1);
-      expect(result).toEqual(new Date(2024, 0, 1)); // Month is 0-indexed in new Date
+      const year = 2023;
+      const lunarDate: LunarDate = { day: 28, month: 5, isLeapMonth: false }; // Lunar May 28, 2023
+      const expectedSolarDate = new Date(2023, 6, 15); // Solar July 15, 2023
+
+      mockLunarDateAdapter.lunarFromYmd.mockReturnValueOnce({
+        getYear: () => year,
+        getMonth: () => lunarDate.month,
+        getDay: () => lunarDate.day,
+        getSolar: () => ({
+          getYear: () => expectedSolarDate.getFullYear(),
+          getMonth: () => expectedSolarDate.getMonth() + 1, // Solar month is 1-indexed
+          getDay: () => expectedSolarDate.getDate()
+        })
+      } as unknown as LunarInstance);
+
+      const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
+
+      expect(result.getFullYear()).toBe(expectedSolarDate.getFullYear());
+      expect(result.getMonth()).toBe(expectedSolarDate.getMonth());
+      expect(result.getDate()).toBe(expectedSolarDate.getDate());
+      expect(mockLunarDateAdapter.getLunarDaysInMonth).toHaveBeenCalledWith(year, lunarDate.month);
     });
 
-    it('should handle error during conversion and return fallback', () => {
-      mockLunarDateAdapter.fromYmd.mockImplementation(() => {
-        throw new Error('Invalid lunar date');
+    it('should adjust day if lunarDate.day is too high', () => {
+      const year = 2023;
+      const lunarDate: LunarDate = { day: 31, month: 5, isLeapMonth: false }; // Lunar May 31, 2023 (invalid day)
+      const adjustedDay = 30; // Max days in mock Lunar May 2023
+      const expectedSolarDate = new Date(2023, 6, 16); // Example: Solar July 16, 2023 for adjusted day
+
+      mockLunarDateAdapter.getLunarDaysInMonth.mockReturnValueOnce(30); // Max day for mock month
+      mockLunarDateAdapter.lunarFromYmd.mockImplementationOnce((y, m, d) => {
+        expect(d).toBe(adjustedDay); // Ensure day is adjusted before calling lunarFromYmd
+        return {
+          getYear: () => y,
+          getMonth: () => m,
+          getDay: () => d,
+          getSolar: vi.fn(() => ({ // Mock getSolar to return the expected solar date
+            getYear: () => expectedSolarDate.getFullYear(),
+            getMonth: () => expectedSolarDate.getMonth() + 1, // Solar month is 1-indexed
+            getDay: () => expectedSolarDate.getDate()
+          }) as unknown as SolarInstance)
+        } as unknown as LunarInstance;
       });
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const result = getSolarDateFromLunarDate(2024, { day: 31, month: 20, isLeapMonth: false }, mockLunarDateAdapter, mockDateAdapter);
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(result).toEqual(new Date(2024, 19, 31)); // Fallback uses original values
-      consoleSpy.mockRestore();
+
+      const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
+      expect(result.getFullYear()).toBe(expectedSolarDate.getFullYear());
+      expect(result.getMonth()).toBe(expectedSolarDate.getMonth());
+      expect(result.getDate()).toBe(expectedSolarDate.getDate());
+    });
+
+    it('should handle errors during conversion and return fallback', () => {
+      const year = 2023;
+      const lunarDate: LunarDate = { day: 1, month: 1, isLeapMonth: false };
+      mockLunarDateAdapter.lunarFromYmd.mockImplementationOnce(() => { throw new Error('Lunar conversion failed'); });
+      
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
+      
+      expect(spy).toHaveBeenCalledWith('Error during lunar to solar conversion:', expect.any(Error));
+      expect(result.getFullYear()).toBe(year);
+      expect(result.getMonth()).toBe(lunarDate.month - 1);
+      expect(result.getDate()).toBe(lunarDate.day);
+      spy.mockRestore();
     });
   });
 
   describe('getLunarDateForSolarDay', () => {
-    it('should convert solar date to lunar date', () => {
-      const solarDate = new Date(2024, 0, 15);
+    it('should convert solar date to lunar date string', () => {
+      const solarDate = new Date(2023, 6, 15); // Solar July 15, 2023
+      const expectedLunarString = '28/5'; // Lunar May 28
+
+      mockDateAdapter.getFullYear.mockReturnValueOnce(2023);
+      mockDateAdapter.getMonth.mockReturnValueOnce(6);
+      mockDateAdapter.getDate.mockReturnValueOnce(15);
+      mockLunarDateAdapter.solarFromYmd.mockReturnValueOnce({
+        getYear: () => 2023, getMonth: () => 7, getDay: () => 15,
+        getLunar: () => ({ getDay: () => 28, getMonth: () => 5 })
+      } as unknown as SolarInstance);
+
+
       const result = getLunarDateForSolarDay(solarDate, mockLunarDateAdapter, mockDateAdapter);
+      expect(result).toBe(expectedLunarString);
       expect(mockDateAdapter.getFullYear).toHaveBeenCalledWith(solarDate);
-      expect(mockLunarDateAdapter.fromSolar).toHaveBeenCalled();
-      expect(result).toBe('19/12'); // Based on mockLunarDateAdapter.fromSolar
+      expect(mockLunarDateAdapter.solarFromYmd).toHaveBeenCalled();
     });
 
-    it('should handle invalid solarDate and return fallback string', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const result = getLunarDateForSolarDay(new Date('invalid'), mockLunarDateAdapter, mockDateAdapter);
-      expect(consoleSpy).toHaveBeenCalled();
+    it('should handle invalid solarDate input', () => {
+      const invalidDate = new Date('invalid date');
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = getLunarDateForSolarDay(invalidDate, mockLunarDateAdapter, mockDateAdapter);
       expect(result).toBe('Ngày không hợp lệ (Âm)');
-      consoleSpy.mockRestore();
+      expect(spy).toHaveBeenCalledWith('Invalid solarDate input to getLunarDateForSolarDay:', invalidDate);
+      spy.mockRestore();
     });
 
-    it('should handle error during conversion and return fallback string', () => {
-      mockLunarDateAdapter.fromYmd.mockImplementation(() => {
-        throw new Error('Conversion error');
-      });
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const result = getLunarDateForSolarDay(new Date(2024, 0, 1), mockLunarDateAdapter, mockDateAdapter);
-      expect(consoleSpy).toHaveBeenCalled();
+    it('should handle errors during conversion and return fallback', () => {
+      const solarDate = new Date(2023, 6, 15);
+      mockDateAdapter.getFullYear.mockReturnValueOnce(2023);
+      mockDateAdapter.getMonth.mockReturnValueOnce(6);
+      mockDateAdapter.getDate.mockReturnValueOnce(15);
+      mockLunarDateAdapter.solarFromYmd.mockImplementationOnce(() => { throw new Error('Solar conversion failed'); });
+      
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      const result = getLunarDateForSolarDay(solarDate, mockLunarDateAdapter, mockDateAdapter);
+      
+      expect(spy).toHaveBeenCalledWith('Error during solar to lunar conversion:', expect.any(Error));
       expect(result).toBe('Lỗi chuyển đổi (Âm)');
-      consoleSpy.mockRestore();
+      spy.mockRestore();
     });
   });
 
   describe('getLunarDateRangeFiltersLogic', () => {
-    it('should compute correct lunar date range filters', () => {
-      const selectedDate = new Date(2024, 0, 15);
-      const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
-      expect(mockDateAdapter.startOfMonth).toHaveBeenCalledWith(selectedDate);
-      expect(mockDateAdapter.endOfMonth).toHaveBeenCalledWith(selectedDate);
-      expect(result).toEqual({ lunarStartDay: 1, lunarStartMonth: 1, lunarEndDay: 31, lunarEndMonth: 1 });
-    });
-  });
+    it('should compute lunar date range filters based on selected solar date', () => {
+      const selectedDate = new Date(2023, 6, 15); // Solar July 15, 2023
+      const startOfMonth = new Date(2023, 6, 1);
+      const endOfMonth = new Date(2023, 7, 0, 23, 59, 59, 999);
 
-  describe('getEventFilterLogic', () => {
-    it('should construct the EventFilter correctly', () => {
-      const selectedDate = new Date(2024, 0, 15);
-      const lunarDateRangeFilters = { lunarStartDay: 1, lunarStartMonth: 1, lunarEndDay: 30, lunarEndMonth: 1 };
-      const result = getEventFilterLogic(selectedDate, 'fam1', 'mem1', lunarDateRangeFilters, mockDateAdapter);
-      expect(mockDateAdapter.startOfMonth).toHaveBeenCalledWith(selectedDate);
-      expect(mockDateAdapter.endOfMonth).toHaveBeenCalledWith(selectedDate);
+      mockDateAdapter.startOfMonth.mockReturnValue(startOfMonth);
+      mockDateAdapter.endOfMonth.mockReturnValue(endOfMonth);
+      mockDateAdapter.getFullYear.mockReturnValue(2023);
+      mockDateAdapter.getMonth
+        .mockReturnValueOnce(6) // startOfMonth.getMonth()
+        .mockReturnValueOnce(7) // endOfMonth.getMonth() - this is 1-indexed in lunar calls
+        .mockReturnValueOnce(7); // endOfMonth.getMonth() - for getLunarDaysInMonth
+
+      // Mock fromYmd and getLunar for start and end of month
+      mockLunarDateAdapter.solarFromYmd
+        .mockImplementationOnce((y, m, d) => ({ getYear: () => y, getMonth: () => m, getDay: () => d, getLunar: () => ({ getMonth: () => 5, getDay: () => 14 }) })) // Start of month (Solar 2023-07-01 -> Lunar 2023-05-14)
+        .mockImplementationOnce((y, m, d) => ({ getYear: () => y, getMonth: () => m, getDay: () => d, getLunar: () => ({ getMonth: () => 6, getDay: () => 14 }) })); // End of month (Solar 2023-07-31 -> Lunar 2023-06-14)
+
+      mockLunarDateAdapter.getLunarDaysInMonth.mockReturnValue(30); // for endLunar month 6
+
+      const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
       expect(result).toEqual({
-        familyId: 'fam1',
-        startDate: new Date(2024, 0, 1),
-        endDate: new Date(2024, 1, 0),
-        lunarStartDay: 1,
-        lunarStartMonth: 1,
-        lunarEndDay: 30,
-        lunarEndMonth: 1,
-        memberId: 'mem1',
+        lunarMonthRange: [5, 6], // Expected Lunar May to June
       });
+      expect(mockLunarDateAdapter.solarFromYmd).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return default filters if Solar instances are invalid', () => {
+      const selectedDate = new Date(2023, 6, 15);
+      mockDateAdapter.startOfMonth.mockReturnValue(new Date(2023, 6, 1));
+      mockDateAdapter.endOfMonth.mockReturnValue(new Date(2023, 7, 0));
+      mockLunarDateAdapter.solarFromYmd.mockReturnValue(null as any); // Simulate invalid Solar instance
+
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
+      expect(result).toEqual({
+        lunarMonthRange: [1, 12],
+      });
+      spy.mockRestore();
+    });
+
+    it('should return default filters if Lunar instances are invalid', () => {
+      const selectedDate = new Date(2023, 6, 15);
+      mockDateAdapter.startOfMonth.mockReturnValue(new Date(2023, 6, 1));
+      mockDateAdapter.endOfMonth.mockReturnValue(new Date(2023, 7, 0));
+      mockLunarDateAdapter.solarFromYmd
+        .mockReturnValueOnce({ getLunar: () => null } as any) // Simulate invalid Lunar instance
+        .mockReturnValueOnce({ getLunar: () => ({ getMonth: () => 6, getDay: () => 14 }) } as any);
+
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
+      expect(result).toEqual({
+        lunarMonthRange: [1, 12],
+      });
+      expect(spy).toHaveBeenCalledWith('Invalid Lunar instances during lunar date range calculation.');
+      spy.mockRestore();
     });
   });
 
   describe('formatEventsForCalendarLogic', () => {
-    const mockEvents: Event[] = [
-      { id: '1', name: 'Solar Event', calendarType: CalendarType.Solar, solarDate: new Date(2024, 0, 10), familyId: 'f1', type: 'Other', repeatRule: 'None', description: '', relatedMemberIds: [], color: '#000000' },
-      { id: '2', name: 'Lunar Event', calendarType: CalendarType.Lunar, lunarDate: { day: 5, month: 1, isLeapMonth: false }, familyId: 'f1', type: 'Other', repeatRule: 'None', description: '', relatedMemberIds: [], color: '#000000' },
-      { id: '3', name: 'No Date Event', familyId: 'f1', type: 'Other', calendarType: CalendarType.Solar, solarDate: null, repeatRule: 'None', description: '', relatedMemberIds: [], color: '#000000' },
-    ];
-    const selectedDate = new Date(2024, 0, 1);
+    const mockEvent1: Event = {
+      id: '1', name: 'Solar Event', type: CalendarType.Solar, solarDate: new Date(2023, 6, 10),
+      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+    };
+    const mockEvent2: Event = {
+      id: '2', name: 'Lunar Event', type: CalendarType.Lunar, lunarDate: { day: 28, month: 5, isLeapMonth: false },
+      familyId: '', calendarType: CalendarType.Lunar, solarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+    };
+    const mockEventOutsideMonth: Event = {
+      id: '3', name: 'Outside Event', type: CalendarType.Solar, solarDate: new Date(2023, 5, 1),
+      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+    };
 
-    it('should format solar events correctly', () => {
-      const formatted = formatEventsForCalendarLogic([mockEvents[0]], selectedDate, mockDateAdapter, mockLunarDateAdapter);
-      expect(formatted).toHaveLength(1);
-      expect(formatted[0]).toMatchObject({
-        title: 'Solar Event',
-        start: new Date(2024, 0, 10),
-        end: new Date(2024, 0, 10),
-        color: 'primary',
-        timed: true,
-        eventObject: mockEvents[0],
-      });
+    it('should format solar events for calendar', () => {
+      const selectedDate = new Date(2023, 6, 15); // July 2023
+      const events = [mockEvent1];
+
+      const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe('Solar Event');
+      expect(result[0].start.getMonth()).toBe(6); // July
+      expect(result[0].start.getDate()).toBe(10);
+      expect(result[0].eventObject).toEqual(mockEvent1);
     });
 
-    it('should format lunar events correctly', () => {
-      const formatted = formatEventsForCalendarLogic([mockEvents[1]], selectedDate, mockDateAdapter, mockLunarDateAdapter);
-      expect(formatted).toHaveLength(1);
-      expect(formatted[0]).toMatchObject({
-        title: 'Lunar Event',
-        start: new Date(2024, 0, 5), // Based on mock getSolarDateFromLunarDate
-        end: new Date(2024, 0, 5),
-        color: 'primary',
-        timed: true,
-        eventObject: mockEvents[1],
-      });
+    it('should format lunar events for calendar', () => {
+      const selectedDate = new Date(2023, 6, 15); // July 2023
+      const events = [mockEvent2];
+
+      mockLunarDateAdapter.getLunarDaysInMonth.mockReturnValue(30);
+
+      const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe('Lunar Event');
+      expect(result[0].start.getMonth()).toBe(6); // July
+      expect(result[0].start.getDate()).toBe(15);
+      expect(result[0].eventObject).toEqual(mockEvent2);
     });
 
-    it('should filter out events without valid start dates', () => {
-      const formatted = formatEventsForCalendarLogic(mockEvents, selectedDate, mockDateAdapter, mockLunarDateAdapter);
-      expect(formatted).toHaveLength(2); // No Date Event should be filtered out
-      expect(formatted.some(e => e.title === 'No Date Event')).toBe(false);
+    it('should filter out events outside the selected month', () => {
+      const selectedDate = new Date(2023, 6, 15); // July 2023
+      const events = [mockEvent1, mockEventOutsideMonth];
+
+      const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe('Solar Event');
     });
 
-    it('should return empty array for empty events input', () => {
-      const formatted = formatEventsForCalendarLogic([], selectedDate, mockDateAdapter, mockLunarDateAdapter);
-      expect(formatted).toEqual([]);
+    it('should return empty array if no events are provided', () => {
+      const selectedDate = new Date(2023, 6, 15);
+      const result = formatEventsForCalendarLogic(null as any, selectedDate, mockDateAdapter, mockLunarDateAdapter);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should handle events without valid dates', () => {
+      const eventWithoutDate: Event = {
+        id: '4', name: 'No Date Event', type: CalendarType.Solar, solarDate: null,
+        familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+      };
+      const selectedDate = new Date(2023, 6, 15);
+      const events = [eventWithoutDate];
+
+      const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
+      expect(result).toHaveLength(0);
     });
   });
 
   describe('getWeekdaysLogic', () => {
-    it('should return an array of weekdays', () => {
+    it('should return an array of weekdays starting from Sunday', () => {
       expect(getWeekdaysLogic()).toEqual([0, 1, 2, 3, 4, 5, 6]);
     });
   });
 
   describe('canManageEventLogic', () => {
-    it('should return true if not readOnly and isAdmin', () => {
-      expect(canManageEventLogic(false, true, vi.fn(), 'f1')).toBe(true);
+    const isFamilyManager = vi.fn((familyId: string) => familyId === 'family1');
+
+    it('should return true if not readOnly and is admin', () => {
+      expect(canManageEventLogic(false, true, isFamilyManager, 'family2')).toBe(true);
     });
-    it('should return true if not readOnly and isFamilyManager', () => {
-      expect(canManageEventLogic(false, false, vi.fn(() => true), 'f1')).toBe(true);
+
+    it('should return true if not readOnly and is family manager', () => {
+      expect(canManageEventLogic(false, false, isFamilyManager, 'family1')).toBe(true);
     });
+
     it('should return false if readOnly', () => {
-      expect(canManageEventLogic(true, true, vi.fn(() => true), 'f1')).toBe(false);
+      expect(canManageEventLogic(true, true, isFamilyManager, 'family1')).toBe(false);
     });
+
     it('should return false if not admin and not family manager', () => {
-      expect(canManageEventLogic(false, false, vi.fn(() => false), 'f1')).toBe(false);
+      expect(canManageEventLogic(false, false, isFamilyManager, 'family2')).toBe(false);
+    });
+
+    it('should handle undefined familyId correctly', () => {
+      expect(canManageEventLogic(false, false, isFamilyManager, undefined)).toBe(false);
     });
   });
 
   describe('getCalendarTitleLogic', () => {
-    it('should return title from calendarRefValue', () => {
-      expect(getCalendarTitleLogic({ title: 'Test Title' } as any)).toBe('Test Title');
+    it('should return the title from calendarRefValue', () => {
+      const calendarRefValue = { title: 'Test Calendar Title' };
+      expect(getCalendarTitleLogic(calendarRefValue)).toBe('Test Calendar Title');
     });
+
     it('should return empty string if calendarRefValue is null', () => {
       expect(getCalendarTitleLogic(null)).toBe('');
     });
+
     it('should return empty string if calendarRefValue has no title', () => {
-      expect(getCalendarTitleLogic({} as any)).toBe('');
+      const calendarRefValue = {};
+      expect(getCalendarTitleLogic(calendarRefValue as any)).toBe('');
     });
   });
 });

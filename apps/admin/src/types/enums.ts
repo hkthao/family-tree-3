@@ -51,12 +51,3 @@ export enum FamilyRole {
   Viewer = 2
 }
 
-export enum EventType {
-  Other = 0,
-  Birth = 1,
-  Death = 2,
-  Marriage = 3,
-  Anniversary = 4,
-  Divorce = 5
-}
-

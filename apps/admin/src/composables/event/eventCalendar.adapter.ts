@@ -1,5 +1,5 @@
 // src/composables/event/eventCalendar.adapter.ts
-import { Solar, Lunar, SolarUtil } from 'lunar-javascript';
+import { Solar, Lunar, SolarUtil, LunarYear, LunarMonth } from 'lunar-javascript';
 import dayjs from 'dayjs';
 /**
  * @interface DateAdapter
@@ -76,7 +76,13 @@ export class LunarJsDateAdapter implements LunarDateAdapter {
     return lunar.getSolar();
   }
   getLunarDaysInMonth(year: number, month: number): number {
-    return SolarUtil.getDaysOfMonth(year, month);
+    const lunarYearObj = LunarYear.fromYear(year);
+    const lunarMonthObj = lunarYearObj.getMonth(month);
+    if (lunarMonthObj) {
+      return lunarMonthObj.getDayCount();
+    }
+    console.error(`Invalid lunar month: ${month} for year: ${year}. Defaulting to 30 days.`);
+    return 30; // Fallback
   }
 }
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApiEventServiceAdapter } from '@/composables/event/event.adapter';
 import type { IEventService } from '@/services/event/event.service.interface';
-import { EventType, CalendarType, RepeatRule } from '@/types/enums';
+import { CalendarType, RepeatRule, EventType } from '@/types';
 import type { Event, Result, ApiError } from '@/types';
 
 // Mock ApiEventService

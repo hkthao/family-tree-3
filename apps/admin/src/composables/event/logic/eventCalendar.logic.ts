@@ -19,6 +19,10 @@ export function getSolarDateFromLunarDate(
 
     const lunar: LunarInstance = lunarDateAdapter.lunarFromYmd(year, lunarDate.month, day);
     const solar: SolarInstance = lunarDateAdapter.getSolar(lunar);
+    if (!solar) {
+      console.warn(`Could not get solar date for lunar date: year=${year}, month=${lunarDate.month}, day=${day}. Falling back.`);
+      return dateAdapter.newDate(year, lunarDate.month - 1, day); // Use adjusted day for fallback
+    }
     return dateAdapter.newDate(solar.getYear(), solar.getMonth() - 1, solar.getDay());
   } catch (e) {
     console.error('Error during lunar to solar conversion:', e);
@@ -77,12 +81,8 @@ export function getLunarDateRangeFiltersLogic(
 
   // Ensure Solar instances are valid before calling getLunar()
   if (!startSolar || !endSolar) {
-    console.error('Invalid Solar instances during lunar date range calculation.');
     return {
-      lunarStartDay: 1,
-      lunarStartMonth: 1,
-      lunarEndDay: 30,
-      lunarEndMonth: 12,
+      lunarMonthRange: [1, 12],
     };
   }
 
@@ -93,27 +93,15 @@ export function getLunarDateRangeFiltersLogic(
   if (!startLunar || !endLunar) {
     console.error('Invalid Lunar instances during lunar date range calculation.');
     return {
-      lunarStartDay: 1,
-      lunarStartMonth: 1,
-      lunarEndDay: 30,
-      lunarEndMonth: 12,
+      lunarMonthRange: [1, 12],
     };
   }
 
-  const lunarStartDay = 1;
   const lunarStartMonth = startLunar.getMonth();
-  let lunarEndDay = endLunar.getDay();
   const lunarEndMonth = endLunar.getMonth();
 
-  if (lunarEndMonth > lunarStartMonth) {
-    lunarEndDay = lunarDateAdapter.getLunarDaysInMonth(dateAdapter.getFullYear(endOfMonth), lunarEndMonth);
-  }
-
   return {
-    lunarStartDay,
-    lunarStartMonth,
-    lunarEndDay,
-    lunarEndMonth,
+    lunarMonthRange: [lunarStartMonth, lunarEndMonth],
   };
 }
 
