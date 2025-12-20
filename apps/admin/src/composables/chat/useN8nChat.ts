@@ -1,27 +1,42 @@
-import { watch, onUnmounted, computed, nextTick, reactive, type Ref, type ComputedRef } from 'vue';
-import { createChat } from '@n8n/chat';
+import { watch, onUnmounted, computed, reactive, type Ref, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import '@n8n/chat/style.css';
+interface ChatMetadata {
+  familyId: string | undefined;
+}
 import { getEnvVariable } from '@/utils/api.util';
 
 import { useAccessToken } from '../auth/useAccessToken';
 import { useUserPreferences } from '../user/useUserPreferences';
+import { type N8nChatAdapter, ApiN8nChatAdapter } from './n8nChat.adapter';
+import { getN8nChatI18n } from './n8nChat.logic';
 
-export function useN8nChat(selectedFamilyId: Ref<string | undefined> | ComputedRef<string | undefined>, chatOpen: Ref<boolean>) {
+interface UseN8nChatDeps {
+  n8nChatAdapter: N8nChatAdapter;
+}
+
+const defaultDeps = {
+  n8nChatAdapter: new ApiN8nChatAdapter(),
+};
+
+export function useN8nChat(
+  selectedFamilyId: Ref<string | undefined> | ComputedRef<string | undefined>,
+  chatOpen: Ref<boolean>,
+  deps: UseN8nChatDeps = defaultDeps
+) {
   const { t } = useI18n();
-  let chatInstance: ReturnType<typeof createChat> | null = null;
-
   const { accessToken } = useAccessToken();
   const { preferences, currentChatLanguage } = useUserPreferences();
+  const { n8nChatAdapter } = deps;
 
-  const chatMetadata = reactive({
+  const chatMetadata = reactive<ChatMetadata>({
     familyId: computed(() => selectedFamilyId.value).value, // Reactive familyId
   });
 
   // Watch for changes in selectedFamilyId and update the reactive metadata
-  watch(selectedFamilyId, (newId) => {
+  const handleFamilyIdChange = (newId: string | undefined) => {
     chatMetadata.familyId = newId;
-  });
+  };
+  watch(selectedFamilyId, handleFamilyIdChange);
 
   const WEBHOOK_URL = getEnvVariable('VITE_N8N_CHAT_WEBHOOK_URL');
   if (!WEBHOOK_URL) {
@@ -29,85 +44,65 @@ export function useN8nChat(selectedFamilyId: Ref<string | undefined> | ComputedR
   }
 
   const initializeChat = async () => {
-    if (chatInstance || !WEBHOOK_URL || !accessToken.value || !preferences.value) {
-      // Don't initialize if already initialized, no webhook URL, no access token, or no preferences
+    // Don't initialize if already initialized, no webhook URL, no access token, or no preferences
+    if (n8nChatAdapter.isMounted() || !WEBHOOK_URL || !accessToken.value || !preferences.value) {
       return;
     }
 
-    // Ensure the DOM target is available before creating the chat
-    await nextTick();
-    const chatTarget = document.querySelector('#n8n-chat-target');
-    if (!chatTarget) {
-      console.warn('#n8n-chat-target not found in DOM, deferring chat initialization.');
-      return;
-    }
-
-    chatInstance = createChat({
+    // Pass targetSelector directly to the adapter
+    n8nChatAdapter.mount({
       webhookUrl: WEBHOOK_URL,
-      webhookConfig: {
-        method: 'POST',
-        headers: {
-          'authorization': `Bearer ${accessToken.value}`,
-        },
-      },
-      target: '#n8n-chat-target',
-      mode: 'fullscreen',
-      chatInputKey: 'chatInput',
-      chatSessionKey: 'sessionId',
-      loadPreviousSession: false,
-      metadata: chatMetadata, // Pass the reactive metadata object
-      showWelcomeScreen: false,
-       // @ts-expect-error: The n8n chat widget expects 'vi' and 'en' for languages, not Language enum values.
+      accessToken: accessToken.value,
+      targetSelector: '#n8n-chat-target',
+      metadata: chatMetadata,
       defaultLanguage: currentChatLanguage.value,
-      initialMessages: [
-       t('n8nChat.welcomeMessage'),
-      ],
-      i18n: {
-        en: {
-          title: 'Gia Phả Việt AI Assistant 👋',
-          subtitle: "Your guide to family history. Select a family to get specific information.",
-          footer: '',
-          inputPlaceholder: 'Type your question..',
-          getStarted: 'New Conversation',
-          closeButtonTooltip: 'Close chat',
-        },
-        vi: {
-          title: 'Trợ lý AI Gia Phả Việt 👋',
-          subtitle: "Người bạn đồng hành trong hành trình tìm hiểu gia phả. Chọn một gia đình để tra cứu thông tin cụ thể.",
-          footer: '',
-          inputPlaceholder: 'Nhập câu hỏi của bạn..',
-          getStarted: 'Cuộc trò chuyện mới',
-          closeButtonTooltip: 'Đóng trò chuyện',
-        },
-      },
-      enableStreaming: false,
+      i18n: getN8nChatI18n(t),
     });
   };
 
   const destroyChat = () => {
-    if (chatInstance) {
-      chatInstance.unmount();
-      chatInstance = null;
-    }
+    n8nChatAdapter.unmount();
   };
 
-  // Watch for access token, preferences, and chatOpen state to initialize/destroy chat
-  watch([accessToken, preferences, chatOpen], async ([newAccessToken, newPreferences, newChatOpen]) => {
-    if (newChatOpen && newAccessToken && newPreferences) {
+  const handleChatDependenciesChange = async () => {
+    const newAccessToken = accessToken.value;
+    const newPreferences = preferences.value;
+    const newChatOpen = chatOpen.value;
+
+    const currentFamilyId = selectedFamilyId.value;
+    const adapterIsMounted = n8nChatAdapter.isMounted();
+
+    // Check if chat should be initialized or re-initialized
+    if (newChatOpen && newAccessToken && newPreferences && WEBHOOK_URL) {
+      // If chat is already mounted but configuration has changed (e.g., familyId, token, or language),
+      // we need to destroy and remount to apply changes.
+      // This is a simplification; a more advanced adapter might support dynamic updates.
+      if (adapterIsMounted) {
+        // Check if metadata (familyId) or access token or language changed
+        // For simplicity, we just destroy and remount if any watched dependency changes.
+        // The watch array includes selectedFamilyId, accessToken, preferences (which includes language)
+        destroyChat();
+      }
       await initializeChat();
-    } else if (!newChatOpen && chatInstance) {
+    } else if (!newChatOpen && adapterIsMounted) {
       destroyChat();
     }
-  }, { immediate: true });
+  };
+  // Watch for access token, preferences, chatOpen, AND selectedFamilyId to initialize/destroy chat
+  watch([accessToken, preferences, chatOpen, selectedFamilyId], handleChatDependenciesChange, { immediate: true });
 
   onUnmounted(() => {
     destroyChat();
   });
 
   return {
-    toggleChat: () => {
-      chatOpen.value = !chatOpen.value;
+    state: {
+      isChatReady: computed(() => n8nChatAdapter.isMounted()),
     },
-    isChatReady: computed(() => !!chatInstance),
+    actions: {
+      toggleChat: () => {
+        chatOpen.value = !chatOpen.value;
+      },
+    },
   };
 }

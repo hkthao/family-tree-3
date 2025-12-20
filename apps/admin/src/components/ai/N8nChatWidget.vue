@@ -5,7 +5,7 @@
         <div class="mt-8 mb-1 pa-1 pb-0">
           <FamilyAutocomplete
             v-model="selectedFamilyId"
-            label="Chọn gia đình để tra cứu"
+            :label="t('n8nChat.familySelectionLabel')"
             clearable
             hide-details
           />
@@ -21,8 +21,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useN8nChat } from '@/composables';
+import '@n8n/chat/style.css';
+
+const { t } = useI18n();
 
 const chatOpen = ref(false);
 const selectedFamilyId = ref<string | undefined>(undefined);
@@ -41,7 +45,7 @@ watch(() => props.modelValue, (newVal) => {
 });
 
 // Use the new composable
-const { toggleChat: toggleChatComposale } = useN8nChat(selectedFamilyId, chatOpen);
+const { actions: { toggleChat: toggleChatComposale } } = useN8nChat(selectedFamilyId, chatOpen);
 
 const toggleChat = () => {
   toggleChatComposale();

@@ -22,7 +22,7 @@ export default mergeConfig(
           functions: 0,
           lines: 0
         },
-        include: ['src/stores/**/*.ts', 'src/views/**/*.vue', 'src/components/**/*.vue']
+        include: ['src/stores/**/*.ts', 'src/views/**/*.vue', 'src/components/**/*.vue', 'src/composables/**/*.ts']
       },
       server: {
         deps: {
