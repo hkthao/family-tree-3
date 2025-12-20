@@ -1,5 +1,5 @@
 // src/composables/event/logic/eventCalendar.logic.ts
-import type { Event, LunarDate, EventFilter } from '@/types';
+import type { Event, LunarDate } from '@/types';
 import { CalendarType } from '@/types/enums';
 import type { DateAdapter, LunarDateAdapter, LunarInstance, SolarInstance } from '@/composables/event/eventCalendar.adapter';
 
@@ -117,30 +117,7 @@ export function getLunarDateRangeFiltersLogic(
   };
 }
 
-/**
- * Computes the event filter for fetching events for the calendar.
- */
-export function getEventFilterLogic(
-  selectedDate: Date,
-  propsFamilyId: string | undefined,
-  propsMemberId: string | undefined,
-  lunarDateRangeFilters: ReturnType<typeof getLunarDateRangeFiltersLogic>,
-  dateAdapter: DateAdapter,
-): EventFilter {
-  const startOfMonth = dateAdapter.startOfMonth(selectedDate);
-  const endOfMonth = dateAdapter.endOfMonth(selectedDate);
 
-  return {
-    familyId: propsFamilyId,
-    startDate: startOfMonth,
-    endDate: endOfMonth,
-    lunarStartDay: lunarDateRangeFilters.lunarStartDay,
-    lunarStartMonth: lunarDateRangeFilters.lunarStartMonth,
-    lunarEndDay: lunarDateRangeFilters.lunarEndDay,
-    lunarEndMonth: lunarDateRangeFilters.lunarEndMonth,
-    memberId: propsMemberId,
-  };
-}
 
 /**
  * Formats raw event data into a structure suitable for a calendar component.
@@ -152,10 +129,15 @@ export function formatEventsForCalendarLogic(
   lunarDateAdapter: LunarDateAdapter,
 ): any[] {
   if (!events) return [];
+
+  const startOfMonth = dateAdapter.startOfMonth(selectedDate);
+  const endOfMonth = dateAdapter.endOfMonth(selectedDate);
+
   return events
     .map((event: Event) => {
       let eventStart: Date | null = null;
       let eventEnd: Date | null = null;
+
       if (event.calendarType === CalendarType.Solar && event.solarDate) {
         eventStart = dateAdapter.newDate(
           dateAdapter.getFullYear(event.solarDate),
@@ -173,7 +155,17 @@ export function formatEventsForCalendarLogic(
         eventEnd = getSolarDateFromLunarDate(year, event.lunarDate, lunarDateAdapter, dateAdapter); // Assuming single day events for now
       }
 
-      if (!eventStart) return null; // Skip events without a valid start date
+      if (!eventStart || !eventEnd) return null; // Skip events without valid start/end dates
+
+      // Client-side filtering for the current month view
+      const eventFallsInSelectedMonth =
+        (eventStart >= startOfMonth && eventStart <= endOfMonth) ||
+        (eventEnd >= startOfMonth && eventEnd <= endOfMonth) ||
+        (eventStart < startOfMonth && eventEnd > endOfMonth); // Event spans across the month
+
+      if (!eventFallsInSelectedMonth) {
+        return null; // Filter out events not in the current month
+      }
 
       const formattedEvent = {
         title: event.name,

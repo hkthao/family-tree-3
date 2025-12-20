@@ -52,3 +52,4 @@ export interface EventFilter extends ListOptions {
   lunarEndDay?: number;
   lunarEndMonth?: number;
 }
+

@@ -9,7 +9,7 @@ import type { Event, Result } from '@/types'; // Import Result type
  * @description Defines the interface for an event service adapter,
  * ensuring consistency and testability across different event service implementations.
  */
-export interface EventServiceAdapter {
+export interface EventServiceAdapter extends IEventService {
   /**
    * Adds a new event.
    * @param eventData The event data to add.
@@ -45,6 +45,13 @@ export interface EventServiceAdapter {
    * @returns A Result object containing paginated events or an ApiError.
    */
   search(listOptions: any, filterOptions: any): Promise<Result<any>>; // TODO: Define proper types for listOptions and filterOptions
+
+  /**
+   * Fetches a list of all events for a specific family.
+   * @param familyId The ID of the family.
+   * @returns A promise that resolves to a Result object containing an array of Event objects or an ApiError.
+   */
+  getEventsByFamilyId(familyId: string): Promise<Result<Event[]>>;
 }
 
 /**
@@ -77,6 +84,14 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
 
   async search(listOptions: any, filterOptions: any): Promise<Result<any>> {
     return this.apiEventService.search(listOptions, filterOptions);
+  }
+
+  async getEventsByFamilyId(familyId: string): Promise<Result<Event[]>> {
+    return this.apiEventService.getEventsByFamilyId(familyId);
+  }
+
+  async getByIds(ids: string[]): Promise<Result<Event[]>> {
+    return this.apiEventService.getByIds(ids);
   }
 }
 

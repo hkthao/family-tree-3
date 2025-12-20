@@ -1,9 +1,9 @@
-import { ref, computed, watch, type Ref, type ComputedRef } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event, LunarDate, EventFilter } from '@/types';
-import { CalendarType } from '@/types/enums';
+import type { Event } from '@/types';
 import { useAuth, type UseAuthReturn } from '@/composables/auth/useAuth';
-import { useUpcomingEvents, type UseUpcomingEventsReturn } from '@/composables/event/useUpcomingEvents';
+import { type IEventService } from '@/services/event/event.service.interface';
+import { DefaultEventServiceAdapter } from '../event.adapter';
 import {
   type DateAdapter,
   DayjsDateAdapter,
@@ -11,20 +11,17 @@ import {
   LunarJsDateAdapter,
 } from '@/composables/event/eventCalendar.adapter';
 import {
-  getSolarDateFromLunarDate,
-  getLunarDateForSolarDay,
-  getLunarDateRangeFiltersLogic,
-  getEventFilterLogic,
   formatEventsForCalendarLogic,
   getWeekdaysLogic,
   canManageEventLogic,
   getCalendarTitleLogic,
+  getLunarDateForSolarDay,
 } from '@/composables/event/logic/eventCalendar.logic';
 
 interface UseEventCalendarDeps {
   useI18n: typeof useI18n;
   useAuth: () => UseAuthReturn;
-  useUpcomingEvents: (baseFilter: Ref<EventFilter> | ComputedRef<EventFilter>) => UseUpcomingEventsReturn;
+  eventService: IEventService;
   dateAdapter: DateAdapter;
   lunarDateAdapter: LunarDateAdapter;
 }
@@ -32,37 +29,52 @@ interface UseEventCalendarDeps {
 const defaultDeps: UseEventCalendarDeps = {
   useI18n,
   useAuth,
-  useUpcomingEvents,
+  eventService: DefaultEventServiceAdapter,
   dateAdapter: new DayjsDateAdapter(),
   lunarDateAdapter: new LunarJsDateAdapter(),
 };
 
 export function useEventCalendar(
-  props: { familyId?: string; memberId?: string; readOnly?: boolean },
+  props: { familyId?: string; readOnly?: boolean },
   emit: (event: 'refetchEvents', ...args: any[]) => void,
   deps: UseEventCalendarDeps = defaultDeps,
 ) {
   const { t, locale } = deps.useI18n();
   const { state: authState } = deps.useAuth();
-  const { dateAdapter, lunarDateAdapter } = deps;
+  const { dateAdapter, lunarDateAdapter, eventService } = deps;
 
   const selectedDate = ref(dateAdapter.newDate()); // Use dateAdapter for new Date()
 
-  const lunarDateRangeFilters = computed(() =>
-    getLunarDateRangeFiltersLogic(selectedDate.value, dateAdapter, lunarDateAdapter),
-  );
+  const events = ref<Event[]>([]);
+  const loading = ref(false);
 
-  const eventFilter = computed(() =>
-    getEventFilterLogic(
-      selectedDate.value,
-      props.familyId,
-      props.memberId,
-      lunarDateRangeFilters.value,
-      dateAdapter,
-    ),
-  );
+  const fetchEvents = async () => {
+    if (!props.familyId) {
+      events.value = [];
+      return;
+    }
+    loading.value = true;
+    try {
+      const response = await eventService.getEventsByFamilyId(props.familyId);
+      if (response.ok) {
+        events.value = response.value;
+      } else {
+        console.error('Error fetching events:', response.error);
+        events.value = [];
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      events.value = [];
+    } finally {
+      loading.value = false;
+    }
+  };
 
-  const { upcomingEvents: events, isLoading: loading, refetch: refetchEvents } = deps.useUpcomingEvents(eventFilter);
+  watch(() => props.familyId, fetchEvents, { immediate: true });
+
+  const refetch = () => {
+    fetchEvents();
+  };
 
   const canAddEvent = computed(() =>
     canManageEventLogic(
@@ -134,7 +146,7 @@ export function useEventCalendar(
   const handleEventSaved = () => {
     editDrawer.value = false;
     selectedEventId.value = null;
-    refetchEvents(); // Refetch data
+    refetch(); // Refetch data
     emit('refetchEvents');
   };
 
@@ -145,7 +157,7 @@ export function useEventCalendar(
 
   const handleAddSaved = () => {
     addDrawer.value = false;
-    refetchEvents(); // Refetch data
+    refetch(); // Refetch data
     emit('refetchEvents');
   };
 
@@ -187,6 +199,7 @@ export function useEventCalendar(
       calendarTitle,
       formattedEvents,
       loading,
+      events, // Expose events from ref
     },
     actions: {
       t,
@@ -202,6 +215,7 @@ export function useEventCalendar(
       handleDetailClosed,
       handleDetailEdit,
       getLunarDateForSolarDay: getLunarDateForSolarDayAction,
+      refetch, // Expose the new refetch function
     },
   };
 }
