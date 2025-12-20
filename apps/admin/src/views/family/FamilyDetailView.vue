@@ -1,18 +1,18 @@
 <template>
-  <div v-if="isLoading">
+  <div v-if="state.isLoading">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
     {{ t('common.loading') }}
   </div>
-  <div v-else-if="error">
-    <v-alert type="error" :text="error?.message || t('family.detail.errorLoading')"></v-alert>
+  <div v-else-if="state.error">
+    <v-alert type="error" :text="state.error.value?.message || t('family.detail.errorLoading')"></v-alert>
   </div>
-  <div v-else-if="familyData">
-    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" />
+  <div v-else-if="state.familyData">
+    <FamilyForm :data="state.familyData.value" :read-only="props.readOnly" :title="t('family.detail.title')" />
     <v-card-actions class="justify-end pa-0">
-      <v-btn color="gray" @click="closeView" data-testid="button-close">
+      <v-btn color="gray" @click="actions.closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
+      <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="state.canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -20,16 +20,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { FamilyForm } from '@/components/family';
-import { useAuth } from '@/composables';
-import { useFamilyQuery } from '@/composables';
+import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 
 const { t } = useI18n();
-const router = useRouter();
-const { state } = useAuth();
 
 const props = defineProps<{
   familyId: string;
@@ -38,20 +33,5 @@ const props = defineProps<{
 
 const emit = defineEmits(['openEditDrawer']);
 
-const familyIdRef = toRef(props, 'familyId');
-const { family: familyData, isLoading, error } = useFamilyQuery(familyIdRef);
-
-const canManageFamily = computed(() => {
-  return state.isAdmin.value || state.isFamilyManager.value(props.familyId);
-});
-
-const openEditDrawer = () => {
-  emit('openEditDrawer', props.familyId);
-};
-
-const closeView = () => {
-  router.push('/family');
-};
-
-
+const { state, actions } = useFamilyDetail(props, emit);
 </script>
