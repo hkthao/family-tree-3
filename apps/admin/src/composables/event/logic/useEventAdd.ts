@@ -1,9 +1,31 @@
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
-import { useGlobalSnackbar } from '@/composables';
-import { useAddEventMutation } from '@/composables';
+import { type UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
+import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
+import { useAddEventMutation, type UseAddEventMutationReturn } from '@/composables/event/mutations/useAddEventMutation';
 
-export function useEventAdd(emit: (event: 'saved' | 'close', ...args: any[]) => void) {
+interface UseEventAddDeps {
+  useI18n: typeof useI18n;
+  useGlobalSnackbar: () => UseGlobalSnackbarReturn;
+  useAddEventMutation: () => UseAddEventMutationReturn;
+}
+
+const defaultDeps: UseEventAddDeps = {
+  useI18n,
+  useGlobalSnackbar,
+  useAddEventMutation,
+};
+
+export function useEventAdd(
+  emit: (event: 'saved' | 'close', ...args: any[]) => void,
+  deps: UseEventAddDeps = defaultDeps,
+) {
+  const {
+    useI18n,
+    useGlobalSnackbar,
+    useAddEventMutation,
+  } = deps;
+
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const { mutate: addEvent, isPending: isAddingEvent } = useAddEventMutation();
@@ -14,7 +36,7 @@ export function useEventAdd(emit: (event: 'saved' | 'close', ...args: any[]) => 
         showSnackbar(t('event.messages.addSuccess'), 'success');
         emit('saved');
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         showSnackbar(error.message || t('event.messages.saveError'), 'error');
       },
     });
@@ -25,9 +47,13 @@ export function useEventAdd(emit: (event: 'saved' | 'close', ...args: any[]) => 
   };
 
   return {
-    isAddingEvent,
-    handleAddEvent,
-    closeForm,
-    t, // Return t for use in the component template
+    state: {
+      isAddingEvent,
+    },
+    actions: {
+      handleAddEvent,
+      closeForm,
+      t, // Return t for use in the component template
+    },
   };
 }

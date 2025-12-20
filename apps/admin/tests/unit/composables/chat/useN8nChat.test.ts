@@ -171,7 +171,7 @@ describe('useN8nChat', () => {
     // Call onUnmounted manually (Vitest handles this automatically during component unmount)
     // In a real Vue test, this would be triggered by unmounting the component using the composable.
     // For direct composable testing, we simulate the lifecycle.
-    const { unmount } = require('vue').getCurrentInstance() || {}; // This is not how it works in Vitest for composables
+
     // Correct way to test onUnmounted in composables is by having a wrapper component or directly calling the cleanup logic
 
     // A simpler way to test the onUnmounted effect for composables is to trigger the effect directly

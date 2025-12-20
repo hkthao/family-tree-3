@@ -65,3 +65,5 @@ export function useConfirmDialog() {
     cancel,
   };
 }
+
+export type UseConfirmDialogReturn = ReturnType<typeof useConfirmDialog>;

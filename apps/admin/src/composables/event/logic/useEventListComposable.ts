@@ -15,7 +15,7 @@ export function useEventListComposable(props: {
   const { t } = useI18n();
 
   const searchQuery = ref(props.search);
-  let debounceTimer: ReturnType<typeof setTimeout>;
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   const debouncedSearch = computed({
     get() {
@@ -23,18 +23,22 @@ export function useEventListComposable(props: {
     },
     set(newValue: string) {
       searchQuery.value = newValue;
-      clearTimeout(debounceTimer);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
       debounceTimer = setTimeout(() => {
         emit('update:search', newValue);
       }, 300);
     },
   });
 
-  watch(() => props.search, (newSearch) => {
+  const handlePropsSearchChange = (newSearch: string) => {
     if (newSearch !== searchQuery.value) {
       searchQuery.value = newSearch;
     }
-  });
+  };
+
+  watch(() => props.search, handlePropsSearchChange);
 
   const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -92,13 +96,17 @@ export function useEventListComposable(props: {
   };
 
   return {
-    t,
-    debouncedSearch,
-    itemsPerPage,
-    headers,
-    loadEvents,
-    editEvent,
-    confirmDelete,
-    formatDate,
+    state: {
+      debouncedSearch,
+      itemsPerPage,
+      headers,
+    },
+    actions: {
+      t,
+      loadEvents,
+      editEvent,
+      confirmDelete,
+      formatDate,
+    },
   };
 }

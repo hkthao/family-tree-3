@@ -53,3 +53,5 @@ export function useEventListFilters() {
     setFilters,
   };
 }
+
+export type UseEventListFiltersReturn = ReturnType<typeof useEventListFilters>;

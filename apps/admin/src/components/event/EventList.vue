@@ -103,13 +103,21 @@ const emit = defineEmits([
 ]);
 
 const {
-  t,
+  state,
+  actions,
+} = useEventListComposable(props, emit);
+
+const {
   debouncedSearch,
   itemsPerPage,
   headers,
+} = state;
+
+const {
+  t,
   loadEvents,
   editEvent,
   confirmDelete,
   formatDate,
-} = useEventListComposable(props, emit);
+} = actions;
 </script>

@@ -1,17 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ApiEventService } from '@/services/event/api.event.service';
-import type { IEventService } from '@/services/event/event.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter';
 
-const apiEventService: IEventService = new ApiEventService(apiClient);
+interface UseDeleteEventMutationDeps {
+  eventService: EventServiceAdapter;
+}
 
-export function useDeleteEventMutation() {
+export function useDeleteEventMutation(
+  deps: UseDeleteEventMutationDeps = { eventService: DefaultEventServiceAdapter }
+) {
+  const { eventService } = deps;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (eventId: string) => {
-      const response = await apiEventService.delete(eventId);
+      const response = await eventService.delete(eventId);
       if (response.ok) {
         return response.value;
       }
@@ -22,3 +25,5 @@ export function useDeleteEventMutation() {
     },
   });
 }
+
+export type UseDeleteEventMutationReturn = ReturnType<typeof useDeleteEventMutation>;

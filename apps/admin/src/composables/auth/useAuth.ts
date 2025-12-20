@@ -51,3 +51,5 @@ export function useAuth(deps: UseAuthDeps = defaultUseAuthDeps) {
   };
 }
 
+export type UseAuthReturn = ReturnType<typeof useAuth>;
+

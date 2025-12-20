@@ -61,12 +61,20 @@ import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/l
 const emit = defineEmits(['update:filters']);
 
 const {
-  t,
+  state,
+  actions,
+} = useEventSearch(emit);
+
+const {
   expanded,
   filters,
   eventTypes,
-  calendarTypes, // Expose calendarTypes
+  calendarTypes,
+} = state;
+
+const {
+  t,
   applyFilters,
   resetFilters,
-} = useEventSearch(emit);
+} = actions;
 </script>

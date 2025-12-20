@@ -11,3 +11,5 @@ export function useGlobalSnackbar() {
     showSnackbar,
   };
 }
+
+export type UseGlobalSnackbarReturn = ReturnType<typeof useGlobalSnackbar>;

@@ -65,3 +65,5 @@ export function useCrudDrawer<T = string>() {
     closeAllDrawers,
   };
 }
+
+export type UseCrudDrawerReturn<T> = ReturnType<typeof useCrudDrawer<T>>;

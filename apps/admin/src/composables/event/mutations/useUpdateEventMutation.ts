@@ -1,13 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ApiEventService } from '@/services/event/api.event.service';
-import type { IEventService } from '@/services/event/event.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Event } from '@/types';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
-const apiEventService: IEventService = new ApiEventService(apiClient);
+interface UseUpdateEventMutationDeps {
+  eventService: EventServiceAdapter;
+}
 
-export function useUpdateEventMutation() {
+export function useUpdateEventMutation(
+  deps: UseUpdateEventMutationDeps = { eventService: DefaultEventServiceAdapter }
+) {
+  const { eventService } = deps;
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -15,7 +18,7 @@ export function useUpdateEventMutation() {
       if (!updatedEvent.id) {
         throw new Error('Event ID is required for update');
       }
-      const response = await apiEventService.update(updatedEvent);
+      const response = await eventService.update(updatedEvent); // Use injected service
       if (response.ok) {
         return response.value;
       }
@@ -27,3 +30,5 @@ export function useUpdateEventMutation() {
     },
   });
 }
+
+export type UseUpdateEventMutationReturn = ReturnType<typeof useUpdateEventMutation>;

@@ -1,15 +1,34 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, type Ref } from 'vue';
 import { formatDate } from '@/utils/dateUtils';
 import { useI18n } from 'vue-i18n';
-import type { Event, ListOptions, EventFilter } from '@/types';
-import { useServices } from '@/composables';
-import { useQuery } from '@tanstack/vue-query';
+import type { Event, ListOptions, EventFilter, Paginated } from '@/types';
+import { useQuery, type UseQueryReturnType } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter';
+import { mapFiltersToQueryOptions, sortEventsBySolarDateDesc } from './eventTimeline.logic';
 
-export function useEventTimeline(props: { familyId?: string; memberId?: string; readOnly?: boolean }) {
-  const { t } = useI18n();
-  const { event: eventService } = useServices(); // Renamed to avoid conflict
-  
+interface UseEventTimelineDeps {
+  useI18n: typeof useI18n;
+  eventService: EventServiceAdapter;
+  useQuery: <TData = unknown, TError = Error>(
+    options: any,
+  ) => UseQueryReturnType<TData, TError>;
+  formatDate: (date: Date | string | null | undefined) => string;
+}
+
+const defaultDeps: UseEventTimelineDeps = {
+  useI18n,
+  eventService: DefaultEventServiceAdapter,
+  useQuery,
+  formatDate,
+};
+
+export function useEventTimeline(
+  props: { familyId?: string; memberId?: string; readOnly?: boolean },
+  deps: UseEventTimelineDeps = defaultDeps,
+) {
+  const { t } = deps.useI18n();
+  const { eventService } = deps;
 
   const selectedEventId = ref<string | null>(null);
   const detailDrawer = ref(false);
@@ -24,22 +43,18 @@ export function useEventTimeline(props: { familyId?: string; memberId?: string; 
   });
 
   // Fetch events using useQuery
-  const { data, isLoading, error, refetch } = useQuery<{ items: Event[]; totalPages: number; totalCount: number }, Error>({
-    queryKey: [queryKeys.events.list(filters.value), currentPage.value, itemsPerPage.value, sortBy.value],
+  const { data, isLoading, error, refetch } = deps.useQuery<Paginated<Event>, Error>({
+    queryKey: computed(() => [queryKeys.events.list(filters.value), currentPage.value, itemsPerPage.value, sortBy.value]),
     queryFn: async () => {
-      const currentFilters = {
-        ...filters.value,
-        page: currentPage.value,
-        itemsPerPage: itemsPerPage.value,
-        sortBy: sortBy.value,
-      };
-      const result = await eventService.search(currentFilters, currentFilters); // Pass currentFilters as both options and filters
+      const { listOptions, filterOptions } = mapFiltersToQueryOptions(
+        filters.value,
+        currentPage.value,
+        itemsPerPage.value,
+        sortBy.value,
+      );
+      const result = await eventService.search(listOptions, filterOptions);
       if (result.ok) {
-        return {
-          items: result.value.items,
-          totalPages: result.value.totalPages,
-          totalCount: result.value.totalItems,
-        };
+        return result.value;
       } else {
         throw result.error;
       }
@@ -47,14 +62,7 @@ export function useEventTimeline(props: { familyId?: string; memberId?: string; 
     enabled: computed(() => !!(filters.value.familyId || filters.value.memberId)),
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: { items: [], totalPages: 0, totalCount: 0 },
-    select: (data) => {
-      // Sort by solarDate in descending order
-      const sortedItems = [...data.items].sort((a, b) => {
-        if (!a.solarDate || !b.solarDate) return 0;
-        return new Date(b.solarDate).getTime() - new Date(a.solarDate).getTime();
-      });
-      return { ...data, items: sortedItems };
-    },
+    select: sortEventsBySolarDateDesc, // Use extracted logic
   });
 
   const list = computed(() => ({
@@ -64,7 +72,7 @@ export function useEventTimeline(props: { familyId?: string; memberId?: string; 
     currentPage: currentPage.value,
     itemsPerPage: itemsPerPage.value,
     totalPages: data.value?.totalPages || 0,
-    totalCount: data.value?.totalCount || 0,
+    totalCount: data.value?.totalItems || 0,
     sortBy: sortBy.value,
   }));
 
@@ -98,26 +106,32 @@ export function useEventTimeline(props: { familyId?: string; memberId?: string; 
     setListOptions({ page: newPage });
   };
 
+  const handlePropsChange = ([newFamilyId, newMemberId]: [string | undefined, string | undefined]) => {
+    setFilters({ familyId: newFamilyId, memberId: newMemberId });
+  };
+
   watch(
     [() => props.familyId, () => props.memberId],
-    ([newFamilyId, newMemberId]) => {
-      setFilters({ familyId: newFamilyId, memberId: newMemberId });
-    },
+    handlePropsChange,
     { immediate: true },
   );
 
   return {
-    t,
-    list,
-    selectedEventId,
-    detailDrawer,
-    paginationLength,
-    showEventDetails,
-    handleDetailClosed,
-    handlePageChange,
-    formatDate,
-    setListOptions,
-    setFilters,
-    isLoading, // Expose isLoading directly
+    state: {
+      list,
+      selectedEventId,
+      detailDrawer,
+      paginationLength,
+      isLoading,
+    },
+    actions: {
+      t,
+      showEventDetails,
+      handleDetailClosed,
+      handlePageChange,
+      formatDate: deps.formatDate,
+      setListOptions,
+      setFilters,
+    },
   };
 }

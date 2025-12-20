@@ -38,3 +38,5 @@ export function useEventRules(_state: EventFormState) {
 
   return rules;
 }
+
+export type UseEventRulesReturn = ReturnType<typeof useEventRules>;

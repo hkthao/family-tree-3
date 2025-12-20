@@ -34,3 +34,9 @@ vi.mock('vue-i18n', () => ({
 vi.mock('@novu/js/ui', () => ({
   NovuUI: vi.fn(), // Mock the NovuUI export
 }));
+
+// Mock @/utils/result globally
+vi.mock('@/utils/result', () => ({
+  success: (value: any) => ({ ok: true, value }),
+  failure: (error: any) => ({ ok: false, error }),
+}));

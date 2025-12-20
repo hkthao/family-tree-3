@@ -88,7 +88,11 @@ const props = defineProps<{
 const emit = defineEmits(['refetchEvents']);
 
 const {
-  t,
+  state,
+  actions,
+} = useEventCalendar(props, emit);
+
+const {
   locale,
   canAddEvent,
   canEditEvent,
@@ -102,10 +106,15 @@ const {
   calendarRef,
   calendarType,
   calendarTitle,
+  formattedEvents,
+  loading,
+} = state;
+
+const {
+  t,
   prev,
   next,
   setToday,
-  formattedEvents,
   getEventColor,
   showEventDetails,
   handleEventSaved,
@@ -114,9 +123,8 @@ const {
   handleAddClosed,
   handleDetailClosed,
   handleDetailEdit,
-  loading,
   getLunarDateForSolarDay,
-} = useEventCalendar(props, emit);
+} = actions;
 </script>
 
 <style>

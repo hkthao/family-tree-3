@@ -4,6 +4,7 @@ using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
+using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -113,6 +114,18 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
             FamilyId = familyId,
         };
         var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy tất cả các sự kiện của một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần lấy sự kiện.</param>
+    /// <returns>Danh sách tất cả các sự kiện của gia đình.</returns>
+    [HttpGet("family/{familyId}")]
+    public async Task<IActionResult> GetAllEventsByFamilyId([FromRoute] Guid familyId)
+    {
+        var result = await _mediator.Send(new GetAllEventsByFamilyIdQuery { FamilyId = familyId });
         return result.ToActionResult(this, _logger);
     }
 

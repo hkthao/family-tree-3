@@ -1,8 +1,15 @@
 import { computed, unref, type Ref, type ComputedRef } from 'vue';
-import { useEventsQuery } from '@/composables';
+import { useEventsQuery, type UseEventsQueryReturn } from '@/composables/event/queries/useEventsQuery'; // Updated import
 import type { EventFilter } from '@/types';
 
-export function useUpcomingEvents(baseFilter: Ref<EventFilter> | ComputedRef<EventFilter>) {
+interface UseUpcomingEventsDeps {
+  useEventsQuery: (filters: Ref<EventFilter>) => UseEventsQueryReturn;
+}
+
+export function useUpcomingEvents(
+  baseFilter: Ref<EventFilter> | ComputedRef<EventFilter>,
+  deps: UseUpcomingEventsDeps = { useEventsQuery }
+) {
   const upcomingEventsFilter = computed<EventFilter>(() => {
     const currentBaseFilter = unref(baseFilter);
     return {
@@ -18,7 +25,7 @@ export function useUpcomingEvents(baseFilter: Ref<EventFilter> | ComputedRef<Eve
     error, // Use 'error' from query
     refetch,
     query, // Keep query object to access isError if needed
-  } = useEventsQuery(upcomingEventsFilter);
+  } = deps.useEventsQuery(upcomingEventsFilter); // Use injected useEventsQuery
 
   return {
     upcomingEvents,
@@ -29,4 +36,7 @@ export function useUpcomingEvents(baseFilter: Ref<EventFilter> | ComputedRef<Eve
     refetch,
   };
 }
+
+export type UseUpcomingEventsReturn = ReturnType<typeof useUpcomingEvents>;
+
 
