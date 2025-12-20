@@ -20,12 +20,15 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { FamilyForm } from '@/components/family';
 import { useFamilyAdd } from '@/composables/family/logic/useFamilyAdd';
 import { useI18n } from 'vue-i18n';
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
-const { state, actions } = useFamilyAdd(emit);
-const { familyFormRef } = state;
+
+const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);
+
+const { state, actions } = useFamilyAdd(emit, familyFormRef);
 </script>
