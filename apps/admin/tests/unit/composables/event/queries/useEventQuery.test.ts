@@ -1,12 +1,11 @@
 // tests/unit/composables/event/queries/useEventQuery.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useEventQuery } from '@/composables/event/queries/useEventQuery';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import type { Event } from '@/types';
 import { success, failure } from '@/utils/result';
-import { queryKeys } from '@/constants/queryKeys';
 
 // Mock useQuery
 vi.mock('@tanstack/vue-query', () => ({
@@ -53,7 +52,7 @@ describe('useEventQuery', () => {
     const eventIdRef = ref('1');
     vi.mocked(mockEventService.getById).mockResolvedValue(success(mockEvent));
 
-    const { query, event, isLoading } = useEventQuery(eventIdRef, { eventService: mockEventService });
+    const { event, isLoading } = useEventQuery(eventIdRef, { eventService: mockEventService });
 
     // Manually trigger queryFn as useQuery is mocked
     const queryFn = vi.mocked(useQuery).mock.calls[0][0].queryFn;
@@ -80,18 +79,14 @@ describe('useEventQuery', () => {
     const errorResult = failure(new Error('API Error'));
     vi.mocked(mockEventService.getById).mockResolvedValue(errorResult);
 
-    const { query } = useEventQuery(eventIdRef, { eventService: mockEventService });
+    useEventQuery(eventIdRef, { eventService: mockEventService });
 
     const queryFn = vi.mocked(useQuery).mock.calls[0][0].queryFn;
     await expect(queryFn()).rejects.toThrow('API Error');
   });
 
   it('should throw an error if eventService.getById returns undefined (event not found)', async () => {
-    const eventIdRef = ref('1');
     vi.mocked(mockEventService.getById).mockResolvedValue(success(undefined));
-
-    const { query } = useEventQuery(eventIdRef, { eventService: mockEventService });
-
     const queryFn = vi.mocked(useQuery).mock.calls[0][0].queryFn;
     await expect(queryFn()).rejects.toThrow('Event not found');
   });

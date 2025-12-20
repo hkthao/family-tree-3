@@ -2,7 +2,6 @@ import { reactive, toRef, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
-import { CalendarType } from '@/types/enums';
 import { useEventRules, type UseEventRulesReturn } from '@/validations/event.validation';
 import { cloneDeep } from 'lodash'; // Keep for now for initial formData cloning
 

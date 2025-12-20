@@ -1,6 +1,6 @@
 // tests/unit/composables/chat/useN8nChat.test.ts
 import { describe, it, expect, vi, beforeEach, type SpyInstance } from 'vitest';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useN8nChat } from '@/composables/chat/useN8nChat';
 import { useI18n } from 'vue-i18n';
 import { useAccessToken } from '@/composables/auth/useAccessToken';
@@ -24,9 +24,7 @@ const mockN8nChatAdapter: N8nChatAdapter = {
 describe('useN8nChat', () => {
   let mockAccessToken: SpyInstance;
   let mockPreferences: SpyInstance;
-  let mockCurrentChatLanguage: SpyInstance;
   let mockGetEnvVariable: SpyInstance;
-  let mockUseI18n: SpyInstance;
   let mockT: SpyInstance;
 
   const WEBHOOK_URL = 'http://test-webhook.com';
@@ -36,11 +34,10 @@ describe('useN8nChat', () => {
 
     mockAccessToken = vi.mocked(useAccessToken).mockReturnValue({ accessToken: ref('test-token') }).accessToken;
     mockPreferences = vi.mocked(useUserPreferences).mockReturnValue({ preferences: ref({}), currentChatLanguage: ref('en') }).preferences;
-    mockCurrentChatLanguage = vi.mocked(useUserPreferences).mockReturnValue({ preferences: ref({}), currentChatLanguage: ref('en') }).currentChatLanguage;
     mockGetEnvVariable = vi.mocked(apiUtil.getEnvVariable).mockReturnValue(WEBHOOK_URL);
 
     mockT = vi.fn((key) => key);
-    mockUseI18n = vi.mocked(useI18n).mockReturnValue({ t: mockT });
+    vi.mocked(useI18n).mockReturnValue({ t: mockT });
 
     // Reset adapter mocks for each test
     mockN8nChatAdapter.mount.mockClear();

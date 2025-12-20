@@ -1,11 +1,11 @@
 // tests/unit/composables/event/logic/useEventCalendar.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables';
 import { useUpcomingEvents } from '@/composables/event/useUpcomingEvents';
 import { useEventCalendar } from '@/composables/event/logic/useEventCalendar';
-import type { Event, LunarDate } from '@/types';
+import type { Event } from '@/types';
 import { CalendarType } from '@/types/enums';
 import type { DateAdapter, LunarDateAdapter, DayjsDateAdapter, LunarJsDateAdapter } from '@/composables/event/eventCalendar.adapter';
 import * as eventCalendarLogic from '@/composables/event/logic/eventCalendar.logic';
@@ -40,8 +40,8 @@ vi.mock('@/composables/event/eventCalendar.adapter', () => ({
   })),
   LunarJsDateAdapter: vi.fn(() => ({
     fromYmd: vi.fn((y, m, d) => ({ getSolar: () => ({ getYear: () => y, getMonth: () => m, getDay: () => d }) })),
-    fromSolar: vi.fn((s) => ({ getDay: () => 1, getMonth: () => 1 })),
-    getSolar: vi.fn((l) => ({ getYear: () => 2024, getMonth: () => 1, getDay: () => 1 })),
+    fromSolar: vi.fn((_s) => ({ getDay: () => 1, getMonth: () => 1 })),
+    getSolar: vi.fn((_l) => ({ getYear: () => 2024, getMonth: () => 1, getDay: () => 1 })),
   })),
 }));
 vi.mock('@/composables/event/logic/eventCalendar.logic', () => ({

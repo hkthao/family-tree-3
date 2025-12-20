@@ -10,14 +10,13 @@ import {
   canManageEventLogic,
   getCalendarTitleLogic,
 } from '@/composables/event/logic/eventCalendar.logic';
-import type { Event, LunarDate } from '@/types';
+import type { Event } from '@/types';
 import { CalendarType } from '@/types/enums';
 import type { DateAdapter, LunarDateAdapter } from '@/composables/event/eventCalendar.adapter';
 
 describe('eventCalendar.logic', () => {
   let mockDateAdapter: DateAdapter;
   let mockLunarDateAdapter: LunarDateAdapter;
-  let mockT: vi.Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -44,7 +43,6 @@ describe('eventCalendar.logic', () => {
       } as any)),
       getSolar: vi.fn((lunar) => lunar.getSolar()),
     };
-    mockT = vi.fn((key) => key);
   });
 
   describe('getSolarDateFromLunarDate', () => {

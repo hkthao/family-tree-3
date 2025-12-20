@@ -3,9 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useAddEventMutation } from '@/composables/event/mutations/useAddEventMutation';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
-import type { Event, Result } from '@/types';
+import type { Event } from '@/types';
 import { success, failure } from '@/utils/result';
-import { queryKeys } from '@/constants/queryKeys';
 
 // Mock useQueryClient
 vi.mock('@tanstack/vue-query', () => ({

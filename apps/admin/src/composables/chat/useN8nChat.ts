@@ -69,7 +69,7 @@ export function useN8nChat(
     const newPreferences = preferences.value;
     const newChatOpen = chatOpen.value;
 
-    const currentFamilyId = selectedFamilyId.value;
+
     const adapterIsMounted = n8nChatAdapter.isMounted();
 
     // Check if chat should be initialized or re-initialized

@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useDeleteEventMutation } from '@/composables/event/mutations/useDeleteEventMutation';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
-import type { Result } from '@/types';
 import { success, failure } from '@/utils/result';
 import { queryKeys } from '@/constants/queryKeys';
 

@@ -1,12 +1,11 @@
 // tests/unit/composables/event/queries/useEventsQuery.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useEventsQuery } from '@/composables/event/queries/useEventsQuery';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import type { Event, EventFilter, Paginated, ListOptions, FilterOptions } from '@/types';
 import { success, failure } from '@/utils/result';
-import { queryKeys } from '@/constants/queryKeys';
 
 // Mock useQuery
 vi.mock('@tanstack/vue-query', () => ({
@@ -60,7 +59,7 @@ describe('useEventsQuery', () => {
     const filtersRef = ref<EventFilter>({ page: 1, itemsPerPage: 10, familyId: 'f1', searchQuery: 'Test' });
     vi.mocked(mockEventService.search).mockResolvedValue(success(mockPaginatedEvents));
 
-    const { query, events, totalItems, loading } = useEventsQuery(filtersRef, { eventService: mockEventService });
+    const { events, totalItems, loading } = useEventsQuery(filtersRef, { eventService: mockEventService });
 
     const queryFn = vi.mocked(useQuery).mock.calls[0][0].queryFn;
     const result = await queryFn();
@@ -88,21 +87,13 @@ describe('useEventsQuery', () => {
   });
 
   it('should throw an error if eventService.search fails', async () => {
-    const filtersRef = ref<EventFilter>({ page: 1, itemsPerPage: 10, familyId: 'f1' });
     const errorResult = failure(new Error('API Error'));
     vi.mocked(mockEventService.search).mockResolvedValue(errorResult);
-
-    const { query } = useEventsQuery(filtersRef, { eventService: mockEventService });
-
     const queryFn = vi.mocked(useQuery).mock.calls[0][0].queryFn;
     await expect(queryFn()).rejects.toThrow('API Error');
   });
 
   it('should use placeholderData', () => {
-    const filtersRef = ref<EventFilter>({ page: 1, itemsPerPage: 10, familyId: 'f1' });
-
-    useEventsQuery(filtersRef, { eventService: mockEventService });
-
     const placeholderDataFn = vi.mocked(useQuery).mock.calls[0][0].placeholderData;
     const previousData = { ...mockPaginatedEvents, totalItems: 5 };
     expect(placeholderDataFn(previousData)).toEqual(previousData);

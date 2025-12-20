@@ -184,7 +184,7 @@ describe('useHierarchicalTreeChart', () => {
     // For now, check if clearChart is called when container and chart exist.
 
     // A better way to test onUnmounted:
-    const { unmount } = useHierarchicalTreeChart({ familyId: 'f1', members: mockMembers, relationships: mockRelationships, rootId: null }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter });
+    useHierarchicalTreeChart({ familyId: 'f1', members: mockMembers, relationships: mockRelationships, rootId: null }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter });
     // Assuming 'unmount' is returned or accessible, if not, it's an internal test of Vue's lifecycle.
     // For this mock, we ensure clearChart is called when the cleanup logic runs.
     if (chartContainer.value) { // Ensure container exists for the simulated unmount

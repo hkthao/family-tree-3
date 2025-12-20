@@ -24,7 +24,10 @@
         {{ formatDate(item.solarDate) }}
       </template>
       <template v-else-if="item.calendarType === CalendarType.Lunar && item.lunarDate">
-        {{ t('event.lunarDateDisplay', { day: item.lunarDate.day, month: item.lunarDate.month, isLeapMonth: item.lunarDate.isLeapMonth }) }}
+        {{ t('event.lunarDateDisplay', {
+          day: item.lunarDate.day, month: item.lunarDate.month, isLeapMonth:
+            item.lunarDate.isLeapMonth
+        }) }}
       </template>
       <template v-else>
         -
@@ -54,7 +57,7 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-tooltip :text="t('event.list.action.edit')">
+      <v-tooltip :text="t('common.action.edit')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)"
             data-testid="edit-event-button">
@@ -62,10 +65,10 @@
           </v-btn>
         </template>
       </v-tooltip>
-      <v-tooltip :text="t('event.list.action.delete')">
-                    <template v-slot:activator="{ props }">
-                  <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
-                    data-testid="delete-event-button">            <v-icon>mdi-delete</v-icon>
+      <v-tooltip :text="t('common.action.delete')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
+            data-testid="delete-event-button"> <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
@@ -98,7 +101,6 @@ const emit = defineEmits([
   'edit',
   'delete',
   'create',
-
   'update:search',
 ]);
 

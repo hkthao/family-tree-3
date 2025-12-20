@@ -1,6 +1,5 @@
 // tests/unit/composables/event/logic/useEventForm.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEventForm } from '@/composables/event/logic/useEventForm';
 import type { Event } from '@/types';

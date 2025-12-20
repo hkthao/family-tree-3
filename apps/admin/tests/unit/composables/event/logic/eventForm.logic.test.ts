@@ -9,7 +9,7 @@ import {
   getLunarMonths,
   processEventFormDataForSave,
 } from '@/composables/event/logic/eventForm.logic';
-import type { Event, LunarDate } from '@/types';
+import type { Event } from '@/types';
 import { EventType } from '@/types';
 import { CalendarType, RepeatRule } from '@/types/enums';
 import { cloneDeep } from 'lodash'; // Required for testing processEventFormDataForSave

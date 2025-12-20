@@ -38,7 +38,6 @@ vi.mock('@tanstack/vue-query', () => ({
 describe('useEventEdit', () => {
   let mockT: vi.Mock;
   let mockShowSnackbar: vi.Mock;
-  let mockUseEventQuery: vi.Mock;
   let mockEventData: ReturnType<typeof ref>;
   let mockIsLoadingEvent: ReturnType<typeof ref>;
   let mockUpdateEventMutate: vi.Mock;
@@ -71,10 +70,6 @@ describe('useEventEdit', () => {
 
     mockEventData = ref(initialEvent);
     mockIsLoadingEvent = ref(false);
-    mockUseEventQuery = vi.fn(() => ({
-      event: mockEventData,
-      isLoading: mockIsLoadingEvent,
-    })) as unknown as typeof useEventQuery;
     vi.mocked(useEventQuery).mockReturnValue({ event: mockEventData, isLoading: mockIsLoadingEvent } as UseEventQueryReturn);
 
     mockUpdateEventMutate = vi.fn();

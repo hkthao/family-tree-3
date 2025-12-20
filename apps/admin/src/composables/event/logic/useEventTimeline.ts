@@ -1,4 +1,4 @@
-import { ref, computed, watch, type Ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { formatDate } from '@/utils/dateUtils';
 import { useI18n } from 'vue-i18n';
 import type { Event, ListOptions, EventFilter, Paginated } from '@/types';

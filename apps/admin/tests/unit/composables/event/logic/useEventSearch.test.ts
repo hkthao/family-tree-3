@@ -1,6 +1,6 @@
 // tests/unit/composables/event/logic/useEventSearch.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEventSearch } from '@/composables/event/logic/useEventSearch';
 import type { EventFilter } from '@/types';

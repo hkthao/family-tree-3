@@ -80,7 +80,7 @@ export * from './tour/useOnboardingTour';
 export * from './tour/useFamilyTour';
 export * from './tour/useFaceSearchTour';
 export * from './dashboard/useDashboardStats';
-export * from './event/useUpcomingEvents';
+
 export * from './user/useUserPreferences';
 export * from './user/useRecentActivities';
 export * from './event/mutations/useAddEventMutation';

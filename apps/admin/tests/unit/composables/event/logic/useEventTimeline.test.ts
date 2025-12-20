@@ -1,10 +1,9 @@
 // tests/unit/composables/event/logic/useEventTimeline.test.ts
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuery } from '@tanstack/vue-query';
 import { useEventTimeline } from '@/composables/event/logic/useEventTimeline';
-import type { Event, EventFilter, Paginated, ListOptions } from '@/types';
+import type { Event, EventFilter, Paginated } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import * as eventTimelineLogic from '@/composables/event/logic/eventTimeline.logic';
 import { success, failure } from '@/utils/result';
@@ -35,7 +34,6 @@ vi.mock('@/composables/event/logic/eventTimeline.logic', () => ({
 }));
 
 describe('useEventTimeline', () => {
-  let mockT: vi.Mock;
   let mockEventService: EventServiceAdapter;
   let mockUseQuery: vi.Mock;
   let mockFormatDate: vi.Mock;
@@ -193,7 +191,7 @@ describe('useEventTimeline', () => {
   });
 
   it('should update pagination options on setListOptions', () => {
-    const { actions, state } = useEventTimeline({}, {
+    const { actions } = useEventTimeline({}, {
       useI18n: useI18n,
       eventService: mockEventService,
       useQuery: mockUseQuery,

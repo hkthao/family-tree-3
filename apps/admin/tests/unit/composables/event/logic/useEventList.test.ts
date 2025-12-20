@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref, onMounted, watch } from 'vue';
 import { useEventList } from '@/composables/event/logic/useEventList';
-import type { EventFilter, Paginated, ListOptions } from '@/types';
+import type { EventFilter } from '@/types';
 import type { UseConfirmDialogReturn } from '@/composables/common/useConfirmDialog';
 import type { UseGlobalSnackbarReturn } from '@/composables/common/useGlobalSnackbar';
 import type { UseCrudDrawerReturn } from '@/composables/common/useCrudDrawer';
@@ -120,7 +120,7 @@ describe('useEventList', () => {
   });
 
   it('should initialize filters on mounted and watch familyId changes', () => {
-    const { state } = useEventList({ familyId: mockFamilyId }, vi.fn());
+    useEventList({ familyId: mockFamilyId }, vi.fn());
 
     expect(onMounted).toHaveBeenCalledTimes(1);
     // Directly call the onMounted callback
