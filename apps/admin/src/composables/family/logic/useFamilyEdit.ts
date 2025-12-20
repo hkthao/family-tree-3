@@ -1,9 +1,8 @@
-import { ref, computed, toRef, type Ref } from 'vue';
+import { computed, toRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyUpdateDto, FamilyAddDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useFamilyQuery, useUpdateFamilyMutation } from '@/composables';
-import type { FamilyForm as FamilyFormType } from '@/components/family';
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;

@@ -54,29 +54,29 @@ describe('useFamilyDetail', () => {
   it('should initialize with family data, loading state, and error from useFamilyQuery', () => {
     mockIsLoading.value = true;
     mockError.value = new Error('Test Error');
-    const { state } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    const { familyData, isLoading, error } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
 
     expect(mockUseFamilyQuery).toHaveBeenCalledWith(expect.any(Object));
-    expect(state.familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family' });
-    expect(state.isLoading.value).toBe(true);
-    expect(state.error.value).toEqual(new Error('Test Error'));
+    expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family' });
+    expect(isLoading.value).toBe(true);
+    expect(error.value).toEqual(new Error('Test Error'));
   });
 
   it('should return canManageFamily as true if user is admin', () => {
     mockIsAdmin.value = true;
-    const { state } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
-    expect(state.canManageFamily.value).toBe(true);
+    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    expect(canManageFamily.value).toBe(true);
   });
 
   it('should return canManageFamily as true if user is family manager for the current family', () => {
     mockIsFamilyManagerFn.mockImplementation((id: string) => id === mockFamilyId);
-    const { state } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
-    expect(state.canManageFamily.value).toBe(true);
+    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    expect(canManageFamily.value).toBe(true);
   });
 
   it('should return canManageFamily as false if user is not admin or family manager', () => {
-    const { state } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
-    expect(state.canManageFamily.value).toBe(false);
+    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    expect(canManageFamily.value).toBe(false);
   });
 
   it('should emit "openEditDrawer" with familyId when openEditDrawer is called', () => {

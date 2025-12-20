@@ -1,11 +1,10 @@
-import { ref, reactive, watch, type Ref, computed } from 'vue'; // Added computed
+import { ref, reactive, watch, type Ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family, FamilyAddDto, FamilyUpdateDto } from '@/types'; // Updated imports
+import type { Family, FamilyAddDto, FamilyUpdateDto, UserDto } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import type { VForm } from 'vuetify/components';
-import { useUserByIdsQuery } from '@/composables/user/queries/useUserByIdsQuery'; // NEW import for fetching UserDto
 
 interface UseFamilyFormProps {
   data?: Family;
@@ -30,7 +29,6 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         visibility: props.data.visibility || FamilyVisibility.Public,
         managerIds: props.data.managerIds || [],
         viewerIds: props.data.viewerIds || [],
-
       };
     }
     return {
@@ -59,31 +57,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
   const initialManagerIds = ref<string[]>([]);
   const initialViewerIds = ref<string[]>([]);
 
-  // Fetch initial UserDtos for display in UserAutocomplete (not directly bound to v-model)
-  // useUserByIdsQuery returns UserDto[]
-  const { users: fetchedManagersForDisplay, isLoading: isLoadingManagers } = useUserByIdsQuery(
-    computed(() => (isEditMode.value ? (props.data?.managerIds || []) : []))
-  );
-  const { users: fetchedViewersForDisplay, isLoading: isLoadingViewers } = useUserByIdsQuery(
-    computed(() => (isEditMode.value ? (props.data?.viewerIds || []) : []))
-  );
-
-  // Update managers and viewers (ID arrays) when initial data is fetched
-  watch(fetchedManagersForDisplay, (newManagers) => {
-    if (newManagers) {
-      managers.value = newManagers.map(u => u.id);
-      initialManagerIds.value = newManagers.map(u => u.id); // Set initial IDs for tracking
-    }
-  }, { immediate: true });
-
-  watch(fetchedViewersForDisplay, (newViewers) => {
-    if (newViewers) {
-      viewers.value = newViewers.map(u => u.id);
-      initialViewerIds.value = newViewers.map(u => u.id); // Set initial IDs for tracking
-    }
-  }, { immediate: true });
-
-  // Watch for external data changes (e.g., when editing a different family)
+  // Initialize managers and viewers from props.data
   watch(
     () => props.data,
     (newVal) => {
@@ -91,7 +65,10 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         isEditMode.value = true;
         Object.assign(formData, initialFormData()); // Reset form data
         initialAvatarDisplay.value = formData.avatarBase64 || formData.avatarUrl;
-        // The watchers for fetchedManagersForDisplay and fetchedViewersForDisplay will handle updating managers.value and viewers.value (ID arrays)
+        managers.value = newVal.managerIds || [];
+        viewers.value = newVal.viewerIds || [];
+        initialManagerIds.value = [...(newVal.managerIds || [])]; // Store initial IDs
+        initialViewerIds.value = [...(newVal.viewerIds || [])]; // Store initial IDs
       } else {
         isEditMode.value = false;
         Object.assign(formData, initialFormData()); // Reset form data for add mode
@@ -102,7 +79,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         initialAvatarDisplay.value = '';
       }
     },
-    { deep: true }
+    { deep: true, immediate: true } // immediate: true to run on component mount
   );
 
   const visibilityItems = computed(() => [
@@ -120,20 +97,20 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
   const getFormData = (): FamilyAddDto | FamilyUpdateDto => {
     const dataToSubmit = {
       ...formData,
-      managerIds: managers.value, // Now directly an array of IDs
-      viewerIds: viewers.value,   // Now directly an array of IDs
+      managerIds: managers.value,
+      viewerIds: viewers.value,
     };
 
     if (isEditMode.value && 'id' in formData) {
       // Calculate deleted manager IDs
       const deletedManagerIds = initialManagerIds.value.filter(
-        id => !managers.value.includes(id)
+        (id) => !managers.value.includes(id)
       );
       (dataToSubmit as FamilyUpdateDto).deletedManagerIds = deletedManagerIds;
 
       // Calculate deleted viewer IDs
       const deletedViewerIds = initialViewerIds.value.filter(
-        id => !viewers.value.includes(id)
+        (id) => !viewers.value.includes(id)
       );
       (dataToSubmit as FamilyUpdateDto).deletedViewerIds = deletedViewerIds;
     }
@@ -151,6 +128,6 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     getFormData,
     getFamilyAvatarUrl,
     rules,
-    isLoadingUsers: computed(() => isLoadingManagers.value || isLoadingViewers.value),
+    isLoadingUsers: ref(false), // UserAutocomplete handles its own loading
   };
 }
