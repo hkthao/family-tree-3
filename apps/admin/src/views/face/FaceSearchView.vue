@@ -1,17 +1,7 @@
 <template>
   <v-card elevation="2">
     <v-card-text>
-      <v-row>
-        <v-col cols="4">
-          <FamilyAutocomplete
-            v-model="selectedFamilyId"
-            :label="t('face.family')"
-            class="mb-4"
-            data-testid="family-autocomplete"
-          />
-        </v-col>
-      </v-row>
-      <div v-if="selectedFamilyId">
+      <div>
         <FaceUploadInput id="tour-face-upload" @file-uploaded="handleFileUpload" />
         <v-progress-linear v-if="isDetectingFaces" indeterminate color="primary" class="my-4"></v-progress-linear>
         <div v-if="uploadedImage && detectedFaces.length > 0" class="mt-4">
@@ -30,7 +20,6 @@
         <v-alert v-else-if="!isDetectingFaces && uploadedImage && detectedFaces.length === 0"
           type="info" class="my-4">{{ t('memberStory.faceRecognition.noFacesDetected') }}</v-alert>
       </div>
-      <v-alert v-else type="info" class="my-4">{{ t('face.selectFamilyToUpload') }}</v-alert>
     </v-card-text>
   </v-card>
 </template>
@@ -38,13 +27,23 @@
 <script setup lang="ts">
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useFaceSearch } from '@/composables';
+import { onMounted } from 'vue';
+
+const props = defineProps<{
+  familyId?: string;
+}>();
 
 const {
-  state: { selectedFamilyId, uploadedImage, detectedFaces, originalImageUrl, isDetectingFaces, t },
-  actions: { handleFileUpload, resetState },
+  state: { selectedFamilyId, uploadedImage, detectedFaces, isDetectingFaces, t },
+  actions: { handleFileUpload },
 } = useFaceSearch();
+
+onMounted(() => {
+  if (props.familyId) {
+    selectedFamilyId.value = props.familyId;
+  }
+});
 
 useFaceSearchTour(); // Still use the tour composable directly here
 </script>

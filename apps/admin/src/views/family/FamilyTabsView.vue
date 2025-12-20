@@ -40,6 +40,10 @@
         <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
           <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: Face Search Tab -->
+        <v-window-item v-if="canViewFaceDataTab" value="face-search">
+          <FaceSearchView :family-id="familyId" />
+        </v-window-item>
         <!-- NEW: Family Media Tab -->
         <v-window-item value="family-media">
           <FamilyMediaListView :family-id="familyId" />
@@ -83,6 +87,7 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
+import FaceSearchView from '@/views/face/FaceSearchView.vue'; // NEW
 
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
@@ -134,6 +139,7 @@ const allTabDefinitions = computed(() => [
   { value: 'members', text: t('family.members.title'), condition: true as boolean },
   { value: 'family-tree', text: t('family.tree.title'), condition: true as boolean },
   { value: 'face-recognition', text: t('face.face_data'), condition: canViewFaceDataTab.value as boolean },
+  { value: 'face-search', text: t('face.search.title'), condition: canViewFaceDataTab.value as boolean }, // NEW Face Search Tab
 
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
