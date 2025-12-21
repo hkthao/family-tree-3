@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ApiFamilyService } from '@/services/family/api.family.service';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
 import type { FamilyUpdateDto } from '@/types'; // Updated import
+import { useServices } from '@/composables';
 
-const apiFamilyService: IFamilyService = new ApiFamilyService(apiClient);
 
-export function useUpdateFamilyMutation() {
+
+export function useUpdateFamilyMutation(service: IFamilyService = useServices().family) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -15,7 +14,7 @@ export function useUpdateFamilyMutation() {
       if (!updatedFamily.id) {
         throw new Error('Family ID is required for update');
       }
-      const response = await apiFamilyService.update(updatedFamily);
+      const response = await service.update(updatedFamily);
       if (response.ok) {
         return response.value;
       }

@@ -64,12 +64,8 @@ const props = defineProps<{
 }>();
 
 const {
-  importFile,
-  clearExistingData,
-  exportData,
-  isExportingFamilyData,
-  importData,
-  isImportingFamilyData,
+  state: { importFile, clearExistingData, isExportingFamilyData, isImportingFamilyData },
+  actions: { exportData, importData },
 } = useFamilyDataManagement(props.familyId);
 </script>
 

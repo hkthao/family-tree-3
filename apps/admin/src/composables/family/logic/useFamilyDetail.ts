@@ -43,10 +43,12 @@ export function useFamilyDetail(
   };
 
   return {
-    familyData,
-    isLoading,
-    error,
-    canManageFamily,
+    state: {
+      familyData,
+      isLoading,
+      error,
+      canManageFamily,
+    },
     actions: {
       openEditDrawer,
       closeView,

@@ -1,17 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ApiFamilyService } from '@/services/family/api.family.service';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
 import type { FamilyAddDto } from '@/types'; // Updated import
-const apiFamilyService: IFamilyService = new ApiFamilyService(apiClient);
+import { useServices } from '@/composables';
 
-export function useAddFamilyMutation() {
+
+export function useAddFamilyMutation(service: IFamilyService = useServices().family) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (familyData: FamilyAddDto) => {
-      const response = await apiFamilyService.add(familyData);
+      const response = await service.add(familyData);
       if (response.ok) {
         return response.value;
       }

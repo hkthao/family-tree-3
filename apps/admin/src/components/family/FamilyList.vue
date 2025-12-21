@@ -110,7 +110,7 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const { searchQuery, debouncedSearchQuery } = useDebouncedSearch(props.search);
+const { state: { searchQuery, debouncedSearchQuery } } = useDebouncedSearch(props.search);
 
 watch(debouncedSearchQuery, (newValue) => {
   emit('update:search', newValue);

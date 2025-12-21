@@ -76,10 +76,8 @@ const { t } = useI18n();
 const chartMode = ref('hierarchical');
 
 const {
-  members,
-  relationships,
-  selectedRootMemberId,
-  fetchTreeData,
+  state: { members, relationships, selectedRootMemberId },
+  actions: { fetchTreeData },
 } = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
 
 const { state } = useAuth();

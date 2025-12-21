@@ -2,15 +2,32 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMutation } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
-import { ApiFamilyService } from '@/services/family/api.family.service';
-import apiClient from '@/plugins/axios';
+import type { IFamilyService } from '@/services/family/family.service.interface';
+import { useServices } from '@/composables';
 import type { FamilyExportDto } from '@/types';
+import { defaultFileDownloadAdapter, type IFileDownloadAdapter } from '@/composables/utils/fileDownload.adapter';
+import { parseJsonFile } from '@/composables/utils/fileParser.utils';
 
-export function useFamilyDataManagement(familyId: string) {
+interface UseFamilyDataManagementDeps {
+  useI18n: typeof useI18n;
+  useGlobalSnackbar: typeof useGlobalSnackbar;
+  fileDownloadAdapter: IFileDownloadAdapter;
+  familyService: IFamilyService;
+}
+
+const defaultDeps: UseFamilyDataManagementDeps = {
+  useI18n,
+  useGlobalSnackbar,
+  fileDownloadAdapter: defaultFileDownloadAdapter,
+  familyService: useServices().family,
+};
+
+export function useFamilyDataManagement(familyId: string, deps: UseFamilyDataManagementDeps = defaultDeps) {
+  const { useI18n, useGlobalSnackbar, fileDownloadAdapter, familyService } = deps;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
 
-  const apiFamilyService = new ApiFamilyService(apiClient);
+
 
   const importFile = ref<File | null>(null);
   const clearExistingData = ref(true);
@@ -18,7 +35,7 @@ export function useFamilyDataManagement(familyId: string) {
   // Export Family Data Mutation
   const { mutateAsync: exportFamilyDataMutation, isPending: isExportingFamilyData } = useMutation<FamilyExportDto, Error, string>({
     mutationFn: async (id: string) => {
-      const result = await apiFamilyService.exportFamilyData(id);
+      const result = await familyService.exportFamilyData(id);
       if (result.ok) {
         return result.value;
       } else {
@@ -27,16 +44,7 @@ export function useFamilyDataManagement(familyId: string) {
     },
     onSuccess: (data: FamilyExportDto) => {
       showSnackbar(t('family.export.success'), 'success');
-      // Convert FamilyExportDto to Blob and trigger file download
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `family-data-${familyId}.json`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      fileDownloadAdapter.downloadJson(data, `family-data-${familyId}.json`);
     },
     onError: (error) => {
       showSnackbar(`${t('family.export.error')}: ${error.message}`, 'error');
@@ -46,7 +54,7 @@ export function useFamilyDataManagement(familyId: string) {
   // Import Family Data Mutation
   const { mutateAsync: importFamilyDataMutation, isPending: isImportingFamilyData } = useMutation<string, Error, { id: string; familyData: FamilyExportDto; clearExistingData: boolean }>({
     mutationFn: async ({ id, familyData, clearExistingData }) => {
-      const result = await apiFamilyService.importFamilyData(id, familyData, clearExistingData);
+      const result = await familyService.importFamilyData(id, familyData, clearExistingData);
       if (result.ok) {
         return result.value;
       } else {
@@ -69,37 +77,24 @@ export function useFamilyDataManagement(familyId: string) {
 
     try {
       const file = importFile.value;
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          const fileContent = e.target?.result as string;
-          const familyData: FamilyExportDto = JSON.parse(fileContent);
-          await importFamilyDataMutation({ id: familyId, familyData, clearExistingData: clearExistingData.value });
-        } catch (parseError) {
-          console.error('Error parsing JSON file:', parseError);
-          showSnackbar(t('family.import.parse_error'), 'error');
-        }
-      };
-
-      reader.onerror = (e) => {
-        console.error('Error reading file:', e);
-        showSnackbar(t('family.import.read_error'), 'error');
-      };
-
-      reader.readAsText(file);
-    } catch (error) {
+      const familyData: FamilyExportDto = await parseJsonFile(file);
+      await importFamilyDataMutation({ id: familyId, familyData, clearExistingData: clearExistingData.value });
+    } catch (error: any) {
       console.error('Error importing family data:', error);
-      showSnackbar(t('family.import.error'), 'error');
+      showSnackbar(error.message || t('family.import.error'), 'error');
     }
   };
 
   return {
-    importFile,
-    clearExistingData,
-    exportData,
-    isExportingFamilyData,
-    importData,
-    isImportingFamilyData,
+    state: {
+      importFile,
+      clearExistingData,
+      isExportingFamilyData,
+      isImportingFamilyData,
+    },
+    actions: {
+      exportData,
+      importData,
+    },
   };
 }

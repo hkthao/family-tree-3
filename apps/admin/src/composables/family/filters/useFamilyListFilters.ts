@@ -37,15 +37,19 @@ export function useFamilyListFilters() {
   };
 
   return {
-    searchQuery: computed(() => filters.value.searchQuery),
-    page: computed(() => filters.value.page),
-    itemsPerPage: computed(() => filters.value.itemsPerPage),
-    sortBy: computed(() => filters.value.sortBy),
-    filters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setSearchQuery,
-    setFilters,
+    state: {
+      searchQuery: computed(() => filters.value.searchQuery),
+      page: computed(() => filters.value.page),
+      itemsPerPage: computed(() => filters.value.itemsPerPage),
+      sortBy: computed(() => filters.value.sortBy),
+      filters,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setSearchQuery,
+      setFilters,
+    },
   };
 }

@@ -51,18 +51,19 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
 
   const familyListFiltersComposables = useFamilyListFilters();
   const {
-    searchQuery: familyListSearchQuery,
-    itemsPerPage,
-    sortBy,
-    filters,
-  } = toRefs(familyListFiltersComposables);
-
-  const {
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setSearchQuery,
-    setFilters,
+    state: {
+      searchQuery: familyListSearchQuery,
+      itemsPerPage,
+      sortBy,
+      filters,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setSearchQuery,
+      setFilters,
+    }
   } = familyListFiltersComposables;
 
   const { families, totalItems, loading, refetch } = useFamiliesQuery(filters);
@@ -148,12 +149,12 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
       confirmDelete,
       openAddDrawer,
       handleFamilyAddClosed,
-      setItemsPerPage, // Added
-      setPage, // Added
-      setSortBy, // Added
-      setSearchQuery, // Added
-      setFilters, // Added
+      setItemsPerPage,
+      setPage,
+      setSortBy,
+      setSearchQuery,
+      setFilters,
+      t,
     },
-    t, // Pass t directly for template
   };
 }

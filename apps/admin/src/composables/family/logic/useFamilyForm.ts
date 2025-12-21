@@ -5,6 +5,7 @@ import { FamilyVisibility } from '@/types';
 import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import type { VForm } from 'vuetify/components';
+import { getFamilyVisibilityOptions } from '@/composables/utils/familyOptions';
 
 interface UseFamilyFormProps {
   data?: Family;
@@ -82,13 +83,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     { deep: true, immediate: true } // immediate: true to run on component mount
   );
 
-  const visibilityItems = computed(() => [
-    {
-      title: t('family.form.visibility.private'),
-      value: FamilyVisibility.Private,
-    },
-    { title: t('family.form.visibility.public'), value: FamilyVisibility.Public },
-  ]);
+  const visibilityItems = getFamilyVisibilityOptions(t);
 
   const validate = async () => {
     return (await formRef.value?.validate())?.valid || false;
@@ -118,16 +113,19 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
   };
 
   return {
-    t,
-    formData,
-    initialAvatarDisplay,
-    managers,
-    viewers,
-    visibilityItems,
-    validate,
-    getFormData,
-    getFamilyAvatarUrl,
-    rules,
-    isLoadingUsers: ref(false), // UserAutocomplete handles its own loading
+    state: {
+      formData,
+      initialAvatarDisplay,
+      managers,
+      viewers,
+      visibilityItems,
+      getFamilyAvatarUrl,
+      rules,
+      isLoadingUsers: ref(false),
+    },
+    actions: {
+      validate,
+      getFormData,
+    },
   };
 }

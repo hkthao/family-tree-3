@@ -30,11 +30,11 @@
     <v-row>
       <v-col cols="12">
         <UserAutocomplete v-model="managers" multiple :disabled="props.readOnly" hideDetails
-          :label="t('family.permissions.managers')" data-testid="family-managers-select" :loading="isLoadingUsers"></UserAutocomplete>
+          :label="$t('family.permissions.managers')" data-testid="family-managers-select" :loading="isLoadingUsers"></UserAutocomplete>
       </v-col>
       <v-col cols="12">
         <UserAutocomplete v-model="viewers" multiple :disabled="props.readOnly" hideDetails
-          :label="t('family.permissions.viewers')" data-testid="family-viewers-select" :loading="isLoadingUsers"></UserAutocomplete>
+          :label="$t('family.permissions.viewers')" data-testid="family-viewers-select" :loading="isLoadingUsers"></UserAutocomplete>
       </v-col>
     </v-row>
   </v-form>
@@ -58,17 +58,8 @@ defineEmits(['submit']);
 const formRef = ref<VForm | null>(null);
 
 const {
-  t,
-  formData,
-  initialAvatarDisplay,
-  managers,
-  viewers,
-  visibilityItems,
-  validate,
-  getFormData,
-  getFamilyAvatarUrl,
-  rules,
-  isLoadingUsers, // NEW
+  state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
+  actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
 
 defineExpose({

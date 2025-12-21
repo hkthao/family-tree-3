@@ -33,5 +33,5 @@ const props = defineProps<{
 
 const emit = defineEmits(['openEditDrawer']);
 
-const { familyData, isLoading, error, canManageFamily, actions } = useFamilyDetail(props, emit);
+const { state: { familyData, isLoading, error, canManageFamily }, actions } = useFamilyDetail(props, emit);
 </script>
