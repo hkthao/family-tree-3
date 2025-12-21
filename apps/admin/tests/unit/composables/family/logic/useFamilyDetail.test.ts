@@ -55,7 +55,7 @@ describe('useFamilyDetail', () => {
   it('should initialize with family data, loading state, and error from useFamilyQuery', () => {
     mockIsLoading.value = true;
     mockError.value = new Error('Test Error');
-    const { familyData, isLoading, error } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    const { state: { familyData, isLoading, error } } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
 
     expect(mockUseFamilyQuery).toHaveBeenCalledWith(expect.any(Object));
     expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family', managerIds: [], viewerIds: [] });
@@ -65,18 +65,18 @@ describe('useFamilyDetail', () => {
 
   it('should return canManageFamily as true if user is admin', () => {
     mockIsAdmin.value = true;
-    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    const { state: { canManageFamily } } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
     expect(canManageFamily.value).toBe(true);
   });
 
   it('should return canManageFamily as true if user is family manager for the current family', () => {
     mockIsFamilyManagerFn.mockImplementation((id: string): boolean => id === mockFamilyId);
-    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    const { state: { canManageFamily } } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
     expect(canManageFamily.value).toBe(true);
   });
 
   it('should return canManageFamily as false if user is not admin or family manager', () => {
-    const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
+    const { state: { canManageFamily } } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
     expect(canManageFamily.value).toBe(false);
   });
 

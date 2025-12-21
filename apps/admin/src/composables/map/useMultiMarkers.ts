@@ -25,7 +25,7 @@ interface UseMultiMarkersOptions {
 
 export function useMultiMarkers(options: UseMultiMarkersOptions) {
   const { mapboxMarkerAdapter = defaultMapboxMarkerAdapter, mapboxBoundsAdapter = defaultMapboxBoundsAdapter } = options;
-  const activeMarkers = ref<Marker[]>([]);
+  const activeMarkers = ref<mapboxgl.Marker[]>([]);
 
   const fitMapToMarkers = (markers: MapMarker[]) => {
     if (!options.mapInstance.value || markers.length === 0) {

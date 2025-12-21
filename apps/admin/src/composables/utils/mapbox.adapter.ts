@@ -1,6 +1,5 @@
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 // =====================================================================================
 // IMapboxMapAdapter
@@ -12,10 +11,10 @@ export interface IMapboxMapAdapter {
     center?: [number, number];
     zoom?: number;
     accessToken: string;
-  }): any;
-  removeMap(map: any): void;
-  onMapLoad(map: any, callback: () => void): void;
-  isMapStyleLoaded(map: any): boolean;
+  }): mapboxgl.Map;
+  removeMap(map: mapboxgl.Map): void;
+  onMapLoad(map: mapboxgl.Map, callback: () => void): void;
+  isMapStyleLoaded(map: mapboxgl.Map): boolean;
 }
 
 export const defaultMapboxMapAdapter: IMapboxMapAdapter = {
@@ -43,13 +42,13 @@ export const defaultMapboxMapAdapter: IMapboxMapAdapter = {
 // IMapboxMarkerAdapter
 // =====================================================================================
 export interface IMapboxMarkerAdapter {
-  createMarker(options?: { color?: string; anchor?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }): any;
-  setMarkerLngLat(marker: any, lngLat: [number, number]): any;
-  addMarkerToMap(marker: any, map: any): any;
-  removeMarker(marker: any): void;
-  createPopup(): any;
-  setPopupHtml(popup: any, html: string): any;
-  setMarkerPopup(marker: any, popup: any): any;
+  createMarker(options?: { color?: string; anchor?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }): mapboxgl.Marker;
+  setMarkerLngLat(marker: mapboxgl.Marker, lngLat: [number, number]): mapboxgl.Marker;
+  addMarkerToMap(marker: mapboxgl.Marker, map: mapboxgl.Map): mapboxgl.Marker;
+  removeMarker(marker: mapboxgl.Marker): void;
+  createPopup(): mapboxgl.Popup;
+  setPopupHtml(popup: mapboxgl.Popup, html: string): mapboxgl.Popup;
+  setMarkerPopup(marker: mapboxgl.Marker, popup: mapboxgl.Popup): mapboxgl.Marker;
 }
 
 export const defaultMapboxMarkerAdapter: IMapboxMarkerAdapter = {
@@ -66,9 +65,9 @@ export const defaultMapboxMarkerAdapter: IMapboxMarkerAdapter = {
 // IMapboxBoundsAdapter
 // =====================================================================================
 export interface IMapboxBoundsAdapter {
-  createBounds(): any;
-  extendBounds(bounds: any, lngLat: [number, number]): any;
-  fitMapBounds(map: any, bounds: any, options?: { padding?: number; maxZoom?: number; duration?: number }): void;
+  createBounds(): mapboxgl.LngLatBounds;
+  extendBounds(bounds: mapboxgl.LngLatBounds, lngLat: [number, number]): mapboxgl.LngLatBounds;
+  fitMapBounds(map: mapboxgl.Map, bounds: mapboxgl.LngLatBounds, options?: { padding?: number; maxZoom?: number; duration?: number }): void;
 }
 
 export const defaultMapboxBoundsAdapter: IMapboxBoundsAdapter = {

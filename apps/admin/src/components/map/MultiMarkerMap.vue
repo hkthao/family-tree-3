@@ -11,7 +11,6 @@
 </template>
 <script setup lang="ts">
 import { ref, onUnmounted, watch, type Ref, computed } from 'vue';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapbox } from '@/composables/map/useMapbox';
 import { useMultiMarkers, type MapMarker } from '@/composables/map/useMultiMarkers';
 import { VAutocomplete } from 'vuetify/components'; // Import VAutocomplete
@@ -40,7 +39,7 @@ watch(() => props.markers, (newMarkers) => {
 }, { deep: true });
 
 useMultiMarkers({
-  mapInstance: mapInstance as Ref<mapboxgl.Map | null>,
+  mapInstance: mapInstance as any,
   markers: markersRef,
   initialZoom: props.initialZoom,
 });

@@ -1,5 +1,4 @@
 import { ref, onMounted, onUnmounted, type Ref } from 'vue';
-import type * as mapboxgl from 'mapbox-gl';
 import { defaultMapboxMapAdapter, type IMapboxMapAdapter } from '@/composables/utils/mapbox.adapter';
 
 interface UseMapboxOptions {
