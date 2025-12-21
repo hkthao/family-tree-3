@@ -1,4 +1,4 @@
-import { ref, computed, watch, nextTick, type Ref } from 'vue';
+import { ref, computed, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@/composables';
@@ -37,10 +37,8 @@ export function useFamilyTabs(
   emit: (event: 'open-edit-drawer', id: string) => void,
   deps: UseFamilyTabsDeps = defaultDeps,
 ) {
-  const { useI18n, useRoute: _useRoute, useRouter: _useRouter, useAuth, useQueryClient, localStorageAdapter } = deps;
+  const { useI18n, useAuth, useQueryClient, localStorageAdapter } = deps;
   const { t } = useI18n();
-  const route = _useRoute();
-  const router = _useRouter();
   const { state: authState } = useAuth();
   const queryClient = useQueryClient();
 
@@ -78,6 +76,8 @@ export function useFamilyTabs(
 
   // --- Functions ---
   const initializeTabs = (currentSelectedTabValue: string | null) => {
+    console.log('initializeTabs - activeTabs:', availableTabs.value.map(t => t.value));
+    console.log('initializeTabs - currentSelectedTabValue:', currentSelectedTabValue);
     const activeTabs = availableTabs.value;
     const { visibleTabs: newVisible, moreTabs: newMore, actualSelectedTabValue } = calculateTabVisibility(
       activeTabs,
@@ -106,10 +106,7 @@ export function useFamilyTabs(
 
     visibleTabs.value = newVisibleTabs;
     moreTabs.value = newMoreTabs;
-
-    nextTick(() => {
-      selectedTab.value = tabToSelect.value;
-    });
+    selectedTab.value = tabToSelect.value;
   };
 
   const handleOpenEditDrawer = (_id: string) => {

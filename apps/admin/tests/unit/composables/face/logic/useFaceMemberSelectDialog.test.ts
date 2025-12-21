@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFaceMemberSelectDialog } from '@/composables/face/logic/useFaceMemberSelectDialog';
 import { useQuery } from '@tanstack/vue-query';
-import { ref, computed, nextTick, reactive } from 'vue';
-import type { DetectedFace, Member, Result, ApiError } from '@/types';
+import { ref, nextTick, reactive } from 'vue';
+import type { DetectedFace, Member, ApiError } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
-import { queryKeys } from '@/constants/queryKeys';
+
 import type { Composer } from 'vue-i18n';
 
 // Mock the external dependencies
@@ -136,9 +136,7 @@ describe('useFaceMemberSelectDialog', () => {
     expect(state.internalRelationPrompt.value).toBe('Mother');
   });
 
-  it('should call memberService.getById in queryFn when selectedMemberId is defined', async () => {
-    const familyIdRef = ref('family1');
-    let capturedQueryFn: (() => Promise<Member | undefined>) | undefined;
+       it('should call memberService.getById in queryFn when selectedMemberId is defined', async () => {    let capturedQueryFn: (() => Promise<Member | undefined>) | undefined;
 
     (useQuery as vi.Mock).mockImplementation((options) => {
       capturedQueryFn = options.queryFn;
@@ -265,8 +263,9 @@ describe('useFaceMemberSelectDialog', () => {
     expect(mockEmit).not.toHaveBeenCalledWith('update:show', expect.anything());
   });
 
+
+
   it('should set enabled to true when selectedMemberId is defined', () => {
-    const familyIdRef = ref('family1');
     let enabledComputed: Ref<boolean> | undefined;
 
     (useQuery as vi.Mock).mockImplementation((options) => {
@@ -291,8 +290,9 @@ describe('useFaceMemberSelectDialog', () => {
     expect(enabledComputed?.value).toBe(true);
   });
 
+
+
   it('should set enabled to false when selectedMemberId is undefined', () => {
-    const familyIdRef = ref('family1');
     let enabledComputed: Ref<boolean> | undefined;
 
     (useQuery as vi.Mock).mockImplementation((options) => {
