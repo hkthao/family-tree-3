@@ -1,11 +1,10 @@
 // tests/unit/composables/chat/useN8nChat.test.ts
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
-import { ref, type Ref, type ComputedRef } from 'vue';
+import { ref, type Ref } from 'vue';
 import { useN8nChat } from '@/composables/chat/useN8nChat';
 import { useI18n } from 'vue-i18n';
 import { useAccessToken } from '@/composables/auth/useAccessToken';
 import { useUserPreferences } from '@/composables/user/useUserPreferences';
-import type { N8nChatAdapter } from '@/composables/chat/n8nChat.adapter';
 import * as apiUtil from '@/utils/api.util'; // Import apiUtil to mock getEnvVariable
 
 // Mock external dependencies
