@@ -11,33 +11,42 @@ const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(api
 /**
  * Composible để lấy danh sách Family Media có phân trang.
  * @param filters Ref<FamilyMediaFilter> - Các bộ lọc cho danh sách media.
- * @param listOptions Ref<ListOptions> - Các tùy chọn phân trang và sắp xếp.
+ * @param page Ref<number> - Trang hiện tại.
+ * @param itemsPerPage Ref<number> - Số mục trên mỗi trang.
+ * @param sortBy Ref<ListOptions['sortBy']> - Tùy chọn sắp xếp.
  */
-export function useFamilyMediaListQuery(filters: Ref<FamilyMediaFilter>, listOptions: Ref<ListOptions>) {
-
+export function useFamilyMediaListQuery(
+  filters: Ref<FamilyMediaFilter>,
+  page: Ref<number>,
+  itemsPerPage: Ref<number>,
+  sortBy: Ref<ListOptions['sortBy']>,
+) {
   const query = useQuery<Paginated<FamilyMedia>, Error>({
-    queryKey: computed(() => (unref(listOptions).itemsPerPage !== -1 ? queryKeys.familyMedia.list(
+    queryKey: computed(() => (unref(itemsPerPage) !== -1 ? queryKeys.familyMedia.list(
       unref(filters),
-      unref(listOptions).page,
-      unref(listOptions).itemsPerPage,
-      unref(listOptions).sortBy
+      unref(page),
+      unref(itemsPerPage),
+      unref(sortBy)
     ) : [])),
     queryFn: async () => {
       const currentFilters = unref(filters);
-      const currentListOptions = unref(listOptions);
+      const currentPage = unref(page);
+      const currentItemsPerPage = unref(itemsPerPage);
+      const currentSortBy = unref(sortBy);
+
       const response = await apiFamilyMediaService.search(
         currentFilters.familyId!,
         currentFilters,
-        currentListOptions.page,
-        currentListOptions.itemsPerPage,
-        currentListOptions.sortBy,
+        currentPage,
+        currentItemsPerPage,
+        currentSortBy,
       );
       if (response.ok) {
         return response.value;
       }
       throw response.error;
     },
-    enabled: computed(() => unref(listOptions).itemsPerPage !== -1),
+    enabled: computed(() => unref(itemsPerPage) !== -1),
     staleTime: 1000 * 60, // 1 minute
   });
 

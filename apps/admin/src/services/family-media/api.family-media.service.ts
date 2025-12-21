@@ -16,7 +16,7 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
     const params: Record<string, any> = { ...filters };
     if (familyId) params.familyId = familyId; // Add familyId to params
     if (page) params.page = page;
-    if (itemsPerPage) params.pageSize = itemsPerPage; // Backend uses pageSize
+    if (itemsPerPage) params.itemsPerPage = itemsPerPage; // Backend uses itemsPerPage
     if (sortBy && sortBy.length > 0) {
       params.orderBy = sortBy.map(s => `${s.key} ${s.order}`).join(',');
     }
@@ -41,7 +41,7 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
   }
 
   async addFromUrl(familyId: string, payload: FamilyMediaAddFromUrlDto): Promise<Result<FamilyMedia>> {
-    return await this.api.post<FamilyMedia>(`/${familyId}/from-url`, payload);
+    return await this.api.post<FamilyMedia>(`/family-media/${familyId}/from-url`, payload);
   }
 
   async delete(id: string): Promise<Result<boolean>> {

@@ -1,33 +1,43 @@
 <template>
-  <v-card>
-    <v-card-title class="text-h5">{{ t('familyMedia.addLink.title') }}</v-card-title>
+  <v-card elevation="0">
+    <v-card-title class="text-h5 text-center">{{ t('familyMedia.addLink.title') }}</v-card-title>
     <v-card-text>
       <v-form ref="form" @submit.prevent="submit">
-        <v-text-field
-          v-model="formData.url"
-          :label="t('familyMedia.addLink.form.url')"
-          :rules="[rules.required, rules.url]"
-          required
-        ></v-text-field>
-        <v-text-field
-          v-model="formData.fileName"
-          :label="t('familyMedia.addLink.form.fileName')"
-          :rules="[rules.required]"
-          required
-        ></v-text-field>
-        <v-select
-          v-model="formData.mediaType"
-          :label="t('familyMedia.addLink.form.mediaType')"
-          :items="mediaTypeOptions"
-          item-title="title"
-          item-value="value"
-          clearable
-        ></v-select>
-        <v-textarea
-          v-model="formData.description"
-          :label="t('familyMedia.addLink.form.description')"
-          rows="3"
-        ></v-textarea>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="formData.url"
+              :label="t('familyMedia.addLink.form.url')"
+              :rules="[rules.required, rules.url]"
+              required
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="formData.fileName"
+              :label="t('familyMedia.addLink.form.fileName')"
+              :rules="[rules.required]"
+              required
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-select
+              v-model="formData.mediaType"
+              :label="t('familyMedia.addLink.form.mediaType')"
+              :items="mediaTypeOptions"
+              item-title="title"
+              item-value="value"
+              clearable
+            ></v-select>
+          </v-col>
+          <v-col cols="12">
+            <v-textarea
+              v-model="formData.description"
+              :label="t('familyMedia.addLink.form.description')"
+              rows="3"
+            ></v-textarea>
+          </v-col>
+        </v-row>
       </v-form>
     </v-card-text>
     <v-card-actions>
@@ -39,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useValidationRules } from '@/composables/utils/useValidationRules';
 import { MediaType } from '@/types/enums';
@@ -62,14 +72,9 @@ const formData = ref({
   description: '',
 });
 
-const mediaTypeOptions = computed(() => {
-  return Object.values(MediaType)
-    .filter(value => typeof value === 'number')
-    .map(value => ({
-      title: t(`common.mediaType.${MediaType[value as MediaType]}`),
-      value: value as MediaType,
-    }));
-});
+import { getMediaTypeOptions } from '@/composables/utils/mediaTypeOptions';
+
+const mediaTypeOptions = getMediaTypeOptions(t);
 
 const { mutate: addFamilyMediaFromUrl, isPending: isAdding } = useAddFamilyMediaFromUrlMutation();
 

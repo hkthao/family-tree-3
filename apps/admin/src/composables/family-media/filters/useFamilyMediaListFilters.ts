@@ -1,4 +1,4 @@
-import { ref, computed, unref, type Ref, watch } from 'vue';
+import { ref, type Ref, watch } from 'vue';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 
 export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
@@ -18,11 +18,7 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
     page.value = 1; // Reset to first page when familyId changes
   }, { immediate: true }); // immediate: true to run once on setup
 
-  const listOptions = computed<ListOptions>(() => ({
-    page: page.value,
-    itemsPerPage: itemsPerPage.value,
-    sortBy: sortBy.value,
-  }));
+  // Removed listOptions computed property
 
   const setPage = (newPage: number) => {
     page.value = newPage;
@@ -30,7 +26,6 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
 
   const setItemsPerPage = (newItemsPerPage: number) => {
     itemsPerPage.value = newItemsPerPage;
-    page.value = 1; // Reset to first page when items per page changes
   };
 
   const setSortBy = (newSortBy: ListOptions['sortBy']) => {
@@ -38,11 +33,7 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
   };
 
   const setFilters = (newFilters: FamilyMediaFilter) => {
-    filters.value = {
-      ...newFilters,
-      familyId: unref(familyId), // Always ensure familyId from prop is used
-    };
-    page.value = 1; // Reset to first page when filters change
+    filters.value = { ...filters.value, ...newFilters }; // Update the Ref value
   };
 
   return {
@@ -50,7 +41,6 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
     itemsPerPage,
     sortBy,
     filters,
-    listOptions,
     setPage,
     setItemsPerPage,
     setSortBy,

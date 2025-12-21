@@ -6,6 +6,8 @@
       :total-items="totalItems"
       :loading="isLoading || isDeleting"
       :search="filters.searchQuery"
+      :items-per-page="itemsPerPage"
+      :sort-by="sortBy"
       @update:options="handleListOptionsUpdate"
       @update:search="handleSearchUpdate"
       @view="openDetailDrawer"
@@ -64,8 +66,8 @@ const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.
 
 const familyIdRef = toRef(props, 'familyId');
 const familyMediaListFiltersComposable = useFamilyMediaListFilters(familyIdRef);
-const { filters, listOptions, setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
-const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(filters, listOptions);
+const { filters, page, itemsPerPage, sortBy, setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
+const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(filters, page, itemsPerPage, sortBy);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
 const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
