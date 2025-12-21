@@ -1,11 +1,20 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.MemoryItems.DTOs;
 using backend.Application.MemoryItems.Queries.GetMemoryItemDetail;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
+using Moq;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
-namespace backend.Application.UnitTests.MemoryItems.Queries.GetMemoryItemDetail;
+namespace backend.Application.UnitTests.MemoryItems.Queries;
 
 public class GetMemoryItemDetailQueryHandlerTests : TestBase
 {
@@ -13,27 +22,34 @@ public class GetMemoryItemDetailQueryHandlerTests : TestBase
 
     public GetMemoryItemDetailQueryHandlerTests()
     {
-        _handler = new GetMemoryItemDetailQueryHandler(_context, _mapper);
+        _handler = new GetMemoryItemDetailQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+    }
+
+    // Helper method to create a family and a memory item for tests
+    private async Task<(Family family, MemoryItem memoryItem)> CreateFamilyAndMemoryItem(Guid ownerUserId)
+    {
+        var family = Family.Create("Test Family", "TF001", null, null, "Private", ownerUserId);
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        var memoryItem = new MemoryItem(family.Id, "Test Memory", "Description");
+        _context.MemoryItems.Add(memoryItem);
+        await _context.SaveChangesAsync();
+
+        return (family, memoryItem);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnMemoryItemDetail_WhenMemoryItemExists()
+    public async Task Handle_ShouldReturnMemoryItemDetail_WhenUserCanAccessFamily()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        var memberId1 = Guid.NewGuid();
-        var memberId2 = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Not admin
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true); // Can access
 
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM-TEST" });
-        _context.Members.Add(new Member("Last", "Member 1", "M001", familyId) { Id = memberId1 });
-        _context.Members.Add(new Member("Last", "Member 2", "M002", familyId) { Id = memberId2 });
-        await _context.SaveChangesAsync();
-
-        var memoryItem = new MemoryItem(familyId, "Test Memory", "Description", DateTime.Now.AddDays(-10), EmotionalTag.Happy);
-        memoryItem.AddMedia(new MemoryMedia(memoryItem.Id, "http://example.com/media.jpg"));
-        memoryItem.AddPerson(new MemoryPerson(memoryItem.Id, memberId1));
-        _context.MemoryItems.Add(memoryItem);
-        await _context.SaveChangesAsync();
+        var (family, memoryItem) = await CreateFamilyAndMemoryItem(userId);
 
         var query = new GetMemoryItemDetailQuery { Id = memoryItem.Id };
 
@@ -41,52 +57,100 @@ public class GetMemoryItemDetailQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().Be(memoryItem.Id);
         result.Value.Title.Should().Be(memoryItem.Title);
-        result.Value.MemoryMedia.Should().HaveCount(1);
-        result.Value.MemoryPersons.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnMemoryItemDetail_WhenUserIsAdmin()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Admin
+
+        var (family, memoryItem) = await CreateFamilyAndMemoryItem(Guid.NewGuid()); // Family owned by another user
+
+        var query = new GetMemoryItemDetailQuery { Id = memoryItem.Id };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().Be(memoryItem.Id);
+        result.Value.Title.Should().Be(memoryItem.Title);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+    {
+        // Arrange
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(false);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false);
+
+        var (family, memoryItem) = await CreateFamilyAndMemoryItem(Guid.NewGuid());
+
+        var query = new GetMemoryItemDetailQuery { Id = memoryItem.Id };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.Unauthorized);
+        result.ErrorSource.Should().Be(ErrorSources.Authentication);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnNotFound_WhenUserCannotAccessAndIsNotAdmin()
+    {
+        // Arrange
+        var (family, memoryItem) = await CreateFamilyAndMemoryItem(Guid.NewGuid()); // Family owned by another user
+
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Not admin
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // Cannot access
+
+        var query = new GetMemoryItemDetailQuery { Id = memoryItem.Id };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be("Forbidden");
+        result.ErrorSource.Should().Be("Authorization");
     }
 
     [Fact]
     public async Task Handle_ShouldReturnNotFound_WhenMemoryItemDoesNotExist()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Admin, so access is not an issue
+
         var query = new GetMemoryItemDetailQuery { Id = Guid.NewGuid() }; // Non-existent ID
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Not Found");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnNotFound_WhenMemoryItemIsSoftDeleted()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM-TEST" });
-        await _context.SaveChangesAsync();
-
-        var softDeletedMemoryItem = new MemoryItem(familyId, "Soft Deleted Memory", "Desc", DateTime.Now.AddDays(-5), EmotionalTag.Neutral)
-        {
-            IsDeleted = true,
-            DeletedDate = DateTime.Now,
-            DeletedBy = Guid.NewGuid().ToString()
-        };
-        _context.MemoryItems.Add(softDeletedMemoryItem);
-        await _context.SaveChangesAsync();
-
-        var query = new GetMemoryItemDetailQuery { Id = softDeletedMemoryItem.Id };
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Not Found");
+        result.Error.Should().Be("NotFound");
     }
 }

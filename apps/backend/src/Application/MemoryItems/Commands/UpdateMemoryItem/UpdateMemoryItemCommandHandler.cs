@@ -1,22 +1,45 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using MediatR; // Ensure MediatR is included
+
 namespace backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 
 public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCommand, Result>
 {
     private readonly IApplicationDbContext _context;
-    public UpdateMemoryItemCommandHandler(IApplicationDbContext context)
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUser _currentUser; // Inject ICurrentUser to check for authenticated state
+
+    public UpdateMemoryItemCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser)
     {
         _context = context;
+        _authorizationService = authorizationService;
+        _currentUser = currentUser;
     }
+
     public async Task<Result> Handle(UpdateMemoryItemCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.MemoryItems.FirstOrDefaultAsync(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId, cancellationToken);
+        // 1. Kiểm tra xác thực người dùng
+        if (!_currentUser.IsAuthenticated)
+        {
+            return Result.Failure(ErrorMessages.Unauthorized, ErrorSources.Authentication);
+        }
+
+        var entity = await _context.MemoryItems
+            .FirstOrDefaultAsync(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId, cancellationToken);
         if (entity == null)
         {
             return Result.NotFound();
         }
+
+        // Authorization: Check if user can access the family
+        if (!_authorizationService.CanAccessFamily(request.FamilyId))
+        {
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
         entity.Update(
             request.Title,
             request.Description,

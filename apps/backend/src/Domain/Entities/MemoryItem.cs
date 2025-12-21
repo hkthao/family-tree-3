@@ -5,6 +5,7 @@ namespace backend.Domain.Entities;
 public class MemoryItem : BaseAuditableEntity, ISoftDelete
 {
     public Guid FamilyId { get; private set; }
+    public Family Family { get; private set; } = null!; // ADDED: Direct navigation property to Family
     public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public DateTime? HappenedAt { get; private set; }
@@ -16,10 +17,6 @@ public class MemoryItem : BaseAuditableEntity, ISoftDelete
 
     private readonly List<MemoryPerson> _memoryPersons = new();
     public IReadOnlyCollection<MemoryPerson> MemoryPersons => _memoryPersons.AsReadOnly();
-
-
-
-
 
     // Private constructor for EF Core
     private MemoryItem() { }

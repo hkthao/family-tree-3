@@ -73,7 +73,7 @@ public class Result<T>
     /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
     /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
     /// <returns>Một thể hiện của Result<T> biểu thị không tìm thấy.</returns>
-    public static Result<T> NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+    public static Result<T> NotFound(string error = "NotFound", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
 
@@ -155,7 +155,7 @@ public class Result
     /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
     /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
     /// <returns>Một thể hiện của Result biểu thị không tìm thấy.</returns>
-    public static Result NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+    public static Result NotFound(string error = "NotFound", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
 
