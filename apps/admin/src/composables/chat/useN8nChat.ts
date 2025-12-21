@@ -25,7 +25,7 @@ export function useN8nChat(
 ) {
   const { t } = useI18n();
   const { accessToken } = useAccessToken();
-  const { preferences, currentChatLanguage } = useUserPreferences();
+  const { state: { preferences, currentChatLanguage } } = useUserPreferences();
   const { n8nChatAdapter } = deps;
 
   const chatMetadata = reactive<ChatMetadata>({

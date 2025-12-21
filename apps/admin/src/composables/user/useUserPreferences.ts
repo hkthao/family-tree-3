@@ -54,25 +54,31 @@ export function useUserPreferences() {
   });
 
   // Watch for changes in preferences and update i18n locale
+  const handleLanguageChange = (newLang?: Language) => {
+    if (newLang) {
+      i18n.global.locale.value = (newLang as Language) === Language.English ? 'en' : 'vi';
+    }
+  };
+
   watch(
     () => preferences.value?.language,
-    (newLang) => {
-      if (newLang) {
-        i18n.global.locale.value = (newLang as Language) === Language.English ? 'en' : 'vi';
-      }
-    },
+    handleLanguageChange,
   );
 
   return {
-    preferences,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    savePreferences,
-    isSaving: isSavingMutation, // Expose the renamed isLoading
-    isSaveError,
-    saveError,
-    currentChatLanguage,
+    state: {
+      preferences,
+      isLoading,
+      isError,
+      error,
+      isSaving: isSavingMutation,
+      isSaveError,
+      saveError,
+      currentChatLanguage,
+    },
+    actions: {
+      refetch,
+      savePreferences,
+    },
   };
 }

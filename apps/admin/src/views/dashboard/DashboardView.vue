@@ -51,7 +51,7 @@ const selectedFamilyId = ref<string | null>(null);
 const familyIdForQueries = computed(() => selectedFamilyId.value || undefined);
 
 const { state: { dashboardStats, isLoading: isLoadingStats } } = useDashboardStats(familyIdForQueries);
-const { activities: recentActivities, isLoading: isLoadingRecentActivities } = useRecentActivities(familyIdForQueries);
+const { state: { activities: recentActivities, isLoading: isLoadingRecentActivities } } = useRecentActivities(familyIdForQueries);
 </script>
 
 <style scoped>

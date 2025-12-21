@@ -1,19 +1,21 @@
 import { watch } from 'vue';
 import type { UserProfile } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { ApiUserService } from '@/services/user/api.user.service';
-import apiClient from '@/plugins/axios';
 import { useI18n } from 'vue-i18n';
-import { useGlobalSnackbar } from '@/composables';
+import { useGlobalSnackbar, useServices } from '@/composables';
+import type { IUserService } from '@/services/user/user.service.interface';
 
 const PROFILE_QUERY_KEY = ['userProfile'];
 
-export function useUserProfile() {
+interface UseUserProfileOptions {
+  userService?: IUserService;
+}
+
+export function useUserProfile(options: UseUserProfileOptions = {}) {
+  const { userService = useServices().user } = options;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const queryClient = useQueryClient();
-
-  const userService = new ApiUserService(apiClient);
 
   const { isLoading: isFetchingProfile, data: userProfile, isError: isFetchError, error: fetchError } = useQuery<UserProfile, Error>({
     queryKey: PROFILE_QUERY_KEY,
@@ -27,17 +29,21 @@ export function useUserProfile() {
     },
   });
 
-  watch(isFetchError, (isError) => {
+  const handleFetchErrorChange = (isError: boolean) => {
     if (isError && fetchError.value) {
       showSnackbar(fetchError.value.message, 'error');
     }
-  });
+  };
+
+  watch(isFetchError, handleFetchErrorChange);
 
   return {
-    userProfile,
-    isFetchingProfile,
-    isFetchError,
-    fetchError,
-    queryClient, // Expose queryClient if needed for invalidation elsewhere
+    state: {
+      userProfile,
+      isFetchingProfile,
+      isFetchError,
+      fetchError,
+      queryClient,
+    },
   };
 }

@@ -29,11 +29,15 @@ export function useRecentActivities(
   });
 
   return {
-    activities: query.data,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    isFetching: query.isFetching,
-    refetch: query.refetch,
+    state: {
+      activities: query.data,
+      isLoading: query.isLoading,
+      isError: query.isError,
+      error: query.error,
+      isFetching: query.isFetching,
+    },
+    actions: {
+      refetch: query.refetch,
+    },
   };
 }

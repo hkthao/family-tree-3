@@ -39,7 +39,7 @@ const { t } = useI18n();
 const theme = useTheme();
 
 const router = useRouter();
-const { preferences, savePreferences } = useUserPreferences();
+const { state: { preferences }, actions: { savePreferences } } = useUserPreferences();
 
 const showChatWidget = ref(false); // Reactive variable to control chat widget visibility
 

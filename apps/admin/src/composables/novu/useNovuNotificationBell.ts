@@ -4,7 +4,7 @@ import { Novu } from '@novu/js';
 import { getEnvVariable } from '@/utils/api.util';
 
 export function useNovuNotificationBell() {
-  const { userProfile } = useUserProfile();
+  const { state: { userProfile } } = useUserProfile();
   const unseenCount = ref(0);
   let novuClient: Novu | null = null;
   let unseen_count_changed: (() => void) | null = null;

@@ -1,13 +1,16 @@
-import { computed, ref, watch, type Ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { ApiUserService } from '@/services/user/api.user.service';
-import apiClient from '@/plugins/axios';
 import type { UserDto } from '@/types';
 import { queryKeys as QueryKeys } from '@/constants/queryKeys';
+import type { IUserService } from '@/services/user/user.service.interface';
+import { useServices } from '@/composables';
 
-const userService = new ApiUserService(apiClient);
+interface UseUserByIdsQueryOptions {
+  userService?: IUserService;
+}
 
-export function useUserByIdsQuery(ids: Readonly<Ref<string[]>>) {
+export function useUserByIdsQuery(ids: Readonly<Ref<string[]>>, options: UseUserByIdsQueryOptions = {}) {
+  const { userService = useServices().user } = options;
   const users = ref<UserDto[]>([]);
 
   // Explicitly clear users if ids array is empty
@@ -31,14 +34,18 @@ export function useUserByIdsQuery(ids: Readonly<Ref<string[]>>) {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  watch(data, (newVal) => {
+  const handleDataChange = (newVal?: UserDto[]) => {
     users.value = newVal || [];
-  }, { immediate: true });
+  };
+
+  watch(data, handleDataChange, { immediate: true });
 
   return {
-    users,
-    isLoading,
-    isFetching,
-    error,
+    state: {
+      users,
+      isLoading,
+      isFetching,
+      error,
+    },
   };
 }
