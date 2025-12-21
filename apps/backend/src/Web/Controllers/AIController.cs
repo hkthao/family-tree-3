@@ -1,9 +1,9 @@
-using backend.Application.AI.Chat;
+using backend.Application.AI.Commands.GenerateAiContent;
 using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.AspNetCore.RateLimiting;
+using backend.Application.AI.Chat; // Add this using directive
 
 namespace backend.Web.Controllers;
 
@@ -14,21 +14,27 @@ namespace backend.Web.Controllers;
 [ApiController]
 [Route("api/ai")]
 [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
-public class AIController : ControllerBase
+public class AiController(IMediator mediator, ILogger<AiController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<AIController> _logger;
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<AiController> _logger = logger;
 
-    public AIController(IMediator mediator, ILogger<AIController> logger)
+    /// <summary>
+    /// Tạo nội dung AI dựa trên đầu vào của người dùng và loại yêu cầu.
+    /// </summary>
+    /// <param name="command">Lệnh chứa FamilyId, ChatInput, và ContentType.</param>
+    /// <returns>Nội dung được tạo bởi AI (JSON hoặc văn bản).</returns>
+    [HttpPost("generate-content")]
+    public async Task<IActionResult> GenerateAiContent([FromBody] GenerateAiContentCommand command)
     {
-        _mediator = mediator;
-        _logger = logger;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
-    /// Gửi một tin nhắn đến AI Assistant và nhận phản hồi.
+    /// Gửi tin nhắn đến AI Assistant và nhận phản hồi.
     /// </summary>
-    /// <param name="command">Lệnh chứa tin nhắn và lịch sử trò chuyện.</param>
+    /// <param name="command">Lệnh chứa FamilyId, SessionId, ChatInput và Metadata.</param>
     /// <returns>Phản hồi từ AI Assistant.</returns>
     [HttpPost("chat")]
     public async Task<IActionResult> ChatWithAssistant([FromBody] ChatWithAssistantCommand command)
