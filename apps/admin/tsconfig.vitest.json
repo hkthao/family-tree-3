@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.app.json",
-  "include": ["tests/unit/**/*.spec.ts", "env.d.ts", "src/plugins/services.plugin.ts"],
+  "include": ["tests/unit/**/*.spec.ts", "tests/unit/**/*.test.ts", "env.d.ts", "src/plugins/services.plugin.ts"],
   "exclude": [],
   "compilerOptions": {
     "incremental": true,
