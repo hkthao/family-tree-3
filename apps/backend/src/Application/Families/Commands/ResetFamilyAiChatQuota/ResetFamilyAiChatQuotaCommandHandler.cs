@@ -1,18 +1,9 @@
-using backend.Application.Common.Interfaces; // ADDED
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.Families.Commands;
-
-/// <summary>
-/// Lệnh để đặt lại số lượng yêu cầu trò chuyện AI đã sử dụng hàng tháng cho một gia đình.
-/// </summary>
-public record ResetFamilyAiChatQuotaCommand : IRequest<Result>
-{
-    /// <summary>
-    /// ID của gia đình cần đặt lại hạn mức.
-    /// </summary>
-    public Guid FamilyId { get; init; }
-}
+namespace backend.Application.Families.Commands.ResetFamilyAiChatQuota;
 
 /// <summary>
 /// Handler cho ResetFamilyAiChatQuotaCommand.

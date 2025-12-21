@@ -1,6 +1,6 @@
 using System; // For Action
 using backend.Application.Common.Models;
-using backend.Application.Families.Commands;
+using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration; // Updated namespace
 using backend.Application.UnitTests.Common; // Corrected using statement for TestBase
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
@@ -31,7 +31,8 @@ public class UpdateFamilyLimitConfigurationCommandTests : TestBase
         {
             FamilyId = family.Id,
             MaxMembers = 100,
-            MaxStorageMb = 2048
+            MaxStorageMb = 2048,
+            AiChatMonthlyLimit = 500 // Add new parameter
         };
 
         // Act
@@ -49,6 +50,7 @@ public class UpdateFamilyLimitConfigurationCommandTests : TestBase
         updatedFamily!.FamilyLimitConfiguration.Should().NotBeNull();
         updatedFamily.FamilyLimitConfiguration!.MaxMembers.Should().Be(command.MaxMembers);
         updatedFamily.FamilyLimitConfiguration!.MaxStorageMb.Should().Be(command.MaxStorageMb);
+        updatedFamily.FamilyLimitConfiguration!.AiChatMonthlyLimit.Should().Be(command.AiChatMonthlyLimit); // Assert new parameter
     }
 
     [Fact]
@@ -59,7 +61,8 @@ public class UpdateFamilyLimitConfigurationCommandTests : TestBase
         {
             FamilyId = Guid.NewGuid(), // Non-existent ID
             MaxMembers = 100,
-            MaxStorageMb = 2048
+            MaxStorageMb = 2048,
+            AiChatMonthlyLimit = 500 // Add new parameter
         };
 
         // Act
@@ -83,7 +86,31 @@ public class UpdateFamilyLimitConfigurationCommandTests : TestBase
         {
             FamilyId = family.Id,
             MaxMembers = 0, // Invalid value
-            MaxStorageMb = 2048
+            MaxStorageMb = 2048,
+            AiChatMonthlyLimit = 500 // Add new parameter
+        };
+
+        // Act
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    [Fact]
+    public async Task Handle_GivenInvalidAiChatMonthlyLimit_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var family = Family.Create("Test Family", "TF001", null, null, "Private", Guid.NewGuid());
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        var command = new UpdateFamilyLimitConfigurationCommand
+        {
+            FamilyId = family.Id,
+            MaxMembers = 100,
+            MaxStorageMb = 2048,
+            AiChatMonthlyLimit = -1 // Invalid value
         };
 
         // Act
