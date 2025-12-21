@@ -62,6 +62,11 @@ public interface IApplicationDbContext
     DbSet<PrivacyConfiguration> PrivacyConfigurations { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLimitConfiguration.
+    /// </summary>
+    DbSet<FamilyLimitConfiguration> FamilyLimitConfigurations { get; }
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
     DbSet<FamilyDict> FamilyDicts { get; }

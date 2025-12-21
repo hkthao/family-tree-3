@@ -55,6 +55,13 @@ public abstract class TestBase : IDisposable
     }
 
     /// <summary>
+    /// Phương thức tiện ích để lấy một instance của ApplicationDbContext mới cho mỗi bài kiểm thử.
+    /// </summary>
+    protected ApplicationDbContext GetApplicationDbContext()
+    {
+        return new ApplicationDbContext(_dbContextOptions, _mockDomainEventDispatcher.Object, _mockUser.Object, _mockDateTime.Object);
+    }
+    /// <summary>
     /// Giải phóng tài nguyên.
     /// </summary>
     public virtual void Dispose()

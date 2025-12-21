@@ -49,6 +49,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public IReadOnlyCollection<Event> Events => _events;
 
     public PrivacyConfiguration? PrivacyConfiguration { get; private set; }
+    public FamilyLimitConfiguration? FamilyLimitConfiguration { get; private set; } // NEW: Thêm cấu hình giới hạn gia đình
 
     public void AddFamilyUser(Guid userId, FamilyRole role)
     {
@@ -274,8 +275,25 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             TotalGenerations = 0 // Initial value
         };
 
+        family.PrivacyConfiguration = new PrivacyConfiguration(family.Id); // Initialize with default PrivacyConfiguration using family.Id
+        family.FamilyLimitConfiguration = new FamilyLimitConfiguration(family.Id); // Initialize with default FamilyLimitConfiguration using family.Id
         family.AddFamilyUser(creatorUserId, FamilyRole.Manager);
 
         return family;
     }
+
+    /// <summary>
+    /// Cập nhật cấu hình gia đình.
+    /// </summary>
+    /// <param name="maxMembers">Số lượng thành viên tối đa.</param>
+    /// <param name="maxStorageMb">Dung lượng lưu trữ tối đa (MB).</param>
+    public void UpdateFamilyConfiguration(int maxMembers, int maxStorageMb)
+    {
+        if (FamilyLimitConfiguration == null)
+        {
+            FamilyLimitConfiguration = new FamilyLimitConfiguration(Id);
+        }
+        FamilyLimitConfiguration.Update(maxMembers, maxStorageMb);
+    }
 }
+

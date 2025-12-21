@@ -24,17 +24,46 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
             request.EmotionalTag
         );
         // Handle Media updates
-        var deleteItems = await _context.MemoryMedia
-            .Where(mm => request.DeletedMediaIds.Contains(mm.Id) && mm.MemoryItem.FamilyId == request.FamilyId)
+        // Lấy tất cả media hiện có của MemoryItem
+        var existingMediaItems = await _context.MemoryMedia
+            .Where(mm => mm.MemoryItemId == entity.Id)
             .ToListAsync(cancellationToken);
-        if (deleteItems.Count != 0)
-            _context.MemoryMedia.RemoveRange(deleteItems);
-        // Add or update media
+
+        // Xóa các media đã được đánh dấu để xóa
+        var mediaToDelete = existingMediaItems
+            .Where(mm => request.DeletedMediaIds.Contains(mm.Id))
+            .ToList();
+        if (mediaToDelete.Any())
+        {
+            _context.MemoryMedia.RemoveRange(mediaToDelete);
+        }
+
+        // Cập nhật hoặc thêm media mới
         foreach (var mediaDto in request.MemoryMedia)
         {
-            var existingMedia = _context.MemoryMedia.FirstOrDefault(m => m.Url == mediaDto.Url);
-            if (existingMedia == null)
+            if (mediaDto.Id != Guid.Empty) // Nếu có ID, đây là item đã tồn tại (hoặc được cập nhật)
+            {
+                var existingMedia = existingMediaItems.FirstOrDefault(mm => mm.Id == mediaDto.Id);
+                if (existingMedia != null)
+                {
+                    // Cập nhật URL nếu có thay đổi
+                    if (existingMedia.Url != mediaDto.Url)
+                    {
+                        existingMedia.Update(mediaDto.Url);
+                    }
+                }
+                else
+                {
+                    // Nếu item có ID nhưng không tìm thấy trong existingMediaItems, 
+                    // có thể là một lỗi hoặc item mới được thêm với ID cụ thể.
+                    // Hiện tại, chúng ta sẽ thêm nó như một item mới.
+                    _context.MemoryMedia.Add(new MemoryMedia(entity.Id, mediaDto.Url));
+                }
+            }
+            else // Không có ID, đây là item mới
+            {
                 _context.MemoryMedia.Add(new MemoryMedia(entity.Id, mediaDto.Url));
+            }
         }
         // Handle MemoryPersons updates
         var existingMemoryPersons = await _context.MemoryPersons

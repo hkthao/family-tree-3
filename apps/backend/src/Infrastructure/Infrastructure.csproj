@@ -35,7 +35,7 @@
     <PackageReference Include="AWSSDK.SecurityToken" />
         <PackageReference Include="UglyToad.PdfPig" />
         <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
-        <PackageReference Include="Microsoft.AspNetCore.RateLimiting" />
+
       </ItemGroup>
 
   <ItemGroup>

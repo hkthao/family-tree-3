@@ -156,7 +156,7 @@ public class MappingProfile : Profile
         CreateMap<MemoryPerson, MemoryPersonDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null));
 
-        // Commands to Entities
+        CreateMap<FamilyLimitConfiguration, FamilyLimitConfigurationDto>();
         CreateMap<CreateMemoryItemCommand, MemoryItem>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())

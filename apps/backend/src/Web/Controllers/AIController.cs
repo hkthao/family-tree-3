@@ -1,4 +1,5 @@
 using backend.Application.AI.Chat;
+using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

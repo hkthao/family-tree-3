@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;

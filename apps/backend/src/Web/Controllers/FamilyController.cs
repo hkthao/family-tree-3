@@ -1,4 +1,6 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
+using backend.Application.Families.Commands;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
@@ -14,7 +16,6 @@ using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
@@ -192,6 +193,36 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         if (familyId != command.FamilyId)
         {
             _logger.LogWarning("Mismatched FamilyId in URL ({FamilyId}) and command body ({CommandFamilyId}) for UpdatePrivacyConfigurationCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest("FamilyId in URL does not match command body.");
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Lấy cấu hình giới hạn cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Cấu hình giới hạn của gia đình.</returns>
+    [HttpGet("{familyId}/limit-configuration")]
+    public async Task<IActionResult> GetFamilyLimitConfiguration(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetFamilyLimitConfigurationQuery { FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Cập nhật cấu hình giới hạn cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="command">Lệnh chứa dữ liệu cấu hình giới hạn đã cập nhật.</param>
+    /// <returns>Kết quả của hoạt động cập nhật.</returns>
+    [HttpPut("{familyId}/limit-configuration")]
+    public async Task<IActionResult> UpdateFamilyLimitConfiguration(Guid familyId, [FromBody] UpdateFamilyLimitConfigurationCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyId}) and command body ({CommandFamilyId}) for UpdateFamilyLimitConfigurationCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("FamilyId in URL does not match command body.");
         }
         var result = await _mediator.Send(command);

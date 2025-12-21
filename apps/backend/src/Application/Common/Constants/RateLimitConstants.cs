@@ -1,4 +1,4 @@
-namespace backend.Infrastructure.Constants;
+namespace backend.Application.Common.Constants;
 
 public static class RateLimitConstants
 {

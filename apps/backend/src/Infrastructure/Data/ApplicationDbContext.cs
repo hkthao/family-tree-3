@@ -67,6 +67,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.
     /// </summary>
     public DbSet<PrivacyConfiguration> PrivacyConfigurations => Set<PrivacyConfiguration>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyConfiguration.
+    /// </summary>
+    public DbSet<FamilyLimitConfiguration> FamilyLimitConfigurations => Set<FamilyLimitConfiguration>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
