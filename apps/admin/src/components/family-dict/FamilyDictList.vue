@@ -32,14 +32,14 @@
     <!-- Type column -->
     <template #item.type="{ item }">
       <v-chip label size="small" class="text-capitalize">
-        {{ getFamilyDictTypeTitle(item.type) }}
+        {{ getFamilyDictTypeTitle(t, item.type) }}
       </v-chip>
     </template>
 
     <!-- Lineage column -->
     <template #item.lineage="{ item }">
       <v-chip label size="small" class="text-capitalize">
-        {{ getFamilyDictLineageTitle(item.lineage) }}
+        {{ getFamilyDictLineageTitle(t, item.lineage) }}
       </v-chip>
     </template>
 
@@ -124,6 +124,7 @@
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import { useFamilyDictList } from '@/composables';
+import { getFamilyDictTypeTitle, getFamilyDictLineageTitle } from '@/composables/utils/familyDictOptions';
 
 const props = defineProps<{
   items: FamilyDict[];
@@ -146,15 +147,7 @@ const emit = defineEmits([
 const { t } = useI18n();
 
 const {
-  debouncedSearch,
-  itemsPerPage,
-  headers,
-  canPerformActions,
-  getFamilyDictTypeTitle,
-  getFamilyDictLineageTitle,
-  loadFamilyDicts,
-  viewFamilyDict,
-  editFamilyDict,
-  confirmDelete,
+  state: { debouncedSearch, itemsPerPage, headers, canPerformActions },
+  actions: { loadFamilyDicts, viewFamilyDict, editFamilyDict, confirmDelete },
 } = useFamilyDictList(props, emit);
 </script>

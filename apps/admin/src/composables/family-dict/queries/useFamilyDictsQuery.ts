@@ -1,14 +1,16 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { FamilyDict, FamilyDictFilter, Paginated, ListOptions, FilterOptions } from '@/types';
-import { ApiFamilyDictService } from '@/services/family-dict/api.family-dict.service';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/composables';
 
-const apiFamilyDictService: IFamilyDictService = new ApiFamilyDictService(apiClient);
 
-export function useFamilyDictsQuery(filters: Ref<FamilyDictFilter>) {
+
+export function useFamilyDictsQuery(
+  filters: Ref<FamilyDictFilter>,
+  service: IFamilyDictService = useServices().familyDict,
+) {
   const query = useQuery<Paginated<FamilyDict>, Error>({
     queryKey: computed(() => queryKeys.familyDicts.list(unref(filters))),
     queryFn: async () => {
@@ -26,7 +28,7 @@ export function useFamilyDictsQuery(filters: Ref<FamilyDictFilter>) {
         region: currentFilters.region,
       };
 
-      const response = await apiFamilyDictService.search(listOptions, filterOptions);
+      const response = await service.search(listOptions, filterOptions);
       if (response.ok) {
         return response.value;
       }

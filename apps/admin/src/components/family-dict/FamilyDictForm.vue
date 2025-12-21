@@ -65,14 +65,8 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const {
-  formRef,
-  isFormReadOnly,
-  familyDictTypes,
-  familyDictLineages,
-  formData,
-  rules,
-  validate,
-  getFormData,
+  state: { formRef, isFormReadOnly, familyDictTypes, familyDictLineages, formData, rules },
+  actions: { validate, getFormData },
 } = useFamilyDictForm(props);
 
 defineExpose({

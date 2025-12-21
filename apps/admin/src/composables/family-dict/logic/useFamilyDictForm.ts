@@ -1,9 +1,10 @@
-import { reactive, toRef, computed, ref } from 'vue';
+import { reactive, toRef, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
 import { useFamilyDictRules } from '@/validations/family-dict.validation';
 import { useAuth } from '@/composables';
+import { getFamilyDictTypeOptions, getFamilyDictLineageOptions } from '@/composables/utils/familyDictOptions';
 
 interface FamilyDictFormProps {
   readOnly?: boolean;
@@ -19,20 +20,8 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
     return props.readOnly || !(authState.isAdmin.value || authState.isFamilyManager.value);
   });
 
-  const familyDictTypes = computed(() => [
-    { title: t('familyDict.type.blood'), value: FamilyDictType.Blood },
-    { title: t('familyDict.type.marriage'), value: FamilyDictType.Marriage },
-    { title: t('familyDict.type.adoption'), value: FamilyDictType.Adoption },
-    { title: t('familyDict.type.inLaw'), value: FamilyDictType.InLaw },
-    { title: t('familyDict.type.other'), value: FamilyDictType.Other },
-  ]);
-
-  const familyDictLineages = computed(() => [
-    { title: t('familyDict.lineage.noi'), value: FamilyDictLineage.Noi },
-    { title: t('familyDict.lineage.ngoai'), value: FamilyDictLineage.Ngoai },
-    { title: t('familyDict.lineage.noiNgoai'), value: FamilyDictLineage.NoiNgoai },
-    { title: t('familyDict.lineage.other'), value: FamilyDictLineage.Other },
-  ]);
+  const familyDictTypes = getFamilyDictTypeOptions(t);
+  const familyDictLineages = getFamilyDictLineageOptions(t);
 
   const formData = reactive<Omit<FamilyDict, 'id'> | FamilyDict>(
     props.initialFamilyDictData
@@ -73,13 +62,17 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
   };
 
   return {
-    formRef,
-    isFormReadOnly,
-    familyDictTypes,
-    familyDictLineages,
-    formData,
-    rules,
-    validate,
-    getFormData,
+    state: {
+      formRef,
+      isFormReadOnly,
+      familyDictTypes,
+      familyDictLineages,
+      formData,
+      rules,
+    },
+    actions: {
+      validate,
+      getFormData,
+    },
   };
 }

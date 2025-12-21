@@ -2,20 +2,7 @@ import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 import type { FamilyDictFilter } from '@/types';
 
-interface FamilyDictListOptions {
-  page: Ref<number>;
-  itemsPerPage: Ref<number>;
-  sortBy: Ref<{ key: string; order: 'asc' | 'desc' }[]>;
-  searchQuery: Ref<string>;
-  filters: Ref<FamilyDictFilter>; // Changed to Ref
-  setPage: (page: number) => void;
-  setItemsPerPage: (itemsPerPage: number) => void;
-  setSortBy: (sortBy: { key: string; order: 'asc' | 'desc' }[]) => void;
-  setSearchQuery: (searchQuery: string) => void;
-  setFilters: (filters: FamilyDictFilter) => void;
-}
-
-export function useFamilyDictListFilters(): FamilyDictListOptions {
+export function useFamilyDictListFilters() {
   const page = ref(1);
   const itemsPerPage = ref(10);
   const sortBy = ref<{ key: string; order: 'asc' | 'desc' }[]>([]);
@@ -53,15 +40,19 @@ export function useFamilyDictListFilters(): FamilyDictListOptions {
 
 
   return {
-    page,
-    itemsPerPage,
-    sortBy,
-    searchQuery,
-    filters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setSearchQuery,
-    setFilters,
+    state: {
+      page,
+      itemsPerPage,
+      sortBy,
+      searchQuery,
+      filters,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setSearchQuery,
+      setFilters,
+    },
   };
 }

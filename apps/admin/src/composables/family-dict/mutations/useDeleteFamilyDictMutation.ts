@@ -1,18 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-
-import { ApiFamilyDictService } from '@/services/family-dict/api.family-dict.service';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/composables';
 
-const apiFamilyDictService: IFamilyDictService = new ApiFamilyDictService(apiClient);
 
-export function useDeleteFamilyDictMutation() {
+
+export function useDeleteFamilyDictMutation(service: IFamilyDictService = useServices().familyDict) {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string>({
     mutationFn: async (familyDictId: string) => {
-      const response = await apiFamilyDictService.delete(familyDictId);
+      const response = await service.delete(familyDictId);
       if (response.ok) {
         return;
       }

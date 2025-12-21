@@ -47,12 +47,8 @@ const emit = defineEmits(['update:filters']);
 const { t } = useI18n();
 
 const {
-  expanded,
-  filters,
-  familyDictLineages,
-  regions,
-  applyFilters,
-  resetFilters,
+  state: { expanded, filters, familyDictLineages, regions },
+  actions: { applyFilters, resetFilters },
 } = useFamilyDictSearch(emit);
 </script>
 

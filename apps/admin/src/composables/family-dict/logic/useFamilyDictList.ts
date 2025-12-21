@@ -4,8 +4,8 @@ import type { FamilyDict } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { FamilyDictType, FamilyDictLineage } from '@/types';
 import { useAuth } from '@/composables';
+import { getFamilyDictTypeTitle, getFamilyDictLineageTitle } from '@/composables/utils/familyDictOptions';
 
 interface FamilyDictListProps {
   items: FamilyDict[];
@@ -47,27 +47,6 @@ export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
 
   const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
-  const getFamilyDictTypeTitle = (type: FamilyDictType) => {
-    switch (type) {
-      case FamilyDictType.Blood: return t('familyDict.type.blood');
-      case FamilyDictType.Marriage: return t('familyDict.type.marriage');
-      case FamilyDictType.Adoption: return t('familyDict.type.adoption');
-      case FamilyDictType.InLaw: return t('familyDict.type.inLaw');
-      case FamilyDictType.Other: return t('familyDict.type.other');
-      default: return t('common.unknown');
-    }
-  };
-
-  const getFamilyDictLineageTitle = (lineage: FamilyDictLineage) => {
-    switch (lineage) {
-      case FamilyDictLineage.Noi: return t('familyDict.lineage.noi');
-      case FamilyDictLineage.Ngoai: return t('familyDict.lineage.ngoai');
-      case FamilyDictLineage.NoiNgoai: return t('familyDict.lineage.noiNgoai');
-      case FamilyDictLineage.Other: return t('familyDict.lineage.other');
-      default: return t('common.unknown');
-    }
-  };
-
   const headers = computed<DataTableHeader[]>(() => {
     const baseHeaders: DataTableHeader[] = [
       {
@@ -81,12 +60,14 @@ export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
         key: 'type',
         width: '150px',
         align: 'center',
+        value: (item: Record<string, any>) => getFamilyDictTypeTitle(t, (item as FamilyDict).type),
       },
       {
         title: t('familyDict.list.headers.lineage'),
         key: 'lineage',
         width: '150px',
         align: 'center',
+        value: (item: Record<string, any>) => getFamilyDictLineageTitle(t, (item as FamilyDict).lineage),
       },
       {
         title: t('familyDict.list.headers.namesByRegion'),
@@ -129,15 +110,17 @@ export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
   };
 
   return {
-    debouncedSearch,
-    itemsPerPage,
-    headers,
-    canPerformActions,
-    getFamilyDictTypeTitle,
-    getFamilyDictLineageTitle,
-    loadFamilyDicts,
-    viewFamilyDict,
-    editFamilyDict,
-    confirmDelete,
+    state: {
+      debouncedSearch,
+      itemsPerPage,
+      headers,
+      canPerformActions,
+    },
+    actions: {
+      loadFamilyDicts,
+      viewFamilyDict,
+      editFamilyDict,
+      confirmDelete,
+    },
   };
 }

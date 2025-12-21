@@ -26,12 +26,10 @@ export function useFamilyDictImport(showDialogProp: boolean, emit: (event: 'upda
     emit('update:show', newVal);
   });
 
-  const onFileSelected = (files: File[]) => {
-    if (files && files.length > 0) {
-      const file = files[0];
+  const parseFamilyDictFile = (file: File, t: (key: string) => string): Promise<{ data: Omit<FamilyDict, 'id'>[] | null, error: string }> => {
+    return new Promise((resolve) => {
       if (file.type !== 'application/json') {
-        parsedDataError.value = t('familyDict.import.errors.invalidFileType');
-        parsedData.value = null;
+        resolve({ data: null, error: t('familyDict.import.errors.invalidFileType') });
         return;
       }
 
@@ -41,18 +39,24 @@ export function useFamilyDictImport(showDialogProp: boolean, emit: (event: 'upda
           const content = e.target?.result as string;
           const data = JSON.parse(content);
           if (!Array.isArray(data) || data.some(item => !item.name || Number.isNaN(item.type) || Number.isNaN(item.lineage) || !item.namesByRegion || !item.namesByRegion.north)) {
-            parsedDataError.value = t('familyDict.import.errors.invalidJsonStructure');
-            parsedData.value = null;
+            resolve({ data: null, error: t('familyDict.import.errors.invalidJsonStructure') });
           } else {
-            parsedData.value = data;
-            parsedDataError.value = '';
+            resolve({ data: data, error: '' });
           }
         } catch (error) {
-          parsedDataError.value = t('familyDict.import.errors.invalidJson');
-          parsedData.value = null;
+          resolve({ data: null, error: t('familyDict.import.errors.invalidJson') });
         }
       };
       reader.readAsText(file);
+    });
+  };
+
+  const onFileSelected = async (files: File[]) => {
+    if (files && files.length > 0) {
+      const file = files[0];
+      const { data, error } = await parseFamilyDictFile(file, t);
+      parsedData.value = data;
+      parsedDataError.value = error;
     } else {
       resetState();
     }
@@ -86,13 +90,17 @@ export function useFamilyDictImport(showDialogProp: boolean, emit: (event: 'upda
   };
 
   return {
-    dialog,
-    selectedFile,
-    parsedData,
-    parsedDataError,
-    isImportingFamilyDicts,
-    onFileSelected,
-    importFamilyDicts,
-    closeDialog,
+    state: {
+      dialog,
+      selectedFile,
+      parsedData,
+      parsedDataError,
+      isImportingFamilyDicts,
+    },
+    actions: {
+      onFileSelected,
+      importFamilyDicts,
+      closeDialog,
+    },
   };
 }
