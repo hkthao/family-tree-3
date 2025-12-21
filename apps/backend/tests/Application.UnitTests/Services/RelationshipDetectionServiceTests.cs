@@ -39,6 +39,8 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockMediator = new Mock<IMediator>(); // Initialize IMediator mock
         _mockMediator.Setup(m => m.Send(It.IsAny<GetPromptByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Default AI System Prompt for testing" }));
+        _mockMediator.Setup(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success()); // ADDED: Setup for IncrementFamilyAiChatUsageCommand
         _mockLogger = new Mock<ILogger<RelationshipDetectionService>>(); // Initialize ILogger mock
         _service = new RelationshipDetectionService(
             _context,
@@ -238,6 +240,54 @@ public class RelationshipDetectionServiceTests : TestBase
     }
 
     /// <summary>
+    /// 🎯 Mục tiêu: Kiểm tra xem việc gọi AI có tăng hạn mức sử dụng AI hay không.
+    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (không suy luận cục bộ), và AI trả về thành công.
+    /// ⚙️ Act: Gọi DetectRelationshipAsync.
+    /// ⚙️ Assert: Đảm bảo IncrementFamilyAiChatUsageCommand được gửi và AiGenerateService được gọi.
+    /// </summary>
+    [Fact]
+    public async Task DetectRelationshipAsync_ShouldIncrementAiChatUsage_WhenAiIsCalled()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberA = new Member("MemberA", "Test", "A1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+        var memberB = new Member("MemberB", "Test", "B1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
+
+        _context.Members.Add(memberA);
+        _context.Members.Add(memberB);
+        await _context.SaveChangesAsync();
+
+        var members = _context.Members.ToList();
+        var relationships = _context.Relationships.ToList();
+
+        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
+            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
+
+        var pathToB = new RelationshipPath(new List<Guid> { memberA.Id, memberB.Id }, new List<GraphEdge> { new GraphEdge(memberA.Id, memberB.Id, RelationshipType.Child) });
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberA.Id, memberB.Id)).Returns(pathToB);
+        _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberB.Id, memberA.Id)).Returns(new RelationshipPath()); // No path back
+
+        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success()); // Simulate successful quota increment
+
+        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
+            It.IsAny<GenerateRequest>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "friend" }));
+
+        // Act
+        var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Description.Should().Be("friend");
+        _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    /// <summary>
     /// 🎯 Mục tiêu: Kiểm tra phát hiện quan hệ cha-con trực tiếp thông qua quy tắc cục bộ (bỏ qua AI).
     /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (suy luận cục bộ thành công).
     /// ⚙️ Act: Gọi DetectRelationshipAsync.
@@ -294,6 +344,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.First().Should().Be(nameof(RelationshipType.Father));
 
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
+        _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify that AI usage increment command was NOT sent
         _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
     }
 }

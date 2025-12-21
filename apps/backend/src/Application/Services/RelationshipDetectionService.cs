@@ -7,6 +7,8 @@ using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging; // Add this using directive
+using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
+using Microsoft.EntityFrameworkCore; // ADDED for ToListAsync
 
 namespace backend.Application.Services;
 
@@ -121,6 +123,21 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         // Fallback to AI call if local rules couldn't determine both relationships
         if (pathToB.NodeIds.Any() || pathToA.NodeIds.Any())
         {
+            // NEW: Check and increment AI chat usage quota
+            var incrementUsageCommand = new IncrementFamilyAiChatUsageCommand { FamilyId = familyId };
+            var incrementUsageResult = await _mediator.Send(incrementUsageCommand, cancellationToken);
+
+            if (!incrementUsageResult.IsSuccess)
+            {
+                _logger.LogWarning("AI Chat usage increment failed for family {FamilyId}: {Error}", familyId, incrementUsageResult.Error);
+                return new RelationshipDetectionResult
+                {
+                    Description = incrementUsageResult.Error ?? "Lỗi hạn mức AI.",
+                    Path = new List<Guid>(),
+                    Edges = new List<string>()
+                };
+            }
+
             const string RELATIONSHIP_AI_SYSTEM_PROMPT_CODE = "RELATIONSHIP_AI_SYSTEM_PROMPT";
             string systemPromptContent = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp. Thông tin về giới tính của các thành viên (ví dụ: 'Tên (nam)' hoặc 'Tên (nữ)') đã được thêm vào mô tả để hỗ trợ suy luận. Hãy suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên, và cung cấp một mô tả NGẮN GỌN, SÚC TÍCH về mối quan hệ của A với B và B với A bằng ngôn ngữ tự nhiên. Tránh liệt kê lại chi tiết đường dẫn trừ khi cần thiết để làm rõ. Kết quả phải là một đối tượng JSON có một trường: 'InferredRelationship', chứa chuỗi mô tả này. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' trong chuỗi. Ví dụ JSON: { \"InferredRelationship\": \"A là cha của B và B là con của A.\" }"; // Fallback default
 
