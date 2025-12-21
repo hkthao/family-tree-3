@@ -26,7 +26,7 @@ const props = defineProps<{
 const mapContainer = ref<HTMLElement | null>(null);
 const selectedMarker = ref<MapMarker | null>(null);
 
-const { mapInstance } = useMapbox({
+const { state: { mapInstance } } = useMapbox({
   mapboxAccessToken: props.mapboxAccessToken,
   initialCenter: props.initialCenter,
   initialZoom: props.initialZoom,

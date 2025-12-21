@@ -1,6 +1,9 @@
 import { ref, watch, onMounted, type Ref } from 'vue';
-import mapboxgl from 'mapbox-gl';
+import type * as mapboxgl from 'mapbox-gl';
 import { LocationType } from '@/types/familyLocation.d';
+import { defaultMapboxMarkerAdapter, defaultMapboxBoundsAdapter, type IMapboxMarkerAdapter, type IMapboxBoundsAdapter, type IMapboxMapAdapter } from '@/composables/utils/mapbox.adapter';
+import type { Marker } from 'mapbox-gl'; // Import Marker type directly from mapbox-gl
+import { getLocationTypeIcon } from '@/composables/utils/map.utils';
 
 export interface MapMarker {
   id: string;
@@ -12,47 +15,28 @@ export interface MapMarker {
   locationType: LocationType;
 }
 
-// Function to get icon based on location type
-const getLocationTypeIcon = (type: LocationType): string => {
-  switch (type) {
-    case LocationType.Grave:
-      return 'mdi-grave-stone';
-    case LocationType.Homeland:
-      return 'mdi-home-map-marker';
-    case LocationType.AncestralHall:
-      return 'mdi-temple-hindu';
-    case LocationType.Cemetery:
-      return 'mdi-cemetery';
-    case LocationType.EventLocation:
-      return 'mdi-map-marker-account';
-    case LocationType.Other:
-      return 'mdi-map-marker';
-    default:
-      return 'mdi-map-marker';
-  }
-};
-
 interface UseMultiMarkersOptions {
   mapInstance: Ref<mapboxgl.Map | null>;
   markers: Ref<MapMarker[] | undefined>;
   initialZoom?: number;
+  mapboxMarkerAdapter?: IMapboxMarkerAdapter;
+  mapboxBoundsAdapter?: IMapboxBoundsAdapter;
 }
 
 export function useMultiMarkers(options: UseMultiMarkersOptions) {
-  const activeMarkers = ref<mapboxgl.Marker[]>([]);
+  const { mapboxMarkerAdapter = defaultMapboxMarkerAdapter, mapboxBoundsAdapter = defaultMapboxBoundsAdapter } = options;
+  const activeMarkers = ref<Marker[]>([]);
 
   const fitMapToMarkers = (markers: MapMarker[]) => {
     if (!options.mapInstance.value || markers.length === 0) {
       return;
     }
-    const bounds = new mapboxgl.LngLatBounds();
+    const bounds = mapboxBoundsAdapter.createBounds();
     markers.forEach(marker => {
-      bounds.extend([marker.lng, marker.lat]);
+      mapboxBoundsAdapter.extendBounds(bounds, [marker.lng, marker.lat]);
     });
-    options.mapInstance.value.fitBounds(bounds, {
-      padding: 50,
+    mapboxBoundsAdapter.fitMapBounds(options.mapInstance.value, bounds, {
       maxZoom: options.initialZoom || 10,
-      duration: 0, // No animation for initial fit
     });
   };
 
@@ -88,14 +72,14 @@ export function useMultiMarkers(options: UseMultiMarkersOptions) {
           break;
       }
 
-      const marker = new mapboxgl.Marker({
+      const marker = mapboxMarkerAdapter.createMarker({
         color: markerColor,
         anchor: 'bottom'
-      })
-              if (options.mapInstance.value) {
-                marker.setLngLat([loc.lng!, loc.lat!])
-                  .addTo(options.mapInstance.value);
-              }
+      });
+      if (options.mapInstance.value) {
+        mapboxMarkerAdapter.setMarkerLngLat(marker, [loc.lng!, loc.lat!]);
+        mapboxMarkerAdapter.addMarkerToMap(marker, options.mapInstance.value);
+      }
       if (loc.title || loc.description || loc.address || loc.lng || loc.lat) {
         const popupContent = `
           <div style="font-family: Arial, sans-serif; padding: 10px; max-width: 250px;">
@@ -108,34 +92,34 @@ export function useMultiMarkers(options: UseMultiMarkersOptions) {
             <p style="font-size: 12px; color: #777777; margin-top: 5px;">Kinh độ: ${loc.lng?.toFixed(4)}, Vĩ độ: ${loc.lat?.toFixed(4)}</p>
           </div>
         `;
-        marker.setPopup(new mapboxgl.Popup().setHTML(popupContent));
+        mapboxMarkerAdapter.setMarkerPopup(marker, mapboxMarkerAdapter.setPopupHtml(mapboxMarkerAdapter.createPopup(), popupContent));
       }
 
       return marker;
     }).filter(Boolean) as mapboxgl.Marker[];
   };
 
-  watch(options.markers, (newMarkers) => {
+  const handleMarkersChange = (newMarkers: MapMarker[] | undefined) => {
     // Remove existing markers
-    activeMarkers.value.forEach(marker => marker.remove());
+    activeMarkers.value.forEach(marker => mapboxMarkerAdapter.removeMarker(marker as mapboxgl.Marker));
     activeMarkers.value = [];
     // Add new markers
     const markersToAdd = newMarkers || [];
     addMarkersToMap(markersToAdd);
     // Fit map to new markers
     if (markersToAdd.length > 0) {
-      if (options.mapInstance.value && options.mapInstance.value.isStyleLoaded()) {
+      if (options.mapInstance.value && options.mapInstance.value.isStyleLoaded && options.mapInstance.value.isStyleLoaded()) {
         fitMapToMarkers(markersToAdd);
-      } else {
+      } else if (options.mapInstance.value) {
         // If map is not loaded yet, fit after load
-        options.mapInstance.value?.on('load', () => {
+        options.mapInstance.value.on('load', () => {
           fitMapToMarkers(markersToAdd);
         });
       }
     }
-  }, { deep: true, immediate: true });
+  };
 
-  onMounted(() => {
+  const handleMapMounted = () => {
     if (options.mapInstance.value && (options.markers.value?.length || 0) > 0) {
       // Initial load, ensure markers are added and map fitted
       options.mapInstance.value.on('load', () => {
@@ -143,11 +127,19 @@ export function useMultiMarkers(options: UseMultiMarkersOptions) {
         fitMapToMarkers(options.markers.value || []);
       });
     }
-  })
+  };
+
+  watch(() => options.markers.value, handleMarkersChange, { deep: true, immediate: true });
+
+  onMounted(handleMapMounted);
 
   return {
-    activeMarkers,
-    addMarkersToMap,
-    fitMapToMarkers,
+    state: {
+      activeMarkers,
+    },
+    actions: {
+      addMarkersToMap,
+      fitMapToMarkers,
+    },
   };
 }

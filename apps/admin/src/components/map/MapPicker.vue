@@ -19,7 +19,7 @@ const emit = defineEmits(['update:coordinates']);
 const mapContainer = ref<HTMLElement | null>(null);
 const marker = ref<mapboxgl.Marker | null>(null);
 
-const { mapInstance } = useMapbox({
+const { state: { mapInstance } } = useMapbox({
   mapboxAccessToken: props.mapboxAccessToken,
   initialCenter: props.initialCenter,
   initialZoom: props.initialZoom,
@@ -29,7 +29,7 @@ const { mapInstance } = useMapbox({
 onMounted(() => {
   watch(mapInstance, (newMapInstance) => {
     if (newMapInstance) {
-      newMapInstance.on('click', (e) => {
+      newMapInstance.on('click', (e: mapboxgl.MapMouseEvent) => {
         const { lng, lat } = e.lngLat;
         updateMarker([lng, lat]);
         emit('update:coordinates', { longitude: lng, latitude: lat });
