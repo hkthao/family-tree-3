@@ -66,13 +66,8 @@ import { useRelationshipDetector } from '@/composables/relationship/useRelations
 
 const { t } = useI18n();
 const {
-  selectedFamilyId,
-  selectedMemberAId,
-  selectedMemberBId,
-  result,
-  loading,
-  error,
-  detectRelationship,
+  state: { selectedFamilyId, selectedMemberAId, selectedMemberBId, result, loading, error },
+  actions: { detectRelationship },
 } = useRelationshipDetector();
 </script>
 

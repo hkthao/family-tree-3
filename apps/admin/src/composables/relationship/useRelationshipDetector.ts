@@ -17,12 +17,14 @@ export function useRelationshipDetector() {
   const error = ref<string | null>(null);
 
   // Reset members and results when family changes
-  watch(selectedFamilyId, () => {
+  const handleFamilyIdChange = () => {
     selectedMemberAId.value = undefined;
     selectedMemberBId.value = undefined;
     result.value = null;
     error.value = null;
-  });
+  };
+
+  watch(selectedFamilyId, handleFamilyIdChange);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: { familyId: string; memberAId: string; memberBId: string }) => {
@@ -71,12 +73,16 @@ export function useRelationshipDetector() {
   };
 
   return {
-    selectedFamilyId,
-    selectedMemberAId,
-    selectedMemberBId,
-    result,
-    loading: isPending, // isLoading from useMutation
-    error,
-    detectRelationship,
+    state: {
+      selectedFamilyId,
+      selectedMemberAId,
+      selectedMemberBId,
+      result,
+      loading: isPending,
+      error,
+    },
+    actions: {
+      detectRelationship,
+    },
   };
 }

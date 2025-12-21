@@ -26,12 +26,14 @@ export function useRelationshipForm(options: UseRelationshipFormOptions) {
       },
   );
 
-  watch(() => formData.familyId, (newFamilyId, oldFamilyId) => {
+  const handleFamilyIdChange = (newFamilyId?: string, oldFamilyId?: string) => {
     if (newFamilyId !== oldFamilyId) {
       formData.sourceMemberId = '';
       formData.targetMemberId = '';
     }
-  });
+  };
+
+  watch(() => formData.familyId, handleFamilyIdChange);
 
   const { rules } = useRelationshipRules(toRefs(formData));
 
@@ -45,10 +47,14 @@ export function useRelationshipForm(options: UseRelationshipFormOptions) {
   };
 
   return {
-    formRef,
-    formData,
-    validate,
-    getFormData,
-    validationRules: rules,
+    state: {
+      formRef,
+      formData,
+      validationRules: rules,
+    },
+    actions: {
+      validate,
+      getFormData,
+    },
   };
 }

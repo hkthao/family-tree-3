@@ -51,11 +51,8 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const {
-  formRef,
-  formData,
-  validate,
-  getFormData,
-  validationRules,
+  state: { formRef, formData, validationRules },
+  actions: { validate, getFormData },
 } = useRelationshipForm({
   id: props.id,
   readOnly: props.readOnly,
