@@ -1,6 +1,6 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0"
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="memberListActions.loadMembers" elevation="0"
     data-testid="member-list" fixed-header>
     <template #top>
       <v-toolbar flat>
@@ -33,7 +33,7 @@
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
       <div class="member-full-name-column">
-<a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+<a @click="memberListActions.viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
       <div class="text-caption text-medium-emphasis">
@@ -79,7 +79,7 @@
       <div class="d-flex ga-2" v-if="props.allowEdit || props.allowDelete">
         <v-tooltip :text="t('member.list.action.edit')">
           <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="editMember(item)"
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="memberListActions.editMember(item)"
               data-testid="edit-member-button" aria-label="Edit" v-if="props.allowEdit">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
@@ -87,7 +87,7 @@
         </v-tooltip>
         <v-tooltip :text="t('member.list.action.delete')">
           <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="confirmDelete(item)"
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="memberListActions.confirmDelete(item)"
               data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete" v-if="props.allowDelete">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -218,7 +218,7 @@ const headers = computed<DataTableHeader[]>(() => {
 const loadMembers = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[]; 
+  sortBy: { key: string; order: string }[];
 }) => {
   emit('update:options', options);
 };
@@ -234,4 +234,10 @@ const editMember = (member: Member) => {
 const confirmDelete = (member: Member) => {
   emit('delete', member.id);
 };
-</script>
+
+const memberListActions = {
+  loadMembers,
+  viewMember,
+  editMember,
+  confirmDelete,
+};</script>

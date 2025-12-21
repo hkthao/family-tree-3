@@ -10,7 +10,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onUnmounted, watch, type Ref, computed } from 'vue';
+import { ref, onUnmounted, watch, computed } from 'vue';
 import { useMapbox } from '@/composables/map/useMapbox';
 import { useMultiMarkers, type MapMarker } from '@/composables/map/useMultiMarkers';
 import { VAutocomplete } from 'vuetify/components'; // Import VAutocomplete

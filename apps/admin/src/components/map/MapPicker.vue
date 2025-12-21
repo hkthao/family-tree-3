@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useMapbox } from '@/composables/map/useMapbox';
-import { defaultMapboxMarkerAdapter, defaultMapboxMapAdapter, type IMapboxMarkerAdapter } from '@/composables/utils/mapbox.adapter';
+import { defaultMapboxMarkerAdapter, defaultMapboxMapAdapter } from '@/composables/utils/mapbox.adapter';
 
 const props = defineProps<{
   mapboxAccessToken: string;
