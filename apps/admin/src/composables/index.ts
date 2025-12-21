@@ -68,6 +68,7 @@ export * from './prompt/mutations/useCreatePromptMutation';
 export * from './prompt/mutations/useDeletePromptMutation';
 export * from './prompt/queries/usePromptsQuery';
 export * from './prompt/queries/usePromptQuery';
+export * from './prompt/logic/usePromptFormLogic';
 export * from './family-media/filters/useFamilyMediaListFilters';
 export * from './family-media/mutations/useFamilyMediaMutations';
 export * from './family-media/logic/useFamilyMediaDeletion';

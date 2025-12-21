@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
 import type { Prompt } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
-import { usePromptQuery, useUpdatePromptMutation } from '@/composables';
+import { usePromptQuery, useUpdatePromptMutation, usePromptFormLogic } from '@/composables';
 
 interface PromptEditViewProps {
   promptId: string;
@@ -35,37 +35,25 @@ const promptFormRef = ref<InstanceType<typeof PromptForm> | null>(null);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 
-const { data: prompt, isLoading: isQueryLoading } = usePromptQuery(toRef(props, 'promptId'));
-const { mutate: updatePrompt, isPending: isUpdatingPrompt } = useUpdatePromptMutation();
+const { state: { prompt, isLoading: isQueryLoading } } = usePromptQuery(toRef(props, 'promptId'));
+
+const updatePromptMutation = useUpdatePromptMutation(); // Get the raw mutation object
 
 
 
-const handleUpdatePrompt = async () => {
-  if (!promptFormRef.value) return;
-  const isValid = await promptFormRef.value.validate();
+const { state: { isUpdatingPrompt }, actions: { handleUpdatePrompt, closeForm } } = usePromptFormLogic({
 
-  if (!isValid) {
-    return;
-  }
+  promptFormRef,
 
-  const promptData = promptFormRef.value.getFormData() as Prompt;
-  if (!promptData.id) {
-    showSnackbar(t('prompt.messages.saveError'), 'error');
-    return;
-  }
+  t,
 
-  updatePrompt(promptData, {
-    onSuccess: () => {
-      showSnackbar(t('prompt.messages.updateSuccess'), 'success');
-      emit('saved');
-    },
-    onError: (error) => {
-      showSnackbar(error.message || t('prompt.messages.saveError'), 'error');
-    },
-  });
-};
+  showSnackbar,
 
-const closeForm = () => {
-  emit('close');
-};
+  updatePromptMutation,
+
+  onSaved: () => emit('saved'),
+
+  onClosed: () => emit('close'),
+
+});
 </script>

@@ -4,7 +4,7 @@
       <span class="text-h5 text-uppercase">{{ t('prompt.detail.title') }}</span>
     </v-card-title>
     <v-progress-linear v-if="isLoading || isDeletingPrompt" indeterminate color="primary"></v-progress-linear>
-    <v-alert v-else-if="isError" type="error" dismissible class="mt-4">
+    <v-alert v-else-if="error" type="error" dismissible class="mt-4">
       {{ error?.message || t('prompt.detail.errorLoading') }}
     </v-alert>
     <v-card-text>
@@ -37,8 +37,8 @@ const { showConfirmDialog } = useConfirmDialog();
 const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
-const { data: prompt, isLoading, isError, error } = usePromptQuery(toRef(props, 'promptId'));
-const { mutateAsync: deletePrompt, isPending: isDeletingPrompt } = useDeletePromptMutation();
+const { state: { prompt, isLoading, error }, actions: { refetch } } = usePromptQuery(toRef(props, 'promptId'));
+const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt: deletePromptAction } } = useDeletePromptMutation();
 
 const canEditOrDelete = computed(() => {
   return state.isAdmin.value;
@@ -66,7 +66,7 @@ const handleDelete = async () => {
 
   if (confirmed) {
     try {
-      await deletePrompt(prompt.value.id);
+      await deletePromptAction(prompt.value.id);
       showSnackbar(t('prompt.messages.deleteSuccess'), 'success');
       emit('prompt-deleted');
       emit('close');

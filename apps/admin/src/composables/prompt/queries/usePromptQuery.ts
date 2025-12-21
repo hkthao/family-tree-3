@@ -21,5 +21,17 @@ export function usePromptQuery(promptId: MaybeRefOrGetter<string | undefined>) {
     enabled: computed(() => !!unref(promptId)),
   });
 
-  return queryResult;
+  const prompt = computed(() => queryResult.data.value);
+  const isLoading = computed(() => queryResult.isFetching.value);
+
+  return {
+    state: {
+      prompt,
+      isLoading,
+      error: queryResult.error,
+    },
+    actions: {
+      refetch: queryResult.refetch,
+    },
+  };
 }

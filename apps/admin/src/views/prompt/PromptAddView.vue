@@ -28,7 +28,7 @@ const promptFormRef = ref<InstanceType<typeof PromptForm> | null>(null);
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-const { mutate: createPrompt, isPending: isAddingPrompt } = useCreatePromptMutation();
+const { state: { isPending: isAddingPrompt }, actions: { createPrompt } } = useCreatePromptMutation();
 
 const handleAddPrompt = async () => {
   if (!promptFormRef.value) return;
@@ -49,7 +49,7 @@ const handleAddPrompt = async () => {
       showSnackbar(t('prompt.messages.addSuccess'), 'success');
       emit('saved');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       showSnackbar(error.message || t('prompt.messages.saveError'), 'error');
     },
   });

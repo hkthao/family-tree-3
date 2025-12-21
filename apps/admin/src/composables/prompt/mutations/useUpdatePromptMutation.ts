@@ -7,7 +7,7 @@ export function useUpdatePromptMutation() {
   const { prompt: promptService } = useServices();
   const queryClient = useQueryClient();
 
-  return useMutation<Prompt, Error, Prompt>({
+  const { mutate, isPending } = useMutation<Prompt, Error, Prompt>({
     mutationFn: async (updatedPrompt) => {
       const result = await (promptService as IPromptService).update(updatedPrompt);
       if (result.ok) {
@@ -20,4 +20,15 @@ export function useUpdatePromptMutation() {
       queryClient.invalidateQueries({ queryKey: ['prompt', data.id] });
     },
   });
+
+  return {
+    state: {
+      isPending,
+    },
+    actions: {
+      updatePrompt: mutate,
+    },
+  };
 }
+
+export type UseUpdatePromptMutationReturn = ReturnType<typeof useUpdatePromptMutation>;
