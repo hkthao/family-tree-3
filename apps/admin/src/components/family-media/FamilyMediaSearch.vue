@@ -29,7 +29,6 @@
                 density="compact"
                 hide-details
                 clearable
-                @update:model-value="applyFilters"
               ></v-select>
             </v-col>
             <!-- Add more filter options as needed (e.g., refType, refId if filtering for specific entities) -->
@@ -48,10 +47,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyMediaFilter } from '@/types';
-import { MediaType } from '@/types/enums'; // Assuming enums are exported from here
 
 const emit = defineEmits(['update:filters']);
 const { t } = useI18n();
@@ -62,20 +60,9 @@ const filters = ref<FamilyMediaFilter>({
   mediaType: undefined,
 });
 
-const mediaTypes = computed(() => {
-  return Object.keys(MediaType)
-    .filter(key => isNaN(Number(key))) // Filter out numeric keys from enum
-    .map(key => {
-      // Ensure consistent handling of "All" for media types
-      if (key === 'None') { // Assuming 'None' is a valid option to display all
-        return { title: t('common.allMediaTypes'), value: undefined };
-      }
-      return {
-        title: t(`common.mediaType.${key}`),
-        value: MediaType[key as keyof typeof MediaType],
-      };
-    });
-});
+import { getMediaTypeOptions } from '@/composables/utils/mediaTypeOptions';
+
+const mediaTypes = getMediaTypeOptions(t);
 
 watch(
   filters.value,
