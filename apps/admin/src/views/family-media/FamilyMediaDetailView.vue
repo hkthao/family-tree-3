@@ -35,7 +35,10 @@ const familyMediaIdRef = toRef(props, 'familyMediaId');
 const { familyMedia, isLoading: isLoadingFamilyMedia } = useFamilyMediaQuery(familyMediaIdRef);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
-const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
+const {
+  state: { isDeleting },
+  actions: { confirmAndDelete },
+} = useFamilyMediaDeletion({
   familyId: familyIdRef,
   deleteMutation: deleteFamilyMediaMutation,
   successMessageKey: 'familyMedia.messages.deleteSuccess',

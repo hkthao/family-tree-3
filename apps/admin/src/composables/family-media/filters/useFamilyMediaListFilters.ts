@@ -1,8 +1,13 @@
 import { ref, type Ref, watch } from 'vue';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 
-export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
-  const defaultItemsPerPage = 10;
+interface UseFamilyMediaListFiltersOptions {
+  familyId: Ref<string | undefined>;
+  defaultItemsPerPage?: number;
+}
+
+export function useFamilyMediaListFilters(options: UseFamilyMediaListFiltersOptions) {
+  const { familyId, defaultItemsPerPage = 10 } = options;
 
   const page = ref(1);
   const itemsPerPage = ref(defaultItemsPerPage);
@@ -37,13 +42,17 @@ export function useFamilyMediaListFilters(familyId: Ref<string | undefined>) {
   };
 
   return {
-    page,
-    itemsPerPage,
-    sortBy,
-    filters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setFilters,
+    state: {
+      page,
+      itemsPerPage,
+      sortBy,
+      filters,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setFilters,
+    },
   };
 }

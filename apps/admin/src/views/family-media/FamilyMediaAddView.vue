@@ -34,7 +34,10 @@ const { t } = useI18n();
 const familyIdRef = toRef(props, 'familyId');
 const { mutateAsync: addFamilyMediaMutation } = useAddFamilyMediaMutation();
 
-const { isSubmitting, handleSubmit } = useFamilyMediaFormLogic({
+const {
+  state: { isSubmitting },
+  actions: { handleSubmit },
+} = useFamilyMediaFormLogic({
   familyId: familyIdRef,
   mutation: addFamilyMediaMutation,
   successMessageKey: 'familyMedia.messages.addSuccess',

@@ -46,14 +46,8 @@ defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const {
-  formRef,
-  file,
-  description,
-  formRules,
-  getFormData,
-  validate,
-  resetValidation,
-  resetForm,
+  state: { formRef, file, description, formRules },
+  actions: { getFormData, validate, resetValidation, resetForm },
 } = useFamilyMediaForm(props.initialMedia);
 
 defineExpose({

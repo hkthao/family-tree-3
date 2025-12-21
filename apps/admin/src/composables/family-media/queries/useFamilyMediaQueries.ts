@@ -1,12 +1,10 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { FamilyMedia, FamilyMediaFilter, Paginated, ListOptions } from '@/types';
-import { ApiFamilyMediaService } from '@/services/family-media/api.family-media.service';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
-import { apiClient } from '@/plugins/axios';
-import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/composables'; // Added missing import
+import { queryKeys } from '@/constants/queryKeys'; // Added missing import
 
-const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(apiClient);
 
 /**
  * Composible để lấy danh sách Family Media có phân trang.
@@ -20,6 +18,7 @@ export function useFamilyMediaListQuery(
   page: Ref<number>,
   itemsPerPage: Ref<number>,
   sortBy: Ref<ListOptions['sortBy']>,
+  service: IFamilyMediaService = useServices().familyMedia, // Inject service
 ) {
   const query = useQuery<Paginated<FamilyMedia>, Error>({
     queryKey: computed(() => (unref(itemsPerPage) !== -1 ? queryKeys.familyMedia.list(
@@ -34,7 +33,7 @@ export function useFamilyMediaListQuery(
       const currentItemsPerPage = unref(itemsPerPage);
       const currentSortBy = unref(sortBy);
 
-      const response = await apiFamilyMediaService.search(
+      const response = await service.search(
         currentFilters.familyId!,
         currentFilters,
         currentPage,
@@ -69,11 +68,14 @@ export function useFamilyMediaListQuery(
  * @param familyId Ref<string | undefined> - ID của gia đình.
  * @param familyMediaId Ref<string | undefined> - ID của media item.
  */
-export function useFamilyMediaQuery(familyMediaId: Ref<string | undefined>) {
+export function useFamilyMediaQuery(
+  familyMediaId: Ref<string | undefined>,
+  service: IFamilyMediaService = useServices().familyMedia, // Inject service
+) {
   const query = useQuery<FamilyMedia, Error>({
     queryKey: computed(() => (unref(familyMediaId) ? queryKeys.familyMedia.detail(unref(familyMediaId)!) : [])),
     queryFn: async () => {
-      const response = await apiFamilyMediaService.getById(familyMediaId.value!);
+      const response = await service.getById(familyMediaId.value!);
       if (response.ok) {
         return response.value;
       }

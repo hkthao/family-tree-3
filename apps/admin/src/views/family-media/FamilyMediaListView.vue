@@ -65,12 +65,18 @@ const allowEdit = computed(() => state.isAdmin.value || state.isFamilyManager.va
 const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId));
 
 const familyIdRef = toRef(props, 'familyId');
-const familyMediaListFiltersComposable = useFamilyMediaListFilters(familyIdRef);
-const { filters, page, itemsPerPage, sortBy, setItemsPerPage, setPage, setSortBy, setFilters } = familyMediaListFiltersComposable;
+const familyMediaListFiltersComposable = useFamilyMediaListFilters({ familyId: familyIdRef });
+const {
+  state: { filters, page, itemsPerPage, sortBy },
+  actions: { setItemsPerPage, setPage, setSortBy, setFilters },
+} = familyMediaListFiltersComposable;
 const { familyMediaList, totalItems, isLoading, refetch } = useFamilyMediaListQuery(filters, page, itemsPerPage, sortBy);
 const { mutateAsync: deleteFamilyMediaMutation } = useDeleteFamilyMediaMutation();
 
-const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
+const {
+  state: { isDeleting },
+  actions: { confirmAndDelete },
+} = useFamilyMediaDeletion({
   familyId: familyIdRef,
   deleteMutation: deleteFamilyMediaMutation,
   successMessageKey: 'familyMedia.messages.deleteSuccess',

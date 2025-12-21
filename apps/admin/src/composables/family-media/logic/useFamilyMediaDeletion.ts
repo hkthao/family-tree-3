@@ -65,7 +65,11 @@ export function useFamilyMediaDeletion(options: UseFamilyMediaDeletionOptions) {
   };
 
   return {
-    isDeleting,
-    confirmAndDelete,
+    state: {
+      isDeleting,
+    },
+    actions: {
+      confirmAndDelete,
+    },
   };
 }

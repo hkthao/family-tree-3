@@ -61,7 +61,11 @@ export function useFamilyMediaFormLogic(options: UseFamilyMediaFormLogicOptions)
   };
 
   return {
-    isSubmitting,
-    handleSubmit,
+    state: {
+      isSubmitting,
+    },
+    actions: {
+      handleSubmit,
+    },
   };
 }
