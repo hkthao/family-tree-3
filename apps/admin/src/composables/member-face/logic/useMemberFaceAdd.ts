@@ -237,21 +237,25 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
   };
 
   return {
-    isDetectingFaces,
-    isAddingMemberFace,
-    isSaving,
-    showSelectMemberDialog,
-    faceToLabel,
-    selectedFamilyId,
-    uploadedImage,
-    detectedFaces,
-    canSaveLabels,
-    handleFileUpload,
-    openSelectMemberDialog,
-    handleLabelFaceAndCloseDialog,
-    handleRemoveFace,
-    saveAllLabeledFaces,
-    closeForm,
-    resetState,
+    state: {
+      isDetectingFaces,
+      isAddingMemberFace,
+      isSaving,
+      showSelectMemberDialog,
+      faceToLabel,
+      selectedFamilyId,
+      uploadedImage,
+      detectedFaces,
+      canSaveLabels,
+    },
+    actions: {
+      handleFileUpload,
+      openSelectMemberDialog,
+      handleLabelFaceAndCloseDialog,
+      handleRemoveFace,
+      saveAllLabeledFaces,
+      closeForm,
+      resetState,
+    },
   };
 }

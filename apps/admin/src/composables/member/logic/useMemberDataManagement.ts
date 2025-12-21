@@ -24,8 +24,11 @@ export const useMemberDataManagement = (initialFamilyId?: string) => {
   };
 
   const setItemsPerPage = (perPage: number) => {
-    itemsPerPage.value = perPage;
-    currentPage.value = 1; // Reset to first page when items per page changes
+    if (itemsPerPage.value != perPage) {
+      itemsPerPage.value = perPage;
+      currentPage.value = 1; // Reset to first page when items per page changes
+    }
+
   };
 
   const setSortBy = (newSortBy: { key: string; order: 'asc' | 'desc' }[]) => {
@@ -60,16 +63,20 @@ export const useMemberDataManagement = (initialFamilyId?: string) => {
   }, { deep: true });
 
   return {
-    searchQuery,
-    currentPage,
-    itemsPerPage,
-    sortBy,
-    filters,
-    paginationOptions,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setSearchQuery,
-    setFilters,
+    state: {
+      searchQuery,
+      currentPage,
+      itemsPerPage,
+      sortBy,
+      filters,
+      paginationOptions,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setSearchQuery,
+      setFilters,
+    },
   };
 };

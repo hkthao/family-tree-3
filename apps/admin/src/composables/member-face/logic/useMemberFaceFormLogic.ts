@@ -60,7 +60,11 @@ export function useMemberFaceFormLogic(options: UseMemberFaceFormLogicOptions) {
   };
 
   return {
-    isSubmitting,
-    handleSubmit,
+    state: {
+      isSubmitting,
+    },
+    actions: {
+      handleSubmit,
+    },
   };
 }

@@ -55,21 +55,25 @@ const { t } = useI18n();
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null);
 
 const {
-  isDetectingFaces,
-  isSaving, // Add isSaving here
-  showSelectMemberDialog,
-  faceToLabel,
-  selectedFamilyId,
-  uploadedImage,
-  detectedFaces,
-  canSaveLabels,
-  handleFileUpload: composableHandleFileUpload, // Rename to avoid conflict with local wrapper
-  openSelectMemberDialog,
-  handleLabelFaceAndCloseDialog,
-  handleRemoveFace,
-  saveAllLabeledFaces,
-  closeForm: composableCloseForm, // Rename to avoid conflict with local wrapper
-  resetState: composableResetState, // Rename to avoid conflict with local wrapper
+  state: {
+    isDetectingFaces,
+    isSaving,
+    showSelectMemberDialog,
+    faceToLabel,
+    selectedFamilyId,
+    uploadedImage,
+    detectedFaces,
+    canSaveLabels,
+  },
+  actions: {
+    handleFileUpload: composableHandleFileUpload,
+    openSelectMemberDialog,
+    handleLabelFaceAndCloseDialog,
+    handleRemoveFace,
+    saveAllLabeledFaces,
+    closeForm: composableCloseForm,
+    resetState: composableResetState,
+  },
 } = useMemberFaceAdd({
   memberId: props.memberId,
   familyId: props.familyId,

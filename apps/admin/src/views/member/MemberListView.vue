@@ -61,14 +61,8 @@ const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || stat
 const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 
 const {
-  searchQuery,
-  paginationOptions,
-  filters,
-  setSearchQuery,
-  setFilters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
+  state: { searchQuery, paginationOptions, filters },
+  actions: { setSearchQuery, setFilters, setPage, setItemsPerPage, setSortBy },
 } = useMemberDataManagement(props.familyId);
 
 const { data: membersData, isLoading: isLoadingMembers, refetch } = useMembersQuery(paginationOptions, filters);

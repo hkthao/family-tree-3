@@ -70,7 +70,10 @@ const { state } = useAuth();
 const { memberFace, queryLoading } = useMemberFaceDetailQuery(props.memberFaceId);
 const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
 
-const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+const {
+  state: { isDeleting },
+  actions: { confirmAndDelete },
+} = useMemberFaceDeletion({
   deleteMutation: deleteMemberFaceMutation,
   successMessageKey: 'memberFace.messages.deleteSuccess',
   errorMessageKey: 'memberFace.messages.deleteError',

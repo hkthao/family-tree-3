@@ -21,7 +21,7 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+        <v-text-field v-model="searchQuery" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
           hide-details clearable class="mr-2" data-test-id="member-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
@@ -111,6 +111,7 @@ import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
 const props = defineProps<{
   items: Member[];
@@ -136,25 +137,15 @@ const emit = defineEmits([
 
 const { t } = useI18n();
 
-const searchQuery = ref(props.search);
-let debounceTimer: ReturnType<typeof setTimeout>;
+const { state: { searchQuery, debouncedSearchQuery } } = useDebouncedSearch(props.search);
 
-const debouncedSearch = computed({
-  get() {
-    return searchQuery.value;
-  },
-  set(newValue: string) {
-    searchQuery.value = newValue;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      emit('update:search', newValue);
-    }, 300);
-  },
+watch(debouncedSearchQuery, (newValue) => {
+  emit('update:search', newValue);
 });
 
 watch(() => props.search, (newSearch) => {
   if (newSearch !== searchQuery.value) {
-    searchQuery.value = newSearch;
+    searchQuery.value = newSearch ?? '';
   }
 });
 
