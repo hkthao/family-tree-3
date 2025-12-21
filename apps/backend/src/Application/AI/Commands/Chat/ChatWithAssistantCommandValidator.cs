@@ -7,6 +7,9 @@ public class ChatWithAssistantCommandValidator : AbstractValidator<ChatWithAssis
 {
     public ChatWithAssistantCommandValidator()
     {
+        RuleFor(v => v.FamilyId)
+            .NotEmpty().WithMessage("FamilyId cannot be empty.");
+
         RuleFor(v => v.SessionId)
             .NotEmpty().WithMessage("SessionId cannot be empty.");
 

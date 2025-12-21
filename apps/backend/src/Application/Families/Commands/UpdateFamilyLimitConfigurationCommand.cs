@@ -25,6 +25,11 @@ public record UpdateFamilyLimitConfigurationCommand : IRequest<Result>
     /// Dung lượng lưu trữ tối đa được cấp cho gia đình (tính bằng Megabyte).
     /// </summary>
     public int MaxStorageMb { get; init; }
+
+    /// <summary>
+    /// Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng cho gia đình.
+    /// </summary>
+    public int AiChatMonthlyLimit { get; init; }
 }
 
 /// <summary>
@@ -50,7 +55,7 @@ public class UpdateFamilyLimitConfigurationCommandHandler : IRequestHandler<Upda
             return Result.NotFound($"Không tìm thấy gia đình với ID '{request.FamilyId}'.");
         }
 
-        family.UpdateFamilyConfiguration(request.MaxMembers, request.MaxStorageMb);
+        family.UpdateFamilyConfiguration(request.MaxMembers, request.MaxStorageMb, request.AiChatMonthlyLimit);
 
         await _context.SaveChangesAsync(cancellationToken);
 

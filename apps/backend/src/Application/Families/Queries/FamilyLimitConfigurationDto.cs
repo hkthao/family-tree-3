@@ -24,4 +24,14 @@ public class FamilyLimitConfigurationDto
     /// Dung lượng lưu trữ tối đa được cấp cho gia đình (tính bằng Megabyte).
     /// </summary>
     public int MaxStorageMb { get; set; }
+
+    /// <summary>
+    /// Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng cho gia đình.
+    /// </summary>
+    public int AiChatMonthlyLimit { get; set; }
+
+    /// <summary>
+    /// Số lượng yêu cầu trò chuyện AI đã sử dụng trong tháng hiện tại.
+    /// </summary>
+    public int AiChatMonthlyUsage { get; set; }
 }

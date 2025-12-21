@@ -26,6 +26,16 @@ public class FamilyLimitConfiguration : BaseAuditableEntity
     public int MaxStorageMb { get; private set; } = 1024; // Giá trị mặc định: 1GB
 
     /// <summary>
+    /// Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng cho gia đình.
+    /// </summary>
+    public int AiChatMonthlyLimit { get; private set; } = 500; // Giá trị mặc định: 500 lượt trò chuyện AI mỗi tháng
+
+    /// <summary>
+    /// Số lượng yêu cầu trò chuyện AI đã sử dụng trong tháng hiện tại.
+    /// </summary>
+    public int AiChatMonthlyUsage { get; private set; } = 0; // Giá trị mặc định: 0
+
+    /// <summary>
     /// Private constructor cho EF Core.
     /// </summary>
     private FamilyLimitConfiguration() { }
@@ -44,7 +54,8 @@ public class FamilyLimitConfiguration : BaseAuditableEntity
     /// </summary>
     /// <param name="maxMembers">Số lượng thành viên tối đa.</param>
     /// <param name="maxStorageMb">Dung lượng lưu trữ tối đa (MB).</param>
-    public void Update(int maxMembers, int maxStorageMb)
+    /// <param name="aiChatMonthlyLimit">Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng.</param>
+    public void Update(int maxMembers, int maxStorageMb, int aiChatMonthlyLimit)
     {
         if (maxMembers <= 0)
         {
@@ -54,8 +65,29 @@ public class FamilyLimitConfiguration : BaseAuditableEntity
         {
             throw new ArgumentException("Dung lượng lưu trữ tối đa phải lớn hơn 0.", nameof(maxStorageMb));
         }
+        if (aiChatMonthlyLimit < 0)
+        {
+            throw new ArgumentException("Giới hạn trò chuyện AI hàng tháng không thể âm.", nameof(aiChatMonthlyLimit));
+        }
 
         MaxMembers = maxMembers;
         MaxStorageMb = maxStorageMb;
+        AiChatMonthlyLimit = aiChatMonthlyLimit;
+    }
+
+    /// <summary>
+    /// Ghi lại việc sử dụng một yêu cầu trò chuyện AI.
+    /// </summary>
+    public void IncrementAiChatUsage()
+    {
+        AiChatMonthlyUsage++;
+    }
+
+    /// <summary>
+    /// Đặt lại số lượng yêu cầu trò chuyện AI đã sử dụng về 0 (thường vào đầu tháng mới).
+    /// </summary>
+    public void ResetAiChatUsage()
+    {
+        AiChatMonthlyUsage = 0;
     }
 }

@@ -23,4 +23,5 @@ public static class ErrorMessages
     public const string FaceThumbnailUploadFailed = "Face thumbnail upload failed.";
     public const string ExternalIdNotFound = "External ID (sub claim) not found in claims.";
     public const string InvalidUserIdFormat = "Invalid user ID format.";
+    public const string AiChatQuotaExceeded = "Vượt quá hạn mức trò chuyện AI hàng tháng. Vui lòng nâng cấp gói của bạn hoặc đợi đến tháng sau.";
 }

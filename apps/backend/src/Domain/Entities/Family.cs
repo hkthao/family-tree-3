@@ -49,7 +49,21 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public IReadOnlyCollection<Event> Events => _events;
 
     public PrivacyConfiguration? PrivacyConfiguration { get; private set; }
-    public FamilyLimitConfiguration? FamilyLimitConfiguration { get; private set; } // NEW: Thêm cấu hình giới hạn gia đình
+    public FamilyLimitConfiguration? FamilyLimitConfiguration { get; set; } // CHANGED to 'set' for EF Core to populate
+
+    /// <summary>
+    /// Đảm bảo rằng FamilyLimitConfiguration đã được khởi tạo.
+    /// </summary>
+    /// <returns>True nếu một FamilyLimitConfiguration mới được tạo, ngược lại là False.</returns>
+    public bool EnsureFamilyLimitConfigurationExists()
+    {
+        if (FamilyLimitConfiguration == null)
+        {
+            FamilyLimitConfiguration = new FamilyLimitConfiguration(Id);
+            return true; // Đã tạo một cái mới
+        }
+        return false; // Đã tồn tại
+    }
 
     public void AddFamilyUser(Guid userId, FamilyRole role)
     {
@@ -287,13 +301,14 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// </summary>
     /// <param name="maxMembers">Số lượng thành viên tối đa.</param>
     /// <param name="maxStorageMb">Dung lượng lưu trữ tối đa (MB).</param>
-    public void UpdateFamilyConfiguration(int maxMembers, int maxStorageMb)
+    /// <param name="aiChatMonthlyLimit">Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng.</param>
+    public void UpdateFamilyConfiguration(int maxMembers, int maxStorageMb, int aiChatMonthlyLimit)
     {
         if (FamilyLimitConfiguration == null)
         {
             FamilyLimitConfiguration = new FamilyLimitConfiguration(Id);
         }
-        FamilyLimitConfiguration.Update(maxMembers, maxStorageMb);
+        FamilyLimitConfiguration.Update(maxMembers, maxStorageMb, aiChatMonthlyLimit);
     }
 }
 

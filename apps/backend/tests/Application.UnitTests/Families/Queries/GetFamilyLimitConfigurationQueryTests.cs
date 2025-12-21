@@ -1,12 +1,12 @@
-using backend.Application.Families.Queries;
-using backend.Domain.Entities;
-using FluentAssertions; // FluentAssertions
-using Xunit;
-using backend.Infrastructure.Data;
-using backend.Application.UnitTests.Common; // Corrected using statement for TestBase
+using System; // For Guid.Empty
 using AutoMapper;
 using backend.Application.Families.DTOs; // For FamilyLimitConfigurationMapperProfile
-using System; // For Guid.Empty
+using backend.Application.Families.Queries;
+using backend.Application.UnitTests.Common; // Corrected using statement for TestBase
+using backend.Domain.Entities;
+using backend.Infrastructure.Data;
+using FluentAssertions; // FluentAssertions
+using Xunit;
 
 namespace backend.Tests.Application.UnitTests.Families.Queries;
 
@@ -24,7 +24,7 @@ public class GetFamilyLimitConfigurationQueryTests : TestBase
     {
         // Arrange
         var family = Family.Create("Test Family", "TF001", null, null, "Private", Guid.NewGuid());
-        family.UpdateFamilyConfiguration(100, 2048); // Ensure it has a custom config
+        family.UpdateFamilyConfiguration(100, 2048, 500); // Ensure it has a custom config with AI Chat Limit
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
@@ -38,6 +38,7 @@ public class GetFamilyLimitConfigurationQueryTests : TestBase
         result.Value!.FamilyId.Should().Be(family.Id);
         result.Value!.MaxMembers.Should().Be(100);
         result.Value!.MaxStorageMb.Should().Be(2048);
+        result.Value!.AiChatMonthlyLimit.Should().Be(500); // New assertion
     }
 
     [Fact]
