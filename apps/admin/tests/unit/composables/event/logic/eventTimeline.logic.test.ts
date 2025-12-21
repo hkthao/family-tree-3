@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { mapFiltersToQueryOptions, sortEventsBySolarDateDesc } from '@/composables/event/logic/eventTimeline.logic';
 import type { Event, EventFilter, ListOptions, Paginated } from '@/types';
-import { EventType, CalendarType, RepeatRule } from '@/types';
+import { EventType, CalendarType } from '@/types';
 
 describe('eventTimeline.logic', () => {
   describe('mapFiltersToQueryOptions', () => {
@@ -105,7 +105,6 @@ describe('eventTimeline.logic', () => {
         totalItems: 3,
         totalPages: 1,
         page: 1,
-        itemsPerPage: 10,
       };
 
       const sorted = sortEventsBySolarDateDesc(paginatedData);
@@ -118,7 +117,6 @@ describe('eventTimeline.logic', () => {
         totalItems: 3,
         totalPages: 1,
         page: 1,
-        itemsPerPage: 10,
       };
 
       const sorted = sortEventsBySolarDateDesc(paginatedData);
@@ -132,7 +130,6 @@ describe('eventTimeline.logic', () => {
         totalItems: 3,
         totalPages: 1,
         page: 1,
-        itemsPerPage: 10,
       };
 
       const sortedResult = sortEventsBySolarDateDesc(paginatedData);
@@ -152,13 +149,11 @@ describe('eventTimeline.logic', () => {
         totalItems: 2,
         totalPages: 1,
         page: 1,
-        itemsPerPage: 10,
       };
       const sorted = sortEventsBySolarDateDesc(paginatedData);
       expect(sorted.totalItems).toBe(2);
       expect(sorted.totalPages).toBe(1);
       expect(sorted.page).toBe(1);
-      expect(sorted.itemsPerPage).toBe(10);
     });
   });
 });

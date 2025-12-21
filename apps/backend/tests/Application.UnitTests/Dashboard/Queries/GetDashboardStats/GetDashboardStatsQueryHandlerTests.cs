@@ -3,7 +3,10 @@ using backend.Application.Dashboard.Queries.GetDashboardStats;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Application.Families.Queries;
+using backend.Application.Common.Models;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -13,13 +16,24 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IMediator> _mockMediator; // NEW
     private readonly GetDashboardStatsQueryHandler _handler;
 
     public GetDashboardStatsQueryHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new GetDashboardStatsQueryHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _mockDateTime.Object);
+        _mockMediator = new Mock<IMediator>(); // NEW
+        // Setup default mock for IMediator.Send to return a successful FamilyLimitConfigurationDto
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetFamilyLimitConfigurationQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FamilyLimitConfigurationDto>.Success(new FamilyLimitConfigurationDto
+            {
+                Id = Guid.NewGuid(),
+                FamilyId = It.IsAny<Guid>(), // This will be overridden by the actual FamilyId in the query
+                MaxMembers = 50,
+                MaxStorageMb = 1024
+            }));
+        _handler = new GetDashboardStatsQueryHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _mockDateTime.Object, _mockMediator.Object);
     }
 
     [Fact]

@@ -14,4 +14,8 @@ public class DashboardStatsDto
     public int DeceasedMembersCount { get; set; }
     public int AverageAge { get; set; }
     public Dictionary<int, int> MembersPerGeneration { get; set; } = new();
+
+    // Storage Usage and Limit
+    public double UsedStorageMb { get; set; }
+    public double MaxStorageMb { get; set; }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useUpdateEventMutation } from '@/composables/event/mutations/useUpdateEventMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
@@ -46,12 +46,12 @@ describe('useUpdateEventMutation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useQueryClient as vi.Mock).mockReturnValue(mockQueryClient);
+    (useQueryClient as Mock).mockReturnValue(mockQueryClient);
   });
 
   it('should call eventService.update with correct data in mutationFn', async () => {
     // Mock useMutation to immediately execute mutationFn
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn(mockEvent);
       return {
         mutate: vi.fn(),
@@ -69,7 +69,7 @@ describe('useUpdateEventMutation', () => {
     const eventWithoutId = { ...mockEvent, id: undefined as any };
 
     // Mock useMutation to allow testing the mutationFn's error path
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       return {
         mutate: vi.fn(async (data, callbacks) => {
           try {
@@ -92,7 +92,7 @@ describe('useUpdateEventMutation', () => {
 
   it('should call onSuccess and invalidate queries on successful mutation', async () => {
     const onSuccessCallback = vi.fn();
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.onSuccess(mockEvent, mockEvent); // pass data and variables
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onSuccess(data, data)),
@@ -112,7 +112,7 @@ describe('useUpdateEventMutation', () => {
   it('should call onError on failed mutation', async () => {
     const onErrorCallback = vi.fn();
     const mockError = new Error('Failed to update event');
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn = vi.fn(() => Promise.reject(mockError));
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onError(mockError)),

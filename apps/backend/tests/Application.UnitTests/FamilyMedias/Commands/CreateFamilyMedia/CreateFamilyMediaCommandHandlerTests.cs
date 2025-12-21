@@ -257,7 +257,6 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
 
         int maxStorageMb = 1; // 1 MB limit
         long existingFilesSize = (long)(0.8 * 1024 * 1024); // 0.8 MB
-        const int newFileSize = 524288; // 0.5 MB in bytes
 
         // Override default mock for IMediator to return specific FamilyLimitConfigurationDto
         _mockMediator.Setup(m => m.Send(
@@ -284,10 +283,14 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
         });
         await _context.SaveChangesAsync();
 
+        // Verify the existing media is correctly added to the in-memory database
+        _context.FamilyMedia.Should().HaveCount(1);
+        _context.FamilyMedia.Sum(fm => fm.FileSize).Should().Be(existingFilesSize);
+
         var command = new CreateFamilyMediaCommand
         {
             FamilyId = familyId,
-            File = new byte[newFileSize], // File that exceeds the limit
+            File = new byte[524288], // File that exceeds the limit (0.5 MB)
             FileName = "largefile.jpg",
             MediaType = MediaType.Image
         };

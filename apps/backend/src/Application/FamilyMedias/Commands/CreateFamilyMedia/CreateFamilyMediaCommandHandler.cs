@@ -75,7 +75,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         var currentStorageBytes = await _context.FamilyMedia
             .Where(fm => fm.FamilyId == request.FamilyId)
             .SumAsync(fm => fm.FileSize, cancellationToken);
-
+        
         if (currentStorageBytes + request.File.Length > maxStorageBytes)
         {
             return Result<FamilyMediaDto>.Failure($"Storage limit ({familyLimitConfig.MaxStorageMb} MB) exceeded.", ErrorSources.Validation);

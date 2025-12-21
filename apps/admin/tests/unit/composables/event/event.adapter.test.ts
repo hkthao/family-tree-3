@@ -43,7 +43,7 @@ describe('ApiEventServiceAdapter', () => {
     statusCode: 400,
     message: 'Bad Request',
     details: [],
-    timestamp: new Date().toISOString(),
+    name: ''
   };
 
   // Helper function for successful Result
@@ -54,7 +54,19 @@ describe('ApiEventServiceAdapter', () => {
   it('nên gọi apiEventService.add và trả về kết quả', async () => {
     mockApiEventService.add = vi.fn().mockResolvedValue(successResult(mockEvent));
 
-    const eventDataWithoutId: Omit<Event, 'id'> = { ...mockEvent, id: undefined as any };
+    const eventDataWithoutId: Omit<Event, 'id'> = {
+      name: 'Test Event',
+      code: 'TE001',
+      type: EventType.Other,
+      familyId: 'family1',
+      calendarType: CalendarType.Solar,
+      solarDate: new Date('2023-01-01'),
+      lunarDate: { day: 1, month: 1, isLeapMonth: false },
+      repeatRule: RepeatRule.None,
+      description: 'A test description',
+      color: '#FF0000',
+      relatedMemberIds: ['member1'],
+    };
     const result = await adapter.add(eventDataWithoutId);
 
     expect(mockApiEventService.add).toHaveBeenCalledWith(eventDataWithoutId);
@@ -64,7 +76,19 @@ describe('ApiEventServiceAdapter', () => {
   it('nên xử lý lỗi từ apiEventService.add', async () => {
     mockApiEventService.add = vi.fn().mockResolvedValue(errorResult(mockError));
 
-    const eventDataWithoutId: Omit<Event, 'id'> = { ...mockEvent, id: undefined as any };
+    const eventDataWithoutId: Omit<Event, 'id'> = {
+      name: 'Test Event',
+      code: 'TE001',
+      type: EventType.Other,
+      familyId: 'family1',
+      calendarType: CalendarType.Solar,
+      solarDate: new Date('2023-01-01'),
+      lunarDate: { day: 1, month: 1, isLeapMonth: false },
+      repeatRule: RepeatRule.None,
+      description: 'A test description',
+      color: '#FF0000',
+      relatedMemberIds: ['member1'],
+    };
     const result = await adapter.add(eventDataWithoutId);
 
     expect(mockApiEventService.add).toHaveBeenCalledWith(eventDataWithoutId);

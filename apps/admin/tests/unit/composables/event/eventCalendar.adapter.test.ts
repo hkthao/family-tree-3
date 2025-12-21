@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { DayjsDateAdapter, LunarJsDateAdapter } from '@/composables/event/eventCalendar.adapter';
-import dayjs from 'dayjs';
 import { Lunar, Solar } from 'lunar-javascript';
 
 describe('DayjsDateAdapter', () => {

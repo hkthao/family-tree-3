@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Event } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
-import { ref, type Ref, computed } from 'vue';
+import { ref, type Ref } from 'vue';
 import { EventType, CalendarType, RepeatRule } from '@/types';
 
 // Mock the external dependencies

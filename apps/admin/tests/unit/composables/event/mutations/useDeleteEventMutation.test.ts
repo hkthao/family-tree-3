@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useDeleteEventMutation } from '@/composables/event/mutations/useDeleteEventMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 
 // Mock the external dependencies
-vi.mock('@tanstack/vue-query', () => ({
+Mock('@tanstack/vue-query', () => ({
   useMutation: vi.fn(),
   useQueryClient: vi.fn(),
 }));
@@ -31,12 +31,12 @@ describe('useDeleteEventMutation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useQueryClient as vi.Mock).mockReturnValue(mockQueryClient);
+    (useQueryClient as Mock).mockReturnValue(mockQueryClient);
   });
 
   it('should call eventService.delete with the correct event ID in mutationFn', async () => {
     // Mock useMutation to immediately execute mutationFn
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn(eventIdToDelete);
       return {
         mutate: vi.fn(),
@@ -52,7 +52,7 @@ describe('useDeleteEventMutation', () => {
 
   it('should call onSuccess and invalidate queries on successful mutation', async () => {
     const onSuccessCallback = vi.fn();
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.onSuccess();
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onSuccess()),
@@ -71,7 +71,7 @@ describe('useDeleteEventMutation', () => {
   it('should call onError on failed mutation', async () => {
     const onErrorCallback = vi.fn();
     const mockError = new Error('Failed to delete event');
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn = vi.fn(() => Promise.reject(mockError));
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onError(mockError)),

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useAddEventMutation } from '@/composables/event/mutations/useAddEventMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
@@ -45,12 +45,12 @@ describe('useAddEventMutation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useQueryClient as vi.Mock).mockReturnValue(mockQueryClient);
+    (useQueryClient as Mock).mockReturnValue(mockQueryClient);
   });
 
   it('should call eventService.add with correct data in mutationFn', async () => {
     // Mock useMutation to immediately execute mutationFn
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn(mockEventData);
       return {
         mutate: vi.fn(),
@@ -66,7 +66,7 @@ describe('useAddEventMutation', () => {
 
   it('should call onSuccess and invalidate queries on successful mutation', async () => {
     const onSuccessCallback = vi.fn();
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.onSuccess();
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onSuccess()),
@@ -85,7 +85,7 @@ describe('useAddEventMutation', () => {
   it('should call onError on failed mutation', async () => {
     const onErrorCallback = vi.fn();
     const mockError = new Error('Failed to add event');
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options) => {
       options.mutationFn = vi.fn(() => Promise.reject(mockError));
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onError(mockError)),
