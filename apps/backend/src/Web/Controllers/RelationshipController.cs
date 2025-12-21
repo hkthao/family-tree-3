@@ -21,7 +21,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/relationship")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class RelationshipController(IMediator mediator, ILogger<RelationshipController> logger) : ControllerBase
 {
     /// <summary>

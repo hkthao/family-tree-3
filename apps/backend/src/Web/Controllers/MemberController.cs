@@ -25,7 +25,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/member")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class MemberController(IMediator mediator, ILogger<MemberController> logger) : ControllerBase
 {
     /// <summary>

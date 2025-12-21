@@ -27,7 +27,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
 {
     /// <summary>

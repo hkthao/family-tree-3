@@ -12,7 +12,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-link")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

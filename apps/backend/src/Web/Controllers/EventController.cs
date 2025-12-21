@@ -19,7 +19,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/event")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {
     /// <summary>

@@ -9,7 +9,7 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/family-data")] // Changed route to avoid conflict with /api/family
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyExportImportController(IMediator mediator, ILogger<FamilyExportImportController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

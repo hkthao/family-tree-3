@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Novu;
@@ -104,13 +105,16 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
-        services.AddNovuServices(configuration);
-
-        // Add Rate Limiting services
-        services.AddRateLimitingServices(configuration);
-
-        return services;
-    }
+                // Add Rate Limiting services
+                services.AddRateLimiter(rateLimiterOptions =>
+                {
+                    rateLimiterOptions.AddPolicy<string, UserRateLimiterPolicy>(RateLimitConstants.PerUserPolicy);
+                    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                });
+        
+        
+                return services;
+            }
 
     /// <summary>
     /// Adds Novu related services to the dependency injection container.
@@ -143,69 +147,6 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>
-    /// Adds rate limiting services to the dependency injection container.
-    /// </summary>
-    public static IServiceCollection AddRateLimitingServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddRateLimiter(rateLimiterOptions =>
-        {
-            rateLimiterOptions.AddFixedWindowLimiter(RateLimitConstants.FixedPolicy, options =>
-            {
-                options.PermitLimit = 10;
-                options.Window = TimeSpan.FromSeconds(10);
-                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                options.QueueLimit = 2;
-            });
 
-            rateLimiterOptions.AddSlidingWindowLimiter(RateLimitConstants.SlidingPolicy, options =>
-            {
-                options.PermitLimit = 10;
-                options.Window = TimeSpan.FromSeconds(10);
-                options.SegmentsPerWindow = 2;
-                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                options.QueueLimit = 2;
-            });
-
-            rateLimiterOptions.AddConcurrencyLimiter(RateLimitConstants.ConcurrencyPolicy, options =>
-            {
-                options.PermitLimit = 10;
-                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                options.QueueLimit = 2;
-            });
-
-            rateLimiterOptions.AddTokenBucketLimiter(RateLimitConstants.TokenPolicy, options =>
-            {
-                options.TokenLimit = 10;
-                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                options.QueueLimit = 2;
-                options.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
-                options.TokensPerPeriod = 1;
-                options.AutoReplenishment = true;
-            });
-
-            // "per user" rate limiting
-            rateLimiterOptions.AddPolicy(RateLimitConstants.UserPolicy, httpContext =>
-            {
-                var userId =
-                    httpContext.User.Identity?.IsAuthenticated == true
-                        ? httpContext.User.Identity!.Name!
-                        : httpContext.Connection.Id;
-
-                return RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: userId,
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 250,
-                        Window = TimeSpan.FromMinutes(1),
-                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                        QueueLimit = 0
-                    });
-            });
-            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-        });
-
-        return services;
-    }
 }
 

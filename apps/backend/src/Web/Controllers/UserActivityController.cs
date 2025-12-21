@@ -11,7 +11,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/activity")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>

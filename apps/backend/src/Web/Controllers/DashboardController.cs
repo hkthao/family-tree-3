@@ -14,7 +14,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/dashboard")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class DashboardController(IMediator mediator, ILogger<DashboardController> logger) : ControllerBase
 {
     /// <summary>

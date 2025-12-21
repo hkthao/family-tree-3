@@ -16,7 +16,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/user")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class UserController(IMediator mediator, ILogger<UserController> logger) : ControllerBase
 {
     /// <summary>

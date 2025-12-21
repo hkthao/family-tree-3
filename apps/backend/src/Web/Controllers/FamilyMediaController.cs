@@ -15,7 +15,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-media")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyMediaController(IMediator mediator, ILogger<FamilyMediaController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

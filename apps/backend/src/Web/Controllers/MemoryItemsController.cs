@@ -16,7 +16,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController] // Add this
 [Route("api/memory-items")] // Add this
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class MemoryItemsController : ControllerBase
 {
     private readonly IMediator _mediator; // Add this

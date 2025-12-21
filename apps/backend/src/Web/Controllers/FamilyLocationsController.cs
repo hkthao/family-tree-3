@@ -15,7 +15,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-locations")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyLocationsController(IMediator mediator, ILogger<FamilyLocationsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

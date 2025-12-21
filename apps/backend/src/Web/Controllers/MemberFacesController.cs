@@ -14,7 +14,7 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/member-faces")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class MemberFacesController(IMediator mediator, ILogger<MemberFacesController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

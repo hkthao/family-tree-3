@@ -16,7 +16,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-dict")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyDictsController(IMediator mediator, ILogger<FamilyDictsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

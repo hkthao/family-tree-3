@@ -8,7 +8,7 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class VersionController : ControllerBase
 {
     [HttpGet]

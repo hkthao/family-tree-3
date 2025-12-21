@@ -13,7 +13,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/ai")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -18,7 +18,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/prompts")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class PromptsController(IMediator mediator, ILogger<PromptsController> logger) : ControllerBase
 {
     /// <summary>

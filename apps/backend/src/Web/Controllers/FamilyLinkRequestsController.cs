@@ -17,7 +17,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family-link-requests")]
-[EnableRateLimiting(RateLimitConstants.UserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLinkRequestsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
