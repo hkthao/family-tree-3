@@ -12,20 +12,22 @@ interface UseFamilyDataManagementDeps {
   useI18n: typeof useI18n;
   useGlobalSnackbar: typeof useGlobalSnackbar;
   fileDownloadAdapter: IFileDownloadAdapter;
-  familyService: IFamilyService;
+  familyService: () => IFamilyService;
 }
 
 const defaultDeps: UseFamilyDataManagementDeps = {
   useI18n,
   useGlobalSnackbar,
   fileDownloadAdapter: defaultFileDownloadAdapter,
-  familyService: useServices().family,
+  familyService: () => useServices().family,
 };
 
 export function useFamilyDataManagement(familyId: string, deps: UseFamilyDataManagementDeps = defaultDeps) {
-  const { useI18n, useGlobalSnackbar, fileDownloadAdapter, familyService } = deps;
+  const { useI18n, useGlobalSnackbar, fileDownloadAdapter, familyService: getFamilyService } = deps;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
+
+  const familyService = getFamilyService(); // Call the factory function here
 
 
 
