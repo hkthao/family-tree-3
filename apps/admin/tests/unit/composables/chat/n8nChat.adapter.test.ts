@@ -33,7 +33,16 @@ describe('ApiN8nChatAdapter', () => {
       targetSelector: '#n8n-chat-target',
       metadata: { familyId: '123' },
       defaultLanguage: 'en',
-      i18n: { en: { title: 'English Title' } },
+      i18n: {
+        en: {
+          title: 'English Title',
+          subtitle: 'English Subtitle',
+          footer: 'English Footer',
+          inputPlaceholder: 'English Input Placeholder',
+          getStarted: 'English Get Started',
+          closeButtonTooltip: 'English Close Button',
+        }
+      },
     };
 
     adapter.mount(options);
@@ -65,7 +74,16 @@ describe('ApiN8nChatAdapter', () => {
       targetSelector: '#n8n-chat-target',
       metadata: { familyId: '123' },
       defaultLanguage: 'en',
-      i18n: { en: { title: 'English Title' } },
+      i18n: {
+        en: {
+          title: 'English Title',
+          subtitle: 'English Subtitle',
+          footer: 'English Footer',
+          inputPlaceholder: 'English Input Placeholder',
+          getStarted: 'English Get Started',
+          closeButtonTooltip: 'English Close Button',
+        }
+      },
     };
 
     adapter.mount(options); // First mount
@@ -83,7 +101,16 @@ describe('ApiN8nChatAdapter', () => {
       targetSelector: '#n8n-chat-target',
       metadata: { familyId: '123' },
       defaultLanguage: 'en',
-      i18n: { en: { title: 'English Title' } },
+      i18n: {
+        en: {
+          title: 'English Title',
+          subtitle: 'English Subtitle',
+          footer: 'English Footer',
+          inputPlaceholder: 'English Input Placeholder',
+          getStarted: 'English Get Started',
+          closeButtonTooltip: 'English Close Button',
+        }
+      },
     };
 
     adapter.mount(options);
@@ -100,7 +127,16 @@ describe('ApiN8nChatAdapter', () => {
       targetSelector: '#n8n-chat-target',
       metadata: { familyId: '123' },
       defaultLanguage: 'en',
-      i18n: { en: { title: 'English Title' } },
+      i18n: {
+        en: {
+          title: 'English Title',
+          subtitle: 'English Subtitle',
+          footer: 'English Footer',
+          inputPlaceholder: 'English Input Placeholder',
+          getStarted: 'English Get Started',
+          closeButtonTooltip: 'English Close Button',
+        }
+      },
     };
     adapter.mount(options);
     expect(adapter.isMounted()).toBe(true);

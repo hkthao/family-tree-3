@@ -1,11 +1,11 @@
 // tests/unit/composables/chat/useN8nChat.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach, type SpyInstance } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { ref, type Ref, type ComputedRef } from 'vue';
 import { useN8nChat } from '@/composables/chat/useN8nChat';
 import { useI18n } from 'vue-i18n';
 import { useAccessToken } from '@/composables/auth/useAccessToken';
 import { useUserPreferences } from '@/composables/user/useUserPreferences';
-import { N8nChatAdapter } from '@/composables/chat/n8nChat.adapter';
+import type { N8nChatAdapter } from '@/composables/chat/n8nChat.adapter';
 import * as apiUtil from '@/utils/api.util'; // Import apiUtil to mock getEnvVariable
 
 // Mock external dependencies
@@ -18,21 +18,21 @@ vi.mock('@/utils/api.util'); // Mock the module for getEnvVariable
 const mockIsMountedRef = ref(false);
 
 // Mock the N8nChatAdapter
-const mockN8nChatAdapter: N8nChatAdapter = {
+const mockN8nChatAdapter: any = {
   mount: vi.fn(() => {
     mockIsMountedRef.value = true; // Simulate chat being mounted
-  }),
+  }) as Mock,
   unmount: vi.fn(() => {
     mockIsMountedRef.value = false; // Simulate chat being unmounted
-  }),
+  }) as Mock,
   isMounted: vi.fn(() => mockIsMountedRef.value), // Now it's a function that returns the ref's value
 };
 
 describe('useN8nChat', () => {
   let mockAccessToken: Ref<string | undefined>;
   let mockPreferences: Ref<any>; // Changed type to Ref<any> for flexibility
-  let mockGetEnvVariable: SpyInstance;
-  let mockT: SpyInstance;
+  let mockGetEnvVariable: any;
+  let mockT: any;
 
   const WEBHOOK_URL = 'http://test-webhook.com';
 
@@ -46,18 +46,18 @@ describe('useN8nChat', () => {
     // Correctly mock useAccessToken to return a ref directly
     // This assumes useAccessToken returns an object with accessToken as a ref
     const accessTokenRef = ref('test-token');
-    vi.mocked(useAccessToken).mockReturnValue({ accessToken: accessTokenRef });
+    vi.mocked(useAccessToken).mockReturnValue({ accessToken: accessTokenRef } as any);
     mockAccessToken = accessTokenRef;
 
     const preferencesRef = ref({});
     const currentChatLanguageRef = ref('en');
-    vi.mocked(useUserPreferences).mockReturnValue({ preferences: preferencesRef, currentChatLanguage: currentChatLanguageRef });
+    vi.mocked(useUserPreferences).mockReturnValue({ preferences: preferencesRef, currentChatLanguage: currentChatLanguageRef } as any);
     mockPreferences = preferencesRef; // Correctly get the ref
 
     mockGetEnvVariable = vi.mocked(apiUtil.getEnvVariable).mockReturnValue(WEBHOOK_URL);
 
     mockT = vi.fn((key) => key);
-    vi.mocked(useI18n).mockReturnValue({ t: mockT });
+    vi.mocked(useI18n).mockReturnValue({ t: mockT } as any);
 
     // Reset adapter mocks for each test
     mockN8nChatAdapter.mount.mockClear();
