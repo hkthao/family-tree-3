@@ -94,4 +94,28 @@ public class FamilyMediaController(IMediator mediator, ILogger<FamilyMediaContro
         var result = await _mediator.Send(new DeleteFamilyMediaCommand { Id = id });
         return result.ToActionResult(this, _logger, 204);
     }
+
+    /// <summary>
+    /// Tạo media mới từ URL cho một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="request">Request chứa thông tin URL media.</param>
+    /// <returns>ID của media vừa được tạo.</returns>
+    [HttpPost("{familyId}/from-url")]
+    public async Task<IActionResult> CreateFamilyMediaFromUrl([FromRoute] Guid familyId, [FromBody] CreateFamilyMediaFromUrlRequest request)
+    {
+        var command = new Application.FamilyMedias.Commands.CreateFamilyMediaFromUrl.CreateFamilyMediaFromUrlCommand
+        {
+            FamilyId = familyId,
+            Url = request.Url,
+            FileName = request.FileName,
+            MediaType = request.MediaType,
+            Description = request.Description,
+            Folder = request.Folder
+        };
+
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201, nameof(GetFamilyMediaById), new { familyId, id = result.Value });
+    }
 }
+
