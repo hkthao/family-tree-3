@@ -6,11 +6,11 @@ import type { IFamilyAccess } from '@/types/family.d';
 
 describe('auth.logic', () => {
   describe('checkUserHasRole', () => {
-    const adminUser: UserProfile = { id: '1', email: 'admin@example.com', name: 'Admin User', roles: ['Admin', 'User'] };
-    const regularUser: UserProfile = { id: '2', email: 'user@example.com', name: 'Regular User', roles: ['User'] };
-    const noRoleUser: UserProfile = { id: '3', email: 'norole@example.com', name: 'No Role User', roles: [] };
+    const adminUser: UserProfile = { id: '1', externalId: 'external_admin_id', email: 'admin@example.com', name: 'Admin User', roles: ['Admin', 'User'] };
+    const regularUser: UserProfile = { id: '2', externalId: 'external_user_id', email: 'user@example.com', name: 'Regular User', roles: ['User'] };
+    const noRoleUser: UserProfile = { id: '3', externalId: 'external_norole_id', email: 'norole@example.com', name: 'No Role User', roles: [] };
     const nullUser: UserProfile | null = null;
-    const undefinedRolesUser: UserProfile = { id: '4', email: 'undefined@example.com', name: 'Undefined Roles User' };
+    const undefinedRolesUser: UserProfile = { id: '4', externalId: 'external_undefined_id', email: 'undefined@example.com', name: 'Undefined Roles User', roles: [] };
 
     it('should return true if user has the specified single role', () => {
       expect(checkUserHasRole(adminUser, 'Admin')).toBe(true);
@@ -49,7 +49,7 @@ describe('auth.logic', () => {
   describe('checkUserHasFamilyRole', () => {
     const familyAccess: IFamilyAccess[] = [
       { familyId: 'family1', role: FamilyRole.Manager },
-      { familyId: 'family2', role: FamilyRole.Member },
+      { familyId: 'family2', role: FamilyRole.Viewer },
     ];
 
     it('should return true if user has the specified family role', () => {
@@ -57,7 +57,7 @@ describe('auth.logic', () => {
     });
 
     it('should return false if user does not have the specified family role', () => {
-      expect(checkUserHasFamilyRole(familyAccess, 'family1', FamilyRole.Member)).toBe(false);
+      expect(checkUserHasFamilyRole(familyAccess, 'family1', FamilyRole.Viewer)).toBe(false);
     });
 
     it('should return false if user does not have access to the family', () => {

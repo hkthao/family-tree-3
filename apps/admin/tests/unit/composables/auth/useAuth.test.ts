@@ -31,7 +31,7 @@ vi.mock('@/composables/auth/auth.logic', () => ({
     if (!userFamilyAccess || userFamilyAccess.length === 0) {
       return false;
     }
-    return userFamilyAccess.some(access => access.familyId === familyId && access.role === role);
+    return userFamilyAccess.some((access: IFamilyAccess) => access.familyId === familyId && access.role === role);
   }),
 }));
 
@@ -55,14 +55,14 @@ describe('useAuth', () => {
 
   it('should return isLoggedIn as true when authenticated', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
     const { state } = useAuth();
     expect(state.isLoggedIn.value).toBe(true);
   });
 
   it('should return correct user roles', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User', 'Editor'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User', 'Editor'] };
     const { state } = useAuth();
     expect(state.userRoles.value).toEqual(['User', 'Editor']);
   });
@@ -74,7 +74,7 @@ describe('useAuth', () => {
 
   it('should correctly determine if user has a specific role', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User', 'Admin'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User', 'Admin'] };
     const { actions } = useAuth();
     expect(actions.hasRole('Admin')).toBe(true);
     expect(actions.hasRole('User')).toBe(true);
@@ -83,7 +83,7 @@ describe('useAuth', () => {
 
   it('should correctly determine if user has one of multiple roles', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
     const { actions } = useAuth();
     expect(actions.hasRole(['User', 'Admin'])).toBe(true);
     expect(actions.hasRole(['Guest', 'Editor'])).toBe(false);
@@ -91,31 +91,31 @@ describe('useAuth', () => {
 
   it('should return isAdmin as true for an Admin user', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'admin@example.com', name: 'Admin User', roles: ['Admin'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'admin@example.com', name: 'Admin User', roles: ['Admin'] };
     const { state } = useAuth();
     expect(state.isAdmin.value).toBe(true);
   });
 
   it('should return isAdmin as false for a non-Admin user', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'user@example.com', name: 'User', roles: ['User'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'user@example.com', name: 'User', roles: ['User'] };
     const { state } = useAuth();
     expect(state.isAdmin.value).toBe(false);
   });
 
   it('should correctly determine if user has a specific family role', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
     mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Manager }];
     const { actions } = useAuth();
     expect(actions.hasFamilyRole('family123', FamilyRole.Manager)).toBe(true);
-    expect(actions.hasFamilyRole('family123', FamilyRole.Member)).toBe(false);
+    expect(actions.hasFamilyRole('family123', FamilyRole.Viewer)).toBe(false);
     expect(actions.hasFamilyRole('family456', FamilyRole.Manager)).toBe(false);
   });
 
   it('should return isFamilyManager as true for a family manager', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
     mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Manager }];
     const { state } = useAuth();
     expect(state.isFamilyManager.value('family123')).toBe(true);
@@ -123,16 +123,16 @@ describe('useAuth', () => {
 
   it('should return isFamilyManager as false for a non-family manager', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { id: '1', email: 'test@example.com', name: 'Test User', roles: ['User'] };
-    mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Member }];
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Viewer }];
     const { state } = useAuth();
     expect(state.isFamilyManager.value('family123')).toBe(false);
   });
 
   it('should expose currentUser and userFamilyAccess from the store', () => {
     mockAuthStore.isAuthenticated = true;
-    const userProfile: UserProfile = { id: 'user1', email: 'user@example.com', name: 'User One', roles: ['User'] };
-    const familyAccess: IFamilyAccess[] = [{ familyId: 'fam1', role: FamilyRole.Member }];
+    const userProfile: UserProfile = { id: 'user1', externalId: 'some_external_id', email: 'user@example.com', name: 'User One', roles: ['User'] };
+    const familyAccess: IFamilyAccess[] = [{ familyId: 'fam1', role: FamilyRole.Viewer }];
     mockAuthStore.user = userProfile;
     mockAuthStore.userFamilyAccess = familyAccess;
 
