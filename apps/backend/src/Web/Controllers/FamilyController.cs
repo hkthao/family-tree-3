@@ -1,16 +1,16 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
-using backend.Application.Families.Commands;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Application.Families.Commands.UpdatePrivacyConfiguration; // New using
+using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
+using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration; // ADDED
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
-using backend.Application.Families.Queries.GetPrivacyConfiguration; // New using
+using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
