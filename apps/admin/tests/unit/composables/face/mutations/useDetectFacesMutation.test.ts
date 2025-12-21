@@ -5,7 +5,6 @@ import { ref } from 'vue'; // Added this line
 import { queryKeys } from '@/constants/queryKeys';
 import type { DetectedFace } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
-import type { IFaceService } from '@/services/face/face.service.interface';
 // Mock the external dependencies
 vi.mock('@tanstack/vue-query', () => ({
   useQuery: vi.fn((options) => {

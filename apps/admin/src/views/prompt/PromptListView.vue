@@ -53,11 +53,11 @@ const listOptions = reactive<PromptListOptions>({
   searchQuery: searchQuery.value,
 });
 
-const { state: { prompts: promptsData, totalItems, isLoading: isListLoading, error: listError }, actions: { refetch } } = usePromptsQuery(listOptions);
+const { state: { prompts: promptsData, totalItems, isLoading: isListLoading, error: listError } } = usePromptsQuery(listOptions);
 const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt } } = useDeletePromptMutation();
 
 const items = computed(() => promptsData.value || []);
-const listTotalItems = computed(() => totalItems.value || 0);
+
 const loading = computed(() => isListLoading.value || isDeletingPrompt.value);
 
 const {

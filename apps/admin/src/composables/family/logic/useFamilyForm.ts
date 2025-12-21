@@ -1,6 +1,6 @@
-import { ref, reactive, watch, type Ref, computed } from 'vue';
+import { ref, reactive, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family, FamilyAddDto, FamilyUpdateDto, UserDto } from '@/types';
+import type { Family, FamilyAddDto, FamilyUpdateDto } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';

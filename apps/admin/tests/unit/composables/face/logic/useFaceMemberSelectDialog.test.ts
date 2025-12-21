@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFaceMemberSelectDialog } from '@/composables/face/logic/useFaceMemberSelectDialog';
 import { useQuery } from '@tanstack/vue-query';
 import { ref, nextTick, reactive, type Ref } from 'vue';
-import { type DetectedFace, type Member, type ApiError, type FaceStatus, Gender } from '@/types';
+import { type DetectedFace, type Member, type ApiError, Gender } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
 
 import type { Composer } from 'vue-i18n';

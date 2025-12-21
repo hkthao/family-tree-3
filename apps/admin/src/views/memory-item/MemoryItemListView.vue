@@ -63,7 +63,7 @@ const {
   actions: { setPage, setItemsPerPage, setSortBy },
 } = useMemoryItemDataManagement(computed(() => props.familyId));
 
-const { state: { memberFaces, totalItems, isLoading: isLoadingMemoryItems }, actions: { refetch } } = useMemoryItemsQuery(
+const { state: { memberFaces, totalItems, isLoading: isLoadingMemoryItems } } = useMemoryItemsQuery(
   computed(() => props.familyId),
   paginationOptions,
   filters

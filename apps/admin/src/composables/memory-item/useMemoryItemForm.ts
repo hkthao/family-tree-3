@@ -74,16 +74,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     return internalMemoryMedia.value.filter(media => media.isNew && media.file).map(media => media.file as File);
   });
 
-  const acceptedMimeTypes = computed(() => {
-    return [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/bmp',
-      'image/webp',
-      'image/svg+xml',
-    ].join(',');
-  });
+
 
   const defaultNewMemoryItem: LocalMemoryItem = {
     id: '',

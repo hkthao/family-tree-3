@@ -1,4 +1,4 @@
-import { ref, watch, type Ref, type ComputedRef } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n, type Composer } from 'vue-i18n';
 import { useGlobalSnackbar, type UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
 import { useDetectFacesMutation, type UseDetectFacesMutationReturn } from '@/composables/face/mutations/useDetectFacesMutation';

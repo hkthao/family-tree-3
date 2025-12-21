@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { reactive, watch, computed } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
+import { reactive, computed } from 'vue';
 import { useServices } from '@/composables';
 import type { Prompt } from '@/types/prompt';
 import type { Paginated, ListOptions } from '@/types/pagination.d';
@@ -11,7 +11,7 @@ export interface PromptListOptions extends ListOptions {
 
 export function usePromptsQuery(options: PromptListOptions) {
   const { prompt: promptService } = useServices();
-  const queryClient = useQueryClient();
+
 
   const reactiveOptions = reactive(options);
 

@@ -37,7 +37,7 @@ const { showConfirmDialog } = useConfirmDialog();
 const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
-const { state: { prompt, isLoading, error }, actions: { refetch } } = usePromptQuery(toRef(props, 'promptId'));
+const { state: { prompt, isLoading, error } } = usePromptQuery(toRef(props, 'promptId'));
 const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt: deletePromptAction } } = useDeletePromptMutation();
 
 const canEditOrDelete = computed(() => {

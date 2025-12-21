@@ -1,7 +1,7 @@
 import { ref, watch, onMounted, type Ref } from 'vue';
 import type * as mapboxgl from 'mapbox-gl';
 import { LocationType } from '@/types/familyLocation.d';
-import { defaultMapboxMarkerAdapter, defaultMapboxBoundsAdapter, type IMapboxMarkerAdapter, type IMapboxBoundsAdapter, type IMapboxMapAdapter } from '@/composables/utils/mapbox.adapter';
+import { defaultMapboxMarkerAdapter, defaultMapboxBoundsAdapter, type IMapboxMarkerAdapter, type IMapboxBoundsAdapter } from '@/composables/utils/mapbox.adapter';
 import type { Marker } from 'mapbox-gl'; // Import Marker type directly from mapbox-gl
 import { getLocationTypeIcon } from '@/composables/utils/map.utils';
 

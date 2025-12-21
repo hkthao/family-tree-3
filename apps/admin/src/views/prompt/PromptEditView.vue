@@ -19,7 +19,6 @@
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
-import type { Prompt } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { usePromptQuery, useUpdatePromptMutation, usePromptFormLogic } from '@/composables';
 
