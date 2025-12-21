@@ -7,6 +7,8 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using backend.Application.Families.Queries;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -16,12 +18,14 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
 {
     private readonly Mock<IFileStorageService> _fileStorageServiceMock;
     private readonly Mock<ILogger<CreateFamilyMediaCommandHandler>> _loggerMock;
+    private readonly Mock<IMediator> _mockMediator; // NEW
     private readonly CreateFamilyMediaCommandHandler _handler;
 
     public CreateFamilyMediaCommandHandlerTests()
     {
         _fileStorageServiceMock = new Mock<IFileStorageService>();
         _loggerMock = new Mock<ILogger<CreateFamilyMediaCommandHandler>>();
+        _mockMediator = new Mock<IMediator>(); // NEW
 
         // Setup default mocks for IFileStorageService for successful upload
         _fileStorageServiceMock.Setup(s => s.UploadFileAsync(
@@ -34,6 +38,16 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
         // Default authorization setup: allow all family management
         _mockAuthorizationService.Setup(x => x.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
+        // Setup default mock for IMediator.Send to return a successful FamilyLimitConfigurationDto
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetFamilyLimitConfigurationQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FamilyLimitConfigurationDto>.Success(new FamilyLimitConfigurationDto
+            {
+                Id = Guid.NewGuid(),
+                FamilyId = It.IsAny<Guid>(), // This will be overridden by the actual FamilyId in the query
+                MaxMembers = 50,
+                MaxStorageMb = 1024
+            }));
+
         // Handler uses the mocked services and _context from TestBase
         _handler = new CreateFamilyMediaCommandHandler(
             _context,
@@ -41,7 +55,8 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             _fileStorageServiceMock.Object,
             _mockUser.Object,
             _loggerMock.Object,
-            _mapper);
+            _mapper,
+            _mockMediator.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)
@@ -229,5 +244,63 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.MediaType.Should().Be(MediaType.Video);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenStorageLimitExceeded()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var family = CreateTestFamily(familyId);
+        await _context.Families.AddAsync(family);
+        await _context.SaveChangesAsync();
+
+        int maxStorageMb = 1; // 1 MB limit
+        long existingFilesSize = (long)(0.8 * 1024 * 1024); // 0.8 MB
+        const int newFileSize = 524288; // 0.5 MB in bytes
+
+        // Override default mock for IMediator to return specific FamilyLimitConfigurationDto
+        _mockMediator.Setup(m => m.Send(
+                It.Is<GetFamilyLimitConfigurationQuery>(q => q.FamilyId == familyId),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FamilyLimitConfigurationDto>.Success(new FamilyLimitConfigurationDto
+            {
+                Id = Guid.NewGuid(),
+                FamilyId = familyId,
+                MaxMembers = 50,
+                MaxStorageMb = maxStorageMb
+            }));
+
+        // Add existing media to almost reach the limit
+        _context.FamilyMedia.Add(new Domain.Entities.FamilyMedia // Correct entity type
+        {
+            Id = Guid.NewGuid(), // Must have an ID
+            FamilyId = familyId,
+            FileName = "existing1.jpg",
+            FilePath = "http://existing.com/file1.jpg",
+            MediaType = MediaType.Image,
+            FileSize = existingFilesSize, // FileSize is here
+            UploadedBy = _mockUser.Object.UserId
+        });
+        await _context.SaveChangesAsync();
+
+        var command = new CreateFamilyMediaCommand
+        {
+            FamilyId = familyId,
+            File = new byte[newFileSize], // File that exceeds the limit
+            FileName = "largefile.jpg",
+            MediaType = MediaType.Image
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.Validation);
+        result.Error.Should().Contain($"Storage limit ({maxStorageMb} MB) exceeded.");
+        _fileStorageServiceMock.Verify(s => s.UploadFileAsync(
+            It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()
+        ), Times.Never); // File should not be uploaded
     }
 }

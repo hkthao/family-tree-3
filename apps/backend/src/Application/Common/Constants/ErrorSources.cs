@@ -14,4 +14,5 @@ public static class ErrorSources
     public const string BadRequest = "BadRequest";
     public const string Conflict = "Conflict"; // NEW
     public const string ExternalServiceError = "ExternalServiceError";
+    public const string InternalError = "InternalError";
 }
