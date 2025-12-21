@@ -3,11 +3,14 @@ using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/activity")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>

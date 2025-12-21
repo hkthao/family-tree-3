@@ -9,6 +9,8 @@ using backend.Application.Relationships.Queries.SearchRelationships;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -18,6 +20,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/relationship")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class RelationshipController(IMediator mediator, ILogger<RelationshipController> logger) : ControllerBase
 {
     /// <summary>

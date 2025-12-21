@@ -8,11 +8,14 @@ using backend.Application.MemoryItems.Queries.SearchMemoryItems;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController] // Add this
 [Route("api/memory-items")] // Add this
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class MemoryItemsController : ControllerBase
 {
     private readonly IMediator _mediator; // Add this

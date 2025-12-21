@@ -2,11 +2,12 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
+using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
-using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
@@ -17,6 +18,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/event")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {
     /// <summary>

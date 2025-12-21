@@ -6,6 +6,8 @@ using backend.Application.Prompts.Queries.SearchPrompts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -15,6 +17,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/prompts")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class PromptsController(IMediator mediator, ILogger<PromptsController> logger) : ControllerBase
 {
     /// <summary>

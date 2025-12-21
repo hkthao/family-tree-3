@@ -4,6 +4,8 @@ using backend.Application.Identity.Queries.GetUserByUsernameOrEmail; // Added
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -13,6 +15,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/user")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class UserController(IMediator mediator, ILogger<UserController> logger) : ControllerBase
 {
     /// <summary>

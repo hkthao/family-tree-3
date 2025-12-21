@@ -4,11 +4,14 @@ using backend.Application.FamilyLinks.Queries.SearchFamilyLinks; // New import
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/family-link")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class FamilyLinkController(IMediator mediator, ILogger<FamilyLinkController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

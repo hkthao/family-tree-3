@@ -2,10 +2,13 @@ using backend.Application.ExportImport.Commands;
 using backend.Application.ExportImport.Queries;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/family-data")] // Changed route to avoid conflict with /api/family
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class FamilyExportImportController(IMediator mediator, ILogger<FamilyExportImportController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

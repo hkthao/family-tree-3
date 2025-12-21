@@ -3,11 +3,14 @@ using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/user-profile")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hồ sơ người dùng.
 /// </summary>

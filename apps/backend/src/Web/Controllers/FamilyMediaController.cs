@@ -7,11 +7,14 @@ using backend.Web.Models.FamilyMedia; // NEW
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/family-media")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class FamilyMediaController(IMediator mediator, ILogger<FamilyMediaController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

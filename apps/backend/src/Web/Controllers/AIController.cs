@@ -2,6 +2,8 @@ using backend.Application.AI.Chat;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/ai")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;

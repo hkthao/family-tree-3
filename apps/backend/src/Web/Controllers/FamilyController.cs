@@ -15,6 +15,8 @@ using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -24,6 +26,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
 {
     /// <summary>

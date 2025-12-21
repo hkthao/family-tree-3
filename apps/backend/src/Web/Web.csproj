@@ -28,6 +28,7 @@
     </PackageReference>
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.RateLimiting" />
   </ItemGroup>
 
 

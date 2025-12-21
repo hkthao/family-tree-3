@@ -12,6 +12,8 @@ using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -22,6 +24,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/member")]
+[EnableRateLimiting(RateLimitConstants.UserPolicy)]
 public class MemberController(IMediator mediator, ILogger<MemberController> logger) : ControllerBase
 {
     /// <summary>
