@@ -43,11 +43,15 @@ export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined
   };
 
   return {
-    filters,
-    paginationOptions,
-    setFilters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
+    state: {
+      filters,
+      paginationOptions,
+    },
+    actions: {
+      setFilters,
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+    },
   };
 };

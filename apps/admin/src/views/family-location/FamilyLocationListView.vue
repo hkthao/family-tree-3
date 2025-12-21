@@ -64,12 +64,8 @@ const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || stat
 const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 
 const {
-  filters,
-  paginationOptions,
-  setFilters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
+  state: { filters, paginationOptions },
+  actions: { setFilters, setPage, setItemsPerPage, setSortBy },
 } = useFamilyLocationDataManagement(toRef(props, 'familyId'));
 
 const { data: familyLocationsData, isLoading: isLoadingFamilyLocations, refetch } = useFamilyLocationsQuery(paginationOptions, filters);
