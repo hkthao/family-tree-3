@@ -3,7 +3,6 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
-using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration; // ADDED
@@ -156,19 +155,7 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.ToActionResult(this, _logger);
     }
-
-    /// <summary>
-    /// Tạo dữ liệu gia đình có cấu trúc bằng AI từ văn bản ngôn ngữ tự nhiên.
-    /// </summary>
-    /// <param name="command">Lệnh chứa văn bản cần phân tích và ID phiên làm việc.</param>
-    /// <returns>Kết quả phân tích văn bản.</returns>
-    [HttpPost("generate-data")]
-    public async Task<IActionResult> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger);
-    }
-
+    
     /// <summary>
     /// Lấy cấu hình riêng tư cho một gia đình cụ thể.
     /// </summary>

@@ -4,8 +4,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Prompts.Queries.GetPromptById;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Dynamic;
 using System.Text.Json; // For JsonSerializerOptions and deserialization

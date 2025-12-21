@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
 using System.Dynamic;
 
 namespace backend.Application.AI.Commands.GenerateAiContent;

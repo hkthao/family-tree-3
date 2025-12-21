@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.AI.Commands.GenerateAiContent;
 
 /// <summary>

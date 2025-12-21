@@ -8,7 +8,6 @@ using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging; // Add this using directive
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
-using Microsoft.EntityFrameworkCore; // ADDED for ToListAsync
 
 namespace backend.Application.Services;
 
