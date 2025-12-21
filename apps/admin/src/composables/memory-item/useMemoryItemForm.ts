@@ -2,9 +2,17 @@ import { ref, computed, reactive, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem, MemoryMedia as BaseMemoryMedia } from '@/types';
 import { EmotionalTag } from '@/types';
-// Removed useMemoryMediaForm import
 import { useMemoryItemRules } from '@/validations/memoryItem.validation';
 import type { VForm } from 'vuetify/components';
+
+const ACCEPTED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/bmp',
+  'image/webp',
+  'image/svg+xml',
+].join(',');
 
 export interface LocalMemoryMedia extends BaseMemoryMedia {
   isNew?: boolean;
@@ -30,8 +38,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   const uploadedFiles = ref<File[]>([]);
   const deletedMediaIds = ref<string[]>([]);
 
-  // Watch uploadedFiles from VFileUpload and process them
-  watch(uploadedFiles, (newFiles) => {
+  const handleUploadedFilesChange = (newFiles: File[]) => {
     if (newFiles.length === 0) return;
     newFiles.forEach(file => {
       internalMemoryMedia.value.push({
@@ -46,7 +53,9 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     nextTick(() => {
       uploadedFiles.value = [];
     });
-  });
+  };
+
+  watch(uploadedFiles, handleUploadedFilesChange);
 
   const removeMedia = (mediaToDelete: LocalMemoryMedia) => {
     if (!options.readOnly) {
@@ -100,7 +109,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
 
   const { rules } = useMemoryItemRules();
 
-  watch(() => options.initialMemoryItemData, (newData) => {
+  const handleInitialMemoryItemDataChange = (newData?: MemoryItem) => {
     if (newData) {
       Object.assign(form, {
         ...newData,
@@ -114,7 +123,9 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
       internalMemoryMedia.value = [];
       deletedMediaIds.value = [];
     }
-  });
+  };
+
+  watch(() => options.initialMemoryItemData, handleInitialMemoryItemDataChange, { deep: true });
 
   const emotionalTagOptions = computed(() => [
     { title: t('memoryItem.emotionalTag.happy'), value: EmotionalTag.Happy },
@@ -155,19 +166,21 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   };
 
   return {
-    formRef, // Expose the formRef for the component to bind to
-    form,
-    emotionalTagOptions,
-    // mediaManagement is removed
-    validate,
-    getFormData,
-    // Expose media management properties directly
-    memoryMedia: internalMemoryMedia,
-    uploadedFiles,
-    deletedMediaIds,
-    removeMedia,
-    newlyUploadedFiles,
-    acceptedMimeTypes,
-    validationRules: rules,
+    state: {
+      formRef,
+      form,
+      emotionalTagOptions,
+      memoryMedia: internalMemoryMedia,
+      uploadedFiles,
+      deletedMediaIds,
+      newlyUploadedFiles,
+      acceptedMimeTypes: ACCEPTED_MIME_TYPES,
+      validationRules: rules,
+    },
+    actions: {
+      validate,
+      getFormData,
+      removeMedia,
+    },
   };
 }

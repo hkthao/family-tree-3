@@ -19,9 +19,13 @@ export function useMemoryItemDetail(options: UseMemoryItemDetailOptions) {
   };
 
   return {
-    memoryItem,
-    isLoading,
-    error,
-    closeView,
+    state: {
+      memoryItem,
+      isLoading,
+      error,
+    },
+    actions: {
+      closeView,
+    },
   };
 }

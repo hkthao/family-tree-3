@@ -109,11 +109,15 @@ export function useMemoryItemEdit(options: UseMemoryItemEditOptions) {
   };
 
   return {
-    memoryItem,
-    isLoading,
-    isUpdatingMemoryItem,
-    isUploadingMedia, // Expose isUploadingMedia
-    handleUpdateItem,
-    closeForm,
+    state: {
+      memoryItem,
+      isLoading,
+      isUpdatingMemoryItem,
+      isUploadingMedia,
+    },
+    actions: {
+      handleUpdateItem,
+      closeForm,
+    },
   };
 }

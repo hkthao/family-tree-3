@@ -2,7 +2,7 @@
   <div data-testid="memory-item-list-view">
     <MemoryItemList
       :items="memoryItems"
-      :total-items="totalItems"
+      :total-items="currentTotalItems"
       :loading="isLoadingMemoryItems"
       :family-id="props.familyId"
       @update:options="handleListOptionsUpdate"
@@ -59,26 +59,26 @@ const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
 const {
-  paginationOptions,
-  filters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
+  state: { paginationOptions, filters },
+  actions: { setPage, setItemsPerPage, setSortBy },
 } = useMemoryItemDataManagement(computed(() => props.familyId));
 
-const { data: memoryItemsData, isLoading: isLoadingMemoryItems } = useMemoryItemsQuery(
+const { state: { memberFaces, totalItems, isLoading: isLoadingMemoryItems }, actions: { refetch } } = useMemoryItemsQuery(
   computed(() => props.familyId),
   paginationOptions,
   filters
 );
 
-const memoryItems = ref<MemoryItem[]>(memoryItemsData.value?.items || []);
-const totalItems = ref(memoryItemsData.value?.totalItems || 0);
+const memoryItems = ref<MemoryItem[]>(memberFaces.value || []);
+const currentTotalItems = ref(totalItems.value || 0);
 
-watch(memoryItemsData, (newData) => {
-  memoryItems.value = newData?.items || [];
-  totalItems.value = newData?.totalItems || 0;
-}, { deep: true });
+watch(memberFaces, (newData) => {
+  memoryItems.value = newData || [];
+});
+
+watch(totalItems, (newTotal) => {
+  currentTotalItems.value = newTotal || 0;
+});
 
 const { mutate: deleteMemoryItem } = useDeleteMemoryItemMutation();
 

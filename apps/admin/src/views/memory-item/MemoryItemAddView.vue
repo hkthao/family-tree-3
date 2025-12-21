@@ -39,7 +39,10 @@ const { t } = useI18n();
 
 console.log(memoryItemFormRef.value);
 
-const { isAddingMemoryItem, isUploadingMedia, handleAddItem, closeForm } = useMemoryItemAdd({
+const {
+  state: { isAddingMemoryItem, isUploadingMedia },
+  actions: { handleAddItem, closeForm },
+} = useMemoryItemAdd({
   familyId: props.familyId,
   onSaveSuccess: () => {
     emit('close');

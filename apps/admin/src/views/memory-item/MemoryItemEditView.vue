@@ -58,7 +58,10 @@ const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
 
 const { t } = useI18n();
 
-const { memoryItem, isLoading, isUpdatingMemoryItem, isUploadingMedia, handleUpdateItem, closeForm } = useMemoryItemEdit({
+const {
+  state: { memoryItem, isLoading, isUpdatingMemoryItem, isUploadingMedia },
+  actions: { handleUpdateItem, closeForm },
+} = useMemoryItemEdit({
   familyId: props.familyId,
   memoryItemId: props.memoryItemId,
   onSaveSuccess: () => {

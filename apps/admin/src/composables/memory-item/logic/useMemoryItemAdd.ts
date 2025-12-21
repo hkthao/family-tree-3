@@ -87,9 +87,13 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
   };
 
   return {
-    isUploadingMedia,
-    isAddingMemoryItem,
-    handleAddItem,
-    closeForm: onCancel,
+    state: {
+      isUploadingMedia,
+      isAddingMemoryItem,
+    },
+    actions: {
+      handleAddItem,
+      closeForm: onCancel,
+    },
   };
 }

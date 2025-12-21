@@ -45,7 +45,7 @@ const emit = defineEmits(['close']);
 
 const { t } = useI18n();
 
-const { memoryItem, isLoading, error, closeView } = useMemoryItemDetail({
+const { state: { memoryItem, isLoading, error }, actions: { closeView } } = useMemoryItemDetail({
   familyId: props.familyId,
   memoryItemId: props.memoryItemId,
   onClose: () => {

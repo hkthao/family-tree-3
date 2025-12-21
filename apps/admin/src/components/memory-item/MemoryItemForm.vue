@@ -66,19 +66,17 @@ const props = defineProps<MemoryItemFormProps>();
 const { t } = useI18n();
 
 const {
-  form,
-  emotionalTagOptions,
-  validate,
-  getFormData,
-  validationRules,
-  formRef, // Capture the formRef returned by useMemoryItemForm
-  // Directly destructure media management properties
-  memoryMedia,
-  uploadedFiles,
-  deletedMediaIds,
-  removeMedia,
-  newlyUploadedFiles,
-  acceptedMimeTypes,
+  state: {
+    form,
+    emotionalTagOptions,
+    memoryMedia,
+    uploadedFiles,
+    deletedMediaIds,
+    newlyUploadedFiles,
+    acceptedMimeTypes,
+    validationRules,
+  },
+  actions: { validate, getFormData, removeMedia },
 } = useMemoryItemForm({
   initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
@@ -93,7 +91,7 @@ export interface MemoryItemFormExpose {
   uploadedFiles: Ref<File[]>;
   deletedMediaIds: Ref<string[]>;
   removeMedia: (mediaToDelete: LocalMemoryMedia) => void;
-  acceptedMimeTypes: ComputedRef<string>;
+  acceptedMimeTypes: string;
 }
 
 defineExpose<MemoryItemFormExpose>({
