@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useEventsQuery } from '@/composables/event/queries/useEventsQuery';
 import { useQuery } from '@tanstack/vue-query';
-import { ref, type Ref, computed } from 'vue';
+import { ref, type Ref } from 'vue';
 import type { Event, EventFilter, Paginated } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import { queryKeys } from '@/constants/queryKeys';
@@ -14,13 +14,13 @@ vi.mock('@tanstack/vue-query', () => ({
 
 // Mock eventService
 const mockEventService: EventServiceAdapter = {
-  add: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  getById: vi.fn(),
-  search: vi.fn(),
-  getEventsByFamilyId: vi.fn(),
-  getByIds: vi.fn(),
+  add: vi.fn() as Mock,
+  update: vi.fn() as Mock,
+  delete: vi.fn() as Mock,
+  getById: vi.fn() as Mock,
+  search: vi.fn() as Mock,
+  getEventsByFamilyId: vi.fn() as Mock,
+  getByIds: vi.fn() as Mock,
 };
 
 describe('useEventsQuery', () => {
@@ -44,7 +44,6 @@ describe('useEventsQuery', () => {
     totalItems: 1,
     totalPages: 1,
     page: 1,
-    itemsPerPage: 10,
   };
 
   beforeEach(() => {
@@ -64,11 +63,11 @@ describe('useEventsQuery', () => {
     });
 
     // Mock useQuery to immediately execute queryFn
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn();
       return { data: ref(mockPaginatedEvents), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
-    mockEventService.search.mockResolvedValue({ ok: true, value: mockPaginatedEvents });
+    (mockEventService.search as Mock).mockResolvedValue({ ok: true, value: mockPaginatedEvents });
 
     useEventsQuery(filtersRef, { eventService: mockEventService });
 
@@ -86,11 +85,11 @@ describe('useEventsQuery', () => {
 
   it('should return events and totalItems on successful query', async () => {
     const filtersRef: Ref<EventFilter> = ref({ page: 1, itemsPerPage: 10 });
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn();
       return { data: ref(mockPaginatedEvents), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
-    mockEventService.search.mockResolvedValue({ ok: true, value: mockPaginatedEvents });
+    (mockEventService.search as Mock).mockResolvedValue({ ok: true, value: mockPaginatedEvents });
 
     const { events, totalItems } = useEventsQuery(filtersRef, { eventService: mockEventService });
 
@@ -100,7 +99,7 @@ describe('useEventsQuery', () => {
 
   it('should return loading true while fetching', () => {
     const filtersRef: Ref<EventFilter> = ref({ page: 1, itemsPerPage: 10 });
-    (useQuery as vi.Mock).mockImplementation(() => {
+    (useQuery as Mock).mockImplementation(() => {
       return { data: ref(null), isFetching: ref(true), error: ref(null), refetch: vi.fn() };
     });
 
@@ -112,11 +111,11 @@ describe('useEventsQuery', () => {
   it('should return error on failed query', async () => {
     const filtersRef: Ref<EventFilter> = ref({ page: 1, itemsPerPage: 10 });
     const mockError = new Error('Failed to fetch events');
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return { data: ref(null), isFetching: ref(false), error: ref(mockError), refetch: vi.fn() };
     });
-    mockEventService.search.mockResolvedValue({ ok: false, error: mockError });
+    (mockEventService.search as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { error } = useEventsQuery(filtersRef, { eventService: mockEventService });
 
@@ -127,11 +126,11 @@ describe('useEventsQuery', () => {
     const filtersRef: Ref<EventFilter> = ref({ page: 1, itemsPerPage: 10 });
     const previousData: Paginated<Event> = {
       items: [{ ...mockEvent, id: 'previous1' }],
-      totalItems: 1, totalPages: 1, page: 1, itemsPerPage: 10,
+      totalItems: 1, totalPages: 1, page: 1
     };
     let placeholderDataFn: ((previousData: Paginated<Event> | undefined) => Paginated<Event> | undefined) | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       placeholderDataFn = options.placeholderData;
       return { data: ref(mockPaginatedEvents), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
@@ -153,7 +152,7 @@ describe('useEventsQuery', () => {
     });
     let queryKeyComputed: Ref<any> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       queryKeyComputed = options.queryKey;
       return { data: ref(mockPaginatedEvents), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });

@@ -57,7 +57,7 @@ describe('useAddEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.add.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.add as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     useAddEventMutation({ eventService: mockEventService });
 
@@ -73,7 +73,7 @@ describe('useAddEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.add.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.add  as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     const { mutate } = useAddEventMutation({ eventService: mockEventService });
     mutate(mockEventData, { onSuccess: onSuccessCallback });
@@ -92,7 +92,7 @@ describe('useAddEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.add.mockResolvedValue({ ok: false, error: mockError });
+    (mockEventService.add as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { mutate } = useAddEventMutation({ eventService: mockEventService });
     mutate(mockEventData, { onError: onErrorCallback });

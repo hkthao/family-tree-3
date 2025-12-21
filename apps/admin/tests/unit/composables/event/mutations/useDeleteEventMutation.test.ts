@@ -5,7 +5,7 @@ import { queryKeys } from '@/constants/queryKeys';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 
 // Mock the external dependencies
-Mock('@tanstack/vue-query', () => ({
+vi.mock('@tanstack/vue-query', () => ({
   useMutation: vi.fn(),
   useQueryClient: vi.fn(),
 }));
@@ -43,7 +43,7 @@ describe('useDeleteEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.delete.mockResolvedValue({ ok: true });
+    (mockEventService.delete as Mock).mockResolvedValue({ ok: true });
 
     useDeleteEventMutation({ eventService: mockEventService });
 
@@ -59,7 +59,7 @@ describe('useDeleteEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.delete.mockResolvedValue({ ok: true });
+    (mockEventService.delete as Mock).mockResolvedValue({ ok: true });
 
     const { mutate } = useDeleteEventMutation({ eventService: mockEventService });
     mutate(eventIdToDelete, { onSuccess: onSuccessCallback });
@@ -78,7 +78,7 @@ describe('useDeleteEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.delete.mockResolvedValue({ ok: false, error: mockError });
+    (mockEventService.delete as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { mutate } = useDeleteEventMutation({ eventService: mockEventService });
     mutate(eventIdToDelete, { onError: onErrorCallback });

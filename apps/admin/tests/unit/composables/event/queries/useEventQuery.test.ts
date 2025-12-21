@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useEventQuery } from '@/composables/event/queries/useEventQuery';
 import { useQuery } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
@@ -14,13 +14,13 @@ vi.mock('@tanstack/vue-query', () => ({
 
 // Mock eventService
 const mockEventService: EventServiceAdapter = {
-  add: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  getById: vi.fn(),
-  search: vi.fn(),
-  getEventsByFamilyId: vi.fn(),
-  getByIds: vi.fn(),
+  add: vi.fn() as Mock,
+  update: vi.fn() as Mock,
+  delete: vi.fn() as Mock,
+  getById: vi.fn() as Mock,
+  search: vi.fn() as Mock,
+  getEventsByFamilyId: vi.fn() as Mock,
+  getByIds: vi.fn() as Mock,
 };
 
 describe('useEventQuery', () => {
@@ -47,11 +47,11 @@ describe('useEventQuery', () => {
     const eventIdRef = ref('event1');
 
     // Mock useQuery to immediately execute queryFn
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn();
       return { data: ref(mockEvent), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
-    mockEventService.getById.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.getById as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     useEventQuery(eventIdRef, { eventService: mockEventService });
 
@@ -60,11 +60,11 @@ describe('useEventQuery', () => {
 
   it('should return event data on successful query', async () => {
     const eventIdRef = ref('event1');
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn();
       return { data: ref(mockEvent), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
-    mockEventService.getById.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.getById as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     const { event } = useEventQuery(eventIdRef, { eventService: mockEventService });
 
@@ -73,7 +73,7 @@ describe('useEventQuery', () => {
 
   it('should return isLoading true while fetching', () => {
     const eventIdRef = ref('event1');
-    (useQuery as vi.Mock).mockImplementation(() => {
+    (useQuery as Mock).mockImplementation(() => {
       return { data: ref(null), isFetching: ref(true), error: ref(null), refetch: vi.fn() };
     });
 
@@ -85,11 +85,11 @@ describe('useEventQuery', () => {
   it('should return error on failed query', async () => {
     const eventIdRef = ref('event1');
     const mockError = new Error('Failed to fetch event');
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError)); // Directly mock queryFn to return a rejected promise
       return { data: ref(null), isFetching: ref(false), error: ref(mockError), refetch: vi.fn() };
     });
-    mockEventService.getById.mockResolvedValue({ ok: false, error: mockError });
+    (mockEventService.getById as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { error } = useEventQuery(eventIdRef, { eventService: mockEventService });
 
@@ -99,7 +99,7 @@ describe('useEventQuery', () => {
   it('should throw an error if event ID is missing in queryFn', async () => {
     const eventIdRef = ref(undefined);
     const mockError = new Error('Event ID is required');
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {
         data: ref(null),
@@ -117,7 +117,7 @@ describe('useEventQuery', () => {
   it('should throw an error if event not found (response.value is undefined)', async () => {
     const eventIdRef = ref('event1');
     const mockError = new Error('Event not found');
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {
         data: ref(null),
@@ -126,7 +126,7 @@ describe('useEventQuery', () => {
         refetch: vi.fn(),
       };
     });
-    mockEventService.getById.mockResolvedValue({ ok: true, value: undefined });
+    (mockEventService.getById as Mock).mockResolvedValue({ ok: true, value: undefined });
 
     const { query } = useEventQuery(eventIdRef, { eventService: mockEventService });
 
@@ -137,7 +137,7 @@ describe('useEventQuery', () => {
     const eventIdRef = ref(undefined);
     let enabledComputed: Ref<boolean> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       enabledComputed = options.enabled;
       return { data: ref(null), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
@@ -151,7 +151,7 @@ describe('useEventQuery', () => {
     const eventIdRef = ref('event1');
     let enabledComputed: Ref<boolean> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       enabledComputed = options.enabled;
       return { data: ref(null), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });
@@ -165,7 +165,7 @@ describe('useEventQuery', () => {
     const eventIdRef = ref('event1');
     let queryKeyComputed: Ref<any> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       queryKeyComputed = options.queryKey;
       return { data: ref(null), isFetching: ref(false), error: ref(null), refetch: vi.fn() };
     });

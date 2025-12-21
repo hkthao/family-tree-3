@@ -38,16 +38,26 @@ const mockLunarDateAdapter: LunarDateAdapter = {
       getYear: () => year,
       getMonth: () => month,
       getDay: () => day,
-      getSolar: () => mockLunarDateAdapter.solarFromYmd(year, month, day) // recursive mock
+      getSolar: vi.fn(() => { // Mock getSolar to return a SolarInstance
+        // For simplicity, this mock returns a SolarInstance that corresponds to the given Lunar date
+        // The actual conversion logic is handled by the real Lunar.fromYmd().toSolar()
+        // Provide consistent mocking for getSolar result in lunarFromYmd
+        return mockLunarDateAdapter.solarFromYmd(year, month + 2, day + 15); // Example approximation
+      })
     } as unknown as LunarInstance;
-  }) as Mock, // Added as Mock
+  }) as Mock,
   solarFromYmd: vi.fn((year: number, month: number, day: number) => {
     // Simplified mock for SolarInstance
     return {
       getYear: () => year,
       getMonth: () => month,
       getDay: () => day,
-      getLunar: () => mockLunarDateAdapter.lunarFromYmd(year, month, day) // recursive mock
+      getLunar: vi.fn(() => { // Mock getLunar to return a LunarInstance
+        // For simplicity, this mock returns a LunarInstance that corresponds to the given Solar date
+        // The actual conversion logic is handled by the real Solar.fromYmd().toLunar()
+        // Provide consistent mocking for getLunar result in solarFromYmd
+        return mockLunarDateAdapter.lunarFromYmd(year, month - 2, day - 15); // Example approximation
+      })
     } as unknown as SolarInstance;
   }) as Mock,
   fromSolar: vi.fn((solar: SolarInstance) => {
@@ -57,7 +67,7 @@ const mockLunarDateAdapter: LunarDateAdapter = {
       return mockLunarDateAdapter.lunarFromYmd(2023, 5, 28);
     }
     return mockLunarDateAdapter.lunarFromYmd(solar.getYear(), solar.getMonth(), solar.getDay());
-  }) as Mock, // Added as Mock
+  }) as Mock,
 
   getSolar: vi.fn((lunar: LunarInstance) => {
     // Example mapping, adjust based on actual conversion logic if needed
@@ -65,7 +75,7 @@ const mockLunarDateAdapter: LunarDateAdapter = {
     if (lunar.getYear() === 2023 && lunar.getMonth() === 5 && lunar.getDay() === 28) {
       return {
         getYear: () => 2023,
-        getMonth: () => 7, // July
+        getMonth: () => 7, // July (1-indexed for Solar)
         getDay: () => 15,
         getLunar: vi.fn()
       } as unknown as SolarInstance;
@@ -73,15 +83,16 @@ const mockLunarDateAdapter: LunarDateAdapter = {
     if (lunar.getYear() === 2023 && lunar.getMonth() === 5 && lunar.getDay() === 30) { // Add specific mapping for adjusted day
       return mockLunarDateAdapter.solarFromYmd(2023, 7, 16);
     }
+    // Fallback if no specific mapping, just return a solar instance
     return mockLunarDateAdapter.solarFromYmd(lunar.getYear(), lunar.getMonth(), lunar.getDay());
-  }) as Mock, // Added as Mock
+  }) as Mock,
 
   getLunarDaysInMonth: vi.fn((year: number, month: number) => {
     // Mock known values for specific months for testing
     if (year === 2023 && month === 5) return 30;
     if (year === 2023 && month === 6) return 29;
     return 30; // Default
-  }) as Mock, // Added as Mock
+  }) as Mock,
 
 };
 
@@ -94,18 +105,19 @@ describe('eventCalendar.logic', () => {
     it('should convert lunar date to solar date', () => {
       const year = 2023;
       const lunarDate: LunarDate = { day: 28, month: 5, isLeapMonth: false }; // Lunar May 28, 2023
-      const expectedSolarDate = new Date(2023, 6, 15); // Solar July 15, 2023
+      const expectedSolarDate = new Date(2023, 6, 15); // Solar July 15, 2023 (0-indexed month)
 
-      (mockLunarDateAdapter.lunarFromYmd as Mock).mockReturnValueOnce({
-        getYear: () => year,
-        getMonth: () => lunarDate.month,
-        getDay: () => lunarDate.day,
-        getSolar: () => ({
-          getYear: () => expectedSolarDate.getFullYear(),
-          getMonth: () => expectedSolarDate.getMonth() + 1, // Solar month is 1-indexed
-          getDay: () => expectedSolarDate.getDate()
-        })
-      } as unknown as LunarInstance);
+      // Directly mock getSolar to return the expected SolarInstance for the lunarFromYmd call
+      (mockLunarDateAdapter.getSolar as Mock).mockReturnValueOnce({
+        getYear: () => expectedSolarDate.getFullYear(),
+        getMonth: () => expectedSolarDate.getMonth() + 1, // Solar month is 1-indexed
+        getDay: () => expectedSolarDate.getDate()
+      } as unknown as SolarInstance);
+      // Ensure lunarFromYmd is mocked to return a valid LunarInstance without recursive solarFromYmd
+      (mockLunarDateAdapter.lunarFromYmd as Mock).mockImplementationOnce((y, m, d) => ({
+        getYear: () => y, getMonth: () => m, getDay: () => d, getSolar: vi.fn() // Simplified getSolar here
+      }) as unknown as LunarInstance);
+
 
       const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
 
@@ -119,7 +131,7 @@ describe('eventCalendar.logic', () => {
       const year = 2023;
       const lunarDate: LunarDate = { day: 31, month: 5, isLeapMonth: false }; // Lunar May 31, 2023 (invalid day)
       const adjustedDay = 30; // Max days in mock Lunar May 2023
-      const expectedSolarDate = new Date(2023, 6, 16); // Example: Solar July 16, 2023 for adjusted day
+      const expectedSolarDate = new Date(2023, 6, 16); // Example: Solar July 16, 2023 for adjusted day (0-indexed month)
 
       (mockLunarDateAdapter.getLunarDaysInMonth as Mock).mockReturnValueOnce(30); // Max day for mock month
       (mockLunarDateAdapter.lunarFromYmd as Mock).mockImplementationOnce((y: number, m: number, d: number) => {
@@ -146,10 +158,8 @@ describe('eventCalendar.logic', () => {
       const year = 2023;
       const lunarDate: LunarDate = { day: 1, month: 1, isLeapMonth: false };
       (mockLunarDateAdapter.lunarFromYmd as Mock).mockImplementationOnce(() => { throw new Error('Lunar conversion failed'); });
-      
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => { }); // Mock console.error
       const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
-      
       expect(spy).toHaveBeenCalledWith('Error during lunar to solar conversion:', expect.any(Error));
       expect(result.getFullYear()).toBe(year);
       expect(result.getMonth()).toBe(lunarDate.month - 1);
@@ -160,15 +170,14 @@ describe('eventCalendar.logic', () => {
 
   describe('getLunarDateForSolarDay', () => {
     it('should convert solar date to lunar date string', () => {
-      const solarDate = new Date(2023, 6, 15); // Solar July 15, 2023
-      const expectedLunarString = '28/5'; // Lunar May 28
+      const solarDate = new Date(2023, 6, 15); // Solar July 15, 2023 (0-indexed month)
       const expectedLunarString = '28/5'; // Lunar May 28
       (mockDateAdapter.getFullYear as Mock).mockReturnValueOnce(2023);
       (mockDateAdapter.getMonth as Mock).mockReturnValueOnce(6);
       (mockDateAdapter.getDate as Mock).mockReturnValueOnce(15);
       (mockLunarDateAdapter.solarFromYmd as Mock).mockReturnValueOnce({
-        getYear: () => 2023, getMonth: () => 7, getDay: () => 15,
-        getLunar: () => ({ getDay: () => 28, getMonth: () => 5 })
+        getYear: () => 2023, getMonth: () => 7, getDay: () => 15, // Solar month is 1-indexed
+        getLunar: () => ({ getDay: () => 28, getMonth: () => 5 }) as unknown as LunarInstance
       } as unknown as SolarInstance);
 
 
@@ -180,7 +189,7 @@ describe('eventCalendar.logic', () => {
 
     it('should handle invalid solarDate input', () => {
       const invalidDate = new Date('invalid date');
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
       const result = getLunarDateForSolarDay(invalidDate, mockLunarDateAdapter, mockDateAdapter);
       expect(result).toBe('Ngày không hợp lệ (Âm)');
@@ -194,10 +203,10 @@ describe('eventCalendar.logic', () => {
       (mockDateAdapter.getMonth as Mock).mockReturnValueOnce(6);
       (mockDateAdapter.getDate as Mock).mockReturnValueOnce(15);
       (mockLunarDateAdapter.solarFromYmd as Mock).mockImplementationOnce(() => { throw new Error('Solar conversion failed'); });
-      
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => { }); // Mock console.error
       const result = getLunarDateForSolarDay(solarDate, mockLunarDateAdapter, mockDateAdapter);
-      
+
       expect(spy).toHaveBeenCalledWith('Error during solar to lunar conversion:', expect.any(Error));
       expect(result).toBe('Lỗi chuyển đổi (Âm)');
       spy.mockRestore();
@@ -239,7 +248,7 @@ describe('eventCalendar.logic', () => {
       (mockDateAdapter.endOfMonth as Mock).mockReturnValue(new Date(2023, 7, 0));
       (mockLunarDateAdapter.solarFromYmd as Mock).mockReturnValue(null as any); // Simulate invalid Solar instance
 
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
 
       expect(result).toEqual({
@@ -256,7 +265,7 @@ describe('eventCalendar.logic', () => {
         .mockReturnValueOnce({ getLunar: () => null } as any) // Simulate invalid Lunar instance
         .mockReturnValueOnce({ getLunar: () => ({ getMonth: () => 6, getDay: () => 14 }) } as any);
 
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const result = getLunarDateRangeFiltersLogic(selectedDate, mockDateAdapter, mockLunarDateAdapter);
 
       expect(result).toEqual({

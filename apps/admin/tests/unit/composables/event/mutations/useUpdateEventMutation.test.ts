@@ -58,7 +58,7 @@ describe('useUpdateEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.update.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.update as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     useUpdateEventMutation({ eventService: mockEventService });
 
@@ -99,7 +99,7 @@ describe('useUpdateEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.update.mockResolvedValue({ ok: true, value: mockEvent });
+    (mockEventService.update as Mock).mockResolvedValue({ ok: true, value: mockEvent });
 
     const { mutate } = useUpdateEventMutation({ eventService: mockEventService });
     mutate(mockEvent, { onSuccess: onSuccessCallback });
@@ -119,7 +119,7 @@ describe('useUpdateEventMutation', () => {
         isPending: false,
       };
     });
-    mockEventService.update.mockResolvedValue({ ok: false, error: mockError });
+    (mockEventService.update as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { mutate } = useUpdateEventMutation({ eventService: mockEventService });
     mutate(mockEvent, { onError: onErrorCallback });
