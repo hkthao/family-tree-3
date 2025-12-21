@@ -13,8 +13,8 @@ describe('useMembersPerGenerationChart', () => {
     membersPerGeneration: { 1: 5, 2: 10 },
   };
 
-  let getMembersPerGenerationChartDataSpy: ReturnType<typeof vi.spyOn>;
-  let getMembersPerGenerationChartOptionsSpy: ReturnType<typeof vi.spyOn>;
+    let getMembersPerGenerationChartDataSpy: any;
+    let getMembersPerGenerationChartOptionsSpy: any;
   let mockT: ReturnType<typeof vi.fn>; // To store the 't' spy
   let mockThemeObject: any; // To store the mock theme object
 
@@ -23,7 +23,7 @@ describe('useMembersPerGenerationChart', () => {
 
     // Set up the mock for useI18n and capture the 't' spy
     mockT = vi.fn((key: string) => key);
-    vi.mocked(useI18n).mockReturnValue({ t: mockT });
+    vi.mocked(useI18n).mockReturnValue({ t: mockT } as any);
 
     // Set up the mock for useTheme and capture the mock theme object
     mockThemeObject = {
@@ -44,7 +44,7 @@ describe('useMembersPerGenerationChart', () => {
     getMembersPerGenerationChartDataSpy = vi.spyOn(chartLogic, 'getMembersPerGenerationChartData');
     getMembersPerGenerationChartOptionsSpy = vi.spyOn(chartLogic, 'getMembersPerGenerationChartOptions');
 
-    getMembersPerGenerationChartDataSpy.mockImplementation((data, t) => {
+    getMembersPerGenerationChartDataSpy.mockImplementation((data: { [key: number]: number } | undefined, t: (key: string) => string) => {
       if (!data) return { series: [{ name: t('dashboard.membersPerGenerationChart.members'), data: [] }], categories: [] };
       const generations = Object.keys(data).map(Number).sort((a, b) => a - b);
       return {
@@ -53,7 +53,7 @@ describe('useMembersPerGenerationChart', () => {
       };
     });
 
-    getMembersPerGenerationChartOptionsSpy.mockImplementation((categories, t, theme) => ({
+    getMembersPerGenerationChartOptionsSpy.mockImplementation((categories: string[], t: (key: string) => string, theme: any) => ({
       chart: { type: 'bar' },
       xaxis: { categories },
       colors: [theme.global.current.value.colors.primary],

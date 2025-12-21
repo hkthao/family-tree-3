@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useGenderRatioChart } from '@/composables/charts/useGenderRatioChart';
 
 // Mock dependencies directly within vi.mock factories
@@ -41,11 +41,11 @@ describe('useGenderRatioChart', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getGenderRatioChartSeries.mockImplementation((male, female) => {
+    (getGenderRatioChartSeries as Mock).mockImplementation((male: number | undefined, female: number | undefined) => {
       if (male === undefined || female === undefined) return [0, 0];
       return [male * 100, female * 100];
     });
-    getGenderRatioChartOptions.mockImplementation((t: (key: string) => string, theme: any) => ({
+    (getGenderRatioChartOptions as Mock).mockImplementation((t: (key: string) => string, theme: any) => ({
       chart: { type: 'donut' },
       labels: [t('member.gender.male'), t('member.gender.female')],
       colors: [theme.global.current.value.colors.primary, theme.global.current.value.colors.error],
@@ -60,7 +60,7 @@ describe('useGenderRatioChart', () => {
 
   it('should return series from getGenderRatioChartSeries', () => {
     const expectedSeries = [60, 40];
-    getGenderRatioChartSeries.mockReturnValue(expectedSeries);
+    (getGenderRatioChartSeries as Mock).mockReturnValue(expectedSeries);
     const { state } = useGenderRatioChart(mockProps);
     expect(state.series.value).toEqual(expectedSeries);
   });
@@ -73,7 +73,7 @@ describe('useGenderRatioChart', () => {
 
   it('should return chartOptions from getGenderRatioChartOptions', () => {
     const expectedChartOptions = { chart: { type: 'donut' } };
-    getGenderRatioChartOptions.mockReturnValue(expectedChartOptions);
+    (getGenderRatioChartOptions as Mock).mockReturnValue(expectedChartOptions);
     const { state } = useGenderRatioChart(mockProps);
     expect(state.chartOptions.value).toEqual(expectedChartOptions);
   });

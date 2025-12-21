@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useHierarchicalTreeChart } from '@/composables/charts/useHierarchicalTreeChart';
 import { transformFamilyData, determineMainChartId } from '@/composables/charts/hierarchicalTreeChart.logic';
 import { createDefaultF3Adapter } from '@/composables/charts/f3.adapter';
@@ -141,7 +141,7 @@ describe('useHierarchicalTreeChart', () => {
     await actions.renderChart(mockMembers);
 
     // Get the chart instance created by createChart mock
-    const createdChartInstance = mockF3Adapter.createChart.mock.results[0].value;
+    const createdChartInstance = (mockF3Adapter.createChart as Mock).mock.results[0].value;
     expect(mockF3Adapter.updateChart).toHaveBeenCalledWith(createdChartInstance, '2', { initial: true });
   });
 

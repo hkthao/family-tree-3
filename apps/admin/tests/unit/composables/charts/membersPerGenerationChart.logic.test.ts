@@ -58,10 +58,10 @@ describe('membersPerGenerationChart.logic', () => {
       expect(options.chart?.type).toBe('bar');
       expect(options.xaxis?.categories).toEqual(chartCategories);
       expect(options.xaxis?.title?.text).toBe('dashboard.membersPerGenerationChart.generation');
-      expect(options.yaxis?.title?.text).toBe('dashboard.membersPerGenerationChart.totalMembers');
+      expect((options.yaxis as ApexYAxis)?.title?.text).toBe('dashboard.membersPerGenerationChart.totalMembers');
       expect(options.colors).toEqual(['#007bff']);
       expect(options.tooltip?.theme).toBe('light');
-      expect(options.tooltip?.y?.formatter?.(10)).toBe('10 dashboard.membersPerGenerationChart.members');
+      expect((options.tooltip?.y as ApexTooltipY)?.formatter?.(10)).toBe('10 dashboard.membersPerGenerationChart.members');
     });
 
     it('should set dark theme for tooltip when theme is dark', () => {

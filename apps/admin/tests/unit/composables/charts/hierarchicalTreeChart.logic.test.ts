@@ -87,7 +87,7 @@ describe('hierarchicalTreeChart.logic', () => {
 
     it('should handle gender undefined', () => {
       const unknownGenderMember: Member[] = [
-        { id: '6', firstName: 'Unknown', lastName: 'Gender', fullName: 'Unknown Gender', gender: Gender.Unknown, familyId: 'f1' },
+        { id: '6', firstName: 'Unknown', lastName: 'Gender', fullName: 'Unknown Gender', gender: Gender.Other, familyId: 'f1' },
       ];
       const transformed = transformFamilyData(unknownGenderMember, [], null);
       expect(transformed[0].data.gender).toBe('F'); // Expect 'F' due to new logic
