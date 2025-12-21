@@ -1,7 +1,7 @@
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IFamilyMediaService } from './family-media.service.interface';
 import { type Result } from '@/types'; // Change to normal import with ok, err
-import type {  FamilyMedia, FamilyMediaFilter, Paginated } from '@/types'; // Import from '@/types'
+import type { FamilyMedia, FamilyMediaFilter, Paginated, FamilyMediaAddFromUrlDto } from '@/types'; // Import from '@/types'
 
 export class ApiFamilyMediaService implements IFamilyMediaService {
   constructor(private api: ApiClientMethods) { }
@@ -38,6 +38,10 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
         'Content-Type': 'multipart/form-data',
       },
     });
+  }
+
+  async addFromUrl(familyId: string, payload: FamilyMediaAddFromUrlDto): Promise<Result<FamilyMedia>> {
+    return await this.api.post<FamilyMedia>(`/${familyId}/from-url`, payload);
   }
 
   async delete(id: string): Promise<Result<boolean>> {

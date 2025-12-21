@@ -27,3 +27,11 @@ export interface FamilyMediaFilter {
   mediaType?: MediaType; // Filter by media type
   // Pagination properties will be handled by ListOptions which are part of Paginated
 }
+
+export interface FamilyMediaAddFromUrlDto {
+  familyId: string;
+  url: string;
+  fileName: string;
+  mediaType?: MediaType;
+  description?: string;
+}

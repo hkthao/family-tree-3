@@ -17,6 +17,8 @@
         :create-button-tooltip="t('familyMedia.list.createButton')"
         create-button-test-id="add-new-family-media-button"
         :hide-create-button="!allowAdd"
+        :add-link-button-tooltip="allowAddLink ? t('familyMedia.list.addLinkButton') : undefined"
+        @add-link="emit('addLink')"
         :search-query="searchQuery"
         :search-label="t('common.search')"
         @update:search="searchQuery = $event"
@@ -73,10 +75,11 @@ interface FamilyMediaListProps {
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  allowAddLink?: boolean; // New prop
 }
 
 const props = defineProps<FamilyMediaListProps>();
-const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search']);
+const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search', 'addLink']); // New emit
 const { t } = useI18n();
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);

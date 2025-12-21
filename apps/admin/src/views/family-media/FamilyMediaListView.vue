@@ -1,10 +1,22 @@
 <template>
   <div data-testid="family-media-list-view">
     <FamilyMediaSearch @update:filters="handleFilterUpdate" />
-    <FamilyMediaList :items="familyMediaList" :total-items="totalItems" :loading="isLoading || isDeleting"
+    <FamilyMediaList
+      :items="familyMediaList"
+      :total-items="totalItems"
+      :loading="isLoading || isDeleting"
       :search="filters.searchQuery"
-      @update:options="handleListOptionsUpdate" @update:search="handleSearchUpdate" @view="openDetailDrawer"
-      @delete="confirmDelete" @create="openAddDrawer()" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete" />
+      @update:options="handleListOptionsUpdate"
+      @update:search="handleSearchUpdate"
+      @view="openDetailDrawer"
+      @delete="confirmDelete"
+      @create="openAddDrawer()"
+      @add-link="openAddLinkDrawer()"
+      :allow-add="allowAdd"
+      :allow-edit="allowEdit"
+      :allow-delete="allowDelete"
+      :allow-add-link="allowAdd"
+    />
 
     <!-- Add/Edit/Detail Drawers (similar to MemberListView) -->
     <!-- Detail Family Media Drawer -->
@@ -18,11 +30,17 @@
       <FamilyMediaAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMediaClosed"
         @saved="handleMediaSaved" />
     </BaseCrudDrawer>
+
+    <!-- Add Family Media From Link Drawer -->
+    <BaseCrudDrawer v-if="allowAdd" v-model="addLinkDrawer" @close="handleMediaClosed">
+      <FamilyMediaAddLinkView v-if="addLinkDrawer" :family-id="props.familyId" @close="handleMediaClosed"
+        @saved="handleMediaSaved" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { nextTick, toRef, computed } from 'vue';
+import { nextTick, toRef, computed, ref } from 'vue'; // Added ref
 import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables';
@@ -31,9 +49,9 @@ import { useAuth } from '@/composables'; // Import useAuth
 import FamilyMediaSearch from '@/components/family-media/FamilyMediaSearch.vue';
 import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
 import FamilyMediaAddView from '@/views/family-media/FamilyMediaAddView.vue';
-
 import FamilyMediaDetailView from '@/views/family-media/FamilyMediaDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import FamilyMediaAddLinkView from '@/views/family-media/FamilyMediaAddLinkView.vue'; // New Import
 
 const props = defineProps<{
   familyId: string;
@@ -60,7 +78,7 @@ const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
   refetchList: refetch,
 });
 
-  const {
+const {
     addDrawer,
     detailDrawer,
     selectedItemId,
@@ -68,6 +86,13 @@ const { isDeleting, confirmAndDelete } = useFamilyMediaDeletion({
     openDetailDrawer,
     closeAllDrawers,
   } = useCrudDrawer<string>();
+
+const addLinkDrawer = ref(false); // New state for addLinkDrawer
+
+const openAddLinkDrawer = () => {
+  addLinkDrawer.value = true;
+};
+
 const handleFilterUpdate = (newFilters: FamilyMediaFilter) => {
   setFilters(newFilters);
 };
@@ -94,11 +119,13 @@ const confirmDelete = async (familyMediaId: string) => {
 
 const handleMediaSaved = () => {
   closeAllDrawers();
+  addLinkDrawer.value = false; // Close addLinkDrawer as well
   refetch(); // Refetch the list after add/edit/delete
 };
 
 const handleMediaClosed = () => {
   closeAllDrawers();
+  addLinkDrawer.value = false; // Close addLinkDrawer as well
 };
 
 const handleDetailClosed = () => {
