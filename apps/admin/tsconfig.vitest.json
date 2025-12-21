@@ -7,6 +7,6 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vitest.tsbuildinfo",
 
     "lib": ["es2022", "dom"],
-    "types": ["node", "jsdom"]
+    "types": ["node", "jsdom", "vitest/globals"]
   }
 }

@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFaceSearch } from '@/composables/face/logic/useFaceSearch';
 import { ref } from 'vue';
-import type { Composer } from 'vue-i18n';
+import { type Composer } from 'vue-i18n';
 import type { UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
-import type { UseDetectFacesMutationReturn } from '@/composables/face/mutations/useDetectFacesMutation';
-import type { DetectedFace } from '@/types';
+import type { DetectedFace } from '@/types'; // Changed to type import
+import type { UseDetectFacesMutationReturn } from '@/composables';
 
 // Mock external dependencies
 const mockShowSnackbar = vi.fn();
@@ -14,38 +14,47 @@ const mockUseGlobalSnackbar: () => UseGlobalSnackbarReturn = () => ({
 
 const mockUseI18n: () => Composer = () => ({
   t: vi.fn((key: string) => key),
-}) as Composer;
+}) as any;
 
 const mockMutate = vi.fn();
-const mockIsPending = ref(false);
-const mockDetectError = ref(null);
+const mockIsPending = ref<boolean>(false);
+const mockDetectError = ref<Error | null>(null);
 
 const mockUseDetectFacesMutation: () => UseDetectFacesMutationReturn = () => ({
   mutate: mockMutate,
   isPending: mockIsPending,
   error: mockDetectError,
-});
+}) as any; // Cast to any to bypass complex type issues
 
-const mockFileReader = vi.fn(() => ({
+// Mock FileReader using vi.stubGlobal
+const mockFileReaderInstance = {
   readAsDataURL: vi.fn(),
   onload: vi.fn(),
-}));
+  result: null as string | ArrayBuffer | null,
+};
+
+vi.stubGlobal('FileReader', class {
+  constructor() {
+    return mockFileReaderInstance;
+  }
+});
+
 
 vi.mock('@tanstack/vue-query', () => ({
-  useQuery: vi.fn((options) => {
+  useQuery: vi.fn((options: any) => {
     const queryResult = {
       data: ref(options?.initialData || options?.placeholderData),
       isLoading: ref(false),
       isError: ref(false),
-      error: ref(null),
+      error: ref<Error | null>(null),
       isFetching: ref(false),
       refetch: vi.fn(),
     };
     return queryResult;
   }),
-  useMutation: vi.fn((options) => {
-      const isPending = ref(false);
-      const error = ref(null);
+  useMutation: vi.fn((options: any) => {
+      const isPending = ref<boolean>(false);
+      const error = ref<Error | null>(null);
       const mutate = vi.fn(async (variables, callbacks) => {
           isPending.value = true;
           try {
@@ -53,8 +62,8 @@ vi.mock('@tanstack/vue-query', () => ({
               callbacks?.onSuccess?.(data, variables, null);
               return data;
           } catch (err) {
-              error.value = err;
-              callbacks?.onError?.(err, variables, null);
+              error.value = err as Error;
+              callbacks?.onError?.(err as Error, variables, null);
               throw err;
           } finally {
               isPending.value = false;
@@ -76,7 +85,7 @@ vi.mock('@tanstack/vue-query', () => ({
 describe('useFaceSearch', () => {
   const mockFile = new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' });
   const mockDetectedFaces: DetectedFace[] = [
-    { id: 'face1', memberId: 'member1', boundingBox: { x: 1, y: 1, width: 1, height: 1 }, thumbnail: 'base64' },
+    { id: 'face1', memberId: 'member1', boundingBox: { x: 1, y: 1, width: 1, height: 1 }, thumbnail: 'base64', embedding: [1, 2, 3], status: "unrecognized" },
   ];
   const mockOriginalImageUrl = 'http://example.com/original.jpg';
 
@@ -84,6 +93,10 @@ describe('useFaceSearch', () => {
     vi.clearAllMocks();
     mockIsPending.value = false;
     mockDetectError.value = null;
+    // Reset the mock FileReader instance before each test
+    mockFileReaderInstance.readAsDataURL.mockClear();
+    mockFileReaderInstance.onload = vi.fn();
+    mockFileReaderInstance.result = null;
   });
 
   it('should initialize with correct default state', () => {
@@ -91,13 +104,13 @@ describe('useFaceSearch', () => {
       useI18n: mockUseI18n,
       useGlobalSnackbar: mockUseGlobalSnackbar,
       useDetectFacesMutation: mockUseDetectFacesMutation,
-      FileReader: mockFileReader,
+      FileReader: FileReader as any, // Cast to any because of stubGlobal
     });
 
     expect(state.selectedFamilyId.value).toBeUndefined();
     expect(state.uploadedImage.value).toBeUndefined();
     expect(state.detectedFaces.value).toEqual([]);
-    expect(state.originalImageUrl.value).toBeNull(); // Changed to toBeNull()
+    expect(state.originalImageUrl.value).toBeNull();
     expect(state.isDetectingFaces.value).toBe(false);
   });
 
@@ -106,11 +119,11 @@ describe('useFaceSearch', () => {
       useI18n: mockUseI18n,
       useGlobalSnackbar: mockUseGlobalSnackbar,
       useDetectFacesMutation: mockUseDetectFacesMutation,
-      FileReader: mockFileReader,
+      FileReader: FileReader as any, // Cast to any because of stubGlobal
     });
 
     mockDetectError.value = new Error('Detection failed');
-    await vi.dynamicImportSettled(); // Wait for watchers to trigger
+    await vi.dynamicImportSettled();
 
     expect(mockShowSnackbar).toHaveBeenCalledWith('Detection failed', 'error');
   });
@@ -120,7 +133,7 @@ describe('useFaceSearch', () => {
       useI18n: mockUseI18n,
       useGlobalSnackbar: mockUseGlobalSnackbar,
       useDetectFacesMutation: mockUseDetectFacesMutation,
-      FileReader: mockFileReader,
+      FileReader: FileReader as any, // Cast to any because of stubGlobal
     });
 
     state.uploadedImage.value = 'some-image';
@@ -140,7 +153,7 @@ describe('useFaceSearch', () => {
         useI18n: mockUseI18n,
         useGlobalSnackbar: mockUseGlobalSnackbar,
         useDetectFacesMutation: mockUseDetectFacesMutation,
-        FileReader: mockFileReader,
+        FileReader: FileReader as any, // Cast to any because of stubGlobal
       });
 
       state.uploadedImage.value = 'some-image';
@@ -156,7 +169,7 @@ describe('useFaceSearch', () => {
         useI18n: mockUseI18n,
         useGlobalSnackbar: mockUseGlobalSnackbar,
         useDetectFacesMutation: mockUseDetectFacesMutation,
-        FileReader: mockFileReader,
+        FileReader: FileReader as any, // Cast to any because of stubGlobal
       });
 
       state.selectedFamilyId.value = undefined;
@@ -171,19 +184,16 @@ describe('useFaceSearch', () => {
         useI18n: mockUseI18n,
         useGlobalSnackbar: mockUseGlobalSnackbar,
         useDetectFacesMutation: mockUseDetectFacesMutation,
-        FileReader: mockFileReader,
+        FileReader: FileReader as any, // Cast to any because of stubGlobal
       });
 
       state.selectedFamilyId.value = 'family1';
 
       // Mock FileReader to simulate onload event
-      mockFileReader.mockImplementation(() => {
-        const reader = new EventTarget() as FileReader;
-        reader.readAsDataURL = vi.fn(() => {
-          reader.onload?.({ target: { result: 'base64image' } } as ProgressEvent<FileReader>);
-        });
-        reader.onload = null; // Reset onload for subsequent calls
-        return reader;
+      mockFileReaderInstance.readAsDataURL.mockImplementation((_file: Blob) => {
+        mockFileReaderInstance.result = 'base64image';
+        // Simulate event dispatch
+        (mockFileReaderInstance.onload as Mock)?.({ target: mockFileReaderInstance } as unknown as ProgressEvent<FileReader>);
       });
 
       mockMutate.mockImplementation((_variables, callbacks) => {
@@ -207,18 +217,15 @@ describe('useFaceSearch', () => {
         useI18n: mockUseI18n,
         useGlobalSnackbar: mockUseGlobalSnackbar,
         useDetectFacesMutation: mockUseDetectFacesMutation,
-        FileReader: mockFileReader,
+        FileReader: FileReader as any, // Cast to any because of stubGlobal
       });
 
       state.selectedFamilyId.value = 'family1';
 
-      mockFileReader.mockImplementation(() => {
-        const reader = new EventTarget() as FileReader;
-        reader.readAsDataURL = vi.fn(() => {
-          reader.onload?.({ target: { result: 'base64image' } } as ProgressEvent<FileReader>);
-        });
-        reader.onload = null;
-        return reader;
+      mockFileReaderInstance.readAsDataURL.mockImplementation((_file: Blob) => {
+        mockFileReaderInstance.result = 'base64image';
+        // Simulate event dispatch
+        (mockFileReaderInstance.onload as Mock)?.({ target: mockFileReaderInstance } as unknown as ProgressEvent<FileReader>);
       });
 
       const mockError = new Error('API error');

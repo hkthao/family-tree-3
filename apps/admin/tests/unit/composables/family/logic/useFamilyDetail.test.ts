@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 import { ref } from 'vue';
+import type { Family } from '@/types';
 
 // Mock dependencies
 const mockT = vi.fn((key: string) => key);
@@ -10,8 +11,8 @@ const mockPush = vi.fn();
 const mockUseRouter = vi.fn(() => ({ push: mockPush }));
 
 const mockIsAdmin = ref(false);
-const mockIsFamilyManagerFn = vi.fn(() => false);
-const mockIsFamilyManager = ref(mockIsFamilyManagerFn);
+const mockIsFamilyManagerFn: Mock<((familyId: string) => boolean)> = vi.fn(() => false);
+const mockIsFamilyManager = ref<((familyId: string) => boolean)>(mockIsFamilyManagerFn);
 const mockUseAuth = vi.fn(() => ({
   state: {
     isAdmin: mockIsAdmin,
@@ -19,9 +20,9 @@ const mockUseAuth = vi.fn(() => ({
   },
 }));
 
-const mockFamily = ref(null);
+const mockFamily = ref<Family | null>(null);
 const mockIsLoading = ref(false);
-const mockError = ref(null);
+const mockError = ref<Error | null>(null);
 const mockUseFamilyQuery = vi.fn(() => ({
   family: mockFamily,
   isLoading: mockIsLoading,
@@ -30,7 +31,7 @@ const mockUseFamilyQuery = vi.fn(() => ({
 
 describe('useFamilyDetail', () => {
   let emit: (event: 'openEditDrawer', familyId: string) => void;
-  let deps;
+  let deps: any;
   const mockFamilyId = 'family123';
   const mockReadOnly = true;
 
@@ -39,7 +40,7 @@ describe('useFamilyDetail', () => {
     emit = vi.fn();
     mockIsAdmin.value = false;
     mockIsFamilyManagerFn.mockReturnValue(false); // Corrected
-    mockFamily.value = { id: mockFamilyId, name: 'Test Family' };
+    mockFamily.value = { id: mockFamilyId, name: 'Test Family', managerIds: [], viewerIds: [] };
     mockIsLoading.value = false;
     mockError.value = null;
 
@@ -57,7 +58,7 @@ describe('useFamilyDetail', () => {
     const { familyData, isLoading, error } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
 
     expect(mockUseFamilyQuery).toHaveBeenCalledWith(expect.any(Object));
-    expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family' });
+    expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family', managerIds: [], viewerIds: [] });
     expect(isLoading.value).toBe(true);
     expect(error.value).toEqual(new Error('Test Error'));
   });
@@ -69,7 +70,7 @@ describe('useFamilyDetail', () => {
   });
 
   it('should return canManageFamily as true if user is family manager for the current family', () => {
-    mockIsFamilyManagerFn.mockImplementation((id: string) => id === mockFamilyId);
+    mockIsFamilyManagerFn.mockImplementation((id: string): boolean => id === mockFamilyId);
     const { canManageFamily } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
     expect(canManageFamily.value).toBe(true);
   });

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useAddMemberFaceMutation } from '@/composables/member-face/mutations/useAddMemberFaceMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { ref } from 'vue';
 import { queryKeys } from '@/constants/queryKeys';
 import type { MemberFace } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
@@ -16,18 +17,20 @@ vi.mock('@tanstack/vue-query', () => ({
       isFetching: ref(false),
       refetch: vi.fn(),
     };
-  }),
-  useMutation: vi.fn((options) => {
+  }) as Mock,
+  useMutation: vi.fn((options: any) => {
       const isPending = ref(false);
-      const error = ref(null);
+      const error = ref<unknown | null>(null);
       const mutate = vi.fn(async (variables, callbacks) => {
           isPending.value = true;
           try {
               const data = await options.mutationFn(variables);
+              options?.onSuccess?.(data, variables, null); // Call options.onSuccess
               callbacks?.onSuccess?.(data, variables, null);
               return data;
           } catch (err) {
               error.value = err;
+              options?.onError?.(err, variables, null); // Call options.onError
               callbacks?.onError?.(err, variables, null);
               throw err;
           } finally {
@@ -39,12 +42,12 @@ vi.mock('@tanstack/vue-query', () => ({
           isPending,
           error,
       };
-  }),
+  }) as Mock,
   useQueryClient: vi.fn(() => ({
     invalidateQueries: vi.fn(),
     setQueryData: vi.fn(),
     getQueryData: vi.fn(),
-  })),
+  })) as Mock,
 }));
 
 // Mock memberFaceService
@@ -82,12 +85,12 @@ describe('useAddMemberFaceMutation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useQueryClient as vi.Mock).mockReturnValue(mockQueryClient);
+    (useQueryClient as Mock).mockReturnValue(mockQueryClient);
   });
 
   it('should call memberFaceService.add with correct data in mutationFn', async () => {
     // Mock useMutation to immediately execute mutationFn
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options: any) => {
       options.mutationFn(mockMemberFaceData);
       return {
         mutate: vi.fn(),
@@ -95,7 +98,7 @@ describe('useAddMemberFaceMutation', () => {
         error: null,
       };
     });
-    mockMemberFaceService.add.mockResolvedValue({ ok: true, value: mockMemberFace });
+    (mockMemberFaceService.add as Mock).mockResolvedValue({ ok: true, value: mockMemberFace });
 
     useAddMemberFaceMutation({ useMutation: useMutation as any, getMemberFaceService: () => mockMemberFaceService, useQueryClient: useQueryClient as any });
 
@@ -104,7 +107,7 @@ describe('useAddMemberFaceMutation', () => {
 
   it('should call onSuccess and invalidate queries on successful mutation', async () => {
     const onSuccessCallback = vi.fn();
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options: any) => {
       options.onSuccess();
       return {
         mutate: vi.fn((data, callbacks) => callbacks.onSuccess()),
@@ -112,7 +115,7 @@ describe('useAddMemberFaceMutation', () => {
         error: null,
       };
     });
-    mockMemberFaceService.add.mockResolvedValue({ ok: true, value: mockMemberFace });
+    (mockMemberFaceService.add as Mock).mockResolvedValue({ ok: true, value: mockMemberFace });
 
     const { mutate } = useAddMemberFaceMutation({ useMutation: useMutation as any, getMemberFaceService: () => mockMemberFaceService, useQueryClient: useQueryClient as any });
     mutate(mockMemberFaceData, { onSuccess: onSuccessCallback });
@@ -123,7 +126,7 @@ describe('useAddMemberFaceMutation', () => {
 
   it('should throw an error on failed mutation', async () => {
     const mockError = new Error('Failed to add member face');
-    (useMutation as vi.Mock).mockImplementation((options) => {
+    (useMutation as Mock).mockImplementation((options: any) => {
       options.mutationFn = vi.fn(() => Promise.reject(mockError));
       return {
         mutate: vi.fn((data, callbacks) => {
@@ -134,7 +137,7 @@ describe('useAddMemberFaceMutation', () => {
         error: mockError,
       };
     });
-    mockMemberFaceService.add.mockResolvedValue({ ok: false, error: mockError });
+    (mockMemberFaceService.add as Mock).mockResolvedValue({ ok: false, error: mockError });
 
     const { mutate } = useAddMemberFaceMutation({ useMutation: useMutation as any, getMemberFaceService: () => mockMemberFaceService, useQueryClient: useQueryClient as any });
 

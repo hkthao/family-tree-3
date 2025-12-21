@@ -1,5 +1,5 @@
 // tests/unit/composables/family-dict/useFamilyDictFormLogic.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { useFamilyDictFormLogic } from '@/composables/family-dict/useFamilyDictFormLogic';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ const mockValidate = vi.fn();
 const mockGetFormData = vi.fn();
 
 vi.mock('@/composables', async (importOriginal) => {
-  const original = await importOriginal();
+  const original = (await importOriginal()) as Record<string, unknown>;
   return {
     ...original,
     useAddFamilyDictMutation: vi.fn(),
@@ -43,7 +43,7 @@ describe('useFamilyDictFormLogic', () => {
     // The mock for useAddFamilyDictMutation will create its own internal isPending ref.
 
     // This mock will be the default, and individual test cases will override the 'mutate' behavior.
-    (useAddFamilyDictMutation as vi.Mock).mockImplementation(() => {
+    (useAddFamilyDictMutation as Mock).mockImplementation(() => {
       return {
         mutate: vi.fn(), // Will be overridden by individual tests if needed
         isPending: ref(false), // Default to a simple ref

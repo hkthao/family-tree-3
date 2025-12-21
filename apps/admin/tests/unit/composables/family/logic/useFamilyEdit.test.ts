@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useFamilyEdit } from '@/composables/family/logic/useFamilyEdit';
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 
 // Mock dependencies
 const mockT = vi.fn((key: string) => key);
@@ -11,7 +11,7 @@ const mockUseGlobalSnackbar = vi.fn(() => ({ showSnackbar: mockShowSnackbar }));
 
 const mockFamily = ref({ id: 'family1', name: 'Test Family' });
 const mockIsLoadingFamily = ref(false);
-const mockErrorFamily = ref(null);
+const mockErrorFamily = ref<Error | null>(null);
 const mockUseFamilyQuery = vi.fn(() => ({
   family: mockFamily,
   isLoading: mockIsLoadingFamily,
@@ -25,16 +25,14 @@ const mockUseUpdateFamilyMutation = vi.fn(() => ({
   isPending: mockIsUpdatingFamily,
 }));
 
-const mockFamilyFormRef = {
-  value: {
-    validate: vi.fn(() => true),
-    getFormData: vi.fn(() => ({ id: 'family1', name: 'Updated Family' })),
-  },
-};
+const mockFamilyFormRef: Ref<any | null> = ref({
+  validate: vi.fn(() => true),
+  getFormData: vi.fn(() => ({ id: 'family1', name: 'Updated Family' })),
+});
 
 describe('useFamilyEdit', () => {
   let emit: (event: 'close' | 'saved') => void;
-  let deps;
+  let deps: any;
   const mockProps = { familyId: 'family1' };
 
   beforeEach(() => {

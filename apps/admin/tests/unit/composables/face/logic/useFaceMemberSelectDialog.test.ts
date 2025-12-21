@@ -1,28 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFaceMemberSelectDialog } from '@/composables/face/logic/useFaceMemberSelectDialog';
 import { useQuery } from '@tanstack/vue-query';
-import { ref, nextTick, reactive } from 'vue';
-import type { DetectedFace, Member, ApiError } from '@/types';
+import { ref, nextTick, reactive, type Ref } from 'vue';
+import { type DetectedFace, type Member, type ApiError, type FaceStatus, Gender } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
 
 import type { Composer } from 'vue-i18n';
 
 // Mock the external dependencies
 vi.mock('@tanstack/vue-query', () => ({
-  useQuery: vi.fn((options) => {
+  useQuery: vi.fn((options: any) => {
     const queryResult = {
       data: ref(options?.initialData || options?.placeholderData),
       isLoading: ref(false),
       isError: ref(false),
-      error: ref(null),
+      error: ref<Error | null>(null),
       isFetching: ref(false),
       refetch: vi.fn(),
     };
     return queryResult;
   }),
-  useMutation: vi.fn((options) => {
+  useMutation: vi.fn((options: any) => {
       const isPending = ref(false);
-      const error = ref(null);
+      const error = ref<Error | null>(null);
       const mutate = vi.fn(async (variables, callbacks) => {
           isPending.value = true;
           try {
@@ -30,8 +30,8 @@ vi.mock('@tanstack/vue-query', () => ({
               callbacks?.onSuccess?.(data, variables, null);
               return data;
           } catch (err) {
-              error.value = err;
-              callbacks?.onError?.(err, variables, null);
+              error.value = err as Error;
+              callbacks?.onError?.(err as Error, variables, null);
               throw err;
           } finally {
               isPending.value = false;
@@ -57,15 +57,16 @@ const mockUseI18n = vi.fn(() => ({
 
 // Mock memberService
 const mockMemberService: IMemberService = {
-  fetchMembersByFamilyId: vi.fn(),
-  add: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  getById: vi.fn(),
-  search: vi.fn(),
-  addItems: vi.fn(),
-  updateMemberBiography: vi.fn(),
-  getRelatives: vi.fn(),
+  fetchMembersByFamilyId: vi.fn() as Mock,
+  add: vi.fn() as Mock,
+  update: vi.fn() as Mock,
+  delete: vi.fn() as Mock,
+  getById: vi.fn() as Mock,
+  search: vi.fn() as Mock,
+  addItems: vi.fn() as Mock,
+  updateMemberBiography: vi.fn() as Mock,
+  getRelatives: vi.fn() as Mock,
+  getByIds: vi.fn() as Mock, // Added missing property
 };
 
 describe('useFaceMemberSelectDialog', () => {
@@ -76,13 +77,17 @@ describe('useFaceMemberSelectDialog', () => {
     relationPrompt: 'Father',
     thumbnail: 'base64thumbnail',
     boundingBox: { x: 10, y: 10, width: 20, height: 20 },
+    embedding: [1, 2, 3], // Changed to number[]
+    status: "unrecognized", // Changed to FaceStatus enum
   };
 
   const mockMember: Member = {
     id: 'member1',
     fullName: 'John Doe',
-    gender: 0,
+    gender: Gender.Male, // Changed to Gender enum
     familyId: 'family1',
+    lastName: '',
+    firstName: ''
   };
 
   const mockProps = {
@@ -136,20 +141,21 @@ describe('useFaceMemberSelectDialog', () => {
     expect(state.internalRelationPrompt.value).toBe('Mother');
   });
 
-       it('should call memberService.getById in queryFn when selectedMemberId is defined', async () => {    let capturedQueryFn: (() => Promise<Member | undefined>) | undefined;
+  it('should call memberService.getById in queryFn when selectedMemberId is defined', async () => {
+    let capturedQueryFn: (() => Promise<Member | undefined>) | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       capturedQueryFn = options.queryFn;
       return {
         data: ref(mockMember),
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
     });
-    mockMemberService.getById.mockResolvedValue({ ok: true, value: mockMember });
+    (mockMemberService.getById as Mock).mockResolvedValue({ ok: true, value: mockMember });
 
     const { state } = useFaceMemberSelectDialog(mockProps, mockEmit as any, {
       useI18n: mockUseI18n,
@@ -167,17 +173,17 @@ describe('useFaceMemberSelectDialog', () => {
   });
 
   it('should return member details on successful query', async () => {
-    (useQuery as vi.Mock).mockImplementation(() => {
+    (useQuery as Mock).mockImplementation(() => {
       return {
         data: ref(mockMember),
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
     });
-    mockMemberService.getById.mockResolvedValue({ ok: true, value: mockMember });
+    (mockMemberService.getById as Mock).mockResolvedValue({ ok: true, value: mockMember });
 
     const { state } = useFaceMemberSelectDialog(mockProps, mockEmit as any, {
       useI18n: mockUseI18n,
@@ -189,14 +195,14 @@ describe('useFaceMemberSelectDialog', () => {
   });
 
   it('should handle query error and set selectedMemberDetails to undefined', async () => {
-    const mockError: ApiError = { message: 'Member not found', statusCode: 404 };
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    const mockError: ApiError = { message: 'Member not found', statusCode: 404, name: 'ApiError' };
+    (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {
         data: ref(undefined),
         isLoading: ref(false),
         isError: ref(true),
-        error: ref(mockError),
+        error: ref<Error | null>(mockError),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
@@ -212,16 +218,16 @@ describe('useFaceMemberSelectDialog', () => {
   });
 
   it('should emit "label-face" and "update:show" on handleSave with valid data', () => {
-    const member = { id: 'member1', fullName: 'John Doe', gender: 0, familyId: 'family1' };
+    const member = { id: 'member1', fullName: 'John Doe', gender: Gender.Male, familyId: 'family1' }; // Changed to Gender enum
     const face = { ...mockDetectedFace, memberId: 'member1' };
     const updatedFace: DetectedFace = { ...face, memberName: member.fullName, relationPrompt: mockDetectedFace.relationPrompt };
 
-    (useQuery as vi.Mock).mockImplementation(() => {
+    (useQuery as Mock).mockImplementation(() => {
       return {
         data: ref(member), // Simulate selectedMemberDetails being available
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
@@ -241,12 +247,12 @@ describe('useFaceMemberSelectDialog', () => {
   it('should not emit on handleSave if selectedFace or selectedMemberId is missing', () => {
     const face = { ...mockDetectedFace, memberId: undefined as any };
 
-    (useQuery as vi.Mock).mockImplementation(() => {
+    (useQuery as Mock).mockImplementation(() => {
       return {
         data: ref(undefined),
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
@@ -268,13 +274,13 @@ describe('useFaceMemberSelectDialog', () => {
   it('should set enabled to true when selectedMemberId is defined', () => {
     let enabledComputed: Ref<boolean> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       enabledComputed = options.enabled;
       return {
         data: ref(undefined),
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
@@ -295,13 +301,13 @@ describe('useFaceMemberSelectDialog', () => {
   it('should set enabled to false when selectedMemberId is undefined', () => {
     let enabledComputed: Ref<boolean> | undefined;
 
-    (useQuery as vi.Mock).mockImplementation((options) => {
+    (useQuery as Mock).mockImplementation((options: any) => {
       enabledComputed = options.enabled;
       return {
         data: ref(undefined),
         isLoading: ref(false),
         isError: ref(false),
-        error: ref(null),
+        error: ref<Error | null>(null),
         isFetching: ref(false),
         refetch: vi.fn(),
       };
@@ -317,3 +323,4 @@ describe('useFaceMemberSelectDialog', () => {
     expect(enabledComputed?.value).toBe(false);
   });
 });
+
