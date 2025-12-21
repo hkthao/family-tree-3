@@ -85,7 +85,6 @@ public class Startup
     {
         services.AddCompositionRootServices(Configuration);
         services.AddWebServices(Configuration);
-        services.AddInfrastructureServices(Configuration); // This is where AddRateLimitingServices is now included
 
         services.AddControllers(options =>
         {
