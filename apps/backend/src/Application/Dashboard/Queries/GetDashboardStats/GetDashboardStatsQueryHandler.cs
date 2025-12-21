@@ -1,9 +1,7 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Queries;
 using backend.Application.Dashboard.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;

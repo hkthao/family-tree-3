@@ -1,12 +1,12 @@
-using backend.Application.Common.Constants;
 using System.Threading.RateLimiting;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
-
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Novu;
@@ -105,16 +104,16 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
-                // Add Rate Limiting services
-                services.AddRateLimiter(rateLimiterOptions =>
-                {
-                    rateLimiterOptions.AddPolicy<string, UserRateLimiterPolicy>(RateLimitConstants.PerUserPolicy);
-                    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-                });
-        
-        
-                return services;
-            }
+        // Add Rate Limiting services
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            rateLimiterOptions.AddPolicy<string, UserRateLimiterPolicy>(RateLimitConstants.PerUserPolicy);
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
+
+
+        return services;
+    }
 
     /// <summary>
     /// Adds Novu related services to the dependency injection container.

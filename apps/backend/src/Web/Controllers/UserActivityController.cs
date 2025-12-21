@@ -1,9 +1,8 @@
+using backend.Application.Common.Constants;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;

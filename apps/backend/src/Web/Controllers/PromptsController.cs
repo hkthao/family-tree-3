@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Prompts.Commands.CreatePrompt;
 using backend.Application.Prompts.Commands.DeletePrompt;
 using backend.Application.Prompts.Commands.UpdatePrompt;
@@ -5,8 +6,6 @@ using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.Prompts.Queries.SearchPrompts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;

@@ -1,6 +1,5 @@
-using AutoMapper;
-using backend.Domain.Entities;
 using backend.Application.Families.Queries;
+using backend.Domain.Entities;
 
 namespace backend.Application.Families.DTOs;
 

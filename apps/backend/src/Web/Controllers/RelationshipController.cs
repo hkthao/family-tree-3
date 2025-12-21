@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
@@ -8,8 +9,6 @@ using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;

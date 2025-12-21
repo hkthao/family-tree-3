@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.Members.Commands.CreateMembers;
@@ -11,8 +12,6 @@ using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;

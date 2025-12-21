@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using backend.Domain.Enums;
 
 namespace backend.Web.Models.FamilyMedia;
 

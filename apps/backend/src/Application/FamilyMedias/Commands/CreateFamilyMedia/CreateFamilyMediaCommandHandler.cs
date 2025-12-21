@@ -4,7 +4,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.DTOs;
 using Microsoft.Extensions.Logging;
-using MediatR;
 
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
@@ -75,7 +74,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         var currentStorageBytes = await _context.FamilyMedia
             .Where(fm => fm.FamilyId == request.FamilyId)
             .SumAsync(fm => fm.FileSize, cancellationToken);
-        
+
         if (currentStorageBytes + request.File.Length > maxStorageBytes)
         {
             return Result<FamilyMediaDto>.Failure($"Storage limit ({familyLimitConfig.MaxStorageMb} MB) exceeded.", ErrorSources.Validation);

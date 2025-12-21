@@ -1,7 +1,5 @@
 using backend.Application.Common.Interfaces; // ADDED
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore; // ADDED
 
 namespace backend.Application.Families.Commands;
 

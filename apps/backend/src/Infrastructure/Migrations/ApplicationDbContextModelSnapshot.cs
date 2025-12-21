@@ -292,6 +292,14 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("id");
 
+                    b.Property<int>("AiChatMonthlyLimit")
+                        .HasColumnType("int")
+                        .HasColumnName("ai_chat_monthly_limit");
+
+                    b.Property<int>("AiChatMonthlyUsage")
+                        .HasColumnType("int")
+                        .HasColumnName("ai_chat_monthly_usage");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created");
