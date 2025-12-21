@@ -15,8 +15,10 @@ export function useFamilyListFilters() {
   };
 
   const setItemsPerPage = (newItemsPerPage: number) => {
-    filters.value.itemsPerPage = newItemsPerPage;
-    filters.value.page = 1; // Reset to first page when items per page changes
+    if (filters.value.itemsPerPage !== newItemsPerPage) {
+      filters.value.itemsPerPage = newItemsPerPage;
+      filters.value.page = 1; // Reset to first page when items per page changes
+    }
   };
 
   const setSortBy = (newSortBy: { key: string; order: 'asc' | 'desc' }[]) => {
@@ -24,16 +26,24 @@ export function useFamilyListFilters() {
   };
 
   const setSearchQuery = (newSearchQuery: string) => {
-    filters.value.searchQuery = newSearchQuery;
-    filters.value.page = 1; // Reset to first page on new search
+    if (filters.value.searchQuery !== newSearchQuery) {
+      filters.value.searchQuery = newSearchQuery;
+      filters.value.page = 1; // Reset to first page on new search
+    }
   };
 
   const setFilters = (newFilters: FamilyFilter) => {
-    filters.value = { ...filters.value, ...newFilters };
-    if (newFilters.page !== undefined) filters.value.page = newFilters.page;
-    if (newFilters.itemsPerPage !== undefined) filters.value.itemsPerPage = newFilters.itemsPerPage;
-    if (newFilters.sortBy !== undefined) filters.value.sortBy = newFilters.sortBy;
-    if (newFilters.searchQuery !== undefined) filters.value.searchQuery = newFilters.searchQuery;
+    const oldFilters = { ...filters.value };
+    filters.value = { ...oldFilters, ...newFilters };
+
+    // If any filter other than 'page' has changed, and newFilters.page was not explicitly set, reset to page 1.
+    const hasNonPageFilterChanged = Object.keys(newFilters).some(key =>
+      key !== 'page' && oldFilters[key] !== newFilters[key]
+    );
+
+    if (hasNonPageFilterChanged && newFilters.page === undefined) {
+      filters.value.page = 1;
+    }
   };
 
   return {

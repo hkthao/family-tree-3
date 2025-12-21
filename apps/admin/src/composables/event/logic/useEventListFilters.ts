@@ -15,8 +15,10 @@ export function useEventListFilters() {
   };
 
   const setItemsPerPage = (newItemsPerPage: number) => {
-    filters.value.itemsPerPage = newItemsPerPage;
-    filters.value.page = 1; // Reset to first page when items per page changes
+    if (filters.value.itemsPerPage != newItemsPerPage) {
+      filters.value.itemsPerPage = newItemsPerPage;
+      filters.value.page = 1; // Reset to first page when items per page changes
+    }
   };
 
   const setSortBy = (newSortBy: { key: string; order: 'asc' | 'desc' }[]) => {

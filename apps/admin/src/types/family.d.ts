@@ -1,3 +1,4 @@
+import type { FilterOptions } from './pagination'; // Added explicit import
 export enum FamilyVisibility {
   Private = 'Private',
   Public = 'Public',
@@ -53,7 +54,7 @@ export interface IFamilyAccess {
   role: number; // Corresponds to FamilyRole enum in backend
 }
 
-export interface FamilyFilter {
+export interface FamilyFilter extends FilterOptions {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;
   familyId?: string;
