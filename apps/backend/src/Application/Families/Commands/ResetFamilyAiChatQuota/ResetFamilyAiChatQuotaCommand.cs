@@ -1,6 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
-using System;
 
 namespace backend.Application.Families.Commands.ResetFamilyAiChatQuota;
 

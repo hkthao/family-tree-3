@@ -1,13 +1,9 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper; // Added for ProjectTo extension method
-using AutoMapper.QueryableExtensions; // Added for ProjectTo extension method
-using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Specifications;
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore; // Added for Include extension method
 
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 

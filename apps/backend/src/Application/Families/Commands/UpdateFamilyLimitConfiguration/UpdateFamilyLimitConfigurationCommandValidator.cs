@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
 
 /// <summary>

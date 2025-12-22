@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities; // Ensure this is included for MemoryItem
 
 namespace backend.Application.MemoryItems.Commands.DeleteMemoryItem;
 

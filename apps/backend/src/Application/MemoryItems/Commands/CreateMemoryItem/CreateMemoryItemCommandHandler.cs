@@ -2,7 +2,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using MediatR; // Ensure MediatR is included
 
 namespace backend.Application.MemoryItems.Commands.CreateMemoryItem;
 
