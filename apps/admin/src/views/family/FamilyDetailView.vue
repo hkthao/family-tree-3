@@ -7,7 +7,7 @@
     <v-alert type="error" :text="error?.message || t('family.detail.errorLoading')"></v-alert>
   </div>
   <div v-else-if="familyData">
-    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" />
+    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" :display-limit-config="true" />
     <v-card-actions class="justify-end pa-0">
       <v-btn color="gray" @click="actions.closeView" data-testid="button-close">
         {{ t('common.close') }}

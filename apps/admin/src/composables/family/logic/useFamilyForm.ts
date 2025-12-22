@@ -18,7 +18,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
   const isEditMode = ref(!!props.data);
 
   // Initial state for formData
-  const initialFormData = (): FamilyAddDto | FamilyUpdateDto => {
+  const initialFormData = (): FamilyAddDto | FamilyUpdateDto | Family => {
     if (props.data) {
       return {
         id: props.data.id,
@@ -30,6 +30,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         visibility: props.data.visibility || FamilyVisibility.Public,
         managerIds: props.data.managerIds || [],
         viewerIds: props.data.viewerIds || [],
+        familyLimitConfiguration: props.data.familyLimitConfiguration,
       };
     }
     return {
@@ -44,7 +45,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     };
   };
 
-  const formData = reactive<FamilyAddDto | FamilyUpdateDto>(initialFormData());
+  const formData = reactive<FamilyAddDto | FamilyUpdateDto | Family>(initialFormData());
 
   const initialAvatarDisplay = ref(formData.avatarBase64 || formData.avatarUrl);
 
@@ -64,7 +65,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     (newVal) => {
       if (newVal) {
         isEditMode.value = true;
-        Object.assign(formData, initialFormData()); // Reset form data
+        Object.assign(formData, { ...initialFormData(), familyLimitConfiguration: newVal.familyLimitConfiguration }); // Reset form data and include familyLimitConfiguration
         initialAvatarDisplay.value = formData.avatarBase64 || formData.avatarUrl;
         managers.value = newVal.managerIds || [];
         viewers.value = newVal.viewerIds || [];

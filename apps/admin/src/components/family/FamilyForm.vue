@@ -27,6 +27,40 @@
           :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
+    <v-row v-if="props.displayLimitConfig">
+      <v-col cols="6">
+        <v-text-field
+          :label="$t('family.form.maxMembers')"
+          :model-value="formData.familyLimitConfiguration?.maxMembers"
+          readonly
+          data-testid="family-max-members"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field
+          :label="$t('family.form.maxStorageMb')"
+          :model-value="formData.familyLimitConfiguration?.maxStorageMb ? formData.familyLimitConfiguration.maxStorageMb + ' MB' : ''"
+          readonly
+          data-testid="family-max-storage-mb"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field
+          :label="$t('family.form.aiChatMonthlyLimit')"
+          :model-value="formData.familyLimitConfiguration?.aiChatMonthlyLimit ?? ''"
+          readonly
+          data-testid="family-ai-chat-monthly-limit"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field
+          :label="$t('family.form.aiChatMonthlyUsage')"
+          :model-value="formData.familyLimitConfiguration?.aiChatMonthlyUsage ?? ''"
+          readonly
+          data-testid="family-ai-chat-monthly-usage"
+        ></v-text-field>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12">
         <UserAutocomplete v-model="managers" multiple :disabled="props.readOnly" hideDetails
@@ -49,8 +83,9 @@ import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useFamilyForm } from '@/composables';
 
 const props = defineProps<{
-  data?: Family; // Keep Family type for incoming data from API
+  data?: Family;
   readOnly?: boolean;
+  displayLimitConfig?: boolean;
 }>();
 // Removed emit from props, as it's handled internally now.
 defineEmits(['submit']);

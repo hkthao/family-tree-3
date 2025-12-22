@@ -19,6 +19,7 @@ export interface Family {
   totalGenerations?: number;
   managerIds: string[]; // Changed to string[]
   viewerIds: string[]; // Changed to string[]
+  familyLimitConfiguration?: FamilyLimitConfiguration;
 
 }
 
@@ -32,6 +33,7 @@ export interface FamilyAddDto {
   visibility?: FamilyVisibility;
   managerIds: string[];
   viewerIds: string[];
+  familyLimitConfiguration?: FamilyLimitConfiguration;
 }
 
 export interface FamilyUpdateDto {
@@ -47,6 +49,7 @@ export interface FamilyUpdateDto {
   viewerIds: string[];
   deletedManagerIds: string[]; // New field
   deletedViewerIds: string[]; // New field
+  familyLimitConfiguration?: FamilyLimitConfiguration;
 }
 
 export interface IFamilyAccess {
@@ -64,8 +67,17 @@ export interface FamilyFilter extends FilterOptions {
 }
 
 export interface FamilyUser {
-    userId: string;
-    role: number;
+  userId: string;
+  role: number;
+}
+
+export interface FamilyLimitConfiguration {
+  id: string;
+  familyId: string;
+  maxMembers: number;
+  maxStorageMb: number;
+  aiChatMonthlyLimit: number;
+  aiChatMonthlyUsage: number;
 }
 
 export interface MemberExportDto {
@@ -119,6 +131,7 @@ export interface FamilyExportDto {
   familyUsers?: any[]; // Added for consistency with test expectations
   settings?: any; // Added for consistency with test expectations
   privacyConfiguration?: any; // Added for consistency with test expectations
+  familyLimitConfiguration?: FamilyLimitConfiguration;
   members: MemberExportDto[];
   relationships: RelationshipExportDto[];
   events: EventExportDto[];
