@@ -4,7 +4,7 @@ export const donateRoutes: Array<RouteRecordRaw> = [
   {
     path: '/donate',
     name: 'Donate',
-    component: () => import('@/views/DonateView.vue'),
+    component: () => import('@/views/info-pages/DonateView.vue'),
     meta: {
       requiresAuth: true,
       layout: 'MainLayout',

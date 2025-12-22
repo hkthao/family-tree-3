@@ -100,7 +100,7 @@ import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
-import ChatView from '@/components/ai/ChatView.vue'; // NEW
+import ChatView from '@/views/chat/ChatView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();

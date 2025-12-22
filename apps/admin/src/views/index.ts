@@ -54,3 +54,5 @@ export { default as FamilyTreeMobileView } from './FamilyTreeMobileView.vue';
 
 // Export MainRouterView (if it's intended to be used as a view component)
 export { default as MainRouterView } from './MainRouterView.vue';
+export { default as ChatView } from './chat/ChatView.vue';
+export { default as DonateView } from './info-pages/DonateView.vue';
