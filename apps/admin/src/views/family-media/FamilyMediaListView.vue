@@ -13,7 +13,7 @@
       @view="openDetailDrawer"
       @delete="confirmDelete"
       @create="openAddDrawer()"
-      @add-link="openAddLinkDrawer()"
+      @add-link="openAddDrawer()"
       :allow-add="allowAdd"
       :allow-edit="allowEdit"
       :allow-delete="allowDelete"
@@ -33,11 +33,7 @@
         @saved="handleMediaSaved" />
     </BaseCrudDrawer>
 
-    <!-- Add Family Media From Link Drawer -->
-    <BaseCrudDrawer v-if="allowAdd" v-model="addLinkDrawer" @close="handleMediaClosed">
-      <FamilyMediaAddLinkView v-if="addLinkDrawer" :family-id="props.familyId" @close="handleMediaClosed"
-        @saved="handleMediaSaved" />
-    </BaseCrudDrawer>
+
   </div>
 </template>
 
@@ -53,7 +49,7 @@ import FamilyMediaList from '@/components/family-media/FamilyMediaList.vue';
 import FamilyMediaAddView from '@/views/family-media/FamilyMediaAddView.vue';
 import FamilyMediaDetailView from '@/views/family-media/FamilyMediaDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import FamilyMediaAddLinkView from '@/views/family-media/FamilyMediaAddLinkView.vue'; // New Import
+
 
 const props = defineProps<{
   familyId: string;
@@ -95,11 +91,9 @@ const {
     closeAllDrawers,
   } = useCrudDrawer<string>();
 
-const addLinkDrawer = ref(false); // New state for addLinkDrawer
 
-const openAddLinkDrawer = () => {
-  addLinkDrawer.value = true;
-};
+
+
 
 const handleFilterUpdate = (newFilters: FamilyMediaFilter) => {
   setFilters(newFilters);
@@ -127,13 +121,13 @@ const confirmDelete = async (familyMediaId: string) => {
 
 const handleMediaSaved = () => {
   closeAllDrawers();
-  addLinkDrawer.value = false; // Close addLinkDrawer as well
+
   refetch(); // Refetch the list after add/edit/delete
 };
 
 const handleMediaClosed = () => {
   closeAllDrawers();
-  addLinkDrawer.value = false; // Close addLinkDrawer as well
+
 };
 
 const handleDetailClosed = () => {

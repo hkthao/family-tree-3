@@ -634,6 +634,8 @@
   "familyMedia.search.mediaTypeLabel": "Filter by Media Type",
   "familyMedia.search.searchQueryLabel": "Search by File Name or Description",
   "familyMedia.search.title": "Search Family Media",
+  "familyMedia.addUnified.uploadFileTabTitle": "Upload File",
+  "familyMedia.addUnified.fromUrlTabTitle": "From URL",
   "memoryItem.title": "Memory Items",
   "memoryItem.detail.title": "Memory Item Details",
   "memoryItem.list.title": "Memory Items List",

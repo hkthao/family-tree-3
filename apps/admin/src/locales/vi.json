@@ -769,6 +769,8 @@
   "familyMedia.search.mediaTypeLabel": "Lọc theo Loại Media",
   "familyMedia.search.searchQueryLabel": "Tìm kiếm theo Tên tệp hoặc Mô tả",
   "familyMedia.search.title": "Tìm kiếm nâng cao",
+  "familyMedia.addUnified.uploadFileTabTitle": "Tải lên Tệp",
+  "familyMedia.addUnified.fromUrlTabTitle": "Từ URL",
   "familyMedia.upload.uploadButton": "Tải lên",
   "familyMedia.viewer.audioNotSupported": "Trình duyệt của bạn không hỗ trợ phần tử âm thanh.",
   "familyMedia.viewer.unsupportedMediaType": "Loại media không được hỗ trợ.",
