@@ -24,7 +24,7 @@ export const useMemoryItemsQuery = (
       familyId.value,
       options.value.page,
       options.value.itemsPerPage,
-      options.value.sortBy,
+      JSON.stringify(options.value.sortBy),
       combinedFilters.value.emotionalTag,
       combinedFilters.value.memberId,
       combinedFilters.value.searchTerm,
@@ -52,7 +52,7 @@ export const useMemoryItemsQuery = (
     placeholderData: (previousData: Paginated<MemoryItem> | undefined) => previousData,
   });
 
-  const memberFaces = computed<MemoryItem[]>(() => query.data.value?.items || []);
+  const memoryItems = computed<MemoryItem[]>(() => query.data.value?.items || []);
   const totalItems = computed<number>(() => query.data.value?.totalItems || 0);
   const isLoading = computed<boolean>(() => query.isPending.value || query.isFetching.value);
 
@@ -64,7 +64,7 @@ export const useMemoryItemsQuery = (
 
   return {
     state: {
-      memberFaces,
+      memoryItems,
       totalItems,
       isLoading,
       error: query.error,

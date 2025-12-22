@@ -6,7 +6,6 @@ import type { MemoryItem } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 
 export const useMemoryItemQuery = (
-  familyIdParam: Ref<string | undefined> | string,
   memoryItemIdParam: Ref<string | undefined> | string,
 ) => {
   const services = useServices();

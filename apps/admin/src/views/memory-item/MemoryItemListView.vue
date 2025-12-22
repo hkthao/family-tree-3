@@ -63,16 +63,16 @@ const {
   actions: { setPage, setItemsPerPage, setSortBy },
 } = useMemoryItemDataManagement(computed(() => props.familyId));
 
-const { state: { memberFaces, totalItems, isLoading: isLoadingMemoryItems } } = useMemoryItemsQuery(
+const { state: { memoryItems: queryMemoryItems, totalItems, isLoading: isLoadingMemoryItems } } = useMemoryItemsQuery(
   computed(() => props.familyId),
   paginationOptions,
   filters
 );
 
-const memoryItems = ref<MemoryItem[]>(memberFaces.value || []);
+const memoryItems = ref<MemoryItem[]>(queryMemoryItems.value || []);
 const currentTotalItems = ref(totalItems.value || 0);
 
-watch(memberFaces, (newData) => {
+watch(queryMemoryItems, (newData) => {
   memoryItems.value = newData || [];
 });
 
@@ -127,7 +127,7 @@ const handleDeleteConfirm = (id: string) => {
   deleteMemoryItem({ familyId: props.familyId, id }, {
     onSuccess: () => {
       showSnackbar(t('memoryItem.messages.deleteSuccess'), 'success');
-      queryClient.invalidateQueries({ queryKey: ['family', props.familyId, 'memory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['memory-items'] });
     },
     onError: (error) => {
       showSnackbar(error.message || t('memoryItem.messages.deleteError'), 'error');
@@ -137,7 +137,7 @@ const handleDeleteConfirm = (id: string) => {
 
 const handleMemoryItemSaved = () => {
   closeAllDrawers();
-  queryClient.invalidateQueries({ queryKey: ['family', props.familyId, 'memory-items'] });
+  queryClient.invalidateQueries({ queryKey: ['memory-items'] });
 };
 
 const handleMemoryItemClosed = () => {

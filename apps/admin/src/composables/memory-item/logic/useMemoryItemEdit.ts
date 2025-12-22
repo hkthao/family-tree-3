@@ -2,8 +2,7 @@ import { computed, type Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import { useMemoryItemQuery, useUpdateMemoryItemMutation, useAddFamilyMediaMutation } from '@/composables';
-import type { MemoryItem, FamilyMedia, MemoryMedia } from '@/types';
-import type { LocalMemoryMedia } from '@/composables/memory-item/useMemoryItemForm'; // Import LocalMemoryMedia
+import type { FamilyMedia, MemoryMedia } from '@/types';
 import type { IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue'; // Import the exposed interface
 
 interface UseMemoryItemEditOptions {
@@ -23,7 +22,6 @@ export function useMemoryItemEdit(options: UseMemoryItemEditOptions) {
   const isUploadingMedia = ref(false);
 
   const { data: memoryItem, isLoading: isLoadingMemoryItem, refetch } = useMemoryItemQuery(
-    familyId,
     memoryItemId,
   );
   const { mutate: updateMemoryItem, isPending: isUpdatingMemoryItem } = useUpdateMemoryItemMutation();
