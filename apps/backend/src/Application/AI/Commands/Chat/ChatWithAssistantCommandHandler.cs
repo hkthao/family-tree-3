@@ -69,8 +69,9 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         {
             SessionId = request.SessionId,
             ChatInput = request.ChatInput,
-            Metadata = request.Metadata
+            Metadata = request.Metadata ?? new Dictionary<string, object>()
         };
+        chatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
         return await _chatAiService.CallChatWebhookAsync(chatRequest, cancellationToken);
     }
 }

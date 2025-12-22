@@ -6,9 +6,9 @@
           <div v-for="(message, index) in state.messages" :key="index"
             :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
             <template v-if="message.sender === 'user'">
-              <v-chip class="ma-1" color="primary" label>
+              <v-sheet class="ma-1 pa-2 text-wrap" color="primary" rounded="lg">
                 {{ message.text }}
-              </v-chip>
+              </v-sheet>
               <v-avatar cover class="ml-1" size="36">
                 <v-img v-if="state.userProfile?.value?.avatar"
                   :src="getAvatarUrl(state.userProfile.value.avatar, undefined)"
@@ -20,9 +20,9 @@
               <v-avatar class="mr-1" size="36">
                 <v-icon>mdi-robot-outline</v-icon>
               </v-avatar>
-              <v-chip class="ma-1" color="grey-lighten-1" label>
+              <v-sheet class="ma-1 pa-2 text-wrap" color="secondary" rounded="lg">
                 {{ message.text }}
-              </v-chip>
+              </v-sheet>
             </template>
             <template v-if="!message.text">
               <!-- Debugging: log message if text is empty or not a string -->
