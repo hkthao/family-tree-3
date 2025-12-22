@@ -1,10 +1,12 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using Microsoft.EntityFrameworkCore;
+using MediatR;
 
 namespace backend.Application.Families.Commands.ResetFamilyAiChatQuota;
 
 /// <summary>
-/// Handler cho ResetFamilyAiChatQuotaCommand.
+/// Handler để xử lý lệnh ResetFamilyAiChatQuotaCommand.
 /// </summary>
 public class ResetFamilyAiChatQuotaCommandHandler : IRequestHandler<ResetFamilyAiChatQuotaCommand, Result>
 {
@@ -28,7 +30,7 @@ public class ResetFamilyAiChatQuotaCommandHandler : IRequestHandler<ResetFamilyA
 
         if (family.FamilyLimitConfiguration == null)
         {
-            return Result.NotFound($"Không tìm thấy cấu hình giới hạn cho gia đình với ID '{request.FamilyId}'.");
+            return Result.NotFound($"Gia đình với ID '{request.FamilyId}' không có cấu hình giới hạn.");
         }
 
         family.FamilyLimitConfiguration.ResetAiChatUsage();

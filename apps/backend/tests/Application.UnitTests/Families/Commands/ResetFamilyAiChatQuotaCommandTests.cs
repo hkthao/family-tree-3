@@ -87,7 +87,7 @@ public class ResetFamilyAiChatQuotaCommandTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Không tìm thấy cấu hình giới hạn cho gia đình với ID '{familyId}'.");
+        result.Error.Should().Contain($"Gia đình với ID '{familyId}' không có cấu hình giới hạn.");
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 }

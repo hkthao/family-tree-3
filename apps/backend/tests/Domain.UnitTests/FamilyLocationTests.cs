@@ -17,7 +17,7 @@ public class FamilyLocationTests
         var latitude = 10.0;
         var longitude = 20.0;
         var address = "123 Test St";
-                    var locationType = LocationType.Homeland;        var accuracy = LocationAccuracy.Exact;
+        var locationType = LocationType.Homeland; var accuracy = LocationAccuracy.Exact;
         var source = LocationSource.UserSelected;
 
         // Act
@@ -52,7 +52,7 @@ public class FamilyLocationTests
         // Arrange
         var familyId = Guid.NewGuid();
         var name = "Default Location";
-                    var locationType = LocationType.Grave;
+        var locationType = LocationType.Grave;
         // Act
         var familyLocation = new FamilyLocation
         {

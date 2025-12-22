@@ -1,5 +1,6 @@
 using backend.Application.Common.Dtos;
 using backend.Application.Families.Dtos;
+using backend.Application.Families.Queries;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
@@ -29,4 +30,5 @@ public class FamilyDetailDto : BaseAuditableDto
             return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Viewer).Select(e => e.UserId)];
         }
     }
+    public FamilyLimitConfigurationDto? FamilyLimitConfiguration { get; set; }
 }

@@ -4,7 +4,8 @@ using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration; // ADDED
+using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
+using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
@@ -213,6 +214,18 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
             return BadRequest("FamilyId in URL does not match command body.");
         }
         var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Đặt lại hạn ngạch trò chuyện AI hàng tháng cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần đặt lại hạn ngạch.</param>
+    /// <returns>Kết quả của hoạt động.</returns>
+    [HttpPost("{familyId}/reset-ai-chat-quota")]
+    public async Task<IActionResult> ResetFamilyAiChatQuota(Guid familyId)
+    {
+        var result = await _mediator.Send(new ResetFamilyAiChatQuotaCommand { FamilyId = familyId });
         return result.ToActionResult(this, _logger, 204);
     }
 }
