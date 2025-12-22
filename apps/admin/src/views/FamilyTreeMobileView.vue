@@ -6,11 +6,11 @@
         <v-tab value="force-directed">{{ t('familyTree.tab.forceDirected') }}</v-tab>
       </v-tabs>
 
-      <v-card-text>
+      <v-card-text class="pa-0">
         <v-window v-model="tab">
           <v-window-item value="hierarchical">
             <HierarchicalFamilyTree
-              v-if="familyId"
+              v-if="familyId && members.length > 0"
               :family-id="familyId"
               :members="members"
               :relationships="relationships"
@@ -20,9 +20,10 @@
 
           <v-window-item value="force-directed">
             <ForceDirectedFamilyTree
-              v-if="familyId"
+              v-if="familyId && members.length > 0"
               :family-id="familyId"
               :members="members"
+              :isMobile="true"
               :relationships="relationships"
             />
             <v-alert v-else type="info" prominent>{{ t('familyTree.noDataMessage') }}</v-alert>
