@@ -40,7 +40,7 @@ public class FamilyTests
         var newMaxStorageMb = 2048;
 
         // Act
-        family.UpdateFamilyConfiguration(newMaxMembers, newMaxStorageMb);
+        family.UpdateFamilyConfiguration(newMaxMembers, newMaxStorageMb, 0);
 
         // Assert
         family.FamilyLimitConfiguration.Should().NotBeNull();
@@ -61,7 +61,7 @@ public class FamilyTests
         var validMaxStorageMb = 1024;
 
         // Act
-        Action act = () => family.UpdateFamilyConfiguration(invalidMaxMembers, validMaxStorageMb);
+        Action act = () => family.UpdateFamilyConfiguration(invalidMaxMembers, validMaxStorageMb, 0);
 
         // Assert
         act.Should().Throw<ArgumentException>();

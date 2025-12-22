@@ -35,7 +35,7 @@ public class FamilyLimitConfigurationTests
         var config = new FamilyLimitConfiguration(familyId);
 
         // Act
-        config.Update(newMaxMembers, newMaxStorageMb);
+        config.Update(newMaxMembers, newMaxStorageMb, 0);
 
         // Assert
         config.MaxMembers.Should().Be(newMaxMembers);
@@ -54,7 +54,7 @@ public class FamilyLimitConfigurationTests
         var config = new FamilyLimitConfiguration(familyId);
 
         // Act
-        Action act = () => config.Update(newMaxMembers, newMaxStorageMb);
+        Action act = () => config.Update(newMaxMembers, newMaxStorageMb, 0);
 
         // Assert
         act.Should().Throw<ArgumentException>();
