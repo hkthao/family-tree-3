@@ -55,6 +55,10 @@
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: AI Chat Tab -->
+        <v-window-item value="ai-chat">
+          <ChatView :family-id="familyId" />
+        </v-window-item>
         <!-- NEW: Family Location Tab -->
         <v-window-item value="locations">
           <FamilyLocationListView :family-id="familyId" :allow-add="allowAdd" :allow-edit="allowEdit"
@@ -96,6 +100,7 @@ import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
+import ChatView from '@/components/ai/ChatView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
@@ -148,6 +153,7 @@ const allTabDefinitions = computed(() => [
   { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
   { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
   { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
+  { value: 'ai-chat', text: t('aiChat.title'), condition: true as boolean }, // NEW AI Chat Tab
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));
