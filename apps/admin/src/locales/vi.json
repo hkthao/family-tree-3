@@ -44,6 +44,7 @@
   "aiChat.title": "Trợ lý AI",
   "aiChat.placeholder": "Nhập tin nhắn của bạn...",
   "aiChat.typing": "AI đang nhập...",
+  "aiChat.welcomeMessage": "Chào bạn, tôi là Trợ lý AI của Gia Phả Việt. Tôi sẵn sàng giúp bạn khám phá và gìn giữ lịch sử gia đình mình. Bạn muốn hỏi gì hôm nay?",
   "ai.faceTag": "Nhận diện khuôn mặt (tagging)",
   "aiBiography.errors.fetchLastPromptFailed": "Không thể tải gợi ý đã lưu.",
   "aiBiography.errors.fetchMemberFailed": "Không thể tải chi tiết thành viên.",

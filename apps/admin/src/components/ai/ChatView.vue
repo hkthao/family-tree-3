@@ -8,16 +8,25 @@
       <v-sheet class="pa-4 h-100 overflow-y-auto pb-16">
         <div class="chat-messages" ref="chatMessagesContainer">
           <div v-for="(message, index) in messages" :key="index"
-            :class="['d-flex', message.sender === 'user' ? 'justify-end' : 'justify-start']">
-            <v-chip class="ma-1" :color="message.sender === 'user' ? 'primary' : 'grey-lighten-1'" label>
-              <div v-if="message.sender === 'ai'">
-                <v-icon start icon="mdi-robot-outline"></v-icon>
-              </div>
-              <div v-else>
-                <v-icon start icon="mdi-account-circle"></v-icon>
-              </div>
-              {{ message.text }}
-            </v-chip>
+            :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
+            <template v-if="message.sender === 'user'">
+              <v-chip class="ma-1" color="primary" label>
+                {{ message.text }}
+              </v-chip>
+              <v-avatar cover class="ml-1" size="36">
+                <v-img v-if="userProfile?.value?.avatar" :src="userProfile.value.avatar"
+                  :alt="userProfile.value.name || 'User'" />
+                <v-icon v-else>mdi-account-circle</v-icon>
+              </v-avatar>
+            </template>
+            <template v-else>
+              <v-avatar class="mr-1" size="36">
+                <v-icon>mdi-robot-outline</v-icon>
+              </v-avatar>
+              <v-chip class="ma-1" color="grey-lighten-1" label>
+                {{ message.text }}
+              </v-chip>
+            </template>
           </div>
           <div v-if="loading" class="d-flex justify-start">
             <v-chip class="ma-1" color="grey-lighten-1" label>
@@ -42,10 +51,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-// Assuming a composable for AI chat functionality
 import { useAiChat } from '@/composables/ai/aiChat.composable';
+import { useAuth } from '@/composables';
 
 const props = defineProps<{
   familyId: string;
@@ -56,6 +65,8 @@ const newMessage = ref('');
 const chatMessagesContainer = ref<HTMLElement | null>(null);
 
 const { messages, loading, sendMessage: sendAiMessage } = useAiChat(props.familyId);
+const { state: authState } = useAuth(); // Use useAuth
+const userProfile = computed(() => authState.currentUser); // Use userProfile as requested
 
 const sendMessage = async () => {
   if (newMessage.value.trim() && !loading.value) {
