@@ -25,18 +25,14 @@
       </v-btn>
     </v-toolbar>
     <div>
-      <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 200px;">
+      <div v-if="loading" class="d-flex justify-center align-center">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </div>
-      <div v-else-if="!formattedEvents || formattedEvents.length === 0" class="d-flex justify-center align-center"
-        style="min-height: 200px;">
-        <v-alert type="info" dense>{{ t('event.calendar.noEvents') }}</v-alert>
       </div>
       <v-calendar v-else class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
         :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
         :weekdays="weekdays">
         <template #day-label="{ date, day }">
-          <div class="d-flex flex-column align-center">
+          <div class="d-flex flex-column align-center day-item">
             <div class="text-solar-day">{{ day }}</div>
             <div class="text-lunar-day text-grey-darken-1">
               <!-- Placeholder for Lunar Date -->
@@ -133,15 +129,19 @@ const {
   font-size: 20px;
 }
 
-.text-lunar-day{
+.text-lunar-day {
   position: absolute;
   right: 0px;
   top: 0px;
   font-size: 0.8em;
+
 }
 
 .v-calendar.v-calendar-events .v-calendar-weekly__day {
   padding: 5px;
-  min-height: 100px;
+}
+
+.day-item {
+  min-height: 80px;
 }
 </style>
