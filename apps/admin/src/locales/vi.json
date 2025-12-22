@@ -1417,5 +1417,6 @@
   "version.info.commitId": "Commit ID:",
   "version.info.environment": "Môi trường:",
   "version.info.frontendVersion": "Phiên bản Frontend:",
-  "version.title": "Phiên bản ứng dụng"
+  "version.title": "Phiên bản ứng dụng",
+  "mediaPicker.noMedia": "Không có media nào để hiển thị."
 }

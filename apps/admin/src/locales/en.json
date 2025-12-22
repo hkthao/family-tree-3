@@ -1205,9 +1205,10 @@
   "version.info.environment": "Environment:",
   "version.info.frontendVersion": "Frontend Version:",
   "version.title": "App Version",
-  "familyLocation": {
-    "search": {
-      "reset": "Reset Filters"
-    }
+      "familyLocation": {
+      "search": {
+        "reset": "Reset Filters"
+      }
+    },
+    "mediaPicker.noMedia": "No media to display."
   }
-}
