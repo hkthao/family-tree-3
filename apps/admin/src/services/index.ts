@@ -28,8 +28,9 @@ export * from './user/api.user.service';
 export * from './family-dict/family-dict.service.interface';
 export * from './family-dict/api.family-dict.service';
 
-export * from './ai/ai.service.interface';
-export * from './ai/api.ai.service';
+export * from './chat/chat.service.interface';
+export * from './chat/api.chat.service';
+
 
 export * from './member-face/member-face.service.interface';
 export * from './member-face/api.member-face.service';

@@ -1,44 +1,51 @@
-import { ref } from 'vue';
+import { ref } from 'vue'; // Keep watch for local effects that are still needed here
 import { useI18n } from 'vue-i18n';
+import { v4 as uuidv4 } from 'uuid'; // Import v4 for uuid generation
+import { useSendMessageMutation } from '@/composables/ai/mutations/useSendMessageMutation'; // NEW
+import type { AiChatMessage } from '@/types'; // Import the new message type
 
-interface Message {
-  sender: 'user' | 'ai';
-  text: string;
+// Define dependencies for useAiChat composable
+interface UseAiChatDeps {
+  useSendMessageMutation: typeof useSendMessageMutation;
 }
 
-export function useAiChat(familyId: string) {
+const defaultAiChatDeps: UseAiChatDeps = {
+  useSendMessageMutation: useSendMessageMutation,
+};
+
+export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatDeps) {
+  const { useSendMessageMutation } = deps;
   const { t } = useI18n();
-  const messages = ref<Message[]>([
+  const sessionId = uuidv4(); // Generate a session ID once per chat session
+  const messages = ref<AiChatMessage[]>([
     { sender: 'ai', text: t('aiChat.welcomeMessage') },
   ]);
-  const loading = ref(false);
+
+  const {
+    mutate: sendAiMessageMutation,
+    isPending: isSendingMessage,
+  } = useSendMessageMutation();
 
   const sendMessage = async (messageText: string) => {
     messages.value.push({ sender: 'user', text: messageText });
-    loading.value = true;
 
-    // Simulate API call
-    try {
-      // In a real application, you would make an API call here
-      // For example:
-      // const response = await apiClient.post(`/api/ai-chat/${familyId}`, { message: messageText });
-      // messages.value.push({ sender: 'ai', text: response.data.reply });
-
-      // Placeholder for AI response
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-      messages.value.push({ sender: 'ai', text: `Chào bạn, tôi là Trợ lý AI của gia đình ${familyId}. Bạn muốn hỏi gì thêm?` });
-
-    } catch (error) {
-      console.error('AI chat error:', error);
-      messages.value.push({ sender: 'ai', text: 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau.' });
-    } finally {
-      loading.value = false;
-    }
+    sendAiMessageMutation(
+      { familyId, sessionId, message: messageText },
+      {
+        onSuccess: (responseAiMessage) => {
+          messages.value.push(responseAiMessage);
+        },
+        onError: (error) => {
+          console.error('AI chat error:', error);
+          messages.value.push({ sender: 'ai', text: 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau.' });
+        },
+      }
+    );
   };
 
   return {
     messages,
-    loading,
+    loading: isSendingMessage,
     sendMessage,
   };
 }

@@ -113,4 +113,7 @@ export * from './relationship/useRelationshipForm';
 export * from './map/useMapbox';
 export * from './map/useMultiMarkers';
 
+export * from './ai/useChatView'; // NEWLY ADDED
+export * from './ai/mutations/useSendMessageMutation'; // NEWLY ADDED
+
 export * from '../validations/family-location.validation';

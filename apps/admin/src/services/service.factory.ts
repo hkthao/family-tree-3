@@ -21,9 +21,6 @@ import { ApiUserService } from './user/api.user.service';
 import type { IFamilyDictService } from './family-dict/family-dict.service.interface';
 import { ApiFamilyDictService } from './family-dict/api.family-dict.service';
 
-
-import type { IAiService } from './ai/ai.service.interface';
-import { ApiAiService } from './ai/api.ai.service';
 import type { IMemberFaceService } from './member-face/member-face.service.interface';
 import { ApiMemberFaceService } from './member-face/api.member-face.service';
 import type { IPromptService } from './prompt/prompt.service.interface';
@@ -45,6 +42,7 @@ import { ApiFamilyLocationService } from './family-location/api.family-location.
 import type { IMemoryItemService } from './memory-item/memory-item.service.interface';
 import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
 
+
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
   family: IFamilyService;
@@ -58,8 +56,6 @@ export interface AppServices {
   chat: IChatService;
   user: IUserService;
   familyDict: IFamilyDictService;
-
-  ai: IAiService;
   memberFace: IMemberFaceService;
   prompt: IPromptService;
   familyLink: IFamilyLinkService;
@@ -117,10 +113,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         ? new ApiFamilyDictService(apiClient)
         : testServices?.familyDict || new ApiFamilyDictService(apiClient),
 
-    ai:
-      mode === 'real'
-        ? new ApiAiService(apiClient)
-        : testServices?.ai || new ApiAiService(apiClient),
+
     memberFace:
       mode === 'real'
         ? new ApiMemberFaceService(apiClient)

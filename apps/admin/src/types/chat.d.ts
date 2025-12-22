@@ -1,3 +1,8 @@
+export interface AiChatMessage {
+  sender: 'user' | 'ai';
+  text: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
