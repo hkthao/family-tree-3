@@ -246,6 +246,7 @@
   "common.validations.required": "Bắt buộc.",
   "common.errors.noPermission": "Bạn không có quyền thực hiện hành động này.",
   "common.viewDetails": "Xem chi tiết",
+  "common.itemsPerPage": "Số mục mỗi trang",
   "confirmDelete.message": "Bạn có chắc muốn xoá {name} không?",
   "confirmDelete.title": "Xác nhận Xóa",
   "culture.traditions": "Truyền thống & lễ hội",

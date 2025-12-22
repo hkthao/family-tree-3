@@ -1,6 +1,37 @@
 <template>
   <v-container fluid>
-    <v-row v-if="loading">
+    <v-row class="mb-4">
+      <v-col cols="6">
+                  <!-- eslint-disable-next-line vue/valid-v-model -->
+                  <v-text-field
+                    :label="t('common.search')"
+                    prepend-inner-icon="mdi-magnify"
+                    clearable
+                    v-model="localSearchQuery"
+                    hide-details
+                    density="compact"
+                  ></v-text-field>      </v-col>
+      <v-col cols="6">
+                  <!-- eslint-disable-next-line vue/valid-v-model -->
+                  <v-select
+                    :label="t('familyMedia.search.mediaTypeLabel')"
+                    :items="[
+                      { title: t('common.allMediaTypes'), value: '' },
+                      { title: t('common.mediaType.Image'), value: 'Image' },
+                      { title: t('common.mediaType.Video'), value: 'Video' },
+                      { title: t('common.mediaType.Audio'), value: 'Audio' },
+                      { title: t('common.mediaType.Document'), value: 'Document' },
+                      { title: t('common.mediaType.Other'), value: 'Other' },
+                    ]"
+                    item-title="title"
+                    item-value="value"
+                    v-model="localMediaType"
+                    hide-details
+                    density="compact"
+                  ></v-select>      </v-col>
+    </v-row>
+
+    <v-row v-if="isLoading">
       <v-col cols="12" class="text-center">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
       </v-col>
@@ -35,36 +66,84 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <v-row v-if="totalItems > itemsPerPage">
+      <v-col cols="12" class="d-flex justify-center">
+        <v-pagination
+          v-model="pagination.page"
+          :length="Math.ceil(totalItems / itemsPerPage)"
+          :total-visible="7"
+          @update:modelValue="handlePageChange"
+        ></v-pagination>
+      </v-col>
+      <v-col cols="12" class="text-center text-caption">
+        {{ t('common.itemsPerPage') }}:
+        <v-menu>
+          <template v-slot:activator="{ props: menuProps }">
+            <v-btn
+              variant="text"
+              size="small"
+              v-bind="menuProps"
+            >
+              {{ itemsPerPage }}
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item v-for="size in [10, 25, 50, 100]" :key="size" @click="itemsPerPage = size">
+              <v-list-item-title>{{ size }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue'; // Removed 'computed'
 import { useI18n } from 'vue-i18n';
-
+import { useMediaPickerData } from '@/composables';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { type MediaItem } from '@/types/media';
+import { MediaType } from '@/types/enums';
 
 type SelectionMode = 'single' | 'multiple';
 
 const props = withDefaults(defineProps<{
-  mediaList: MediaItem[];
+  familyId: string;
   selectionMode?: SelectionMode;
   initialSelection?: string[] | string;
-  loading?: boolean;
+  initialSearchQuery?: string;
+  initialMediaType?: string;
 }>(), {
   selectionMode: 'single',
   initialSelection: () => [],
-  loading: false,
+  initialSearchQuery: '',
+  initialMediaType: '',
 });
 
 const emit = defineEmits<{
   (e: 'update:selection', value: string[] | string): void;
-  (e: 'selected', value: MediaItem[] | MediaItem): void;
+  (e: 'selected', value: MediaItem[] | MediaItem | null): void;
 }>();
 
 const { t } = useI18n();
 
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
+const {
+  state: { mediaList, totalItems, isLoading, pagination }, // Removed 'filters' as it's not directly used for v-model
+  actions: { setPage, setItemsPerPage, setSearchQuery, setMediaType, setFamilyId },
+} = useMediaPickerData({
+  familyId: props.familyId,
+  itemsPerPage: itemsPerPage.value,
+  searchQuery: props.initialSearchQuery,
+  mediaType: props.initialMediaType,
+});
+
 const internalSelectedIds = ref<string[]>([]);
+const localSearchQuery = ref(props.initialSearchQuery);
+const localMediaType = ref<string | MediaType | undefined>(props.initialMediaType);
 
 // Initialize internalSelectedIds based on initialSelection prop
 watch(() => props.initialSelection, (newVal) => {
@@ -73,7 +152,27 @@ watch(() => props.initialSelection, (newVal) => {
   } else {
     internalSelectedIds.value = Array.isArray(newVal) ? newVal : [];
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
+
+// Update familyId in composable if prop changes
+watch(() => props.familyId, (newFamilyId) => {
+  setFamilyId(newFamilyId);
+});
+
+// Update itemsPerPage in composable if local itemsPerPage changes
+watch(itemsPerPage, (newItemsPerPage) => {
+  setItemsPerPage(newItemsPerPage);
+});
+
+// Watch local search query and update composable
+watch(localSearchQuery, (newQuery) => {
+  setSearchQuery(newQuery || '');
+});
+
+// Watch local media type and update composable
+watch(localMediaType, (newType) => {
+  setMediaType(newType);
+});
 
 const isSelected = (id: string) => internalSelectedIds.value.includes(id);
 
@@ -84,7 +183,8 @@ const toggleSelection = (id: string) => {
     const index = internalSelectedIds.value.indexOf(id);
     if (index > -1) {
       internalSelectedIds.value.splice(index, 1);
-    } else {
+    }
+    else {
       internalSelectedIds.value.push(id);
     }
   }
@@ -92,7 +192,7 @@ const toggleSelection = (id: string) => {
 };
 
 const emitSelection = () => {
-  const selectedMediaItems = props.mediaList.filter(media => internalSelectedIds.value.includes(media.id));
+  const selectedMediaItems = mediaList.value.filter(media => internalSelectedIds.value.includes(media.id));
 
   if (props.selectionMode === 'single') {
     emit('update:selection', internalSelectedIds.value[0] || '');
@@ -102,6 +202,19 @@ const emitSelection = () => {
     emit('selected', selectedMediaItems);
   }
 };
+
+const handlePageChange = (newPage: number) => {
+  setPage(newPage);
+};
+
+// No longer needed as localSearchQuery and localMediaType are watched
+// const handleSearchUpdate = (query: string | null) => {
+//   setSearchQuery(query || '');
+// };
+
+// const handleMediaTypeUpdate = (type: string | MediaType | null) => {
+//   setMediaType(type || '');
+// };
 
 </script>
 
