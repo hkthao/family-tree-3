@@ -2,21 +2,11 @@ import { reactive, computed, watch, toRef } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useServices } from '@/composables';
 import type { Paginated, ListOptions } from '@/types/pagination';
-import type { MediaItem } from '@/types';
+import type { MediaItem, FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums'; // Import MediaType
 import type { FamilyMediaFilter } from '@/types/familyMedia';
-import type { IFamilyMediaService } from '@/services/familyMedia/familyMedia.service.interface';
-
-const getMediaTypeEnumValue = (mediaTypeString: string | MediaType | undefined): MediaType | undefined => {
-  if (mediaTypeString === undefined || typeof mediaTypeString === 'number') {
-    return mediaTypeString as MediaType | undefined;
-  }
-  const key = mediaTypeString as keyof typeof MediaType;
-  if (MediaType[key] !== undefined) {
-    return MediaType[key];
-  }
-  return undefined;
-};
+import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
+import { getMediaTypeEnumValue } from './familyMedia.utils'; // Import from utils
 
 export interface MediaListOptions extends ListOptions {
   familyId?: string;
@@ -35,6 +25,14 @@ const defaultDeps: UseMediaPickerDataDeps = {
   useQueryClient,
   useServices,
 };
+
+function mapFamilyMediaToMediaItem(familyMedia: FamilyMedia): MediaItem {
+  return {
+    id: familyMedia.id,
+    url: familyMedia.filePath,
+    type: familyMedia.mediaType.toString(),
+  };
+}
 
 export function useMediaPickerData(
   options: MediaListOptions,
@@ -66,24 +64,37 @@ export function useMediaPickerData(
       reactiveOptions.sortBy,
     ],
     queryFn: async () => {
+      console.log('useQuery queryFn started for familyId:', familyIdRef.value); // Log queryFn start
       if (!familyIdRef.value) {
         return { items: [], totalItems: 0, page: 1, itemsPerPage: 10, totalPages: 0 };
       }
 
-      const { familyId, searchQuery, mediaType, ...listOptions } = reactiveOptions;
+      const { searchQuery, mediaType, familyId, ...listOptions } = reactiveOptions; // Destructure familyId out for filters
       const filters: FamilyMediaFilter = {
         searchQuery: searchQuery || undefined,
-        mediaType: getMediaTypeEnumValue(mediaType), // Sử dụng hàm chuyển đổi
-        familyId: familyId,
+        mediaType: getMediaTypeEnumValue(mediaType),
+        familyId: familyId, // familyId is now part of filters
       };
 
+      console.log('Calling familyMediaService.search with listOptions:', listOptions, 'and filters:', filters); // Added log
       const result = await (familyMediaService as IFamilyMediaService).search(listOptions, filters);
       if (result.ok) {
-        return result.value;
+        const mappedItems = result.value.items.map(mapFamilyMediaToMediaItem);
+        return {
+          ...result.value,
+          items: mappedItems,
+        };
       }
       throw result.error;
     },
     enabled: computed(() => !!familyIdRef.value), // Only run query if familyId is available
+  });
+
+  // Watch for errors and log them
+  watch(queryResult.error, (newError) => {
+    if (newError) {
+      console.error('useQuery queryFn error:', newError);
+    }
   });
 
   const mediaList = computed(() => queryResult.data.value?.items || []);
@@ -97,18 +108,16 @@ export function useMediaPickerData(
   const setMediaType = (mediaType: string | MediaType | undefined) => { reactiveOptions.mediaType = mediaType; };
   const setFamilyId = (familyId: string) => { reactiveOptions.familyId = familyId; };
 
-  watch(
-    () => options,
-    (newOptions) => {
-      reactiveOptions.familyId = newOptions.familyId;
-      reactiveOptions.searchQuery = newOptions.searchQuery || '';
-      reactiveOptions.mediaType = newOptions.mediaType || '';
-      reactiveOptions.page = newOptions.page || 1;
-      reactiveOptions.itemsPerPage = newOptions.itemsPerPage || 10;
-      reactiveOptions.sortBy = newOptions.sortBy || [];
-    },
-    { deep: true }
-  );
+  const handleOptionsChange = (newOptions: MediaListOptions) => {
+    reactiveOptions.familyId = newOptions.familyId;
+    reactiveOptions.searchQuery = newOptions.searchQuery || '';
+    reactiveOptions.mediaType = newOptions.mediaType || '';
+    reactiveOptions.page = newOptions.page || 1;
+    reactiveOptions.itemsPerPage = newOptions.itemsPerPage || 10;
+    reactiveOptions.sortBy = newOptions.sortBy || [];
+  };
+
+  watch(() => options, handleOptionsChange, { deep: true });
 
   return {
     state: {

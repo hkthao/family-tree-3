@@ -16,7 +16,7 @@ export const useMemberFaceListFilters = () => {
       ...filters,
       searchQuery: searchQuery.value,
       page: page.value,
-      pageSize: itemsPerPage.value,
+      itemsPerPage: itemsPerPage.value,
       sortBy: sortBy.value.length > 0 ? sortBy.value[0].key : undefined,
       sortOrder: sortBy.value.length > 0 ? (sortBy.value[0].order === 'desc' ? 'descending' : 'ascending') : undefined,
     };

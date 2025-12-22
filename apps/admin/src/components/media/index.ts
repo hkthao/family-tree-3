@@ -1,1 +1,0 @@
-export { default as MediaPicker } from './MediaPicker.vue';

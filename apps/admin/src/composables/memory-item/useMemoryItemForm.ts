@@ -1,7 +1,7 @@
 import { ref, computed, reactive, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem, MemoryMedia as BaseMemoryMedia } from '@/types';
-import type { MediaItem } from '@/types/familyMedia'; // Re-added this import
+import type { MediaItem } from '@/types/familyMedia';
 import { EmotionalTag, MediaType } from '@/types'; // Import MediaType
 import { useMemoryItemRules } from '@/validations/memoryItem.validation';
 import type { VForm } from 'vuetify/components';

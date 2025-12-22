@@ -43,7 +43,7 @@ export * from './familyLink/api.familyLink.service';
 export * from './familyLinkRequest/familyLinkRequest.service.interface';
 export * from './familyLinkRequest/api.familyLinkRequest.service';
 
-export * from './familyMedia';
+export * from './family-media';
 
 export * from './family-location/family-location.service.interface';
 export * from './family-location/api.family-location.service';

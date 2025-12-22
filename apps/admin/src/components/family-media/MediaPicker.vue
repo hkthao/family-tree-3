@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="pa-0">
     <v-row class="mb-4">
       <v-col cols="6">
         <v-text-field :label="t('common.search')" prepend-inner-icon="mdi-magnify" clearable v-model="localSearchQuery"
@@ -88,6 +88,8 @@ const emit = defineEmits<{
   (e: 'update:selection', value: string[] | string): void;
   (e: 'selected', value: MediaItem[] | MediaItem | null): void;
 }>();
+
+console.log('MediaPicker familyId:', props.familyId); // Log familyId prop
 
 const { t } = useI18n();
 

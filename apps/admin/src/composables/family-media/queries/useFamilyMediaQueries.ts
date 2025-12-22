@@ -33,13 +33,12 @@ export function useFamilyMediaListQuery(
       const currentItemsPerPage = unref(itemsPerPage);
       const currentSortBy = unref(sortBy);
 
-      const response = await service.search(
-        currentFilters.familyId!,
-        currentFilters,
-        currentPage,
-        currentItemsPerPage,
-        currentSortBy,
-      );
+      const listOptions: ListOptions = {
+        page: currentPage,
+        itemsPerPage: currentItemsPerPage,
+        sortBy: currentSortBy,
+      };
+      const response = await service.search(listOptions, currentFilters);
       if (response.ok) {
         return response.value;
       }

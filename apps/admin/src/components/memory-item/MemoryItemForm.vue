@@ -46,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { type ComputedRef, type Ref } from 'vue';
+import { type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MediaItem, MemoryItem } from '@/types';
+import type { MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
