@@ -104,6 +104,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
+        services.AddNovuServices(configuration);
         // Add Rate Limiting services
         services.AddRateLimiter(rateLimiterOptions =>
         {

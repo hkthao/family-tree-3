@@ -37,11 +37,6 @@ public class MemoryItemConfiguration : IEntityTypeConfiguration<MemoryItem>
         builder.Property(mi => mi.DeletedBy);
         builder.Property(mi => mi.DeletedDate);
 
-        // Relationships
-        builder.HasOne<Family>()
-            .WithMany()
-            .HasForeignKey(mi => mi.FamilyId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete on Family
+
     }
 }
