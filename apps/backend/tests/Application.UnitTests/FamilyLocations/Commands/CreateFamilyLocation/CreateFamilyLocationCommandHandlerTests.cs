@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants; // ADDED for ErrorMessages and ErrorSources
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // Added for BaseEvent
@@ -16,22 +17,27 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
 
     public CreateFamilyLocationCommandHandlerTests()
     {
-        _handler = new CreateFamilyLocationCommandHandler(_context, _mapper);
+        _handler = new CreateFamilyLocationCommandHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
-    private Family CreateTestFamily(Guid familyId)
+    private Family CreateTestFamily(Guid familyId, Guid creatorUserId)
     {
-        var family = Family.Create("Test Family", "TF", null, null, "Public", Guid.NewGuid());
+        var family = Family.Create("Test Family", "TF", null, null, "Public", creatorUserId);
         family.Id = familyId; // Assign the provided familyId
         return family;
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateFamilyLocation_WhenValidCommand()
+    public async Task Handle_ShouldCreateFamilyLocationAndRaiseEvent()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+
         var familyId = Guid.NewGuid();
-        var family = CreateTestFamily(familyId);
+        var family = CreateTestFamily(familyId, userId); // Use userId as creator
         await _context.Families.AddAsync(family);
         await _context.SaveChangesAsync();
 
@@ -43,9 +49,9 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
             Latitude = 10.0,
             Longitude = 20.0,
             Address = "123 Main St",
-            LocationType = LocationType.Homeland, // Changed from Residence
-            Accuracy = LocationAccuracy.Exact,     // Changed from House
-            Source = LocationSource.UserSelected  // Changed from UserGenerated
+            LocationType = LocationType.Homeland,
+            Accuracy = LocationAccuracy.Exact,
+            Source = LocationSource.UserSelected
         };
 
         // Act
@@ -100,8 +106,13 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
     public async Task Handle_ShouldRaiseFamilyLocationCreatedEvent()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+
         var familyId = Guid.NewGuid();
-        var family = CreateTestFamily(familyId);
+        var family = CreateTestFamily(familyId, userId); // Use userId as creator
         await _context.Families.AddAsync(family);
         await _context.SaveChangesAsync();
 
@@ -125,5 +136,89 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(
             It.Is<List<BaseEvent>>(events => events.Any(e => e is FamilyLocationCreatedEvent))
         ), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+    {
+        // Arrange
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(false); // User is not authenticated
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true); // Authorization not relevant here
+
+        var familyId = Guid.NewGuid();
+        var family = CreateTestFamily(familyId, Guid.NewGuid()); // Family owned by another user
+        await _context.Families.AddAsync(family);
+        await _context.SaveChangesAsync();
+
+        var command = new CreateFamilyLocationCommand
+        {
+            FamilyId = familyId,
+            Name = "Unauthorized Location"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.Unauthorized);
+        result.ErrorSource.Should().Be(ErrorSources.Authentication);
+        _context.FamilyLocations.Should().BeEmpty(); // No location should be created
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnForbidden_WhenUserCannotAccessFamily()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // User cannot access family
+
+        var familyId = Guid.NewGuid();
+        var family = CreateTestFamily(familyId, Guid.NewGuid()); // Family owned by another user
+        await _context.Families.AddAsync(family);
+        await _context.SaveChangesAsync();
+
+        var command = new CreateFamilyLocationCommand
+        {
+            FamilyId = familyId,
+            Name = "Forbidden Location"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        _context.FamilyLocations.Should().BeEmpty(); // No location should be created
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnNotFound_WhenFamilyDoesNotExist()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true); // User can access (mocked)
+
+        var nonExistentFamilyId = Guid.NewGuid(); // Family does not exist
+        var command = new CreateFamilyLocationCommand
+        {
+            FamilyId = nonExistentFamilyId,
+            Name = "Location for Non-existent Family"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, nonExistentFamilyId));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
+        _context.FamilyLocations.Should().BeEmpty(); // No location should be created
     }
 }

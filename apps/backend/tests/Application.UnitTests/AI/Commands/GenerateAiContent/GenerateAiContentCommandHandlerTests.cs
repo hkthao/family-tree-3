@@ -1,25 +1,25 @@
+using System;
+using System.Dynamic;
+using System.Text.Json;
 using backend.Application.AI.Commands.GenerateAiContent;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Events.Queries; // ADDED
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries; // ADDED
 using backend.Application.Members.Queries; // ADDED
-using backend.Application.Events.Queries; // ADDED
 using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR; // ADDED
+using Microsoft.EntityFrameworkCore; // For Include
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Dynamic;
-using System.Text.Json;
 using Xunit;
-using Microsoft.EntityFrameworkCore; // For Include
 
 namespace backend.Application.UnitTests.AI.Commands.GenerateAiContent;
 

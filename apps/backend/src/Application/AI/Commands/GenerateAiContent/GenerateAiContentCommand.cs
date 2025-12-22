@@ -1,5 +1,5 @@
-using backend.Application.Common.Models;
 using System.Dynamic;
+using backend.Application.Common.Models;
 
 namespace backend.Application.AI.Commands.GenerateAiContent;
 

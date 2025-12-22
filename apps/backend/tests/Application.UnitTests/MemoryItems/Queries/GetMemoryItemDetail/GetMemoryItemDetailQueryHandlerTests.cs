@@ -1,3 +1,7 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -6,13 +10,9 @@ using backend.Application.MemoryItems.Queries.GetMemoryItemDetail;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.MemoryItems.Queries;
 

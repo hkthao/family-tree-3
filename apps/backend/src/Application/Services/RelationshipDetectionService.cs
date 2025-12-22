@@ -1,13 +1,13 @@
 using System.Text;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Interfaces;
+using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
 using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Interfaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging; // Add this using directive
-using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
 
 namespace backend.Application.Services;
 

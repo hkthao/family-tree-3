@@ -1,7 +1,7 @@
+using System;
 using backend.Application.AI.Commands.GenerateAiContent;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.AI.Commands.GenerateAiContent;
 

@@ -1,15 +1,15 @@
+using System.Dynamic;
+using System.Text.Json; // For JsonSerializerOptions and deserialization
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
-using backend.Application.Prompts.Queries.GetPromptById;
-using Microsoft.Extensions.Logging;
-using System.Dynamic;
-using System.Text.Json; // For JsonSerializerOptions and deserialization
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Members.Queries; // For MemberDto
-using backend.Application.Events.Queries; // For EventDto
+using backend.Application.Prompts.Queries.GetPromptById;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Commands.GenerateAiContent;
 

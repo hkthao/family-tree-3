@@ -17,7 +17,7 @@ public class UpdateFamilyLocationCommandHandlerTests : TestBase
 
     public UpdateFamilyLocationCommandHandlerTests()
     {
-        _handler = new UpdateFamilyLocationCommandHandler(_context, _mapper);
+        _handler = new UpdateFamilyLocationCommandHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)

@@ -13,7 +13,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
 
     public SearchFamilyLocationsQueryHandlerTests()
     {
-        _handler = new SearchFamilyLocationsQueryHandler(_context, _mapper);
+        _handler = new SearchFamilyLocationsQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId, string name, string code)

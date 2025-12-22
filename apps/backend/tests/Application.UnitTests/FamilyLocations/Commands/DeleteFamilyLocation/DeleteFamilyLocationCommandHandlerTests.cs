@@ -18,7 +18,7 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
 
     public DeleteFamilyLocationCommandHandlerTests()
     {
-        _handler = new DeleteFamilyLocationCommandHandler(_context);
+        _handler = new DeleteFamilyLocationCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)
@@ -82,7 +82,7 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
     {
         // Arrange
         var command = new DeleteFamilyLocationCommand(Guid.NewGuid()); // Non-existent ID
-        var handler = new DeleteFamilyLocationCommandHandler(_context);
+        var handler = new DeleteFamilyLocationCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

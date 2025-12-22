@@ -14,7 +14,7 @@ public class GetFamilyLocationByIdQueryHandlerTests : TestBase
 
     public GetFamilyLocationByIdQueryHandlerTests()
     {
-        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper);
+        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)

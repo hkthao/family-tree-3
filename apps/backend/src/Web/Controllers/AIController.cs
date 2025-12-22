@@ -1,9 +1,9 @@
+using backend.Application.AI.Chat; // Add this using directive
 using backend.Application.AI.Commands.GenerateAiContent;
 using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using backend.Application.AI.Chat; // Add this using directive
 
 namespace backend.Web.Controllers;
 

@@ -4,8 +4,8 @@ using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration; // ADDED
+using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
@@ -155,7 +155,7 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.ToActionResult(this, _logger);
     }
-    
+
     /// <summary>
     /// Lấy cấu hình riêng tư cho một gia đình cụ thể.
     /// </summary>

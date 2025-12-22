@@ -34,6 +34,7 @@ public abstract class TestBase : IDisposable
         // Mock ICurrentUser and IDateTime and IDomainEventDispatcher
         _mockUser = new Mock<ICurrentUser>();
         _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid()); // Provide a default mocked UserId
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true); // Default to authenticated
         _mockDateTime = new Mock<IDateTime>();
         _mockDomainEventDispatcher = new Mock<IDomainEventDispatcher>();
 
@@ -42,6 +43,7 @@ public abstract class TestBase : IDisposable
 
         // Mock IAuthorizationService and HttpClient
         _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true); // Default to authorized
         _mockAspNetCoreAuthorizationService = new Mock<Microsoft.AspNetCore.Authorization.IAuthorizationService>(); // Initialized
         _mockHttpClient = new Mock<HttpClient>(); // Initialized HttpClient
 

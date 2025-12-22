@@ -1,9 +1,13 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using AutoMapper; // Added for ProjectTo extension method
+using AutoMapper.QueryableExtensions; // Added for ProjectTo extension method
+using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Specifications;
 using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore; // Added for Include extension method
 
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 
@@ -15,18 +19,46 @@ public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<Pagin
     public LocationSource? Source { get; init; }
 }
 
-public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationListDto>>>
+public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<FamilyLocationListDto>>> Handle(SearchFamilyLocationsQuery request, CancellationToken cancellationToken)
     {
+        // 1. Kiểm tra xác thực người dùng
+        if (!_currentUser.IsAuthenticated)
+        {
+            return Result<PaginatedList<FamilyLocationListDto>>.Success(PaginatedList<FamilyLocationListDto>.Empty());
+        }
+
+        var currentUserId = _currentUser.UserId;
+        var isAdmin = _authorizationService.IsAdmin();
+
         var query = _context.FamilyLocations
+            .Include(l => l.Family) // Include Family for access control
+            .ThenInclude(f => f!.FamilyUsers) // Include FamilyUsers for access control
             .AsNoTracking()
             .AsQueryable();
 
-        query = query.WithSpecification(new FamilyLocationByFamilyIdSpecification(request.FamilyId));
+        // Apply access control based on whether FamilyId is provided in the request
+        if (request.FamilyId.HasValue)
+        {
+            // If a specific FamilyId is requested, check if the user has access to it
+            if (!_authorizationService.CanAccessFamily(request.FamilyId.Value))
+            {
+                return Result<PaginatedList<FamilyLocationListDto>>.Success(PaginatedList<FamilyLocationListDto>.Empty());
+            }
+            query = query.WithSpecification(new FamilyLocationByFamilyIdSpecification(request.FamilyId));
+        }
+        else
+        {
+            // If no specific FamilyId is requested, filter by all families the user has access to
+            query = query.WithSpecification(new FamilyLocationAccessSpecification(isAdmin, currentUserId));
+        }
+
         query = query.WithSpecification(new FamilyLocationSearchTermSpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyLocationByLocationTypeSpecification(request.LocationType));
         query = query.WithSpecification(new FamilyLocationBySourceSpecification(request.Source));
