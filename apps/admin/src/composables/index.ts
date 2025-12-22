@@ -113,6 +113,4 @@ export * from './relationship/useRelationshipForm';
 export * from './map/useMapbox';
 export * from './map/useMultiMarkers';
 
-export * from './media';
-
 export * from '../validations/family-location.validation';

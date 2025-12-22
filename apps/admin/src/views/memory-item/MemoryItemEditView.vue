@@ -35,11 +35,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
+import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
-
 import { useMemoryItemEdit } from '@/composables';
+import { type IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue';
 
 const props = defineProps({
   familyId: {
@@ -54,7 +54,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 
-const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
+const memoryItemFormRef: Ref<IMemoryItemFormInstance | null> = ref(null);
 
 const { t } = useI18n();
 

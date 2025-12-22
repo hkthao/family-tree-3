@@ -35,3 +35,8 @@ export interface FamilyMediaAddFromUrlDto {
   mediaType?: MediaType;
   description?: string;
 }
+export interface MediaItem {
+  id: string;
+  url: string;
+  type: string; // e.g., 'image', 'video'
+}

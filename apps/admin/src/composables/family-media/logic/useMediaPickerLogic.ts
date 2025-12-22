@@ -1,5 +1,5 @@
 import { ref, watch, computed, type Ref } from 'vue';
-import { type MediaItem } from '@/types/media';
+import { type MediaItem } from '@/types';
 import { MediaType } from '@/types/enums';
 
 type SelectionMode = 'single' | 'multiple';

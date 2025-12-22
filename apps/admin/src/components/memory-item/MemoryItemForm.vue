@@ -13,7 +13,7 @@
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="uploadedFiles" :accept="acceptedMimeTypes"
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="newlyUploadedFiles" :accept="acceptedMimeTypes"
           data-testid="memory-item-file-upload" multiple :rules="validationRules.uploadedFiles"
           :disabled="props.readOnly"></VFileUpload>
       </v-col>
@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { type ComputedRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryItem } from '@/types';
+import type { MediaItem, MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
@@ -67,42 +67,42 @@ const { t } = useI18n();
 
 const {
   state: {
+    formRef, // Add formRef here
     form,
     emotionalTagOptions,
     memoryMedia,
-    uploadedFiles,
+    newlyUploadedFiles, // Changed from uploadedFiles
     deletedMediaIds,
-    newlyUploadedFiles,
     acceptedMimeTypes,
     validationRules,
   },
-  actions: { validate, getFormData, removeMedia },
+  actions: { validate, getFormData, removeMedia, addExistingMedia },
 } = useMemoryItemForm({
   initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
   readOnly: props.readOnly,
 });
 
-export interface MemoryItemFormExpose {
+export interface IMemoryItemFormInstance {
   validate: () => Promise<boolean>;
   getFormData: () => MemoryItem;
-  newlyUploadedFiles: ComputedRef<File[]>;
+  newlyUploadedFiles: Ref<File[]>; // Changed from uploadedFiles
   memoryMedia: Ref<LocalMemoryMedia[]>; // Changed from Ref<LocalMemoryMedia[]>
-  uploadedFiles: Ref<File[]>;
   deletedMediaIds: Ref<string[]>;
   removeMedia: (mediaToDelete: LocalMemoryMedia) => void;
   acceptedMimeTypes: string;
+  addExistingMedia: (mediaItems: any[]) => void; // Changed from MediaItem[] to any[]
 }
 
-defineExpose<MemoryItemFormExpose>({
+defineExpose<IMemoryItemFormInstance>({
   validate,
   getFormData,
   newlyUploadedFiles,
   memoryMedia,
-  uploadedFiles,
   deletedMediaIds,
   removeMedia,
   acceptedMimeTypes,
+  addExistingMedia,
 });
 </script>
 

@@ -3,7 +3,7 @@ import type { ApiClientMethods } from '@/plugins/axios';
 import type { Result } from '@/types/result';
 import type { ApiError } from '@/types/apiError';
 import type { Paginated, ListOptions } from '@/types/pagination';
-import type { MediaItem } from '@/types/media';
+import type { MediaItem } from '@/types/familyMedia';
 import type { FamilyMediaFilter } from '@/types/familyMedia';
 
 export class ApiFamilyMediaService implements IFamilyMediaService {

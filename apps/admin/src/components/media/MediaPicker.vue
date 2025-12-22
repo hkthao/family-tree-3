@@ -64,10 +64,10 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useMediaPickerData } from '@/composables';
+import { useMediaPickerData } from '@/composables/family-media';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { type MediaItem } from '@/types/media';
-import { useMediaPickerLogic } from '@/composables/media/useMediaPickerLogic';
+import { type MediaItem } from '@/types';
+import { useMediaPickerLogic } from '@/composables/family-media';
 
 type SelectionMode = 'single' | 'multiple';
 

@@ -13,17 +13,37 @@
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isAddingMemoryItem || isUploadingMedia">{{
         t('common.cancel')
         }}</v-btn>
+      <v-btn color="secondary" data-testid="button-select-media" @click="showMediaPicker = true" :disabled="isAddingMemoryItem || isUploadingMedia">
+        {{ t('memoryItem.form.selectMedia') }}
+      </v-btn>
       <v-btn color="primary" data-testid="button-save" @click="handleAddItem" :loading="isAddingMemoryItem || isUploadingMedia"
         :disabled="isAddingMemoryItem || isUploadingMedia">{{ t('common.save') }}</v-btn>
     </v-card-actions>
+
+    <v-dialog v-model="showMediaPicker" max-width="800">
+      <v-card>
+        <v-card-title>{{ t('memoryItem.form.selectMedia') }}</v-card-title>
+        <v-card-text>
+          <MediaPicker :family-id="familyId" selection-mode="multiple" @selected="handleMediaSelected" />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="showMediaPicker = false">{{ t('common.cancel') }}</v-btn>
+          <v-btn color="primary" @click="confirmMediaSelection">{{ t('common.select') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
+import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemAdd } from '@/composables';
+import MediaPicker from '@/components/media/MediaPicker.vue';
+import { type MediaItem } from '@/types';
+import { type IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue';
 
 const props = defineProps({
   familyId: {
@@ -32,12 +52,30 @@ const props = defineProps({
   },
 });
 
-const memoryItemFormRef = ref<InstanceType<typeof MemoryItemForm> | null>(null);
+const memoryItemFormRef: Ref<IMemoryItemFormInstance | null> = ref(null);
 const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 
-console.log(memoryItemFormRef.value);
+const showMediaPicker = ref(false);
+const selectedMediaFromPicker = ref<MediaItem[]>([]);
+
+const handleMediaSelected = (selectedItems: MediaItem[] | MediaItem | null) => {
+  // MediaPicker can emit single or multiple depending on selection-mode.
+  // We're using multiple, so it will be MediaItem[] or null if cleared.
+  if (Array.isArray(selectedItems)) {
+    selectedMediaFromPicker.value = selectedItems;
+  } else if (selectedItems === null) {
+    selectedMediaFromPicker.value = [];
+  }
+};
+
+const confirmMediaSelection = () => {
+  if (memoryItemFormRef.value) {
+    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedMediaFromPicker.value);
+  }
+  showMediaPicker.value = false;
+};
 
 const {
   state: { isAddingMemoryItem, isUploadingMedia },
