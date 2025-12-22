@@ -16,7 +16,7 @@ export { default as EventEditView } from './event/EventEditView.vue';
 export { default as EventListView } from './event/EventListView.vue';
 
 // Export pages from face
-export { default as FaceSearchView } from './face/FaceSearchView.vue';
+export { default as FaceSearchView } from './member-face/FaceSearchView.vue';
 
 // Export pages from family
 export { default as FamilyAddView } from './family-media/FamilyMediaAddView.vue';

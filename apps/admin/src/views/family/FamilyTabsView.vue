@@ -87,7 +87,7 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
-import FaceSearchView from '@/views/face/FaceSearchView.vue'; // NEW
+import FaceSearchView from '@/views/member-face/FaceSearchView.vue'; // NEW
 
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
