@@ -13,6 +13,12 @@ namespace backend.Application.UnitTests.Families.Commands;
 
 public class ResetFamilyAiChatQuotaCommandTests : TestBase
 {
+    public ResetFamilyAiChatQuotaCommandTests()
+    {
+        _mockAuthorizationService.Setup(s => s.AuthorizeAsync(It.IsAny<string>())) // ADDED
+                                 .ReturnsAsync(Result.Success()); // ADDED
+    }
+
     // Test thành công khi đặt lại hạn mức trò chuyện AI cho gia đình tồn tại.
     [Fact]
     public async Task Handle_GivenExistingFamily_ShouldResetAiChatUsage()
@@ -28,7 +34,7 @@ public class ResetFamilyAiChatQuotaCommandTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new ResetFamilyAiChatQuotaCommand { FamilyId = familyId };
-        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context);
+        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context, _mockAuthorizationService.Object); // MODIFIED
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -53,7 +59,7 @@ public class ResetFamilyAiChatQuotaCommandTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid(); // Một ID không tồn tại
         var command = new ResetFamilyAiChatQuotaCommand { FamilyId = familyId };
-        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context);
+        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context, _mockAuthorizationService.Object); // MODIFIED
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -79,7 +85,7 @@ public class ResetFamilyAiChatQuotaCommandTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new ResetFamilyAiChatQuotaCommand { FamilyId = familyId };
-        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context);
+        var handler = new ResetFamilyAiChatQuotaCommandHandler(_context, _mockAuthorizationService.Object); // MODIFIED
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

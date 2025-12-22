@@ -6,6 +6,8 @@ using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using FluentAssertions; // FluentAssertions
 using Microsoft.EntityFrameworkCore; // For Include
+using Moq; // ADDED
+using backend.Application.Common.Interfaces; // ADDED
 using Xunit;
 
 namespace backend.Tests.Application.UnitTests.Families.Commands;
@@ -16,7 +18,9 @@ public class UpdateFamilyLimitConfigurationCommandTests : TestBase
 
     public UpdateFamilyLimitConfigurationCommandTests()
     {
-        _handler = new UpdateFamilyLimitConfigurationCommandHandler(_context); // Use inherited _context
+        _mockAuthorizationService.Setup(s => s.AuthorizeAsync(It.IsAny<string>())) // ADDED
+                                 .ReturnsAsync(Result.Success()); // ADDED
+        _handler = new UpdateFamilyLimitConfigurationCommandHandler(_context, _mockAuthorizationService.Object); // Use inherited _context // MODIFIED
     }
 
     [Fact]

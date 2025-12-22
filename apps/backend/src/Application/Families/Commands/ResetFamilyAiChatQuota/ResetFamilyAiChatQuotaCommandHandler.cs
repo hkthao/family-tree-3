@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.EntityFrameworkCore;
 using MediatR;
+using backend.Application.Common.Constants;
 
 namespace backend.Application.Families.Commands.ResetFamilyAiChatQuota;
 
@@ -11,14 +11,22 @@ namespace backend.Application.Families.Commands.ResetFamilyAiChatQuota;
 public class ResetFamilyAiChatQuotaCommandHandler : IRequestHandler<ResetFamilyAiChatQuotaCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
 
-    public ResetFamilyAiChatQuotaCommandHandler(IApplicationDbContext context)
+    public ResetFamilyAiChatQuotaCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
     {
         _context = context;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result> Handle(ResetFamilyAiChatQuotaCommand request, CancellationToken cancellationToken)
     {
+        var authorized = await _authorizationService.AuthorizeAsync(AppRoles.Administrator);
+        if (!authorized.IsSuccess)
+        {
+            return Result.Unauthorized(authorized.Error ?? "Lỗi ủy quyền không xác định.");
+        }
+
         var family = await _context.Families
             .Include(f => f.FamilyLimitConfiguration)
             .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
