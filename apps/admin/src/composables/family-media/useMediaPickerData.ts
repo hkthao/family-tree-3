@@ -64,7 +64,6 @@ export function useMediaPickerData(
       reactiveOptions.sortBy,
     ],
     queryFn: async () => {
-      console.log('useQuery queryFn started for familyId:', familyIdRef.value); // Log queryFn start
       if (!familyIdRef.value) {
         return { items: [], totalItems: 0, page: 1, itemsPerPage: 10, totalPages: 0 };
       }
@@ -76,7 +75,6 @@ export function useMediaPickerData(
         familyId: familyId, // familyId is now part of filters
       };
 
-      console.log('Calling familyMediaService.search with listOptions:', listOptions, 'and filters:', filters); // Added log
       const result = await (familyMediaService as IFamilyMediaService).search(listOptions, filters);
       if (result.ok) {
         const mappedItems = result.value.items.map(mapFamilyMediaToMediaItem);

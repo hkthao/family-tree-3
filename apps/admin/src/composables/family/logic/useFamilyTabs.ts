@@ -76,8 +76,6 @@ export function useFamilyTabs(
 
   // --- Functions ---
   const initializeTabs = (currentSelectedTabValue: string | null) => {
-    console.log('initializeTabs - activeTabs:', availableTabs.value.map(t => t.value));
-    console.log('initializeTabs - currentSelectedTabValue:', currentSelectedTabValue);
     const activeTabs = availableTabs.value;
     const { visibleTabs: newVisible, moreTabs: newMore, actualSelectedTabValue } = calculateTabVisibility(
       activeTabs,

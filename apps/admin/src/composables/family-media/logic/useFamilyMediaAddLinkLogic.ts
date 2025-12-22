@@ -30,13 +30,10 @@ export function useFamilyMediaAddLinkLogic(deps: UseFamilyMediaAddLinkLogicDeps)
   const { mutate: addFamilyMediaFromUrl, isPending: isAddingUrl } = useAddFamilyMediaFromUrlMutation();
 
   watch(() => urlFormData.value.url, (newUrl) => {
-    console.log('Watching URL:', newUrl);
     if (newUrl && (/\.(jpeg|jpg|png|gif|webp)(\?.*)?$/i.test(newUrl) || /fm=(jpeg|jpg|png|gif|webp)/i.test(newUrl))) {
       imagePreviewUrl.value = newUrl;
-      console.log('Image preview URL set to:', imagePreviewUrl.value);
     } else {
       imagePreviewUrl.value = null;
-      console.log('Image preview URL set to null. URL did not match regex or was empty.');
     }
   });
 

@@ -31,7 +31,6 @@ export function useDetectFacesMutation(
   const { useMutation: injectedUseMutation, getMemberFaceService, useQueryClient: injectedUseQueryClient } = deps;
   const memberFaceService = getMemberFaceService();
   const queryClient = injectedUseQueryClient();
-  console.log('useDetectFacesMutation: queryClient instance', queryClient);
 
   return injectedUseMutation<FaceDetectionRessult, ApiError, DetectFacesCommand>({
     mutationFn: async (command: DetectFacesCommand) => {

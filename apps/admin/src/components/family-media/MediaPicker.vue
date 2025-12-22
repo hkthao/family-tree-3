@@ -89,8 +89,6 @@ const emit = defineEmits<{
   (e: 'selected', value: MediaItem[] | MediaItem | null): void;
 }>();
 
-console.log('MediaPicker familyId:', props.familyId); // Log familyId prop
-
 const { t } = useI18n();
 
 const {
