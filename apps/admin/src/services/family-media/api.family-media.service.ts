@@ -1,6 +1,6 @@
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IFamilyMediaService } from './family-media.service.interface';
-import { type Result, ok, err } from '@/types';
+import { type Result } from '@/types';
 import type { FamilyMedia, FamilyMediaFilter, Paginated, FamilyMediaAddFromUrlDto, ListOptions } from '@/types'; // Import from '@/types'
 
 // ... other imports

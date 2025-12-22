@@ -36,30 +36,25 @@
       >{{ t('common.save') }}</v-btn>
     </v-card-actions>
 
-    <v-dialog v-model="showMediaPicker" max-width="800">
-      <v-card>
-        <v-card-title>{{ t('memoryItem.form.selectMedia') }}</v-card-title>
-        <v-card-text>
-          <MediaPicker :family-id="familyId" selection-mode="multiple" @selected="handleMediaSelected" />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="showMediaPicker = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" @click="confirmMediaSelection">{{ t('common.select') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <MemoryMediaPickerDialog
+      v-model="showMediaPicker"
+      :family-id="familyId"
+      @confirm="handleMediaConfirmed"
+      :selected-media="initialSelectedMedia"
+    />
+
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, type Ref } from 'vue';
+import { ref, type PropType, type Ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemEdit } from '@/composables';
 import { type IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue';
-import MediaPicker from '@/components/family-media/MediaPicker.vue'; // Import MediaPicker
-import { type MediaItem } from '@/types'; // Import MediaItem
+import MemoryMediaPickerDialog from '@/components/memory-item/MemoryMediaPickerDialog.vue';
+import { type MediaItem } from '@/types';
+
 
 const props = defineProps({
   familyId: {
@@ -78,25 +73,23 @@ const memoryItemFormRef: Ref<IMemoryItemFormInstance | null> = ref(null);
 
 const { t } = useI18n();
 
-const showMediaPicker = ref(false); // Reactive variable to control MediaPicker dialog visibility
-const selectedMediaFromPicker = ref<MediaItem[]>([]); // Reactive variable to store selected media
+const showMediaPicker = ref(false);
 
-// Handle media selected from the MediaPicker
-const handleMediaSelected = (selectedItems: MediaItem[] | MediaItem | null) => {
-  if (Array.isArray(selectedItems)) {
-    selectedMediaFromPicker.value = selectedItems;
-  } else if (selectedItems === null) {
-    selectedMediaFromPicker.value = [];
-  }
-};
-
-// Confirm media selection and add to the form
-const confirmMediaSelection = () => {
+const handleMediaConfirmed = (selectedItems: MediaItem[]) => {
   if (memoryItemFormRef.value) {
-    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedMediaFromPicker.value);
+    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedItems);
   }
   showMediaPicker.value = false;
 };
+
+const initialSelectedMedia = computed<MediaItem[]>(() => {
+  if (!memoryItem.value || !memoryItem.value.memoryMedia) return [];
+  return memoryItem.value.memoryMedia.map(media => ({
+    id: media.id,
+    url: media.url,
+    type: media.type as unknown as string,
+  }));
+});
 
 const {
   state: { memoryItem, isLoading, isUpdatingMemoryItem, isUploadingMedia },

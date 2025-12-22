@@ -23,19 +23,12 @@
           t('common.save') }}</v-btn>
     </v-card-actions>
 
-    <v-dialog v-model="showMediaPicker" max-width="800">
-      <v-card>
-        <v-card-title>{{ t('memoryItem.form.selectMedia') }}</v-card-title>
-        <v-card-text>
-          <MediaPicker :family-id="familyId" selection-mode="multiple" @selected="handleMediaSelected" />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="showMediaPicker = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" @click="confirmMediaSelection">{{ t('common.select') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <MemoryMediaPickerDialog
+      v-model="showMediaPicker"
+      :family-id="familyId"
+      @confirm="handleMediaConfirmed"
+    />
+
   </v-card>
 </template>
 
@@ -44,9 +37,9 @@ import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemAdd } from '@/composables';
-import MediaPicker from '@/components/family-media/MediaPicker.vue';
 import { type MediaItem } from '@/types';
 import { type IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue';
+import MemoryMediaPickerDialog from '@/components/memory-item/MemoryMediaPickerDialog.vue'; // New import
 
 const props = defineProps({
   familyId: {
@@ -61,21 +54,10 @@ const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 
 const showMediaPicker = ref(false);
-const selectedMediaFromPicker = ref<MediaItem[]>([]);
 
-const handleMediaSelected = (selectedItems: MediaItem[] | MediaItem | null) => {
-  // MediaPicker can emit single or multiple depending on selection-mode.
-  // We're using multiple, so it will be MediaItem[] or null if cleared.
-  if (Array.isArray(selectedItems)) {
-    selectedMediaFromPicker.value = selectedItems;
-  } else if (selectedItems === null) {
-    selectedMediaFromPicker.value = [];
-  }
-};
-
-const confirmMediaSelection = () => {
+const handleMediaConfirmed = (selectedItems: MediaItem[]) => {
   if (memoryItemFormRef.value) {
-    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedMediaFromPicker.value);
+    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedItems);
   }
   showMediaPicker.value = false;
 };
@@ -96,4 +78,9 @@ const {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.v-card-text-scrollable {
+  max-height: 70vh; /* Adjust as needed */
+  overflow-y: auto;
+}
+</style>
