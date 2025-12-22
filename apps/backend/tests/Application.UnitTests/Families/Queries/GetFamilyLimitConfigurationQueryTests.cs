@@ -58,8 +58,9 @@ public class GetFamilyLimitConfigurationQueryTests : TestBase
         // Assert
         result.Value!.Should().NotBeNull();
         result.Value!.FamilyId.Should().Be(family.Id);
-        result.Value!.MaxMembers.Should().Be(50); // Default value
-        result.Value!.MaxStorageMb.Should().Be(1024); // Default value
+        result.Value!.MaxMembers.Should().Be(5000); // Default value
+        result.Value!.MaxStorageMb.Should().Be(2048); // Default value
+        result.Value!.AiChatMonthlyLimit.Should().Be(100); // Default value
     }
 
     [Fact]
@@ -75,8 +76,9 @@ public class GetFamilyLimitConfigurationQueryTests : TestBase
         // Assert
         result.Value!.Should().NotBeNull();
         result.Value!.FamilyId.Should().Be(nonExistentFamilyId);
-        result.Value!.MaxMembers.Should().Be(50); // Default value as per handler's logic
-        result.Value!.MaxStorageMb.Should().Be(1024); // Default value as per handler's logic
+        result.Value!.MaxMembers.Should().Be(5000); // Default value as per handler's logic
+        result.Value!.MaxStorageMb.Should().Be(2048); // Default value as per handler's logic
+        result.Value!.AiChatMonthlyLimit.Should().Be(100); // Default value as per handler's logic
         result.Value!.Id.Should().Be(Guid.Empty); // ID should be Guid.Empty for non-existent config
     }
 }

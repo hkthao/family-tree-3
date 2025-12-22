@@ -18,17 +18,17 @@ public class FamilyLimitConfiguration : BaseAuditableEntity
     /// <summary>
     /// Số lượng thành viên tối đa được phép trong gia đình.
     /// </summary>
-    public int MaxMembers { get; private set; } = 50; // Giá trị mặc định
+    public int MaxMembers { get; private set; } = 5000; // Giá trị mặc định
 
     /// <summary>
     /// Dung lượng lưu trữ tối đa được cấp cho gia đình (tính bằng Megabyte).
     /// </summary>
-    public int MaxStorageMb { get; private set; } = 1024; // Giá trị mặc định: 1GB
+    public int MaxStorageMb { get; private set; } = 2048; // Giá trị mặc định: 2GB
 
     /// <summary>
     /// Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng cho gia đình.
     /// </summary>
-    public int AiChatMonthlyLimit { get; private set; } = 500; // Giá trị mặc định: 500 lượt trò chuyện AI mỗi tháng
+    public int AiChatMonthlyLimit { get; private set; } = 100; // Giá trị mặc định: 100 lượt trò chuyện AI mỗi tháng
 
     /// <summary>
     /// Số lượng yêu cầu trò chuyện AI đã sử dụng trong tháng hiện tại.

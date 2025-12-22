@@ -19,8 +19,9 @@ public class FamilyLimitConfigurationTests
         // Assert
         config.Should().NotBeNull();
         config.FamilyId.Should().Be(familyId);
-        config.MaxMembers.Should().Be(50);
-        config.MaxStorageMb.Should().Be(1024);
+        config.MaxMembers.Should().Be(5000);
+        config.MaxStorageMb.Should().Be(2048);
+        config.AiChatMonthlyLimit.Should().Be(100);
         config.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5)); // FluentAssertions for DateTime
         config.Id.Should().NotBe(Guid.Empty);
     }

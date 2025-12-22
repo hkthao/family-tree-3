@@ -23,8 +23,9 @@ public class FamilyTests
         family.Should().NotBeNull();
         family.FamilyLimitConfiguration.Should().NotBeNull();
         family.FamilyLimitConfiguration!.FamilyId.Should().Be(family.Id);
-        family.FamilyLimitConfiguration!.MaxMembers.Should().Be(50);
-        family.FamilyLimitConfiguration!.MaxStorageMb.Should().Be(1024);
+        family.FamilyLimitConfiguration!.MaxMembers.Should().Be(5000);
+        family.FamilyLimitConfiguration!.MaxStorageMb.Should().Be(2048);
+        family.FamilyLimitConfiguration!.AiChatMonthlyLimit.Should().Be(100);
     }
 
     [Fact]

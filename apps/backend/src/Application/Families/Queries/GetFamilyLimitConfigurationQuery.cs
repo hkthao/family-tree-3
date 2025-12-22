@@ -53,8 +53,9 @@ public class GetFamilyLimitConfigurationQueryHandler : IRequestHandler<GetFamily
             {
                 Id = Guid.Empty, // Placeholder for non-existent ID
                 FamilyId = request.FamilyId,
-                MaxMembers = 50, // Default value
-                MaxStorageMb = 1024 // Default value
+                MaxMembers = 5000, // Default value
+                MaxStorageMb = 2048, // Default value
+                AiChatMonthlyLimit = 100 // Default value
             });
         }
 
