@@ -34,7 +34,7 @@ import { useI18n } from 'vue-i18n';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
-import { useFamilyMediaForm } from '@/composables/family-media/useFamilyMediaForm';
+import { useFamilyMediaForm } from '@/composables/family-media';
 
 interface FamilyMediaFormProps {
   initialMedia?: FamilyMedia;

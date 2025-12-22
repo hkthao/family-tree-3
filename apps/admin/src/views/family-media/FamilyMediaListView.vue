@@ -17,7 +17,6 @@
       :allow-add="allowAdd"
       :allow-edit="allowEdit"
       :allow-delete="allowDelete"
-      :allow-add-link="allowAdd"
     />
 
     <!-- Add/Edit/Detail Drawers (similar to MemberListView) -->
@@ -38,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, toRef, computed, ref } from 'vue'; // Added ref
+import { nextTick, toRef, computed } from 'vue';
 import { useCrudDrawer } from '@/composables';
 import type { FamilyMediaFilter, ListOptions } from '@/types';
 import { useFamilyMediaListQuery, useDeleteFamilyMediaMutation, useFamilyMediaListFilters, useFamilyMediaDeletion } from '@/composables';
