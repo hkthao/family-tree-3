@@ -7,6 +7,7 @@ using backend.Application.Relationships.Queries.DetectRelationship;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
+using backend.Application.Relationships.Queries.GetRelationshipsByFamilyId;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -64,6 +65,18 @@ public class RelationshipController(IMediator mediator, ILogger<RelationshipCont
     public async Task<IActionResult> Search([FromQuery] SearchRelationshipsQuery query)
     {
         var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy tất cả mối quan hệ của một gia đình dựa trên FamilyId.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách các mối quan hệ của gia đình.</returns>
+    [HttpGet("by-family/{familyId}")]
+    public async Task<IActionResult> GetRelationshipsByFamilyId(Guid familyId)
+    {
+        var result = await _mediator.Send(new GetRelationshipsByFamilyIdQuery(familyId));
         return result.ToActionResult(this, _logger);
     }
 
