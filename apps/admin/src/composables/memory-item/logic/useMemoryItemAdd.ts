@@ -5,6 +5,7 @@ import { useAddMemoryItemMutation } from '@/composables';
 import { useAddFamilyMediaMutation } from '@/composables';
 import type { MemoryItem, FamilyMedia, MemoryMedia } from '@/types';
 import type { IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue'; // Import the exposed interface
+import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
 
 interface UseMemoryItemAddOptions {
   familyId: string;
@@ -20,6 +21,7 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
 
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
+  const queryClient = useQueryClient(); // Get queryClient instance
   const { mutate: addMemoryItem, isPending: isAddingMemoryItem } = useAddMemoryItemMutation();
   const { mutateAsync: addFamilyMedia } = useAddFamilyMediaMutation();
 
@@ -70,6 +72,7 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
           t('memoryItem.messages.addSuccess'),
           'success',
         );
+        queryClient.invalidateQueries({ queryKey: ['memory-items', { familyId: familyId }] }); // Invalidate the memory-items query
         onSaveSuccess();
       },
       onError: (error) => {
