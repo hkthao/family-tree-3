@@ -39,7 +39,7 @@
       </v-sheet>
     </v-card-text>
     <!-- Suggestion Chips -->
-    <div class="chat-suggestions-container pa-4">
+    <div class="chat-suggestions-container px-4">
       <v-chip-group column>
         <v-chip v-for="(suggestion, index) in state.suggestionChips" :key="index"
           @click="actions.selectSuggestion(suggestion)">
@@ -113,7 +113,7 @@ watch(state.messages, () => {
 
 .chat-suggestions-container {
   position: absolute;
-  bottom: 120px;
+  bottom: 100px;
   /* Adjust based on input field height */
   left: 0;
   right: 0;

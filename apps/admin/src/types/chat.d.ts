@@ -25,7 +25,5 @@ export interface MessageItem {
 }
 
 export interface ChatResponse {
-  response: string;
-  context: any[];
-  createdAt: string;
+  output: string;
 }
