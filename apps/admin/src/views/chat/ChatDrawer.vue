@@ -3,24 +3,25 @@
     :location="location" :width="width" :class="drawerClass">
     <v-card flat class="fill-height d-flex flex-column">
       <v-card-title class="text-center" v-if="familyName">
-        {{ familyName }}
-        <v-spacer></v-spacer>
+        {{ t('chat.drawer.chatWithFamilyTitle', { familyName }) }}
       </v-card-title>
-      <template v-if="currentFamilyId">
-        <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)" />
-      </template>
-      <template v-else>
-        <div class="d-flex flex-column justify-center align-center">
-          <v-icon size="64" class="mb-4">mdi-account-group</v-icon>
-          <div class="text-h6 mb-4">{{ t('chat.drawer.selectFamilyPrompt') }}</div>
-          <FamilyAutocomplete v-model="selectedFamilyForChat" :label="t('chat.drawer.selectFamilyLabel')"
-            variant="outlined" class="mb-4 w-100"
-            :rules="[(v: string) => !!v || t('chat.drawer.validation.selectFamilyRequired')]" :clearable="true" />
-          <v-btn color="primary" :disabled="!selectedFamilyForChat" @click="startChatWithSelectedFamily">
-            {{ t('chat.drawer.startChatButton') }}
-          </v-btn>
-        </div>
-      </template>
+      <v-card-text class="pa-0">
+        <template v-if="currentFamilyId">
+          <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)" />
+        </template>
+        <template v-else>
+          <div class="d-flex flex-column justify-center align-center">
+            <v-icon size="64" class="mb-4">mdi-account-group</v-icon>
+            <div class="text-h6 mb-4">{{ t('chat.drawer.selectFamilyPrompt') }}</div>
+            <FamilyAutocomplete v-model="selectedFamilyForChat" :label="t('chat.drawer.selectFamilyLabel')"
+              variant="outlined" class="mb-4 w-100"
+              :rules="[(v: string) => !!v || t('chat.drawer.validation.selectFamilyRequired')]" :clearable="true" />
+            <v-btn color="primary" :disabled="!selectedFamilyForChat" @click="startChatWithSelectedFamily">
+              {{ t('chat.drawer.startChatButton') }}
+            </v-btn>
+          </div>
+        </template>
+      </v-card-text>
     </v-card>
   </v-navigation-drawer>
 </template>

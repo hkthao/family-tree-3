@@ -18,7 +18,7 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
   const { t } = useI18n();
   const sessionId = uuidv4(); // Generate a session ID once per chat session
   const messages = ref<AiChatMessage[]>([
-    { sender: 'ai', text: t('aiChat.welcomeMessage') },
+    { sender: 'ai', text: t('aiChat.welcomeMessage') }
   ]);
 
   const {

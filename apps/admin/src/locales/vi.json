@@ -209,6 +209,7 @@
   "chat.drawer.selectFamilyLabel": "Chọn Gia Đình",
   "chat.drawer.startChatButton": "Bắt đầu Chat",
   "chat.drawer.validation.selectFamilyRequired": "Vui lòng chọn gia đình",
+  "chat.drawer.chatWithFamilyTitle": "Trò chuyện với gia đình {familyName}",
   "common.actions": "Hành động",
   "common.add": "Thêm",
   "common.advancedSearch": "Tìm kiếm nâng cao",

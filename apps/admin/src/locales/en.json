@@ -199,6 +199,7 @@
   "chat.drawer.selectFamilyLabel": "Select Family",
   "chat.drawer.startChatButton": "Start Chat",
   "chat.drawer.validation.selectFamilyRequired": "Please select a family",
+  "chat.drawer.chatWithFamilyTitle": "Chat with {familyName} Family",
   "common.actions": "Actions",
   "common.advancedSearch": "Advanced Search",
   "common.back": "Back",
