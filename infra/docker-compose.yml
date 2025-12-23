@@ -28,6 +28,11 @@ services:
       - mysql
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   admin:
     build:
@@ -40,6 +45,11 @@ services:
       - ./.env.dev
     depends_on:
       - backend
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   face-service:
     build:
@@ -53,6 +63,26 @@ services:
     mem_limit: 4g # Increase memory limit
     volumes:
       - ../infra/app/models:/face-service/app/models/dlib_models
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  promtail:
+    image: grafana/promtail:2.6.1 # Use a specific version of Promtail
+    container_name: family-tree-promtail
+    env_file:
+      - ./.env.dev
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro # Mount the config file
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro # Mount Docker logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Mount Docker socket
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - backend
+      - admin
+      - face-service
 
 volumes:
   mysql-data:
