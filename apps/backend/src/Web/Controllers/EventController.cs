@@ -1,11 +1,14 @@
+using backend.Application.Common.Constants;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
+using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
@@ -16,6 +19,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/event")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {
     /// <summary>
@@ -113,6 +117,18 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
             FamilyId = familyId,
         };
         var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy tất cả các sự kiện của một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần lấy sự kiện.</param>
+    /// <returns>Danh sách tất cả các sự kiện của gia đình.</returns>
+    [HttpGet("family/{familyId}")]
+    public async Task<IActionResult> GetAllEventsByFamilyId([FromRoute] Guid familyId)
+    {
+        var result = await _mediator.Send(new GetAllEventsByFamilyIdQuery { FamilyId = familyId });
         return result.ToActionResult(this, _logger);
     }
 

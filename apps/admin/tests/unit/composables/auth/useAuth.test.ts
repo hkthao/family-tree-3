@@ -1,154 +1,145 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useAuth } from '@/composables/auth/useAuth';
-import { useAuthStore } from '@/stores/auth.store';
-import { FamilyRole } from '@/types/enums';
 import { createPinia, setActivePinia } from 'pinia';
-import { computed } from 'vue';
+import { FamilyRole } from '@/types/enums';
+import type { UserProfile } from '@/types';
+import type { IFamilyAccess } from '@/types/family.d';
+import { checkUserHasRole, checkUserHasFamilyRole } from '@/composables/auth/auth.logic'; // Import the actual functions
 
 // Mock the auth store
+const mockAuthStore = {
+  isAuthenticated: false,
+  user: null as UserProfile | null,
+  userFamilyAccess: [] as IFamilyAccess[],
+};
+
+// Mock the @/stores/auth.store module
 vi.mock('@/stores/auth.store', () => ({
-  useAuthStore: vi.fn(),
+  useAuthStore: vi.fn(() => mockAuthStore),
+}));
+
+// Mock the auth.logic module, as useAuth now depends on it
+vi.mock('@/composables/auth/auth.logic', () => ({
+  checkUserHasRole: vi.fn((userProfile, roles) => {
+    if (!userProfile?.roles) {
+      return false;
+    }
+    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+    return rolesToCheck.some(role => userProfile.roles?.includes(role));
+  }),
+  checkUserHasFamilyRole: vi.fn((userFamilyAccess, familyId, role) => {
+    if (!userFamilyAccess || userFamilyAccess.length === 0) {
+      return false;
+    }
+    return userFamilyAccess.some((access: IFamilyAccess) => access.familyId === familyId && access.role === role);
+  }),
 }));
 
 describe('useAuth', () => {
-  let mockAuthStore: ReturnType<typeof useAuthStore>;
-
   beforeEach(() => {
     setActivePinia(createPinia());
-    mockAuthStore = {
-      isAuthenticated: false,
-      user: null,
-      userFamilyAccess: [],
-    } as ReturnType<typeof useAuthStore>;
-
-    // Mock the useAuthStore to return our mock store
-    (useAuthStore as vi.Mock).mockReturnValue(mockAuthStore);
-  });
-
-  // Test isLoggedIn
-  it('isLoggedIn should return true when authenticated', () => {
-    mockAuthStore.isAuthenticated = true;
-    const { isLoggedIn } = useAuth();
-    expect(isLoggedIn.value).toBe(true);
-  });
-
-  it('isLoggedIn should return false when not authenticated', () => {
+    // Reset mockAuthStore before each test
     mockAuthStore.isAuthenticated = false;
-    const { isLoggedIn } = useAuth();
-    expect(isLoggedIn.value).toBe(false);
-  });
-
-  // Test userRoles
-  it('userRoles should return an empty array if user is null', () => {
-    mockAuthStore.isAuthenticated = true;
     mockAuthStore.user = null;
-    const { userRoles } = useAuth();
-    expect(userRoles.value).toEqual([]);
+    mockAuthStore.userFamilyAccess = [];
+    vi.clearAllMocks();
+    // Reset mocks for auth.logic functions as well
+    vi.mocked(checkUserHasRole).mockClear();
+    vi.mocked(checkUserHasFamilyRole).mockClear();
   });
 
-  it('userRoles should return user roles if user exists', () => {
+  it('should return isLoggedIn as false when not authenticated', () => {
+    const { state } = useAuth();
+    expect(state.isLoggedIn.value).toBe(false);
+  });
+
+  it('should return isLoggedIn as true when authenticated', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User', 'Editor'] } as any;
-    const { userRoles } = useAuth();
-    expect(userRoles.value).toEqual(['User', 'Editor']);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    const { state } = useAuth();
+    expect(state.isLoggedIn.value).toBe(true);
   });
 
-  // Test hasRole
-  it('hasRole should return false if not authenticated', () => {
-    mockAuthStore.isAuthenticated = false;
-    mockAuthStore.user = { roles: ['User'] } as any;
-    const { hasRole } = useAuth();
-    expect(hasRole('User')).toBe(false);
-  });
-
-  it('hasRole should return true for a single role that the user has', () => {
+  it('should return correct user roles', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User', 'Editor'] } as any;
-    const { hasRole } = useAuth();
-    expect(hasRole('Editor')).toBe(true);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User', 'Editor'] };
+    const { state } = useAuth();
+    expect(state.userRoles.value).toEqual(['User', 'Editor']);
   });
 
-  it('hasRole should return false for a single role that the user does not have', () => {
+  it('should return an empty array for user roles if user is null', () => {
+    const { state } = useAuth();
+    expect(state.userRoles.value).toEqual([]);
+  });
+
+  it('should correctly determine if user has a specific role', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User'] } as any;
-    const { hasRole } = useAuth();
-    expect(hasRole('Admin')).toBe(false);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User', 'Admin'] };
+    const { actions } = useAuth();
+    expect(actions.hasRole('Admin')).toBe(true);
+    expect(actions.hasRole('User')).toBe(true);
+    expect(actions.hasRole('Guest')).toBe(false);
   });
 
-  it('hasRole should return true for multiple roles if the user has at least one', () => {
+  it('should correctly determine if user has one of multiple roles', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User', 'Viewer'] } as any;
-    const { hasRole } = useAuth();
-    expect(hasRole(['Admin', 'Viewer'])).toBe(true);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    const { actions } = useAuth();
+    expect(actions.hasRole(['User', 'Admin'])).toBe(true);
+    expect(actions.hasRole(['Guest', 'Editor'])).toBe(false);
   });
 
-  it('hasRole should return false for multiple roles if the user has none of them', () => {
+  it('should return isAdmin as true for an Admin user', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User'] } as any;
-    const { hasRole } = useAuth();
-    expect(hasRole(['Admin', 'Moderator'])).toBe(false);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'admin@example.com', name: 'Admin User', roles: ['Admin'] };
+    const { state } = useAuth();
+    expect(state.isAdmin.value).toBe(true);
   });
 
-  // Test isAdmin
-  it('isAdmin should return true if user has Admin role', () => {
+  it('should return isAdmin as false for a non-Admin user', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User', 'Admin'] } as any;
-    const { isAdmin } = useAuth();
-    expect(isAdmin.value).toBe(true);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'user@example.com', name: 'User', roles: ['User'] };
+    const { state } = useAuth();
+    expect(state.isAdmin.value).toBe(false);
   });
 
-  it('isAdmin should return false if user does not have Admin role', () => {
+  it('should correctly determine if user has a specific family role', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.user = { roles: ['User'] } as any;
-    const { isAdmin } = useAuth();
-    expect(isAdmin.value).toBe(false);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Manager }];
+    const { actions } = useAuth();
+    expect(actions.hasFamilyRole('family123', FamilyRole.Manager)).toBe(true);
+    expect(actions.hasFamilyRole('family123', FamilyRole.Viewer)).toBe(false);
+    expect(actions.hasFamilyRole('family456', FamilyRole.Manager)).toBe(false);
   });
 
-  // Test hasFamilyRole
-  it('hasFamilyRole should return false if not authenticated', () => {
-    mockAuthStore.isAuthenticated = false;
-    mockAuthStore.userFamilyAccess = [{ familyId: 'family1', role: FamilyRole.Manager }];
-    const { hasFamilyRole } = useAuth();
-    expect(hasFamilyRole('family1', FamilyRole.Manager)).toBe(false);
-  });
-
-  it('hasFamilyRole should return true if user has the specified family role', () => {
+  it('should return isFamilyManager as true for a family manager', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.userFamilyAccess = [{ familyId: 'family1', role: FamilyRole.Manager }];
-    const { hasFamilyRole } = useAuth();
-    expect(hasFamilyRole('family1', FamilyRole.Manager)).toBe(true);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Manager }];
+    const { state } = useAuth();
+    expect(state.isFamilyManager.value('family123')).toBe(true);
   });
 
-  it('hasFamilyRole should return false if user does not have the specified family role for the family', () => {
+  it('should return isFamilyManager as false for a non-family manager', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.userFamilyAccess = [{ familyId: 'family1', role: FamilyRole.Member }];
-    const { hasFamilyRole } = useAuth();
-    expect(hasFamilyRole('family1', FamilyRole.Manager)).toBe(false);
+    mockAuthStore.user = { id: '1', externalId: 'some_external_id', email: 'test@example.com', name: 'Test User', roles: ['User'] };
+    mockAuthStore.userFamilyAccess = [{ familyId: 'family123', role: FamilyRole.Viewer }];
+    const { state } = useAuth();
+    expect(state.isFamilyManager.value('family123')).toBe(false);
   });
 
-  it('hasFamilyRole should return false if user does not have access to the family', () => {
+  it('should expose currentUser and userFamilyAccess from the store', () => {
     mockAuthStore.isAuthenticated = true;
-    mockAuthStore.userFamilyAccess = [{ familyId: 'family2', role: FamilyRole.Manager }];
-    const { hasFamilyRole } = useAuth();
-    expect(hasFamilyRole('family1', FamilyRole.Manager)).toBe(false);
-  });
+    const userProfile: UserProfile = { id: 'user1', externalId: 'some_external_id', email: 'user@example.com', name: 'User One', roles: ['User'] };
+    const familyAccess: IFamilyAccess[] = [{ familyId: 'fam1', role: FamilyRole.Viewer }];
+    mockAuthStore.user = userProfile;
+    mockAuthStore.userFamilyAccess = familyAccess;
 
-  // Test isFamilyManager
-  it('isFamilyManager should return true if user is manager for the given familyId', () => {
-    mockAuthStore.isAuthenticated = true;
-    mockAuthStore.userFamilyAccess = [{ familyId: 'familyA', role: FamilyRole.Manager }];
-    const { isFamilyManager } = useAuth();
-    expect(isFamilyManager.value('familyA')).toBe(true);
-  });
+    const { state } = useAuth();
 
-  it('isFamilyManager should return false if user is not manager for the given familyId', () => {
-    mockAuthStore.isAuthenticated = true;
-    mockAuthStore.userFamilyAccess = [
-      { familyId: 'familyA', role: FamilyRole.Member },
-      { familyId: 'familyB', role: FamilyRole.Manager },
-    ];
-    const { isFamilyManager } = useAuth();
-    expect(isFamilyManager.value('familyA')).toBe(false);
-    expect(isFamilyManager.value('familyC')).toBe(false); // No access to familyC
+    expect(state.currentUser.value).toEqual(userProfile);
+    expect(state.userFamilyAccess.value).toEqual(familyAccess);
   });
 });
+

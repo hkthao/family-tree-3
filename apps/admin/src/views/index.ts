@@ -16,10 +16,10 @@ export { default as EventEditView } from './event/EventEditView.vue';
 export { default as EventListView } from './event/EventListView.vue';
 
 // Export pages from face
-export { default as FaceSearchView } from './face/FaceSearchView.vue';
+export { default as FaceSearchView } from './member-face/FaceSearchView.vue';
 
 // Export pages from family
-export { default as FamilyAddView } from './family/FamilyAddView.vue';
+export { default as FamilyAddView } from './family-media/FamilyMediaAddView.vue';
 export { default as FamilyTabsView } from './family/FamilyTabsView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as FamilyListView } from './family/FamilyListView.vue';
@@ -49,5 +49,10 @@ export { default as FamilyDictDetailView } from './family-dict/FamilyDictDetailV
 export { default as FamilyDictEditView } from './family-dict/FamilyDictEditView.vue';
 export { default as FamilyDictListView } from './family-dict/FamilyDictListView.vue';
 
+// Export the new FamilyTreeMobileView
+export { default as FamilyTreeMobileView } from './FamilyTreeMobileView.vue';
+
 // Export MainRouterView (if it's intended to be used as a view component)
 export { default as MainRouterView } from './MainRouterView.vue';
+export { default as ChatView } from './chat/ChatView.vue';
+export { default as DonateView } from './info-pages/DonateView.vue';

@@ -9,6 +9,11 @@ namespace backend.Application.AI.Chat;
 public record ChatWithAssistantCommand : IRequest<Result<ChatResponse>>
 {
     /// <summary>
+    /// ID của gia đình liên quan đến yêu cầu trò chuyện.
+    /// </summary>
+    public Guid FamilyId { get; init; }
+
+    /// <summary>
     /// ID phiên trò chuyện.
     /// </summary>
     public string SessionId { get; init; } = null!;

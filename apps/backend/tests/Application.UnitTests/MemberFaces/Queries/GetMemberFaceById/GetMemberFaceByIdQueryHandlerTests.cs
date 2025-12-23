@@ -1,7 +1,4 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

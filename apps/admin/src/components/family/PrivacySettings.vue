@@ -52,10 +52,8 @@ const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
 
 const {
-  privacyConfiguration,
-  isLoading,
-  isUpdating,
-  updatePrivacySettings,
+  state: { privacyConfiguration, isLoading, isUpdating },
+  actions: { updatePrivacySettings },
 } = usePrivacyConfiguration(toRef(props, 'familyId')); // Pass familyId as a ref
 
 const selectedProperties = ref<string[]>([]);

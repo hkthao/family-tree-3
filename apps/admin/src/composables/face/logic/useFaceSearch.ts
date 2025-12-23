@@ -1,14 +1,31 @@
 import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useGlobalSnackbar } from '@/composables';
-import { useDetectFacesMutation } from '@/composables';
+import { useI18n, type Composer } from 'vue-i18n';
+import { useGlobalSnackbar, type UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
+import { useDetectFacesMutation, type UseDetectFacesMutationReturn } from '@/composables/face/mutations/useDetectFacesMutation';
 import type { DetectedFace } from '@/types';
 
-export function useFaceSearch() {
-  const { t } = useI18n();
-  const { showSnackbar } = useGlobalSnackbar();
+interface UseFaceSearchDeps {
+  useI18n: () => Composer;
+  useGlobalSnackbar: () => UseGlobalSnackbarReturn;
+  useDetectFacesMutation: () => UseDetectFacesMutationReturn;
+  FileReader: typeof FileReader;
+}
 
-  const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = useDetectFacesMutation();
+const defaultDeps: UseFaceSearchDeps = {
+  useI18n,
+  useGlobalSnackbar,
+  useDetectFacesMutation,
+  FileReader,
+};
+
+export function useFaceSearch(
+  deps: UseFaceSearchDeps = defaultDeps,
+) {
+  const { useI18n: injectedUseI18n, useGlobalSnackbar: injectedUseGlobalSnackbar, useDetectFacesMutation: injectedUseDetectFacesMutation, FileReader: InjectedFileReader } = deps;
+  const { t } = injectedUseI18n();
+  const { showSnackbar } = injectedUseGlobalSnackbar();
+
+  const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = injectedUseDetectFacesMutation();
 
   const selectedFamilyId = ref<string | undefined>(undefined);
   const uploadedImage = ref<string | null | undefined>(undefined);
@@ -38,19 +55,19 @@ export function useFaceSearch() {
     }
 
     // Immediately create a local URL for display
-    const reader = new FileReader();
+    const reader = new InjectedFileReader();
     reader.onload = (e) => {
       uploadedImage.value = e.target?.result as string;
     };
     reader.readAsDataURL(file);
 
     detectFaces({ imageFile: file, familyId: selectedFamilyId.value, resize: true }, {
-      onSuccess: (data) => {
+      onSuccess: (data: { detectedFaces: DetectedFace[]; originalImageUrl: string | null }) => {
         // uploadedImage.value is now set from local blob
         detectedFaces.value = data.detectedFaces;
         originalImageUrl.value = data.originalImageUrl;
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         showSnackbar(error.message, 'error');
         uploadedImage.value = null; // Clear image on error
         detectedFaces.value = []; // Ensure faces are cleared on error
@@ -59,13 +76,17 @@ export function useFaceSearch() {
   };
 
   return {
-    selectedFamilyId,
-    uploadedImage,
-    detectedFaces,
-    originalImageUrl,
-    isDetectingFaces,
-    handleFileUpload,
-    resetState,
-    t, // Expose t for use in component, as it's often used in templates
+    state: {
+      selectedFamilyId,
+      uploadedImage,
+      detectedFaces,
+      originalImageUrl,
+      isDetectingFaces,
+      t, // Expose t for use in component, as it's often used in templates
+    },
+    actions: {
+      handleFileUpload,
+      resetState,
+    },
   };
 }

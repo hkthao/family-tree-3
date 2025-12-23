@@ -1,7 +1,8 @@
 import type { MemoryItem, EmotionalTag } from '@/types';
 import type { ICrudService } from '@/services/common/crud.service.interface';
+import type { FilterOptions } from '@/types'; // Import FilterOptions
 
-export interface MemoryItemFilter {
+export interface MemoryItemFilter extends FilterOptions {
   searchTerm?: string;
   startDate?: Date;
   endDate?: Date;

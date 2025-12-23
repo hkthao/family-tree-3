@@ -15,14 +15,8 @@ export * from './ui/useAvatarCropper';
 
 
 
-export * from './chat/useN8nChat';
-export * from './face/logic/useFaceResultList';
-export * from './face/logic/useFaceSearch';
-export * from './face/logic/useFaceMemberSelectDialog';
-export * from './face/logic/useFaceUploadInput';
-export * from './face/logic/useFaceLabelCard';
-export * from './face/logic/useFaceDetectionSidebar';
-export * from './face/logic/useFaceBoundingBoxViewer';
+
+export * from './face'; // Add this specific export
 export * from './auth/useAuth';
 export * from './auth/useAccessToken';
 export * from './member/mutations/useAddMemberMutation';
@@ -41,13 +35,17 @@ export * from './family/mutations/useDeleteFamilyMutation';
 export * from './family/logic/useFamilyForm';
 export * from './family/logic/useDebouncedSearch';
 export * from './family/logic/useFamilyDataManagement';
+export * from './family/logic/useFamilyAdd';
+export * from './family/logic/useFamilyDetail';
+export * from './family/logic/useFamilyEdit';
+export * from './family/logic/useFamilyList';
 export * from './family/queries/useFamiliesQuery';
 export * from './family/queries/useFamilyQuery';
 export * from './family/search/useFamilySearch';
 export * from './charts/useMembersPerGenerationChart';
 export * from './charts/useGenderRatioChart';
 export * from './charts/useHierarchicalTreeChart';
-export * from './utils/useServices';
+
 export * from './user/logic/useProfileSettings';
 export * from './user/logic/useUserProfile';
 export * from './user/queries/useUserByIdsQuery';
@@ -70,6 +68,7 @@ export * from './prompt/mutations/useCreatePromptMutation';
 export * from './prompt/mutations/useDeletePromptMutation';
 export * from './prompt/queries/usePromptsQuery';
 export * from './prompt/queries/usePromptQuery';
+export * from './prompt/logic/usePromptFormLogic';
 export * from './family-media/filters/useFamilyMediaListFilters';
 export * from './family-media/mutations/useFamilyMediaMutations';
 export * from './family-media/logic/useFamilyMediaDeletion';
@@ -79,10 +78,10 @@ export * from './family-media/queries/useFamilyMediaQueries';
 export * from './tour/useOnboardingTour';
 export * from './tour/useFamilyTour';
 export * from './tour/useFaceSearchTour';
-export * from './data/useDashboardStats';
-export * from './data/useUpcomingEvents';
-export * from './data/useUserPreferences';
-export * from './data/useRecentActivities';
+export * from './dashboard/useDashboardStats';
+
+export * from './user/useUserPreferences';
+export * from './user/useRecentActivities';
 export * from './event/mutations/useAddEventMutation';
 export * from './event/mutations/useUpdateEventMutation';
 export * from './event/mutations/useDeleteEventMutation';
@@ -108,19 +107,13 @@ export * from './family-dict/logic/useFamilyDictSearch';
 export * from './family-dict/logic/useFamilyDictForm';
 export * from './family-dict/queries/useFamilyDictsQuery';
 export * from './family-dict/queries/useFamilyDictQuery';
-export * from './member-face/filters/useMemberFaceListFilters';
-export * from './member-face/mutations/useDeleteMemberFaceMutation';
-export * from './member-face/mutations/mutations';
-export * from './member-face/mutations/useUpdateMemberFaceMutation';
-export * from './member-face/logic/useMemberFaceFormLogic';
-export * from './member-face/logic/useMemberFaceForm';
-export * from './member-face/logic/useMemberFaceAdd';
-export * from './member-face/logic/useMemberFaceDeletion';
-export * from './member-face/queries/useMemberFaceDetailQuery';
-export * from './member-face/queries/useMemberFacesQuery';
+export * from './member-face';
 export * from './member/useMemberFormComposable';
 export * from './relationship/useRelationshipForm';
 export * from './map/useMapbox';
 export * from './map/useMultiMarkers';
+
+export * from './ai/useChatView'; // NEWLY ADDED
+export * from './ai/mutations/useSendMessageMutation'; // NEWLY ADDED
 
 export * from '../validations/family-location.validation';

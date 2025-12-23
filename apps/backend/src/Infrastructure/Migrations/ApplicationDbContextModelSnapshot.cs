@@ -285,6 +285,75 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("family_dicts");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.FamilyLimitConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AiChatMonthlyLimit")
+                        .HasColumnType("int")
+                        .HasColumnName("ai_chat_monthly_limit");
+
+                    b.Property<int>("AiChatMonthlyUsage")
+                        .HasColumnType("int")
+                        .HasColumnName("ai_chat_monthly_usage");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<int>("MaxMembers")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(50)
+                        .HasColumnName("max_members");
+
+                    b.Property<int>("MaxStorageMb")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1024)
+                        .HasColumnName("max_storage_mb");
+
+                    b.HasKey("Id")
+                        .HasName("pk_family_limit_configurations");
+
+                    b.HasIndex("FamilyId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_family_limit_configurations_family_id");
+
+                    b.ToTable("family_limit_configurations");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.FamilyLink", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1634,6 +1703,18 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Member");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.FamilyLimitConfiguration", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
+                        .WithOne("FamilyLimitConfiguration")
+                        .HasForeignKey("backend.Domain.Entities.FamilyLimitConfiguration", "FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_family_limit_configurations_families_family_id");
+
+                    b.Navigation("Family");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.FamilyLink", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Family", "Family1")
@@ -1886,6 +1967,8 @@ namespace backend.Infrastructure.Migrations
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
                 {
                     b.Navigation("Events");
+
+                    b.Navigation("FamilyLimitConfiguration");
 
                     b.Navigation("FamilyUsers");
 

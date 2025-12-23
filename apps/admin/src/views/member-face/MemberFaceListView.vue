@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, watch, toRefs, computed } from 'vue';
+import { onMounted, watch, computed } from 'vue';
 import { useCrudDrawer } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import type { MemberFace, MemberFaceFilter, ListOptions, FilterOptions } from '@/types';
@@ -45,36 +45,25 @@ const {
 
 const memberFaceListFiltersComposables = useMemberFaceListFilters();
 const {
-  searchQuery,
-  page,
-  itemsPerPage,
-  sortBy,
-  filters, // This is MemberFaceFilter
-} = toRefs(memberFaceListFiltersComposables);
-const {
-  setPage,
-  setItemsPerPage,
-  setSortBy,
-  setSearchQuery,
-  setFilters,
+  state: { searchQuery, page, itemsPerPage, sortBy, filters },
+  actions: { setPage, setItemsPerPage, setSortBy, setSearchQuery, setFilters },
 } = memberFaceListFiltersComposables;
 
-const listOptions = computed<ListOptions>(() => ({
-  page: page.value,
-  itemsPerPage: itemsPerPage.value,
-  sortBy: sortBy.value.map(s => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
-}));
-
+  const listOptions = computed<ListOptions>(() => ({
+    page: page.value,
+    itemsPerPage: itemsPerPage.value,
+    sortBy: sortBy.value.map((s: { key: string; order: 'asc' | 'desc' }) => ({ key: s.key, order: s.order as 'asc' | 'desc' })),
+  }));
 // Create a reactive filter object to pass to the query
 const queryFilters = computed<FilterOptions>(() => ({
-  ...filters.value,
+  ...filters,
   searchQuery: searchQuery.value,
 }));
 
 const { memberFaces, totalItems, queryLoading, refetch } = useMemberFacesQuery(listOptions, queryFilters);
 const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
 
-const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+const { state: { isDeleting }, actions: { confirmAndDelete } } = useMemberFaceDeletion({
   deleteMutation: deleteMemberFaceMutation,
   successMessageKey: 'memberFace.messages.deleteSuccess',
   errorMessageKey: 'memberFace.messages.deleteError',

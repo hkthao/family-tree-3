@@ -5,21 +5,26 @@ import { useGlobalSnackbar } from '@/composables';
 import { useUserProfile } from '@/composables';
 import type { UpdateUserProfileDto, UserProfile } from '@/types';
 import { useMutation } from '@tanstack/vue-query';
-import { ApiUserService } from '@/services/user/api.user.service';
-import apiClient from '@/plugins/axios';
+import type { IUserService } from '@/services/user/user.service.interface';
+import { useServices } from '@/plugins/services.plugin';
 import type { VForm } from 'vuetify/components';
 
-export function useProfileSettings() {
+interface UseProfileSettingsOptions {
+  userService?: IUserService;
+}
+
+export function useProfileSettings(options: UseProfileSettingsOptions = {}) {
+  const { userService = useServices().user } = options;
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
 
   const formRef = ref<VForm | null>(null);
 
   // Use the new useUserProfile composable
-  const { userProfile, isFetchingProfile, isFetchError, fetchError, queryClient } = useUserProfile();
+  const { state: { userProfile, isFetchingProfile, isFetchError, fetchError, queryClient } } = useUserProfile();
 
   // Initialize userService for update operations (fetch is now handled by useUserProfile)
-  const userService = new ApiUserService(apiClient);
+
 
   // Form Data
   const formData = reactive({
@@ -32,7 +37,7 @@ export function useProfileSettings() {
     externalId: '',
   });
 
-  watch(userProfile, (data) => {
+  const handleUserProfileChange = (data?: UserProfile) => {
     if (data) {
       Object.assign(formData, {
         firstName: data.firstName || '',
@@ -52,7 +57,9 @@ export function useProfileSettings() {
         externalId: '',
       });
     }
-  }, { immediate: true });
+  };
+
+  watch(userProfile, handleUserProfileChange, { immediate: true });
 
   // Generated Full Name
   const generatedFullName = computed(() => {
@@ -81,7 +88,7 @@ export function useProfileSettings() {
     },
   });
 
-  watch(isUpdateSuccess, (success) => {
+  const handleUpdateSuccess = (success: boolean) => {
     if (success && userProfile.value) { // Ensure userProfile.value is available for updating cache
       queryClient.setQueryData(['userProfile'], userProfile.value); // Update cache with the latest data
       showSnackbar(t('userSettings.profile.saveSuccess'), 'success');
@@ -89,13 +96,17 @@ export function useProfileSettings() {
       formData.avatar = userProfile.value.avatar || null;
       formData.avatarBase64 = null; // Clear base64 after successful upload
     }
-  });
+  };
 
-  watch(isUpdateError, (isError) => {
+  watch(isUpdateSuccess, handleUpdateSuccess);
+
+  const handleUpdateError = (isError: boolean) => {
     if (isError && updateError.value) {
       showSnackbar(updateError.value.message, 'error');
     }
-  });
+  };
+
+  watch(isUpdateError, handleUpdateError);
 
   // Save Profile function
   const saveProfile = async () => {
@@ -129,15 +140,19 @@ export function useProfileSettings() {
   };
 
   return {
-    formData,
-    formRef,
-    initialAvatarDisplay,
-    isFetchingProfile,
-    isSavingProfile,
-    saveProfile,
-    userProfile,
-    isFetchError,
-    fetchError,
-    validationRules,
+    state: {
+      formData,
+      formRef,
+      initialAvatarDisplay,
+      isFetchingProfile,
+      isSavingProfile,
+      userProfile,
+      isFetchError,
+      fetchError,
+      validationRules,
+    },
+    actions: {
+      saveProfile,
+    },
   };
 }

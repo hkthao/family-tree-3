@@ -1,14 +1,18 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Event, EventFilter, Paginated, ListOptions, FilterOptions } from '@/types';
-import { ApiEventService } from '@/services/event/api.event.service'; // This will be created soon
-import type { IEventService } from '@/services/event/event.service.interface'; // This will be created soon
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
-const apiEventService: IEventService = new ApiEventService(apiClient);
+interface UseEventsQueryDeps {
+  eventService: EventServiceAdapter;
+}
 
-export function useEventsQuery(filters: Ref<EventFilter>) {
+export function useEventsQuery(
+  filters: Ref<EventFilter>,
+  deps: UseEventsQueryDeps = { eventService: DefaultEventServiceAdapter }
+) {
+  const { eventService } = deps;
   const query = useQuery<Paginated<Event>, Error>({
     queryKey: computed(() => queryKeys.events.list(unref(filters))),
     queryFn: async () => {
@@ -28,13 +32,10 @@ export function useEventsQuery(filters: Ref<EventFilter>) {
         startDate: currentFilters.startDate,
         endDate: currentFilters.endDate,
         calendarType: currentFilters.calendarType,
-        lunarStartDay: currentFilters.lunarStartDay,
-        lunarStartMonth: currentFilters.lunarStartMonth,
-        lunarEndDay: currentFilters.lunarEndDay,
-        lunarEndMonth: currentFilters.lunarEndMonth,
+        lunarMonthRange: currentFilters.lunarMonthRange, // Updated to new property
       };
 
-      const response = await apiEventService.search(listOptions, filterOptions);
+      const response = await eventService.search(listOptions, filterOptions); // Use injected service
       if (response.ok) {
         return response.value;
       }
@@ -57,3 +58,5 @@ export function useEventsQuery(filters: Ref<EventFilter>) {
     refetch: query.refetch,
   };
 }
+
+export type UseEventsQueryReturn = ReturnType<typeof useEventsQuery>;

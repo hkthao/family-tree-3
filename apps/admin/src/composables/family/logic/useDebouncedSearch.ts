@@ -24,7 +24,9 @@ export function useDebouncedSearch(initialSearchValue: string = '', delay: numbe
   });
 
   return {
-    searchQuery,
-    debouncedSearchQuery,
+    state: {
+      searchQuery,
+      debouncedSearchQuery,
+    },
   };
 }

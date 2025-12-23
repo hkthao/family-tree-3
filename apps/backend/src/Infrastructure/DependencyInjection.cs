@@ -1,10 +1,16 @@
+using System.Threading.RateLimiting;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -99,6 +105,13 @@ public static class DependencyInjection
 
         // Add Novu services
         services.AddNovuServices(configuration);
+        // Add Rate Limiting services
+        services.AddRateLimiter(rateLimiterOptions =>
+        {
+            rateLimiterOptions.AddPolicy<string, UserRateLimiterPolicy>(RateLimitConstants.PerUserPolicy);
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
+
 
         return services;
     }
@@ -133,4 +146,7 @@ public static class DependencyInjection
 
         return services;
     }
+
+
 }
+

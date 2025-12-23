@@ -1,5 +1,5 @@
-import type { ApiError, Result } from "@/types";
+import type { ApiError, Result, ChatResponse } from "@/types";
 
 export interface IChatService {
-      sendMessage(sessionId: string, message: string): Promise<Result<string, ApiError>>; // Updated signature
+      sendMessage(familyId: string, sessionId: string, message: string): Promise<Result<ChatResponse, ApiError>>; // Updated signature
 }

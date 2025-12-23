@@ -24,20 +24,9 @@ public class GetMembersByFamilyIdQueryHandler(IApplicationDbContext context, IAu
     /// <returns>Một Result chứa danh sách MemberListDto nếu thành công, ngược lại là lỗi.</returns>
     public async Task<Result<List<MemberDto>>> Handle(GetMembersByFamilyIdQuery request, CancellationToken cancellationToken)
     {
-        // 1. Lấy tất cả các liên kết gia đình liên quan đến request.FamilyId
-        var linkedFamilyIds = await _context.FamilyLinks
-            .Where(fl => fl.Family1Id == request.FamilyId || fl.Family2Id == request.FamilyId)
-            .Select(fl => fl.Family1Id == request.FamilyId ? fl.Family2Id : fl.Family1Id)
-            .ToListAsync(cancellationToken);
-
-        // Bao gồm FamilyId gốc vào danh sách các ID cần truy vấn
-        var allFamilyIdsToQuery = new List<Guid> { request.FamilyId };
-        allFamilyIdsToQuery.AddRange(linkedFamilyIds);
-
-        // 2. Lấy thành viên từ tất cả các gia đình liên quan và áp dụng MemberAccessSpecification
         var members = await _context.Members
             .AsNoTracking()
-            .Where(m => allFamilyIdsToQuery.Contains(m.FamilyId))
+            .Where(m => m.FamilyId == request.FamilyId)
             .WithSpecification(new MemberAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId))
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

@@ -33,10 +33,10 @@
     <PackageReference Include="Qdrant.Client" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
     <PackageReference Include="AWSSDK.SecurityToken" />
-    <PackageReference Include="UglyToad.PdfPig" />
-    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
+        <PackageReference Include="UglyToad.PdfPig" />
+        <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
 
-  </ItemGroup>
+      </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />

@@ -58,6 +58,4 @@ export interface MemberFilter {
   husbandId?: string | null;
   wifeId?: string | null;
   searchQuery?: string; // New property for search term
-  sortBy?: string; // Column name to sort by
-  sortOrder?: 'asc' | 'desc'; // Sort order
 }

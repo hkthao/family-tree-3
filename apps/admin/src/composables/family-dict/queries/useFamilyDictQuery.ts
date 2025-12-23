@@ -1,14 +1,16 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { FamilyDict } from '@/types';
-import { ApiFamilyDictService } from '@/services/family-dict/api.family-dict.service';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/plugins/services.plugin';
 
-const apiFamilyDictService: IFamilyDictService = new ApiFamilyDictService(apiClient);
 
-export function useFamilyDictQuery(familyDictId: Ref<string | undefined>) {
+
+export function useFamilyDictQuery(
+  familyDictId: Ref<string | undefined>,
+  service: IFamilyDictService = useServices().familyDict,
+) {
   const query = useQuery<FamilyDict, Error>({
     queryKey: computed(() => queryKeys.familyDicts.detail(unref(familyDictId) as string)),
     queryFn: async () => {
@@ -16,7 +18,7 @@ export function useFamilyDictQuery(familyDictId: Ref<string | undefined>) {
       if (!id) {
         throw new Error('FamilyDict ID is required');
       }
-      const response = await apiFamilyDictService.getById(id);
+      const response = await service.getById(id);
       if (response.ok) {
         if (response.value === undefined) {
           throw new Error('FamilyDict not found');

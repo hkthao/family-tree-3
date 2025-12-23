@@ -7,12 +7,12 @@
     <v-alert type="error" :text="error?.message || t('family.detail.errorLoading')"></v-alert>
   </div>
   <div v-else-if="familyData">
-    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" />
+    <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" :display-limit-config="true" />
     <v-card-actions class="justify-end pa-0">
-      <v-btn color="gray" @click="closeView" data-testid="button-close">
+      <v-btn color="gray" @click="actions.closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
+      <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -20,16 +20,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { FamilyForm } from '@/components/family';
-import { useAuth } from '@/composables';
-import { useFamilyQuery } from '@/composables';
+import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 
 const { t } = useI18n();
-const router = useRouter();
-const { isAdmin, isFamilyManager } = useAuth();
 
 const props = defineProps<{
   familyId: string;
@@ -38,20 +33,5 @@ const props = defineProps<{
 
 const emit = defineEmits(['openEditDrawer']);
 
-const familyIdRef = toRef(props, 'familyId');
-const { family: familyData, isLoading, error } = useFamilyQuery(familyIdRef);
-
-const canManageFamily = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
-});
-
-const openEditDrawer = () => {
-  emit('openEditDrawer', props.familyId);
-};
-
-const closeView = () => {
-  router.push('/family');
-};
-
-
+const { state: { familyData, isLoading, error, canManageFamily }, actions } = useFamilyDetail(props, emit);
 </script>

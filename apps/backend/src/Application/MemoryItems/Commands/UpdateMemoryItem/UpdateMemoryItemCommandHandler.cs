@@ -1,22 +1,44 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+
 namespace backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 
 public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCommand, Result>
 {
     private readonly IApplicationDbContext _context;
-    public UpdateMemoryItemCommandHandler(IApplicationDbContext context)
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUser _currentUser; // Inject ICurrentUser to check for authenticated state
+
+    public UpdateMemoryItemCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser)
     {
         _context = context;
+        _authorizationService = authorizationService;
+        _currentUser = currentUser;
     }
+
     public async Task<Result> Handle(UpdateMemoryItemCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.MemoryItems.FirstOrDefaultAsync(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId, cancellationToken);
+        // 1. Kiểm tra xác thực người dùng
+        if (!_currentUser.IsAuthenticated)
+        {
+            return Result.Failure(ErrorMessages.Unauthorized, ErrorSources.Authentication);
+        }
+
+        var entity = await _context.MemoryItems
+            .FirstOrDefaultAsync(mi => mi.Id == request.Id && mi.FamilyId == request.FamilyId, cancellationToken);
         if (entity == null)
         {
             return Result.NotFound();
         }
+
+        // Authorization: Check if user can access the family
+        if (!_authorizationService.CanAccessFamily(request.FamilyId))
+        {
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
         entity.Update(
             request.Title,
             request.Description,
@@ -24,22 +46,45 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
             request.EmotionalTag
         );
         // Handle Media updates
-        var deleteItems = await _context.MemoryMedia
-            .Where(mm => request.DeletedMediaIds.Contains(mm.Id) && mm.MemoryItem.FamilyId == request.FamilyId)
+        // Lấy tất cả media hiện có của MemoryItem
+        var existingMediaItems = await _context.MemoryMedia
+            .Where(mm => mm.MemoryItemId == entity.Id)
             .ToListAsync(cancellationToken);
-        if (deleteItems.Count != 0)
-            _context.MemoryMedia.RemoveRange(deleteItems);
-        // Add or update media
+
+        // Xóa các media đã được đánh dấu để xóa
+        var mediaToDelete = existingMediaItems
+            .Where(mm => request.DeletedMediaIds.Contains(mm.Id))
+            .ToList();
+        if (mediaToDelete.Any())
+        {
+            _context.MemoryMedia.RemoveRange(mediaToDelete);
+        }
+
+        // Cập nhật hoặc thêm media mới
         foreach (var mediaDto in request.MemoryMedia)
         {
-            var existingMedia = entity.MemoryMedia.FirstOrDefault(m => m.Id == mediaDto.Id);
-            if (existingMedia == null)
+            if (mediaDto.Id != Guid.Empty) // Nếu có ID, đây là item đã tồn tại (hoặc được cập nhật)
+            {
+                var existingMedia = existingMediaItems.FirstOrDefault(mm => mm.Id == mediaDto.Id);
+                if (existingMedia != null)
+                {
+                    // Cập nhật URL nếu có thay đổi
+                    if (existingMedia.Url != mediaDto.Url)
+                    {
+                        existingMedia.Update(mediaDto.Url);
+                    }
+                }
+                else
+                {
+                    // Nếu item có ID nhưng không tìm thấy trong existingMediaItems, 
+                    // có thể là một lỗi hoặc item mới được thêm với ID cụ thể.
+                    // Hiện tại, chúng ta sẽ thêm nó như một item mới.
+                    _context.MemoryMedia.Add(new MemoryMedia(entity.Id, mediaDto.Url));
+                }
+            }
+            else // Không có ID, đây là item mới
             {
                 _context.MemoryMedia.Add(new MemoryMedia(entity.Id, mediaDto.Url));
-            }
-            else
-            {
-                existingMedia.Update(mediaDto.Url);
             }
         }
         // Handle MemoryPersons updates

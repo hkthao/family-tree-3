@@ -2,28 +2,36 @@ import { useQuery } from '@tanstack/vue-query';
 import { computed, unref } from 'vue';
 import type { MaybeRef } from '@vueuse/core';
 import type { Member, MemberFilter, ListOptions, Result } from '@/types';
-import { apiClient } from '@/plugins/axios';
-import { ApiMemberService } from '@/services/member/api.member.service';
 import type { IMemberService } from '@/services/member/member.service.interface';
+import { useServices } from '@/plugins/services.plugin';
 
-const apiMemberService: IMemberService = new ApiMemberService(apiClient);
+
 
 export const useMembersQuery = (
   paginationOptions: MaybeRef<ListOptions>,
   filters: MaybeRef<MemberFilter>,
+  service: IMemberService = useServices().member,
 ) => {
   const queryKey = computed(() => [
     'members',
     'list',
-    unref(paginationOptions),
-    unref(filters),
+    unref(paginationOptions).page,
+    unref(paginationOptions).itemsPerPage,
+    unref(paginationOptions).sortBy,
+    unref(filters).searchQuery,
+    unref(filters).gender,
+    unref(filters).familyId,
+    unref(filters).fatherId,
+    unref(filters).motherId,
+    unref(filters).husbandId,
+    unref(filters).wifeId,
   ]);
 
   return useQuery({
     queryKey,
     queryFn: async () => {
       const result: Result<{ items: Member[]; totalItems: number; totalPages: number }> =
-        await apiMemberService.search(unref(paginationOptions), unref(filters));
+        await service.search(unref(paginationOptions), unref(filters));
       if (result.ok) {
         return result.value;
       }

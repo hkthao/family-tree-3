@@ -1,29 +1,65 @@
-import { onMounted, toRefs, watch } from 'vue';
+import { onMounted, toRefs, watch, type Ref, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/types';
-import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
-import { useEventListFilters } from '@/composables';
-import { useEventsQuery } from '@/composables';
-import { useDeleteEventMutation } from '@/composables';
+import {
+  useConfirmDialog,
+  type UseConfirmDialogReturn,
+} from '@/composables/ui/useConfirmDialog';
+import {
+  useGlobalSnackbar,
+  type UseGlobalSnackbarReturn,
+} from '@/composables/ui/useGlobalSnackbar';
+import {
+  useCrudDrawer,
+  type UseCrudDrawerReturn,
+} from '@/composables/ui/useCrudDrawer';
+import { useEventListFilters, type UseEventListFiltersReturn } from '@/composables/event/logic/useEventListFilters';
+import { useEventsQuery, type UseEventsQueryReturn } from '@/composables/event/queries/useEventsQuery';
+import { useDeleteEventMutation, type UseDeleteEventMutationReturn } from '@/composables/event/mutations/useDeleteEventMutation';
 
-export function useEventList(props: { familyId: string; readOnly?: boolean }, _emit: (event: 'saved' | 'close', ...args: any[]) => void) {
+interface UseEventListDeps {
+  useI18n: typeof useI18n;
+  useConfirmDialog: () => UseConfirmDialogReturn;
+  useGlobalSnackbar: () => UseGlobalSnackbarReturn;
+  useCrudDrawer: <T>() => UseCrudDrawerReturn<T>;
+  useEventListFilters: () => UseEventListFiltersReturn;
+  useEventsQuery: (filters: Ref<EventFilter> | ComputedRef<EventFilter>) => UseEventsQueryReturn;
+  useDeleteEventMutation: () => UseDeleteEventMutationReturn;
+}
+
+const defaultDeps: UseEventListDeps = {
+  useI18n,
+  useConfirmDialog,
+  useGlobalSnackbar,
+  useCrudDrawer,
+  useEventListFilters,
+  useEventsQuery,
+  useDeleteEventMutation,
+};
+
+export function useEventList(
+  props: { familyId: string; readOnly?: boolean },
+  _emit: (event: 'saved' | 'close', ...args: any[]) => void,
+  deps: UseEventListDeps = defaultDeps,
+) {
+  const {
+    useI18n,
+    useConfirmDialog,
+    useGlobalSnackbar,
+    useCrudDrawer,
+    useEventListFilters,
+    useEventsQuery,
+    useDeleteEventMutation,
+  } = deps;
+
   const { t } = useI18n();
   const { showConfirmDialog } = useConfirmDialog();
   const { showSnackbar } = useGlobalSnackbar();
 
   const eventListFiltersComposables = useEventListFilters();
-  const {
-    searchQuery: eventListSearchQuery,
-    filters,
-  } = toRefs(eventListFiltersComposables);
+  const { searchQuery: eventListSearchQuery, filters } = toRefs(eventListFiltersComposables);
 
-  const {
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setSearchQuery,
-    setFilters,
-  } = eventListFiltersComposables;
+  const { setPage, setItemsPerPage, setSortBy, setSearchQuery, setFilters } = eventListFiltersComposables;
 
   const { events, totalItems, loading, refetch } = useEventsQuery(filters);
   const { mutate: deleteEvent } = useDeleteEventMutation();
@@ -41,7 +77,6 @@ export function useEventList(props: { familyId: string; readOnly?: boolean }, _e
     closeDetailDrawer,
     closeAllDrawers,
   } = useCrudDrawer<string>();
-
 
   const handleFilterUpdate = (newFilters: Omit<EventFilter, 'searchQuery'>) => {
     setFilters(newFilters);
@@ -73,17 +108,11 @@ export function useEventList(props: { familyId: string; readOnly?: boolean }, _e
     if (confirmed) {
       deleteEvent(eventId, {
         onSuccess: () => {
-          showSnackbar(
-            t('event.messages.deleteSuccess'),
-            'success',
-          );
+          showSnackbar(t('event.messages.deleteSuccess'), 'success');
           refetch(); // Refetch the list after successful deletion
         },
-        onError: (error) => {
-          showSnackbar(
-            error.message || t('event.messages.deleteError'),
-            'error',
-          );
+        onError: (error: Error) => {
+          showSnackbar(error.message || t('event.messages.deleteError'), 'error');
         },
       });
     }
@@ -94,36 +123,42 @@ export function useEventList(props: { familyId: string; readOnly?: boolean }, _e
     refetch(); // Refetch the list in case an event was added/updated
   };
 
+  const handleFamilyIdChange = (newFamilyId: string) => {
+    setFilters({ familyId: newFamilyId });
+  };
+
   onMounted(() => {
-    setFilters({ familyId: props.familyId });
+    handleFamilyIdChange(props.familyId); // Initial set
   });
 
-  // Watch for changes in familyId prop and update filters
-  watch(() => props.familyId, (newFamilyId) => {
-    setFilters({ familyId: newFamilyId });
-  });
+  watch(() => props.familyId, handleFamilyIdChange);
 
   return {
-    t,
-    eventListSearchQuery,
-    filters,
-    events,
-    totalItems,
-    loading,
-    addDrawer,
-    editDrawer,
-    detailDrawer,
-    selectedItemId,
-    handleFilterUpdate,
-    handleSearchUpdate,
-    handleListOptionsUpdate,
-    confirmDelete,
-    handleEventSaved,
-    openAddDrawer,
-    openEditDrawer,
-    openDetailDrawer,
-    closeAddDrawer,
-    closeEditDrawer,
-    closeDetailDrawer,
+    state: {
+      eventListSearchQuery,
+      filters,
+      events,
+      totalItems,
+      loading,
+      addDrawer,
+      editDrawer,
+      detailDrawer,
+      selectedItemId,
+    },
+    actions: {
+      t, // Expose t for template usage
+      handleFilterUpdate,
+      handleSearchUpdate,
+      handleListOptionsUpdate,
+      confirmDelete,
+      handleEventSaved,
+      openAddDrawer,
+      openEditDrawer,
+      openDetailDrawer,
+      closeAddDrawer,
+      closeEditDrawer,
+      closeDetailDrawer,
+      refetchEvents: refetch, // Expose refetch
+    },
   };
 }

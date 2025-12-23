@@ -1,16 +1,10 @@
-using backend.Application.Common.Models;
+using backend.Application.Common.Constants; // Added for ErrorSources
 using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Constants; // Added for ErrorSources
-using backend.Domain.Common; // Added for BaseEvent
 
 namespace backend.Application.UnitTests.FamilyLocations.Queries.GetFamilyLocationById;
 
@@ -20,7 +14,7 @@ public class GetFamilyLocationByIdQueryHandlerTests : TestBase
 
     public GetFamilyLocationByIdQueryHandlerTests()
     {
-        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper);
+        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)

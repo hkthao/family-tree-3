@@ -1,7 +1,7 @@
 import { computed, ref, watch, unref, type MaybeRef } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Member, Relationship } from '@/types';
 
@@ -91,12 +91,16 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
   });
 
   return {
-    members: getFilteredMembers,
-    relationships: getFilteredRelationships,
-    isLoading,
-    isError,
-    error,
-    selectedRootMemberId,
-    fetchTreeData, // Expose a method to re-fetch/invalidate queries
+    state: {
+      members: getFilteredMembers,
+      relationships: getFilteredRelationships,
+      isLoading,
+      isError,
+      error,
+      selectedRootMemberId,
+    },
+    actions: {
+      fetchTreeData,
+    },
   };
 }

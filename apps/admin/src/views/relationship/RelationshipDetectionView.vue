@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-card>
       <v-card-title class="text-h5">{{ t('relationshipDetection.title') }}</v-card-title>
       <v-card-text>
@@ -15,12 +15,14 @@
             <v-col cols="12" md="6">
               <MemberAutocomplete v-model="selectedMemberAId" :label="t('relationshipDetection.memberALabel')"
                 :family-id="selectedFamilyId"
+                :disabled="!selectedFamilyId"
                 :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.memberARequired')]" clearable
                 required />
             </v-col>
             <v-col cols="12" md="6">
               <MemberAutocomplete v-model="selectedMemberBId" :label="t('relationshipDetection.memberBLabel')"
                 :family-id="selectedFamilyId"
+                :disabled="!selectedFamilyId"
                 :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.memberBRequired')]" clearable
                 required />
             </v-col>
@@ -40,9 +42,7 @@
         <div v-if="result">
           <v-card-title class="text-h6">{{ t('relationshipDetection.resultTitle') }}</v-card-title>
           <v-card-text>
-            <p><strong>{{ t('relationshipDetection.descriptionLabel') }}:</strong> {{ result.description }}</p>
-            <p><strong>{{ t('relationshipDetection.path') }}:</strong> {{ result.path.join(' -> ') }}</p>
-            <p><strong>{{ t('relationshipDetection.edges') }}:</strong> {{ result.edges.join(' -> ') }}</p>
+            <div style="white-space: pre-wrap;">{{ result.description }}</div>
           </v-card-text>
         </div>
 
@@ -66,13 +66,8 @@ import { useRelationshipDetector } from '@/composables/relationship/useRelations
 
 const { t } = useI18n();
 const {
-  selectedFamilyId,
-  selectedMemberAId,
-  selectedMemberBId,
-  result,
-  loading,
-  error,
-  detectRelationship,
+  state: { selectedFamilyId, selectedMemberAId, selectedMemberBId, result, loading, error },
+  actions: { detectRelationship },
 } = useRelationshipDetector();
 </script>
 

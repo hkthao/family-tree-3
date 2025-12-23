@@ -19,8 +19,6 @@ import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables';
 import type { Member, Relationship } from '@/types';
 
-import { onMounted, watch } from 'vue'; // Import onMounted and watch
-
 const { t } = useI18n();
 const emit = defineEmits([
   'show-member-detail-drawer', // New emit event
@@ -33,22 +31,10 @@ const props = defineProps({
   rootId: { type: String, default: null }, // New prop for specifying the root member ID
 });
 
-const { chartContainer, renderChart } = useHierarchicalTreeChart(
+const { chartContainer } = useHierarchicalTreeChart(
   props,
   emit,
-  t
-);
-
-onMounted(() => {
-  renderChart(props.members);
-});
-
-watch(
-  () => [props.members, props.relationships, props.rootId],
-  () => {
-    renderChart(props.members);
-  },
-  { deep: true }
+  { t }
 );
 </script>
 

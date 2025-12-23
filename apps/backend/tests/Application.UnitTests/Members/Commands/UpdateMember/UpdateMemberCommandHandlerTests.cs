@@ -9,7 +9,6 @@ using backend.Domain.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;

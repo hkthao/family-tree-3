@@ -14,7 +14,7 @@ interface NovuOptions {
 
 export function useNovuInbox(containerRef: Ref<HTMLElement | null>) {
   const { t } = useI18n();
-  const { userProfile, isFetchingProfile } = useProfileSettings();
+  const { state: { userProfile, isFetchingProfile } } = useProfileSettings();
   let novuInstance: NovuUI | null = null;
 
   const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');

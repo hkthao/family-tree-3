@@ -1,14 +1,18 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Event } from '@/types';
-import { ApiEventService } from '@/services/event/api.event.service';
-import type { IEventService } from '@/services/event/event.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
-const apiEventService: IEventService = new ApiEventService(apiClient);
+interface UseEventQueryDeps {
+  eventService: EventServiceAdapter;
+}
 
-export function useEventQuery(eventId: Ref<string | undefined>) {
+export function useEventQuery(
+  eventId: Ref<string | undefined>,
+  deps: UseEventQueryDeps = { eventService: DefaultEventServiceAdapter }
+) {
+  const { eventService } = deps;
   const query = useQuery<Event, Error>({
     queryKey: computed(() => (unref(eventId) ? queryKeys.events.detail(unref(eventId)!) : [])),
     queryFn: async () => {
@@ -16,7 +20,7 @@ export function useEventQuery(eventId: Ref<string | undefined>) {
       if (!id) {
         throw new Error('Event ID is required');
       }
-      const response = await apiEventService.getById(id);
+      const response = await eventService.getById(id); // Use injected service
       if (response.ok) {
         if (response.value === undefined) {
           throw new Error('Event not found');
@@ -40,3 +44,5 @@ export function useEventQuery(eventId: Ref<string | undefined>) {
     refetch: query.refetch,
   };
 }
+
+export type UseEventQueryReturn = ReturnType<typeof useEventQuery>;

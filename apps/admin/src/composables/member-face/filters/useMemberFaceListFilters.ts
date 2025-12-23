@@ -16,7 +16,7 @@ export const useMemberFaceListFilters = () => {
       ...filters,
       searchQuery: searchQuery.value,
       page: page.value,
-      pageSize: itemsPerPage.value,
+      itemsPerPage: itemsPerPage.value,
       sortBy: sortBy.value.length > 0 ? sortBy.value[0].key : undefined,
       sortOrder: sortBy.value.length > 0 ? (sortBy.value[0].order === 'desc' ? 'descending' : 'ascending') : undefined,
     };
@@ -27,8 +27,10 @@ export const useMemberFaceListFilters = () => {
   };
 
   const setItemsPerPage = (newItemsPerPage: number) => {
-    itemsPerPage.value = newItemsPerPage;
-    page.value = 1; // Reset page when items per page changes
+    if (itemsPerPage.value !== newItemsPerPage) {
+      itemsPerPage.value = newItemsPerPage;
+      page.value = 1; // Reset page when items per page changes
+    }
   };
 
   const setSortBy = (newSortBy: { key: string; order: 'asc' | 'desc' }[]) => {
@@ -46,16 +48,20 @@ export const useMemberFaceListFilters = () => {
   };
 
   return {
-    searchQuery,
-    filters,
-    page,
-    itemsPerPage,
-    sortBy,
-    combinedFilters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
-    setFilters,
-    setSearchQuery,
+    state: {
+      searchQuery,
+      filters,
+      page,
+      itemsPerPage,
+      sortBy,
+      combinedFilters,
+    },
+    actions: {
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+      setFilters,
+      setSearchQuery,
+    },
   };
 };

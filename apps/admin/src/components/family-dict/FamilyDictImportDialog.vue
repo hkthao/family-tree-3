@@ -41,13 +41,7 @@ const emit = defineEmits(['update:show', 'imported']);
 const { t } = useI18n();
 
 const {
-  dialog,
-  selectedFile,
-  parsedData,
-  parsedDataError,
-  isImportingFamilyDicts,
-  onFileSelected,
-  importFamilyDicts,
-  closeDialog,
+  state: { dialog, selectedFile, parsedData, parsedDataError, isImportingFamilyDicts },
+  actions: { onFileSelected, importFamilyDicts, closeDialog },
 } = useFamilyDictImport(props.show, emit);
 </script>

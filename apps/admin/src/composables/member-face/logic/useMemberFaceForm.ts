@@ -84,8 +84,10 @@ export function useMemberFaceForm(options: UseMemberFaceFormOptions, formRef: Re
 
   return {
     state,
-    validate,
-    getFormData,
+    actions: {
+      validate,
+      getFormData,
+    },
     rules, // Expose rules for the template
   };
 }

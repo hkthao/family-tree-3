@@ -13,9 +13,9 @@
         </v-carousel>
       </v-col>
       <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="uploadedFiles"
-          :accept="acceptedMimeTypes" data-testid="memory-item-file-upload" multiple
-          :rules="validationRules.uploadedFiles" :disabled="props.readOnly"></VFileUpload>
+        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="newlyUploadedFiles" :accept="acceptedMimeTypes"
+          data-testid="memory-item-file-upload" multiple :rules="validationRules.uploadedFiles"
+          :disabled="props.readOnly"></VFileUpload>
       </v-col>
 
       <v-col cols="12">
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ComputedRef, type Ref } from 'vue';
+import { type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
@@ -66,45 +66,43 @@ const props = defineProps<MemoryItemFormProps>();
 const { t } = useI18n();
 
 const {
-  form,
-  emotionalTagOptions,
-  validate,
-  getFormData,
-  validationRules,
-  formRef, // Capture the formRef returned by useMemoryItemForm
-  // Directly destructure media management properties
-  memoryMedia,
-  uploadedFiles,
-  deletedMediaIds,
-  removeMedia,
-  newlyUploadedFiles,
-  acceptedMimeTypes,
+  state: {
+    formRef, // Add formRef here
+    form,
+    emotionalTagOptions,
+    memoryMedia,
+    newlyUploadedFiles, // Changed from uploadedFiles
+    deletedMediaIds,
+    acceptedMimeTypes,
+    validationRules,
+  },
+  actions: { validate, getFormData, removeMedia, addExistingMedia },
 } = useMemoryItemForm({
   initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
   readOnly: props.readOnly,
 });
 
-export interface MemoryItemFormExpose {
+export interface IMemoryItemFormInstance {
   validate: () => Promise<boolean>;
   getFormData: () => MemoryItem;
-  newlyUploadedFiles: ComputedRef<File[]>;
+  newlyUploadedFiles: Ref<File[]>; // Changed from uploadedFiles
   memoryMedia: Ref<LocalMemoryMedia[]>; // Changed from Ref<LocalMemoryMedia[]>
-  uploadedFiles: Ref<File[]>;
   deletedMediaIds: Ref<string[]>;
   removeMedia: (mediaToDelete: LocalMemoryMedia) => void;
-  acceptedMimeTypes: ComputedRef<string>;
+  acceptedMimeTypes: string;
+  addExistingMedia: (mediaItems: any[]) => void; // Changed from MediaItem[] to any[]
 }
 
-defineExpose<MemoryItemFormExpose>({
+defineExpose<IMemoryItemFormInstance>({
   validate,
   getFormData,
   newlyUploadedFiles,
   memoryMedia,
-  uploadedFiles,
   deletedMediaIds,
   removeMedia,
   acceptedMimeTypes,
+  addExistingMedia,
 });
 </script>
 
@@ -121,9 +119,9 @@ defineExpose<MemoryItemFormExpose>({
 .carousel-image,
 .carousel-video {
   max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
   border-radius: 5px;
+  height: 500px;
 }
 
 .carousel-delete-btn {

@@ -1,4 +1,5 @@
 using backend.Domain.Enums;
+using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Interfaces;
 
@@ -43,5 +44,10 @@ public interface IAuthorizationService
     /// <param name="userProfile">Hồ sơ người dùng hiện tại.</param>
     /// <param name="requiredRole">Vai trò tối thiểu được yêu cầu.</param>
     /// <returns>True nếu người dùng có vai trò yêu cầu hoặc cao hơn, ngược lại là false.</returns>
-    bool HasFamilyRole(Guid familyId, FamilyRole requiredRole);
+    /// <summary>
+    /// Kiểm tra xem người dùng hiện tại có một vai trò cụ thể hay không.
+    /// </summary>
+    /// <param name="role">Vai trò cần kiểm tra (ví dụ: "Administrator").</param>
+    /// <returns>Result.Success() nếu được ủy quyền, ngược lại là Result.Unauthorized().</returns>
+    Task<Result> AuthorizeAsync(string role);
 }

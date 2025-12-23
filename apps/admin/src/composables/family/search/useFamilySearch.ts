@@ -1,18 +1,16 @@
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { ApiFamilyService } from '@/services/family/api.family.service';
-import apiClient from '@/plugins/axios';
 import type { Family } from '@/types';
-
-// Instantiate the service outside the composable to avoid re-instantiation on every call
-const familyService = new ApiFamilyService(apiClient);
+import type { IFamilyService } from '@/services/family/family.service.interface';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseFamilySearchOptions {
   debounceTime?: number;
+  service?: IFamilyService;
 }
 
 export function useFamilySearch(options?: UseFamilySearchOptions) {
-  const { debounceTime = 300 } = options || {};
+  const { debounceTime = 300, service = useServices().family } = options || {};
 
   const searchTerm = ref('');
   const debouncedSearchTerm = ref('');
@@ -24,7 +22,7 @@ export function useFamilySearch(options?: UseFamilySearchOptions) {
       if (!debouncedSearchTerm.value) {
         return [];
       }
-      const result = await familyService.search({ page: 1, itemsPerPage: 10 }, { name: debouncedSearchTerm.value });
+      const result = await service.search({ page: 1, itemsPerPage: 10 }, { name: debouncedSearchTerm.value });
       if (result.ok) {
         return result.value.items;
       }
@@ -46,9 +44,12 @@ export function useFamilySearch(options?: UseFamilySearchOptions) {
   });
 
   return {
-    searchTerm,
-    families: data,
-    isLoading: computed(() => isLoading.value || isFetching.value),
-    error,
+    state: {
+      searchTerm,
+      families: data,
+      isLoading: computed(() => isLoading.value || isFetching.value),
+      error,
+    },
+    actions: {}, // No explicit actions defined within this composable beyond updating searchTerm
   };
 }

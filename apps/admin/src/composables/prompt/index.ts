@@ -3,3 +3,4 @@ export * from './queries/usePromptsQuery';
 export * from './mutations/useCreatePromptMutation';
 export * from './mutations/useUpdatePromptMutation';
 export * from './mutations/useDeletePromptMutation';
+export * from './logic/usePromptFormLogic';

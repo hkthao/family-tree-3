@@ -57,7 +57,11 @@ export function useMemberFaceDeletion(options: UseMemberFaceDeletionOptions) {
   };
 
   return {
-    isDeleting,
-    confirmAndDelete,
+    state: {
+      isDeleting,
+    },
+    actions: {
+      confirmAndDelete,
+    },
   };
 }

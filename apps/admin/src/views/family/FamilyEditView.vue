@@ -6,18 +6,18 @@
         }}</span>
     </v-card-title>
     <v-card-text>
-      <FamilyForm ref="familyFormRef" v-if="family" :data="family" :read-only="false" />
+      <FamilyForm ref="familyFormRef" v-if="state.family" :data="state.family.value" :read-only="false" />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey" data-testid="button-cancel" @click="closeForm" :disabled="isLoading || isUpdatingFamily">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="grey" data-testid="button-cancel" @click="actions.closeForm" :disabled="state.isLoading.value || state.isUpdatingFamily.value">{{ t('common.cancel') }}</v-btn>
       <v-btn
         color="primary"
         data-testid="button-save"
-        @click="handleUpdateItem"
-        :loading="isUpdatingFamily"
-        :disabled="isLoading || isUpdatingFamily"
+        @click="actions.handleUpdateItem"
+        :loading="state.isUpdatingFamily.value"
+        :disabled="state.isLoading.value || state.isUpdatingFamily.value"
         >{{
         t('common.save')
         }}</v-btn
@@ -27,16 +27,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRef } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
-import type { Family } from '@/types';
-import { useGlobalSnackbar } from '@/composables';
-import { useFamilyQuery, useUpdateFamilyMutation } from '@/composables';
+import { useFamilyEdit } from '@/composables/family/logic/useFamilyEdit';
+import type { FamilyAddDto, FamilyUpdateDto } from '@/types'; // Updated import
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;
-  getFormData: () => Family | Omit<Family, 'id'>;
+  getFormData: () => FamilyAddDto | FamilyUpdateDto;
 }
 
 interface FamilyEditViewProps {
@@ -49,44 +48,6 @@ const emit = defineEmits(['close', 'saved']);
 const familyFormRef = ref<FamilyFormExposed | null>(null);
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
+const { state, actions } = useFamilyEdit(props, emit, familyFormRef);
 
-const { family: family, isLoading: isLoadingFamily } = useFamilyQuery(toRef(props, 'familyId') as any); // Cast for initialFamilyId, will refine if error occurs
-const { mutate: updateFamily, isPending: isUpdatingFamily } = useUpdateFamilyMutation();
-const isLoading = computed(() => isLoadingFamily.value);
-
-const handleUpdateItem = async () => {
-  if (!familyFormRef.value) return;
-  const isValid = await familyFormRef.value.validate();
-  if (!isValid) return;
-
-  const itemData = familyFormRef.value.getFormData() as Family;
-  if (!itemData.id) {
-    showSnackbar(
-      t('family.management.messages.saveError'),
-      'error',
-    );
-    return;
-  }
-
-  updateFamily(itemData, {
-    onSuccess: () => {
-      showSnackbar(
-        t('family.management.messages.updateSuccess'),
-        'success',
-      );
-      emit('saved');
-    },
-    onError: (error) => {
-      showSnackbar(
-        error.message || t('family.management.messages.saveError'),
-        'error',
-      );
-    },
-  });
-};
-
-const closeForm = () => {
-  emit('close');
-};
 </script>

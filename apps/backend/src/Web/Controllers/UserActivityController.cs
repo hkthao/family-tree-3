@@ -1,13 +1,16 @@
+using backend.Application.Common.Constants;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/activity")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>

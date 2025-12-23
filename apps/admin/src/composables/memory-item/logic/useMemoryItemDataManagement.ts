@@ -19,8 +19,16 @@ export const useMemoryItemDataManagement = (_familyId: Ref<string | undefined> |
   });
 
   const setFilters = (newFilters: MemoryItemFilter) => {
+    const oldFilters = { ...filters.value };
     Object.assign(filters.value, newFilters);
-    paginationOptions.value.page = 1;
+
+    const hasNonPageFilterChanged = Object.keys(newFilters).some(key =>
+      key !== 'page' && oldFilters[key] !== newFilters[key]
+    );
+
+    if (hasNonPageFilterChanged && newFilters.page === undefined) {
+      paginationOptions.value.page = 1;
+    }
   };
 
   const setPage = (page: number) => {
@@ -28,7 +36,10 @@ export const useMemoryItemDataManagement = (_familyId: Ref<string | undefined> |
   };
 
   const setItemsPerPage = (itemsPerPage: number) => {
-    paginationOptions.value.itemsPerPage = itemsPerPage;
+    if (paginationOptions.value.itemsPerPage !== itemsPerPage) {
+      paginationOptions.value.itemsPerPage = itemsPerPage;
+      paginationOptions.value.page = 1;
+    }
   };
 
   const setSortBy = (sortBy: Array<{ key: string; order: 'asc' | 'desc' }>) => {
@@ -36,11 +47,15 @@ export const useMemoryItemDataManagement = (_familyId: Ref<string | undefined> |
   };
 
   return {
-    filters,
-    paginationOptions,
-    setFilters,
-    setPage,
-    setItemsPerPage,
-    setSortBy,
+    state: {
+      filters,
+      paginationOptions,
+    },
+    actions: {
+      setFilters,
+      setPage,
+      setItemsPerPage,
+      setSortBy,
+    },
   };
 };

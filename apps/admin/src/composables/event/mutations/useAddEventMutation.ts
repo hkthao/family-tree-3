@@ -1,18 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ApiEventService } from '@/services/event/api.event.service';
-import type { IEventService } from '@/services/event/event.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Event } from '@/types';
+import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
-const apiEventService: IEventService = new ApiEventService(apiClient);
+interface UseAddEventMutationDeps {
+  eventService: EventServiceAdapter;
+}
 
-export function useAddEventMutation() {
+export function useAddEventMutation(
+  deps: UseAddEventMutationDeps = { eventService: DefaultEventServiceAdapter }
+) {
+  const { eventService } = deps;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (eventData: Omit<Event, 'id'>) => {
-      const response = await apiEventService.add(eventData);
+      const response = await eventService.add(eventData); // Use injected service
       if (response.ok) {
         return response.value;
       }
@@ -23,3 +26,5 @@ export function useAddEventMutation() {
     },
   });
 }
+
+export type UseAddEventMutationReturn = ReturnType<typeof useAddEventMutation>;

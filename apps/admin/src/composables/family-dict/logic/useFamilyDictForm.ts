@@ -1,9 +1,10 @@
-import { reactive, toRef, computed, ref } from 'vue';
+import { reactive, toRef, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
 import { useFamilyDictRules } from '@/validations/family-dict.validation';
 import { useAuth } from '@/composables';
+import { getFamilyDictTypeOptions, getFamilyDictLineageOptions } from '@/composables/utils/familyDictOptions';
 
 interface FamilyDictFormProps {
   readOnly?: boolean;
@@ -12,27 +13,15 @@ interface FamilyDictFormProps {
 
 export function useFamilyDictForm(props: FamilyDictFormProps) {
   const { t } = useI18n();
-  const { isAdmin, isFamilyManager } = useAuth();
+  const { state: authState } = useAuth(); // Renamed to authState
   const formRef = ref<any>(null);
 
   const isFormReadOnly = computed(() => {
-    return props.readOnly || !(isAdmin.value || isFamilyManager.value);
+    return props.readOnly || !(authState.isAdmin.value || authState.isFamilyManager.value);
   });
 
-  const familyDictTypes = computed(() => [
-    { title: t('familyDict.type.blood'), value: FamilyDictType.Blood },
-    { title: t('familyDict.type.marriage'), value: FamilyDictType.Marriage },
-    { title: t('familyDict.type.adoption'), value: FamilyDictType.Adoption },
-    { title: t('familyDict.type.inLaw'), value: FamilyDictType.InLaw },
-    { title: t('familyDict.type.other'), value: FamilyDictType.Other },
-  ]);
-
-  const familyDictLineages = computed(() => [
-    { title: t('familyDict.lineage.noi'), value: FamilyDictLineage.Noi },
-    { title: t('familyDict.lineage.ngoai'), value: FamilyDictLineage.Ngoai },
-    { title: t('familyDict.lineage.noiNgoai'), value: FamilyDictLineage.NoiNgoai },
-    { title: t('familyDict.lineage.other'), value: FamilyDictLineage.Other },
-  ]);
+  const familyDictTypes = getFamilyDictTypeOptions(t);
+  const familyDictLineages = getFamilyDictLineageOptions(t);
 
   const formData = reactive<Omit<FamilyDict, 'id'> | FamilyDict>(
     props.initialFamilyDictData
@@ -49,7 +38,7 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
       },
   );
 
-  const state = reactive({
+  const formLocalState = reactive({ // Renamed to formLocalState
     name: toRef(formData, 'name'),
     type: toRef(formData, 'type'),
     description: toRef(formData, 'description'),
@@ -61,7 +50,7 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
     }),
   });
 
-  const rules = useFamilyDictRules(state);
+  const rules = useFamilyDictRules(formLocalState); // Passed formLocalState
 
   const validate = async () => {
     const { valid } = await formRef.value.validate();
@@ -73,13 +62,17 @@ export function useFamilyDictForm(props: FamilyDictFormProps) {
   };
 
   return {
-    formRef,
-    isFormReadOnly,
-    familyDictTypes,
-    familyDictLineages,
-    formData,
-    rules,
-    validate,
-    getFormData,
+    state: {
+      formRef,
+      isFormReadOnly,
+      familyDictTypes,
+      familyDictLineages,
+      formData,
+      rules,
+    },
+    actions: {
+      validate,
+      getFormData,
+    },
   };
 }

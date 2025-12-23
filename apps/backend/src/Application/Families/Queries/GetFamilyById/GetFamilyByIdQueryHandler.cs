@@ -3,6 +3,10 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using backend.Application.Families.DTOs; // ADDED
+using backend.Application.Families.Queries; // ADDED
+using Microsoft.EntityFrameworkCore; // ADDED
+using AutoMapper.QueryableExtensions; // ADDED
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
@@ -21,21 +25,39 @@ public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper ma
             return Result<FamilyDetailDto>.Failure(ErrorMessages.Unauthorized, ErrorSources.Authentication);
         }
 
-        var query = _context.Families.AsQueryable();
+        var authorizedQuery = _context.Families.AsQueryable();
 
         // Apply FamilyAccessSpecification to filter families based on user's access
-        query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
-        query = query.WithSpecification(new FamilyByIdSpecification(request.Id)); // Apply the FamilyByIdSpecification after access control
+        authorizedQuery = authorizedQuery.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
+        authorizedQuery = authorizedQuery.WithSpecification(new FamilyByIdSpecification(request.Id)); // Apply the FamilyByIdSpecification after access control
 
-        // Comment: DTO projection is used here to select only the necessary columns from the database,
-        // optimizing the SQL query and reducing the amount of data transferred.
-        var familyDto = await query
-            .ProjectTo<FamilyDetailDto>(_mapper.ConfigurationProvider)
-            .AsSplitQuery() // Keep AsSplitQuery if it's still needed, moved to after specifications
+        // Fetch the Family entity, including its limit configuration
+        var family = await authorizedQuery
+            .Include(f => f.FamilyLimitConfiguration) // Ensure FamilyLimitConfiguration is loaded
+            .AsSplitQuery()
             .FirstOrDefaultAsync(cancellationToken);
 
-        return familyDto == null
-            ? Result<FamilyDetailDto>.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound)
-            : Result<FamilyDetailDto>.Success(familyDto);
+        if (family == null)
+        {
+            return Result<FamilyDetailDto>.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
+        }
+
+        // Map the Family entity to FamilyDetailDto
+        var familyDetailDto = _mapper.Map<FamilyDetailDto>(family);
+
+        // If FamilyLimitConfiguration is null, assign default values to the DTO
+        if (familyDetailDto.FamilyLimitConfiguration == null)
+        {
+            familyDetailDto.FamilyLimitConfiguration = new FamilyLimitConfigurationDto
+            {
+                Id = Guid.Empty, // Placeholder for non-existent ID
+                FamilyId = family.Id,
+                MaxMembers = 5000, // Default value
+                MaxStorageMb = 2048, // Default value
+                AiChatMonthlyLimit = 100 // Default value
+            };
+        }
+
+        return Result<FamilyDetailDto>.Success(familyDetailDto);
     }
 }

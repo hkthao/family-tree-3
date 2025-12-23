@@ -7,10 +7,9 @@ interface UseMemoryItemDetailOptions {
 }
 
 export function useMemoryItemDetail(options: UseMemoryItemDetailOptions) {
-  const { familyId, memoryItemId, onClose } = options;
+  const { memoryItemId, onClose } = options;
 
   const { data: memoryItem, isLoading, error } = useMemoryItemQuery(
-    familyId,
     memoryItemId,
   );
 
@@ -19,9 +18,13 @@ export function useMemoryItemDetail(options: UseMemoryItemDetailOptions) {
   };
 
   return {
-    memoryItem,
-    isLoading,
-    error,
-    closeView,
+    state: {
+      memoryItem,
+      isLoading,
+      error,
+    },
+    actions: {
+      closeView,
+    },
   };
 }

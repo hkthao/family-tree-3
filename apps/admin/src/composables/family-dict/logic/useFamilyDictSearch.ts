@@ -1,7 +1,7 @@
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyDictFilter } from '@/types';
-import { FamilyDictLineage } from '@/types';
+import { getFamilyDictLineageOptions, getFamilyDictRegionOptions } from '@/composables/utils/familyDictOptions';
 
 export function useFamilyDictSearch(emit: (event: 'update:filters', value: FamilyDictFilter) => void) {
   const { t } = useI18n();
@@ -13,18 +13,9 @@ export function useFamilyDictSearch(emit: (event: 'update:filters', value: Famil
     region: undefined,
   });
 
-  const familyDictLineages = computed(() => [
-    { title: t('familyDict.lineage.noi'), value: FamilyDictLineage.Noi },
-    { title: t('familyDict.lineage.ngoai'), value: FamilyDictLineage.Ngoai },
-    { title: t('familyDict.lineage.noiNgoai'), value: FamilyDictLineage.NoiNgoai },
-    { title: t('familyDict.lineage.other'), value: FamilyDictLineage.Other },
-  ]);
+  const familyDictLineages = getFamilyDictLineageOptions(t);
 
-  const regions = computed(() => [
-    { title: t('familyDict.form.namesByRegion.north'), value: 'north' },
-    { title: t('familyDict.form.namesByRegion.central'), value: 'central' },
-    { title: t('familyDict.form.namesByRegion.south'), value: 'south' },
-  ]);
+  const regions = getFamilyDictRegionOptions(t);
 
   watch(
     filters.value,
@@ -48,11 +39,15 @@ export function useFamilyDictSearch(emit: (event: 'update:filters', value: Famil
   };
 
   return {
-    expanded,
-    filters,
-    familyDictLineages,
-    regions,
-    applyFilters,
-    resetFilters,
+    state: {
+      expanded,
+      filters,
+      familyDictLineages,
+      regions,
+    },
+    actions: {
+      applyFilters,
+      resetFilters,
+    },
   };
 }

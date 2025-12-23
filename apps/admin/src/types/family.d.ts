@@ -1,3 +1,4 @@
+import type { FilterOptions } from './pagination'; // Added explicit import
 export enum FamilyVisibility {
   Private = 'Private',
   Public = 'Public',
@@ -16,9 +17,39 @@ export interface Family {
   familyUsers?: FamilyUser[];
   totalMembers?: number;
   totalGenerations?: number;
-  managerIds: [];
-  viewerIds: [];
+  managerIds: string[]; // Changed to string[]
+  viewerIds: string[]; // Changed to string[]
+  familyLimitConfiguration?: FamilyLimitConfiguration;
 
+}
+
+export interface FamilyAddDto {
+  name: string;
+  code?: string;
+  description?: string;
+  avatarUrl?: string;
+  avatarBase64?: string | null;
+  address?: string;
+  visibility?: FamilyVisibility;
+  managerIds: string[];
+  viewerIds: string[];
+  familyLimitConfiguration?: FamilyLimitConfiguration;
+}
+
+export interface FamilyUpdateDto {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  avatarUrl?: string;
+  avatarBase64?: string | null;
+  address?: string;
+  visibility?: FamilyVisibility;
+  managerIds: string[];
+  viewerIds: string[];
+  deletedManagerIds: string[]; // New field
+  deletedViewerIds: string[]; // New field
+  familyLimitConfiguration?: FamilyLimitConfiguration;
 }
 
 export interface IFamilyAccess {
@@ -26,7 +57,7 @@ export interface IFamilyAccess {
   role: number; // Corresponds to FamilyRole enum in backend
 }
 
-export interface FamilyFilter {
+export interface FamilyFilter extends FilterOptions {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;
   familyId?: string;
@@ -36,8 +67,17 @@ export interface FamilyFilter {
 }
 
 export interface FamilyUser {
-    userId: string;
-    role: number;
+  userId: string;
+  role: number;
+}
+
+export interface FamilyLimitConfiguration {
+  id: string;
+  familyId: string;
+  maxMembers: number;
+  maxStorageMb: number;
+  aiChatMonthlyLimit: number;
+  aiChatMonthlyUsage: number;
 }
 
 export interface MemberExportDto {
@@ -91,6 +131,7 @@ export interface FamilyExportDto {
   familyUsers?: any[]; // Added for consistency with test expectations
   settings?: any; // Added for consistency with test expectations
   privacyConfiguration?: any; // Added for consistency with test expectations
+  familyLimitConfiguration?: FamilyLimitConfiguration;
   members: MemberExportDto[];
   relationships: RelationshipExportDto[];
   events: EventExportDto[];

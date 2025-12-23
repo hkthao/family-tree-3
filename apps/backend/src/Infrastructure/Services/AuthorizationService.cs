@@ -1,12 +1,35 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Enums;
+using backend.Application.Common.Models;
+using backend.Application.Common.Constants;
 
 namespace backend.Infrastructure.Services;
 
-public class AuthorizationService(ICurrentUser user, IApplicationDbContext context) : IAuthorizationService
+public class AuthorizationService : IAuthorizationService
 {
-    private readonly ICurrentUser _user = user;
-    private readonly IApplicationDbContext _context = context;
+    private readonly ICurrentUser _user;
+    private readonly IApplicationDbContext _context;
+
+    public AuthorizationService(ICurrentUser user, IApplicationDbContext context)
+    {
+        _user = user;
+        _context = context;
+    }
+
+    public Task<Result> AuthorizeAsync(string role)
+    {
+        // For now, only 'Admin' role is supported through this method
+        if (role == AppRoles.Administrator)
+        {
+            if (IsAdmin())
+            {
+                return Task.FromResult(Result.Success());
+            }
+            return Task.FromResult(Result.Unauthorized("Người dùng không có quyền quản trị viên."));
+        }
+        // If other roles need to be supported, they can be added here
+        return Task.FromResult(Result.Failure($"Vai trò '{role}' không được hỗ trợ để ủy quyền."));
+    }
 
     public bool IsAdmin()
     {

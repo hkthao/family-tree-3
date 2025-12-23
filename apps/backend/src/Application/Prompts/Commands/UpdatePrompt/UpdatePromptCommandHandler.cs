@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
@@ -6,14 +7,22 @@ namespace backend.Application.Prompts.Commands.UpdatePrompt;
 public class UpdatePromptCommandHandler : IRequestHandler<UpdatePromptCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
 
-    public UpdatePromptCommandHandler(IApplicationDbContext context)
+    public UpdatePromptCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
     {
         _context = context;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result> Handle(UpdatePromptCommand request, CancellationToken cancellationToken)
     {
+        // Kiểm tra quyền: Chỉ admin mới có thể cập nhật prompt
+        if (!_authorizationService.IsAdmin())
+        {
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
         var entity = await _context.Prompts
             .FindAsync(new object[] { request.Id }, cancellationToken);
 

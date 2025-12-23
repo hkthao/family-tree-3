@@ -1,6 +1,9 @@
 using backend.CompositionRoot;
+using backend.Infrastructure;
+
 using backend.Infrastructure.Data;
 using backend.Web.Formatters; // Added for custom HTML input formatter
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -121,21 +124,11 @@ public class Startup
     {
         if (env.IsDevelopment())
         {
-            // Initialise and seed database
-            // Task.Run(async () =>
-            // {
-            //     using var scope = app.ApplicationServices.CreateScope();
-            //     var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
-            //     await initialiser.InitialiseAsync();
-            //     await initialiser.SeedAsync();
-            // });
         }
         else
         {
             app.UseHsts();
         }
-
-
 
         app.UseCors("AllowFrontend");
         app.UseHealthChecks("/health");
@@ -152,6 +145,7 @@ public class Startup
             settings.DocumentPath = "/api/specification.json";
         });
 
+        app.UseRateLimiter();
         app.UseRouting();
 
         var supportedCultures = new[] { "en-US", "vi-VN" };
@@ -159,15 +153,12 @@ public class Startup
             .SetDefaultCulture(supportedCultures[0])
             .AddSupportedCultures(supportedCultures)
             .AddSupportedUICultures(supportedCultures);
-
         app.UseRequestLocalization(localizationOptions);
-
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();
         app.UseMiddleware<NovuSubscriberCreationMiddleware>();
         app.UseAuthorization();
         app.UseExceptionHandler(options => { });
-
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();

@@ -13,12 +13,12 @@ interface UseMemberFormOptions {
 }
 
 export function useMemberFormComposable(options: UseMemberFormOptions) {
-  const { isAdmin, isFamilyManager } = useAuth();
+  const { state } = useAuth();
 
   const formRef = ref<HTMLFormElement | null>(null);
 
   const isFormReadOnly = computed(() => {
-    return options.readOnly || !(isAdmin.value || isFamilyManager.value);
+    return options.readOnly || !(state.isAdmin.value || state.isFamilyManager.value);
   });
 
   const formData = reactive<Omit<Member, 'id'> | Member>(

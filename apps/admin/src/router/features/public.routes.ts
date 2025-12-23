@@ -1,16 +1,9 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { FaqPage, SupportLegalPage } from '@/views';
-import PublicFamilyTreeViewer from '@/views/PublicFamilyTreeViewer.vue'; // Direct import due to lazy loading syntax
+import { FaqPage, SupportLegalPage, FamilyTreeMobileView } from '@/views'; // Add FamilyTreeMobileView
 import MobileMapView from '@/views/family-location/MobileMapView.vue'; // Import MobileMapView
 import MobileMapPickerView from '@/views/family-location/MobileMapPickerView.vue'; // Import MobileMapView
 
 export const publicRoutes: RouteRecordRaw[] = [
-  {
-    path: '/public/family-tree/:familyId/:rootId?',
-    name: 'PublicFamilyTreeViewer',
-    component: PublicFamilyTreeViewer,
-    meta: { requiresAuth: false }, // Public route does not require authentication
-  },
   {
     path: '/public/support-legal',
     name: 'PublicSupportLegal',
@@ -34,5 +27,11 @@ export const publicRoutes: RouteRecordRaw[] = [
     name: 'MobileMapPicker',
     component: MobileMapPickerView,
     meta: { requiresAuth: false }, // Public route does not require authentication
+  },
+  {
+    path: '/public/mobile/tree-view', // A more descriptive public path
+    name: 'FamilyTreeMobileView',
+    component: FamilyTreeMobileView,
+    meta: { requiresAuth: false },
   },
 ];

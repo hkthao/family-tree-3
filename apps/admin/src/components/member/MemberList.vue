@@ -1,27 +1,19 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0"
-    data-testid="member-list" fixed-header>
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="memberListActions.loadMembers"
+    elevation="0" data-testid="member-list" fixed-header>
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('ai-create')">
-          <v-tooltip :text="t('member.list.action.aiCreate')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')"
-          data-testid="add-new-member-button">
+        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+        <v-text-field v-model="searchQuery" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
           hide-details clearable class="mr-2" data-test-id="member-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
@@ -33,14 +25,15 @@
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
       <div class="member-full-name-column">
-<a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-        {{ item.fullName }}
-      </a>
-      <div class="text-caption text-medium-emphasis">
-        {{ item.code }}
+        <a @click="memberListActions.viewMember(item)"
+          class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+          {{ item.fullName }}
+        </a>
+        <div class="text-caption text-medium-emphasis">
+          {{ item.code }}
+        </div>
       </div>
-      </div>
-      
+
     </template>
 
     <!-- Father column -->
@@ -55,8 +48,10 @@
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="Gender.Male" />
-      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="Gender.Female" />
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl"
+        :gender="Gender.Male" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl"
+        :gender="Gender.Female" />
     </template>
 
     <!-- Family column -->
@@ -79,7 +74,7 @@
       <div class="d-flex ga-2" v-if="props.allowEdit || props.allowDelete">
         <v-tooltip :text="t('member.list.action.edit')">
           <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="editMember(item)"
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="memberListActions.editMember(item)"
               data-testid="edit-member-button" aria-label="Edit" v-if="props.allowEdit">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
@@ -87,8 +82,9 @@
         </v-tooltip>
         <v-tooltip :text="t('member.list.action.delete')">
           <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="confirmDelete(item)"
-              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete" v-if="props.allowDelete">
+            <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="memberListActions.confirmDelete(item)"
+              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete"
+              v-if="props.allowDelete">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
@@ -109,15 +105,16 @@ import { useI18n } from 'vue-i18n';
 import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
+import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
 const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
-  search?: string; 
-  readOnly?: boolean; 
+  search?: string;
+  readOnly?: boolean;
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
@@ -136,25 +133,15 @@ const emit = defineEmits([
 
 const { t } = useI18n();
 
-const searchQuery = ref(props.search);
-let debounceTimer: ReturnType<typeof setTimeout>;
+const { state: { searchQuery, debouncedSearchQuery } } = useDebouncedSearch(props.search);
 
-const debouncedSearch = computed({
-  get() {
-    return searchQuery.value;
-  },
-  set(newValue: string) {
-    searchQuery.value = newValue;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      emit('update:search', newValue);
-    }, 300);
-  },
+watch(debouncedSearchQuery, (newValue) => {
+  emit('update:search', newValue);
 });
 
 watch(() => props.search, (newSearch) => {
   if (newSearch !== searchQuery.value) {
-    searchQuery.value = newSearch;
+    searchQuery.value = newSearch ?? '';
   }
 });
 
@@ -227,7 +214,7 @@ const headers = computed<DataTableHeader[]>(() => {
 const loadMembers = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[]; 
+  sortBy: { key: string; order: string }[];
 }) => {
   emit('update:options', options);
 };
@@ -243,4 +230,10 @@ const editMember = (member: Member) => {
 const confirmDelete = (member: Member) => {
   emit('delete', member.id);
 };
-</script>
+
+const memberListActions = {
+  loadMembers,
+  viewMember,
+  editMember,
+  confirmDelete,
+};</script>

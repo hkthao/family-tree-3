@@ -1,5 +1,4 @@
 ﻿using backend.Domain.Enums;
-using backend.Domain.ValueObjects;
 
 namespace backend.Domain.Entities;
 
@@ -50,6 +49,21 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public IReadOnlyCollection<Event> Events => _events;
 
     public PrivacyConfiguration? PrivacyConfiguration { get; private set; }
+    public FamilyLimitConfiguration? FamilyLimitConfiguration { get; set; } // CHANGED to 'set' for EF Core to populate
+
+    /// <summary>
+    /// Đảm bảo rằng FamilyLimitConfiguration đã được khởi tạo.
+    /// </summary>
+    /// <returns>True nếu một FamilyLimitConfiguration mới được tạo, ngược lại là False.</returns>
+    public bool EnsureFamilyLimitConfigurationExists()
+    {
+        if (FamilyLimitConfiguration == null)
+        {
+            FamilyLimitConfiguration = new FamilyLimitConfiguration(Id);
+            return true; // Đã tạo một cái mới
+        }
+        return false; // Đã tồn tại
+    }
 
     public void AddFamilyUser(Guid userId, FamilyRole role)
     {
@@ -60,15 +74,19 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         _familyUsers.Add(new FamilyUser(Id, userId, role));
     }
 
-
-
-    public void RemoveFamilyUser(Guid userId)
+    public FamilyUser? RemoveFamilyUser(Guid userId)
     {
         var familyUser = _familyUsers.FirstOrDefault(fu => fu.UserId == userId);
         if (familyUser != null)
         {
             _familyUsers.Remove(familyUser);
         }
+        return familyUser;
+    }
+
+    public void ClearFamilyUsers()
+    {
+        _familyUsers.Clear();
     }
 
     public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code)
@@ -97,40 +115,6 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public void UpdateAvatar(string? newAvatarUrl)
     {
         AvatarUrl = newAvatarUrl;
-    }
-
-    public void UpdateFamilyUsers(IEnumerable<FamilyUserUpdateInfo> newFamilyUsers)
-    {
-        var currentFamilyUsers = _familyUsers.ToList();
-        var newFamilyUsersList = newFamilyUsers.ToList();
-
-        // Remove users not in the new list
-        foreach (var currentUser in currentFamilyUsers)
-        {
-            if (!newFamilyUsersList.Any(nf => nf.UserId == currentUser.UserId))
-            {
-                _familyUsers.Remove(currentUser);
-            }
-        }
-
-        // Add or update users from the new list
-        foreach (var newFamilyUser in newFamilyUsersList)
-        {
-            var existingUser = _familyUsers.FirstOrDefault(fu => fu.UserId == newFamilyUser.UserId);
-            if (existingUser == null)
-            {
-                // Add new user
-                _familyUsers.Add(new FamilyUser(Id, newFamilyUser.UserId, newFamilyUser.Role));
-            }
-            else
-            {
-                // Update existing user's role if changed
-                if (existingUser.Role != newFamilyUser.Role)
-                {
-                    existingUser.Role = newFamilyUser.Role;
-                }
-            }
-        }
     }
 
     public Member CreateMember(string lastName, string firstName, string code)
@@ -305,8 +289,26 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             TotalGenerations = 0 // Initial value
         };
 
+        family.PrivacyConfiguration = new PrivacyConfiguration(family.Id); // Initialize with default PrivacyConfiguration using family.Id
+        family.FamilyLimitConfiguration = new FamilyLimitConfiguration(family.Id); // Initialize with default FamilyLimitConfiguration using family.Id
         family.AddFamilyUser(creatorUserId, FamilyRole.Manager);
 
         return family;
     }
+
+    /// <summary>
+    /// Cập nhật cấu hình gia đình.
+    /// </summary>
+    /// <param name="maxMembers">Số lượng thành viên tối đa.</param>
+    /// <param name="maxStorageMb">Dung lượng lưu trữ tối đa (MB).</param>
+    /// <param name="aiChatMonthlyLimit">Giới hạn số lượng yêu cầu trò chuyện AI mỗi tháng.</param>
+    public void UpdateFamilyConfiguration(int maxMembers, int maxStorageMb, int aiChatMonthlyLimit)
+    {
+        if (FamilyLimitConfiguration == null)
+        {
+            FamilyLimitConfiguration = new FamilyLimitConfiguration(Id);
+        }
+        FamilyLimitConfiguration.Update(maxMembers, maxStorageMb, aiChatMonthlyLimit);
+    }
 }
+

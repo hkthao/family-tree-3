@@ -60,15 +60,8 @@ const computedHideSearch = computed(() => props.hideSearch);
 const computedReadOnly = computed(() => props.readOnly);
 
 const {
-  searchQuery,
-  itemsPerPage,
-  sortBy,
-  filters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
-  setSearchQuery,
-  setFilters,
+  state: { searchQuery, itemsPerPage, sortBy, filters },
+  actions: { setPage, setItemsPerPage, setSortBy, setSearchQuery, setFilters },
 } = useFamilyDictListFilters();
 
 const { familyDicts, totalItems, loading, refetch } = useFamilyDictsQuery(filters);

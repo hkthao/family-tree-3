@@ -1,9 +1,12 @@
 <template>
-  <div ref="chartContainer" class="force-directed-graph" data-testid="family-tree-canvas"></div>
+  <div ref="chartContainer" :style="{
+    width: '100%',
+    height: props.isMobile ? '100vh' : '80vh' // Dynamic height based on isMobile prop
+  }" data-testid="family-tree-canvas"></div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
 import * as d3 from 'd3';
 import type { Member, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
@@ -16,6 +19,7 @@ const props = defineProps({
   familyId: { type: String, required: true },
   members: { type: Array<Member>, default: () => [] },
   relationships: { type: Array<Relationship>, default: () => [] },
+  isMobile: { type: Boolean, default: false }, // New prop
 });
 
 const emit = defineEmits([
@@ -131,10 +135,8 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
 
 const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   if (!chartContainer.value) return;
-
-  const width = chartContainer.value.clientWidth;
-  const height = chartContainer.value.clientHeight || 800;
-
+  const width = chartContainer.value.clientWidth || 320; // Ensure a minimum width
+  const height = chartContainer.value.clientHeight || 500; // Ensure a minimum height, 500px might be better for mobile than 800px default
   d3.select(chartContainer.value).select('svg').remove();
 
   const svg = d3.select(chartContainer.value).append('svg')
@@ -258,7 +260,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('class', 'legend-item')
     .attr('transform', (d, i) => `translate(0, ${i * 25})`);
 
-  legendItem.each(function(d) {
+  legendItem.each(function (d) {
     const g = d3.select(this);
     if (d.type === 'circle') {
       g.append('circle')
@@ -347,9 +349,10 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (props.members && props.members.length > 0) {
     const { nodes, links } = transformData(props.members, props.relationships);
+    await nextTick();
     renderChart(nodes, links);
   } else {
     if (!chartContainer.value) return;
@@ -378,16 +381,12 @@ onUnmounted(() => {
 </script>
 
 <style>
-.force-directed-graph {
-  width: 100%;
-  height: 80vh;
-}
 .empty-message {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   flex-direction: column;
-  height: 80vh;
+  height: v-bind("props.isMobile ? '100vh' : '80vh'");
 }
 </style>

@@ -51,7 +51,7 @@ const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationsh
 
 const { t } = useI18n();
 const { showConfirmDialog } = useConfirmDialog();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
 const memberIdRef = toRef(props, 'memberId');
@@ -61,7 +61,7 @@ const { mutate: deleteMember, isPending: isDeletingMember } = useDeleteMemberMut
 const showBiography = ref(false);
 
 const canEditOrDelete = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(member.value?.familyId || '');
 });
 
 const handleClose = () => {

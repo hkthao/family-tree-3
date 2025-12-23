@@ -1,4 +1,5 @@
-import { MainRouterView, FaceSearchView } from '@/views';
+import { MainRouterView } from '@/views';
+import FaceSearchView from '@/views/member-face/FaceSearchView.vue';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const faceRoutes: RouteRecordRaw[] = [

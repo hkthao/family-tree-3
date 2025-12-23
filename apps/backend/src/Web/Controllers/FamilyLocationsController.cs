@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
 using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
@@ -7,11 +8,14 @@ using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/family-locations")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyLocationsController(IMediator mediator, ILogger<FamilyLocationsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

@@ -1,18 +1,16 @@
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { ApiUserService } from '@/services/user/api.user.service';
-import apiClient from '@/plugins/axios';
 import type { Paginated, UserDto } from '@/types';
-
-// Instantiate the service outside the composable to avoid re-instantiation on every call
-const userService = new ApiUserService(apiClient);
+import type { IUserService } from '@/services/user/user.service.interface';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseUserSearchOptions {
   debounceTime?: number;
+  userService?: IUserService;
 }
 
-export function useUserSearch(options?: UseUserSearchOptions) {
-  const { debounceTime = 300 } = options || {};
+export function useUserSearch(options: UseUserSearchOptions = {}) {
+  const { debounceTime = 300, userService = useServices().user } = options;
 
   const searchTerm = ref('');
   const debouncedSearchTerm = ref('');
@@ -20,33 +18,37 @@ export function useUserSearch(options?: UseUserSearchOptions) {
 
   const { data, isLoading, isFetching, error } = useQuery<Paginated<UserDto>, Error>({
     queryKey: ['users', debouncedSearchTerm],
-    queryFn: async () => {
+    queryFn: (async () => {
       if (!debouncedSearchTerm.value) {
-        return { items: [] as UserDto[], page: 1, totalItems: 0, totalPages: 0 };
+        return { items: [] as UserDto[], page: 1, totalItems: 0, totalPages: 0 } as Paginated<UserDto>;
       }
       const result = await userService.search(debouncedSearchTerm.value, 1, 10);
       if (result.ok) {
         return result.value;
       }
       throw result.error;
-    },
+    }) as () => Promise<Paginated<UserDto>>,
     staleTime: 1000 * 60 * 1, // 1 minute
     enabled: computed(() => !!debouncedSearchTerm.value),
   });
 
-  watch(searchTerm, (newSearchTerm) => {
+  const handleSearchTermChange = (newSearchTerm: string) => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
     debounceTimer = setTimeout(() => {
       debouncedSearchTerm.value = newSearchTerm;
     }, debounceTime);
-  });
+  };
+
+  watch(searchTerm, handleSearchTermChange);
 
   return {
-    searchTerm,
-    users: computed(() => data.value?.items || []),
-    isLoading: computed(() => isLoading.value || isFetching.value),
-    error,
+    state: {
+      searchTerm,
+      users: computed(() => (data.value as Paginated<UserDto> | undefined)?.items || []),
+      isLoading: computed(() => isLoading.value || isFetching.value),
+      error,
+    },
   };
 }

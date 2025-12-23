@@ -73,7 +73,7 @@ public class Result<T>
     /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
     /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
     /// <returns>Một thể hiện của Result<T> biểu thị không tìm thấy.</returns>
-    public static Result<T> NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+    public static Result<T> NotFound(string error = "NotFound", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
 
@@ -140,6 +140,16 @@ public class Result
         { IsSuccess = false, Error = "One or more validation errors occurred.", ErrorSource = "Validation", StatusCode = 400, ValidationErrors = validationErrors };
 
     /// <summary>
+    /// Tạo một kết quả không được phép (Unauthorized) với thông báo lỗi và mã trạng thái 401.
+    /// </summary>
+    /// <param name="error">Thông báo lỗi. Mặc định là "Unauthorized".</param>
+    /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "Authorization".</param>
+    /// <returns>Một thể hiện của Result biểu thị không được phép.</returns>
+    public static Result Unauthorized(string error = "Unauthorized", string errorSource = "Authorization") =>
+        new()
+        { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 401 };
+
+    /// <summary>
     /// Tạo một kết quả cấm truy cập (Forbidden) với thông báo lỗi.
     /// </summary>
     /// <param name="error">Thông báo lỗi. Mặc định là "Forbidden".</param>
@@ -155,7 +165,7 @@ public class Result
     /// <param name="error">Thông báo lỗi. Mặc định là "Not Found".</param>
     /// <param name="errorSource">Nguồn gốc của lỗi. Mặc định là "NotFound".</param>
     /// <returns>Một thể hiện của Result biểu thị không tìm thấy.</returns>
-    public static Result NotFound(string error = "Not Found", string errorSource = "NotFound") =>
+    public static Result NotFound(string error = "NotFound", string errorSource = "NotFound") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 404 };
 

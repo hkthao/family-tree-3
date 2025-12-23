@@ -1,7 +1,8 @@
-import { computed, watch, reactive } from 'vue';
+import { watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyLocation } from '@/types';
 import { LocationAccuracy, LocationSource, LocationType } from '@/types';
+import { getLocationTypeOptions, getLocationAccuracyOptions, getLocationSourceOptions } from '@/composables/utils/familyLocationOptions';
 
 interface UseFamilyLocationFormLogicProps {
   initialFamilyLocationData?: FamilyLocation;
@@ -36,31 +37,18 @@ export function useFamilyLocationFormLogic(props: UseFamilyLocationFormLogicProp
     }
   });
 
-  const locationTypeOptions = computed(() => [
-    { title: t('familyLocation.locationType.grave'), value: LocationType.Grave },
-    { title: t('familyLocation.locationType.homeland'), value: LocationType.Homeland },
-    { title: t('familyLocation.locationType.ancestralHall'), value: LocationType.AncestralHall },
-    { title: t('familyLocation.locationType.cemetery'), value: LocationType.Cemetery },
-    { title: t('familyLocation.locationType.eventLocation'), value: LocationType.EventLocation },
-    { title: t('familyLocation.locationType.other'), value: LocationType.Other },
-  ]);
-
-  const locationAccuracyOptions = computed(() => [
-    { title: t('familyLocation.accuracy.exact'), value: LocationAccuracy.Exact },
-    { title: t('familyLocation.accuracy.approximate'), value: LocationAccuracy.Approximate },
-    { title: t('familyLocation.accuracy.estimated'), value: LocationAccuracy.Estimated },
-  ]);
-
-  const locationSourceOptions = computed(() => [
-    { title: t('familyLocation.source.userselected'), value: LocationSource.UserSelected },
-    { title: t('familyLocation.source.geocoded'), value: LocationSource.Geocoded },
-  ]);
+  const locationTypeOptions = getLocationTypeOptions(t);
+  const locationAccuracyOptions = getLocationAccuracyOptions(t);
+  const locationSourceOptions = getLocationSourceOptions(t);
 
   return {
-    form,
-    defaultForm,
-    locationTypeOptions,
-    locationAccuracyOptions,
-    locationSourceOptions,
+    state: {
+      form,
+      defaultForm,
+      locationTypeOptions,
+      locationAccuracyOptions,
+      locationSourceOptions,
+    },
+    actions: {}, // No explicit actions returned from this composable
   };
 }

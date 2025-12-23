@@ -35,7 +35,13 @@ const emit = defineEmits(['close', 'saved']);
 
 const eventFormRef = ref<InstanceType<typeof EventForm> | null>(null);
 
-const { isAddingEvent, handleAddEvent: handleAddEventComposable, closeForm, t } = useEventAdd(emit);
+const {
+  state,
+  actions,
+} = useEventAdd(emit);
+
+const { isAddingEvent } = state;
+const { handleAddEvent: handleAddEventComposable, closeForm, t } = actions;
 
 const handleAddEvent = async () => {
   if (!eventFormRef.value) return;

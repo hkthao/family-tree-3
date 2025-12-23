@@ -1,0 +1,138 @@
+import type { Member, Relationship } from '@/types';
+import { Gender, RelationshipType } from '@/types';
+import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
+
+// Define the type for the data used in the family chart cards
+interface CardDataPayload {
+  id: string;
+  data: {
+    avatar?: string;
+    gender: 'M' | 'F'; // Strictly M or F
+    fullName: string; // Should always be present
+    birthYear?: string | number;
+    deathYear?: string | number;
+    main?: boolean; // Explicitly boolean
+    [key: string]: string | number | boolean | undefined; // Allow other keys, including boolean for main
+  };
+  rels: {
+    spouses: string[];
+    children: string[];
+    father?: string;
+    mother?: string;
+  };
+}
+
+/**
+ * Transforms raw Member and Relationship data into a format suitable for the family-chart (f3) library.
+ * This function is pure and does not interact with the DOM or external libraries directly.
+ * @param members An array of Member objects.
+ * @param relationships An array of Relationship objects.
+ * @param rootId The ID of the root member for the tree, if any.
+ * @returns An array of transformed data objects for f3.
+ */
+export function transformFamilyData(
+  members: Member[],
+  relationships: Relationship[],
+  rootId: string | null
+): CardDataPayload[] {
+  const personMap = new Map<string, CardDataPayload>();
+
+  // 1. Initialize all members in a map for quick access
+  members.forEach((person) => {
+    personMap.set(String(person.id), {
+      id: String(person.id),
+      data: {
+        fullName: person.fullName || `${person.firstName || ''} ${person.lastName || ''}`.trim(),
+        birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
+        deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
+        avatar: getAvatarUrl(person.avatarUrl, person.gender),
+        gender: person.gender === Gender.Male ? 'M' : 'F', // Map Unknown to Female by default
+      },
+      rels: {
+        spouses: [],
+        children: [],
+      },
+    });
+  });
+
+  // 2. Process relationships to build the tree structure
+  relationships.forEach((rel) => {
+    const sourcePerson = personMap.get(String(rel.sourceMemberId));
+    const targetPerson = personMap.get(String(rel.targetMemberId));
+
+    if (!sourcePerson || !targetPerson) {
+      // console.warn('Could not find person for relationship:', rel); // For debugging
+      return; // Skip if a person in the relationship doesn't exist in the member list
+    }
+
+    switch (rel.type) {
+      case RelationshipType.Wife:
+      case RelationshipType.Husband:
+        // Add spouse if not already added to avoid duplicates
+        if (!sourcePerson.rels.spouses.includes(targetPerson.id)) {
+          sourcePerson.rels.spouses.push(targetPerson.id);
+        }
+        if (!targetPerson.rels.spouses.includes(sourcePerson.id)) {
+          targetPerson.rels.spouses.push(sourcePerson.id);
+        }
+        break;
+
+      case RelationshipType.Father:
+        targetPerson.rels.father = sourcePerson.id;
+        if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+          sourcePerson.rels.children.push(targetPerson.id);
+        }
+        break;
+
+      case RelationshipType.Mother:
+        targetPerson.rels.mother = sourcePerson.id;
+        if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+          sourcePerson.rels.children.push(targetPerson.id);
+        }
+        break;
+      // Add other relationship types if they influence tree structure
+    }
+  });
+
+  // 3. Mark the root member and return the array of transformed data
+  return Array.from(personMap.values()).map(person => {
+    if (rootId && person.id === rootId) {
+      return { ...person, data: { ...person.data, main: true } };
+    }
+    return person;
+  });
+}
+
+/**
+ * Determines the initial main ID for the family tree chart.
+ * @param currentMembers All members currently available.
+ * @param transformedData The data transformed for the f3 chart.
+ * @param providedRootId The root ID provided as a prop.
+ * @returns The ID of the main person to set for the chart, or undefined if none can be determined.
+ */
+export function determineMainChartId(
+  currentMembers: Member[],
+  transformedData: CardDataPayload[],
+  providedRootId: string | null
+): string | undefined {
+  let mainIdToSet: string | undefined;
+
+  if (providedRootId) {
+    // Check if the provided rootId exists in the transformed data
+    const foundRootMember = transformedData.find(d => d.id === providedRootId);
+    if (foundRootMember) {
+      mainIdToSet = providedRootId;
+    }
+  }
+
+  if (!mainIdToSet) {
+    // Fallback to existing logic if providedRootId is not found or not provided
+    const rootMember = currentMembers.find((m: Member) => m.isRoot);
+    if (rootMember) {
+      mainIdToSet = rootMember.id;
+    } else if (transformedData.length > 0) {
+      mainIdToSet = transformedData[0].id; // Fallback to the first available member
+    }
+  }
+  return mainIdToSet;
+}

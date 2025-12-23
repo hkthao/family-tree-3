@@ -24,7 +24,7 @@
     <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
-        <EventCalendar :family-id="selectedFamilyId || undefined" :events="upcomingEvents || []" :loading="isLoadingEvents" :read-only="true" id="dashboard-event-calendar" />
+        <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" id="dashboard-event-calendar" />
       </v-col>
       <v-col cols="12" md="6">
         <RecentActivity :family-id="selectedFamilyId || undefined" :activities="recentActivities" :loading="isLoadingRecentActivities" id="dashboard-recent-activity" />
@@ -41,7 +41,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables';
-import { useDashboardStats , useUpcomingEvents, useRecentActivities } from '@/composables';
+import { useDashboardStats, useRecentActivities } from '@/composables';
 
 const { t } = useI18n();
 useOnboardingTour();
@@ -50,9 +50,8 @@ const selectedFamilyId = ref<string | null>(null);
 
 const familyIdForQueries = computed(() => selectedFamilyId.value || undefined);
 
-const { dashboardStats, isLoading: isLoadingStats } = useDashboardStats(familyIdForQueries);
-const { upcomingEvents, isLoading: isLoadingEvents } = useUpcomingEvents(computed(() => ({ familyId: familyIdForQueries.value })));
-const { activities: recentActivities, isLoading: isLoadingRecentActivities } = useRecentActivities(familyIdForQueries);
+const { state: { dashboardStats, isLoading: isLoadingStats } } = useDashboardStats(familyIdForQueries);
+const { state: { activities: recentActivities, isLoading: isLoadingRecentActivities } } = useRecentActivities(familyIdForQueries);
 </script>
 
 <style scoped>

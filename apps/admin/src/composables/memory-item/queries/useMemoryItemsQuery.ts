@@ -19,7 +19,18 @@ export const useMemoryItemsQuery = (
   const combinedFilters = computed(() => ({ ...filters.value, familyId: familyId.value }));
 
   const query = useQuery<Paginated<MemoryItem>, Error>({
-    queryKey: ['memory-items', options, combinedFilters],
+    queryKey: [
+      'memory-items',
+      familyId.value,
+      options.value.page,
+      options.value.itemsPerPage,
+      JSON.stringify(options.value.sortBy),
+      combinedFilters.value.emotionalTag,
+      combinedFilters.value.memberId,
+      combinedFilters.value.searchTerm,
+      combinedFilters.value.startDate,
+      combinedFilters.value.endDate,
+    ],
     queryFn: async () => {
       if (!familyId.value) { // Still need familyId for the filter to be valid
         throw new Error(t('memoryItem.messages.noFamilyId'));
@@ -41,14 +52,26 @@ export const useMemoryItemsQuery = (
     placeholderData: (previousData: Paginated<MemoryItem> | undefined) => previousData,
   });
 
+  const memoryItems = computed<MemoryItem[]>(() => query.data.value?.items || []);
+  const totalItems = computed<number>(() => query.data.value?.totalItems || 0);
+  const isLoading = computed<boolean>(() => query.isPending.value || query.isFetching.value);
+
   const invalidateMemoryItemsQuery = () => {
     queryClient.invalidateQueries({
-      queryKey: ['memory-items', { familyId: familyId.value }], // Invalidate based on the filter
+      queryKey: ['memory-items', { familyId: familyId.value }],
     });
   };
 
   return {
-    ...query,
-    invalidateMemoryItemsQuery,
+    state: {
+      memoryItems,
+      totalItems,
+      isLoading,
+      error: query.error,
+    },
+    actions: {
+      invalidateMemoryItemsQuery,
+      refetch: query.refetch,
+    },
   };
 };

@@ -65,12 +65,15 @@ const props = defineProps<MemberFaceDetailViewProps>();
 const emit = defineEmits(['close', 'edit-member-face', 'member-face-deleted']);
 
 const { t } = useI18n();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 
 const { memberFace, queryLoading } = useMemberFaceDetailQuery(props.memberFaceId);
 const { mutateAsync: deleteMemberFaceMutation } = useDeleteMemberFaceMutation();
 
-const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
+const {
+  state: { isDeleting },
+  actions: { confirmAndDelete },
+} = useMemberFaceDeletion({
   deleteMutation: deleteMemberFaceMutation,
   successMessageKey: 'memberFace.messages.deleteSuccess',
   errorMessageKey: 'memberFace.messages.deleteError',
@@ -83,7 +86,7 @@ const { isDeleting, confirmAndDelete } = useMemberFaceDeletion({
 });
 
 const canPerformActions = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(memberFace.value?.familyId || '');
 });
 
 const handleClose = () => {

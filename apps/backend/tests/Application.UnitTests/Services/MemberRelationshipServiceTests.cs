@@ -1,11 +1,9 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Services;

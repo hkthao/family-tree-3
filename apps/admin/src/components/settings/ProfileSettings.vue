@@ -64,15 +64,8 @@ const { t } = useI18n();
 const localFormRef = ref<VForm | null>(null);
 
 const {
-  formData,
-  formRef,
-  initialAvatarDisplay,
-  isFetchingProfile,
-  isSavingProfile,
-  saveProfile,
-  userProfile,
-  fetchError,
-  validationRules,
+  state: { formData, formRef, initialAvatarDisplay, isFetchingProfile, isSavingProfile, userProfile, fetchError, validationRules },
+  actions: { saveProfile },
 } = useProfileSettings();
 
 // Assign the local form ref to the composable's formRef

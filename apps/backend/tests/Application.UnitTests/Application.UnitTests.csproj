@@ -25,6 +25,10 @@
     <PackageReference Include="AutoFixture.AutoMoq" />
     <PackageReference Include="AutoFixture.Xunit2" />
     <PackageReference Include="Moq.EntityFrameworkCore" />
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

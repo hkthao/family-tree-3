@@ -1,6 +1,9 @@
+using backend.Application.Common.Constants;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
@@ -11,6 +14,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/dashboard")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class DashboardController(IMediator mediator, ILogger<DashboardController> logger) : ControllerBase
 {
     /// <summary>

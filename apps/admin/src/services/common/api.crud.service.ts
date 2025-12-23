@@ -12,7 +12,7 @@ export class ApiCrudService<T extends { id?: string }> implements ICrudService<T
   ): Promise<Result<Paginated<T>>> {
     const params: Record<string, any> = {
       page: options.page,
-      pageSize: options.itemsPerPage,
+      itemsPerPage: options.itemsPerPage,
     };
     if (options.sortBy && options.sortBy.length > 0) {
       params.sortBy = options.sortBy[0].key;

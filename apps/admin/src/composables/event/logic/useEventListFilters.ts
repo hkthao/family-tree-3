@@ -15,8 +15,10 @@ export function useEventListFilters() {
   };
 
   const setItemsPerPage = (newItemsPerPage: number) => {
-    filters.value.itemsPerPage = newItemsPerPage;
-    filters.value.page = 1; // Reset to first page when items per page changes
+    if (filters.value.itemsPerPage != newItemsPerPage) {
+      filters.value.itemsPerPage = newItemsPerPage;
+      filters.value.page = 1; // Reset to first page when items per page changes
+    }
   };
 
   const setSortBy = (newSortBy: { key: string; order: 'asc' | 'desc' }[]) => {
@@ -28,16 +30,32 @@ export function useEventListFilters() {
     filters.value.page = 1; // Reset to first page on new search
   };
 
-  const setFilters = (newFilters: EventFilter) => { // Use EventFilter
-    filters.value = { ...filters.value, ...newFilters };
-    if (newFilters.page !== undefined) filters.value.page = newFilters.page;
-    if (newFilters.itemsPerPage !== undefined) filters.value.itemsPerPage = newFilters.itemsPerPage;
-    if (newFilters.sortBy !== undefined) filters.value.sortBy = newFilters.sortBy;
-    if (newFilters.searchQuery !== undefined) filters.value.searchQuery = newFilters.searchQuery;
-    if (newFilters.familyId !== undefined) filters.value.familyId = newFilters.familyId; // Add familyId specific filter
-    if (newFilters.startDate !== undefined) filters.value.startDate = newFilters.startDate;
-    if (newFilters.endDate !== undefined) filters.value.endDate = newFilters.endDate;
-    if (newFilters.calendarType !== undefined) filters.value.calendarType = newFilters.calendarType;
+  const setFilters = (newFilters: EventFilter) => {
+    if (newFilters.searchQuery !== undefined) {
+      setSearchQuery(newFilters.searchQuery);
+    }
+    if (newFilters.page !== undefined) {
+      setPage(newFilters.page);
+    }
+    if (newFilters.itemsPerPage !== undefined) {
+      setItemsPerPage(newFilters.itemsPerPage);
+    }
+    if (newFilters.sortBy !== undefined) {
+      setSortBy(newFilters.sortBy);
+    }
+    // Handle other filters directly as they don't have side effects that reset page
+    if (newFilters.familyId !== undefined) {
+      filters.value.familyId = newFilters.familyId;
+    }
+    if (newFilters.startDate !== undefined) {
+      filters.value.startDate = newFilters.startDate;
+    }
+    if (newFilters.endDate !== undefined) {
+      filters.value.endDate = newFilters.endDate;
+    }
+    if (newFilters.calendarType !== undefined) {
+      filters.value.calendarType = newFilters.calendarType;
+    }
   };
 
   return {
@@ -53,3 +71,5 @@ export function useEventListFilters() {
     setFilters,
   };
 }
+
+export type UseEventListFiltersReturn = ReturnType<typeof useEventListFilters>;

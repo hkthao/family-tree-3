@@ -9,22 +9,25 @@
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
     <NotificationBell />
-    <!-- Chat Assistant Button -->
-    <v-btn icon @click="showChatWidget = !showChatWidget">
-      <v-icon>mdi-chat-processing</v-icon>
+    <!-- Chat Button -->
+    <v-btn icon @click="showChatDrawer = !showChatDrawer">
+      <v-icon>mdi-chat-processing-outline</v-icon>
     </v-btn>
+
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
   </v-app-bar>
-  <!-- Chat Widget Component -->
-  <N8nChatWidget v-model="showChatWidget" />
+
+  <ChatDrawer v-model="showChatDrawer" />
 </template>
 
+
 <script setup lang="ts">
-import { ref, type PropType, watch } from 'vue'; // Removed onMounted
-import { useTheme } from 'vuetify';
+import { ref, type PropType, watch, computed } from 'vue';
+import { useTheme, useDisplay } from 'vuetify';
 import UserMenu from './UserMenu.vue';
+import ChatDrawer from '@/views/chat/ChatDrawer.vue';
 import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
@@ -33,15 +36,28 @@ import { useUserPreferences } from '@/composables';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
-import { N8nChatWidget } from '@/components/ai'; // Import ChatWidget
+
 
 const { t } = useI18n();
 const theme = useTheme();
+const display = useDisplay(); // Initialize useDisplay
 
 const router = useRouter();
-const { preferences, savePreferences } = useUserPreferences();
+const { state: { preferences }, actions: { savePreferences } } = useUserPreferences();
 
-const showChatWidget = ref(false); // Reactive variable to control chat widget visibility
+const showChatDrawer = ref(false);
+
+
+// Computed property to determine if the chat drawer should be permanent
+const isPermanentChatDrawer = computed(() => display.mdAndUp.value);
+
+watch(isPermanentChatDrawer, (isPermanent) => {
+  if (isPermanent) {
+    showChatDrawer.value = true;
+  }
+}, { immediate: true });
+
+
 
 defineProps({
   currentUser: {

@@ -1,14 +1,16 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Family } from '@/types';
-import { ApiFamilyService } from '@/services/family/api.family.service';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/plugins/services.plugin';
 
-const apiFamilyService: IFamilyService = new ApiFamilyService(apiClient);
 
-export function useFamilyQuery(familyId: Ref<string | undefined>) {
+
+export function useFamilyQuery(
+  familyId: Ref<string | undefined>,
+  service: IFamilyService = useServices().family,
+) {
   const query = useQuery<Family, Error>({
     queryKey: computed(() => (unref(familyId) ? queryKeys.families.detail(unref(familyId)!) : [])),
     queryFn: async () => {
@@ -16,7 +18,7 @@ export function useFamilyQuery(familyId: Ref<string | undefined>) {
       if (!id) {
         throw new Error('Family ID is required');
       }
-      const response = await apiFamilyService.getById(id);
+      const response = await service.getById(id);
       if (response.ok) {
         if (response.value === undefined) {
           throw new Error('Family not found');
@@ -31,6 +33,7 @@ export function useFamilyQuery(familyId: Ref<string | undefined>) {
 
   const family = computed(() => query.data.value);
   const isLoading = computed(() => query.isFetching.value);
+
 
   return {
     query,

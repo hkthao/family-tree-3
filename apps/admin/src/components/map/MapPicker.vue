@@ -4,9 +4,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapbox } from '@/composables/map/useMapbox';
+import { defaultMapboxMarkerAdapter, defaultMapboxMapAdapter } from '@/composables/utils/mapbox.adapter';
 
 const props = defineProps<{
   mapboxAccessToken: string;
@@ -17,39 +16,45 @@ const props = defineProps<{
 const emit = defineEmits(['update:coordinates']);
 
 const mapContainer = ref<HTMLElement | null>(null);
-const marker = ref<mapboxgl.Marker | null>(null);
+const marker = ref<any | null>(null);
 
-const { mapInstance } = useMapbox({
+const { state: { mapInstance } } = useMapbox({
   mapboxAccessToken: props.mapboxAccessToken,
   initialCenter: props.initialCenter,
   initialZoom: props.initialZoom,
   mapContainer: mapContainer,
 });
 
-onMounted(() => {
-  watch(mapInstance, (newMapInstance) => {
-    if (newMapInstance) {
-      newMapInstance.on('click', (e) => {
-        const { lng, lat } = e.lngLat;
-        updateMarker([lng, lat]);
-        emit('update:coordinates', { longitude: lng, latitude: lat });
-      });
-
-      if (props.initialCenter) {
-        updateMarker(props.initialCenter);
-      }
-    }
-  }, { immediate: true });
-});
-
 const updateMarker = (coordinates: [number, number]) => {
   if (!mapInstance.value) return;
   if (marker.value) {
-    marker.value.setLngLat(coordinates);
-  } else if (mapInstance.value) { // Add null check here
-    marker.value = new mapboxgl.Marker().setLngLat(coordinates).addTo(mapInstance.value as any);
+    defaultMapboxMarkerAdapter.setMarkerLngLat(marker.value as any, coordinates);
+  } else {
+    marker.value = defaultMapboxMarkerAdapter.createMarker();
+    defaultMapboxMarkerAdapter.setMarkerLngLat(marker.value as any, coordinates);
+    defaultMapboxMarkerAdapter.addMarkerToMap(marker.value as any, mapInstance.value as any);
   }
 };
+
+onMounted(() => {
+  watch(mapInstance, (newMapInstance) => {
+    if (newMapInstance) {
+      // Use onMapLoad from the adapter to ensure map is fully loaded before adding click listener
+      defaultMapboxMapAdapter.onMapLoad(newMapInstance as any, () => {
+        newMapInstance.on('click', (e: any) => {
+          const { lng, lat } = e.lngLat;
+          updateMarker([lng, lat]);
+          emit('update:coordinates', { longitude: lng, latitude: lat });
+        });
+
+        if (props.initialCenter) {
+          updateMarker(props.initialCenter);
+          emit('update:coordinates', { longitude: props.initialCenter[0], latitude: props.initialCenter[1] });
+        }
+      });
+    }
+  }, { immediate: true });
+});
 
 watch(() => props.initialCenter, (newCenter) => {
   if (mapInstance.value && newCenter) {

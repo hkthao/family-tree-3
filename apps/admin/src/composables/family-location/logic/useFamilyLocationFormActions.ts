@@ -22,8 +22,10 @@ export function useFamilyLocationFormActions(props: UseFamilyLocationFormActions
   };
 
   return {
-    getFormData,
-    setCoordinates,
-    setAddress,
+    actions: {
+      getFormData,
+      setCoordinates,
+      setAddress,
+    },
   };
 }

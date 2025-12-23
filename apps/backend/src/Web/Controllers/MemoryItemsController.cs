@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem;
 using backend.Application.MemoryItems.Commands.DeleteMemoryItem;
@@ -8,11 +9,14 @@ using backend.Application.MemoryItems.Queries.SearchMemoryItems;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController] // Add this
 [Route("api/memory-items")] // Add this
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class MemoryItemsController : ControllerBase
 {
     private readonly IMediator _mediator; // Add this
@@ -39,6 +43,11 @@ public class MemoryItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMemoryItem(Guid id, UpdateMemoryItemCommand command)
     {
+        if (id != command.Id)
+        {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemoryItemCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest();
+        }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);
     }
@@ -57,7 +66,7 @@ public class MemoryItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMemoryItemDetail(Guid id)
     {
-        var result = await _mediator.Send(new GetMemoryItemDetailQuery { Id = id});
+        var result = await _mediator.Send(new GetMemoryItemDetailQuery { Id = id });
         return result.ToActionResult(this, _logger);
     }
 

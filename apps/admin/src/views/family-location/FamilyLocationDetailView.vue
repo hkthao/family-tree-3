@@ -54,7 +54,7 @@ const emit = defineEmits(['close', 'family-location-deleted', 'edit-family-locat
 
 const { t } = useI18n();
 const { showConfirmDialog } = useConfirmDialog();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
 const familyLocationIdRef = toRef(props, 'familyLocationId');
@@ -66,7 +66,7 @@ const {
 const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = useDeleteFamilyLocationMutation();
 
 const canEditOrDelete = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value;
 });
 
 const handleClose = () => {

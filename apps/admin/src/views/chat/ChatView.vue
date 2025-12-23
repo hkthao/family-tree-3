@@ -1,0 +1,156 @@
+<template>
+  <v-card class="mx-auto d-flex flex-column chat-card" height="100%" flat :loading="state.loading.value">
+    <v-card-text class="flex-grow-1 pa-0 ">
+      <div class="chat-messages" ref="chatMessagesContainer">
+        <div v-for="(message, index) in state.messages" :key="index"
+          :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
+          <template v-if="message.sender === 'user'">
+            <v-sheet class="ma-1 pa-2 text-wrap" color="primary" rounded="lg">
+              {{ message.text }}
+            </v-sheet>
+            <v-avatar cover class="ml-1" size="36">
+              <v-img v-if="state.userProfile?.value?.avatar"
+                :src="getAvatarUrl(state.userProfile.value.avatar, undefined)"
+                :alt="state.userProfile.value.name || 'User'" />
+              <v-icon v-else>mdi-account-circle</v-icon>
+            </v-avatar>
+          </template>
+          <template v-else>
+            <v-avatar class="mr-1" size="36">
+              <v-icon>mdi-robot-outline</v-icon>
+            </v-avatar>
+            <v-sheet class="ma-1 pa-2 text-wrap" color="secondary" rounded="lg">
+              {{ message.text }}
+            </v-sheet>
+          </template>
+          <template v-if="!message.text">
+            <!-- Debugging: log message if text is empty or not a string -->
+            {{ console.log('Message without text property:', message) }}
+          </template>
+        </div>
+        <div v-if="state.loading.value" class="d-flex justify-start">
+          <v-chip class="ma-1" color="grey-lighten-1" label>
+            <v-progress-circular indeterminate size="20" width="2"></v-progress-circular>
+            <span class="ml-2">{{ t('aiChat.typing') }}</span>
+          </v-chip>
+        </div>
+        <v-btn
+          v-if="showScrollToBottomButton"
+          icon
+          variant="flat"
+          size="small"
+          color="primary"
+          class="scroll-to-bottom-button"
+          @click="scrollToBottom"
+        >
+          <v-icon>mdi-arrow-down-circle</v-icon>
+        </v-btn>
+      </div>
+    </v-card-text>
+    <v-card-actions class="d-flex justify-center pa-0 chat-input-area">
+      <v-textarea no-resize :auto-grow="false" counter :rows="2" :model-value="state.newMessage.value"
+        @update:model-value="newValue => state.newMessage.value = newValue" :placeholder="t('aiChat.placeholder')"
+        variant="outlined" @keyup.enter="actions.sendMessage" :disabled="state.loading.value">
+        <template v-slot:append-inner>
+          <v-btn icon flat :disabled="state.loading.value || !state.newMessage.value.trim()"
+            @click="actions.sendMessage">
+            <v-icon>mdi-send</v-icon>
+          </v-btn>
+        </template>
+      </v-textarea>
+    </v-card-actions>
+  </v-card>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, nextTick, onUnmounted } from 'vue'; // Added onMounted for debugging
+import { useI18n } from 'vue-i18n'; // Keep useI18n for `t` function in template
+import { getAvatarUrl } from '@/utils/avatar.utils'; // Keep getAvatarUrl as it's a utility
+import { useChatView } from '@/composables/ai/useChatView'; // Import the new composable
+
+const props = defineProps<{
+  familyId: string;
+}>();
+
+const { t } = useI18n(); // Keep t for template
+const chatMessagesContainer = ref<HTMLElement | null>(null);
+const { state, actions } = useChatView(props.familyId);
+const showScrollToBottomButton = ref(false); // New ref for button visibility
+
+const SCROLL_THRESHOLD = 100; // Pixels from the bottom to consider "near bottom"
+
+const scrollToBottom = () => {
+  if (chatMessagesContainer.value) {
+    chatMessagesContainer.value.scrollTop = chatMessagesContainer.value.scrollHeight;
+  }
+};
+
+const handleScroll = () => {
+  if (chatMessagesContainer.value) {
+    const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer.value;
+    // Show button if not at the bottom (with a small tolerance)
+    showScrollToBottomButton.value = scrollHeight - scrollTop > clientHeight + SCROLL_THRESHOLD;
+  }
+};
+
+// Watch for new messages
+watch(state.messages, (newMessages, oldMessages) => {
+  if (chatMessagesContainer.value) {
+    const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer.value;
+    const isNearBottom = scrollHeight - scrollTop <= clientHeight + SCROLL_THRESHOLD;
+
+    // If a new message arrived and the user was near the bottom, auto-scroll
+    if (newMessages.length > oldMessages.length && isNearBottom) {
+      nextTick(() => {
+        scrollToBottom();
+        showScrollToBottomButton.value = false; // Hide button as we are at the bottom
+      });
+    } else if (newMessages.length > oldMessages.length && !isNearBottom) {
+      // If new message arrived and user is scrolled up, show the button
+      showScrollToBottomButton.value = true;
+    }
+  }
+}, { deep: true });
+
+// Add event listener for scroll when component is mounted
+nextTick(() => {
+  if (chatMessagesContainer.value) {
+    chatMessagesContainer.value.addEventListener('scroll', handleScroll);
+    // Initial check in case chat is pre-filled and not at bottom
+    handleScroll();
+  }
+});
+
+// Cleanup event listener when component is unmounted
+onUnmounted(() => {
+  if (chatMessagesContainer.value) {
+    chatMessagesContainer.value.removeEventListener('scroll', handleScroll);
+  }
+});
+</script>
+
+<style scoped>
+.chat-card {
+  position: relative;
+}
+
+.chat-messages {
+  overflow-y: auto;
+  max-height: calc(100vh - 215px); /* Adjusted for larger input area */
+}
+
+.chat-input-area {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--v-card-background);
+}
+
+.scroll-to-bottom-button {
+  position: absolute;
+  bottom: 120px; /* Adjust as needed to be above the input field */
+  right: 32px;
+  z-index: 10; /* Ensure it's above other content */
+}
+</style>

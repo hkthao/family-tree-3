@@ -8,6 +8,7 @@ export const queryKeys = {
   events: {
     all: ['events'] as const,
     list: (filters?: EventFilter) => [...queryKeys.events.all, 'list', filters] as const,
+    familyEvents: (familyId: string) => [...queryKeys.events.all, 'family', familyId] as const,
     detail: (eventId: string) => [...queryKeys.events.all, 'detail', eventId] as const,
   },
   userActivity: {

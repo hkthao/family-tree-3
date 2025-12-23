@@ -8,7 +8,7 @@ export interface Paginated<T> {
 export interface ListOptions {
   page?: number;
   itemsPerPage?: number;
-  sortBy?: { key: string; order: string }[];
+  sortBy?: { key: string; order: 'asc' | 'desc' }[];
 }
 
 export interface FilterOptions {

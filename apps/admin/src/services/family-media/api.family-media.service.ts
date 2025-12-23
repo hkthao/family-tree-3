@@ -1,25 +1,26 @@
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IFamilyMediaService } from './family-media.service.interface';
-import { type Result } from '@/types'; // Change to normal import with ok, err
-import type {  FamilyMedia, FamilyMediaFilter, Paginated } from '@/types'; // Import from '@/types'
+import { type Result } from '@/types';
+import type { FamilyMedia, FamilyMediaFilter, Paginated, FamilyMediaAddFromUrlDto, ListOptions } from '@/types'; // Import from '@/types'
+
+// ... other imports
 
 export class ApiFamilyMediaService implements IFamilyMediaService {
   constructor(private api: ApiClientMethods) { }
 
+
+
   async search(
-    familyId: string,
+    listOptions: ListOptions,
     filters: FamilyMediaFilter,
-    page?: number,
-    itemsPerPage?: number,
-    sortBy?: { key: string; order: string }[],
   ): Promise<Result<Paginated<FamilyMedia>>> {
     const params: Record<string, any> = { ...filters };
-    if (familyId) params.familyId = familyId; // Add familyId to params
-    if (page) params.page = page;
-    if (itemsPerPage) params.pageSize = itemsPerPage; // Backend uses pageSize
-    if (sortBy && sortBy.length > 0) {
-      params.orderBy = sortBy.map(s => `${s.key} ${s.order}`).join(',');
+    if (listOptions.page) params.page = listOptions.page;
+    if (listOptions.itemsPerPage) params.itemsPerPage = listOptions.itemsPerPage;
+    if (listOptions.sortBy && listOptions.sortBy.length > 0) {
+      params.orderBy = listOptions.sortBy.map((s: { key: string; order: string }) => `${s.key} ${s.order}`).join(',');
     }
+
     return await this.api.get<Paginated<FamilyMedia>>(`/family-media/search`, { params });
   }
 
@@ -38,6 +39,10 @@ export class ApiFamilyMediaService implements IFamilyMediaService {
         'Content-Type': 'multipart/form-data',
       },
     });
+  }
+
+  async addFromUrl(familyId: string, payload: FamilyMediaAddFromUrlDto): Promise<Result<FamilyMedia>> {
+    return await this.api.post<FamilyMedia>(`/family-media/${familyId}/from-url`, payload);
   }
 
   async delete(id: string): Promise<Result<boolean>> {

@@ -2,10 +2,18 @@ import { reactive, toRef, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
-import { EventType } from '@/types';
-import { CalendarType, RepeatRule } from '@/types/enums';
-import { useEventRules } from '@/validations/event.validation';
-import { cloneDeep } from 'lodash';
+import { useEventRules, type UseEventRulesReturn } from '@/validations/event.validation';
+import { cloneDeep } from 'lodash'; // Keep for now for initial formData cloning
+
+import {
+  getInitialEventFormData,
+  getEventOptionTypes,
+  getCalendarTypes,
+  getRepeatRules,
+  getLunarDays,
+  getLunarMonths,
+  processEventFormDataForSave,
+} from './eventForm.logic';
 
 interface EventFormProps {
   readOnly?: boolean;
@@ -13,30 +21,23 @@ interface EventFormProps {
   familyId?: string;
 }
 
-export function useEventForm(props: EventFormProps) {
-  const { t } = useI18n();
+interface UseEventFormDeps {
+  useI18n: typeof useI18n;
+  useEventRules: (state: any) => UseEventRulesReturn;
+  cloneDeep: <T>(value: T) => T;
+}
+
+const defaultDeps: UseEventFormDeps = {
+  useI18n,
+  useEventRules,
+  cloneDeep,
+};
+
+export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = defaultDeps) {
+  const { t } = deps.useI18n();
   const formRef = ref<any>(null); // Ref for the v-form component
 
-  const formData = reactive<Omit<Event, 'id'> | Event>(
-    props.initialEventData
-      ? {
-          ...cloneDeep(props.initialEventData),
-          lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
-        }
-      : {
-          name: '',
-          code: '',
-          type: EventType.Other,
-          familyId: props.familyId || null,
-          calendarType: CalendarType.Solar,
-          solarDate: null,
-          lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
-          repeatRule: RepeatRule.None,
-          description: '',
-          color: '#1976D2',
-          relatedMemberIds: [],
-        },
-  );
+  const formData = reactive<Omit<Event, 'id'> | Event>(getInitialEventFormData(props));
 
   const state = reactive({
     name: toRef(formData, 'name'),
@@ -54,27 +55,14 @@ export function useEventForm(props: EventFormProps) {
     relatedMemberIds: toRef(formData, 'relatedMemberIds'),
   });
 
-  const eventOptionTypes = computed(() => [
-    { title: t('event.type.birth'), value: EventType.Birth },
-    { title: t('event.type.marriage'), value: EventType.Marriage },
-    { title: t('event.type.death'), value: EventType.Death },
-    { title: t('event.type.other'), value: EventType.Other },
-  ]);
+  const eventOptionTypes = computed(() => getEventOptionTypes(t));
+  const calendarTypes = computed(() => getCalendarTypes(t));
+  const repeatRules = computed(() => getRepeatRules(t));
 
-  const calendarTypes = computed(() => [
-    { title: t('event.calendarType.solar'), value: CalendarType.Solar },
-    { title: t('event.calendarType.lunar'), value: CalendarType.Lunar },
-  ]);
+  const lunarDays = computed(() => getLunarDays());
+  const lunarMonths = computed(() => getLunarMonths());
 
-  const repeatRules = computed(() => [
-    { title: t('event.repeatRule.none'), value: RepeatRule.None },
-    { title: t('event.repeatRule.yearly'), value: RepeatRule.Yearly },
-  ]);
-
-  const lunarDays = computed(() => Array.from({ length: 30 }, (_, i) => i + 1));
-  const lunarMonths = computed(() => Array.from({ length: 12 }, (_, i) => i + 1));
-
-  const rules = useEventRules(state);
+  const rules = deps.useEventRules(state);
 
   const validate = async () => {
     const { valid } = await formRef.value.validate();
@@ -82,25 +70,24 @@ export function useEventForm(props: EventFormProps) {
   };
 
   const getFormData = () => {
-    const data = cloneDeep(formData);
-    if (data.calendarType === CalendarType.Solar) {
-      data.lunarDate = null;
-    } else if (data.calendarType === CalendarType.Lunar) {
-      data.solarDate = null;
-    }
-    return data;
+    return processEventFormDataForSave(formData as Event);
   };
 
   return {
     formRef,
-    formData,
-    rules,
-    eventOptionTypes,
-    calendarTypes,
-    repeatRules,
-    lunarDays,
-    lunarMonths,
-    validate,
-    getFormData,
+    state: {
+      formData,
+      rules,
+      eventOptionTypes,
+      calendarTypes,
+      repeatRules,
+      lunarDays,
+      lunarMonths,
+    },
+    actions: {
+      validate,
+      getFormData,
+      t, // Expose t for template usage
+    },
   };
 }

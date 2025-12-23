@@ -12,7 +12,7 @@
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutput>$(ArtifactsPath)/coverage/</CoverletOutput>
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-    <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>
+    <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure</CoverletInclude>
   </PropertyGroup>
   <!-- To use dotnet ef without 'msbuildprojectextensionspath' - fixed in .NET 10 -->
   <Import Condition="Exists('$(MSBuildProjectDirectory)\obj\$(MSBuildProjectFile).EntityFrameworkCore.targets')"

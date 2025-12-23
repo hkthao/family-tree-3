@@ -1,12 +1,8 @@
-using backend.Application.Common.Mappings;
-using backend.Application.Common.Models;
-using backend.Application.MemoryItems.DTOs;
 using backend.Application.MemoryItems.Queries.SearchMemoryItems;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace backend.Application.UnitTests.MemoryItems.Queries.SearchMemoryItems;

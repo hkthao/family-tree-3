@@ -1,20 +1,14 @@
-using backend.Application.Common.Models;
+using backend.Application.Common.Constants; // Added for ErrorSources
 using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
 using backend.Application.UnitTests.Common;
+using backend.Domain.Common; // Added for BaseEvent
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Events;
-using FluentAssertions;
-using Xunit;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Moq; // Added for Moq.Times
 using backend.Infrastructure.Data; // Added for ApplicationDbContext
-using backend.Application.Common.Constants; // Added for ErrorSources
-using backend.Domain.Common; // Added for BaseEvent
+using FluentAssertions;
+using Moq; // Added for Moq.Times
+using Xunit;
 
 namespace backend.Application.UnitTests.FamilyLocations.Commands.DeleteFamilyLocation;
 
@@ -24,7 +18,7 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
 
     public DeleteFamilyLocationCommandHandlerTests()
     {
-        _handler = new DeleteFamilyLocationCommandHandler(_context);
+        _handler = new DeleteFamilyLocationCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)
@@ -88,7 +82,7 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
     {
         // Arrange
         var command = new DeleteFamilyLocationCommand(Guid.NewGuid()); // Non-existent ID
-        var handler = new DeleteFamilyLocationCommandHandler(_context);
+        var handler = new DeleteFamilyLocationCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

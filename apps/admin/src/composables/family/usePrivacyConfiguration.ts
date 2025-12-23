@@ -1,7 +1,7 @@
 import { ref, computed, unref, type MaybeRef } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration.d';
 import { queryKeys } from '@/constants/queryKeys';
 
@@ -70,11 +70,15 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
   };
 
   return {
-    privacyConfiguration,
-    isLoading,
-    isUpdating,
-    error,
-    updatePrivacySettings,
-    initialPublicProperties, // Expose initial properties for potential revert logic
+    state: {
+      privacyConfiguration,
+      isLoading,
+      isUpdating,
+      error,
+      initialPublicProperties,
+    },
+    actions: {
+      updatePrivacySettings,
+    },
   };
 }

@@ -1,3 +1,8 @@
+export interface AiChatMessage {
+  sender: 'user' | 'ai';
+  text: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -20,7 +25,5 @@ export interface MessageItem {
 }
 
 export interface ChatResponse {
-  response: string;
-  context: any[];
-  createdAt: string;
+  output: string;
 }

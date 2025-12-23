@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 
 interface MapSelectionData {
   coordinates: { latitude: number; longitude: number };

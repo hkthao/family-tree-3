@@ -1,11 +1,12 @@
 <template>
   <v-data-table-server
-    v-model:items-per-page="itemsPerPage"
+    :items-per-page="props.itemsPerPage"
     :headers="headers"
     :items="props.items"
     :items-length="props.totalItems"
     :loading="props.loading"
     item-value="id"
+    :sort-by="props.sortBy"
     @update:options="handleOptionsUpdate"
     elevation="0"
     data-testid="family-media-list"
@@ -17,9 +18,11 @@
         :create-button-tooltip="t('familyMedia.list.createButton')"
         create-button-test-id="add-new-family-media-button"
         :hide-create-button="!allowAdd"
-        :search-query="searchQuery"
+        :add-link-button-tooltip="allowAddLink ? t('familyMedia.list.addLinkButton') : undefined"
+        @add-link="emit('addLink')"
+        :search-query="props.search"
         :search-label="t('common.search')"
-        @update:search="searchQuery = $event"
+        @update:search="emit('update:search', $event)"
         @create="emit('create')"
       />
     </template>
@@ -56,13 +59,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue'; // ref and watch are removed if not used anymore
 import { useI18n } from 'vue-i18n';
-import type { FamilyMedia } from '@/types';
+import type { FamilyMedia, ListOptions } from '@/types'; // Added ListOptions
 import type { DataTableHeader } from 'vuetify';
 import { MediaType } from '@/types/enums';
 import { formatDate, formatBytes } from '@/utils/format.utils';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ListToolbar from '@/components/common/ListToolbar.vue';
 
 interface FamilyMediaListProps {
@@ -73,32 +75,14 @@ interface FamilyMediaListProps {
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  allowAddLink?: boolean;
+  itemsPerPage: number; // New prop
+  sortBy: ListOptions['sortBy']; // New prop
 }
 
 const props = defineProps<FamilyMediaListProps>();
-const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search']);
+const emit = defineEmits(['update:options', 'view', 'delete', 'create', 'update:search', 'addLink']);
 const { t } = useI18n();
-
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
-
-const searchQuery = ref(props.search || '');
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-watch(searchQuery, (newValue) => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
-  debounceTimer = setTimeout(() => {
-    emit('update:search', newValue);
-    debounceTimer = null; // Clear the timer ID after execution
-  }, 300);
-});
-
-watch(() => props.search, (newSearch) => {
-  if (newSearch !== searchQuery.value) {
-    searchQuery.value = newSearch ?? '';
-  }
-});
 
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [

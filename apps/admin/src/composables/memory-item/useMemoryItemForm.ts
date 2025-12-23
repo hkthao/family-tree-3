@@ -1,10 +1,33 @@
 import { ref, computed, reactive, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemoryItem, MemoryMedia as BaseMemoryMedia } from '@/types';
-import { EmotionalTag } from '@/types';
-// Removed useMemoryMediaForm import
+import type { MediaItem } from '@/types/familyMedia';
+import { EmotionalTag, MediaType } from '@/types'; // Import MediaType
 import { useMemoryItemRules } from '@/validations/memoryItem.validation';
 import type { VForm } from 'vuetify/components';
+
+const ACCEPTED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/bmp',
+  'image/webp',
+  'image/svg+xml',
+  'video/mp4',
+  'video/webm',
+  'audio/mpeg',
+  'audio/wav',
+  'application/pdf',
+].join(',');
+
+// Function to map MIME type to MediaType enum
+const getMediaTypeFromFileType = (mimeType: string): MediaType => {
+  if (mimeType.startsWith('image/')) return MediaType.Image;
+  if (mimeType.startsWith('video/')) return MediaType.Video;
+  if (mimeType.startsWith('audio/')) return MediaType.Audio;
+  if (mimeType === 'application/pdf') return MediaType.Document;
+  return MediaType.Other;
+};
 
 export interface LocalMemoryMedia extends BaseMemoryMedia {
   isNew?: boolean;
@@ -27,26 +50,28 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
   const { t } = useI18n();
 
   const internalMemoryMedia = ref<LocalMemoryMedia[]>([...(options.initialMemoryItemData?.memoryMedia || [])]);
-  const uploadedFiles = ref<File[]>([]);
+  const newlyUploadedFiles = ref<File[]>([]); // Renamed from uploadedFiles
   const deletedMediaIds = ref<string[]>([]);
 
-  // Watch uploadedFiles from VFileUpload and process them
-  watch(uploadedFiles, (newFiles) => {
+  const handleNewlyUploadedFilesChange = (newFiles: File[]) => { // Renamed function
     if (newFiles.length === 0) return;
     newFiles.forEach(file => {
       internalMemoryMedia.value.push({
         id: `new-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Temporary ID for new files
         memoryItemId: options.initialMemoryItemData?.id || '', // Use initial ID or empty
         url: URL.createObjectURL(file), // Create a temporary URL for preview
+        type: getMediaTypeFromFileType(file.type), // Use the mapping function
         isNew: true,
         file: file,
       });
     });
     // Clear the file input after processing in the next tick to avoid recursive updates
     nextTick(() => {
-      uploadedFiles.value = [];
+      newlyUploadedFiles.value = []; // Renamed
     });
-  });
+  };
+
+  watch(newlyUploadedFiles, handleNewlyUploadedFilesChange); // Renamed watch
 
   const removeMedia = (mediaToDelete: LocalMemoryMedia) => {
     if (!options.readOnly) {
@@ -61,20 +86,9 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     }
   };
 
-  const newlyUploadedFiles = computed(() => {
-    return internalMemoryMedia.value.filter(media => media.isNew && media.file).map(media => media.file as File);
-  });
 
-  const acceptedMimeTypes = computed(() => {
-    return [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/bmp',
-      'image/webp',
-      'image/svg+xml',
-    ].join(',');
-  });
+
+
 
   const defaultNewMemoryItem: LocalMemoryItem = {
     id: '',
@@ -100,7 +114,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
 
   const { rules } = useMemoryItemRules();
 
-  watch(() => options.initialMemoryItemData, (newData) => {
+  const handleInitialMemoryItemDataChange = (newData?: MemoryItem) => {
     if (newData) {
       Object.assign(form, {
         ...newData,
@@ -114,7 +128,9 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
       internalMemoryMedia.value = [];
       deletedMediaIds.value = [];
     }
-  });
+  };
+
+  watch(() => options.initialMemoryItemData, handleInitialMemoryItemDataChange, { deep: true });
 
   const emotionalTagOptions = computed(() => [
     { title: t('memoryItem.emotionalTag.happy'), value: EmotionalTag.Happy },
@@ -154,20 +170,35 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     return dataToReturn;
   };
 
+  const addExistingMedia = (mediaItems: MediaItem[]) => {
+    mediaItems.forEach(item => {
+      internalMemoryMedia.value.push({
+        id: item.id,
+        memoryItemId: form.id, // Associate with current form's memory item ID
+        url: item.url,
+        type: getMediaTypeFromFileType(item.type), // Convert string type to MediaType enum
+        isNew: false, // These are existing media, not new uploads
+        // description and fileName can be added if needed, but not part of MediaItem currently
+      });
+    });
+  };
+
   return {
-    formRef, // Expose the formRef for the component to bind to
-    form,
-    emotionalTagOptions,
-    // mediaManagement is removed
-    validate,
-    getFormData,
-    // Expose media management properties directly
-    memoryMedia: internalMemoryMedia,
-    uploadedFiles,
-    deletedMediaIds,
-    removeMedia,
-    newlyUploadedFiles,
-    acceptedMimeTypes,
-    validationRules: rules,
+    state: {
+      formRef,
+      form,
+      emotionalTagOptions,
+      memoryMedia: internalMemoryMedia,
+      newlyUploadedFiles, // Now renamed and explicitly returned
+      deletedMediaIds,
+      acceptedMimeTypes: ACCEPTED_MIME_TYPES,
+      validationRules: rules,
+    },
+    actions: {
+      validate,
+      getFormData,
+      removeMedia,
+      addExistingMedia,
+    },
   };
 }

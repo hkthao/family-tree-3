@@ -6,7 +6,6 @@ using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Families;
-using backend.Domain.ValueObjects; // NEW
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -89,10 +88,27 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
 
         // --- Update FamilyUsers ---
-        var familyUserUpdateInfos = request.FamilyUsers
-            .Select(fu => new FamilyUserUpdateInfo(fu.UserId, fu.Role))
-            .ToList();
-        entity.UpdateFamilyUsers(familyUserUpdateInfos);
+        // Clear all existing family users
+        var familyUsersToRemove = _context.FamilyUsers.Where(fu => fu.FamilyId == entity.Id).ToList();
+        _context.FamilyUsers.RemoveRange(familyUsersToRemove);
+        entity.ClearFamilyUsers(); // Clear the collection in the aggregate root
+
+        // Add Managers
+        foreach (var managerId in request.ManagerIds.Distinct())
+        {
+            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
+        }
+
+        // Add Viewers
+        foreach (var viewerId in request.ViewerIds.Distinct())
+        {
+            // Ensure a user isn't added as both manager and viewer.
+            // If they are a manager, they implicitly have viewer permissions.
+            if (!request.ManagerIds.Contains(viewerId))
+            {
+                entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
+            }
+        }
         // --- End Update FamilyUsers ---
 
         entity.AddDomainEvent(new FamilyUpdatedEvent(entity));

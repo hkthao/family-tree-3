@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { Prompt } from '@/types/prompt';
 import type { IPromptService } from '@/services/prompt/prompt.service.interface';
 
@@ -7,7 +7,7 @@ export function useCreatePromptMutation() {
   const { prompt: promptService } = useServices();
   const queryClient = useQueryClient();
 
-  return useMutation<Prompt, Error, Omit<Prompt, 'id'>>({
+  const { mutate, isPending } = useMutation<Prompt, Error, Omit<Prompt, 'id'>>({
     mutationFn: async (newPrompt) => {
       const result = await (promptService as IPromptService).add(newPrompt);
       if (result.ok) {
@@ -19,4 +19,13 @@ export function useCreatePromptMutation() {
       queryClient.invalidateQueries({ queryKey: ['prompts'] });
     },
   });
+
+  return {
+    state: {
+      isPending,
+    },
+    actions: {
+      createPrompt: mutate,
+    },
+  };
 }

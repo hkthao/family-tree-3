@@ -1,9 +1,10 @@
-import { EmotionalTag } from './enums';
+import { EmotionalTag, MediaType } from './enums';
 
 export interface MemoryMedia {
   id: string;
   memoryItemId: string;
   url: string;
+  type: MediaType; // Changed from string to MediaType
 }
 
 export interface MemoryPerson {

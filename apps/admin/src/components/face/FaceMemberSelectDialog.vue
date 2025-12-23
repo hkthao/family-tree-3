@@ -53,11 +53,7 @@ const emit = defineEmits<{
 }>();
 
 const {
-  t,
-  selectedMemberId,
-  selectedMemberDetails,
-  internalRelationPrompt,
-  faceThumbnailSrc,
-  handleSave,
+  state: { t, selectedMemberId, selectedMemberDetails, internalRelationPrompt, faceThumbnailSrc },
+  actions: { handleSave },
 } = useFaceMemberSelectDialog(props, emit);
 </script>

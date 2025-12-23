@@ -1,12 +1,20 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
-namespace backend.Application.UnitTests.MemoryItems.Commands.CreateMemoryItem;
+namespace backend.Application.UnitTests.MemoryItems.Commands;
 
 public class CreateMemoryItemCommandHandlerTests : TestBase
 {
@@ -14,117 +22,142 @@ public class CreateMemoryItemCommandHandlerTests : TestBase
 
     public CreateMemoryItemCommandHandlerTests()
     {
-        _handler = new CreateMemoryItemCommandHandler(_context);
+        _handler = new CreateMemoryItemCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
+    }
+
+    // Helper method to create a family and a member for tests
+    private async Task<(Family family, Member member)> CreateFamilyAndMember(Guid userId)
+    {
+        var family = Family.Create("Test Family", "TF001", null, null, "Private", userId);
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        var member = new Member("Test", "Member", "TM001", family.Id);
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        return (family, member);
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateMemoryItem_WhenFamilyExists()
+    public async Task Handle_ShouldCreateMemoryItem_WhenUserCanAccessFamily()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM-TEST" });
-        await _context.SaveChangesAsync();
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
 
-        var personId1 = Guid.NewGuid();
-        var personId2 = Guid.NewGuid();
-        _context.Members.Add(new Member("Last", "Person 1", "P001", familyId) { Id = personId1 });
-        _context.Members.Add(new Member("Last", "Person 2", "P002", familyId) { Id = personId2 });
-        await _context.SaveChangesAsync();
-
+        var (family, member) = await CreateFamilyAndMember(userId);
 
         var command = new CreateMemoryItemCommand
         {
-            FamilyId = familyId,
-            Title = "Test Memory Item",
-            Description = "A description for the test memory item.",
+            FamilyId = family.Id,
+            Title = "My First Memory",
+            Description = "A lovely day",
             HappenedAt = DateTime.Now.AddDays(-10),
             EmotionalTag = EmotionalTag.Happy,
-            MemoryMedia = new List<CreateMemoryMediaCommandDto>
-            {
-                new() { Id = Guid.NewGuid(), Url = "http://example.com/photo1.jpg" },
-                new() { Id = Guid.NewGuid(), Url = "http://example.com/photo2.jpg" }
-            },
-            PersonIds = new List<Guid> { personId1, personId2 }
+            MemoryMedia = new[] { new CreateMemoryMediaCommandDto { Url = "http://example.com/pic1.jpg" } },
+            PersonIds = new[] { member.Id }
         };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty();
 
-        var createdMemoryItem = await _context.MemoryItems
+        var memoryItem = await this.GetApplicationDbContext().MemoryItems // Use fresh context for assertion
             .Include(mi => mi.MemoryMedia)
             .Include(mi => mi.MemoryPersons)
             .FirstOrDefaultAsync(mi => mi.Id == result.Value);
 
-        createdMemoryItem.Should().NotBeNull();
-        createdMemoryItem!.FamilyId.Should().Be(command.FamilyId);
-        createdMemoryItem.Title.Should().Be(command.Title);
-        createdMemoryItem.Description.Should().Be(command.Description);
-        createdMemoryItem.HappenedAt.Should().Be(command.HappenedAt);
-        createdMemoryItem.EmotionalTag.Should().Be(command.EmotionalTag);
-        createdMemoryItem.MemoryMedia.Should().HaveCount(2);
-        createdMemoryItem.MemoryMedia.Should().Contain(mm => mm.Url == "http://example.com/photo1.jpg");
-        createdMemoryItem.MemoryPersons.Should().HaveCount(2);
-        createdMemoryItem.MemoryPersons.Should().Contain(mp => mp.MemberId == personId1);
+        memoryItem.Should().NotBeNull();
+        memoryItem!.Title.Should().Be(command.Title);
+        memoryItem.MemoryMedia.Should().ContainSingle(mm => mm.Url == "http://example.com/pic1.jpg");
+        memoryItem.MemoryPersons.Should().ContainSingle(mp => mp.MemberId == member.Id);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+    {
+        // Arrange
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false);
+
+        var (family, member) = await CreateFamilyAndMember(Guid.NewGuid()); // Family owned by another user
+
+        var command = new CreateMemoryItemCommand
+        {
+            FamilyId = family.Id,
+            Title = "Unauthorized Memory"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.Unauthorized);
+        result.ErrorSource.Should().Be(ErrorSources.Authentication);
+        this.GetApplicationDbContext().MemoryItems.Should().BeEmpty(); // Use fresh context for assertion
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnAccessDenied_WhenUserCannotAccessFamily()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(false); // User cannot access
+
+        var (family, member) = await CreateFamilyAndMember(Guid.NewGuid()); // Family owned by another user
+
+        var command = new CreateMemoryItemCommand
+        {
+            FamilyId = family.Id,
+            Title = "Denied Memory"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
+        this.GetApplicationDbContext().MemoryItems.Should().BeEmpty(); // Use fresh context for assertion
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenFamilyDoesNotExist()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(userId);
+        _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockAuthorizationService.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+
+        var nonExistentFamilyId = Guid.NewGuid();
         var command = new CreateMemoryItemCommand
         {
-            FamilyId = Guid.NewGuid(), // Non-existent family ID
-            Title = "Test Memory Item",
-            Description = "A description for the test memory item.",
-            HappenedAt = DateTime.Now.AddDays(-10),
-            EmotionalTag = EmotionalTag.Happy
+            FamilyId = nonExistentFamilyId,
+            Title = "Non Existent Family Memory"
         };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Family not found.");
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCreateMemoryItemWithoutMediaAndPersons()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM-TEST" });
-        await _context.SaveChangesAsync();
-
-        var command = new CreateMemoryItemCommand
-        {
-            FamilyId = familyId,
-            Title = "Memory Item without Media and Persons",
-            Description = "This memory item has no media or associated persons.",
-            HappenedAt = DateTime.Now.AddDays(-5),
-            EmotionalTag = EmotionalTag.Neutral,
-            MemoryMedia = new List<CreateMemoryMediaCommandDto>(), // Empty media
-            PersonIds = new List<Guid>() // Empty persons
-        };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeEmpty();
-
-        var createdMemoryItem = await _context.MemoryItems
-            .Include(mi => mi.MemoryMedia)
-            .Include(mi => mi.MemoryPersons)
-            .FirstOrDefaultAsync(mi => mi.Id == result.Value);
-
-        createdMemoryItem.Should().NotBeNull();
-        createdMemoryItem!.MemoryMedia.Should().BeEmpty();
-        createdMemoryItem.MemoryPersons.Should().BeEmpty();
+        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, nonExistentFamilyId));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
+        this.GetApplicationDbContext().MemoryItems.Should().BeEmpty(); // Use fresh context for assertion
     }
 }

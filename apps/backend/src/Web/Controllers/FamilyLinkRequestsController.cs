@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLinkRequests.Commands.ApproveFamilyLinkRequest;
 using backend.Application.FamilyLinkRequests.Commands.CreateFamilyLinkRequest;
@@ -9,11 +10,14 @@ using backend.Application.FamilyLinks.Queries; // Keep this for FamilyLinkReques
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/family-link-requests")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyLinkRequestsController(IMediator mediator, ILogger<FamilyLinkRequestsController> logger) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

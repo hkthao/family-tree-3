@@ -34,7 +34,7 @@ import { useI18n } from 'vue-i18n';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
-import { useFamilyMediaForm } from '@/composables/family-media/useFamilyMediaForm';
+import { useFamilyMediaForm } from '@/composables/family-media';
 
 interface FamilyMediaFormProps {
   initialMedia?: FamilyMedia;
@@ -46,14 +46,8 @@ defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 const {
-  formRef,
-  file,
-  description,
-  formRules,
-  getFormData,
-  validate,
-  resetValidation,
-  resetForm,
+  state: { formRef, file, description, formRules },
+  actions: { getFormData, validate, resetValidation, resetForm },
 } = useFamilyMediaForm(props.initialMedia);
 
 defineExpose({

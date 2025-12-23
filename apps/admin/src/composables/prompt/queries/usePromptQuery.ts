@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed, unref, type MaybeRefOrGetter } from 'vue';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { Prompt } from '@/types/prompt';
 import type { IPromptService } from '@/services/prompt/prompt.service.interface';
 
@@ -21,5 +21,17 @@ export function usePromptQuery(promptId: MaybeRefOrGetter<string | undefined>) {
     enabled: computed(() => !!unref(promptId)),
   });
 
-  return queryResult;
+  const prompt = computed(() => queryResult.data.value);
+  const isLoading = computed(() => queryResult.isFetching.value);
+
+  return {
+    state: {
+      prompt,
+      isLoading,
+      error: queryResult.error,
+    },
+    actions: {
+      refetch: queryResult.refetch,
+    },
+  };
 }

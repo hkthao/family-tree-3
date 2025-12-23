@@ -8,7 +8,7 @@ export default mergeConfig(
     test: {
       setupFiles: ['./tests/setup.ts'],
       environment: 'jsdom',
-      include: ['tests/unit/**/*.test.ts'],
+      include: ['tests/unit/**/*.test.ts', 'src/**/*.test.ts'],
       exclude: [...configDefaults.exclude, 'e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
       coverage: {
@@ -22,7 +22,7 @@ export default mergeConfig(
           functions: 0,
           lines: 0
         },
-        include: ['src/stores/**/*.ts', 'src/views/**/*.vue', 'src/components/**/*.vue']
+        include: ['src/stores/**/*.ts', 'src/views/**/*.vue', 'src/components/**/*.vue', 'src/composables/**/*.ts']
       },
       server: {
         deps: {
@@ -31,9 +31,9 @@ export default mergeConfig(
       },
     },
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
-    },
+              alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+                '@tests': fileURLToPath(new URL('./tests/unit', import.meta.url)),
+              },    },
   }),
 );

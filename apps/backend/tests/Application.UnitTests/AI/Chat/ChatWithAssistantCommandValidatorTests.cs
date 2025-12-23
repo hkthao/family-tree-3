@@ -56,10 +56,24 @@ public class ChatWithAssistantCommandValidatorTests
     }
 
     [Fact]
+    public void ShouldHaveError_WhenFamilyIdIsEmpty()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.Empty, SessionId = "testSession", ChatInput = "Valid message" };
+
+        // Act
+        var result = _validator.TestValidate(command);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.FamilyId)
+              .WithErrorMessage("FamilyId cannot be empty.");
+    }
+
+    [Fact]
     public void ShouldNotHaveError_WhenCommandIsValid()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand { SessionId = "testSession", ChatInput = "Valid message" };
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "testSession", ChatInput = "Valid message" };
 
         // Act
         var result = _validator.TestValidate(command);

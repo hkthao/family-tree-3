@@ -83,16 +83,24 @@ const props = defineProps<{
 }>();
 
 const {
-  t,
+  state,
+  actions,
+} = useEventTimeline(props);
+
+const {
   list,
   selectedEventId,
   detailDrawer,
   paginationLength,
+} = state;
+
+const {
+  t,
   showEventDetails,
   handleDetailClosed,
   handlePageChange,
   formatDate,
-} = useEventTimeline(props);
+} = actions;
 </script>
 
 <style scoped>

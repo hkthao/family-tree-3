@@ -76,7 +76,7 @@ const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
 
 const authStore = useAuthStore(); // Re-added authStore
-const { userProfile } = useProfileSettings();
+const { state: { userProfile } } = useProfileSettings();
 const currentUser = computed(() => userProfile.value);
 
 const handleMenuItemClick = (route?: string) => {

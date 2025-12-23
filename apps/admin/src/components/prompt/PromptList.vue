@@ -98,10 +98,10 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const { isAdmin } = useAuth();
+const { state } = useAuth();
 
 const canPerformActions = computed(() => {
-  return !props.readOnly && isAdmin.value;
+  return !props.readOnly && state.isAdmin.value;
 });
 
 const emit = defineEmits([

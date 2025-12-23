@@ -1,14 +1,16 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Family, FamilyFilter, Paginated, ListOptions, FilterOptions } from '@/types';
-import { ApiFamilyService } from '@/services/family/api.family.service';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
+import { useServices } from '@/plugins/services.plugin';
 
-const apiFamilyService: IFamilyService = new ApiFamilyService(apiClient);
 
-export function useFamiliesQuery(filters: Ref<FamilyFilter>) {
+
+export function useFamiliesQuery(
+  filters: Ref<FamilyFilter>,
+  service: IFamilyService = useServices().family,
+) {
   const query = useQuery<Paginated<Family>, Error>({
     queryKey: computed(() => queryKeys.families.list(unref(filters))),
     queryFn: async () => {
@@ -26,7 +28,7 @@ export function useFamiliesQuery(filters: Ref<FamilyFilter>) {
         // Add other specific family filters here if they exist in FamilyFilter
       };
 
-      const response = await apiFamilyService.search(listOptions, filterOptions);
+      const response = await service.search(listOptions, filterOptions);
       if (response.ok) {
         return response.value;
       }

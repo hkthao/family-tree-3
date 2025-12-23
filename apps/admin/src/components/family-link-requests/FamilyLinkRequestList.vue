@@ -43,7 +43,7 @@
     </template>
     <template #item.actions="{ item }">
       <div v-if="!readOnly" class="d-flex justify-center">
-        <template v-if="isAdmin">
+        <template v-if="state.isAdmin.value">
           <v-tooltip :text="t('common.delete')">
             <template v-slot:activator="{ props }">
               <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item.id)"
@@ -87,7 +87,7 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const { isAdmin } = useAuth(); // Destructure isAdmin from useAuth()
+const { state } = useAuth(); // Destructure state from useAuth()
 
 const searchQuery = ref(props.search); // Use ref for search input
 let debounceTimer: ReturnType<typeof setTimeout>;

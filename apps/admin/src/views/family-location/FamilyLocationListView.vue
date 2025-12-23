@@ -57,19 +57,15 @@ const props = defineProps<FamilyLocationListViewProps>();
 const emit = defineEmits(['viewFamilyLocation', 'editFamilyLocation', 'createFamilyLocation', 'familyLocationDeleted']);
 const { t } = useI18n();
 
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth(); // Import useAuth
 
-const allowAdd = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowEdit = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowDelete = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowAdd = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 
 const {
-  filters,
-  paginationOptions,
-  setFilters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
+  state: { filters, paginationOptions },
+  actions: { setFilters, setPage, setItemsPerPage, setSortBy },
 } = useFamilyLocationDataManagement(toRef(props, 'familyId'));
 
 const { data: familyLocationsData, isLoading: isLoadingFamilyLocations, refetch } = useFamilyLocationsQuery(paginationOptions, filters);

@@ -5,3 +5,4 @@ export * from './mutations/useDeleteFamilyMutation';
 export * from './mutations/useAddFamilyMutation';
 export * from './queries/useFamilyQuery';
 export * from './mutations/useUpdateFamilyMutation';
+export * from './useFamilyName';

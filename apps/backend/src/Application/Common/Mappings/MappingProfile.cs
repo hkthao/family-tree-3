@@ -5,6 +5,7 @@ using backend.Application.ExportImport.Commands;
 using backend.Application.Families.Dtos;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.FamilyDicts;
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
@@ -23,7 +24,6 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
 using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
 using backend.Application.MemoryItems.DTOs; // Added
-using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
@@ -156,7 +156,7 @@ public class MappingProfile : Profile
         CreateMap<MemoryPerson, MemoryPersonDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null));
 
-        // Commands to Entities
+        CreateMap<FamilyLimitConfiguration, FamilyLimitConfigurationDto>();
         CreateMap<CreateMemoryItemCommand, MemoryItem>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.MemoryMedia, opt => opt.Ignore())

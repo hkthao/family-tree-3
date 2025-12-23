@@ -3,6 +3,22 @@
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer></v-spacer>
 
+    <!-- New Add Link Button -->
+    <v-btn
+      v-if="addLinkButtonTooltip"
+      color="primary"
+      icon
+      @click="emit('addLink')"
+      data-testid="add-link-button"
+      :aria-label="addLinkButtonTooltip"
+    >
+      <v-tooltip :text="addLinkButtonTooltip">
+        <template v-slot:activator="{ props }">
+          <v-icon v-bind="props">mdi-link-plus</v-icon>
+        </template>
+      </v-tooltip>
+    </v-btn>
+
     <v-btn
       v-if="!hideCreateButton"
       color="primary"
@@ -37,7 +53,7 @@
 <script setup lang="ts">
 
 
-const { title, createButtonTooltip, createButtonTestId, hideCreateButton, searchQuery, searchLabel, hideSearch } = defineProps<{
+const { title, createButtonTooltip, createButtonTestId, hideCreateButton, searchQuery, searchLabel, hideSearch, addLinkButtonTooltip } = defineProps<{
   title: string;
   createButtonTooltip: string;
   createButtonTestId: string;
@@ -45,9 +61,10 @@ const { title, createButtonTooltip, createButtonTestId, hideCreateButton, search
   searchQuery?: string;
   searchLabel?: string;
   hideSearch?: boolean;
+  addLinkButtonTooltip?: string; // New prop
 }>();
 
-const emit = defineEmits(['create', 'update:search']);
+const emit = defineEmits(['create', 'update:search', 'addLink']); // New emit
 </script>
 
 <style scoped></style>

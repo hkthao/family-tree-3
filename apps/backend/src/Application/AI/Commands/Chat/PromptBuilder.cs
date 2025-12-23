@@ -1,7 +1,5 @@
-using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions; // Add using directive for Regex
-using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
 

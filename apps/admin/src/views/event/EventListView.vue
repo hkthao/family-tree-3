@@ -40,6 +40,11 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'saved']);
 
 const {
+  state,
+  actions,
+} = useEventList(props, emit);
+
+const {
   eventListSearchQuery,
   filters,
   events,
@@ -49,6 +54,9 @@ const {
   editDrawer,
   detailDrawer,
   selectedItemId,
+} = state;
+
+const {
   handleFilterUpdate,
   handleSearchUpdate,
   handleListOptionsUpdate,
@@ -60,5 +68,5 @@ const {
   closeAddDrawer,
   closeEditDrawer,
   closeDetailDrawer,
-} = useEventList(props, emit);
+} = actions;
 </script>

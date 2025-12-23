@@ -1,13 +1,16 @@
+using backend.Application.Common.Constants;
 using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/user-preference")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến tùy chọn người dùng.
 /// </summary>

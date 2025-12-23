@@ -38,7 +38,13 @@ const emit = defineEmits(['close', 'saved']);
 
 const eventFormRef = ref<EventFormExposed | null>(null);
 
-const { eventData, isLoadingEvent, isUpdatingEvent, handleUpdateEvent: handleUpdateEventComposable, closeForm, t } = useEventEdit(emit, props.eventId);
+const {
+  state,
+  actions,
+} = useEventEdit(emit, props.eventId);
+
+const { eventData, isLoadingEvent, isUpdatingEvent } = state;
+const { handleUpdateEvent: handleUpdateEventComposable, closeForm, t } = actions;
 
 const handleUpdateEvent = async () => {
   if (!eventFormRef.value) return;

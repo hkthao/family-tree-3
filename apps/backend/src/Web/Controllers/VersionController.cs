@@ -1,10 +1,13 @@
 using System.Reflection;
+using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
-namespace FamilyTree.Web.Controllers;
+namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class VersionController : ControllerBase
 {
     [HttpGet]

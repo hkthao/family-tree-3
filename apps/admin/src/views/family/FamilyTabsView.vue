@@ -40,6 +40,10 @@
         <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
           <MemberFaceListView :hideSearch="true" :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: Face Search Tab -->
+        <v-window-item v-if="canViewFaceDataTab" value="face-search">
+          <FaceSearchView :family-id="familyId" />
+        </v-window-item>
         <!-- NEW: Family Media Tab -->
         <v-window-item value="family-media">
           <FamilyMediaListView :family-id="familyId" />
@@ -50,6 +54,10 @@
         </v-window-item>
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
+        </v-window-item>
+        <!-- NEW: AI Chat Tab -->
+        <v-window-item value="ai-chat">
+          <ChatView :family-id="familyId" />
         </v-window-item>
         <!-- NEW: Family Location Tab -->
         <v-window-item value="locations">
@@ -83,6 +91,7 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
+import FaceSearchView from '@/views/member-face/FaceSearchView.vue'; // NEW
 
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
@@ -91,17 +100,18 @@ import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
+import ChatView from '@/views/chat/ChatView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth();
 const queryClient = useQueryClient(); // NEW
 
 const familyId = computed(() => route.params.id as string);
 
-const allowAdd = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
-const allowEdit = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
-const allowDelete = computed(() => isAdmin.value || isFamilyManager.value(familyId.value));
+const allowAdd = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
+const allowEdit = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
+const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
 
 const showEditDrawer = ref(false);
 
@@ -119,10 +129,10 @@ const handleFamilySaved = () => {
 };
 
 const canViewFaceDataTab = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(familyId.value);
 });
 const canManageFamily = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(familyId.value);
 });
 interface TabItem {
   value: string;
@@ -134,6 +144,7 @@ const allTabDefinitions = computed(() => [
   { value: 'members', text: t('family.members.title'), condition: true as boolean },
   { value: 'family-tree', text: t('family.tree.title'), condition: true as boolean },
   { value: 'face-recognition', text: t('face.face_data'), condition: canViewFaceDataTab.value as boolean },
+  { value: 'face-search', text: t('face.search.title'), condition: canViewFaceDataTab.value as boolean }, // NEW Face Search Tab
 
   { value: 'events', text: t('event.list.title'), condition: true as boolean },
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
@@ -142,6 +153,7 @@ const allTabDefinitions = computed(() => [
   { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
   { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
   { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
+  { value: 'ai-chat', text: t('aiChat.title'), condition: true as boolean }, // NEW AI Chat Tab
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));

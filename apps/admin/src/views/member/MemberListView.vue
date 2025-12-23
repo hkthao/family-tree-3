@@ -3,8 +3,7 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
     <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      @ai-create="navigateToAICreateMember" :read-only="props.readOnly"
+      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()" :read-only="props.readOnly"
       :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete">
     </MemberList>
     <!-- Edit Member Drawer -->
@@ -25,10 +24,7 @@
         @edit-member="openEditDrawer" />
     </BaseCrudDrawer>
 
-    <!-- AI Create Member Drawer -->
-    <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" :allow-save="allowAdd" />
-    </BaseCrudDrawer>
+
   </div>
 </template>
 <script setup lang="ts">
@@ -37,7 +33,6 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, watch, computed } from 'vue';
@@ -54,21 +49,15 @@ interface MemberListViewProps {
 const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const queryClient = useQueryClient(); // Initialize useQueryClient
-const { isAdmin, isFamilyManager } = useAuth();
+const { state } = useAuth(); // Import useAuth
 
-const allowAdd = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowEdit = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
-const allowDelete = computed(() => !props.readOnly && (isAdmin.value || isFamilyManager.value(props.familyId)));
+const allowAdd = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
+const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 
 const {
-  searchQuery,
-  paginationOptions,
-  filters,
-  setSearchQuery,
-  setFilters,
-  setPage,
-  setItemsPerPage,
-  setSortBy,
+  state: { searchQuery, paginationOptions, filters },
+  actions: { setSearchQuery, setFilters, setPage, setItemsPerPage, setSortBy },
 } = useMemberDataManagement(props.familyId);
 
 const { data: membersData, isLoading: isLoadingMembers, refetch } = useMembersQuery(paginationOptions, filters);
@@ -98,13 +87,8 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>(); 
 
-const aiCreateDrawer = ref(false);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-
-const navigateToAICreateMember = () => {
-  aiCreateDrawer.value = true;
-};
 
 const handleFilterUpdate = (newFilters: MemberFilter) => {
   setFilters(newFilters);
@@ -170,7 +154,6 @@ const handleDetailClosed = () => {
 
 const closeAllMemberDrawers = () => {
   closeAllDrawers();
-  aiCreateDrawer.value = false;
 };
 
 // Initial load is handled by useMembersQuery, no need for onMounted load

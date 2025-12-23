@@ -5,4 +5,7 @@ namespace backend.Application.Families.Commands.CreateFamily;
 
 public record CreateFamilyCommand : FamilyInput, IRequest<Result<Guid>>
 {
+    public IList<Guid> ManagerIds { get; set; } = [];
+    public IList<Guid> ViewerIds { get; set; } = [];
 }
+

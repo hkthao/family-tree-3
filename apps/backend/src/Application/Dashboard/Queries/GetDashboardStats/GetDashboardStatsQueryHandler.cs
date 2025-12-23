@@ -8,12 +8,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
-public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser user, IDateTime dateTime) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
+public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser user, IDateTime dateTime, IMediator mediator) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _user = user;
     private readonly IDateTime _dateTime = dateTime;
+    private readonly IMediator _mediator = mediator;
 
     // Định nghĩa một record lồng để chứa dữ liệu đã lọc
     private record FilteredDashboardData(
@@ -92,6 +93,30 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         }
         stats.TotalGenerations = maxGlobalGenerations;
         stats.MembersPerGeneration = globalMembersPerGeneration;
+
+        // Calculate Storage Usage and Limit
+        double totalUsedStorageMb = 0;
+        double totalMaxStorageMb = 0;
+
+        foreach (var family in data.FamiliesInScope)
+        {
+            var familyLimitConfigResult = await _mediator.Send(new Families.Queries.GetFamilyLimitConfigurationQuery { FamilyId = family.Id }, cancellationToken);
+
+            if (familyLimitConfigResult.IsSuccess && familyLimitConfigResult.Value != null)
+            {
+                totalMaxStorageMb += familyLimitConfigResult.Value.MaxStorageMb;
+
+                // Calculate current storage for this family
+                var currentFamilyStorageBytes = await _context.FamilyMedia
+                    .Where(fm => fm.FamilyId == family.Id)
+                    .SumAsync(fm => fm.FileSize, cancellationToken);
+
+                totalUsedStorageMb += (double)currentFamilyStorageBytes / (1024 * 1024); // Convert bytes to MB
+            }
+        }
+
+        stats.UsedStorageMb = totalUsedStorageMb;
+        stats.MaxStorageMb = totalMaxStorageMb;
 
         return Result<DashboardStatsDto>.Success(stats);
     }

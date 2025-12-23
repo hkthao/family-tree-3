@@ -4,7 +4,7 @@
     :sort-by="props.sortBy" @update:options="emit('update:options', $event)" elevation="1">
     <template #top>
       <ListToolbar
-        :search="searchQuery"
+        :searchQuery="searchQuery"
         @update:search="searchQuery = $event"
         @create="emit('create')"
         :title="t('family.management.title')"
@@ -110,7 +110,7 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const { searchQuery, debouncedSearchQuery } = useDebouncedSearch(props.search);
+const { state: { searchQuery, debouncedSearchQuery } } = useDebouncedSearch(props.search);
 
 watch(debouncedSearchQuery, (newValue) => {
   emit('update:search', newValue);

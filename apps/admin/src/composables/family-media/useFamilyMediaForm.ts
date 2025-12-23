@@ -49,13 +49,17 @@ export function useFamilyMediaForm(initialMedia?: FamilyMedia) {
   }, { deep: true });
 
   return {
-    formRef,
-    file,
-    description,
-    formRules: rules, // Renamed to avoid conflict with `rules` within the component
-    getFormData,
-    validate,
-    resetValidation,
-    resetForm,
+    state: {
+      formRef,
+      file,
+      description,
+      formRules: rules,
+    },
+    actions: {
+      getFormData,
+      validate,
+      resetValidation,
+      resetForm,
+    },
   };
 }

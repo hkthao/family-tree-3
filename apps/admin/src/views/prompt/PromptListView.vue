@@ -5,7 +5,7 @@
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer">
     </PromptList>
 
-    <v-alert v-if="isListError" type="error" dismissible class="mt-4">
+    <v-alert v-if="listError" type="error" dismissible class="mt-4">
       {{ listError?.message || t('prompt.list.loadError') }}
     </v-alert>
 
@@ -53,11 +53,11 @@ const listOptions = reactive<PromptListOptions>({
   searchQuery: searchQuery.value,
 });
 
-const { data: promptsData, isLoading: isListLoading, isError: isListError, error: listError } = usePromptsQuery(listOptions);
-const { mutateAsync: deletePrompt, isPending: isDeletingPrompt } = useDeletePromptMutation();
+const { state: { prompts: promptsData, totalItems, isLoading: isListLoading, error: listError } } = usePromptsQuery(listOptions);
+const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt } } = useDeletePromptMutation();
 
-const items = computed(() => promptsData.value?.items || []);
-const totalItems = computed(() => promptsData.value?.totalItems || 0);
+const items = computed(() => promptsData.value || []);
+
 const loading = computed(() => isListLoading.value || isDeletingPrompt.value);
 
 const {
@@ -85,7 +85,7 @@ const handleSearchUpdate = (search: string) => {
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[];
+  sortBy: { key: string; order: 'asc' | 'desc' }[];
 }) => {
   listOptions.page = options.page;
   listOptions.itemsPerPage = options.itemsPerPage;

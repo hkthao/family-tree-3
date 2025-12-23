@@ -1,22 +1,20 @@
 import type { FamilyMedia } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-
-import { ApiFamilyMediaService } from '@/services/family-media/api.family-media.service';
+import { useServices } from '@/plugins/services.plugin';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
-import { apiClient } from '@/plugins/axios';
 import { queryKeys } from '@/constants/queryKeys';
 
-const apiFamilyMediaService: IFamilyMediaService = new ApiFamilyMediaService(apiClient);
+
 
 /**
  * Composible để thêm mới Family Media.
  * @returns useMutation hook cho việc thêm media.
  */
-export function useAddFamilyMediaMutation() {
+export function useAddFamilyMediaMutation(service: IFamilyMediaService = useServices().familyMedia) {
   const queryClient = useQueryClient();
   return useMutation<FamilyMedia, Error, { familyId: string; file: File; description?: string }>({
     mutationFn: async (input: { familyId: string; file: File; description?: string }) => {
-      const response = await apiFamilyMediaService.create(input.familyId, input.file, input.description);
+      const response = await service.create(input.familyId, input.file, input.description);
       if (response.ok) {
         return response.value;
       }
@@ -35,11 +33,11 @@ export function useAddFamilyMediaMutation() {
  * Composible để xóa Family Media.
  * @returns useMutation hook cho việc xóa media.
  */
-export function useDeleteFamilyMediaMutation() {
+export function useDeleteFamilyMediaMutation(service: IFamilyMediaService = useServices().familyMedia) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id }: { familyId: string; id: string }) => {
-      const response = await apiFamilyMediaService.delete(id);
+      const response = await service.delete(id);
       if (response.ok) {
         return response.value;
       }
