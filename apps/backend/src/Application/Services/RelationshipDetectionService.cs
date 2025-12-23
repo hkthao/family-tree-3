@@ -93,27 +93,24 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
         var combinedPromptBuilder = new StringBuilder();
 
-        // Simpler, more direct prompt for AI
-        combinedPromptBuilder.AppendLine($"Xác định mối quan hệ gia đình giữa Thành viên '{memberA.FullName}' (ID: {memberAId}) và Thành viên '{memberB.FullName}' (ID: {memberBId}) trong một cây gia phả.");
+        combinedPromptBuilder.AppendLine($"Bạn hãy xác định mối quan hệ gia đình giữa Thành viên {memberA.FullName}{GetVietnameseAgeTerm(memberA.DateOfBirth)} {GetVietnameseGenderTerm(memberA.Gender)} và Thành viên {memberB.FullName}{GetVietnameseAgeTerm(memberB.DateOfBirth)} {GetVietnameseGenderTerm(memberB.Gender)} trong cây gia phả dựa trên các đường dẫn sau:");
 
-        combinedPromptBuilder.AppendLine("\n--- Chi tiết đường dẫn từ A đến B ---");
         if (pathToB.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguageConcise(pathToB, allMembers)); // Use concise description
+            combinedPromptBuilder.AppendLine($"- Đường dẫn từ {memberA.FullName} đến {memberB.FullName}: {_DescribePathInNaturalLanguageConcise(pathToB, allMembers)}");
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"Không có đường dẫn trực tiếp từ Thành viên '{memberA.FullName}' đến Thành viên '{memberB.FullName}'.");
+            combinedPromptBuilder.AppendLine($"- Không có đường dẫn trực tiếp từ {memberA.FullName} đến {memberB.FullName}.");
         }
 
-        combinedPromptBuilder.AppendLine("\n--- Chi tiết đường dẫn từ B đến A ---");
         if (pathToA.NodeIds.Any())
         {
-            combinedPromptBuilder.AppendLine(_DescribePathInNaturalLanguageConcise(pathToA, allMembers)); // Use concise description
+            combinedPromptBuilder.AppendLine($"- Đường dẫn từ {memberB.FullName} đến {memberA.FullName}: {_DescribePathInNaturalLanguageConcise(pathToA, allMembers)}");
         }
         else
         {
-            combinedPromptBuilder.AppendLine($"Không có đường dẫn trực tiếp từ Thành viên '{memberB.FullName}' đến Thành viên '{memberA.FullName}'.");
+            combinedPromptBuilder.AppendLine($"- Không có đường dẫn trực tiếp từ {memberB.FullName} đến {memberA.FullName}.");
         }
         combinedPromptBuilder.AppendLine("Dựa vào thông tin trên, hãy suy luận mối quan hệ trực tiếp trong gia đình giữa hai thành viên và mô tả một cách NGẮN GỌN, SÚC TÍCH bằng tiếng Việt. Tránh liệt kê lại chi tiết đường dẫn.");
         combinedPromptBuilder.AppendLine("Ví dụ: 'A là cha của B và B là con của A.'");
@@ -138,7 +135,7 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             }
 
             const string RELATIONSHIP_AI_SYSTEM_PROMPT_CODE = "RELATIONSHIP_AI_SYSTEM_PROMPT";
-            string systemPromptContent = "Bạn là một chuyên gia về các mối quan hệ gia đình Việt Nam. Phân tích các đường dẫn cây gia phả được cung cấp. Thông tin về giới tính của các thành viên (ví dụ: 'Tên (nam)' hoặc 'Tên (nữ)') đã được thêm vào mô tả để hỗ trợ suy luận. Hãy suy luận mối quan hệ trực tiếp trong gia đình giữa các thành viên, và cung cấp một mô tả NGẮN GỌN, SÚC TÍCH về mối quan hệ của A với B và B với A bằng ngôn ngữ tự nhiên. Tránh liệt kê lại chi tiết đường dẫn trừ khi cần thiết để làm rõ. Kết quả phải là một đối tượng JSON có một trường: 'InferredRelationship', chứa chuỗi mô tả này. Sử dụng các thuật ngữ mối quan hệ tiếng Việt như 'cha', 'mẹ', 'con', 'anh', 'chị', 'em', 'chú', 'bác', 'cô', 'dì', 'cháu', 'ông', 'bà', 'chắt', 'chắt trai', 'chắt gái', 'vợ', 'chồng'. Nếu mối quan hệ không thể xác định được hoặc quá phức tạp, hãy trả về 'unknown' trong chuỗi. Ví dụ JSON: { \"InferredRelationship\": \"A là cha của B và B là con của A.\" }"; // Fallback default
+            string systemPromptContent;
 
             var promptQuery = new GetPromptByIdQuery { Code = RELATIONSHIP_AI_SYSTEM_PROMPT_CODE };
             var promptResult = await _mediator.Send(promptQuery, cancellationToken);
@@ -150,7 +147,13 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             }
             else
             {
-                _logger.LogWarning("Could not fetch system prompt '{PromptCode}' from database. Falling back to default. Error: {Error}", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE, promptResult.Error);
+                _logger.LogError("Could not fetch system prompt '{PromptCode}' from database. Aborting AI generation. Error: {Error}", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE, promptResult.Error);
+                return new RelationshipDetectionResult
+                {
+                    Description = "Lỗi: Không thể tải cấu hình system prompt AI.",
+                    Path = new List<Guid>(),
+                    Edges = new List<string>()
+                };
             }
 
             var aiRequest = new GenerateRequest
@@ -189,6 +192,23 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         };
     }
 
+    private string GetVietnameseAgeTerm(DateTime? dateOfBirth)
+    {
+        if (!dateOfBirth.HasValue)
+        {
+            return "";
+        }
+
+        var today = DateTime.Today;
+        var age = today.Year - dateOfBirth.Value.Year;
+        if (dateOfBirth.Value.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+
+        return age > 0 ? $" {age} tuổi" : "";
+    }
+
     // New helper method to get Vietnamese gender term
     private string GetVietnameseGenderTerm(string? genderString)
     {
@@ -224,8 +244,8 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             var sourceMember = allMembers.GetValueOrDefault(path.Edges[i].SourceMemberId);
             var targetMember = allMembers.GetValueOrDefault(path.Edges[i].TargetMemberId);
 
-            string sourceName = $"{sourceMember?.FullName} {GetVietnameseGenderTerm(sourceMember?.Gender)}".Trim();
-            string targetName = $"{targetMember?.FullName} {GetVietnameseGenderTerm(targetMember?.Gender)}".Trim();
+            string sourceName = $"{sourceMember?.FullName}{GetVietnameseAgeTerm(sourceMember?.DateOfBirth)} {GetVietnameseGenderTerm(sourceMember?.Gender)}".Trim();
+            string targetName = $"{targetMember?.FullName}{GetVietnameseAgeTerm(targetMember?.DateOfBirth)} {GetVietnameseGenderTerm(targetMember?.Gender)}".Trim();
 
             // Ensure we handle cases where sourceMember or targetMember might be null after trimming
             if (string.IsNullOrWhiteSpace(sourceName)) sourceName = $"Thành viên không rõ ({path.Edges[i].SourceMemberId})";

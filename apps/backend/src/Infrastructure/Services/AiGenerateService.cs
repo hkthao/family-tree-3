@@ -102,8 +102,33 @@ public class AiGenerateService : IAiGenerateService
                     return Result<T>.Failure("Invalid response format from n8n: Empty or invalid ChatResponse or its Output.", "ExternalService");
                 }
 
-                // Now deserialize the Output property into the target type T
-                var deserializedOutput = JsonSerializer.Deserialize<T>(chatResponse.Output, options);
+                T? deserializedOutput;
+                try
+                {
+                    // Attempt to deserialize chatResponse.Output as a JSON string for type T
+                    deserializedOutput = JsonSerializer.Deserialize<T>(chatResponse.Output, options);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize ChatResponse.Output as JSON for type {TypeName}. Attempting direct assignment for RelationshipInferenceResultDto if applicable. Raw output: {RawOutput}", typeof(T).Name, chatResponse.Output);
+
+                    // If deserialization fails and T is RelationshipInferenceResultDto,
+                    // assume chatResponse.Output is the raw string for InferredRelationship.
+                    if (typeof(T) == typeof(RelationshipInferenceResultDto))
+                    {
+                        var resultDto = new RelationshipInferenceResultDto
+                        {
+                            InferredRelationship = chatResponse.Output
+                        };
+                        deserializedOutput = (T)(object)resultDto; // Cast to T
+                    }
+                    else
+                    {
+                        // If it's not RelationshipInferenceResultDto or another unexpected error, rethrow
+                        return Result<T>.Failure($"Failed to deserialize structured data from ChatResponse.Output. Expected JSON for type {typeof(T).Name}.", "ExternalService");
+                    }
+                }
+
                 if (deserializedOutput == null)
                 {
                     _logger.LogWarning("Received empty or invalid structured data from ChatResponse.Output. Raw: {RawOutput}", chatResponse.Output);

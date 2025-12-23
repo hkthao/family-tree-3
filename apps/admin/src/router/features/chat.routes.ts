@@ -4,7 +4,7 @@ export const chatRoutes: RouteRecordRaw[] = [
   {
     path: '/chat',
     name: 'Chat',
-    component: () => import('@/views/ChatView.vue'),
+    component: () => import('@/views/chat/ChatView.vue'),
     meta: {
       requiresAuth: true,
       title: 'Chat AI',
