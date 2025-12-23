@@ -2,7 +2,8 @@ import { watch } from 'vue';
 import type { UserProfile } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { useGlobalSnackbar, useServices } from '@/composables';
+import { useGlobalSnackbar } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { IUserService } from '@/services/user/user.service.interface';
 
 const PROFILE_QUERY_KEY = ['userProfile'];

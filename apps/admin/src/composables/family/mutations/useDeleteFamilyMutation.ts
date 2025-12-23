@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 
 

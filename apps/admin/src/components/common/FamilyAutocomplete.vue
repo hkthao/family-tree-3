@@ -8,6 +8,7 @@
     @update:model-value="handleUpdateModelValue"
     :label="label"
     :rules="rules"
+    :hide-no-data="true"
     :readonly="readOnly"
     :clearable="clearable"
     :multiple="multiple"

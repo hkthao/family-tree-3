@@ -2,7 +2,7 @@ import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { FamilyMedia, FamilyMediaFilter, Paginated, ListOptions } from '@/types';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
-import { useServices } from '@/composables'; // Added missing import
+import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys'; // Added missing import
 
 

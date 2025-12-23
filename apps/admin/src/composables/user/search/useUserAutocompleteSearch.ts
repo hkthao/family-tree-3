@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/vue-query';
 import type { UserDto, Paginated } from '@/types';
 import { queryKeys as QueryKeys } from '@/constants/queryKeys';
 import type { IUserService } from '@/services/user/user.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseUserAutocompleteSearchOptions {
   userService?: () => IUserService;

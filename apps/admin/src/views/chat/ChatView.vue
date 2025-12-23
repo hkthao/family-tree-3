@@ -1,7 +1,6 @@
 <template>
   <v-card class="mx-auto d-flex flex-column chat-card" flat :loading="state.loading.value" height="100%">
     <v-card-text class="flex-grow-1 pa-0">
-      <v-sheet class="pa-4 h-100 overflow-y-auto pb-32">
         <div class="chat-messages" ref="chatMessagesContainer">
           <div v-for="(message, index) in state.messages" :key="index"
             :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
@@ -36,10 +35,9 @@
             </v-chip>
           </div>
         </div>
-      </v-sheet>
     </v-card-text>
     <!-- Suggestion Chips -->
-    <div class="chat-suggestions-container px-4">
+    <div class="chat-suggestions-container">
       <v-chip-group column>
         <v-chip v-for="(suggestion, index) in state.suggestionChips" :key="index"
           @click="actions.selectSuggestion(suggestion)">
@@ -48,7 +46,7 @@
       </v-chip-group>
     </div>
 
-    <v-card-actions class="d-flex justify-center pa-4 chat-input-actions">
+    <v-card-actions class="d-flex justify-center pa-0 chat-input-actions">
       <v-textarea no-resize :auto-grow="false" counter :rows="2"
         :model-value="state.newMessage.value"
         @update:model-value="newValue => state.newMessage.value = newValue"
@@ -113,7 +111,7 @@ watch(state.messages, () => {
 
 .chat-suggestions-container {
   position: absolute;
-  bottom: 100px;
+  bottom: 80px;
   /* Adjust based on input field height */
   left: 0;
   right: 0;

@@ -1,7 +1,7 @@
 import { computed, ref, watch, unref, type MaybeRef } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Member, Relationship } from '@/types';
 

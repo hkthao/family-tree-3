@@ -45,7 +45,7 @@ export * from './family/search/useFamilySearch';
 export * from './charts/useMembersPerGenerationChart';
 export * from './charts/useGenderRatioChart';
 export * from './charts/useHierarchicalTreeChart';
-export * from './utils/useServices';
+
 export * from './user/logic/useProfileSettings';
 export * from './user/logic/useUserProfile';
 export * from './user/queries/useUserByIdsQuery';

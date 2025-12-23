@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { useMutation } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { FamilyExportDto } from '@/types';
 import { defaultFileDownloadAdapter, type IFileDownloadAdapter } from '@/composables/utils/fileDownload.adapter';
 import { parseJsonFile } from '@/composables/utils/fileParser.utils';

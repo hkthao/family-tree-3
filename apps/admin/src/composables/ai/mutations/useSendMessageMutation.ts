@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/vue-query';
 import type { UseMutationOptions } from '@tanstack/vue-query';
 import type { ApiError, AiChatMessage, Result, ChatResponse } from '@/types';
 import type { IChatService } from '@/services/chat/chat.service.interface';
-import { useServices } from '@/composables/utils/useServices';
+import { useServices } from '@/plugins/services.plugin';
 
 interface SendMessagePayload {
   familyId: string;

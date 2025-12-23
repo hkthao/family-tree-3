@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/vue-query';
 import type { FamilyDict, FamilyDictFilter, Paginated, ListOptions, FilterOptions } from '@/types';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 
 

@@ -2,7 +2,7 @@ import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Paginated, UserDto } from '@/types';
 import type { IUserService } from '@/services/user/user.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseUserSearchOptions {
   debounceTime?: number;

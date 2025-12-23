@@ -6,7 +6,7 @@ import { useUserProfile } from '@/composables';
 import type { UpdateUserProfileDto, UserProfile } from '@/types';
 import { useMutation } from '@tanstack/vue-query';
 import type { IUserService } from '@/services/user/user.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { VForm } from 'vuetify/components';
 
 interface UseProfileSettingsOptions {

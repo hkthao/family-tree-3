@@ -1,6 +1,6 @@
 // src/composables/face/mutations/useDetectFacesMutation.ts
 import { useMutation, type UseMutationOptions, type UseMutationReturnType, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { FaceDetectionRessult, ApiError } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
 import { queryKeys } from '@/constants/queryKeys';

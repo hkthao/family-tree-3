@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { IFamilyDictService } from '@/services/family-dict/family-dict.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 import type { FamilyDictImport } from '@/types';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 
 

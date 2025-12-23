@@ -9,18 +9,25 @@
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
     <NotificationBell />
-    
+    <!-- Chat Button -->
+    <v-btn icon @click="showChatDrawer = !showChatDrawer">
+      <v-icon>mdi-chat</v-icon>
+    </v-btn>
+
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
   </v-app-bar>
-  
+
+  <ChatDrawer v-model="showChatDrawer" />
 </template>
 
+
 <script setup lang="ts">
-import { ref, type PropType, watch } from 'vue'; // Removed onMounted
-import { useTheme } from 'vuetify';
+import { ref, type PropType, watch, computed } from 'vue';
+import { useTheme, useDisplay } from 'vuetify';
 import UserMenu from './UserMenu.vue';
+import ChatDrawer from '@/views/chat/ChatDrawer.vue';
 import { useRouter } from 'vue-router';
 
 import type { UserProfile } from '@/types';
@@ -33,9 +40,22 @@ import NotificationBell from '@/components/common/NotificationBell.vue';
 
 const { t } = useI18n();
 const theme = useTheme();
+const display = useDisplay(); // Initialize useDisplay
 
 const router = useRouter();
 const { state: { preferences }, actions: { savePreferences } } = useUserPreferences();
+
+const showChatDrawer = ref(false);
+
+
+// Computed property to determine if the chat drawer should be permanent
+const isPermanentChatDrawer = computed(() => display.mdAndUp.value);
+
+watch(isPermanentChatDrawer, (isPermanent) => {
+  if (isPermanent) {
+    showChatDrawer.value = true;
+  }
+}, { immediate: true });
 
 
 

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import { reactive, computed } from 'vue';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { Prompt } from '@/types/prompt';
 import type { Paginated, ListOptions } from '@/types/pagination.d';
 import type { IPromptService } from '@/services/prompt/prompt.service.interface';

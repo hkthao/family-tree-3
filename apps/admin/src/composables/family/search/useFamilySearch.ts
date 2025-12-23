@@ -2,7 +2,7 @@ import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { Family } from '@/types';
 import type { IFamilyService } from '@/services/family/family.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseFamilySearchOptions {
   debounceTime?: number;

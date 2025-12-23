@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
 import type { Relationship } from '@/types';
 

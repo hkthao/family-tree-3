@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/vue-query';
 import type { UserDto } from '@/types';
 import { queryKeys as QueryKeys } from '@/constants/queryKeys';
 import type { IUserService } from '@/services/user/user.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 interface UseUserByIdsQueryOptions {
   userService?: IUserService;

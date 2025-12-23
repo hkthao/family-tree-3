@@ -3,7 +3,7 @@ import { computed, unref } from 'vue';
 import type { MaybeRef } from '@vueuse/core';
 import type { Member, MemberFilter, ListOptions, Result } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 
 
 

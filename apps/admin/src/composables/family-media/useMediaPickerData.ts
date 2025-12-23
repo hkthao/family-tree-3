@@ -1,6 +1,6 @@
 import { reactive, computed, watch, toRef } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { Paginated, ListOptions } from '@/types/pagination';
 import type { MediaItem, FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums'; // Import MediaType

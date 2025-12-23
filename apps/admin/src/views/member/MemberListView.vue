@@ -33,7 +33,6 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import NLEditorView from '@/views/member/NLEditorView.vue';
 import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, watch, computed } from 'vue';

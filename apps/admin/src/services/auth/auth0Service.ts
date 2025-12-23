@@ -3,7 +3,7 @@ import type { RedirectLoginOptions, LogoutOptions } from '@auth0/auth0-spa-js';
 import type { AuthService } from './authService';
 import type { AppState, UserProfile } from '@/types';
 import { getEnvVariable } from '@/utils/api.util';
-import { useServices } from '@/composables/utils/useServices'; // Import useServices
+import { useServices } from '@/plugins/services.plugin';
 import type { IUserService } from '@/services/user/user.service.interface'; // Import IUserService
 
 const AUTH0_DOMAIN = getEnvVariable('VITE_AUTH0_DOMAIN') || '';

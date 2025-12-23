@@ -2,7 +2,7 @@ import { ref, watch, computed, type Ref, type ComputedRef } from 'vue';
 import { useI18n, type Composer } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
 import { useQuery, type UseQueryOptions, type UseQueryReturnType } from '@tanstack/vue-query';
-import { useServices } from '@/composables'; // Keep for defaultDeps
+import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
 import type { IMemberService } from '@/services/member/member.service.interface';
 

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables';
+import { useServices } from '@/plugins/services.plugin';
 import type { FamilyMedia, FamilyMediaAddFromUrlDto, ApiError } from '@/types';
 import { queryKeys } from '@/constants/queryKeys';
 

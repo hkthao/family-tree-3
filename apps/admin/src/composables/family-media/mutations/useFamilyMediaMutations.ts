@@ -1,6 +1,6 @@
 import type { FamilyMedia } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useServices } from '@/composables'; // Import useServices
+import { useServices } from '@/plugins/services.plugin';
 import type { IFamilyMediaService } from '@/services/family-media/family-media.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 
