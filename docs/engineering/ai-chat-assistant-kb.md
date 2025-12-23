@@ -1,6 +1,6 @@
-# Cơ sở Kiến thức Tối ưu cho Chat Assistant về Ứng dụng Gia Phả Việt
+# Cơ sở Kiến thức Tối ưu cho Chat Assistant về Ứng dụng Dòng Họ Việt
 
-Tài liệu này cung cấp cơ sở kiến thức đã được tối ưu hóa cho Chat Assistant, giúp trả lời các câu hỏi của người dùng về ứng dụng Gia Phả Việt một cách chính xác và hiệu quả.
+Tài liệu này cung cấp cơ sở kiến thức đã được tối ưu hóa cho Chat Assistant, giúp trả lời các câu hỏi của người dùng về ứng dụng Dòng Họ Việt một cách chính xác và hiệu quả.
 
 ---
 
@@ -21,13 +21,13 @@ Tài liệu này cung cấp cơ sở kiến thức đã được tối ưu hóa 
 
 # 1. Tóm tắt ngắn gọn (Summary)
 
-Ứng dụng **Gia Phả Việt** là hệ thống quản lý gia phả toàn diện, giúp người dùng tạo, quản lý, trực quan hóa và chia sẻ cây gia phả một cách dễ dàng. Ứng dụng tập trung vào bảo tồn lịch sử gia đình, cung cấp các công cụ trực quan, quản lý thông tin đa dạng, tích hợp AI (như tạo tiểu sử, nhận diện khuôn mặt) và hỗ trợ cộng tác. Tài liệu này cung cấp kiến thức cốt lõi về các khái niệm, quy tắc, logic quan hệ và hướng dẫn sử dụng ứng dụng, được tối ưu hóa cho Chat Assistant để hỗ trợ người dùng cuối.
+Ứng dụng **Dòng Họ Việt** là hệ thống quản lý gia phả toàn diện, giúp người dùng tạo, quản lý, trực quan hóa và chia sẻ cây gia phả một cách dễ dàng. Ứng dụng tập trung vào bảo tồn lịch sử gia đình, cung cấp các công cụ trực quan, quản lý thông tin đa dạng, tích hợp AI (như tạo tiểu sử, nhận diện khuôn mặt) và hỗ trợ cộng tác. Tài liệu này cung cấp kiến thức cốt lõi về các khái niệm, quy tắc, logic quan hệ và hướng dẫn sử dụng ứng dụng, được tối ưu hóa cho Chat Assistant để hỗ trợ người dùng cuối.
 
 ---
 
 # 2. Mô hình miền (Domain Model)
 
-Đây là các khái niệm và thực thể chính mà ứng dụng Gia Phả Việt quản lý:
+Đây là các khái niệm và thực thể chính mà ứng dụng Dòng Họ Việt quản lý:
 
 *   **Dòng họ (Family)**:
     *   **Là gì**: Một tập hợp các thành viên có quan hệ, tạo nên một cây gia phả duy nhất.
@@ -186,28 +186,28 @@ Dưới đây là các bước hướng dẫn cơ bản để bạn thực hiệ
         3.  Nếu thông tin chưa có, bạn có thể thêm người cha cho cha bạn và thiết lập mối quan hệ tương ứng. Bạn có muốn tôi hướng dẫn cách thêm mối quan hệ không?"
 
 *   **Câu hỏi người dùng 3**: "Có quy tắc nào về ngày sinh và ngày mất của thành viên không?"
-    *   **Phản hồi của AI**: "Vâng, có một quy tắc nghiệp vụ quan trọng về ngày sinh và ngày mất. Trong ứng dụng Gia Phả Việt, **ngày mất của một thành viên phải luôn sau ngày sinh của họ**. Hệ thống sẽ kiểm tra quy tắc này khi bạn nhập hoặc cập nhật thông tin thành viên để đảm bảo tính hợp lệ của dữ liệu."
+    *   **Phản hồi của AI**: "Vâng, có một quy tắc nghiệp vụ quan trọng về ngày sinh và ngày mất. Trong ứng dụng Dòng Họ Việt, **ngày mất của một thành viên phải luôn sau ngày sinh của họ**. Hệ thống sẽ kiểm tra quy tắc này khi bạn nhập hoặc cập nhật thông tin thành viên để đảm bảo tính hợp lệ của dữ liệu."
 
 *   **Câu hỏi người dùng 4**: "Vai trò 'Quản lý' và 'Xem' trong dòng họ khác nhau như thế nào?"
-    *   **Phản hồi của AI**: "Trong ứng dụng Gia Phả Việt, vai trò trong dòng họ xác định quyền hạn của bạn:
+    *   **Phản hồi của AI**: "Trong ứng dụng Dòng Họ Việt, vai trò trong dòng họ xác định quyền hạn của bạn:
         *   **Vai trò Quản lý**: Bạn có toàn quyền thêm, sửa đổi hoặc xóa bất kỳ thông tin nào (thành viên, mối quan hệ, sự kiện) trong dòng họ đó.
         *   **Vai trò Xem**: Bạn chỉ có quyền xem thông tin của dòng họ và không thể thực hiện bất kỳ thay đổi nào.
         Bạn có muốn biết cách gán vai trò cho người khác trong dòng họ không?"
 
 *   **Câu hỏi người dùng 5**: "Ứng dụng có thể tự động tạo tiểu sử cho thành viên không?"
-    *   **Phản hồi của AI**: "Có, ứng dụng Gia Phả Việt có tính năng tích hợp AI để giúp bạn tạo tiểu sử cho thành viên. Để sử dụng tính năng này:
+    *   **Phản hồi của AI**: "Có, ứng dụng Dòng Họ Việt có tính năng tích hợp AI để giúp bạn tạo tiểu sử cho thành viên. Để sử dụng tính năng này:
         1.  Truy cập màn hình 'Chi tiết thành viên' của người bạn muốn tạo tiểu sử.
         2.  Tìm phần 'Tiểu sử' và nhấn nút 'Tạo bằng AI'.
         3.  Hệ thống sẽ sử dụng các thông tin đã có của thành viên (như tên, ngày sinh, các sự kiện liên quan) để gợi ý một bản tiểu sử. Bạn có thể xem lại và chỉnh sửa trước khi lưu."
 
 *   **Câu hỏi người dùng 6**: "Nếu tôi tải ảnh lên, ứng dụng có làm gì với các khuôn mặt trong ảnh không?"
-    *   **Phản hồi của AI**: "Vâng, khi bạn tải ảnh lên, ứng dụng Gia Phả Việt có khả năng phát hiện khuôn mặt trong ảnh đó. Sau khi các khuôn mặt được phát hiện, bạn có thể gán nhãn từng khuôn mặt với một thành viên cụ thể trong gia phả của mình. Điều này giúp liên kết hình ảnh với từng cá nhân và có thể hỗ trợ các tính năng khác trong tương lai."
+    *   **Phản hồi của AI**: "Vâng, khi bạn tải ảnh lên, ứng dụng Dòng Họ Việt có khả năng phát hiện khuôn mặt trong ảnh đó. Sau khi các khuôn mặt được phát hiện, bạn có thể gán nhãn từng khuôn mặt với một thành viên cụ thể trong gia phả của mình. Điều này giúp liên kết hình ảnh với từng cá nhân và có thể hỗ trợ các tính năng khác trong tương lai."
 
 ---
 
 # 8. Thông tin Đội ngũ Phát triển
 
-Tài liệu này cung cấp thông tin về đội ngũ phát triển chính của dự án Gia Phả Việt.
+Tài liệu này cung cấp thông tin về đội ngũ phát triển chính của dự án Dòng Họ Việt.
 
 *   **Thành viên:**
     *   **Huynh Kim Thao**: Full Stack Developer

@@ -5,11 +5,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const appName = ref('Gia Phả Việt'); // Centralized app name
+const appName = ref('Dòng Họ Việt'); // Centralized app name
 
 // Optional: If you want to make it configurable via props
 // const props = defineProps({
-//   name: { type: String, default: 'Gia Phả Việt' },
+//   name: { type: String, default: 'Dòng Họ Việt' },
 // });
 // const appName = ref(props.name);
 </script>

@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useAuthenticatedImage } from '@/composables';
+
 
 const props = defineProps({
   src: { type: String, default: null },
@@ -24,8 +24,7 @@ const processedSrc = computed(() => {
   if (isBase64(props.src)) {
     return props.src;
   }
-  // Only use useAuthenticatedImage if it's a URL, not a base64 string
-  return useAuthenticatedImage(props.src).displaySrc.value;
+  return props.src;
 });
 
 const displaySrc = computed(() => {

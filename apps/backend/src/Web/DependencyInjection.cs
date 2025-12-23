@@ -20,8 +20,8 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddOpenApiDocument((configure, sp) =>
         {
-            configure.Title = "API Gia Phả Việt";
-            configure.Description = "API để quản lý thông tin Gia Phả Việt, bao gồm các dòng họ, thành viên, và các mối quan hệ.";
+            configure.Title = "API Dòng Họ Việt";
+            configure.Description = "API để quản lý thông tin Dòng Họ Việt, bao gồm các dòng họ, thành viên, và các mối quan hệ.";
 
             // Add JWT
             configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme

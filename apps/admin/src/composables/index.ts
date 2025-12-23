@@ -7,7 +7,7 @@ export * from './family-location/logic/useFamilyLocationFormActions';
 export * from './family-location/queries/useFamilyLocationQuery';
 export * from './family-location/queries/useFamilyLocationsQuery';
 export * from './ui/useCrudDrawer';
-export * from './ui/useAuthenticatedImage';
+
 export * from './ui/useAppBreadcrumbs';
 export * from './ui/useGlobalSnackbar';
 export * from './ui/useConfirmDialog';
