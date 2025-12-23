@@ -11,7 +11,7 @@
     <NotificationBell />
     <!-- Chat Button -->
     <v-btn icon @click="showChatDrawer = !showChatDrawer">
-      <v-icon>mdi-chat</v-icon>
+      <v-icon>mdi-chat-processing-outline</v-icon>
     </v-btn>
 
     <div class="mx-2">

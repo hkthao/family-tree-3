@@ -15,7 +15,7 @@ export * from './ui/useAvatarCropper';
 
 
 
-export * from './chat/useN8nChat';
+
 export * from './face'; // Add this specific export
 export * from './auth/useAuth';
 export * from './auth/useAccessToken';
