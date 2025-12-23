@@ -22,7 +22,7 @@
 
 ---
 
-Tài liệu này hướng dẫn cách cài đặt môi trường, build, và deploy dự án Gia Phả Việt.
+Tài liệu này hướng dẫn cách cài đặt môi trường, build, và deploy dự án Dòng Họ Việt.
 
 ## 1. Yêu cầu môi trường
 
