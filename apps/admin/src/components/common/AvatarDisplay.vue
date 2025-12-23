@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useAuthenticatedImage } from '@/composables';
 
 const props = defineProps({
@@ -13,5 +14,21 @@ const props = defineProps({
   size: { type: Number, default: 128 },
 });
 
-const { displaySrc } = useAuthenticatedImage(props.src);
+// Regex to check if a string is a Base64 image data URL
+const isBase64 = (str: string | null | undefined): boolean => {
+  if (!str) return false;
+  return str.startsWith('data:image/');
+};
+
+const processedSrc = computed(() => {
+  if (isBase64(props.src)) {
+    return props.src;
+  }
+  // Only use useAuthenticatedImage if it's a URL, not a base64 string
+  return useAuthenticatedImage(props.src).displaySrc.value;
+});
+
+const displaySrc = computed(() => {
+  return processedSrc.value || '/images/default-avatar.png';
+});
 </script>

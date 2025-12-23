@@ -46,17 +46,21 @@ public class FamilyTreeService : IFamilyTreeService
             var birthDateTime = dateOfBirth.Value.ToDateTime(TimeOnly.MinValue);
             if (birthEvent != null)
             {
-                // Update existing birth event
-                // Use UpdateSolarEvent
-                birthEvent.UpdateSolarEvent(
-                    birthEvent.Name,
-                    birthEvent.Code,
-                    birthEvent.Description,
-                    birthDateTime, // New SolarDate
-                    RepeatRule.Yearly, // Birthdays are yearly
-                    birthEvent.Type,
-                    birthEvent.Color
-                );
+                if (birthEvent.CalendarType == CalendarType.Solar)
+                {
+                    // Update existing birth event (Solar)
+                    birthEvent.UpdateSolarEvent(
+                        birthEvent.Name,
+                        birthEvent.Code,
+                        birthEvent.Description,
+                        birthDateTime, // New SolarDate
+                        RepeatRule.Yearly, // Birthdays are yearly
+                        birthEvent.Type,
+                        birthEvent.Color
+                    );
+                }
+                // If it's a Lunar event, we don't update it with a Solar date here.
+                // Further logic would be needed if Lunar dates for members were directly supported and needed syncing.
             }
             else
             {
@@ -86,17 +90,21 @@ public class FamilyTreeService : IFamilyTreeService
             var deathDateTime = dateOfDeath.Value.ToDateTime(TimeOnly.MinValue);
             if (deathEvent != null)
             {
-                // Update existing death event
-                // Use UpdateSolarEvent
-                deathEvent.UpdateSolarEvent(
-                    deathEvent.Name,
-                    deathEvent.Code,
-                    deathEvent.Description,
-                    deathDateTime, // New SolarDate
-                    RepeatRule.Yearly, // Death anniversaries are yearly
-                    deathEvent.Type,
-                    deathEvent.Color
-                );
+                if (deathEvent.CalendarType == CalendarType.Solar)
+                {
+                    // Update existing death event (Solar)
+                    deathEvent.UpdateSolarEvent(
+                        deathEvent.Name,
+                        deathEvent.Code,
+                        deathEvent.Description,
+                        deathDateTime, // New SolarDate
+                        RepeatRule.Yearly, // Death anniversaries are yearly
+                        deathEvent.Type,
+                        deathEvent.Color
+                    );
+                }
+                // If it's a Lunar event, we don't update it with a Solar date here.
+                // Further logic would be needed if Lunar dates for members were directly supported and needed syncing.
             }
             else
             {
