@@ -1,5 +1,5 @@
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useUserProfile } from '@/composables'; // Use useUserProfile instead of useProfileSettings
+import { ref, onUnmounted, watch } from 'vue';
+import { useUserProfile } from '@/composables';
 import { Novu } from '@novu/js';
 import { getEnvVariable } from '@/utils/api.util';
 
@@ -7,8 +7,8 @@ export function useNovuNotificationBell() {
   const { state: { userProfile } } = useUserProfile();
   const unseenCount = ref(0);
   let novuClient: Novu | null = null;
-  let unseen_count_changed: (() => void) | null = null;
-  let notification_received: (() => void) | null = null;
+  let unseen_count_changed_off: (() => void) | null = null; // Renamed for clarity
+  let notification_received_off: (() => void) | null = null; // Renamed for clarity
   const applicationIdentifier = ref(getEnvVariable('VITE_NOVU_APPLICATION_IDENTIFIER') || '');
 
   const updateUnReadCount = async () => {
@@ -24,48 +24,61 @@ export function useNovuNotificationBell() {
     }
   };
 
-  onMounted(async () => {
-    const subscriberId = userProfile.value?.userId;
+  const destroyNovuClient = () => {
+    if (unseen_count_changed_off) {
+      unseen_count_changed_off();
+      unseen_count_changed_off = null;
+    }
+    if (notification_received_off) {
+      notification_received_off();
+      notification_received_off = null;
+    }
+    novuClient = null;
+  };
 
-    if (!subscriberId) {
+  watch(() => userProfile.value?.userId, async (newSubscriberId, oldSubscriberId) => {
+    // Destroy existing client if subscriberId changes or becomes null
+    if (newSubscriberId !== oldSubscriberId && novuClient) {
+      destroyNovuClient();
+    }
+
+    if (!newSubscriberId) {
       console.warn('Subscriber ID not found. Novu notifications will not be initialized.');
       return;
     }
 
-    try {
-      novuClient = new Novu({
-        applicationIdentifier: applicationIdentifier.value,
-        subscriberId: subscriberId,
-      });
+    // Only (re)initialize if a valid subscriberId is present and client is not already initialized for this ID
+    if (newSubscriberId && !novuClient) {
+      try {
+        novuClient = new Novu({
+          applicationIdentifier: applicationIdentifier.value,
+          subscriberId: newSubscriberId,
+        });
 
-      // Fetch initial unread count
-      await updateUnReadCount();
-
-      // Set up event listeners
-      unseen_count_changed = novuClient.on('notifications.unseen_count_changed', async () => {
+        // Fetch initial unread count
         await updateUnReadCount();
-      });
 
-      notification_received = novuClient.on('notifications.notification_received', async () => {
-        await updateUnReadCount();
-      });
+        // Set up event listeners
+        unseen_count_changed_off = novuClient.on('notifications.unseen_count_changed', async () => {
+          await updateUnReadCount();
+        });
 
-    } catch (error) {
-      console.error('Failed to initialize Novu client:', error);
+        notification_received_off = novuClient.on('notifications.notification_received', async () => {
+          await updateUnReadCount();
+        });
+
+      } catch (error) {
+        console.error('Failed to initialize Novu client:', error);
+      }
     }
-  });
+  }, { immediate: true }); // Run immediately to catch initial userProfile state
 
   onUnmounted(() => {
-    if (unseen_count_changed) {
-      unseen_count_changed();
-    }
-    if (notification_received) {
-      notification_received();
-    }
-    novuClient = null; // Clear client on unmount
+    destroyNovuClient();
   });
 
   return {
     unseenCount,
   };
 }
+
