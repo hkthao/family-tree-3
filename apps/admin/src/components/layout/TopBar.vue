@@ -9,16 +9,12 @@
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
     <NotificationBell />
-    <!-- Chat Assistant Button -->
-    <v-btn icon @click="showChatWidget = !showChatWidget">
-      <v-icon>mdi-chat-processing</v-icon>
-    </v-btn>
+    
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
   </v-app-bar>
-  <!-- Chat Widget Component -->
-  <N8nChatWidget v-model="showChatWidget" />
+  
 </template>
 
 <script setup lang="ts">
@@ -33,7 +29,7 @@ import { useUserPreferences } from '@/composables';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
-import { N8nChatWidget } from '@/components/ai'; // Import ChatWidget
+
 
 const { t } = useI18n();
 const theme = useTheme();
@@ -41,7 +37,7 @@ const theme = useTheme();
 const router = useRouter();
 const { state: { preferences }, actions: { savePreferences } } = useUserPreferences();
 
-const showChatWidget = ref(false); // Reactive variable to control chat widget visibility
+
 
 defineProps({
   currentUser: {

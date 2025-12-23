@@ -3,8 +3,7 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
     <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      @ai-create="navigateToAICreateMember" :read-only="props.readOnly"
+      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()" :read-only="props.readOnly"
       :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete">
     </MemberList>
     <!-- Edit Member Drawer -->
@@ -25,10 +24,7 @@
         @edit-member="openEditDrawer" />
     </BaseCrudDrawer>
 
-    <!-- AI Create Member Drawer -->
-    <BaseCrudDrawer v-model="aiCreateDrawer" @close="aiCreateDrawer = false">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" :allow-save="allowAdd" />
-    </BaseCrudDrawer>
+
   </div>
 </template>
 <script setup lang="ts">
@@ -92,13 +88,8 @@ const {
   closeAllDrawers,
 } = useCrudDrawer<string>(); 
 
-const aiCreateDrawer = ref(false);
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-
-const navigateToAICreateMember = () => {
-  aiCreateDrawer.value = true;
-};
 
 const handleFilterUpdate = (newFilters: MemberFilter) => {
   setFilters(newFilters);
@@ -164,7 +155,6 @@ const handleDetailClosed = () => {
 
 const closeAllMemberDrawers = () => {
   closeAllDrawers();
-  aiCreateDrawer.value = false;
 };
 
 // Initial load is handled by useMembersQuery, no need for onMounted load

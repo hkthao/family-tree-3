@@ -1,20 +1,12 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="memberListActions.loadMembers" elevation="0"
-    data-testid="member-list" fixed-header>
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="memberListActions.loadMembers"
+    elevation="0" data-testid="member-list" fixed-header>
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('ai-create')">
-          <v-tooltip :text="t('member.list.action.aiCreate')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')"
-          data-testid="add-new-member-button">
+        <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -33,14 +25,15 @@
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
       <div class="member-full-name-column">
-<a @click="memberListActions.viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-        {{ item.fullName }}
-      </a>
-      <div class="text-caption text-medium-emphasis">
-        {{ item.code }}
+        <a @click="memberListActions.viewMember(item)"
+          class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+          {{ item.fullName }}
+        </a>
+        <div class="text-caption text-medium-emphasis">
+          {{ item.code }}
+        </div>
       </div>
-      </div>
-      
+
     </template>
 
     <!-- Father column -->
@@ -55,8 +48,10 @@
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="Gender.Male" />
-      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="Gender.Female" />
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl"
+        :gender="Gender.Male" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl"
+        :gender="Gender.Female" />
     </template>
 
     <!-- Family column -->
@@ -88,7 +83,8 @@
         <v-tooltip :text="t('member.list.action.delete')">
           <template v-slot:activator="{ props: tooltipProps }">
             <v-btn icon size="small" variant="text" v-bind="tooltipProps" @click="memberListActions.confirmDelete(item)"
-              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete" v-if="props.allowDelete">
+              data-testid="delete-member-button" :data-member-name="item.fullName" aria-label="Delete"
+              v-if="props.allowDelete">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
@@ -109,7 +105,7 @@ import { useI18n } from 'vue-i18n';
 import { Gender, type Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
-import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member'; 
+import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
@@ -117,8 +113,8 @@ const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
-  search?: string; 
-  readOnly?: boolean; 
+  search?: string;
+  readOnly?: boolean;
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
