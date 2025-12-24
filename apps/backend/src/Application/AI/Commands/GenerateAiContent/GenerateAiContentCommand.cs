@@ -18,8 +18,4 @@ public record GenerateAiContentCommand : IRequest<Result<ExpandoObject>>
     /// </summary>
     public string ChatInput { get; init; } = null!;
 
-    /// <summary>
-    /// Loại nội dung AI cần tạo (ví dụ: family, member, event, chat).
-    /// </summary>
-    public string ContentType { get; init; } = null!;
 }

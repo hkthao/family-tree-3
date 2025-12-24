@@ -49,7 +49,7 @@ public class GenerateAiContentCommandHandlerTests : TestBase
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Family System Prompt" }));
         _mockMediator.Setup(m => m.Send(
-            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.GenerateMemberBiographyPromptCode),
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.GenerateMemberPromptCode),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Member System Prompt" }));
         _mockMediator.Setup(m => m.Send(
@@ -210,7 +210,7 @@ public class GenerateAiContentCommandHandlerTests : TestBase
 
         // Mock prompt not found for a specific code
         _mockMediator.Setup(m => m.Send(
-            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.GenerateMemberBiographyPromptCode),
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.GenerateMemberPromptCode),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.NotFound("Prompt not found"));
 

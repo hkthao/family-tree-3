@@ -7,5 +7,5 @@ public static class PromptConstants
     public const string GenerateMemberPromptCode = "GENERATE_MEMBER_PROMPT";
     public const string GenerateEventDetailsPromptCode = "GENERATE_EVENT_DETAILS_PROMPT";
     public const string AiAssistantChatPromptCode = "AI_ASSISTANT_CHAT_PROMPT";
-    public const string GenerateMemberBiographyPromptCode = "GENERATE_MEMBER_BIOGRAPHY_PROMPT";
+    public const string UnifiedAiContentGenerationPromptCode = "UNIFIED_AI_CONTENT_GENERATION_PROMPT";
 }
