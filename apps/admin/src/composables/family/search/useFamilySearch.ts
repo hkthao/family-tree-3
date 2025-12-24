@@ -1,6 +1,6 @@
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { useServices } from '@/plugins/services.plugin';
 
@@ -16,7 +16,7 @@ export function useFamilySearch(options?: UseFamilySearchOptions) {
   const debouncedSearchTerm = ref('');
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const { data, isLoading, isFetching, error } = useQuery<Family[], Error>({
+  const { data, isLoading, isFetching, error } = useQuery<FamilyDto[], Error>({
     queryKey: ['families', debouncedSearchTerm],
     queryFn: async () => {
       if (!debouncedSearchTerm.value) {

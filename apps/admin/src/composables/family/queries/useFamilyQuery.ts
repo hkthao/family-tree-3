@@ -1,6 +1,6 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 import { useServices } from '@/plugins/services.plugin';
@@ -11,7 +11,7 @@ export function useFamilyQuery(
   familyId: Ref<string | undefined>,
   service: IFamilyService = useServices().family,
 ) {
-  const query = useQuery<Family, Error>({
+  const query = useQuery<FamilyDto, Error>({
     queryKey: computed(() => (unref(familyId) ? queryKeys.families.detail(unref(familyId)!) : [])),
     queryFn: async () => {
       const id = unref(familyId);

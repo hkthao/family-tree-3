@@ -2,7 +2,7 @@ import { computed, type Ref } from 'vue';
 import { useServices } from '@/plugins/services.plugin';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import { useQuery } from '@tanstack/vue-query';
 
 const FAMILY_QUERY_KEY = 'family';

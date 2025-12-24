@@ -84,14 +84,14 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import ListToolbar from '@/components/common/ListToolbar.vue';
 import { useDebouncedSearch } from '@/composables';
 
 const props = defineProps<{
-  items: Family[];
+  items: FamilyDto[];
   totalItems: number;
   loading: boolean;
   itemsPerPage: number;

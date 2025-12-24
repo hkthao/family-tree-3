@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '@/composables';
 import { useQueryClient } from '@tanstack/vue-query';
-import type { Family } from '@/types'; // Import Family type
+import type { FamilyDto } from '@/types';
 import type { TabItem } from './familyTabs.logic'; // Import TabItem
 import { calculateTabVisibility, calculateSwappedTabs, MAX_VISIBLE_TABS, MAX_FIXED_TABS } from './familyTabs.logic';
 import type { ILocalStorageAdapter } from './localStorage.adapter'; // Import adapter
@@ -11,7 +11,7 @@ import { defaultLocalStorageAdapter } from './localStorage.adapter'; // Import a
 
 interface UseFamilyTabsProps {
   familyId: Ref<string>;
-  familyData: Ref<Family | undefined>; // Pass familyData as a prop
+  familyData: Ref<FamilyDto | undefined>; // Pass familyData as a prop
 }
 
 interface UseFamilyTabsDeps {

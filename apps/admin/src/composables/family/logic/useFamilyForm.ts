@@ -1,6 +1,6 @@
 import { ref, reactive, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family, FamilyAddDto, FamilyUpdateDto } from '@/types';
+import type { FamilyDto, FamilyAddDto, FamilyUpdateDto } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { useFamilyRules } from '@/validations/family.validation';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
@@ -8,7 +8,7 @@ import type { VForm } from 'vuetify/components';
 import { getFamilyVisibilityOptions } from '@/composables/utils/familyOptions';
 
 interface UseFamilyFormProps {
-  data?: Family;
+  data?: FamilyDto;
   readOnly?: boolean;
 }
 
@@ -18,7 +18,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
   const isEditMode = ref(!!props.data);
 
   // Initial state for formData
-  const initialFormData = (): FamilyAddDto | FamilyUpdateDto | Family => {
+  const initialFormData = (): FamilyAddDto | FamilyUpdateDto | FamilyDto => {
     if (props.data) {
       return {
         id: props.data.id,
@@ -45,7 +45,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     };
   };
 
-  const formData = reactive<FamilyAddDto | FamilyUpdateDto | Family>(initialFormData());
+  const formData = reactive<FamilyAddDto | FamilyUpdateDto | FamilyDto>(initialFormData());
 
   const initialAvatarDisplay = ref(formData.avatarBase64 || formData.avatarUrl);
 

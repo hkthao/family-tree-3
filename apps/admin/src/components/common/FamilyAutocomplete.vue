@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import { ApiFamilyService } from '@/services/family/api.family.service';
 import apiClient from '@/plugins/axios';
@@ -56,7 +56,7 @@ const props = withDefaults(defineProps<FamilyAutocompleteProps>(), {
 
 const emit = defineEmits(['update:modelValue']);
 
-const internalValue = ref<Family | Family[] | null>(null);
+const internalValue = ref<FamilyDto | FamilyDto[] | null>(null);
 const search = ref('');
 const debouncedSearchTerm = ref('');
 
@@ -73,7 +73,7 @@ const modelValueIds = computed(() => {
 });
 
 // Query for preloading selected families by their IDs
-const { data: preloadedFamilies, isLoading: isLoadingPreload } = useQuery<Family[], Error>({
+const { data: preloadedFamilies, isLoading: isLoadingPreload } = useQuery<FamilyDto[], Error>({
   queryKey: ['families', 'ids', modelValueIds],
   queryFn: async () => {
     if (!modelValueIds.value || modelValueIds.value.length === 0) {
@@ -100,7 +100,7 @@ watch(preloadedFamilies, (newFamilies) => {
 }, { immediate: true });
 
 // Query for searching families based on input
-const { data: searchResults, isLoading: isLoadingSearch } = useQuery<Family[], Error>({
+const { data: searchResults, isLoading: isLoadingSearch } = useQuery<FamilyDto[], Error>({
   queryKey: ['families', 'search', debouncedSearchTerm],
   queryFn: async () => {
     const filters: { [key: string]: any } = {};
@@ -139,12 +139,12 @@ watch(search, (newSearchTerm) => {
   }, props.debounceTime);
 });
 
-const handleUpdateModelValue = (value: Family | Family[] | null) => {
+const handleUpdateModelValue = (value: FamilyDto | FamilyDto[] | null) => {
   if (props.multiple) {
-    const ids = Array.isArray(value) ? value.map((item: Family) => item.id) : [];
+    const ids = Array.isArray(value) ? value.map((item: FamilyDto) => item.id) : [];
     emit('update:modelValue', ids);
   } else {
-    const id = value ? (value as Family).id : undefined;
+    const id = value ? (value as FamilyDto).id : undefined;
     emit('update:modelValue', id);
   }
 };

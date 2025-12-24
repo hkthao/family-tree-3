@@ -1,6 +1,6 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Family, FamilyFilter, Paginated, ListOptions, FilterOptions } from '@/types';
+import type { FamilyDto, FamilyFilter, Paginated, ListOptions, FilterOptions } from '@/types';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 import { useServices } from '@/plugins/services.plugin';
@@ -11,7 +11,7 @@ export function useFamiliesQuery(
   filters: Ref<FamilyFilter>,
   service: IFamilyService = useServices().family,
 ) {
-  const query = useQuery<Paginated<Family>, Error>({
+  const query = useQuery<Paginated<FamilyDto>, Error>({
     queryKey: computed(() => queryKeys.families.list(unref(filters))),
     queryFn: async () => {
       const currentFilters = unref(filters);
@@ -34,7 +34,7 @@ export function useFamiliesQuery(
       }
       throw response.error;
     },
-    placeholderData: (previousData: Paginated<Family> | undefined) => previousData, // Keep previous data while fetching new
+    placeholderData: (previousData: Paginated<FamilyDto> | undefined) => previousData, // Keep previous data while fetching new
     staleTime: 1000 * 60 * 1, // 1 minute
   });
 

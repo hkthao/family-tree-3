@@ -44,7 +44,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AICard from '@/components/chat-generated-cards/AICard.vue';
 import { useServices } from '@/plugins/services.plugin';
-import type { GenerateFamilyDataCommand, CombinedAiContentDto, CardData, Family, Member, EventDto } from '@/types';
+import type { GenerateFamilyDataCommand, CombinedAiContentDto, CardData, FamilyDto, Member, EventDto } from '@/types';
 
 interface Message {
   from: 'user' | 'ai';
@@ -70,7 +70,7 @@ const mapCombinedAiContentToCardData = (combinedContent: CombinedAiContentDto): 
   const cards: CardData[] = [];
   let idCounter = 1;
 
-  combinedContent.families?.forEach((family: Family) => {
+  combinedContent.families?.forEach((family: FamilyDto) => {
     cards.push({
       id: (idCounter++).toString(),
       type: 'Family',
