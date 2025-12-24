@@ -65,7 +65,7 @@
           </v-btn>
         </template>
       </v-tooltip>
-      <v-tooltip :text="t('common.action.delete')">
+      <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
             data-testid="delete-event-button"> <v-icon>mdi-delete</v-icon>
