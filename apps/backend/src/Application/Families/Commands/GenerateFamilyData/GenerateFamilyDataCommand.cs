@@ -1,12 +1,12 @@
-using System.Dynamic;
 using backend.Application.Common.Models;
+using backend.Application.AI.DTOs; // Add this using directive
 
-namespace backend.Application.AI.Commands.GenerateAiContent;
+namespace backend.Application.Families.Commands.GenerateFamilyData;
 
 /// <summary>
 /// Lệnh để tạo nội dung bằng AI dựa trên đầu vào của người dùng và loại yêu cầu.
 /// </summary>
-public record GenerateAiContentCommand : IRequest<Result<ExpandoObject>>
+public record GenerateFamilyDataCommand : IRequest<Result<CombinedAiContentDto>>
 {
     /// <summary>
     /// ID của gia đình liên quan đến yêu cầu.

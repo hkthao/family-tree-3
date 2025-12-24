@@ -1,15 +1,16 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Prompts.DTOs;
+using backend.Application.Prompts.DTOs; // Reintroduce PromptDto
+using AutoMapper; // Reintroduce AutoMapper
 
 namespace backend.Application.Prompts.Queries.GetPromptById;
 
 public class GetPromptByIdQueryHandler : IRequestHandler<GetPromptByIdQuery, Result<PromptDto>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly IMapper _mapper; // Reintroduce IMapper
 
-    public GetPromptByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetPromptByIdQueryHandler(IApplicationDbContext context, IMapper mapper) // Reintroduce IMapper in constructor
     {
         _context = context;
         _mapper = mapper;
@@ -40,7 +41,7 @@ public class GetPromptByIdQueryHandler : IRequestHandler<GetPromptByIdQuery, Res
             return Result<PromptDto>.NotFound("Prompt not found.", "NotFound");
         }
 
-        var dto = _mapper.Map<PromptDto>(entity);
+        var dto = _mapper.Map<PromptDto>(entity); // Reintroduce mapping
         return Result<PromptDto>.Success(dto);
     }
 }

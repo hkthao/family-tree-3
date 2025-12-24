@@ -7,6 +7,7 @@ using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
 using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
+using backend.Application.Families.Commands.GenerateFamilyData; // ADDED: New using directive
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
@@ -215,6 +216,24 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Tạo nội dung AI dựa trên đầu vào của người dùng và loại yêu cầu.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình liên quan đến yêu cầu.</param>
+    /// <param name="command">Lệnh chứa FamilyId, ChatInput, và ContentType.</param>
+    /// <returns>Nội dung được tạo bởi AI (JSON hoặc văn bản).</returns>
+    [HttpPost("{familyId}/generate-data")]
+    public async Task<IActionResult> GenerateFamilyData([FromRoute] Guid familyId, [FromBody] GenerateFamilyDataCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyId}) and command body ({CommandFamilyId}) for GenerateFamilyDataCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest("FamilyId in URL does not match command body.");
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>
