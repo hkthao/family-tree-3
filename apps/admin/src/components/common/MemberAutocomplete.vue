@@ -48,7 +48,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const internalValue = ref<MemberDto | MemberDto[] | null>(null);
 const search = ref('');
-const debouncedSearchTerm = ref('');
+const debouncedSearchQuery = ref('');
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -91,17 +91,17 @@ watch(preloadedMembers, (newMembers) => {
 
 // Query for searching members based on input
 const { data: searchResults, isLoading: isLoadingSearch } = useQuery<MemberDto[], Error>({
-  queryKey: ['members', 'search', debouncedSearchTerm, props.familyId],
+  queryKey: ['members', 'search', debouncedSearchQuery, props.familyId],
   queryFn: async () => {
     const filters: { [key: string]: any } = {};
-    if (debouncedSearchTerm.value) {
-      filters.searchQuery = debouncedSearchTerm.value;
+    if (debouncedSearchQuery.value) {
+      filters.searchQuery = debouncedSearchQuery.value;
     }
     if (props.familyId) {
       filters.familyId = props.familyId;
     }
 
-    if (!debouncedSearchTerm.value && !props.familyId) {
+    if (!debouncedSearchQuery.value && !props.familyId) {
       return [];
     }
 
@@ -112,7 +112,7 @@ const { data: searchResults, isLoading: isLoadingSearch } = useQuery<MemberDto[]
     console.error('Error fetching members:', result.error);
     throw result.error;
   },
-  enabled: computed(() => !!debouncedSearchTerm.value || !!props.familyId),
+  enabled: computed(() => !!debouncedSearchQuery.value || !!props.familyId),
   staleTime: 1000 * 30, // 30 seconds
 });
 
@@ -123,19 +123,19 @@ const items = computed(() => searchResults.value || []);
 const loading = computed(() => isLoadingPreload.value || isLoadingSearch.value);
 
 // Debounce search input
-watch(search, (newSearchTerm) => {
+watch(search, (newSearchQuery) => {
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
-    debouncedSearchTerm.value = newSearchTerm;
+    debouncedSearchQuery.value = newSearchQuery;
   }, props.debounceTime);
 });
 
 // Handle familyId changes to clear search results and re-trigger query
 watch(() => props.familyId, () => {
   // Clear debounced search term to avoid old search results
-  debouncedSearchTerm.value = '';
+  debouncedSearchQuery.value = '';
   // The useQuery with familyId in its queryKey will automatically refetch if enabled
   // Also, clear current selection if not multiple
   if (props.multiple) {

@@ -3,9 +3,9 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Events.Specifications;
 
-public class EventsBySearchTermSpecification : Specification<Event>
+public class EventsBySearchQuerySpecification : Specification<Event>
 {
-    public EventsBySearchTermSpecification(string searchTerm)
+    public EventsBySearchQuerySpecification(string searchTerm)
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {

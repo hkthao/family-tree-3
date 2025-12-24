@@ -45,7 +45,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         _context.Families.Add(new Family { Id = Guid.NewGuid(), Name = "Private Family Gamma", Code = "PRIV_G", Visibility = FamilyVisibility.Private.ToString() });
         await _context.SaveChangesAsync();
 
-        var query = new SearchPublicFamiliesQuery { SearchTerm = "Alpha" };
+        var query = new SearchPublicFamiliesQuery { SearchQuery = "Alpha" };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -82,7 +82,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         _context.Families.Add(new Family { Id = Guid.NewGuid(), Name = "Public Family Alpha", Code = "PUB_A", Visibility = FamilyVisibility.Public.ToString() });
         await _context.SaveChangesAsync();
 
-        var query = new SearchPublicFamiliesQuery { SearchTerm = "NonExistent" };
+        var query = new SearchPublicFamiliesQuery { SearchQuery = "NonExistent" };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

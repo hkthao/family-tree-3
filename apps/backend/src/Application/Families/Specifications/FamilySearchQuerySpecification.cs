@@ -3,9 +3,9 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Families.Specifications;
 
-public class FamilySearchTermSpecification : Specification<Family>
+public class FamilySearchQuerySpecification : Specification<Family>
 {
-    public FamilySearchTermSpecification(string? searchTerm)
+    public FamilySearchQuerySpecification(string? searchTerm)
     {
         if (!string.IsNullOrEmpty(searchTerm))
         {

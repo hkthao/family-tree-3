@@ -18,9 +18,9 @@ public class SearchPublicMembersQueryHandler(IApplicationDbContext context, IMap
             .Where(m => m.FamilyId == request.FamilyId);
 
         // Apply search term
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
-            query = query.Where(m => m.FirstName.Contains(request.SearchTerm) || m.LastName.Contains(request.SearchTerm) || m.Code.Contains(request.SearchTerm));
+            query = query.Where(m => m.FirstName.Contains(request.SearchQuery) || m.LastName.Contains(request.SearchQuery) || m.Code.Contains(request.SearchQuery));
         }
 
         // Apply gender filter

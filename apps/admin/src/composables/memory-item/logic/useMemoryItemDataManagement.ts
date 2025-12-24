@@ -3,7 +3,7 @@ import type { EmotionalTag, ListOptions } from '@/types';
 import type { MemoryItemFilter } from '@/services/memory-item/memory-item.service.interface';
 
 export interface MemoryItemSearchCriteria {
-  searchTerm?: string;
+  searchQuery?: string;
   startDate?: Date;
   endDate?: Date;
   emotionalTag?: EmotionalTag;

@@ -27,7 +27,7 @@ export const useMemoryItemsQuery = (
       JSON.stringify(options.value.sortBy),
       combinedFilters.value.emotionalTag,
       combinedFilters.value.memberId,
-      combinedFilters.value.searchTerm,
+      combinedFilters.value.searchQuery,
       combinedFilters.value.startDate,
       combinedFilters.value.endDate,
     ],

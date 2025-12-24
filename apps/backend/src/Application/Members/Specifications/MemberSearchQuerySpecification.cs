@@ -3,9 +3,9 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Members.Specifications;
 
-public class MemberSearchTermSpecification : Specification<Member>
+public class MemberSearchQuerySpecification : Specification<Member>
 {
-    public MemberSearchTermSpecification(string? searchTerm)
+    public MemberSearchQuerySpecification(string? searchTerm)
     {
         if (!string.IsNullOrEmpty(searchTerm))
         {

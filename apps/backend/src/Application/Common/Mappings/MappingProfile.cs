@@ -29,6 +29,7 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
+using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Mappings;
 
@@ -131,6 +132,12 @@ public class MappingProfile : Profile
         CreateMap<FamilyLink, FamilyLinkDto>()
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
+
+        // New mapping for PaginatedList<Family> to PaginatedList<FamilyDto>
+        CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
+            .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))
+            .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages));
 
         // FamilyMedia mappings
         CreateMap<FamilyMedia, FamilyMediaDto>()

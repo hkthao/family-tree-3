@@ -6,6 +6,9 @@ namespace backend.Application.Common.Models;
 /// <typeparam name="T">Kiểu của các mục trong danh sách.</typeparam>
 public class PaginatedList<T>(List<T> items, int count, int page, int itemsPerPage)
 {
+    // Protected parameterless constructor for AutoMapper and EF Core
+    protected PaginatedList() : this(new List<T>(), 0, 1, 10) { }
+
     /// <summary>
     /// Danh sách các mục trên trang hiện tại.
     /// </summary>

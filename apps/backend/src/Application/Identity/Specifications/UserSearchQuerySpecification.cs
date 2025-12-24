@@ -3,9 +3,9 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Users.Specifications;
 
-public class UserSearchTermSpecification : Specification<User>
+public class UserSearchQuerySpecification : Specification<User>
 {
-    public UserSearchTermSpecification(string? searchTerm)
+    public UserSearchQuerySpecification(string? searchTerm)
     {
         if (!string.IsNullOrEmpty(searchTerm))
         {

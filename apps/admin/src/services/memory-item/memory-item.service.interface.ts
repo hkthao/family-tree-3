@@ -3,7 +3,7 @@ import type { ICrudService } from '@/services/common/crud.service.interface';
 import type { FilterOptions } from '@/types'; // Import FilterOptions
 
 export interface MemoryItemFilter extends FilterOptions {
-  searchTerm?: string;
+  searchQuery?: string;
   startDate?: Date;
   endDate?: Date;
   emotionalTag?: EmotionalTag;

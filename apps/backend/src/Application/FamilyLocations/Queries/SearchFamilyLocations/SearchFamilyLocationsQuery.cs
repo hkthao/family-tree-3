@@ -55,7 +55,7 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
             query = query.WithSpecification(new FamilyLocationAccessSpecification(isAdmin, currentUserId));
         }
 
-        query = query.WithSpecification(new FamilyLocationSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new FamilyLocationSearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyLocationByLocationTypeSpecification(request.LocationType));
         query = query.WithSpecification(new FamilyLocationBySourceSpecification(request.Source));
         query = query.WithSpecification(new FamilyLocationOrderingSpecification(request.SortBy, request.SortOrder));

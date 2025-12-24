@@ -49,7 +49,7 @@ public class SearchMemoryItemsQueryHandlerTests : TestBase
         var query = new SearchMemoryItemsQuery
         {
             FamilyId = familyId,
-            SearchTerm = "memory",
+            SearchQuery = "memory",
             StartDate = DateTime.Now.AddDays(-35),
             EndDate = DateTime.Now.AddDays(-15),
             EmotionalTag = EmotionalTag.Happy,
@@ -107,7 +107,7 @@ public class SearchMemoryItemsQueryHandlerTests : TestBase
         var query = new SearchMemoryItemsQuery
         {
             FamilyId = familyId,
-            SearchTerm = "sad",
+            SearchQuery = "sad",
             Page = 1,
             ItemsPerPage = 10
         };

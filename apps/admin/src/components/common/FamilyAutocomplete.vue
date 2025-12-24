@@ -58,7 +58,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const internalValue = ref<FamilyDto | FamilyDto[] | null>(null);
 const search = ref('');
-const debouncedSearchTerm = ref('');
+const debouncedSearchQuery = ref('');
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -101,14 +101,14 @@ watch(preloadedFamilies, (newFamilies) => {
 
 // Query for searching families based on input
 const { data: searchResults, isLoading: isLoadingSearch } = useQuery<FamilyDto[], Error>({
-  queryKey: ['families', 'search', debouncedSearchTerm],
+  queryKey: ['families', 'search', debouncedSearchQuery],
   queryFn: async () => {
     const filters: { [key: string]: any } = {};
-    if (debouncedSearchTerm.value) {
-      filters.searchQuery = debouncedSearchTerm.value;
+    if (debouncedSearchQuery.value) {
+      filters.searchQuery = debouncedSearchQuery.value;
     }
 
-    if (!debouncedSearchTerm.value) {
+    if (!debouncedSearchQuery.value) {
       return [];
     }
 
@@ -119,7 +119,7 @@ const { data: searchResults, isLoading: isLoadingSearch } = useQuery<FamilyDto[]
     console.error('Error fetching families:', result.error);
     throw result.error;
   },
-  enabled: computed(() => !!debouncedSearchTerm.value),
+  enabled: computed(() => !!debouncedSearchQuery.value),
   staleTime: 1000 * 30, // 30 seconds
 });
 
@@ -130,12 +130,12 @@ const items = computed(() => searchResults.value || []);
 const loading = computed(() => isLoadingPreload.value || isLoadingSearch.value);
 
 // Debounce search input
-watch(search, (newSearchTerm) => {
+watch(search, (newSearchQuery) => {
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
-    debouncedSearchTerm.value = newSearchTerm;
+    debouncedSearchQuery.value = newSearchQuery;
   }, props.debounceTime);
 });
 
