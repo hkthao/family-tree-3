@@ -1,37 +1,35 @@
 import type { IFamilyService } from './family.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
 import {
-  type Family,
+  type FamilyDto, // Renamed from Family
   type IFamilyAccess,
   type FamilyExportDto,
-  type FamilyAddDto, // NEW
-  type FamilyUpdateDto, // NEW
+  type FamilyAddDto,
+  type FamilyUpdateDto,
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiFamilyService extends ApiCrudService<Family> implements IFamilyService {
+export class ApiFamilyService extends ApiCrudService<FamilyDto> implements IFamilyService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/family');
   }
 
-  async add(newItem: FamilyAddDto): Promise<Result<Family>> {
-    return await this.http.post<Family>(this.baseUrl, newItem);
+  async add(newItem: FamilyAddDto): Promise<Result<FamilyDto>> {
+    return await this.http.post<FamilyDto>(this.baseUrl, newItem);
   }
 
-  async update(updatedItem: FamilyUpdateDto): Promise<Result<Family>> {
-    const { id } = updatedItem; // Extract id and deletedUserIds
-    // The backend API is expected to handle deletedManagerIds and deletedViewerIds as part of the payload or query params
-    // For now, we'll include it in the payload. Backend will decide how to process.
-    return await this.http.put<Family>(
+  async update(updatedItem: FamilyUpdateDto): Promise<Result<FamilyDto>> {
+    const { id } = updatedItem;
+    return await this.http.put<FamilyDto>(
       `${this.baseUrl}/${id}`,
-      updatedItem, // Include deletedManagerIds and deletedViewerIds in the payload
+      updatedItem,
     );
   }
 
   async addItems(
-    newItems: Omit<Family, 'id'>[],
+    newItems: FamilyAddDto[],
   ): Promise<Result<string[]>> {
 
     return this.http.post<string[]>(`/family/bulk-create`, {

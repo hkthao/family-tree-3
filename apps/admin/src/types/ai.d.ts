@@ -1,6 +1,6 @@
-import { Family } from './family.d';
-import { Member } from './member.d';
-import { EventDto } from './event.d';
+import type { Family } from './family.d';
+import type { Member } from './member.d';
+import type { EventDto } from './event.d';
 
 export interface CardData {
   id: string;
