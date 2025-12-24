@@ -69,6 +69,22 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  ocr-service:
+    build:
+      context: ../services/ocr-service
+      dockerfile: Dockerfile
+    container_name: family-tree-ocr-service
+    ports:
+      - "8001:8000" # Expose port 8000 for the FastAPI app
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+    mem_limit: 2g # Set memory limit for OCR service
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   promtail:
     image: grafana/promtail:2.6.1 # Use a specific version of Promtail
     container_name: family-tree-promtail
@@ -83,6 +99,7 @@ services:
       - backend
       - admin
       - face-service
+      - ocr-service
 
 volumes:
   mysql-data:

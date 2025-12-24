@@ -14,6 +14,7 @@ services:
       - admin
       - backend
       - face-service
+      - ocr-service
 
   certbot:
     image: certbot/certbot
@@ -86,6 +87,20 @@ services:
       - app-network
     restart: unless-stopped
 
+  ocr-service:
+    image: hkthao/family-tree-ocr-service:latest # Assuming a pre-built image
+    platform: linux/amd64
+    container_name: family-tree-ocr-service-prod
+    env_file:
+      - ./.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=${OCR_SERVICE_PORT}
+    mem_limit: 2g # Consistent with dev, adjust if needed
+    networks:
+      - app-network
+    restart: unless-stopped
+
   promtail:
     image: grafana/promtail:2.6.1 # Use a specific version of Promtail
     container_name: family-tree-promtail
@@ -100,6 +115,7 @@ services:
       - backend
       - admin
       - face-service
+      - ocr-service
 
 networks:
   app-network:
