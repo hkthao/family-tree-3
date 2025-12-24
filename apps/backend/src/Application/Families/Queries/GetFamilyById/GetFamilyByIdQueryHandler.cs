@@ -3,10 +3,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Application.Families.DTOs; // ADDED
-using backend.Application.Families.Queries; // ADDED
-using Microsoft.EntityFrameworkCore; // ADDED
-using AutoMapper.QueryableExtensions; // ADDED
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 

@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue';
 import { formatDate } from '@/utils/dateUtils';
 import { useI18n } from 'vue-i18n';
-import type { Event, ListOptions, EventFilter, Paginated } from '@/types';
+import type { EventDto, ListOptions, EventFilter, Paginated } from '@/types';
 import { useQuery, type UseQueryReturnType } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
 import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter';
@@ -43,7 +43,7 @@ export function useEventTimeline(
   });
 
   // Fetch events using useQuery
-  const { data, isLoading, error, refetch } = deps.useQuery<Paginated<Event>, Error>({
+  const { data, isLoading, error, refetch } = deps.useQuery<Paginated<EventDto>, Error>({
     queryKey: computed(() => [queryKeys.events.list(filters.value), currentPage.value, itemsPerPage.value, sortBy.value]),
     queryFn: async () => {
       const { listOptions, filterOptions } = mapFiltersToQueryOptions(
@@ -80,7 +80,7 @@ export function useEventTimeline(
     return Math.max(1, list.value.totalPages);
   });
 
-  const showEventDetails = (event: Event) => {
+  const showEventDetails = (event: EventDto) => {
     selectedEventId.value = event.id;
     detailDrawer.value = true;
   };

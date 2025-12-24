@@ -1,6 +1,6 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import { queryKeys } from '@/constants/queryKeys';
 import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
@@ -13,7 +13,7 @@ export function useEventQuery(
   deps: UseEventQueryDeps = { eventService: DefaultEventServiceAdapter }
 ) {
   const { eventService } = deps;
-  const query = useQuery<Event, Error>({
+  const query = useQuery<EventDto, Error>({
     queryKey: computed(() => (unref(eventId) ? queryKeys.events.detail(unref(eventId)!) : [])),
     queryFn: async () => {
       const id = unref(eventId);

@@ -44,19 +44,12 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AICard from '@/components/chat-generated-cards/AICard.vue';
 import { useServices } from '@/plugins/services.plugin';
-import { GenerateAiContentCommand } from '@/types'; // Import for the command type
-
-interface CardData {
-  id: string; // Assuming each card needs a unique ID for actions
-  type: string;
-  title: string;
-  summary: string;
-}
+import type { GenerateFamilyDataCommand, CombinedAiContentDto, CardData, Family, Member, EventDto } from '@/types';
 
 interface Message {
   from: 'user' | 'ai';
-  text?: string; // Make text optional if cardData is present
-  cardData?: CardData[]; // New property for card data
+  text?: string;
+  cardData?: CardData[];
 }
 
 const props = defineProps({
@@ -70,29 +63,60 @@ const { t } = useI18n();
 const chatInput = ref('');
 const messages = ref<Message[]>([]);
 
-const services = useServices(); // Get all services
-const chatService = services.chat; // Get the chat service
+const services = useServices();
+const chatService = services.chat;
 
-const sendMessage = async () => { // Make it async
+const mapCombinedAiContentToCardData = (combinedContent: CombinedAiContentDto): CardData[] => {
+  const cards: CardData[] = [];
+  let idCounter = 1;
+
+  combinedContent.families?.forEach((family: Family) => {
+    cards.push({
+      id: (idCounter++).toString(),
+      type: 'Family',
+      title: family.name,
+      summary: family.description || ''
+    });
+  });
+
+  combinedContent.members?.forEach((member: Member) => {
+    cards.push({
+      id: (idCounter++).toString(),
+      type: 'Member',
+      title: `${member.firstName} ${member.lastName}`,
+      summary: `${member.dateOfBirth ? new Date(member.dateOfBirth).getFullYear() : ''} - ${member.dateOfDeath ? new Date(member.dateOfDeath).getFullYear() : ''}`.trim()
+    });
+  });
+
+  combinedContent.events?.forEach((event: EventDto) => {
+    cards.push({
+      id: (idCounter++).toString(),
+      type: 'Event',
+      title: event.name,
+      summary: `${event.solarDate ? new Date(event.solarDate).toLocaleDateString() : ''} - ${event.description || event.name}`.trim()
+    });
+  });
+
+  return cards;
+};
+
+const sendMessage = async () => {
   if (chatInput.value.trim()) {
     messages.value.push({ from: 'user', text: chatInput.value.trim() });
-    const userMessage = chatInput.value.trim(); // Store message before clearing input
-    chatInput.value = ''; // Clear input immediately
+    const userMessage = chatInput.value.trim();
+    chatInput.value = '';
 
-    // Define the command for AI content generation
-    const command: GenerateAiContentCommand = {
-      familyId: props.familyId, // Use the familyId prop
+    const command: GenerateFamilyDataCommand = {
+      familyId: props.familyId,
       chatInput: userMessage,
-      contentType: 'Member' // For now, assume 'Member' as a default content type. This might need to be dynamic later.
     };
 
-    // Call the new API method
-    const result = await chatService.generateAiContent(command);
+    const result = await chatService.generateFamilyData(command);
 
-    if (result.success && result.data) {
-      messages.value.push({ from: 'ai', cardData: result.data });
-    } else {
-      // Handle error, e.g., display an error message
+    if (result.ok && result.value) { // Changed to result.ok and result.value
+      const cardData = mapCombinedAiContentToCardData(result.value); // Changed to result.value
+      messages.value.push({ from: 'ai', cardData: cardData });
+    } else if (!result.ok) { // Added else if for error handling
       messages.value.push({ from: 'ai', text: `Error: ${result.error?.message || 'Failed to generate content.'}` });
     }
   }

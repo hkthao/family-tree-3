@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Prompts.DTOs; // Reintroduce PromptDto
-using AutoMapper; // Reintroduce AutoMapper
 
 namespace backend.Application.Prompts.Queries.GetPromptById;
 

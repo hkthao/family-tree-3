@@ -82,14 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import FamilyName from '@/components/common/FamilyName.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
 import { useEventListComposable } from '@/composables';
 import { CalendarType } from '@/types/enums'; // Import CalendarType enum
 
 const props = defineProps<{
-  events: Event[];
+  events: EventDto[];
   totalEvents: number;
   loading: boolean;
   search: string;

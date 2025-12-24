@@ -1,6 +1,6 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Event, EventFilter, Paginated, ListOptions, FilterOptions } from '@/types';
+import type { EventDto, EventFilter, Paginated, ListOptions, FilterOptions } from '@/types';
 import { queryKeys } from '@/constants/queryKeys';
 import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
@@ -13,7 +13,7 @@ export function useEventsQuery(
   deps: UseEventsQueryDeps = { eventService: DefaultEventServiceAdapter }
 ) {
   const { eventService } = deps;
-  const query = useQuery<Paginated<Event>, Error>({
+  const query = useQuery<Paginated<EventDto>, Error>({
     queryKey: computed(() => queryKeys.events.list(unref(filters))),
     queryFn: async () => {
       const currentFilters = unref(filters);
@@ -41,7 +41,7 @@ export function useEventsQuery(
       }
       throw response.error;
     },
-    placeholderData: (previousData: Paginated<Event> | undefined) => previousData, // Keep previous data while fetching new
+    placeholderData: (previousData: Paginated<EventDto> | undefined) => previousData, // Keep previous data while fetching new
     staleTime: 1000 * 60 * 1, // 1 minute
   });
 

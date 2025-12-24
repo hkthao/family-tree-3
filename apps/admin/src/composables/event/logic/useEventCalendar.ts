@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import { useAuth, type UseAuthReturn } from '@/composables/auth/useAuth';
 import { type IEventService } from '@/services/event/event.service.interface';
 import { DefaultEventServiceAdapter } from '../event.adapter';
@@ -45,7 +45,7 @@ export function useEventCalendar(
 
   const selectedDate = ref(dateAdapter.newDate()); // Use dateAdapter for new Date()
 
-  const events = ref<Event[]>([]);
+  const events = ref<EventDto[]>([]);
   const loading = ref(false);
 
   const fetchEvents = async () => {
@@ -138,7 +138,7 @@ export function useEventCalendar(
     return event.color;
   };
 
-  const showEventDetails = (eventSlotScope: Event) => {
+  const showEventDetails = (eventSlotScope: EventDto) => {
     selectedEventId.value = eventSlotScope.id;
     detailDrawer.value = true;
   };
@@ -170,7 +170,7 @@ export function useEventCalendar(
     selectedEventId.value = null;
   };
 
-  const handleDetailEdit = (event: Event) => {
+  const handleDetailEdit = (event: EventDto) => {
     detailDrawer.value = false;
     selectedEventId.value = event.id;
     editDrawer.value = true;

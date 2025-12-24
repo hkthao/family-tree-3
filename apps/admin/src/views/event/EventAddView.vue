@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
 import { useEventAdd } from '@/composables'; // Import useEventAdd
 
@@ -49,7 +49,7 @@ const handleAddEvent = async () => {
   if (!isValid) return;
 
   const eventData = eventFormRef.value.getFormData();
-  handleAddEventComposable(eventData as Omit<Event, 'id'>);
+  handleAddEventComposable(eventData as Omit<EventDto, 'id'>);
 };
 
 </script>

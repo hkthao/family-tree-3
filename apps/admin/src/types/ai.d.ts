@@ -1,3 +1,7 @@
+import { Family } from './family.d';
+import { Member } from './member.d';
+import { EventDto } from './event.d';
+
 export interface CardData {
   id: string;
   type: string;
@@ -5,10 +9,15 @@ export interface CardData {
   summary: string;
 }
 
-export interface GenerateAiContentCommand {
+export interface GenerateFamilyDataCommand {
   familyId: string;
   chatInput: string;
-  contentType: string;
 }
 
-export type GenerateAiContentResponse = CardData[];
+export interface CombinedAiContentDto {
+  families: Family[];
+  members: Member[];
+  events: EventDto[];
+}
+
+export type CombinedAiContentResponse = CombinedAiContentDto;

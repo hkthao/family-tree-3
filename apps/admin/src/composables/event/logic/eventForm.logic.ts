@@ -1,7 +1,7 @@
 // src/composables/event/logic/eventForm.logic.ts
-import type { Event } from '@/types';
+import type { EventDto, AddEventDto, UpdateEventDto } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
-import { EventType } from '@/types';
+import { EventType } from '@/types'; // Changed to type import
 import { CalendarType, RepeatRule } from '@/types/enums';
 import { cloneDeep } from 'lodash';
 
@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 type TranslateFunction = (key: string) => string;
 
 interface GetInitialEventFormDataProps {
-  initialEventData?: Event;
+  initialEventData?: EventDto;
   familyId?: string;
 }
 
@@ -18,25 +18,31 @@ interface GetInitialEventFormDataProps {
  * @param props - Properties including initial event data and family ID.
  * @returns Initial event form data.
  */
-export function getInitialEventFormData(props: GetInitialEventFormDataProps): Omit<Event, 'id'> | Event {
-  return props.initialEventData
-    ? {
-        ...cloneDeep(props.initialEventData),
-        lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
-      }
-    : {
-        name: '',
-        code: '',
-        type: EventType.Other,
-        familyId: props.familyId || null,
-        calendarType: CalendarType.Solar,
-        solarDate: null,
-        lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
-        repeatRule: RepeatRule.None,
-        description: '',
-        color: '#1976D2',
-        relatedMemberIds: [],
-      };
+export function getInitialEventFormData(props: GetInitialEventFormDataProps): AddEventDto | UpdateEventDto {
+  if (props.initialEventData) {
+    // This is an edit operation, return UpdateEventDto
+    const updateData: UpdateEventDto = {
+      ...cloneDeep(props.initialEventData),
+      lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
+    };
+    return updateData;
+  } else {
+    // This is an add operation, return AddEventDto
+    const addData: AddEventDto = {
+      name: '',
+      code: '',
+      type: EventType.Other,
+      familyId: props.familyId || null,
+      calendarType: CalendarType.Solar,
+      solarDate: null,
+      lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
+      repeatRule: RepeatRule.None,
+      description: '',
+      color: '#1976D2',
+      relatedMemberIds: [],
+    };
+    return addData;
+  }
 }
 
 /**
@@ -98,7 +104,7 @@ export function getLunarMonths(): number[] {
  * @param formData - The current form data.
  * @returns Processed event data.
  */
-export function processEventFormDataForSave(formData: Event): Event {
+export function processEventFormDataForSave(formData: AddEventDto | UpdateEventDto): AddEventDto | UpdateEventDto {
   const data = cloneDeep(formData);
 
   // If solarDate is a string, convert it back to a Date object

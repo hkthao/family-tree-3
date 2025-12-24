@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Event } from '@/types'; // Import Event type
+import type { EventDto } from '@/types'; // Import Event type
 import { CalendarType } from '@/types/enums'; // Import enums from enums.ts
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
@@ -109,7 +109,7 @@ import { useEventForm } from '@/composables';
 
 interface EventFormProps {
   readOnly?: boolean;
-  initialEventData?: Event;
+  initialEventData?: EventDto;
   familyId?: string;
 }
 
