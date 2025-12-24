@@ -18,23 +18,55 @@ Bạn PHẢI trả về một đối tượng JSON tuân thủ cấu trúc của
 {
   "families": [
     {
-      // Cấu trúc của đối tượng Family (ví dụ: id, name, description, etc.)
-      // Chi tiết sẽ được suy luận từ ngữ cảnh hoặc được cung cấp riêng
+      "id": "Guid",
+      "name": "string",
+      "code": "string",
+      "description": "string | null",
+      "address": "string | null",
+      "visibility": "FamilyVisibility (Public, Private)",
+      "avatarUrl": "string | null",
     }
   ],
   "members": [
     {
-      // Cấu trúc của đối tượng Member (ví dụ: id, name, gender, dob, dod, etc.)
-      // Chi tiết sẽ được suy luận từ ngữ cảnh hoặc được cung cấp riêng
+      "id": "Guid",
+      "firstName": "string",
+      "lastName": "string",
+      "code": "string",
+      "nickname": "string | null",
+      "gender": "Gender (Male, Female, Other) | null",
+      "dateOfBirth": "DateTime | null",
+      "dateOfDeath": "DateTime | null",
+      "placeOfBirth": "string | null",
+      "placeOfDeath": "string | null",
+      "phone": "string | null",
+      "email": "string | null",
+      "address": "string | null",
+      "occupation": "string | null",
+      "avatarUrl": "string | null",
+      "biography": "string | null",
+      "isDeceased": "bool",
+      "isRoot": "bool"
     }
   ],
   "events": [
     {
-      // Cấu trúc của đối tượng EventDto (ví dụ: id, type, date, description, etc.)
-      // Chi tiết sẽ được suy luận từ ngữ cảnh hoặc được cung cấp riêng
+      "id": "Guid",
+      "name": "string",
+      "code": "string",
+      "description": "string | null",
+      "calendarType": "CalendarType (Solar, Lunar)",
+      "solarDate": "DateTime | null",
+      "lunarDate": {
+        "day": "int",
+        "month": "int",
+        "isLeapMonth": "bool"
+      },
+      "repeatRule": "RepeatRule (None, Yearly)",
+      "familyId": "Guid | null",
+      "type": "EventType (Birth, Marriage, Death, Anniversary, Other)",
+      "color": "string | null",
     }
   ]
 }
 ```
-
-**Lưu ý quan trọng:** Prompt này sẽ được tích hợp với các công cụ nội bộ khác và truy xuất dữ liệu từ cơ sở dữ liệu. Nhiệm vụ của bạn là xử lý `ChatInput` và tạo ra đầu ra theo định dạng `CombinedAiContentDto` dựa trên các quy tắc trên.
