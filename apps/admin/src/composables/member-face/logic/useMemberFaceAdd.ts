@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue';
-import type { DetectedFace, MemberFace, AddMemberFaceDto } from '@/types';
+import type { DetectedFace, AddMemberFaceDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables';
 import { useAddFamilyMediaMutation } from '@/composables';

@@ -20,7 +20,7 @@
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
-import type { MemberDto, MemberUpdateDto } from '@/types';
+import type { MemberUpdateDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useMemberQuery, useUpdateMemberMutation } from '@/composables';
 

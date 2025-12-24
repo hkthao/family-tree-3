@@ -130,7 +130,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { MemberDto, MemberAddDto, MemberUpdateDto } from '@/types';
+import type { MemberDto } from '@/types';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
