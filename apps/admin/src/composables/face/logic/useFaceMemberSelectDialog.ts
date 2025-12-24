@@ -1,6 +1,6 @@
 import { ref, watch, computed, type Ref, type ComputedRef } from 'vue';
 import { useI18n, type Composer } from 'vue-i18n';
-import type { DetectedFace, Member } from '@/types';
+import type { DetectedFace, MemberDto } from '@/types';
 import { useQuery, type UseQueryOptions, type UseQueryReturnType } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
@@ -38,7 +38,7 @@ export function useFaceMemberSelectDialog(props: {
   const internalRelationPrompt = ref<string | undefined>(undefined);
 
   // Fetch member details using useQuery
-  const { data: selectedMemberDetails } = injectedUseQuery<Member | undefined, Error>({
+  const { data: selectedMemberDetails } = injectedUseQuery<MemberDto | undefined, Error>({
     queryKey: computed(() => queryKeys.members.detail(selectedMemberId.value || '')),
     queryFn: async () => {
       if (!selectedMemberId.value) return Promise.reject(new Error(t('member.memberIdRequired')));
@@ -67,7 +67,7 @@ export function useFaceMemberSelectDialog(props: {
 
   const handleSave = () => {
     if (props.selectedFace && selectedMemberId.value && selectedMemberDetails.value) {
-      const member = selectedMemberDetails.value as Member;
+      const member = selectedMemberDetails.value as MemberDto;
       const updatedFace: DetectedFace = {
         ...props.selectedFace,
         memberId: member.id,

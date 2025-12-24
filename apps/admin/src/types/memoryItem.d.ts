@@ -24,3 +24,10 @@ export interface MemoryItem {
   personIds: string[];
   deletedMediaIds?: string[];
 }
+
+export type AddMemoryItemDto = Omit<MemoryItem, 'id' | 'memoryMedia' | 'memoryPersons' | 'deletedMediaIds'> & {
+  memoryMedia: Omit<MemoryMedia, 'id' | 'memoryItemId'>[];
+};
+export type UpdateMemoryItemDto = Omit<MemoryItem, 'memoryPersons'> & {
+  memoryMedia: Omit<MemoryMedia, 'memoryItemId'>[];
+};

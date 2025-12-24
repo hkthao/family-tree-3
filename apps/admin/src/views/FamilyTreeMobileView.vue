@@ -39,11 +39,11 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import HierarchicalFamilyTree from '@/components/family/HierarchicalFamilyTree.vue';
 import ForceDirectedFamilyTree from '@/components/family/ForceDirectedFamilyTree.vue';
-import type { Member, Relationship } from '@/types'; // Assuming these types are defined globally or imported
+import type { MemberDto, Relationship } from '@/types';
 
 interface WindowFamilyTreeData {
   familyId?: string;
-  members?: Member[];
+  members?: MemberDto[];
   relationships?: Relationship[];
 }
 
@@ -51,7 +51,7 @@ const { t } = useI18n();
 
 const tab = ref('hierarchical');
 const familyId = ref<string | undefined>(undefined);
-const members = ref<Member[]>([]);
+const members = ref<MemberDto[]>([]);
 const relationships = ref<Relationship[]>([]);
 
 onMounted(() => {

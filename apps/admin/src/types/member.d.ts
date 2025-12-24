@@ -6,7 +6,7 @@ export enum Gender {
   Other = 'Other',
 }
 
-export interface Member {
+export interface MemberDto {
   id: string;
   lastName: string; // Last name
   firstName: string; // First name
@@ -49,6 +49,43 @@ export interface Member {
 
   order?: number; // New: Order of the member in the family
 }
+
+export type MemberAddDto = Omit<
+  MemberDto,
+  | 'id'
+  | 'relationships'
+  | 'fullName'
+  | 'birthDeathYears'
+  | 'familyName'
+  | 'familyAvatarUrl'
+  | 'validationErrors'
+  | 'fatherFullName'
+  | 'fatherAvatarUrl'
+  | 'motherFullName'
+  | 'motherAvatarUrl'
+  | 'husbandFullName'
+  | 'husbandAvatarUrl'
+  | 'wifeFullName'
+  | 'wifeAvatarUrl'
+>;
+
+export type MemberUpdateDto = Omit<
+  MemberDto,
+  | 'relationships'
+  | 'fullName'
+  | 'birthDeathYears'
+  | 'familyName'
+  | 'familyAvatarUrl'
+  | 'validationErrors'
+  | 'fatherFullName'
+  | 'fatherAvatarUrl'
+  | 'motherFullName'
+  | 'motherAvatarUrl'
+  | 'husbandFullName'
+  | 'husbandAvatarUrl'
+  | 'wifeFullName'
+  | 'wifeAvatarUrl'
+>;
 
 export interface MemberFilter {
   gender?: Gender | undefined;

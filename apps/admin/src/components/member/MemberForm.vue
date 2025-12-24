@@ -130,14 +130,14 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { Member } from '@/types';
+import type { MemberDto, MemberAddDto, MemberUpdateDto } from '@/types';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
 
 const props = defineProps<{
   readOnly?: boolean;
-  initialMemberData?: Member;
+  initialMemberData?: MemberDto;
   familyId: string | null;
 }>();
 

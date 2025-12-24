@@ -3,7 +3,7 @@ import type { ApiError, Relationship, RelationshipDetectionResult, Result } from
 import { type ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiRelationshipService extends ApiCrudService<Relationship> implements IRelationshipService {
+export class ApiRelationshipService extends ApiCrudService<Relationship, Relationship, Relationship> implements IRelationshipService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/relationship');
   }
@@ -15,7 +15,7 @@ export class ApiRelationshipService extends ApiCrudService<Relationship> impleme
     });
   }
 
-  async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> {
+  async addItems(newItems: Relationship[]): Promise<Result<string[], ApiError>> {
     const payload = { relationships: newItems };
     return this.http.post<string[]>(`/relationship/bulk-create`, payload);
   }

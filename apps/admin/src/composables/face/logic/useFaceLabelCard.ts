@@ -1,10 +1,10 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { DetectedFace, Member } from '@/types';
+import type { DetectedFace, MemberDto } from '@/types';
 
 export function useFaceLabelCard(props: {
   face: DetectedFace;
-  members: Member[];
+  members: MemberDto[];
 }, emit: (event: 'label-face' | 'create-member', ...args: any[]) => void) {
   const { t } = useI18n();
 

@@ -11,21 +11,9 @@ import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiFamilyService extends ApiCrudService<FamilyDto> implements IFamilyService {
+export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, FamilyUpdateDto> implements IFamilyService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/family');
-  }
-
-  async add(newItem: FamilyAddDto): Promise<Result<FamilyDto>> {
-    return await this.http.post<FamilyDto>(this.baseUrl, newItem);
-  }
-
-  async update(updatedItem: FamilyUpdateDto): Promise<Result<FamilyDto>> {
-    const { id } = updatedItem;
-    return await this.http.put<FamilyDto>(
-      `${this.baseUrl}/${id}`,
-      updatedItem,
-    );
   }
 
   async addItems(

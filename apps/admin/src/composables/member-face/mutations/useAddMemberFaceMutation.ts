@@ -1,7 +1,7 @@
 // src/composables/member-face/mutations/useAddMemberFaceMutation.ts
 import { useMutation, type UseMutationOptions, type UseMutationReturnType, useQueryClient } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
-import type { MemberFace, ApiError } from '@/types';
+import type { MemberFace, ApiError, AddMemberFaceDto } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 
@@ -26,8 +26,8 @@ export function useAddMemberFaceMutation(
   const memberFaceService = getMemberFaceService();
   const queryClient = injectedUseQueryClient();
 
-  return injectedUseMutation<MemberFace, ApiError, Omit<MemberFace, 'id'>>({
-    mutationFn: async (memberFaceData: Omit<MemberFace, 'id'>) => {
+  return injectedUseMutation<MemberFace, ApiError, AddMemberFaceDto>({
+    mutationFn: async (memberFaceData: AddMemberFaceDto) => {
       const response = await memberFaceService.add(memberFaceData);
       if (response.ok) {
         return response.value;

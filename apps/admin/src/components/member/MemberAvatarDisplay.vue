@@ -6,11 +6,11 @@
 
 <script setup lang="ts">
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
-import type { Member } from '@/types';
+import type { MemberDto } from '@/types';
 import AvatarDisplay from '@/components/common/AvatarDisplay.vue'; // Common avatar component
 
 interface Props {
-  member: Member;
+  member: MemberDto;
   size?: number; // Optional size prop
 }
 

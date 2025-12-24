@@ -29,6 +29,9 @@ export interface FamilyDict {
   namesByRegion: NamesByRegion;
 }
 
+export type AddFamilyDictDto = Omit<FamilyDict, 'id'>;
+export type UpdateFamilyDictDto = FamilyDict;
+
 export interface FamilyDictImport {
   familyDicts: FamilyDict[];
 }

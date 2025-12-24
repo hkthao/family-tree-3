@@ -2,10 +2,10 @@
 
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { IPromptService } from './prompt.service.interface';
-import type { Prompt } from '@/types/prompt';
+import type { Prompt, AddPromptDto, UpdatePromptDto } from '@/types/prompt';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiPromptService extends ApiCrudService<Prompt> implements IPromptService {
+export class ApiPromptService extends ApiCrudService<Prompt, AddPromptDto, UpdatePromptDto> implements IPromptService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/prompts');
   }

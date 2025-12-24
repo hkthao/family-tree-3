@@ -2,7 +2,7 @@ import { ref, watch, computed, unref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { ApiMemberService } from '@/services/member/api.member.service';
 import apiClient from '@/plugins/axios';
-import type { Member } from '@/types';
+import type { MemberDto } from '@/types';
 import type { MaybeRef } from '@vueuse/core'; // Assuming @vueuse/core is available for MaybeRef or define custom
 
 // Instantiate the service outside the composable to avoid re-instantiation on every call
@@ -30,7 +30,7 @@ export function useMemberSearch(options?: UseMemberSearchOptions) {
     { immediate: true }
   );
 
-  const { data, isLoading, isFetching, error } = useQuery<Member[], Error>({
+  const { data, isLoading, isFetching, error } = useQuery<MemberDto[], Error>({
     queryKey: ['members', debouncedSearchTerm, currentFamilyId],
     queryFn: async () => {
       const filters: { [key: string]: any } = {};

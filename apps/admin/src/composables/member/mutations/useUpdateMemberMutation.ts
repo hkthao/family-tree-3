@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { Member } from '@/types';
+import type { MemberDto, MemberUpdateDto } from '@/types';
 import { apiClient } from '@/plugins/axios';
 import { ApiMemberService } from '@/services/member/api.member.service';
 import type { IMemberService } from '@/services/member/member.service.interface';
@@ -9,8 +9,8 @@ const apiMemberService: IMemberService = new ApiMemberService(apiClient);
 export const useUpdateMemberMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (updatedMemberData: Member) => {
+  return useMutation<MemberDto, Error, MemberUpdateDto>({
+    mutationFn: async (updatedMemberData: MemberUpdateDto) => {
       const result = await apiMemberService.update(updatedMemberData);
       if (result.ok) {
         return result.value;

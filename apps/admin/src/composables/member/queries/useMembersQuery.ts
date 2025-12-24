@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed, unref } from 'vue';
 import type { MaybeRef } from '@vueuse/core';
-import type { Member, MemberFilter, ListOptions, Result } from '@/types';
+import type { MemberDto, MemberFilter, ListOptions, Result } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import { useServices } from '@/plugins/services.plugin';
 
@@ -27,10 +27,10 @@ export const useMembersQuery = (
     unref(filters).wifeId,
   ]);
 
-  return useQuery({
+  return useQuery<{ items: MemberDto[]; totalItems: number; totalPages: number }, Error>({
     queryKey,
     queryFn: async () => {
-      const result: Result<{ items: Member[]; totalItems: number; totalPages: number }> =
+      const result: Result<{ items: MemberDto[]; totalItems: number; totalPages: number }> =
         await service.search(unref(paginationOptions), unref(filters));
       if (result.ok) {
         return result.value;

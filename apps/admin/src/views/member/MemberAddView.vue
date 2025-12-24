@@ -19,7 +19,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
-import type { Member } from '@/types';
+import type { MemberAddDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddMemberMutation } from '@/composables';
 interface MemberAddViewProps {
@@ -43,7 +43,7 @@ const handleAddMember = async () => {
     memberData.familyId = props.familyId;
   }
 
-  addMember(memberData as Omit<Member, 'id'>, {
+  addMember(memberData as MemberAddDto, {
     onSuccess: () => {
       showSnackbar(t('member.messages.addSuccess'), 'success');
       emit('saved');

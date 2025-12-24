@@ -32,6 +32,9 @@ export interface FamilyLocation extends BaseAuditableEntity {
   source: LocationSource;
 }
 
+export type AddFamilyLocationDto = Omit<FamilyLocation, 'id'>;
+export type UpdateFamilyLocationDto = FamilyLocation;
+
 export interface FamilyLocationList extends PaginatedList<FamilyLocation> {}
 
 export interface FamilyLocationFilter extends PaginationFilter {

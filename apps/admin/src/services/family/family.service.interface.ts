@@ -2,7 +2,7 @@ import type { ApiError, FamilyDto, PrivacyConfiguration, Result, FamilyAddDto, F
 import type { ICrudService } from "../common/crud.service.interface";
 import type { FamilyExportDto, IFamilyAccess } from '@/types/family';
 
-export interface IFamilyService extends ICrudService<FamilyDto> {
+export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, FamilyUpdateDto> {
   addItems(newItems: FamilyAddDto[]): Promise<Result<string[], ApiError>>;
   exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>>;
   importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>;

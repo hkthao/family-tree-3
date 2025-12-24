@@ -1,10 +1,10 @@
 import type { IEventService } from './event.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
-import type { EventDto } from '@/types';
+import type { EventDto, AddEventDto, UpdateEventDto } from '@/types';
 import type { Result } from '@/types';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiEventService extends ApiCrudService<EventDto> implements IEventService {
+export class ApiEventService extends ApiCrudService<EventDto, AddEventDto, UpdateEventDto> implements IEventService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/event'); // Base path for event API
   }

@@ -1,7 +1,7 @@
 <template>
   <v-autocomplete v-bind="$attrs" v-model="internalValue" v-model:search="search" :items="items" :loading="loading"
     @update:model-value="handleUpdateModelValue" :label="label" :rules="rules" :readonly="readOnly"
-    :clearable="clearable" :multiple="multiple" :item-title="(item: Member) => item.fullName || ''" item-value="id"
+    :clearable="clearable" :multiple="multiple" :item-title="(item: MemberDto) => item.fullName || ''" item-value="id"
     density="compact" :disabled="disabled" :return-object="true" :closable-chips="!disabled" :custom-filter="()=> true">
     <template #chip="{ props: chipProps, item }" v-if="!hideChips">
       <v-chip v-bind="chipProps" size="small" v-if="item.raw"
@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Member } from '@/types';
+import type { MemberDto } from '@/types';
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import { ApiMemberService } from '@/services/member/api.member.service';
 import apiClient from '@/plugins/axios';
@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<MemberAutocompleteProps>(), {
 
 const emit = defineEmits(['update:modelValue']);
 
-const internalValue = ref<Member | Member[] | null>(null);
+const internalValue = ref<MemberDto | MemberDto[] | null>(null);
 const search = ref('');
 const debouncedSearchTerm = ref('');
 
@@ -63,7 +63,7 @@ const modelValueIds = computed(() => {
 });
 
 // Query for preloading selected members by their IDs
-const { data: preloadedMembers, isLoading: isLoadingPreload } = useQuery<Member[], Error>({
+const { data: preloadedMembers, isLoading: isLoadingPreload } = useQuery<MemberDto[], Error>({
   queryKey: ['members', 'ids', modelValueIds],
   queryFn: async () => {
     if (!modelValueIds.value || modelValueIds.value.length === 0) {
@@ -90,7 +90,7 @@ watch(preloadedMembers, (newMembers) => {
 }, { immediate: true });
 
 // Query for searching members based on input
-const { data: searchResults, isLoading: isLoadingSearch } = useQuery<Member[], Error>({
+const { data: searchResults, isLoading: isLoadingSearch } = useQuery<MemberDto[], Error>({
   queryKey: ['members', 'search', debouncedSearchTerm, props.familyId],
   queryFn: async () => {
     const filters: { [key: string]: any } = {};
@@ -146,12 +146,12 @@ watch(() => props.familyId, () => {
 });
 
 
-const handleUpdateModelValue = (value: Member | Member[] | null) => {
+const handleUpdateModelValue = (value: MemberDto | MemberDto[] | null) => {
   if (props.multiple) {
-    const ids = Array.isArray(value) ? value.map((item: Member) => item.id) : [];
+    const ids = Array.isArray(value) ? value.map((item: MemberDto) => item.id) : [];
     emit('update:modelValue', ids);
   } else {
-    const id = value ? (value as Member).id : undefined;
+    const id = value ? (value as MemberDto).id : undefined;
     emit('update:modelValue', id);
   }
 };

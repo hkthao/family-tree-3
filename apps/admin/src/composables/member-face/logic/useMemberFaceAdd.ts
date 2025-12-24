@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue';
-import type { DetectedFace, MemberFace } from '@/types';
+import type { DetectedFace, MemberFace, AddMemberFaceDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables';
 import { useAddFamilyMediaMutation } from '@/composables';
@@ -183,7 +183,7 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
     const facesToSave = detectedFaces.value
       .filter(face => face.memberId)
       .map(face => {
-        const memberFace: Omit<MemberFace, 'id'> = {
+        const memberFace: AddMemberFaceDto = {
           memberId: face.memberId!,
           faceId: face.id,
           boundingBox: face.boundingBox,
@@ -196,7 +196,7 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
           emotionConfidence: face.emotionConfidence,
           isVectorDbSynced: false,
           vectorDbId: undefined,
-          familyId: selectedFamilyId.value!,
+          familyId: selectedFamilyId.value as string, // Assert type here
         };
         return memberFace;
       });

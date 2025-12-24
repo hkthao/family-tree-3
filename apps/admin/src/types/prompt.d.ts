@@ -17,6 +17,9 @@ export interface Prompt {
   description?: string;
 }
 
+export type AddPromptDto = Omit<Prompt, 'id'>;
+export type UpdatePromptDto = Prompt;
+
 /**
  * @interface PromptFilter
  * @brief Định nghĩa các tiêu chí lọc và phân trang cho danh sách Prompts.
