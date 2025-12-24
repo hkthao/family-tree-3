@@ -2,10 +2,10 @@
   <div>
     <v-menu v-if="currentUser" offset-y :placement="placement" :close-on-content-click="false" v-model="menuOpen">
       <template v-slot:activator="{ props: activatorProps }">
-        <v-avatar v-if="!currentUser?.avatar" color="brown" size="large" class="cursor-pointer"
+        <v-avatar v-if="!currentUser?.avatar" color="brown" class="cursor-pointer"
           :aria-label="$t('userMenu.ariaLabel')" aria-haspopup="true" :aria-expanded="menuOpen"
           v-bind="activatorProps">
-          <span class="text-h5">{{ currentUser?.initials }}</span>
+          <span class="text-h6">{{ currentUser?.initials }}</span>
         </v-avatar>
         <AvatarDisplay v-else :src="currentUser?.avatar" :size="36" class="cursor-pointer"
           :aria-label="$t('userMenu.ariaLabel')" aria-haspopup="true" :aria-expanded="menuOpen"
