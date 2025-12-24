@@ -43,6 +43,8 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AICard from '@/components/chat-generated-cards/AICard.vue';
+import { useServices } from '@/plugins/services.plugin';
+import { GenerateAiContentCommand } from '@/types'; // Import for the command type
 
 interface CardData {
   id: string; // Assuming each card needs a unique ID for actions
@@ -68,23 +70,34 @@ const { t } = useI18n();
 const chatInput = ref('');
 const messages = ref<Message[]>([]);
 
-const sendMessage = () => {
+const services = useServices(); // Get all services
+const chatService = services.chat; // Get the chat service
+
+const sendMessage = async () => { // Make it async
   if (chatInput.value.trim()) {
     messages.value.push({ from: 'user', text: chatInput.value.trim() });
-    // Simulate AI response
-    setTimeout(() => {
-      const mockCardData: CardData[] = [
-        { id: '1', type: 'Member', title: 'Nguyễn Văn A', summary: 'Ông nội, sinh 1945, mất 2002' },
-        { id: '2', type: 'Relationship', title: 'Trần Thị B - Cô ruột', summary: 'Sinh khoảng 1970' },
-        { id: '3', type: 'Family', title: 'Trần Thị B - Cô ruột', summary: 'Sinh khoảng 1970' },
-        { id: '4', type: 'Relationship', title: 'Trần Thị B - Cô ruột', summary: 'Sinh khoảng 1970' },
-        { id: '5', type: 'Relationship', title: 'Trần Thị B - Cô ruột', summary: 'Sinh khoảng 1970' },
-      ];
-      messages.value.push({ from: 'ai', cardData: mockCardData });
-    }, 1000);
-    chatInput.value = '';
+    const userMessage = chatInput.value.trim(); // Store message before clearing input
+    chatInput.value = ''; // Clear input immediately
+
+    // Define the command for AI content generation
+    const command: GenerateAiContentCommand = {
+      familyId: props.familyId, // Use the familyId prop
+      chatInput: userMessage,
+      contentType: 'Member' // For now, assume 'Member' as a default content type. This might need to be dynamic later.
+    };
+
+    // Call the new API method
+    const result = await chatService.generateAiContent(command);
+
+    if (result.success && result.data) {
+      messages.value.push({ from: 'ai', cardData: result.data });
+    } else {
+      // Handle error, e.g., display an error message
+      messages.value.push({ from: 'ai', text: `Error: ${result.error?.message || 'Failed to generate content.'}` });
+    }
   }
 };
+
 
 const handleSaveCard = (id: string) => {
   console.log('Saving card:', id);
