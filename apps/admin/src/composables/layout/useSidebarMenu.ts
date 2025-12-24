@@ -100,13 +100,8 @@ const hasPermissionToMenuItem = (item: MenuItem, userRoles: string[]): boolean =
   return item.roles.some(role => userRoles.includes(role));
 };
 
-
 export function useSidebarMenu(userRoles: ComputedRef<string[]>) {
   const filteredMenu = computed(() => {
-    if (!userRoles.value || userRoles.value.length === 0) {
-      return [];
-    }
-
     const menuData = rawMenu.map(section => {
       const filteredItems = section.items.map(item => {
         if (item.children && item.children.length > 0) {
