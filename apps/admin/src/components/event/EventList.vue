@@ -57,7 +57,7 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-tooltip :text="t('common.action.edit')">
+      <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)"
             data-testid="edit-event-button">
