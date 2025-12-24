@@ -8,7 +8,7 @@ import { getAvatarUrl } from '@/utils/avatar.utils';
 
 interface UseMemberFormOptions {
   readOnly?: boolean;
-  initialMemberData?: MemberDto;
+  initialMemberData?: MemberDto | null;
   familyId: string | null;
 }
 

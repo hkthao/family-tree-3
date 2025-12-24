@@ -1,6 +1,6 @@
 import type { IChatService } from './chat.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
-import type { ApiError, Result, ChatResponse, GenerateFamilyDataCommand, CombinedAiContentResponse } from '@/types'; // Updated imports
+import type { ApiError, Result, ChatResponse, GenerateFamilyDataDto, CombinedAiContentResponse } from '@/types'; // Updated imports
 
 export class ApiChatService implements IChatService {
   constructor(private apiClient: ApiClientMethods) {}
@@ -10,7 +10,7 @@ export class ApiChatService implements IChatService {
       return response;
     }
 
-  async generateFamilyData(command: GenerateFamilyDataCommand): Promise<Result<CombinedAiContentResponse, ApiError>> {
+  async generateFamilyData(command: GenerateFamilyDataDto): Promise<Result<CombinedAiContentResponse, ApiError>> {
     const response = await this.apiClient.post<CombinedAiContentResponse>(
       `/family/${command.familyId}/generate-data`, // Updated endpoint
       command

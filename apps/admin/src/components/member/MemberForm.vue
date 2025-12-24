@@ -137,7 +137,7 @@ import { useMemberFormComposable } from '@/composables/member/useMemberFormCompo
 
 const props = defineProps<{
   readOnly?: boolean;
-  initialMemberData?: MemberDto;
+  initialMemberData?: MemberDto | null;
   familyId: string | null;
 }>();
 

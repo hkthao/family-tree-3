@@ -7,7 +7,7 @@
     <v-card-text>
       <div class="text-caption">{{ card.summary }}</div>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions v-if="!card.isSaved">
       <v-spacer></v-spacer>
       <v-btn size="small" variant="text" color="green" @click="emit('save', card.id)">{{ t('common.save') }}</v-btn>
       <v-btn size="small" variant="text" color="red" @click="emit('delete', card.id)">{{ t('common.delete') }}</v-btn>
@@ -23,6 +23,7 @@ interface CardData {
   type: string;
   title: string;
   summary: string;
+  isSaved?: boolean; // Added isSaved property
 }
 
 defineProps<{
