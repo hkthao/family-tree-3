@@ -9,7 +9,6 @@ using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Members.Queries;
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -41,7 +40,7 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
 
         // Setup default mediator behavior for prompt fetching
         _mockMediator.Setup(m => m.Send(
-            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.UnifiedAiContentGenerationPromptCode),
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.FAMILY_DATA_GENERATION_PROMPT),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Unified System Prompt" }));
 
@@ -147,7 +146,7 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         _mockMediator.Setup(m => m.Send(
-            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.UnifiedAiContentGenerationPromptCode),
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.FAMILY_DATA_GENERATION_PROMPT),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.NotFound("Unified prompt not found"));
 
@@ -163,7 +162,7 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"System prompt for '{PromptConstants.UnifiedAiContentGenerationPromptCode}' not configured in the database.");
+        result.Error.Should().Contain($"System prompt for '{PromptConstants.FAMILY_DATA_GENERATION_PROMPT}' not configured in the database.");
         result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // No AI call if prompt not found
         _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);

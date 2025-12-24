@@ -1,5 +1,4 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Extensions; // Required for InferMediaTypeFromUrl
 using backend.Application.FamilyMedias.Commands.CreateFamilyMediaFromUrl;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

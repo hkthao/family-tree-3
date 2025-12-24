@@ -1,10 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

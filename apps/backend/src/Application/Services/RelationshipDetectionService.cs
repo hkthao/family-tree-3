@@ -1,5 +1,6 @@
 using System.Text;
 using backend.Application.AI.DTOs;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
 using backend.Application.Prompts.Queries.GetPromptById; // Add this
@@ -134,20 +135,19 @@ public class RelationshipDetectionService : IRelationshipDetectionService
                 };
             }
 
-            const string RELATIONSHIP_AI_SYSTEM_PROMPT_CODE = "RELATIONSHIP_AI_SYSTEM_PROMPT";
             string systemPromptContent;
 
-            var promptQuery = new GetPromptByIdQuery { Code = RELATIONSHIP_AI_SYSTEM_PROMPT_CODE };
+            var promptQuery = new GetPromptByIdQuery { Code = PromptConstants.RELATIONSHIP_AI_SYSTEM_PROMPT };
             var promptResult = await _mediator.Send(promptQuery, cancellationToken);
 
             if (promptResult.IsSuccess && promptResult.Value != null)
             {
                 systemPromptContent = promptResult.Value.Content;
-                _logger.LogInformation("Successfully fetched system prompt '{PromptCode}' from database.", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE);
+                _logger.LogInformation("Successfully fetched system prompt '{PromptCode}' from database.", PromptConstants.RELATIONSHIP_AI_SYSTEM_PROMPT);
             }
             else
             {
-                _logger.LogError("Could not fetch system prompt '{PromptCode}' from database. Aborting AI generation. Error: {Error}", RELATIONSHIP_AI_SYSTEM_PROMPT_CODE, promptResult.Error);
+                _logger.LogError("Could not fetch system prompt '{PromptCode}' from database. Aborting AI generation. Error: {Error}", PromptConstants.RELATIONSHIP_AI_SYSTEM_PROMPT, promptResult.Error);
                 return new RelationshipDetectionResult
                 {
                     Description = "Lỗi: Không thể tải cấu hình system prompt AI.",

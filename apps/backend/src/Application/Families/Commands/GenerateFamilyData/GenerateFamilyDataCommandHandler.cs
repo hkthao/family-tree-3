@@ -37,7 +37,7 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
         }
 
         // 2. Lấy System Prompt thống nhất
-        string promptCode = PromptConstants.UnifiedAiContentGenerationPromptCode;
+        string promptCode = PromptConstants.FAMILY_DATA_GENERATION_PROMPT;
         var promptResult = await _mediator.Send(new GetPromptByIdQuery { Code = promptCode }, cancellationToken);
 
         string systemPromptContent;
