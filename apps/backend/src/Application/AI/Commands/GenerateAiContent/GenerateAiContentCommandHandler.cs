@@ -53,8 +53,9 @@ public class GenerateAiContentCommandHandler : IRequestHandler<GenerateAiContent
         }
         else
         {
-            _logger.LogWarning("Could not fetch system prompt '{PromptCode}' from database. Using default fallback. Error: {Error}", promptCode, promptResult.Error);
-            systemPromptContent = GetFallbackSystemPrompt(request.ContentType); // Fallback to a generic prompt
+            var errorMessage = $"System prompt for '{promptCode}' not configured in the database.";
+            _logger.LogError(errorMessage);
+            return Result<ExpandoObject>.Failure(errorMessage, ErrorSources.InvalidConfiguration);
         }
 
         // 3. Chuẩn bị yêu cầu AI
@@ -126,7 +127,7 @@ public class GenerateAiContentCommandHandler : IRequestHandler<GenerateAiContent
         return contentType.ToLower() switch
         {
             "family" => PromptConstants.FamilyDataGenerationPromptCode,
-            "member" => PromptConstants.GenerateMemberBiographyPromptCode,
+            "member" => PromptConstants.GenerateMemberPromptCode,
             "event" => PromptConstants.GenerateEventDetailsPromptCode,
             "chat" => PromptConstants.AiAssistantChatPromptCode,
             _ => throw new ArgumentException($"Invalid ContentType: {contentType}")

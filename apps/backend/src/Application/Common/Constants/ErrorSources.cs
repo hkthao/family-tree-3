@@ -16,4 +16,5 @@ public static class ErrorSources
     public const string ExternalServiceError = "ExternalServiceError";
     public const string InternalError = "InternalError";
     public const string QuotaExceeded = "QuotaExceeded";
+    public const string InvalidConfiguration = "InvalidConfiguration";
 }
