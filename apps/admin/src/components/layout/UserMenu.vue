@@ -63,13 +63,13 @@
 </template>
 
 <script setup lang="ts">
-import { userMenuItems } from '@/data/userMenuItems';
-import { ref, computed } from 'vue'; // onMounted is no longer needed
-import { useAuthStore } from '@/stores'; // authStore import
+import { ref, computed } from 'vue';
+import { useAuthStore } from '@/stores';
 import { useProfileSettings } from '@/composables';
 import { AvatarDisplay } from '@/components/common';
+import { useUserMenuItems } from '@/composables/layout/useUserMenuItems'; // Import the new composable
 
-const menuItems = userMenuItems;
+const { userMenuItems: menuItems } = useUserMenuItems();
 
 defineProps({
   placement: {
