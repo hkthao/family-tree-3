@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
+using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
+
 namespace backend.Web.Controllers;
 
 /// <summary>
@@ -71,6 +73,19 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     /// <returns>Một PaginatedList chứa danh sách các gia đình tìm được.</returns>
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] SearchFamiliesQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để tìm kiếm gia đình công khai dựa trên các tiêu chí được cung cấp.
+    /// </summary>
+    /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
+    /// <returns>Một PaginatedList chứa danh sách các gia đình công khai tìm được.</returns>
+    [HttpGet("public-search")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchPublic([FromQuery] SearchPublicFamiliesQuery query)
     {
         var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);

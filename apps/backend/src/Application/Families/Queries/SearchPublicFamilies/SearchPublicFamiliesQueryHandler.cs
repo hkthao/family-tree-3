@@ -1,35 +1,36 @@
-using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.Families.Queries.SearchPublicFamilies;
 
-/// <summary>
-/// Xử lý truy vấn để tìm kiếm các gia đình công khai.
-/// </summary>
-public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchPublicFamiliesQuery, Result<PaginatedList<FamilyDto>>>
+public class SearchPublicFamiliesQueryHandler : IRequestHandler<SearchPublicFamiliesQuery, Result<PaginatedList<FamilyDto>>>
 {
-    private readonly IApplicationDbContext _context = context;
-    private readonly IMapper _mapper = mapper;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
 
     public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchPublicFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Families.AsQueryable();
+        var query = _context.Families
+            .AsNoTracking()
+            .Where(f => f.Visibility == FamilyVisibility.Public.ToString());
 
-        // Chỉ bao gồm các gia đình có Visibility là Public
-        query = query.WithSpecification(new FamilyVisibilitySpecification(FamilyVisibility.Public.ToString()));
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
+        {
+            var searchQuery = request.SearchQuery;
+            query = query.Where(f => f.Name.Contains(searchQuery) || (f.Description != null && f.Description.Contains(searchQuery)));
+        }
 
-        // Áp dụng các tiêu chí tìm kiếm khác
-        query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchTerm));
-        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
+        var paginatedList = await PaginatedList<Family>.CreateAsync(query, request.Page, request.ItemsPerPage);
 
-        var paginatedList = await query
-            .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.Page, request.ItemsPerPage);
-
-        return Result<PaginatedList<FamilyDto>>.Success(paginatedList);
+        return Result<PaginatedList<FamilyDto>>.Success(_mapper.Map<PaginatedList<FamilyDto>>(paginatedList));
     }
 }
