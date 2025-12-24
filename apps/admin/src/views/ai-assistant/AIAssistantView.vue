@@ -1,31 +1,24 @@
 <template>
   <v-container fluid class="pa-0">
-    <v-row no-gutters>
+    <v-row>
       <v-col cols="12">
-        <v-card flat>
-          <v-card-text>
-            <div class="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
-              <!-- Chat messages will go here -->
-              <div v-for="(message, index) in messages" :key="index"
-                :class="['d-flex', message.from === 'user' ? 'justify-end' : 'justify-start']">
-                <v-chip :color="message.from === 'user' ? 'primary' : 'grey'" class="ma-1">
-                  {{ message.text }}
-                </v-chip>
-              </div>
-            </div>
-            <v-row class="mt-4" no-gutters>
-              <v-col cols="10">
-                <v-text-field v-model="chatInput" :label="t('aiAssistant.inputPlaceholder')" variant="outlined" density="compact"
-                  hide-details @keyup.enter="sendMessage"></v-text-field>
-              </v-col>
-              <v-col cols="2" class="d-flex align-center justify-center">
-                <v-btn :disabled="!chatInput.trim()" icon color="primary" @click="sendMessage">
-                  <v-icon>mdi-send</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
+        <v-sheet class="chat-messages" color="transparent" height="calc(100vh - 270px)"
+          max-height="calc(100vh - 270px)">
+          <div v-for="(message, index) in messages" :key="index"
+            :class="['d-flex', message.from === 'user' ? 'justify-end' : 'justify-start']">
+            <v-chip :color="message.from === 'user' ? 'primary' : 'grey'" class="ma-1">
+              {{ message.text }}
+            </v-chip>
+          </div>
+        </v-sheet>
+        <v-textarea v-model="chatInput" :label="t('aiAssistant.inputPlaceholder')" variant="outlined" rows="2" auto-grow
+          hide-details @keydown.enter.prevent="sendMessage">
+          <template v-slot:append-inner>
+            <v-btn :disabled="!chatInput.trim()" variant="text" icon color="primary" @click="sendMessage">
+              <v-icon>mdi-send</v-icon>
+            </v-btn>
+          </template>
+        </v-textarea>
       </v-col>
     </v-row>
   </v-container>
@@ -62,11 +55,3 @@ const sendMessage = () => {
   }
 };
 </script>
-
-<style scoped>
-.chat-messages {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding-right: 10px; /* To prevent scrollbar from overlapping text */
-}
-</style>
