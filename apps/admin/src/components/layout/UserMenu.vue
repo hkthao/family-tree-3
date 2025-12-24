@@ -2,7 +2,12 @@
   <div>
     <v-menu v-if="currentUser" offset-y :placement="placement" :close-on-content-click="false" v-model="menuOpen">
       <template v-slot:activator="{ props: activatorProps }">
-        <AvatarDisplay :src="currentUser?.avatar" :size="36" class="cursor-pointer"
+        <v-avatar v-if="!currentUser?.avatar" color="brown" size="large" class="cursor-pointer"
+          :aria-label="$t('userMenu.ariaLabel')" aria-haspopup="true" :aria-expanded="menuOpen"
+          v-bind="activatorProps">
+          <span class="text-h5">{{ currentUser?.initials }}</span>
+        </v-avatar>
+        <AvatarDisplay v-else :src="currentUser?.avatar" :size="36" class="cursor-pointer"
           :aria-label="$t('userMenu.ariaLabel')" aria-haspopup="true" :aria-expanded="menuOpen"
           v-bind="activatorProps" />
       </template>
@@ -10,7 +15,10 @@
       <v-sheet class="user-menu-sheet rounded-lg elevation-3 pa-3">
         <!-- Header -->
         <div class="user-menu-header d-flex flex-column align-center">
-          <AvatarDisplay :src="currentUser?.avatar" :size="56" />
+          <v-avatar v-if="!currentUser?.avatar" color="brown" size="56">
+            <span class="text-h5">{{ currentUser?.initials }}</span>
+          </v-avatar>
+          <AvatarDisplay v-else :src="currentUser?.avatar" :size="56" />
 
           <div class="d-flex flex-column align-center mt-2">
             <span class="text-h6 font-weight-medium">{{ currentUser?.name }}</span>
@@ -77,7 +85,16 @@ const confirmLogoutDialog = ref(false);
 
 const authStore = useAuthStore(); // Re-added authStore
 const { state: { userProfile } } = useProfileSettings();
-const currentUser = computed(() => userProfile.value);
+const currentUser = computed(() => {
+  if (!userProfile.value) return null;
+  const nameParts = userProfile.value.name?.split(' ') || [];
+  const firstNameInitial = nameParts.length > 0 ? nameParts[0][0] : '';
+  const lastNameInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0] : '';
+  return {
+    ...userProfile.value,
+    initials: `${firstNameInitial}${lastNameInitial}`.toUpperCase()
+  };
+});
 
 const handleMenuItemClick = (route?: string) => {
   if (route) {
