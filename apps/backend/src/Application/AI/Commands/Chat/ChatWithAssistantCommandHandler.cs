@@ -76,10 +76,9 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
             SessionId = request.SessionId
         };
         var contextResult = await _mediator.Send(determineContextCommand, cancellationToken);
-
-        ContextType determinedContext = ContextType.Unknown;
         string contextReasoning = "Not provided.";
 
+        ContextType determinedContext;
         if (contextResult.IsSuccess && contextResult.Value != null)
         {
             determinedContext = contextResult.Value.Context;
@@ -90,11 +89,10 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         {
             _logger.LogError("Không thể xác định ngữ cảnh chat: {Error}. Fallback về ngữ cảnh QA.", contextResult.Error);
             determinedContext = ContextType.QA; // Fallback to QA
-            contextReasoning = "Fallback due to context determination failure or explicit Unknown.";
         }
 
         // 5. Lấy System Prompt chung cho QA (dùng cho các ngữ cảnh chat thông thường)
-        string qaSystemPromptContent = "You are a helpful assistant."; // Default fallback prompt
+        string qaSystemPromptContent = string.Empty; // Default fallback prompt
         var qaPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_QA_PROMPT }, cancellationToken);
         if (qaPromptResult.IsSuccess && qaPromptResult.Value?.Content != null)
         {

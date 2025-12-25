@@ -32,7 +32,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             _logger.LogInformation("Generating Family KB record for FamilyId: {FamilyId}, RecordId: {RecordId}, Type: {RecordType}",
                 request.FamilyId, request.RecordId, request.RecordType);
 
-            BaseEmbeddingsDto? embeddingsDto = null;
+            BaseEmbeddingsDto? embeddingsDto;
             switch (request.RecordType)
             {
                 case KbRecordType.Member:
