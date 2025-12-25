@@ -7,7 +7,8 @@
       </v-card-title>
       <v-card-text class="pa-0">
         <template v-if="currentFamilyId">
-          <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)" @open-relationship-detection="openRelationshipDetection" />
+          <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)"
+            @open-relationship-detection="openRelationshipDetection" />
         </template>
         <template v-else>
           <div class="d-flex flex-column justify-center align-center">
@@ -25,14 +26,12 @@
     </v-card>
   </v-navigation-drawer>
 
-  <v-navigation-drawer
-    v-model="showRelationshipDetectionDrawer"
-    location="right"
-    temporary
-    class="pa-0"
-    width="450"
-  >
-    <RelationshipDetectionView :familyId="relationshipDetectionFamilyId" />
+  <v-navigation-drawer v-model="showRelationshipDetectionDrawer" location="right" temporary width="450">
+    <v-container fluid>
+      <RelationshipDetector 
+      :narrowView="true"
+      :initial-family-id="relationshipDetectionFamilyId" />
+    </v-container>
   </v-navigation-drawer>
 </template>
 
@@ -44,7 +43,7 @@ import ChatView from '@/views/chat/ChatView.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyName } from '@/composables/family';
-import RelationshipDetectionView from '@/views/relationship/RelationshipDetectionView.vue';
+import RelationshipDetector from '@/components/relationship/RelationshipDetector.vue';
 
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
