@@ -1,6 +1,3 @@
-import type { FamilyDto } from '@/types/family.d';
-import type { MemberDto } from '@/types/member.d';
-import type { EventDto } from '@/types/event.d';
 import type { CombinedAiContentDto } from '@/types/ai.d'; // Import CombinedAiContentDto from ai.d.ts
 
 export interface AiChatMessage {

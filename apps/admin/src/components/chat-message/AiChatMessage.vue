@@ -12,9 +12,10 @@
         color="primary"
         variant="elevated"
         size="small"
+        append-icon="mdi-open-in-new"
         @click="navigateToRelationshipPage"
       >
-        Xác định quan hệ
+        {{ t('aiChat.determineRelationship') }}
       </v-btn>
     </template>
   </v-sheet>
@@ -24,6 +25,7 @@
 import type { PropType } from 'vue'; // Use type import
 import { useRouter } from 'vue-router';
 import type { AiChatMessage } from '@/types/chat.d'; // Use type import
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   message: {
@@ -37,6 +39,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const { t } = useI18n();
 
 const navigateToRelationshipPage = () => {
   // Construct the URL using the familyId and the intent from the message
