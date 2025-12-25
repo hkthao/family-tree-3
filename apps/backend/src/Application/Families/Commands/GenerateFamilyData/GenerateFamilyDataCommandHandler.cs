@@ -13,14 +13,12 @@ namespace backend.Application.Families.Commands.GenerateFamilyData;
 /// </summary>
 public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDataCommand, Result<CombinedAiContentDto>>
 {
-    private readonly IApplicationDbContext _context;
     private readonly IMediator _mediator;
     private readonly IAiGenerateService _aiGenerateService;
     private readonly ILogger<GenerateFamilyDataCommandHandler> _logger;
 
-    public GenerateFamilyDataCommandHandler(IApplicationDbContext context, IMediator mediator, IAiGenerateService aiGenerateService, ILogger<GenerateFamilyDataCommandHandler> logger)
+    public GenerateFamilyDataCommandHandler(IMediator mediator, IAiGenerateService aiGenerateService, ILogger<GenerateFamilyDataCommandHandler> logger)
     {
-        _context = context;
         _mediator = mediator;
         _aiGenerateService = aiGenerateService;
         _logger = logger;

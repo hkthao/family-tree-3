@@ -32,7 +32,6 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         _mockLogger = new Mock<ILogger<GenerateFamilyDataCommandHandler>>();
 
         _handler = new GenerateFamilyDataCommandHandler(
-            _context,
             _mockMediator.Object,
             _mockAiGenerateService.Object,
             _mockLogger.Object
