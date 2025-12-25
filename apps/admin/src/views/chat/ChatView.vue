@@ -32,16 +32,16 @@
       </div>
     </v-card-text>
     <v-card-actions class="d-flex justify-center pa-0 chat-input-area">
-      <v-textarea no-resize :auto-grow="false" counter :rows="2" :model-value="state.newMessage.value"
-        @update:model-value="newValue => state.newMessage.value = newValue" :placeholder="t('aiChat.placeholder')"
-        variant="outlined" @keyup.enter="actions.sendMessage" :disabled="state.loading.value">
-        <template v-slot:append-inner>
-          <v-btn icon flat :disabled="state.loading.value || !state.newMessage.value.trim()"
-            @click="actions.sendMessage">
-            <v-icon>mdi-send</v-icon>
-          </v-btn>
-        </template>
-      </v-textarea>
+      <ChatInput
+        :model-value="state.newMessage.value"
+        @update:model-value="handleUpdateNewMessage"
+        :placeholder="t('aiChat.placeholder')"
+        @sendMessage="handleSendMessage"
+        :disabled="state.loading.value"
+        :loading="state.loading.value"
+        @addAttachment="handleAddAttachment"
+        @addLocation="handleAddLocation"
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -52,6 +52,8 @@ import { useI18n } from 'vue-i18n';
 import { useChatView } from '@/composables/ai/useChatView';
 import UserChatMessage from '@/components/chat-message/UserChatMessage.vue';
 import AiChatMessage from '@/components/chat-message/AiChatMessage.vue';
+
+import ChatInput from '@/components/chat/ChatInput.vue';
 
 const props = defineProps<{
   familyId: string;
@@ -65,6 +67,25 @@ const { t } = useI18n(); // Keep t for template
 const chatMessagesContainer = ref<HTMLElement | null>(null);
 const { state, actions } = useChatView(props.familyId);
 const showScrollToBottomButton = ref(false); // New ref for button visibility
+
+const handleUpdateNewMessage = (newValue: string) => {
+  state.newMessage.value = newValue;
+};
+
+const handleSendMessage = () => {
+  actions.sendMessage();
+};
+
+const handleAddAttachment = (type: 'image' | 'pdf') => {
+  console.log(`Attachment type requested: ${type}`);
+  // Implement logic to handle attachment upload
+  // This will likely involve opening a file input dialog
+};
+
+const handleAddLocation = (location: { latitude: number; longitude: number; address?: string }) => {
+  console.log('Location received:', location);
+  // Implement logic to use the received location, e.g., display on map, send to AI
+};
 
 const SCROLL_THRESHOLD = 100; // Pixels from the bottom to consider "near bottom"
 
@@ -125,7 +146,7 @@ onUnmounted(() => {
 
 .chat-messages {
   overflow-y: auto;
-  max-height: calc(100vh - 215px);
+  max-height: calc(100vh - 230px);
   /* Adjusted for larger input area */
 }
 
@@ -139,7 +160,7 @@ onUnmounted(() => {
 
 .scroll-to-bottom-button {
   position: absolute;
-  bottom: 120px;
+  bottom: 135px;
   /* Adjust as needed to be above the input field */
   right: 32px;
   z-index: 10;
