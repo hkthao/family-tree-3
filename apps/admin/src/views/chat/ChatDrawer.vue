@@ -26,22 +26,22 @@
     </v-card>
   </v-navigation-drawer>
 
-  <v-navigation-drawer v-model="showRelationshipDetectionDrawer" location="right" temporary width="450">
+  <v-navigation-drawer v-model="showRelationshipDetectionDrawer" location="right" temporary :width="drawerWidth">
     <v-container fluid>
       <RelationshipDetector :narrowView="true" :initial-family-id="relationshipDetectionFamilyId" />
     </v-container>
   </v-navigation-drawer>
 
   <!-- Member Add Drawer -->
-  <v-navigation-drawer v-model="showMemberAddDrawer" location="right" temporary width="450">
+  <v-navigation-drawer v-model="showMemberAddDrawer" location="right" temporary :width="drawerWidth">
     <MemberAddView :family-id="String(currentFamilyId)" :initial-member-data="memberAddInitialData"
-      @close="generatedDataStore.clearMemberToAdd()" @saved="generatedDataStore.clearMemberToAdd()" />
+      @close="handleMemberFormCloseOrSaved" @saved="handleMemberFormCloseOrSaved" />
   </v-navigation-drawer>
 
   <!-- Event Add Drawer -->
-  <v-navigation-drawer v-model="showEventAddDrawer" location="right" temporary width="450">
+  <v-navigation-drawer v-model="showEventAddDrawer" location="right" temporary :width="drawerWidth">
     <EventAddView :family-id="String(currentFamilyId)" :initial-event-data="eventAddInitialData"
-      @close="generatedDataStore.clearEventToAdd()" @saved="generatedDataStore.clearEventToAdd()" />
+      @close="handleEventFormCloseOrSaved" @saved="handleEventFormCloseOrSaved" />
   </v-navigation-drawer>
 </template>
 
@@ -84,6 +84,7 @@ const props = defineProps({
   },
 });
 
+const drawerWidth = 550
 const router = useRouter();
 const selectedFamilyForChat = ref<string | null>(null);
 const showRelationshipDetectionDrawer = ref(false);
@@ -116,6 +117,8 @@ watch(() => generatedDataStore.memberToAdd, (newVal) => {
   if (newVal) {
     memberAddInitialData.value = { ...newVal, familyId: currentFamilyId.value, id: uuidv4() };
     showMemberAddDrawer.value = true;
+  } else {
+    showMemberAddDrawer.value = false;
   }
 });
 
@@ -123,6 +126,8 @@ watch(() => generatedDataStore.eventToAdd, (newVal) => {
   if (newVal) {
     eventAddInitialData.value = { ...newVal, familyId: currentFamilyId.value, id: uuidv4() };
     showEventAddDrawer.value = true;
+  } else {
+    showEventAddDrawer.value = false;
   }
 });
 
@@ -148,4 +153,13 @@ const startChatWithSelectedFamily = () => {
     emit('update:modelValue', false);
   }
 };
+
+const handleMemberFormCloseOrSaved = () => {
+  generatedDataStore.clearMemberToAdd();
+};
+
+const handleEventFormCloseOrSaved = () => {
+  generatedDataStore.clearEventToAdd();
+};
+
 </script>

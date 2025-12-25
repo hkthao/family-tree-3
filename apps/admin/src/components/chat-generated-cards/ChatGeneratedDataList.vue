@@ -10,8 +10,10 @@
           <v-list-item-title>{{ member.firstName }} {{ member.lastName }}</v-list-item-title>
           <v-list-item-subtitle>
             {{ member.gender === Gender.Male ? t('common.male') : t('common.female') }}
-            <template v-if="member.dateOfBirth">, {{ t('common.born') }} {{ new Date(member.dateOfBirth).getFullYear() }}</template>
-            <template v-if="member.dateOfDeath">, {{ t('common.died') }} {{ new Date(member.dateOfDeath).getFullYear() }}</template>
+            <template v-if="member.dateOfBirth">, {{ t('common.born') }} {{ new Date(member.dateOfBirth).getFullYear()
+              }}</template>
+            <template v-if="member.dateOfDeath">, {{ t('common.died') }} {{ new Date(member.dateOfDeath).getFullYear()
+              }}</template>
           </v-list-item-subtitle>
           <template v-slot:append>
             <v-btn icon size="small" variant="text" @click="generatedDataStore.setMemberToAdd(member)">
@@ -30,7 +32,8 @@
           <v-list-item-title>{{ event.name }}</v-list-item-title>
           <v-list-item-subtitle>
             <template v-if="event.description">{{ event.description }}</template>
-            <template v-if="event.solarDate">, {{ t('common.date') }} {{ new Date(event.solarDate).toLocaleDateString() }}</template>
+            <template v-if="event.solarDate">, {{ t('common.date') }} {{ new Date(event.solarDate).toLocaleDateString()
+              }}</template>
           </v-list-item-subtitle>
           <template v-slot:append>
             <v-btn icon size="small" variant="text" @click="generatedDataStore.setEventToAdd(event)">
@@ -45,12 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import type { CombinedAiContentDto, MemberDto, EventDto } from '@/types';
+import type { CombinedAiContentDto } from '@/types';
 import { Gender } from '@/types/member.d';
 import { useI18n } from 'vue-i18n';
 import { useGeneratedDataStore } from '@/stores/generatedData.store'; // Import the new store
 
-const props = defineProps<{
+defineProps<{
   generatedData: CombinedAiContentDto;
   familyId: string;
 }>();
