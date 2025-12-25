@@ -9,3 +9,4 @@ export * from './prompt.validation';
 export * from './relationship.validation';
 export * from './familyMedia.validation';
 export * from './memoryItem.validation';
+export * from './ai-assistant.validation';

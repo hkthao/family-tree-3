@@ -53,6 +53,7 @@
   "aiAssistant.selectFileForOcr": "Vui lòng chọn một tệp để xử lý OCR.",
   "aiAssistant.ocrSuccess": "Xử lý OCR thành công. Văn bản đã được trích xuất.",
   "aiAssistant.ocrError": "Lỗi khi xử lý OCR. Vui lòng thử lại.",
+  "aiAssistant.inputTooLong": "Nội dung tin nhắn không được vượt quá {max} ký tự.",
   "aiChat.placeholder": "Nhập tin nhắn của bạn...",
   "aiChat.typing": "Đang trả lời...",
   "aiChat.welcomeMessage": "Chào bạn, tôi là Trợ lý AI của Dòng Họ Việt. Tôi sẵn sàng giúp bạn khám phá và gìn giữ lịch sử gia đình mình. Bạn muốn hỏi gì hôm nay?",

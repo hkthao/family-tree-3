@@ -4,7 +4,7 @@ import { useServices } from '@/plugins/services.plugin';
 import { useConfirmDialog } from '@/composables/ui/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import type { GenerateFamilyDataDto, CardData, MemberDto, EventDto, OcrResultDto, CombinedAiContentDto } from '@/types';
+import type { GenerateFamilyDataDto, CardData, MemberDto, EventDto } from '@/types';
 import { mapCombinedAiContentToCardData } from '@/composables/ai-assistant/aiAssistant.transform';
 
 interface Message {
@@ -108,15 +108,21 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
       showSnackbar(error.message || t('aiAssistant.ocrError'), 'error');
     } finally {
       isLoadingOcr.value = false;
-      selectedFile.value = null; // Clear selected file after processing
+      removeSelectedFile(); // Clear selected file after processing
     }
   };
 
-  const removeSelectedFile = () => {
-    selectedFile.value = null;
-  };
-
-  const handleSaveCard = (id: string) => {
+      const removeSelectedFile = () => {
+        selectedFile.value = null;
+      };
+    
+      const clearFileInput = (fileInputElement: HTMLInputElement | null) => {
+        if (fileInputElement) {
+          fileInputElement.value = '';
+        }
+        selectedFile.value = null;
+      };
+    const handleSaveCard = (id: string) => {
     let foundCard: CardData | undefined;
     for (const message of messages.value) {
       if (message.cardData) {
@@ -236,6 +242,7 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
       handleFileChange,
       processOcr,
       removeSelectedFile,
+      clearFileInput,
     },
   };
 }

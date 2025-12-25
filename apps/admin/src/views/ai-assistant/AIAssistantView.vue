@@ -28,24 +28,25 @@
         </v-sheet>
         <v-file-input ref="fileInputRef" v-model="selectedFile" :label="t('aiAssistant.uploadFileLabel')"
           density="compact" prepend-icon="" append-icon="mdi-paperclip" accept="image/*,application/pdf" hide-details
-          show-size @change="handleFileChange" style="display: none;"></v-file-input>
-        <v-textarea v-model="state.chatInput" :label="t('aiAssistant.inputLabel')" :hint="t('aiAssistant.inputHint')"
-          persistent-hint variant="outlined" rows="2" :auto-grow="false" hide-details :no-resize="true"
-          @keydown.enter.prevent="sendMessage">
-          <template v-slot:prepend-inner>
-            <v-btn variant="text" icon color="primary" @click="triggerFileInput" class="mr-2">
-              <v-icon>mdi-ocr</v-icon> <!-- Icon for OCR -->
-              <v-tooltip activator="parent" location="top">{{ t('aiAssistant.processOcr') }}</v-tooltip>
-            </v-btn>
-          </template>
+          show-size @change="handleFileChangeWrapper" style="display: none;"></v-file-input>
+        <v-form ref="formRef" v-model="formIsValid">
+          <v-textarea v-model="state.chatInput" :label="t('aiAssistant.inputLabel')" :hint="t('aiAssistant.inputHint')"
+            persistent-hint variant="outlined" rows="2" :max-rows="10" :auto-grow="true" :no-resize="true"
+            :hide-details="false" maxlength="2000" counter :rules="validationRules.chatInput"
+            @keydown.enter.prevent="sendMessage"> <template v-slot:prepend-inner>
+              <v-btn variant="text" icon color="primary" @click="triggerFileInput" class="mr-2">
+                <v-icon>mdi-ocr</v-icon> <!-- Icon for OCR -->
+                <v-tooltip activator="parent" location="top">{{ t('aiAssistant.processOcr') }}</v-tooltip>
+              </v-btn>
+            </template>
 
-          <template v-slot:append-inner>
-            <v-btn :disabled="!state.chatInput.trim()" variant="text" icon color="primary" @click="sendMessage">
-              <v-icon>mdi-send</v-icon>
-            </v-btn>
-          </template>
-        </v-textarea>
-      </v-col>
+            <template v-slot:append-inner>
+              <v-btn :disabled="!formIsValid" variant="text" icon color="primary" @click="sendMessage">
+                <v-icon>mdi-send</v-icon>
+              </v-btn>
+            </template>
+          </v-textarea>
+        </v-form> </v-col>
     </v-row>
 
     <!-- Add Member Drawer -->
@@ -63,13 +64,14 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n'; // ADDED
 import AICard from '@/components/chat-generated-cards/AICard.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import { useAiAssistant } from '@/composables/ai-assistant/useAiAssistant';
-import { ref } from 'vue'; // Import ref
+import { useAiAssistantRules } from '@/validations/ai-assistant.validation'; // Import the new validation composable
 
 const props = defineProps({
   familyId: {
@@ -81,12 +83,19 @@ const props = defineProps({
 const { t } = useI18n();
 const { state, actions } = useAiAssistant({ familyId: props.familyId });
 
+// Initialize validation rules
+const validationRules = useAiAssistantRules({ chatInput: state.chatInput });
+
+// Refs for form and file input
+const formRef = ref<HTMLFormElement | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
+// Form validity state
+const formIsValid = ref(false);
+
 // Destructure state and actions for easier template binding
 const { messages, isLoadingAiResponse, addMemberDrawer, memberDataToAdd, addEventDrawer, eventDataToAdd, selectedFile } = state;
-const { sendMessage, handleSaveCard, handleMemberClosed, handleMemberSaved, handleDeleteCard, handleEventClosed, handleEventSaved, handleFileChange } = actions;
-
-// Ref for the file input
-const fileInputRef = ref<HTMLInputElement | null>(null);
+const { sendMessage: originalSendMessage, handleSaveCard, handleMemberClosed, handleMemberSaved, handleDeleteCard, handleEventClosed, handleEventSaved, handleFileChange, clearFileInput } = actions;
 
 // Function to trigger the file input click
 const triggerFileInput = () => {
@@ -94,6 +103,23 @@ const triggerFileInput = () => {
     fileInputRef.value.click();
   }
 };
+
+// Wrapper function to handle file change and clear the input
+const handleFileChangeWrapper = async (event: Event) => {
+  await handleFileChange(event); // Call the composable's handleFileChange
+  clearFileInput(fileInputRef.value); // Clear the native file input element
+};
+
+// Override sendMessage to include form validation
+const sendMessage = async () => {
+  if (formRef.value) {
+    const { valid } = await formRef.value.validate();
+    if (valid) {
+      await originalSendMessage();
+    }
+  }
+};
+
 </script>
 
 <style scoped>
