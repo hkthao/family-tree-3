@@ -41,7 +41,7 @@
   <!-- Event Add Drawer -->
   <v-navigation-drawer v-model="showEventAddDrawer" location="right" temporary :width="drawerWidth">
     <EventAddView :family-id="String(currentFamilyId)" :initial-event-data="eventAddInitialData"
-      @close="handleEventFormCloseOrSaved" @saved="handleEventFormCloseOrSaved" />
+      @close="handleEventFormCloseOrSaved" @saved="handleEventFormCloseOrSaved" :key="eventAddInitialData?.id" />
   </v-navigation-drawer>
 </template>
 
