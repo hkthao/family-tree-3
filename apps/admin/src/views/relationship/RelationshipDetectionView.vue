@@ -1,13 +1,14 @@
 <template>
   <v-container fluid>
     <v-card>
-      <v-card-title class="text-h5">{{ t('relationshipDetection.title') }}</v-card-title>
+      <v-card-title class="text-h5 text-center">{{ t('relationshipDetection.title') }}</v-card-title>
       <v-card-text>
         <v-form @submit.prevent="detectRelationship">
           <v-row>
             <v-col cols="12">
               <FamilyAutocomplete v-model="selectedFamilyId" :label="t('relationshipDetection.familyLabel')"
                 :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.familyRequired')]" clearable
+                :disabled="!!props.familyId"
                 required />
             </v-col>
           </v-row>
@@ -64,11 +65,15 @@ import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useRelationshipDetector } from '@/composables/relationship/useRelationshipDetector';
 
+const props = defineProps<{
+  familyId?: string; // Optional familyId prop
+}>();
+
 const { t } = useI18n();
 const {
   state: { selectedFamilyId, selectedMemberAId, selectedMemberBId, result, loading, error },
   actions: { detectRelationship },
-} = useRelationshipDetector();
+} = useRelationshipDetector(props.familyId); // Pass the prop here
 </script>
 
 <style scoped>

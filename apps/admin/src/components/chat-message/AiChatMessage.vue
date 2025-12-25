@@ -9,11 +9,10 @@
     <template v-if="message.intent === 'RELATIONSHIP_LOOKUP_PAGE'">
       <v-btn
         class="mt-2"
-        color="primary"
-        variant="elevated"
+        variant="outlined"
         size="small"
-        append-icon="mdi-open-in-new"
-        @click="navigateToRelationshipPage"
+        append-icon="mdi-arrow-right-circle"
+        @click="emit('open-relationship-detection', familyId)"
       >
         {{ t('aiChat.determineRelationship') }}
       </v-btn>
@@ -23,11 +22,10 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'; // Use type import
-import { useRouter } from 'vue-router';
 import type { AiChatMessage } from '@/types/chat.d'; // Use type import
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
+defineProps({
   message: {
     type: Object as PropType<AiChatMessage>,
     required: true,
@@ -38,16 +36,8 @@ const props = defineProps({
   },
 });
 
-const router = useRouter();
+const emit = defineEmits(['open-relationship-detection']);
 const { t } = useI18n();
-
-const navigateToRelationshipPage = () => {
-  // Construct the URL using the familyId and the intent from the message
-  // The backend currently sends "RELATIONSHIP_LOOKUP_PAGE" as the intent.
-  // The frontend needs to map this to an actual route.
-  // Assuming a route like '/family/:familyId/relationships'
-  router.push(`/family/${props.familyId}/relationships`);
-};
 </script>
 
 <style scoped>

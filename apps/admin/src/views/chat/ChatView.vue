@@ -8,7 +8,7 @@
             <UserChatMessage :message="message" :userProfile="state.userProfile" />
           </template>
           <template v-else>
-            <AiChatMessage :message="message" :familyId="props.familyId" />
+            <AiChatMessage :message="message" :familyId="props.familyId" @open-relationship-detection="(familyId) => emit('open-relationship-detection', familyId)" />
           </template>
           <template v-if="!message.text">
             <!-- Debugging: log message if text is empty or not a string -->
@@ -52,6 +52,8 @@ import AiChatMessage from '@/components/chat-message/AiChatMessage.vue';
 const props = defineProps<{
   familyId: string;
 }>();
+
+const emit = defineEmits(['open-relationship-detection']);
 
 const { t } = useI18n(); // Keep t for template
 const chatMessagesContainer = ref<HTMLElement | null>(null);

@@ -4,11 +4,11 @@ import { useMutation } from '@tanstack/vue-query';
 import { useRelationshipDetectionStore } from '@/stores/relationshipDetection.store';
 import type { RelationshipDetectionResult } from '@/types/relationshipDetection.d';
 
-export function useRelationshipDetector() {
+export function useRelationshipDetector(initialFamilyId?: string) { // Added parameter
   const { t } = useI18n();
   const relationshipDetectionStore = useRelationshipDetectionStore();
 
-  const selectedFamilyId = ref<string | undefined>(undefined);
+  const selectedFamilyId = ref<string | undefined>(initialFamilyId || undefined); // Use initialFamilyId
   const selectedMemberAId = ref<string | undefined>(undefined);
   const selectedMemberBId = ref<string | undefined>(undefined);
 
