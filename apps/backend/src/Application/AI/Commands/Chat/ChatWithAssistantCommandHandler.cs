@@ -120,9 +120,17 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         Result<ChatResponse> finalChatResponseResult;
         switch (determinedContext)
         {
-            case ContextType.QA:
             case ContextType.Unknown:
-                _logger.LogInformation("Ngữ cảnh là QA/Unknown. Gọi dịch vụ AI Chat truyền thống với prompt QA.");
+                _logger.LogInformation("Ngữ cảnh không xác định. Trả về phản hồi không xác định được yêu cầu.");
+                finalChatResponseResult = Result<ChatResponse>.Success(new ChatResponse
+                {
+                    Output = "Xin lỗi, tôi không thể xác định được yêu cầu của bạn. Vui lòng thử lại với một câu hỏi rõ ràng hơn.",
+                    Intent = null // No specific intent for unknown requests
+                });
+                break;
+
+            case ContextType.QA:
+                _logger.LogInformation("Ngữ cảnh là QA. Gọi dịch vụ AI Chat truyền thống với prompt QA.");
                 var qaChatRequest = new ChatRequest
                 {
                     SessionId = request.SessionId,
