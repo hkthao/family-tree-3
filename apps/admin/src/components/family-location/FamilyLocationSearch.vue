@@ -73,7 +73,7 @@ const locationTypeOptions = computed(() => {
   return Object.keys(LocationType)
     .filter((key) => isNaN(Number(key)))
     .map((type) => ({
-      title: t(`familyLocation.locationType.${String(type).toLocaleLowerCase()}`),
+      title: t(`familyLocation.locationType.${String(type)}`),
       value: LocationType[type as keyof typeof LocationType],
     }));
 });
@@ -82,7 +82,7 @@ const locationSourceOptions = computed(() => {
   return Object.keys(LocationSource)
     .filter((key) => isNaN(Number(key)))
     .map((source) => ({
-      title: t(`familyLocation.source.${String(source).toLocaleLowerCase()}`),
+      title: t(`familyLocation.source.${String(source)}`),
       value: LocationSource[source as keyof typeof LocationSource],
     }));
 });
