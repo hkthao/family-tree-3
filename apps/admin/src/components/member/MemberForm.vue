@@ -3,7 +3,8 @@
     <!-- Thông tin cơ bản -->
     <v-row>
       <v-col cols="12">
-        <AvatarInput v-if="!isFormReadOnly" v-model="formData.avatarBase64" :size="96" :initial-avatar="initialAvatarDisplay" />
+        <AvatarInput v-if="!isFormReadOnly" v-model="formData.avatarBase64" :size="96"
+          :initial-avatar="initialAvatarDisplay" />
         <div v-else class="d-flex justify-center mb-4">
           <AvatarDisplay :src="getAvatarUrl(formData.avatarUrl, formData.gender)" :size="96" />
         </div>
@@ -13,21 +14,19 @@
     <v-row>
       <v-col cols="12">
         <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
-          :rules="validationRules.familyId"
-          :multiple="false" :disabled="true" data-testid="member-family-select" />
+          :rules="validationRules.familyId" :multiple="false" :disabled="true" data-testid="member-family-select" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')"
-          :rules="validationRules.lastName"
+        <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" :rules="validationRules.lastName"
           :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-last-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.firstName" :label="t('member.form.firstName')"
-          :rules="validationRules.firstName"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="member-first-name-input"></v-text-field>
+          :rules="validationRules.firstName" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
+          data-testid="member-first-name-input"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-text-field v-model="formData.nickname" :label="t('member.form.nickname')" :readonly="isFormReadOnly"
@@ -41,13 +40,13 @@
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
-          :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
+          :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
+          data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
-          :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar" />
+          :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
+          data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar" />
       </v-col>
     </v-row>
 
@@ -85,22 +84,23 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="6">
         <v-checkbox v-model="formData.isRoot" :label="t('member.form.isRoot')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-is-root-checkbox"></v-checkbox>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="6">
         <v-checkbox v-model="formData.isDeceased" :label="t('member.form.isDeceased')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-is-deceased-checkbox"></v-checkbox>
       </v-col>
-     
+
     </v-row>
 
-     <!-- Thông tin Cha Mẹ -->
+    <!-- Thông tin Cha Mẹ -->
     <v-row>
-       <v-col cols="12" md="12">
-        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :rules="validationRules.order" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
+      <v-col cols="12" md="12">
+        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :rules="validationRules.order"
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" type="number" min="1"
+          data-testid="member-order-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :disabled="isFormReadOnly"

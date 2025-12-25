@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { type PropType, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-
+import { v4 as uuidv4 } from 'uuid';
 import ChatView from '@/views/chat/ChatView.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useI18n } from 'vue-i18n';
@@ -98,23 +98,31 @@ const memberAddInitialData = ref<any | null>(null); // Use any for now to avoid 
 const showEventAddDrawer = ref(false);
 const eventAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with EventDto
 
+watch(() => showMemberAddDrawer.value, (newVal) => {
+  if (!newVal) {
+    memberAddInitialData.value = null;
+    generatedDataStore.clearMemberToAdd();
+  }
+});
+
+watch(() => showEventAddDrawer.value, (newVal) => {
+  if (!newVal) {
+    eventAddInitialData.value = null;
+    generatedDataStore.clearEventToAdd();
+  }
+});
+
 watch(() => generatedDataStore.memberToAdd, (newVal) => {
   if (newVal) {
-    memberAddInitialData.value = { ...newVal, familyId: currentFamilyId.value };
+    memberAddInitialData.value = { ...newVal, familyId: currentFamilyId.value, id: uuidv4() };
     showMemberAddDrawer.value = true;
-  } else {
-    showMemberAddDrawer.value = false;
-    memberAddInitialData.value = null;
   }
 });
 
 watch(() => generatedDataStore.eventToAdd, (newVal) => {
   if (newVal) {
-    eventAddInitialData.value = { ...newVal, familyId: currentFamilyId.value };
+    eventAddInitialData.value = { ...newVal, familyId: currentFamilyId.value, id: uuidv4() };
     showEventAddDrawer.value = true;
-  } else {
-    showEventAddDrawer.value = false;
-    eventAddInitialData.value = null;
   }
 });
 

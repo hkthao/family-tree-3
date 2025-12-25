@@ -5,7 +5,7 @@
     </v-card-title>
     <v-progress-linear v-if="isAddingMember" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" :initial-member-data="props.initialMemberData" />
+      <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" :initial-member-data="props.initialMemberData" :key="props.initialMemberData?.id" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
