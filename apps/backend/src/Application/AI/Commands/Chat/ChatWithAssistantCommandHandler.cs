@@ -103,28 +103,52 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
             _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database. Sử dụng QA mặc định.", PromptConstants.CHAT_QA_PROMPT);
         }
 
+        // --- NEW: Lấy System Prompt cho Family Data Lookup --- 
+        string familyDataLookupSystemPromptContent = "You are a helpful assistant for family data lookup."; // Default fallback prompt
+        var familyDataLookupPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT }, cancellationToken);
+        if (familyDataLookupPromptResult.IsSuccess && familyDataLookupPromptResult.Value?.Content != null)
+        {
+            familyDataLookupSystemPromptContent = familyDataLookupPromptResult.Value.Content;
+        }
+        else
+        {
+            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database. Sử dụng mặc định.", PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT);
+        }
+        // --- END NEW ---
+
         // 6. Xử lý dựa trên ngữ cảnh
         Result<ChatResponse> finalChatResponseResult;
         switch (determinedContext)
         {
             case ContextType.QA:
-            case ContextType.FamilyDataLookup:
             case ContextType.Unknown:
-                _logger.LogInformation("Ngữ cảnh là QA/FamilyDataLookup/Unknown. Gọi dịch vụ AI Chat truyền thống.");
-                var callChatServiceCommand = new CallAiChatServiceCommand
+                _logger.LogInformation("Ngữ cảnh là QA/Unknown. Gọi dịch vụ AI Chat truyền thống với prompt QA.");
+                var qaChatRequest = new ChatRequest
                 {
-                    ChatRequest = new ChatRequest
-                    {
-                        SessionId = request.SessionId,
-                        ChatInput = request.ChatInput,
-                        Metadata = request.Metadata ?? new Dictionary<string, object>(),
-                        Context = determinedContext,
-                        SystemPrompt = qaSystemPromptContent,
-                        CollectionName = _n8nSettings.Chat.CollectionName
-                    }
+                    SessionId = request.SessionId,
+                    ChatInput = request.ChatInput,
+                    Metadata = request.Metadata ?? new Dictionary<string, object>(),
+                    Context = determinedContext,
+                    SystemPrompt = qaSystemPromptContent,
+                    CollectionName = _n8nSettings.Chat.CollectionName
                 };
-                callChatServiceCommand.ChatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
-                finalChatResponseResult = await _mediator.Send(callChatServiceCommand, cancellationToken);
+                qaChatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
+                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { ChatRequest = qaChatRequest }, cancellationToken);
+                break;
+
+            case ContextType.FamilyDataLookup:
+                _logger.LogInformation("Ngữ cảnh là FamilyDataLookup. Gọi dịch vụ AI Chat truyền thống với prompt Family Data Lookup.");
+                var familyDataLookupChatRequest = new ChatRequest
+                {
+                    SessionId = request.SessionId,
+                    ChatInput = request.ChatInput,
+                    Metadata = request.Metadata ?? new Dictionary<string, object>(),
+                    Context = determinedContext,
+                    SystemPrompt = familyDataLookupSystemPromptContent, // Use specific prompt
+                    CollectionName = _n8nSettings.Chat.CollectionName
+                };
+                familyDataLookupChatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
+                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { ChatRequest = familyDataLookupChatRequest }, cancellationToken);
                 break;
 
             case ContextType.DataGeneration:

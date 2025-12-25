@@ -40,7 +40,7 @@ public class DetermineChatContextCommandHandler : IRequestHandler<DetermineChatC
             _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ cơ sở dữ liệu. Hủy phân tích ngữ cảnh. Lỗi: {Error}", PromptConstants.CONTEXT_CLASSIFICATION_PROMPT, promptResult.Error);
             return Result<ContextClassificationDto>.Failure($"System prompt for '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' not configured or fetched from the database.", promptResult.ErrorSource ?? "Unknown");
         }
-        
+
         var systemPrompt = promptResult.Value?.Content;
 
         if (string.IsNullOrEmpty(systemPrompt))
