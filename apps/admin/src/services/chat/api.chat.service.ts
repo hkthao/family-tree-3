@@ -3,12 +3,12 @@ import type { ApiClientMethods } from '@/plugins/axios';
 import type { ApiError, Result, ChatResponse, GenerateFamilyDataDto, CombinedAiContentResponse, OcrResultDto } from '@/types'; // Updated imports
 
 export class ApiChatService implements IChatService {
-  constructor(private apiClient: ApiClientMethods) {}
+  constructor(private apiClient: ApiClientMethods) { }
 
-    async sendMessage(familyId: string, sessionId: string, message: string): Promise<Result<ChatResponse, ApiError>> {
-        const response = await this.apiClient.post<ChatResponse>(`/ai/chat`, { familyId: familyId, sessionId: sessionId, chatInput: message });
-      return response;
-    }
+  async sendMessage(familyId: string, sessionId: string, message: string): Promise<Result<ChatResponse, ApiError>> {
+    const response = await this.apiClient.post<ChatResponse>(`/ai/chat`, { familyId: familyId, sessionId: sessionId, chatInput: message });
+    return response;
+  }
 
   async generateFamilyData(command: GenerateFamilyDataDto): Promise<Result<CombinedAiContentResponse, ApiError>> {
     const response = await this.apiClient.post<CombinedAiContentResponse>(

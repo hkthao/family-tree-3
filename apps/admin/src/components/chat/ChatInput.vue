@@ -20,7 +20,7 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item @click="addImagePdf">
+          <v-list-item @click="triggerFileInput">
             <v-list-item-title>{{ t('chatInput.menu.addImagePdf') }}</v-list-item-title>
           </v-list-item>
           <v-list-item @click="getCurrentLocation">
@@ -35,11 +35,13 @@
       </v-btn>
     </template>
   </v-textarea>
+  <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*,application/pdf" style="display: none;">
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useChatInput } from '@/composables/chat/useChatInput';
 
 const props = defineProps({
   modelValue: String,
@@ -51,60 +53,26 @@ const props = defineProps({
 const emit = defineEmits([
   'update:modelValue',
   'sendMessage',
-  'addAttachment',
+  'addAttachment', // Keep this for now, might be removed later if addImagePdf handles everything
   'addLocation',
 ]);
 
 const { t } = useI18n();
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
-const updateModelValue = (value: string) => {
-  emit('update:modelValue', value);
+const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation } = useChatInput(props, emit);
+
+const triggerFileInput = () => {
+  fileInput.value?.click();
 };
 
-const handleEnterKey = (event: KeyboardEvent) => {
-  if (!event.shiftKey) {
-    event.preventDefault(); // Prevent new line
-    sendMessage();
-  }
-};
-
-const sendMessage = () => {
-  if (props.modelValue?.trim() && !props.disabled) {
-    emit('sendMessage');
-  }
-};
-
-const addImagePdf = () => {
-  console.log('Add Image/PDF clicked');
-  // Placeholder for future implementation
-  emit('addAttachment', 'image'); // Default to image for now, can be expanded
-};
-
-const getCurrentLocation = () => {
-  console.log('Get Current Location clicked');
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-        // For now, just append to message, later can be a structured input
-        const locationText = `Location: Latitude ${latitude}, Longitude ${longitude}`;
-        emit('addLocation', { latitude, longitude });
-        // Optionally, append to the current message
-        emit('update:modelValue', `${props.modelValue}\n${locationText}`);
-        // You might want to implement reverse geocoding here to get an address
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        // Inform user about error
-        // alert(t('chatInput.errors.locationAccessDenied'));
-      }
-    );
-  } else {
-    console.error('Geolocation is not supported by this browser.');
-    // Inform user about lack of support
-    // alert(t('chatInput.errors.geolocationNotSupported'));
+const handleFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0];
+    await addImagePdf(file);
+    target.value = ''; // Clear the input so the same file can be selected again
   }
 };
 </script>
