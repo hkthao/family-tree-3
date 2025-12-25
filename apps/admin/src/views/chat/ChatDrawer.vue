@@ -104,12 +104,18 @@ watch(() => showMemberAddDrawer.value, (newVal) => {
     memberAddInitialData.value = null;
     generatedDataStore.clearMemberToAdd();
   }
+  else{
+    handleEventFormCloseOrSaved()
+  }
 });
 
 watch(() => showEventAddDrawer.value, (newVal) => {
   if (!newVal) {
     eventAddInitialData.value = null;
     generatedDataStore.clearEventToAdd();
+  }
+  else{
+    handleMemberFormCloseOrSaved()
   }
 });
 

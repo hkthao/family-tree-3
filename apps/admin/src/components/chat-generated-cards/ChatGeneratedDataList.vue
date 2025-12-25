@@ -1,6 +1,5 @@
 <template>
-  <v-card class="mt-4" flat variant="outlined">
-    <v-card-title class="pa-2">{{ t('aiChat.generatedData') }}</v-card-title>
+  <v-card class="mt-2" flat>
     <v-list density="compact">
       <template v-for="(member, index) in generatedData.members" :key="`member-${index}`">
         <v-list-item>
