@@ -8,9 +8,7 @@
       <v-card-text class="pa-0">
         <template v-if="currentFamilyId">
           <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)"
-            @open-relationship-detection="openRelationshipDetection"
-            @add-generated-member="handleAddGeneratedMember"
-            @add-generated-event="handleAddGeneratedEvent" />
+            @open-relationship-detection="openRelationshipDetection" />
         </template>
         <template v-else>
           <div class="d-flex flex-column justify-center align-center">
@@ -30,35 +28,25 @@
 
   <v-navigation-drawer v-model="showRelationshipDetectionDrawer" location="right" temporary width="450">
     <v-container fluid>
-      <RelationshipDetector 
-      :narrowView="true"
-      :initial-family-id="relationshipDetectionFamilyId" />
+      <RelationshipDetector :narrowView="true" :initial-family-id="relationshipDetectionFamilyId" />
     </v-container>
   </v-navigation-drawer>
 
   <!-- Member Add Drawer -->
   <v-navigation-drawer v-model="showMemberAddDrawer" location="right" temporary width="450">
-    <MemberAddView 
-      :family-id="String(currentFamilyId)"
-      :initial-member-data="memberAddInitialData"
-      @close="showMemberAddDrawer = false"
-      @saved="handleSavedMember"
-    />
+    <MemberAddView :family-id="String(currentFamilyId)" :initial-member-data="memberAddInitialData"
+      @close="generatedDataStore.clearMemberToAdd()" @saved="generatedDataStore.clearMemberToAdd()" />
   </v-navigation-drawer>
 
   <!-- Event Add Drawer -->
   <v-navigation-drawer v-model="showEventAddDrawer" location="right" temporary width="450">
-    <EventAddView 
-      :family-id="String(currentFamilyId)"
-      :initial-event-data="eventAddInitialData"
-      @close="showEventAddDrawer = false"
-      @saved="handleSavedEvent"
-    />
+    <EventAddView :family-id="String(currentFamilyId)" :initial-event-data="eventAddInitialData"
+      @close="generatedDataStore.clearEventToAdd()" @saved="generatedDataStore.clearEventToAdd()" />
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
-import { type PropType, ref, computed } from 'vue';
+import { type PropType, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ChatView from '@/views/chat/ChatView.vue';
@@ -66,9 +54,9 @@ import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyName } from '@/composables/family';
 import RelationshipDetector from '@/components/relationship/RelationshipDetector.vue';
-import MemberAddView from '@/views/member/MemberAddView.vue'; // New import
-import EventAddView from '@/views/event/EventAddView.vue';   // New import
-import type { MemberDto, EventDto } from '@/types'; // Import types
+import MemberAddView from '@/views/member/MemberAddView.vue';
+import EventAddView from '@/views/event/EventAddView.vue';
+import { useGeneratedDataStore } from '@/stores/generatedData.store'; // New import
 
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -101,35 +89,38 @@ const selectedFamilyForChat = ref<string | null>(null);
 const showRelationshipDetectionDrawer = ref(false);
 const relationshipDetectionFamilyId = ref<string | undefined>(undefined);
 
-// New reactive variables for member and event add drawers
+// Use the generated data store
+const generatedDataStore = useGeneratedDataStore();
+
+// Reactive variables for member and event add drawers
 const showMemberAddDrawer = ref(false);
-const memberAddInitialData = ref<MemberDto | null>(null);
+const memberAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with MemberDto
 const showEventAddDrawer = ref(false);
-const eventAddInitialData = ref<EventDto | null>(null);
+const eventAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with EventDto
+
+watch(() => generatedDataStore.memberToAdd, (newVal) => {
+  if (newVal) {
+    memberAddInitialData.value = { ...newVal, familyId: currentFamilyId.value };
+    showMemberAddDrawer.value = true;
+  } else {
+    showMemberAddDrawer.value = false;
+    memberAddInitialData.value = null;
+  }
+});
+
+watch(() => generatedDataStore.eventToAdd, (newVal) => {
+  if (newVal) {
+    eventAddInitialData.value = { ...newVal, familyId: currentFamilyId.value };
+    showEventAddDrawer.value = true;
+  } else {
+    showEventAddDrawer.value = false;
+    eventAddInitialData.value = null;
+  }
+});
 
 const openRelationshipDetection = (familyId: string) => {
   relationshipDetectionFamilyId.value = familyId;
   showRelationshipDetectionDrawer.value = true;
-};
-
-const handleAddGeneratedMember = (memberData: MemberDto) => {
-  memberAddInitialData.value = { ...memberData, familyId: currentFamilyId.value };
-  showMemberAddDrawer.value = true;
-};
-
-const handleAddGeneratedEvent = (eventData: EventDto) => {
-  eventAddInitialData.value = { ...eventData, familyId: currentFamilyId.value };
-  showEventAddDrawer.value = true;
-};
-
-const handleSavedMember = () => {
-  showMemberAddDrawer.value = false;
-  // Potentially refresh chat messages here if needed, or emit an event to ChatView
-};
-
-const handleSavedEvent = () => {
-  showEventAddDrawer.value = false;
-  // Potentially refresh chat messages here if needed, or emit an event to ChatView
 };
 
 const currentFamilyId = computed(() => {
@@ -149,9 +140,4 @@ const startChatWithSelectedFamily = () => {
     emit('update:modelValue', false);
   }
 };
-
 </script>
-
-<style scoped>
-/* Add any specific styles for the ChatDrawer here */
-</style>

@@ -8,7 +8,11 @@
             <UserChatMessage :message="message" :userProfile="state.userProfile" />
           </template>
           <template v-else>
-            <AiChatMessage :message="message" :familyId="props.familyId" @open-relationship-detection="(familyId) => emit('open-relationship-detection', familyId)" />
+            <AiChatMessage
+              :message="message"
+              :familyId="props.familyId"
+              @open-relationship-detection="(familyId) => emit('open-relationship-detection', familyId)"
+            />
           </template>
           <template v-if="!message.text">
             <!-- Debugging: log message if text is empty or not a string -->
@@ -43,9 +47,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'; // Added onMounted for debugging
-import { useI18n } from 'vue-i18n'; // Keep useI18n for `t` function in template
-import { useChatView } from '@/composables/ai/useChatView'; // Import the new composable
+import { ref, watch, nextTick, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useChatView } from '@/composables/ai/useChatView';
 import UserChatMessage from '@/components/chat-message/UserChatMessage.vue';
 import AiChatMessage from '@/components/chat-message/AiChatMessage.vue';
 
@@ -55,8 +59,6 @@ const props = defineProps<{
 
 const emit = defineEmits([
   'open-relationship-detection',
-  'add-generated-member',
-  'add-generated-event',
 ]);
 
 const { t } = useI18n(); // Keep t for template

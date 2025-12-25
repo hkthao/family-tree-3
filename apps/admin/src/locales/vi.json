@@ -238,6 +238,8 @@
   "common.date": "Ngày",
   "common.born": "Sinh",
   "common.died": "Mất",
+  "common.male": "Nam",
+  "common.female": "Nữ",
   "common.delete": "Xóa",
   "common.edit": "Chỉnh sửa",
   "common.errors.loadUserById": "Không thể tải thông tin người dùng.",
