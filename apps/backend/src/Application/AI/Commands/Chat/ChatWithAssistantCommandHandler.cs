@@ -178,6 +178,15 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 }
                 break;
 
+            case ContextType.RelationshipLookup:
+                _logger.LogInformation("Ngữ cảnh là RelationshipLookup. Đề xuất chuyển hướng đến trang quản lý mối quan hệ.");
+                finalChatResponseResult = Result<ChatResponse>.Success(new ChatResponse
+                {
+                    Output = "Để xác định và quản lý mối quan hệ giữa các thành viên, vui lòng truy cập trang quản lý mối quan hệ.",
+                    Intent = IntentConstants.RELATIONSHIP_LOOKUP_PAGE // Use the constant here
+                });
+                break;
+
             default:
                 _logger.LogWarning("Ngữ cảnh không được xử lý: {Context}. Mặc định về QA.", determinedContext);
                 goto case ContextType.QA;

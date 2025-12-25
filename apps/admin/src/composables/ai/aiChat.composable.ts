@@ -19,14 +19,14 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
   const sessionId = uuidv4(); // Generate a session ID once per chat session
   const messages = ref<AiChatMessage[]>([
     { sender: 'ai', text: t('aiChat.welcomeMessage') },
-    {sender: 'ai', text: `Dưới đây là một số thông tin chính về ứng dụng Gia Phả Việt:
-- Ứng dụng Gia Phả Việt là hệ thống quản lý gia phả toàn diện, giúp người dùng tạo, quản lý, trực quan hóa và chia sẻ cây gia phả một cách dễ dàng.
-- Ứng dụng tập trung vào bảo tồn lịch sử gia đình, cung cấp các công cụ trực quan để theo dõi các thành viên và mối quan hệ trong gia đình.
-- Người dùng có thể thêm thông tin, sự kiện liên quan đến thành viên gia đình, cũng như tạo các tiểu sử, câu chuyện giúp lưu giữ ký ức gia đình.
-- Ứng dụng hỗ trợ tùy chọn sử dụng AI để tạo nội dung tiểu sử hay hỗ trợ quản lý dữ liệu gia đình.
-- Người dùng cần chịu trách nhiệm cung cấp thông tin chính xác và sử dụng các tính năng một cách có trách nhiệm, tôn trọng quyền riêng tư và các quy định hiện hành.
+//     {sender: 'ai', text: `Dưới đây là một số thông tin chính về ứng dụng Gia Phả Việt:
+// - Ứng dụng Gia Phả Việt là hệ thống quản lý gia phả toàn diện, giúp người dùng tạo, quản lý, trực quan hóa và chia sẻ cây gia phả một cách dễ dàng.
+// - Ứng dụng tập trung vào bảo tồn lịch sử gia đình, cung cấp các công cụ trực quan để theo dõi các thành viên và mối quan hệ trong gia đình.
+// - Người dùng có thể thêm thông tin, sự kiện liên quan đến thành viên gia đình, cũng như tạo các tiểu sử, câu chuyện giúp lưu giữ ký ức gia đình.
+// - Ứng dụng hỗ trợ tùy chọn sử dụng AI để tạo nội dung tiểu sử hay hỗ trợ quản lý dữ liệu gia đình.
+// - Người dùng cần chịu trách nhiệm cung cấp thông tin chính xác và sử dụng các tính năng một cách có trách nhiệm, tôn trọng quyền riêng tư và các quy định hiện hành.
 
-Nếu bạn cần hướng dẫn chi tiết hơn về các tính năng hoặc cách sử dụng ứng dụng, tôi sẵn sàng hỗ trợ thêm nhé!`},
+// Nếu bạn cần hướng dẫn chi tiết hơn về các tính năng hoặc cách sử dụng ứng dụng, tôi sẵn sàng hỗ trợ thêm nhé!`},
   ]);
 
   const {

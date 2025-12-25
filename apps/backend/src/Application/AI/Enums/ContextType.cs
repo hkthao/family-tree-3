@@ -23,5 +23,10 @@ public enum ContextType
     /// <summary>
     /// Ngữ cảnh yêu cầu tạo dữ liệu JSON từ đoạn chat.
     /// </summary>
-    DataGeneration = 3
+    DataGeneration = 3,
+
+    /// <summary>
+    /// Ngữ cảnh liên quan đến xác định mối quan hệ giữa hai thành viên.
+    /// </summary>
+    RelationshipLookup = 4
 }
