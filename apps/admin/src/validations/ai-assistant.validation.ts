@@ -6,7 +6,7 @@ interface AiAssistantFormState {
   chatInput: string;
 }
 
-export function useAiAssistantRules(state: AiAssistantFormState) {
+export function useAiAssistantRules(_state: AiAssistantFormState) {
   const { t } = useI18n();
   const rulesVuetify = useRules();
 

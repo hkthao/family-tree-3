@@ -53,7 +53,11 @@ const props = defineProps<{
   familyId: string;
 }>();
 
-const emit = defineEmits(['open-relationship-detection']);
+const emit = defineEmits([
+  'open-relationship-detection',
+  'add-generated-member',
+  'add-generated-event',
+]);
 
 const { t } = useI18n(); // Keep t for template
 const chatMessagesContainer = ref<HTMLElement | null>(null);
