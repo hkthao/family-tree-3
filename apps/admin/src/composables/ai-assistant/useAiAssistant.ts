@@ -1,10 +1,10 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
 import { useConfirmDialog } from '@/composables/ui/useConfirmDialog';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import type { GenerateFamilyDataDto, CardData, MemberDto, EventDto } from '@/types';
+import type { GenerateFamilyDataDto, CardData, MemberDto, EventDto, OcrResultDto, CombinedAiContentDto } from '@/types';
 import { mapCombinedAiContentToCardData } from '@/composables/ai-assistant/aiAssistant.transform';
 
 interface Message {
@@ -46,6 +46,8 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
   const savingCardId = ref<string | null>(null);
   const addEventDrawer = ref(false); // New ref for EventAddView drawer
   const eventDataToAdd = ref<EventDto | null>(null); // New ref to hold event data to add
+  const selectedFile = ref<File | null>(null); // New ref for uploaded file
+  const isLoadingOcr = ref(false); // New ref for OCR loading state
 
   const sendMessage = async () => {
     if (chatInput.value.trim()) {
@@ -73,6 +75,45 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
         isLoadingAiResponse.value = false;
       }
     }
+  };
+
+  const handleFileChange = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      selectedFile.value = target.files[0];
+      await processOcr(); // Automatically process after file selection
+    } else {
+      selectedFile.value = null;
+    }
+  };
+
+  const processOcr = async () => {
+    if (!selectedFile.value) {
+      showSnackbar(t('aiAssistant.selectFileForOcr'), 'warning');
+      return;
+    }
+
+    isLoadingOcr.value = true;
+    try {
+      const ocrResult = await chatService.performOcr(selectedFile.value);
+      if (ocrResult.ok && ocrResult.value) {
+        chatInput.value = ''; // Clear input first
+        await nextTick(); // Wait for the DOM to update with empty value
+        chatInput.value = ocrResult.value.text; // Then set the new value
+        showSnackbar(t('aiAssistant.ocrSuccess'), 'success');
+      } else if (!ocrResult.ok) { // Properly narrow the type
+        showSnackbar(ocrResult.error?.message || t('aiAssistant.ocrError'), 'error');
+      }
+    } catch (error: any) {
+      showSnackbar(error.message || t('aiAssistant.ocrError'), 'error');
+    } finally {
+      isLoadingOcr.value = false;
+      selectedFile.value = null; // Clear selected file after processing
+    }
+  };
+
+  const removeSelectedFile = () => {
+    selectedFile.value = null;
   };
 
   const handleSaveCard = (id: string) => {
@@ -181,6 +222,8 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
       savingCardId,
       addEventDrawer,
       eventDataToAdd,
+      selectedFile,
+      isLoadingOcr,
     }),
     actions: {
       sendMessage,
@@ -190,6 +233,9 @@ export function useAiAssistant(options: UseAiAssistantOptions, deps?: Partial<Ai
       handleEventClosed,
       handleEventSaved,
       handleDeleteCard,
+      handleFileChange,
+      processOcr,
+      removeSelectedFile,
     },
   };
 }

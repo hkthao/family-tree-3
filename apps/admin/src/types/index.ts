@@ -26,3 +26,4 @@ export * from './relationshipDetection.d'; // NEWLY ADDED for relationship detec
 export * from './privacyConfiguration.d';
 export * from './apiError.d';
 export * from './ai.d';
+export * from './ocr.d'; // NEW
