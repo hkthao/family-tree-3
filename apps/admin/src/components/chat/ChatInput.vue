@@ -1,4 +1,15 @@
 <template>
+  <div class="w-100">
+  <v-chip
+    v-if="selectedLocation"
+    class="mb-2"
+    closable
+    color="primary"
+    prepend-icon="mdi-map-marker"
+    @update:modelValue="clearSelectedLocation"
+  >
+    {{ t('chatInput.locationChip') }}
+  </v-chip>
   <v-textarea
     ref="textareaRef"
     no-resize
@@ -36,6 +47,7 @@
     </template>
   </v-textarea>
   <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*,application/pdf" style="display: none;">
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +73,7 @@ const { t } = useI18n();
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation } = useChatInput(props, emit);
+const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation, clearSelectedLocation, selectedLocation } = useChatInput(props, emit);
 
 const triggerFileInput = () => {
   fileInput.value?.click();

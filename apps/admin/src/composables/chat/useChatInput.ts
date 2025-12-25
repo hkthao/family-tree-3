@@ -1,4 +1,4 @@
-import { toRefs } from 'vue';
+import { ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types';
@@ -23,6 +23,8 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
   const { chat: chatService } = useServices();
   const { showSnackbar } = useGlobalSnackbar();
 
+  const selectedLocation = ref<{ latitude: number; longitude: number; address?: string } | null>(null);
+
   const updateModelValue = (value: string) => {
     emit('update:modelValue', value);
   };
@@ -36,7 +38,11 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
 
   const sendMessage = () => {
     const currentModelValue = modelValue?.value ?? '';
-    if (currentModelValue.trim() && !disabled.value) {
+    if ((currentModelValue.trim() || selectedLocation.value) && !disabled.value) {
+      if (selectedLocation.value) {
+        emit('addLocation', selectedLocation.value);
+        clearSelectedLocation();
+      }
       emit('sendMessage');
     }
   };
@@ -71,10 +77,8 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
         (position) => {
           const { latitude, longitude } = position.coords;
           console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-          const locationText = `Location: Latitude ${latitude}, Longitude ${longitude}`;
-          const currentModelValue = modelValue?.value ?? '';
-          emit('addLocation', { latitude, longitude });
-          emit('update:modelValue', `${currentModelValue + '\n'}${locationText}`);
+          selectedLocation.value = { latitude, longitude };
+          showSnackbar(t('chatInput.locationSelected'), 'success');
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -87,12 +91,18 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
     }
   };
 
+  const clearSelectedLocation = () => {
+    selectedLocation.value = null;
+  };
+
   return {
     updateModelValue,
     handleEnterKey,
     sendMessage,
     addImagePdf,
     getCurrentLocation,
+    clearSelectedLocation,
     isPerformingOcr: ocrMutation.isPending,
+    selectedLocation,
   };
 }
