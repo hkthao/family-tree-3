@@ -80,6 +80,13 @@ public class ChatWithAssistantCommandHandlerTestsV2
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "QA System Prompt Content" }));
 
+        // GetPromptByIdQuery for FamilyDataLookup
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Family Data Lookup System Prompt Content" }));
+
+
         // IncrementFamilyAiChatUsageCommand
         _mockMediator.Setup(m => m.Send(
             It.IsAny<IncrementFamilyAiChatUsageCommand>(),
@@ -243,7 +250,7 @@ public class ChatWithAssistantCommandHandlerTestsV2
     }
 
     [Fact]
-    public async Task Handle_ShouldUseDefaultQAPrompt_WhenPromptFetchingFails()
+    public async Task Handle_ShouldReturnFailure_WhenQAPromptFetchingFails()
     {
         // Arrange
         var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "QA question" };
@@ -253,11 +260,37 @@ public class ChatWithAssistantCommandHandlerTestsV2
             .ReturnsAsync(Result<PromptDto>.Failure("Prompt not found", "Configuration"));
 
         // Act
-        await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockMediator.Verify(m => m.Send(
-            It.Is<CallAiChatServiceCommand>(c => c.ChatRequest.SystemPrompt == "You are a helpful assistant."),
-            It.IsAny<CancellationToken>()), Times.Once);
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
+        result.Error.Should().Be("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.");
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenFamilyDataLookupPromptFetchingFails()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "lookup family data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.FamilyDataLookup }));
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Failure("Prompt not found", "Configuration"));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
+        result.Error.Should().Be("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.");
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

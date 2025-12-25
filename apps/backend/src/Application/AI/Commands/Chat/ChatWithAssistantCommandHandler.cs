@@ -92,27 +92,30 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         }
 
         // 5. Lấy System Prompt chung cho QA (dùng cho các ngữ cảnh chat thông thường)
-        string qaSystemPromptContent = string.Empty; // Default fallback prompt
+        string? qaSystemPromptContent = null;
         var qaPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_QA_PROMPT }, cancellationToken);
         if (qaPromptResult.IsSuccess && qaPromptResult.Value?.Content != null)
         {
             qaSystemPromptContent = qaPromptResult.Value.Content;
         }
-        else
+        
+        if (string.IsNullOrWhiteSpace(qaSystemPromptContent))
         {
-            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database. Sử dụng QA mặc định.", PromptConstants.CHAT_QA_PROMPT);
+            return Result<ChatResponse>.Failure("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.", ErrorSources.InvalidConfiguration);
         }
 
         // --- NEW: Lấy System Prompt cho Family Data Lookup --- 
-        string familyDataLookupSystemPromptContent = "You are a helpful assistant for family data lookup."; // Default fallback prompt
+        string? familyDataLookupSystemPromptContent = null;
         var familyDataLookupPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT }, cancellationToken);
         if (familyDataLookupPromptResult.IsSuccess && familyDataLookupPromptResult.Value?.Content != null)
         {
             familyDataLookupSystemPromptContent = familyDataLookupPromptResult.Value.Content;
         }
-        else
+        
+        if (string.IsNullOrWhiteSpace(familyDataLookupSystemPromptContent))
         {
-            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database. Sử dụng mặc định.", PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT);
+            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database và không có prompt mặc định. Trả về lỗi.", PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT);
+            return Result<ChatResponse>.Failure("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.", ErrorSources.InvalidConfiguration);
         }
         // --- END NEW ---
 
