@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
@@ -72,7 +72,15 @@ const { t } = useI18n();
 const {
   state: { selectedFamilyId, selectedMemberAId, selectedMemberBId, result, loading, error },
   actions: { detectRelationship },
-} = useRelationshipDetector(props.initialFamilyId);
+} = useRelationshipDetector(props.initialFamilyId, t);
+
+watch(() => props.initialFamilyId, (newFamilyId) => {
+  selectedFamilyId.value = newFamilyId;
+  selectedMemberAId.value = undefined;
+  selectedMemberBId.value = undefined;
+  result.value = null;
+  error.value = null;
+});
 </script>
 
 <style scoped>
