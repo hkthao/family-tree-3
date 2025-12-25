@@ -42,7 +42,7 @@ public class AiGenerateService : IAiGenerateService
     /// <returns>Kết quả chứa dữ liệu có cấu trúc đã phân tích.</returns>
     public async Task<Result<T>> GenerateDataAsync<T>(GenerateRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_n8nSettings.Chat.GenerateWebhookUrl))
+        if (string.IsNullOrEmpty(_n8nSettings.Chat.ChatWebhookUrl))
         {
             _logger.LogWarning("n8n structured data webhook URL is not configured.");
             return Result<T>.Failure("n8n structured data integration is not configured.", "Configuration");
@@ -65,14 +65,15 @@ public class AiGenerateService : IAiGenerateService
 
         // The request object itself contains all necessary data including ChatInput, SystemPrompt, and Metadata
         // We can directly serialize the request object as the payload for the webhook
+        request.Context = Application.AI.Enums.ContextType.DataGeneration;
         var jsonPayload = JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
         try
         {
-            _logger.LogInformation("Calling n8n structured data webhook at {Url} with payload: {Payload}", _n8nSettings.Chat.GenerateWebhookUrl, jsonPayload);
+            _logger.LogInformation("Calling n8n structured data webhook at {Url} with payload: {Payload}", _n8nSettings.Chat.ChatWebhookUrl, jsonPayload);
 
-            var response = await httpClient.PostAsync(_n8nSettings.Chat.GenerateWebhookUrl, content, cancellationToken);
+            var response = await httpClient.PostAsync(_n8nSettings.Chat.ChatWebhookUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -144,7 +145,7 @@ public class AiGenerateService : IAiGenerateService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred while calling the n8n structured data webhook at {Url}.", _n8nSettings.Chat.GenerateWebhookUrl);
+            _logger.LogError(ex, "An exception occurred while calling the n8n structured data webhook at {Url}.", _n8nSettings.Chat.ChatWebhookUrl);
             return Result<T>.Failure($"An error occurred: {ex.Message}", "Exception");
         }
     }
