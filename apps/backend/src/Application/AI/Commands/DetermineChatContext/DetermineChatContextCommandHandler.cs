@@ -41,8 +41,13 @@ public class DetermineChatContextCommandHandler : IRequestHandler<DetermineChatC
             return Result<ContextClassificationDto>.Failure($"System prompt for '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' not configured or fetched from the database.", promptResult.ErrorSource ?? "Unknown");
         }
         
-        // Use the fetched prompt's Value, ensuring it's not null before assignment
-        var systemPrompt = promptResult.Value?.Content ?? throw new InvalidOperationException("System prompt content fetched from database is null or empty.");
+        var systemPrompt = promptResult.Value?.Content;
+
+        if (string.IsNullOrEmpty(systemPrompt))
+        {
+            _logger.LogError("Nội dung system prompt cho '{PromptCode}' lấy từ database là null hoặc trống. Hủy tạo AI.", PromptConstants.CONTEXT_CLASSIFICATION_PROMPT);
+            return Result<ContextClassificationDto>.Failure($"Nội dung system prompt cho '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' là null hoặc trống.", "Configuration");
+        }
 
         var generateRequest = new GenerateRequest
         {
