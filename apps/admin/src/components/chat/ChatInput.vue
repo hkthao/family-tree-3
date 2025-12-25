@@ -13,7 +13,8 @@
   <v-textarea
     ref="textareaRef"
     no-resize
-    :auto-grow="false"
+    :auto-grow="true"
+    :max-rows="5"
     counter
     :rows="2"
     :model-value="modelValue"
