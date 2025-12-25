@@ -32,7 +32,7 @@
 import type { PropType } from 'vue';
 import type { AiChatMessage, EventDto, MemberDto } from '@/types';
 import { useI18n } from 'vue-i18n';
-import ChatGeneratedDataList from '@/components/chat-generated-cards/ChatGeneratedDataList.vue'; // New import
+import ChatGeneratedDataList from '@/components/chat/ChatGeneratedDataList.vue'; // New import
 
 defineProps({
   message: {

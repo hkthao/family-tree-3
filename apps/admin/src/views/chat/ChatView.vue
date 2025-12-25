@@ -11,7 +11,7 @@
             <AiChatMessage
               :message="message"
               :familyId="props.familyId"
-              @open-relationship-detection="(familyId) => emit('open-relationship-detection', familyId)"
+              @open-relationship-detection="(familyId: string) => emit('open-relationship-detection', familyId)"
             />
           </template>
           <template v-if="!message.text">
@@ -50,8 +50,8 @@
 import { ref, watch, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useChatView } from '@/composables/ai/useChatView';
-import UserChatMessage from '@/components/chat-message/UserChatMessage.vue';
-import AiChatMessage from '@/components/chat-message/AiChatMessage.vue';
+import UserChatMessage from '@/components/chat/UserChatMessage.vue';
+import AiChatMessage from '@/components/chat/AiChatMessage.vue';
 
 import ChatInput from '@/components/chat/ChatInput.vue';
 

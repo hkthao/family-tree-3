@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n'; // ADDED
-import AICard from '@/components/chat-generated-cards/AICard.vue';
+import AICard from '@/components/chat/AICard.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
