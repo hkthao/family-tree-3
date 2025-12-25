@@ -1,6 +1,13 @@
+import type { FamilyDto } from '@/types/family.d';
+import type { MemberDto } from '@/types/member.d';
+import type { EventDto } from '@/types/event.d';
+import type { CombinedAiContentDto } from '@/types/ai.d'; // Import CombinedAiContentDto from ai.d.ts
+
 export interface AiChatMessage {
   sender: 'user' | 'ai';
   text: string;
+  intent?: string; // New property
+  generatedData?: CombinedAiContentDto; // Also add generatedData for consistency
 }
 
 export interface ChatMessage {
@@ -25,5 +32,7 @@ export interface MessageItem {
 }
 
 export interface ChatResponse {
-  output: string;
+  output?: string;
+  generatedData?: CombinedAiContentDto;
+  intent?: string;
 }

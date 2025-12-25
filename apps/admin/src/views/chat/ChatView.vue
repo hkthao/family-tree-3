@@ -5,27 +5,10 @@
         <div v-for="(message, index) in state.messages" :key="index"
           :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
           <template v-if="message.sender === 'user'">
-            <v-sheet class="ma-1 pa-2 text-wrap" color="primary" rounded="lg">
-              <div class="message-content">
-                {{ message.text }}
-              </div>
-            </v-sheet>
-            <v-avatar cover class="ml-1" size="36">
-              <v-img v-if="state.userProfile?.value?.avatar"
-                :src="getAvatarUrl(state.userProfile.value.avatar, undefined)"
-                :alt="state.userProfile.value.name || 'User'" />
-              <v-icon v-else>mdi-account-circle</v-icon>
-            </v-avatar>
+            <UserChatMessage :message="message" :userProfile="state.userProfile" />
           </template>
           <template v-else>
-            <v-avatar class="mr-1" size="36">
-              <v-icon>mdi-robot-outline</v-icon>
-            </v-avatar>
-            <v-sheet class="ma-1 pa-2 text-wrap" color="secondary" rounded="lg">
-              <div class="message-content">
-                {{ message.text }}
-              </div>
-            </v-sheet>
+            <AiChatMessage :message="message" :familyId="props.familyId" />
           </template>
           <template v-if="!message.text">
             <!-- Debugging: log message if text is empty or not a string -->
@@ -62,8 +45,9 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onUnmounted } from 'vue'; // Added onMounted for debugging
 import { useI18n } from 'vue-i18n'; // Keep useI18n for `t` function in template
-import { getAvatarUrl } from '@/utils/avatar.utils'; // Keep getAvatarUrl as it's a utility
 import { useChatView } from '@/composables/ai/useChatView'; // Import the new composable
+import UserChatMessage from '@/components/chat-message/UserChatMessage.vue';
+import AiChatMessage from '@/components/chat-message/AiChatMessage.vue';
 
 const props = defineProps<{
   familyId: string;
@@ -155,7 +139,9 @@ onUnmounted(() => {
 }
 
 .message-content {
-  white-space: pre-wrap; /* Preserves whitespace and wraps text */
-  word-break: break-word; /* Ensures long words break to prevent overflow */
+  white-space: pre-wrap;
+  /* Preserves whitespace and wraps text */
+  word-break: break-word;
+  /* Ensures long words break to prevent overflow */
 }
 </style>
