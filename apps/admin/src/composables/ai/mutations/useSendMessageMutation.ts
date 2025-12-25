@@ -21,7 +21,12 @@ export function useSendMessageMutation(
       mutationFn: async (payload: SendMessagePayload) => {
         const result: Result<ChatResponse, ApiError> = await chatService.sendMessage(payload.familyId, payload.sessionId, payload.message);
         if (result.ok) {
-          return { sender: 'ai', text: result.value.output } as AiChatMessage;
+          return {
+            sender: 'ai',
+            text: result.value.output || '',
+            intent: result.value.intent,
+            generatedData: result.value.generatedData,
+          } as AiChatMessage;
         } else {
           throw result.error;
         }
