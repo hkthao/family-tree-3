@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 type TranslateFunction = (key: string) => string;
 
 interface GetInitialEventFormDataProps {
-  initialEventData?: EventDto;
+  initialEventData?: EventDto | null;
   familyId?: string;
 }
 

@@ -17,7 +17,7 @@ import {
 
 interface EventFormProps {
   readOnly?: boolean;
-  initialEventData?: EventDto;
+  initialEventData?: EventDto | null;
   familyId?: string;
 }
 

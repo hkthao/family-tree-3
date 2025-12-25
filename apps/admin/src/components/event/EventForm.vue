@@ -109,7 +109,7 @@ import { useEventForm } from '@/composables';
 
 interface EventFormProps {
   readOnly?: boolean;
-  initialEventData?: EventDto;
+  initialEventData?: EventDto | null; // Allow null for initial data
   familyId?: string;
 }
 

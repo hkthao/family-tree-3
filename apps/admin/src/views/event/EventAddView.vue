@@ -10,6 +10,7 @@
         data-testid="event-form"
         :family-id="props.familyId"
         :allow-family-edit="true"
+        :initial-event-data="props.initialEventData"
       />
     </v-card-text>
     <v-card-actions>
@@ -28,6 +29,7 @@ import { useEventAdd } from '@/composables'; // Import useEventAdd
 
 interface EventAddViewProps {
   familyId?: string;
+  initialEventData?: EventDto | null; // New prop for initial data
 }
 
 const props = defineProps<EventAddViewProps>();
