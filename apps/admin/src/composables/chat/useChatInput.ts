@@ -4,6 +4,7 @@ import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useMutation } from '@tanstack/vue-query';
+import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
 
 interface UseChatInputProps {
   modelValue?: string;
@@ -22,6 +23,7 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
   const { t } = useI18n();
   const { chat: chatService } = useServices();
   const { showSnackbar } = useGlobalSnackbar();
+  const mapDrawerStore = useMapLocationDrawerStore();
 
   const selectedLocation = ref<{ latitude: number; longitude: number; address?: string } | null>(null);
 
@@ -91,6 +93,23 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
     }
   };
 
+  const openMapPicker = async () => {
+    try {
+      const result = await mapDrawerStore.openDrawer();
+      if (result.coordinates) {
+        selectedLocation.value = {
+          latitude: result.coordinates.latitude,
+          longitude: result.coordinates.longitude,
+          address: result.location,
+        };
+        showSnackbar(t('chatInput.locationSelectedFromMap'), 'success');
+      }
+    } catch (error) {
+      console.error('Map location selection cancelled or failed:', error);
+      showSnackbar(t('chatInput.errors.locationSelectionCancelled'), 'info');
+    }
+  };
+
   const clearSelectedLocation = () => {
     selectedLocation.value = null;
   };
@@ -101,6 +120,7 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
     sendMessage,
     addImagePdf,
     getCurrentLocation,
+    openMapPicker,
     clearSelectedLocation,
     isPerformingOcr: ocrMutation.isPending,
     selectedLocation,

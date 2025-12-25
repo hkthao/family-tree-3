@@ -38,6 +38,9 @@
           <v-list-item @click="getCurrentLocation">
             <v-list-item-title>{{ t('chatInput.menu.getCurrentLocation') }}</v-list-item-title>
           </v-list-item>
+          <v-list-item @click="openMapPicker">
+            <v-list-item-title>{{ t('chatInput.menu.selectFromMap') }}</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </template>
@@ -74,7 +77,7 @@ const { t } = useI18n();
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation, clearSelectedLocation, selectedLocation } = useChatInput(props, emit);
+const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation, openMapPicker, clearSelectedLocation, selectedLocation } = useChatInput(props, emit);
 
 const triggerFileInput = () => {
   fileInput.value?.click();
