@@ -34,8 +34,13 @@ public class RelationshipGraph : IRelationshipGraph
             _adjacencyList[relationship.SourceMemberId].Add(new GraphEdge(relationship.SourceMemberId, relationship.TargetMemberId, relationship.Type));
 
             // Add reverse relationship to allow bidirectional traversal
-            var reverseType = GetReverseRelationshipType(relationship.Type);
-            _adjacencyList[relationship.TargetMemberId].Add(new GraphEdge(relationship.TargetMemberId, relationship.SourceMemberId, reverseType));
+            // Only add reverse relationship for types that are 'forward' definitions
+            // Child is inherently a reverse relationship (from child to parent), so we don't need to reverse it again.
+            if (relationship.Type != RelationshipType.Child) 
+            {
+                var reverseType = GetReverseRelationshipType(relationship.Type);
+                _adjacencyList[relationship.TargetMemberId].Add(new GraphEdge(relationship.TargetMemberId, relationship.SourceMemberId, reverseType));
+            }
         }
     }
 
