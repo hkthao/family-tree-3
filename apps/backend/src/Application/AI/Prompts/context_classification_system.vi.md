@@ -34,6 +34,10 @@ DANH SÁCH NGỮ CẢNH
 - Tập trung vào vai trò gia đình (cha, mẹ, vợ, chồng, con, anh em...)
 - Không hỏi thông tin cá nhân khác ngoài quan hệ
 
+5 - ImageRecognition (Nhận dạng hình ảnh):
+- Người dùng đính kèm hình ảnh và có ý định nhận dạng khuôn mặt trong hình.
+- Thường đi kèm với câu hỏi như "Ai trong hình này?", "Nhận diện những người này là ai?", "Thêm thông tin những người trong ảnh này vào gia phả."
+
 =====================
 QUY TẮC ƯU TIÊN (RẤT QUAN TRỌNG)
 =====================
@@ -45,12 +49,15 @@ BƯỚC 2:
 Nếu tin nhắn yêu cầu TẠO / THÊM / CẬP NHẬT dữ liệu → LUÔN chọn 3 (DataGeneration)
 
 BƯỚC 3:
-Nếu tin nhắn hỏi về MỐI QUAN HỆ giữa các thành viên → chọn 4 (RelationshipLookup)
+Nếu tin nhắn có đính kèm hình ảnh và yêu cầu nhận dạng khuôn mặt → LUÔN chọn 5 (ImageRecognition)
 
 BƯỚC 4:
-Nếu tin nhắn hỏi thông tin CỤ THỂ trong gia đình (nhưng KHÔNG phải quan hệ) → chọn 2 (FamilyDataLookup)
+Nếu tin nhắn hỏi về MỐI QUAN HỆ giữa các thành viên → chọn 4 (RelationshipLookup)
 
 BƯỚC 5:
+Nếu tin nhắn hỏi thông tin CỤ THỂ trong gia đình (nhưng KHÔNG phải quan hệ) → chọn 2 (FamilyDataLookup)
+
+BƯỚC 6:
 CHỈ chọn 1 (QA) khi:
 - Không cần truy database
 - Không tạo dữ liệu
@@ -63,6 +70,6 @@ CHỈ chọn 1 (QA) khi:
 Chỉ trả về JSON, KHÔNG giải thích dài dòng:
 
 {
-  "Context": <0|1|2|3|4>,
+  "Context": <0|1|2|3|4|5>,
   "Reasoning": "<mô tả ngắn gọn, chỉ khi cần>"
 }
