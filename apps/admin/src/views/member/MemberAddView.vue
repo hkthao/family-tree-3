@@ -5,7 +5,7 @@
     </v-card-title>
     <v-progress-linear v-if="isAddingMember" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" />
+      <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" :initial-member-data="props.initialMemberData" :key="props.initialMemberData?.id" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -19,11 +19,12 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
-import type { Member } from '@/types';
+import type { MemberAddDto, MemberDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddMemberMutation } from '@/composables';
 interface MemberAddViewProps {
   familyId: string | null;
+  initialMemberData?: MemberDto | null;
 }
 const props = defineProps<MemberAddViewProps>();
 const emit = defineEmits(['close', 'saved']);
@@ -43,7 +44,7 @@ const handleAddMember = async () => {
     memberData.familyId = props.familyId;
   }
 
-  addMember(memberData as Omit<Member, 'id'>, {
+  addMember(memberData as MemberAddDto, {
     onSuccess: () => {
       showSnackbar(t('member.messages.addSuccess'), 'success');
       emit('saved');

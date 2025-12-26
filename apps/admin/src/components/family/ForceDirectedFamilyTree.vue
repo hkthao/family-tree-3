@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
 import * as d3 from 'd3';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
@@ -17,7 +17,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   familyId: { type: String, required: true },
-  members: { type: Array<Member>, default: () => [] },
+  members: { type: Array<MemberDto>, default: () => [] },
   relationships: { type: Array<Relationship>, default: () => [] },
   isMobile: { type: Boolean, default: false }, // New prop
 });
@@ -45,7 +45,7 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   type: 'parent-child' | 'spouse';
 }
 
-const transformData = (members: Member[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
+const transformData = (members: MemberDto[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
   const nodes: GraphNode[] = members.map(m => ({
     id: String(m.id),
     name: m.fullName || `${m.firstName} ${m.lastName}`,

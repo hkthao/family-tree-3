@@ -77,13 +77,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { VForm } from 'vuetify/components';
-import type { Family } from '@/types'; // Updated import
+import type { FamilyDto } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useFamilyForm } from '@/composables';
 
 const props = defineProps<{
-  data?: Family;
+  data?: FamilyDto;
   readOnly?: boolean;
   displayLimitConfig?: boolean;
 }>();

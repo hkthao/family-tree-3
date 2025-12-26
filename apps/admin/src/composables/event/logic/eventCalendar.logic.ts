@@ -1,5 +1,5 @@
 // src/composables/event/logic/eventCalendar.logic.ts
-import type { Event, LunarDate } from '@/types';
+import type { EventDto, LunarDate } from '@/types';
 import { CalendarType } from '@/types/enums';
 import type { DateAdapter, LunarDateAdapter, LunarInstance, SolarInstance } from '@/composables/event/eventCalendar.adapter';
 
@@ -111,7 +111,7 @@ export function getLunarDateRangeFiltersLogic(
  * Formats raw event data into a structure suitable for a calendar component.
  */
 export function formatEventsForCalendarLogic(
-  events: Event[],
+  events: EventDto[],
   selectedDate: Date,
   dateAdapter: DateAdapter,
   lunarDateAdapter: LunarDateAdapter,
@@ -122,7 +122,7 @@ export function formatEventsForCalendarLogic(
   const endOfMonth = dateAdapter.endOfMonth(selectedDate);
 
   return events
-    .map((event: Event) => {
+    .map((event: EventDto) => {
       let eventStart: Date | null = null;
       let eventEnd: Date | null = null;
 

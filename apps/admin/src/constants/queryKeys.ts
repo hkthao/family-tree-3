@@ -29,6 +29,11 @@ export const queryKeys = {
     relationshipsByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'relationships'] as const,
     memberRelationshipsByMemberId: (memberId: string) => [...queryKeys.families.all, memberId, 'relationships'] as const,
   },
+  publicFamilies: { // NEW
+    all: ['publicFamilies'] as const,
+    list: (filters?: FamilyFilter) => [...queryKeys.publicFamilies.all, 'list', filters] as const,
+    detail: (familyId: string) => [...queryKeys.publicFamilies.all, 'detail', familyId] as const,
+  },
   members: {
     all: ['members'] as const,
     detail: (memberId: string) => [...queryKeys.members.all, 'detail', memberId] as const,

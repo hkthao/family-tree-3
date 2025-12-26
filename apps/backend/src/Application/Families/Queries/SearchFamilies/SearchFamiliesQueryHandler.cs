@@ -17,7 +17,7 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
     {
         var query = _context.Families.AsQueryable();
 
-        query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
         query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
         query = query.WithSpecification(new FamilyVisibilitySpecification(request.Visibility));

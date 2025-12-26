@@ -1,37 +1,24 @@
 import type { IFamilyService } from './family.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
 import {
-  type Family,
+  type FamilyDto, // Renamed from Family
   type IFamilyAccess,
   type FamilyExportDto,
-  type FamilyAddDto, // NEW
-  type FamilyUpdateDto, // NEW
+  type FamilyAddDto,
+  type FamilyUpdateDto,
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
 import { ApiCrudService } from '../common/api.crud.service';
+import type { ListOptions, FilterOptions, Paginated } from '@/types'; // NEW
 
-export class ApiFamilyService extends ApiCrudService<Family> implements IFamilyService {
+export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, FamilyUpdateDto> implements IFamilyService {
   constructor(protected http: ApiClientMethods) {
     super(http, '/family');
   }
 
-  async add(newItem: FamilyAddDto): Promise<Result<Family>> {
-    return await this.http.post<Family>(this.baseUrl, newItem);
-  }
-
-  async update(updatedItem: FamilyUpdateDto): Promise<Result<Family>> {
-    const { id } = updatedItem; // Extract id and deletedUserIds
-    // The backend API is expected to handle deletedManagerIds and deletedViewerIds as part of the payload or query params
-    // For now, we'll include it in the payload. Backend will decide how to process.
-    return await this.http.put<Family>(
-      `${this.baseUrl}/${id}`,
-      updatedItem, // Include deletedManagerIds and deletedViewerIds in the payload
-    );
-  }
-
   async addItems(
-    newItems: Omit<Family, 'id'>[],
+    newItems: FamilyAddDto[],
   ): Promise<Result<string[]>> {
 
     return this.http.post<string[]>(`/family/bulk-create`, {
@@ -68,4 +55,18 @@ export class ApiFamilyService extends ApiCrudService<Family> implements IFamilyS
     const payload = { familyId, publicMemberProperties };
     return this.http.put<void>(`/family/${familyId}/privacy-configuration`, payload);
   }
+
+  async searchPublic(listOptions: ListOptions, filterOptions: FilterOptions): Promise<Result<Paginated<FamilyDto>>> {
+    const params = {
+      page: listOptions.page,
+      itemsPerPage: listOptions.itemsPerPage,
+      sortBy: listOptions.sortBy?.map(s => `${s.key}:${s.order}`).join(','),
+      searchQuery: filterOptions.searchQuery,
+    };
+    // Clean up undefined/null values from params
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null));
+
+    return this.http.get<Paginated<FamilyDto>>(`/family/public-search`, { params: cleanParams });
+  }
 }
+

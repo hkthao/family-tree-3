@@ -1,16 +1,16 @@
-using System.Threading.RateLimiting;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Infrastructure.Auth;
+using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.RateLimiting;
+using FamilyTree.Infrastructure; // For ImgbbSettings
+using FamilyTree.Infrastructure.Services; // For ImgbbImageUploadService
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,6 +54,17 @@ public static class DependencyInjection
 
         // Register N8nSettings
         services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
+
+        // Register ImgbbSettings
+        services.Configure<ImgbbSettings>(configuration.GetSection(ImgbbSettings.SectionName));
+
+        // Register ImgbbImageUploadService and configure its HttpClient
+        services.AddHttpClient<IImageUploadService, ImgbbImageUploadService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var imgbbSettings = serviceProvider.GetRequiredService<IOptions<ImgbbSettings>>().Value;
+                    httpClient.BaseAddress = new Uri(imgbbSettings.BaseUrl);
+                });
 
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();

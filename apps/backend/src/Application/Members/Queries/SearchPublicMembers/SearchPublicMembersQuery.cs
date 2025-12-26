@@ -7,7 +7,7 @@ namespace backend.Application.Members.Queries.SearchPublicMembers;
 public record SearchPublicMembersQuery : PaginatedQuery, IRequest<Result<PaginatedList<MemberListDto>>>
 {
     public Guid FamilyId { get; init; }
-    public string? SearchTerm { get; init; }
+    public string? SearchQuery { get; init; }
     public Gender? Gender { get; init; }
     public bool? IsRoot { get; init; }
 }

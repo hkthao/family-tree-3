@@ -3,17 +3,17 @@ using backend.Domain.Entities;
 
 namespace backend.Application.FamilyLocations.Specifications;
 
-public class FamilyLocationSearchTermSpecification : Specification<FamilyLocation>
+public class FamilyLocationSearchQuerySpecification : Specification<FamilyLocation>
 {
-    public FamilyLocationSearchTermSpecification(string? searchTerm)
+    public FamilyLocationSearchQuerySpecification(string? searchTerm)
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var lowerSearchTerm = searchTerm.ToLower(); // Convert search term to lowercase
+            var lowerSearchQuery = searchTerm.ToLower(); // Convert search term to lowercase
 
-            Query.Where(l => l.Name.ToLower().Contains(lowerSearchTerm) || // Convert Name to lowercase
-                             (l.Description != null && l.Description.ToLower().Contains(lowerSearchTerm)) || // Convert Description to lowercase
-                             (l.Address != null && l.Address.ToLower().Contains(lowerSearchTerm))); // Convert Address to lowercase
+            Query.Where(l => l.Name.ToLower().Contains(lowerSearchQuery) || // Convert Name to lowercase
+                             (l.Description != null && l.Description.ToLower().Contains(lowerSearchQuery)) || // Convert Description to lowercase
+                             (l.Address != null && l.Address.ToLower().Contains(lowerSearchQuery))); // Convert Address to lowercase
         }
     }
 }

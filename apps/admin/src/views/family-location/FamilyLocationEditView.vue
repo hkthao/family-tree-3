@@ -25,12 +25,6 @@
         :loading="isUpdatingFamilyLocation" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
           t('common.save') }}</v-btn>
     </v-card-actions>
-    <!-- Map Picker Drawer -->
-    <BaseCrudDrawer v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'" @close="closeMapDrawer">
-      <FamilyMapPicker v-if="mapDrawer"
-        :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
-        @confirm-selection="handleMapCoordinatesSelected" @close="closeMapDrawer" />
-    </BaseCrudDrawer>
   </v-card>
 
 
@@ -39,12 +33,11 @@
 <script setup lang="ts">
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { FamilyLocationForm } from '@/components/family-location'; // Assuming index.ts re-exports it
+import { FamilyLocationForm } from '@/components/family-location';
 import type { FamilyLocation } from '@/types';
-import { useGlobalSnackbar, useCrudDrawer } from '@/composables';
+import { useGlobalSnackbar } from '@/composables';
 import { useFamilyLocationQuery, useUpdateFamilyLocationMutation } from '@/composables';
-import FamilyMapPicker from './FamilyMapPicker.vue'; // Import FamilyMapPicker
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; // Import BaseCrudDrawer
+import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
 
 interface FamilyLocationEditViewProps {
   familyLocationId: string;
@@ -57,6 +50,7 @@ const familyLocationFormRef = ref<InstanceType<typeof FamilyLocationForm> | null
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
+const mapDrawerStore = useMapLocationDrawerStore();
 
 const familyLocationIdRef = toRef(props, 'familyLocationId');
 const {
@@ -65,15 +59,6 @@ const {
   error: familyLocationError,
 } = useFamilyLocationQuery(familyLocationIdRef);
 const { mutate: updateFamilyLocation, isPending: isUpdatingFamilyLocation } = useUpdateFamilyLocationMutation();
-
-// Map Drawer related logic
-const {
-  addDrawer: mapDrawer, // Use alias for map drawer
-  openAddDrawer: openMapDrawer,
-  closeAllDrawers: closeMapDrawer,
-} = useCrudDrawer<string>();
-
-const initialMapCoordinates = ref<{ latitude?: number; longitude?: number }>({});
 
 const handleUpdateFamilyLocation = async () => {
   if (!familyLocationFormRef.value) return;
@@ -104,29 +89,17 @@ const closeForm = () => {
   emit('close');
 };
 
-const handleOpenMapPicker = () => {
-  const currentFormData = familyLocationFormRef.value?.getFormData();
-  initialMapCoordinates.value = {
-    latitude: currentFormData?.latitude,
-    longitude: currentFormData?.longitude,
-  };
-  openMapDrawer();
-};
-
-const handleMapCoordinatesSelected = (payload: { coordinates: { latitude: number; longitude: number; }, location: string }) => {
-  if (familyLocationFormRef.value) {
-    familyLocationFormRef.value.setCoordinates(payload.coordinates.latitude, payload.coordinates.longitude);
-    familyLocationFormRef.value.setAddress(payload.location);
+const handleOpenMapPicker = async () => {
+  try {
+    const result = await mapDrawerStore.openDrawer(); // Open global map picker
+    if (result.coordinates && familyLocationFormRef.value) {
+      familyLocationFormRef.value.setCoordinates(result.coordinates.latitude, result.coordinates.longitude);
+      familyLocationFormRef.value.setAddress(result.location);
+    }
+  } catch (error) {
+    console.error('Map location selection cancelled or failed:', error);
   }
-  closeMapDrawer();
 };
 
 
 </script>
-<style>
-.map-drawer {
-  top: 0px !important;
-  bottom: 0px !important;
-  height: auto !important;
-}
-</style>

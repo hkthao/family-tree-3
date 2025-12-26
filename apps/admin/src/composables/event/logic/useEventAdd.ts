@@ -1,5 +1,5 @@
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types';
+import type { AddEventDto } from '@/types';
 import { type UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useAddEventMutation, type UseAddEventMutationReturn } from '@/composables/event/mutations/useAddEventMutation';
@@ -30,7 +30,7 @@ export function useEventAdd(
   const { showSnackbar } = useGlobalSnackbar();
   const { mutate: addEvent, isPending: isAddingEvent } = useAddEventMutation();
 
-  const handleAddEvent = async (eventData: Omit<Event, 'id'>) => {
+  const handleAddEvent = async (eventData: AddEventDto) => {
     addEvent(eventData, {
       onSuccess: () => {
         showSnackbar(t('event.messages.addSuccess'), 'success');

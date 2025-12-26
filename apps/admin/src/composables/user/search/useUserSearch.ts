@@ -12,40 +12,40 @@ interface UseUserSearchOptions {
 export function useUserSearch(options: UseUserSearchOptions = {}) {
   const { debounceTime = 300, userService = useServices().user } = options;
 
-  const searchTerm = ref('');
-  const debouncedSearchTerm = ref('');
+  const searchQuery = ref('');
+  const debouncedSearchQuery = ref('');
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const { data, isLoading, isFetching, error } = useQuery<Paginated<UserDto>, Error>({
-    queryKey: ['users', debouncedSearchTerm],
+    queryKey: ['users', debouncedSearchQuery],
     queryFn: (async () => {
-      if (!debouncedSearchTerm.value) {
+      if (!debouncedSearchQuery.value) {
         return { items: [] as UserDto[], page: 1, totalItems: 0, totalPages: 0 } as Paginated<UserDto>;
       }
-      const result = await userService.search(debouncedSearchTerm.value, 1, 10);
+      const result = await userService.search(debouncedSearchQuery.value, 1, 10);
       if (result.ok) {
         return result.value;
       }
       throw result.error;
     }) as () => Promise<Paginated<UserDto>>,
     staleTime: 1000 * 60 * 1, // 1 minute
-    enabled: computed(() => !!debouncedSearchTerm.value),
+    enabled: computed(() => !!debouncedSearchQuery.value),
   });
 
-  const handleSearchTermChange = (newSearchTerm: string) => {
+  const handleSearchQueryChange = (newSearchQuery: string) => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
     debounceTimer = setTimeout(() => {
-      debouncedSearchTerm.value = newSearchTerm;
+      debouncedSearchQuery.value = newSearchQuery;
     }, debounceTime);
   };
 
-  watch(searchTerm, handleSearchTermChange);
+  watch(searchQuery, handleSearchQueryChange);
 
   return {
     state: {
-      searchTerm,
+      searchQuery,
       users: computed(() => (data.value as Paginated<UserDto> | undefined)?.items || []),
       isLoading: computed(() => isLoading.value || isFetching.value),
       error,

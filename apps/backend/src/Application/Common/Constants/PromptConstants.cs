@@ -2,9 +2,9 @@ namespace backend.Application.Common.Constants;
 
 public static class PromptConstants
 {
-    public const string FamilyDataGenerationPromptCode = "FAMILY_DATA_GENERATION_PROMPT";
-    public const string StoryGenerationPromptCode = "STORY_GENERATION_PROMPT";
-    public const string GenerateMemberBiographyPromptCode = "GENERATE_MEMBER_BIOGRAPHY_PROMPT";
-    public const string GenerateEventDetailsPromptCode = "GENERATE_EVENT_DETAILS_PROMPT";
-    public const string AiAssistantChatPromptCode = "AI_ASSISTANT_CHAT_PROMPT";
+    public const string FAMILY_DATA_GENERATION_PROMPT = "FAMILY_DATA_GENERATION_PROMPT";
+    public const string RELATIONSHIP_AI_SYSTEM_PROMPT = "RELATIONSHIP_AI_SYSTEM_PROMPT";
+    public const string CONTEXT_CLASSIFICATION_PROMPT = "CONTEXT_CLASSIFICATION_PROMPT";
+    public const string CHAT_QA_PROMPT = "CHAT_QA_PROMPT";
+    public const string CHAT_FAMILY_DATA_LOOKUP_PROMPT = "CHAT_FAMILY_DATA_LOOKUP_PROMPT"; // New constant
 }

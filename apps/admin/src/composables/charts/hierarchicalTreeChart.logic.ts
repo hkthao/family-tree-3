@@ -1,4 +1,4 @@
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
@@ -31,7 +31,7 @@ interface CardDataPayload {
  * @returns An array of transformed data objects for f3.
  */
 export function transformFamilyData(
-  members: Member[],
+  members: MemberDto[],
   relationships: Relationship[],
   rootId: string | null
 ): CardDataPayload[] {
@@ -111,7 +111,7 @@ export function transformFamilyData(
  * @returns The ID of the main person to set for the chart, or undefined if none can be determined.
  */
 export function determineMainChartId(
-  currentMembers: Member[],
+  currentMembers: MemberDto[],
   transformedData: CardDataPayload[],
   providedRootId: string | null
 ): string | undefined {
@@ -127,7 +127,7 @@ export function determineMainChartId(
 
   if (!mainIdToSet) {
     // Fallback to existing logic if providedRootId is not found or not provided
-    const rootMember = currentMembers.find((m: Member) => m.isRoot);
+    const rootMember = currentMembers.find((m: MemberDto) => m.isRoot);
     if (rootMember) {
       mainIdToSet = rootMember.id;
     } else if (transformedData.length > 0) {

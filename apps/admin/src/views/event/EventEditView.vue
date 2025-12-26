@@ -21,12 +21,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { EventForm } from '@/components/event';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import { useEventEdit } from '@/composables'; // Import useEventEdit
 
 interface EventFormExposed {
   validate: () => Promise<boolean>;
-  getFormData: () => Event | Omit<Event, 'id'>;
+  getFormData: () => EventDto | Omit<EventDto, 'id'>;
 }
 
 interface EventEditViewProps {
@@ -54,7 +54,7 @@ const handleUpdateEvent = async () => {
     return;
   }
 
-  const eventToUpdate = eventFormRef.value.getFormData() as Event;
+  const eventToUpdate = eventFormRef.value.getFormData() as EventDto;
   handleUpdateEventComposable(eventToUpdate);
 };
 </script>

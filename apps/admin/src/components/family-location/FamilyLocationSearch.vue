@@ -53,8 +53,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { LocationType, LocationSource } from '@/types';
-import type { FamilyLocationSearchCriteria } from '@/composables';
+import { type FamilyLocationSearchCriteria } from '@/composables';
+import { getLocationTypeOptions, getLocationSourceOptions } from '@/composables/utils/familyLocationOptions';
 
 const emit = defineEmits<{
   (e: 'update:filters', value: FamilyLocationSearchCriteria): void;
@@ -69,23 +69,9 @@ const filters = ref<FamilyLocationSearchCriteria>({
   locationSource: undefined,
 });
 
-const locationTypeOptions = computed(() => {
-  return Object.keys(LocationType)
-    .filter((key) => isNaN(Number(key)))
-    .map((type) => ({
-      title: t(`familyLocation.locationType.${String(type).toLocaleLowerCase()}`),
-      value: LocationType[type as keyof typeof LocationType],
-    }));
-});
+const locationTypeOptions = computed(() => getLocationTypeOptions(t));
 
-const locationSourceOptions = computed(() => {
-  return Object.keys(LocationSource)
-    .filter((key) => isNaN(Number(key)))
-    .map((source) => ({
-      title: t(`familyLocation.source.${String(source).toLocaleLowerCase()}`),
-      value: LocationSource[source as keyof typeof LocationSource],
-    }));
-});
+const locationSourceOptions = computed(() => getLocationSourceOptions(t));
 
 const applyFilters = () => {
   emit('update:filters', filters.value);

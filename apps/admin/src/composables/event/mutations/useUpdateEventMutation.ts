@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
-import type { Event } from '@/types';
+import type { UpdateEventDto } from '@/types';
 import { type EventServiceAdapter, DefaultEventServiceAdapter } from '../event.adapter'; // Updated import
 
 interface UseUpdateEventMutationDeps {
@@ -14,9 +14,9 @@ export function useUpdateEventMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (updatedEvent: Event) => {
+    mutationFn: async (updatedEvent: UpdateEventDto) => {
       if (!updatedEvent.id) {
-        throw new Error('Event ID is required for update');
+        throw new Error('EventDto ID is required for update');
       }
       const response = await eventService.update(updatedEvent); // Use injected service
       if (response.ok) {

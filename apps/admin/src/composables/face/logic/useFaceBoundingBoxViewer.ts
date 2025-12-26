@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, BoundingBox } from '@/types';
 
@@ -8,13 +8,20 @@ export function useFaceBoundingBoxViewer(props: {
   selectable: boolean;
   selectedFaceId: string | null;
   loading: boolean;
+  imageContainer: Ref<HTMLElement | null>; // Change to Ref<HTMLElement | null>
 }, _emit: (event: 'face-selected', face: DetectedFace) => void) {
   const { t } = useI18n();
 
-  const imageContainer = ref<HTMLElement | null>(null);
   const imageLoaded = ref(false);
   const naturalWidth = ref(0);
   const naturalHeight = ref(0);
+
+  // Use a local ref to hold the actual HTMLElement value
+  const containerElement = ref<HTMLElement | null>(null);
+
+  watch(() => props.imageContainer.value, (newVal) => {
+    containerElement.value = newVal;
+  }, { immediate: true }); // Watch immediately to catch initial value
 
   const onImageLoad = (event: Event) => {
     const img = event.target as HTMLImageElement;
@@ -24,10 +31,10 @@ export function useFaceBoundingBoxViewer(props: {
   };
 
   const getBoxStyle = (box: BoundingBox | null | undefined) => {
-    if (!box || !imageLoaded.value || !imageContainer.value) return {};
+    if (!box || !imageLoaded.value || !containerElement.value) return {};
 
-    const containerWidth = imageContainer.value.offsetWidth;
-    const containerHeight = imageContainer.value.offsetHeight;
+    const containerWidth = containerElement.value.offsetWidth;
+    const containerHeight = containerElement.value.offsetHeight;
 
     // Calculate scaling factors
     const scaleX = containerWidth / naturalWidth.value;
@@ -51,7 +58,6 @@ export function useFaceBoundingBoxViewer(props: {
 
   return {
     t,
-    imageContainer,
     imageLoaded,
     onImageLoad,
     getBoxStyle,

@@ -1,53 +1,134 @@
+using System.Net.Http; // Add this
 using backend.Application.AI.Chat;
+using backend.Application.AI.Commands.Chat.CallAiChatService;
+using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
+using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UnitTests.Common; // Corrected
-using backend.Domain.Entities;
+using backend.Application.Common.Models.AppSetting;
+using backend.Application.Common.Queries.ValidateUserAuthentication;
+using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
+using backend.Application.Families.Commands.GenerateFamilyData;
+using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
+using backend.Application.Families.Queries.CheckAiChatQuota;
+using backend.Application.Prompts.DTOs;
+using backend.Application.Prompts.Queries.GetPromptById;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.AI.Commands.Chat;
 
-public class ChatWithAssistantCommandHandlerTests : TestBase
+public class ChatWithAssistantCommandHandlerTestsV2
 {
-    private readonly Mock<IAiChatService> _aiChatServiceMock;
-    private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<ILogger<ChatWithAssistantCommandHandler>> _loggerMock;
+    private readonly Mock<IMediator> _mockMediator;
+    private readonly Mock<IOptions<N8nSettings>> _mockN8nSettings;
+    private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
     private readonly ChatWithAssistantCommandHandler _handler;
 
-    public ChatWithAssistantCommandHandlerTests()
+    public ChatWithAssistantCommandHandlerTestsV2()
     {
-        _aiChatServiceMock = new Mock<IAiChatService>();
-        _currentUserMock = new Mock<ICurrentUser>();
         _loggerMock = new Mock<ILogger<ChatWithAssistantCommandHandler>>();
+        _mockMediator = new Mock<IMediator>();
+        _mockN8nSettings = new Mock<IOptions<N8nSettings>>();
+        _mockHttpClientFactory = new Mock<IHttpClientFactory>();
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockAiGenerateService = new Mock<IAiGenerateService>();
+
+        // Setup N8nSettings mock
+        _mockN8nSettings.Setup(o => o.Value).Returns(new N8nSettings
+        {
+            Chat = new ChatSettings { CollectionName = "DefaultChatCollection" }
+        });
+
+        // Setup default authorization mocks (allow by default for other tests)
+        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>())).Returns(true);
+
         _handler = new ChatWithAssistantCommandHandler(
-            _aiChatServiceMock.Object,
-            _context,
-            _currentUserMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object,
+            _mockMediator.Object,
+            _mockN8nSettings.Object,
+            _mockHttpClientFactory.Object,
+            _mockAuthorizationService.Object
+        ); // Corrected closing parenthesis
 
-        // Thiết lập người dùng hiện tại mặc định
-        _currentUserMock.Setup(u => u.UserId).Returns(Guid.NewGuid());
-        // Thiết lập người dùng hiện tại là đã xác thực
-        _currentUserMock.Setup(u => u.IsAuthenticated).Returns(true);
+        // --- Setup default mediator behaviors ---
+
+        // ValidateUserAuthenticationQuery
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<ValidateUserAuthenticationQuery>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
+        // EnsureFamilyAiConfigExistsCommand
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<EnsureFamilyAiConfigExistsCommand>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
+        // CheckAiChatQuotaQuery
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<CheckAiChatQuotaQuery>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
+        // DetermineChatContextCommand
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.QA })); // Default to QA
+
+        // GetPromptByIdQuery for QA
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_QA_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "QA System Prompt Content" }));
+
+        // GetPromptByIdQuery for FamilyDataLookup
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Family Data Lookup System Prompt Content" }));
+
+
+        // IncrementFamilyAiChatUsageCommand
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<IncrementFamilyAiChatUsageCommand>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
+        // CallAiChatServiceCommand
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<CallAiChatServiceCommand>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ChatResponse>.Success(new ChatResponse { Output = "AI Chat Response" }));
+
+        // GenerateFamilyDataCommand
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<GenerateFamilyDataCommand>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<CombinedAiContentDto>.Success(new CombinedAiContentDto()));
     }
 
-    // Test khi gia đình không tồn tại
+    // --- Orchestrator Tests ---
+
     [Fact]
-    public async Task Handle_GivenNonExistingFamily_ShouldReturnNotFound()
+    public async Task Handle_ShouldReturnUnauthorized_WhenUserNotAuthenticated()
     {
         // Arrange
-        var command = new ChatWithAssistantCommand
-        {
-            FamilyId = Guid.NewGuid(), // ID gia đình không tồn tại
-            SessionId = "session1",
-            ChatInput = "Hello AI"
-        };
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "hi" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<ValidateUserAuthenticationQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Unauthorized("Not authenticated", "Authentication"));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -55,24 +136,19 @@ public class ChatWithAssistantCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be(ErrorSources.NotFound);
-        result.Error.Should().Contain(string.Format(ErrorMessages.FamilyNotFound, command.FamilyId));
-        _aiChatServiceMock.Verify(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        result.ErrorSource.Should().Be("Authentication");
+        result.Error.Should().Be("Not authenticated");
+        _mockMediator.Verify(m => m.Send(It.IsAny<EnsureFamilyAiConfigExistsCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // Test khi người dùng không được xác thực
     [Fact]
-    public async Task Handle_GivenUnauthenticatedUser_ShouldReturnUnauthorized()
+    public async Task Handle_ShouldReturnFailure_WhenEnsureFamilyAiConfigFails()
     {
         // Arrange
-        _currentUserMock.Setup(u => u.IsAuthenticated).Returns(false); // Người dùng không được xác thực
-
-        var command = new ChatWithAssistantCommand
-        {
-            FamilyId = Guid.NewGuid(),
-            SessionId = "session1",
-            ChatInput = "Hello AI"
-        };
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "hi" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<EnsureFamilyAiConfigExistsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure("Config error", "Config"));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -80,33 +156,40 @@ public class ChatWithAssistantCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be(ErrorSources.Authentication);
-        result.Error.Should().Be(ErrorMessages.Unauthorized);
-        _aiChatServiceMock.Verify(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        result.ErrorSource.Should().Be("Config");
+        _mockMediator.Verify(m => m.Send(It.IsAny<ValidateUserAuthenticationQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(m => m.Send(It.IsAny<CheckAiChatQuotaQuery>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // Test khi hạn mức AI chat chưa bị vượt quá
     [Fact]
-    public async Task Handle_GivenQuotaNotExceeded_ShouldIncrementUsageAndCallAiService()
+    public async Task Handle_ShouldReturnQuotaExceeded_WhenQuotaCheckFails()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        var family = Family.Create("Test Family", "TF001", null, null, "Public", Guid.NewGuid());
-        family.Id = familyId;
-        family.FamilyLimitConfiguration!.Update(50, 1024, 5); // Giới hạn 5 lượt
-        family.FamilyLimitConfiguration.IncrementAiChatUsage(); // Sử dụng 1 lượt
-        await _context.Families.AddAsync(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "hi" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<CheckAiChatQuotaQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure("Quota exceeded", "QuotaExceeded"));
 
-        var command = new ChatWithAssistantCommand
-        {
-            FamilyId = familyId,
-            SessionId = "session1",
-            ChatInput = "Hello AI"
-        };
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
 
-        _aiChatServiceMock.Setup(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ChatResponse>.Success(new ChatResponse { Output = "AI Response" }));
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be("QuotaExceeded");
+        _mockMediator.Verify(m => m.Send(It.IsAny<ValidateUserAuthenticationQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(m => m.Send(It.IsAny<EnsureFamilyAiConfigExistsCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(m => m.Send(It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldCallAiChatService_WhenContextIsQA()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "QA question" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.QA }));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -114,76 +197,23 @@ public class ChatWithAssistantCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value!.Output.Should().Be("AI Response");
-
-        // Kiểm tra xem hạn mức đã được tăng
-        var updatedFamily = await _context.Families
-            .Include(f => f.FamilyLimitConfiguration)
-            .FirstOrDefaultAsync(f => f.Id == familyId);
-        updatedFamily!.FamilyLimitConfiguration!.AiChatMonthlyUsage.Should().Be(2); // Đã tăng từ 1 lên 2
-
-        _aiChatServiceMock.Verify(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        result.Value!.Output.Should().Be("AI Chat Response");
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // Test khi hạn mức AI chat bị vượt quá
     [Fact]
-    public async Task Handle_GivenQuotaExceeded_ShouldReturnQuotaExceededError()
+    public async Task Handle_ShouldCallGenerateFamilyData_WhenContextIsDataGeneration()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        var family = Family.Create("Test Family", "TF001", null, null, "Public", Guid.NewGuid());
-        family.Id = familyId;
-        family.FamilyLimitConfiguration!.Update(50, 1024, 1); // Giới hạn 1 lượt
-        family.FamilyLimitConfiguration.IncrementAiChatUsage(); // Sử dụng 1 lượt (đã đạt giới hạn)
-        await _context.Families.AddAsync(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "generate data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<CombinedAiContentDto>.Success(new CombinedAiContentDto()));
 
-        var command = new ChatWithAssistantCommand
-        {
-            FamilyId = familyId,
-            SessionId = "session1",
-            ChatInput = "Hello AI"
-        };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be(ErrorSources.QuotaExceeded);
-        result.Error.Should().Be(ErrorMessages.AiChatQuotaExceeded);
-        _aiChatServiceMock.Verify(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()), Times.Never);
-
-        // Kiểm tra xem hạn mức sử dụng không bị tăng thêm
-        var updatedFamily = await _context.Families
-            .Include(f => f.FamilyLimitConfiguration)
-            .FirstOrDefaultAsync(f => f.Id == familyId);
-        updatedFamily!.FamilyLimitConfiguration!.AiChatMonthlyUsage.Should().Be(1);
-    }
-
-    // Test khi FamilyLimitConfiguration ban đầu là null (trường hợp ngoại lệ)
-    [Fact]
-    public async Task Handle_GivenNullFamilyLimitConfiguration_ShouldInitializeAndProceed()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        var family = Family.Create("Test Family Null Config", "TF003", null, null, "Public", Guid.NewGuid());
-        family.Id = familyId;
-        family.FamilyLimitConfiguration = null; // Cố tình đặt là null
-        await _context.Families.AddAsync(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var command = new ChatWithAssistantCommand
-        {
-            FamilyId = familyId,
-            SessionId = "session1",
-            ChatInput = "Hello AI"
-        };
-
-        _aiChatServiceMock.Setup(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ChatResponse>.Success(new ChatResponse { Output = "AI Response Initialized" }));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -191,16 +221,160 @@ public class ChatWithAssistantCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value!.Output.Should().Be("AI Response Initialized");
+        result.Value!.Output.Should().Be("Dữ liệu gia đình đã được tạo thành công.");
+        result.Value.GeneratedData.Should().NotBeNull();
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 
-        var updatedFamily = await _context.Families
-            .Include(f => f.FamilyLimitConfiguration)
-            .FirstOrDefaultAsync(f => f.Id == familyId);
-        updatedFamily.Should().NotBeNull();
-        updatedFamily!.FamilyLimitConfiguration.Should().NotBeNull();
-        updatedFamily.FamilyLimitConfiguration!.AiChatMonthlyUsage.Should().Be(1); // Đã được khởi tạo và tăng lên 1
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenDataGenerationFails()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "generate data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<CombinedAiContentDto>.Failure("Data gen failed", "Generation"));
 
-        _aiChatServiceMock.Verify(x => x.CallChatWebhookAsync(It.IsAny<ChatRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnAuthorizationFailure_WhenContextIsDataGenerationAndUserNotAuthorized()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "generate data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+
+        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(command.FamilyId)).Returns(false);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.Authorization);
+        result.Error.Should().Be("Bạn không có quyền tạo dữ liệu gia đình.");
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Usage increment should NOT happen
+
+    }
+
+    [Fact]
+    public async Task Handle_ShouldAppendLocationToChatInput_WhenContextIsDataGenerationAndLocationProvided()
+    {
+        // Arrange
+        var initialChatInput = "original chat input";
+        var location = new ChatLocation { Latitude = 10.0, Longitude = 20.0, Address = "Test Address", Source = "current" }; // MODIFIED
+        var familyId = Guid.NewGuid();
+
+        var command = new ChatWithAssistantCommand
+        {
+            FamilyId = familyId,
+            SessionId = "s1",
+            ChatInput = initialChatInput,
+            Location = location
+        };
+
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+
+        // Capture the GenerateFamilyDataCommand sent to mediator
+        GenerateFamilyDataCommand? capturedCommand = null;
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<CombinedAiContentDto>>, CancellationToken>((req, ct) => capturedCommand = (GenerateFamilyDataCommand)req)
+            .ReturnsAsync(Result<CombinedAiContentDto>.Success(new CombinedAiContentDto()));
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        capturedCommand.Should().NotBeNull();
+        capturedCommand!.FamilyId.Should().Be(familyId);
+        capturedCommand!.ChatInput.Should().Contain(initialChatInput);
+        capturedCommand!.ChatInput.Should().Contain($"--- Thông tin vị trí được cung cấp ---");
+        capturedCommand!.ChatInput.Should().Contain($"[Location: Latitude={location.Latitude}, Longitude={location.Longitude}");
+        // Address is optional, so check for it if present
+        if (!string.IsNullOrWhiteSpace(location.Address))
+        {
+            capturedCommand!.ChatInput.Should().Contain($", Address={location.Address}");
+        }
+        // MODIFIED: Add source check
+        capturedCommand!.ChatInput.Should().Contain($", Source={location.Source}]"); // MODIFIED
+
+        _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldIncrementUsage_Always()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "hi" };
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenQAPromptFetchingFails()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "QA question" };
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_QA_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Failure("Prompt not found", "Configuration"));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
+        result.Error.Should().Be("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.");
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenFamilyDataLookupPromptFetchingFails()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "lookup family data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.FamilyDataLookup }));
+        _mockMediator.Setup(m => m.Send(
+            It.Is<GetPromptByIdQuery>(q => q.Code == PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PromptDto>.Failure("Prompt not found", "Configuration"));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
+        result.Error.Should().Be("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.");
+        _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

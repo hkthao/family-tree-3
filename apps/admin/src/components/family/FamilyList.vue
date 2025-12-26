@@ -84,14 +84,14 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { getFamilyAvatarUrl } from '@/utils/avatar.utils';
 import ListToolbar from '@/components/common/ListToolbar.vue';
 import { useDebouncedSearch } from '@/composables';
 
 const props = defineProps<{
-  items: Family[];
+  items: FamilyDto[];
   totalItems: number;
   loading: boolean;
   itemsPerPage: number;
@@ -127,52 +127,50 @@ const headers = computed<DataTableHeader[]>(() => [
     title: t('family.management.headers.avatar'),
     key: 'avatarUrl',
     sortable: false,
-    width: '120px',
+    minWidth: '100px',
     align: 'center',
   },
   {
     title: t('family.management.headers.name'),
     key: 'name',
     sortable: true,
-    width: 'auto',
+    minWidth: '250px',
     align: 'start',
   },
   {
     title: t('family.management.headers.code'),
     key: 'code',
     sortable: true,
-    width: '120px',
+    minWidth: '120px',
     align: 'start',
   },
   {
     title: t('family.management.headers.totalMembers'),
     key: 'totalMembers',
     sortable: true,
-    width: '120px',
+    minWidth: '120px',
     align: 'center',
   },
   {
     title: t('family.management.headers.totalGenerations'),
     key: 'totalGenerations',
     sortable: true,
-    width: '120px',
+    minWidth: '120px',
     align: 'center',
   },
-
-
   {
     title: t('family.management.headers.visibility'),
     key: 'visibility',
     sortable: true,
-    width: '120px',
+    minWidth: '120px',
     align: 'center',
   },
   {
     title: t('family.management.headers.actions'),
     key: 'actions',
     sortable: false,
-    width: '120px',
     align: 'center',
+    fixed: "end",
   },
 ]);
 </script>

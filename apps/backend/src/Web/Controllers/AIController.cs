@@ -1,5 +1,4 @@
-using backend.Application.AI.Chat; // Add this using directive
-using backend.Application.AI.Commands.GenerateAiContent;
+using backend.Application.AI.Chat;
 using backend.Application.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +17,6 @@ public class AiController(IMediator mediator, ILogger<AiController> logger) : Co
 {
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<AiController> _logger = logger;
-
-    /// <summary>
-    /// Tạo nội dung AI dựa trên đầu vào của người dùng và loại yêu cầu.
-    /// </summary>
-    /// <param name="command">Lệnh chứa FamilyId, ChatInput, và ContentType.</param>
-    /// <returns>Nội dung được tạo bởi AI (JSON hoặc văn bản).</returns>
-    [HttpPost("generate-content")]
-    public async Task<IActionResult> GenerateAiContent([FromBody] GenerateAiContentCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger);
-    }
 
     /// <summary>
     /// Gửi tin nhắn đến AI Assistant và nhận phản hồi.

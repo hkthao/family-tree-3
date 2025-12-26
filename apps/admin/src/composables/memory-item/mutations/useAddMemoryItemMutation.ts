@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables';
 import { useI18n } from 'vue-i18n';
-import type { MemoryItem } from '@/types';
+import type { MemoryItem, AddMemoryItemDto } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 
 export const useAddMemoryItemMutation = () => {
@@ -10,8 +10,8 @@ export const useAddMemoryItemMutation = () => {
   const { t } = useI18n();
   const queryClient = useQueryClient();
 
-  return useMutation<MemoryItem, Error, Omit<MemoryItem, 'id'>>({
-    mutationFn: async (newMemoryItem) => {
+  return useMutation<MemoryItem, Error, AddMemoryItemDto>({
+    mutationFn: async (newMemoryItem: AddMemoryItemDto) => {
       if (!newMemoryItem.familyId) {
         throw new Error(t('memoryItem.messages.noFamilyId'));
       }

@@ -432,6 +432,8 @@
   "family.list.action.aiCreate": "Create Family with AI",
   "family.list.action.create": "Add New Family",
   "family.manageFamilies": "Manage Families",
+  "menu.community": "Community",
+
   "family.manageMembers": "Manage Members",
   "family.management.filterLabel": "Filter by Visibility",
   "family.management.headers.actions": "Actions",

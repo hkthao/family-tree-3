@@ -1,14 +1,13 @@
 import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useMutation } from '@tanstack/vue-query';
-import { useRelationshipDetectionStore } from '@/stores/relationshipDetection.store';
 import type { RelationshipDetectionResult } from '@/types/relationshipDetection.d';
+import { useServices } from '@/plugins/services.plugin';
 
-export function useRelationshipDetector() {
-  const { t } = useI18n();
-  const relationshipDetectionStore = useRelationshipDetectionStore();
+export function useRelationshipDetector(initialFamilyId?: string, t?: (key: string) => string) {
+  const i18n_t = t || ((key: string) => key);
+  const { relationship } = useServices();
 
-  const selectedFamilyId = ref<string | undefined>(undefined);
+  const selectedFamilyId = ref<string | undefined>(initialFamilyId || undefined);
   const selectedMemberAId = ref<string | undefined>(undefined);
   const selectedMemberBId = ref<string | undefined>(undefined);
 
@@ -28,36 +27,44 @@ export function useRelationshipDetector() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: { familyId: string; memberAId: string; memberBId: string }) => {
-      // Direct call to the store action
-      return await relationshipDetectionStore.detectRelationship(
+      const response = await relationship.detectRelationship(
         payload.familyId,
         payload.memberAId,
         payload.memberBId
       );
+
+      if (response && response.ok) {
+        return response.value;
+      } else if (response && !response.ok) {
+        // Here we throw an error so onError can catch it
+        throw new Error(response.error?.message || i18n_t('relationshipDetection.genericError'));
+      } else {
+        throw new Error(i18n_t('relationshipDetection.genericError'));
+      }
     },
     onSuccess: (data: RelationshipDetectionResult | null) => {
       // Handle the case where the API returns null or an 'unknown' description
-      if (data && (data.description === 'unknown' || data.description === t('relationshipDetection.noRelationshipFound'))) {
-        error.value = t('relationshipDetection.noRelationshipFound');
+      if (data && (data.description === 'unknown' || data.description === i18n_t('relationshipDetection.noRelationshipFound'))) {
+        error.value = i18n_t('relationshipDetection.noRelationshipFound');
         result.value = null; // Clear result if unknown or no relationship found
       } else if (data) {
         result.value = data;
         error.value = null; // Clear previous errors
       } else {
         // If data is null/undefined and not explicitly handled above
-        error.value = t('relationshipDetection.noRelationshipFound');
+        error.value = i18n_t('relationshipDetection.noRelationshipFound');
         result.value = null;
       }
     },
     onError: (err: any) => {
-      error.value = err.message || t('relationshipDetection.genericError');
+      error.value = err.message || i18n_t('relationshipDetection.genericError');
       result.value = null; // Clear any previous result on error
     },
   });
 
   const detectRelationship = () => {
     if (!selectedFamilyId.value || !selectedMemberAId.value || !selectedMemberBId.value) {
-      error.value = t('relationshipDetection.selectFamilyAndMembersError');
+      error.value = i18n_t('relationshipDetection.selectFamilyAndMembersError');
       return;
     }
 

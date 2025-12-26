@@ -1,74 +1,54 @@
-# 📌 BACKEND IMPLEMENTATION SPEC
+Triển khai một OCR service bằng Python, sử dụng FastAPI, để backend khác có thể upload file và nhận về text đã OCR.
 
-## Feature: **TỦ KỶ VẬT (MEMORY CABINET)**
+Mục tiêu:
+- Nhận file đính kèm (ảnh hoặc PDF)
+- Thực hiện OCR để trích xuất nội dung văn bản
+- Trả về text thuần (plain text) cho backend xử lý tiếp
+- Service này KHÔNG xử lý logic nghiệp vụ gia phả
 
-### 1. Mục tiêu
+Yêu cầu kỹ thuật:
+- Ngôn ngữ: Python
+- Framework: FastAPI
+- OCR engine: Tesseract OCR (qua pytesseract)
+- Hỗ trợ tiếng Việt và tiếng Anh
+- Chạy được độc lập như một microservice
 
-Xây dựng backend cho tính năng **Tủ Kỷ Vật**, cho phép người dùng lưu giữ các kỷ niệm (kỷ vật) gắn với **cá nhân / gia đình / dòng họ**, có thể chứa **nội dung + media + người liên quan**, và hiển thị theo thời gian.
+Endpoint:
+POST /ocr
+- Nhận multipart/form-data
+- Field: file (PDF hoặc image: jpg, png)
+- Response: JSON chứa text OCR
 
----
+Luồng xử lý:
+1. Nhận file upload
+2. Xác định loại file
+   - Nếu PDF: convert từng trang sang image
+   - Nếu image: xử lý trực tiếp
+3. Preprocess image (grayscale, threshold cơ bản)
+4. OCR từng trang / ảnh
+5. Gộp kết quả thành một chuỗi text
+6. Làm sạch text (loại bỏ dòng trống dư thừa)
+7. Trả kết quả cho client
 
-## 2. Phạm vi (Scope – KHÔNG làm ngoài phạm vi này)
+Cấu trúc project đề xuất:
+- main.py: FastAPI app + routing
+- services/ocr_service.py: logic OCR chính
+- utils/file_loader.py: load PDF / image
+- utils/image_preprocess.py: tiền xử lý ảnh
+- utils/text_cleaner.py: làm sạch text
 
-* CRUD Memory Item
-* Upload & quản lý media
-* Gắn người vào kỷ vật
+Yêu cầu code:
+- Code rõ ràng, dễ đọc
+- Tách logic OCR khỏi layer API
+- Có xử lý lỗi cơ bản (file không hỗ trợ, OCR fail)
+- Không lưu file upload lâu dài (xử lý tạm thời)
 
----
+Response format ví dụ:
+{
+  "success": true,
+  "text": "Nội dung văn bản sau OCR..."
+}
 
-## 3. Khái niệm chính
-
-### Memory Item (Kỷ vật)
-
-> Một kỷ niệm hoặc vật kỷ niệm có ý nghĩa, có thể là câu chuyện, hình ảnh, sự kiện, hoặc vật thể.
-
----
-
-## 4. Database Design
-
-### 4.1 `memory_items`
-
-| Field         | Type     | Description                 |        |       |          |          |
-| ------------- | -------- | --------------------------- | ------ | ----- | -------- | -------- |
-| id            | UUID     | Primary key                 |        |       |          |          |
-| family_id     | UUID     |                             |        |       |          |          |
-| title         | string   | Tên kỷ vật                  |        |       |          |          |
-| description   | text     | Nội dung chi tiết           |        |       |          |          |
-| happened_at   | datetime | Thời điểm xảy ra (nullable) |        |       |          |          |
-| emotional_tag | enum     | `happy                      | sad    | proud | memorial | neutral` |
----
-
-### 4.2 `memory_media`
-
-| Field          | Type         |       |       |            |
-| -------------- | ------------ | ----- | ----- | ---------- |
-| id             | UUID         |       |       |            |
-| memory_item_id | UUID (FK)    |       |       |            |
-| type           | enum (`image | video | audio | document`) |
-| url            | string       |       |       |            |
-
----
-
-### 4.3 `memory_persons`
-
-| Field          | Type         |           |           |
-| -------------- | ------------ | --------- | --------- |
-| memory_item_id | UUID         |           |           |
-| memeber_id     | UUID         |           |           |
-
----
-
-## 7. Validation Rules
-
-* `title` bắt buộc
-* `happenedAt` ≤ current date
-
----
-
-## 8. Coding Requirements
-
-* Clean Architecture / Layered Architecture
-* DTO rõ ràng
-* Enum mapping chặt chẽ
-* Soft delete
----
+Ghi chú:
+- Service này được dùng để hỗ trợ nhập liệu số lượng lớn
+- OCR không cần chính xác tuyệt đối, ưu tiên giữ đúng cấu trúc dòng và năm tháng

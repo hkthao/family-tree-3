@@ -393,7 +393,7 @@
         "operationId": "Events_GetEvents",
         "parameters": [
           {
-            "name": "SearchTerm",
+            "name": "SearchQuery",
             "in": "query",
             "schema": {
               "type": "string",

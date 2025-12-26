@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 
 const { t } = useI18n();
 const emit = defineEmits([
@@ -26,7 +26,7 @@ const emit = defineEmits([
 
 const props = defineProps({
   familyId: { type: String, default: null },
-  members: { type: Array<Member>, default: () => [] },
+  members: { type: Array<MemberDto>, default: () => [] },
   relationships: { type: Array<Relationship>, default: () => [] },
   rootId: { type: String, default: null }, // New prop for specifying the root member ID
 });

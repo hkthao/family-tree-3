@@ -5,7 +5,7 @@
     </v-card-title>
     <v-progress-linear v-if="isAddingFamilyLocation" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLocationForm ref="familyLocationFormRef" :family-id="props.familyId" />
+      <FamilyLocationForm ref="familyLocationFormRef" :family-id="props.familyId" :initial-family-location-data="props.initialLocationData" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -19,15 +19,7 @@
         :loading="isAddingFamilyLocation" :disabled="isAddingFamilyLocation">{{
           t('common.save') }}</v-btn>
     </v-card-actions>
-
-    <!-- Map Picker Drawer -->
-    <BaseCrudDrawer class="map-drawer" v-model="mapDrawer" :width="700" :hide-overlay="false" :location="'right'"
-      @close="closeMapDrawer">
-      <FamilyMapPicker v-if="mapDrawer"
-        :initial-center="initialMapCoordinates.latitude && initialMapCoordinates.longitude ? [initialMapCoordinates.longitude, initialMapCoordinates.latitude] : undefined"
-        @confirm-selection="handleMapCoordinatesSelected" @close="closeMapDrawer" />
-    </BaseCrudDrawer>
-  </v-card>
+</v-card>
 
 </template>
 <script setup lang="ts">
@@ -35,13 +27,13 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
 import type { FamilyLocation } from '@/types';
-import { useGlobalSnackbar, useCrudDrawer } from '@/composables';
+import { useGlobalSnackbar } from '@/composables';
 import { useAddFamilyLocationMutation } from '@/composables';
-import FamilyMapPicker from './FamilyMapPicker.vue';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
 
 interface FamilyLocationAddViewProps {
   familyId: string;
+  initialLocationData?: FamilyLocation | null; // Add initialLocationData prop
 }
 const props = defineProps<FamilyLocationAddViewProps>();
 const emit = defineEmits(['close', 'saved']);
@@ -49,17 +41,9 @@ const emit = defineEmits(['close', 'saved']);
 const familyLocationFormRef = ref<InstanceType<typeof FamilyLocationForm> | null>(null);
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
+const mapDrawerStore = useMapLocationDrawerStore();
 
 const { mutate: addFamilyLocation, isPending: isAddingFamilyLocation } = useAddFamilyLocationMutation();
-
-// Map Drawer related logic
-const {
-  addDrawer: mapDrawer, // Use alias for map drawer
-  openAddDrawer: openMapDrawer,
-  closeAllDrawers: closeMapDrawer,
-} = useCrudDrawer<string>();
-
-const initialMapCoordinates = ref<{ latitude?: number; longitude?: number }>({});
 
 const handleAddFamilyLocation = async () => {
   if (!familyLocationFormRef.value) return;
@@ -85,29 +69,17 @@ const closeForm = () => {
   emit('close');
 };
 
-const handleOpenMapPicker = () => {
-  const currentFormData = familyLocationFormRef.value?.getFormData();
-  initialMapCoordinates.value = {
-    latitude: currentFormData?.latitude,
-    longitude: currentFormData?.longitude,
-  };
-  openMapDrawer();
-};
-
-const handleMapCoordinatesSelected = (payload: { coordinates: { latitude: number; longitude: number; }, location: string }) => {
-  if (familyLocationFormRef.value) {
-    familyLocationFormRef.value.setCoordinates(payload.coordinates.latitude, payload.coordinates.longitude);
-    familyLocationFormRef.value.setAddress(payload.location);
+const handleOpenMapPicker = async () => {
+  try {
+    const result = await mapDrawerStore.openDrawer(); // Open global map picker
+    if (result.coordinates && familyLocationFormRef.value) {
+      familyLocationFormRef.value.setCoordinates(result.coordinates.latitude, result.coordinates.longitude);
+      familyLocationFormRef.value.setAddress(result.location);
+    }
+  } catch (error) {
+    console.error('Map location selection cancelled or failed:', error);
   }
-  closeMapDrawer();
 };
 
 
 </script>
-<style>
-.map-drawer {
-  top: 0px !important;
-  bottom: 0px !important;
-  height: auto !important;
-}
-</style>

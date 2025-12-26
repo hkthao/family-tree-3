@@ -5,7 +5,7 @@ import { LocationAccuracy, LocationSource, LocationType } from '@/types';
 import { getLocationTypeOptions, getLocationAccuracyOptions, getLocationSourceOptions } from '@/composables/utils/familyLocationOptions';
 
 interface UseFamilyLocationFormLogicProps {
-  initialFamilyLocationData?: FamilyLocation;
+  initialFamilyLocationData?: FamilyLocation | null; // Allow null for initial data
   familyId: string;
 }
 

@@ -48,7 +48,7 @@ import {
   useFamilyLocationFormActions,
 } from '@/composables';
 interface FamilyLocationFormProps {
-  initialFamilyLocationData?: FamilyLocation;
+  initialFamilyLocationData?: FamilyLocation | null; // Allow null for initial data
   familyId: string;
   readOnly?: boolean;
 }

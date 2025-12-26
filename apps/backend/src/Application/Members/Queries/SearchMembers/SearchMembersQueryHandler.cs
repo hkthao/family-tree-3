@@ -28,7 +28,7 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
         query = query.WithSpecification(new MemberAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
 
         // Apply individual specifications
-        query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new MemberSearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new MemberByGenderSpecification(request.Gender));
         query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new MemberByFatherIdSpecification(request.FatherId));

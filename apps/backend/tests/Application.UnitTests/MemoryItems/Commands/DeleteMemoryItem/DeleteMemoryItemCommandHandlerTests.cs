@@ -1,14 +1,8 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemoryItems.Commands.DeleteMemoryItem;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

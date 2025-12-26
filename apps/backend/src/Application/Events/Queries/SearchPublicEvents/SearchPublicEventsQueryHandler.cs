@@ -21,9 +21,9 @@ public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapp
             query = query.WithSpecification(new EventsByFamilyIdSpecification(request.FamilyId.Value));
         }
 
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
-            query = query.WithSpecification(new EventsBySearchTermSpecification(request.SearchTerm));
+            query = query.WithSpecification(new EventsBySearchQuerySpecification(request.SearchQuery));
         }
 
         if (request.EventType.HasValue)

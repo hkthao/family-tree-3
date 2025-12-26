@@ -8,6 +8,8 @@
       <router-view />
     </v-main>
     <GlobalSnackbar />
+    <ConfirmDialog />
+    <MapLocationDrawer />
   </v-app>
 </template>
 
@@ -18,6 +20,8 @@ import { Sidebar, TopBar } from '@/components/layout';
 import AppBreadcrumbs from '@/components/common/AppBreadcrumbs.vue';
 import GlobalSnackbar from '@/components/common/GlobalSnackbar.vue';
 import DonateMessage from '@/components/common/DonateMessage.vue';
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
+import MapLocationDrawer from '@/components/common/MapLocationDrawer.vue';
 import { useAuthStore } from '@/stores';
 
 const drawer = ref(true);

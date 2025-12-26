@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { DetectedFace, Member } from '@/types';
+import type { DetectedFace, MemberDto } from '@/types';
 import { useFaceMemberSelectDialog } from '@/composables';
 
 const props = defineProps({

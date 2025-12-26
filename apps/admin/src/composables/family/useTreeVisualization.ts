@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 
 export function useTreeVisualization(familyId: MaybeRef<string | undefined>, initialMemberId?: MaybeRef<string | undefined>) {
   const { t } = useI18n();
@@ -13,7 +13,7 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
   const selectedRootMemberId = ref<string | undefined>(unref(initialMemberId));
 
   // Fetch members
-  const { data: members, isLoading: isLoadingMembers, isError: isErrorMembers, error: errorMembers } = useQuery<Member[], Error>({
+  const { data: members, isLoading: isLoadingMembers, isError: isErrorMembers, error: errorMembers } = useQuery<MemberDto[], Error>({
     queryKey: queryKeys.families.membersByFamilyId(unref(familyId) || ''),
     queryFn: async () => {
       const currentFamilyId = unref(familyId);

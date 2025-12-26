@@ -1,4 +1,7 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth;
+using backend.Infrastructure.Services;
 using backend.Web.Filters; // Add this using directive for the filter
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -53,5 +56,12 @@ public static class DependencyInjection
 
         // Register the ApiKeyAuthenticationFilter
         services.AddScoped<ApiKeyAuthenticationFilter>();
+
+        // Register OcrSettings
+        services.Configure<OcrSettings>(configuration.GetSection(nameof(OcrSettings)));
+        services.AddHttpClient<IOcrService, OcrService>(client =>
+        {
+            client.BaseAddress = new Uri(configuration.GetSection(nameof(OcrSettings))["BaseUrl"] ?? throw new InvalidOperationException("OCR BaseUrl is not configured."));
+        });
     }
 }

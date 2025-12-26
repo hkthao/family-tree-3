@@ -72,12 +72,12 @@
 </template>
 
 <script setup lang="ts">
-import type { DetectedFace, Member } from '@/types';
+import type { DetectedFace, MemberDto } from '@/types';
 import { useFaceLabelCard } from '@/composables';
 
 const props = defineProps({
   face: { type: Object as () => DetectedFace, required: true },
-  members: { type: Array as () => Member[], default: () => [] }, // New prop for available members
+  members: { type: Array as () => MemberDto[], default: () => [] }, // New prop for available members
 });
 
 const emit = defineEmits(['label-face', 'create-member']); // Updated emits

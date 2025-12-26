@@ -20,7 +20,7 @@
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MemberForm } from '@/components/member';
-import type { Member } from '@/types';
+import type { MemberUpdateDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useMemberQuery, useUpdateMemberMutation } from '@/composables';
 
@@ -48,7 +48,7 @@ const handleUpdateMember = async () => {
     return;
   }
 
-  const memberData = memberFormRef.value.getFormData() as Member;
+  const memberData = memberFormRef.value.getFormData() as MemberUpdateDto;
   if (!memberData.id) {
     showSnackbar(t('member.messages.saveError'), 'error');
     return;

@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { type PropType } from 'vue';
+import { ref, type PropType } from 'vue'; // Removed nextTick, it's not strictly necessary for this fix
 import type { DetectedFace } from '@/types';
 import { useFaceBoundingBoxViewer } from '@/composables';
 
@@ -39,14 +39,14 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['face-selected']);
+const imageContainer = ref<HTMLElement | null>(null); // Keep this ref
 
 const {
   t,
-  imageContainer,
   imageLoaded,
   onImageLoad,
   getBoxStyle,
-} = useFaceBoundingBoxViewer(props, emit);
+} = useFaceBoundingBoxViewer({ ...props, imageContainer: imageContainer }, emit); // Pass the ref itself
 </script>
 
 <style scoped>

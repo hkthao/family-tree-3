@@ -1,5 +1,5 @@
 // src/composables/event/logic/eventTimeline.logic.ts
-import type { Event, EventFilter, ListOptions, Paginated } from '@/types';
+import type { EventDto, EventFilter, ListOptions, Paginated } from '@/types';
 import { cloneDeep } from 'lodash';
 
 /**
@@ -43,7 +43,7 @@ export function mapFiltersToQueryOptions(
  * @param data The paginated event data.
  * @returns Paginated event data with items sorted.
  */
-export function sortEventsBySolarDateDesc(data: Paginated<Event>): Paginated<Event> {
+export function sortEventsBySolarDateDesc(data: Paginated<EventDto>): Paginated<EventDto> {
   const sortedItems = [...data.items].sort((a, b) => {
     // Events with null/undefined solarDate should come last
     if (!a.solarDate && !b.solarDate) return 0; // Both are null, preserve original order

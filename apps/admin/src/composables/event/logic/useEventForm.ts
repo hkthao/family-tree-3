@@ -1,6 +1,6 @@
 import { reactive, toRef, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types';
+import type { EventDto, AddEventDto, UpdateEventDto } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
 import { useEventRules, type UseEventRulesReturn } from '@/validations/event.validation';
 import { cloneDeep } from 'lodash'; // Keep for now for initial formData cloning
@@ -17,7 +17,7 @@ import {
 
 interface EventFormProps {
   readOnly?: boolean;
-  initialEventData?: Event;
+  initialEventData?: EventDto | null;
   familyId?: string;
 }
 
@@ -37,7 +37,7 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
   const { t } = deps.useI18n();
   const formRef = ref<any>(null); // Ref for the v-form component
 
-  const formData = reactive<Omit<Event, 'id'> | Event>(getInitialEventFormData(props));
+  const formData = reactive<AddEventDto | UpdateEventDto>(getInitialEventFormData(props));
 
   const state = reactive({
     name: toRef(formData, 'name'),
@@ -70,7 +70,7 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
   };
 
   const getFormData = () => {
-    return processEventFormDataForSave(formData as Event);
+    return processEventFormDataForSave(formData as EventDto);
   };
 
   return {

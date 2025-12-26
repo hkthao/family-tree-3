@@ -1,9 +1,7 @@
 using backend.CompositionRoot;
-using backend.Infrastructure;
 
 using backend.Infrastructure.Data;
 using backend.Web.Formatters; // Added for custom HTML input formatter
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 

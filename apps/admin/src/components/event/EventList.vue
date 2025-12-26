@@ -57,7 +57,7 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-tooltip :text="t('common.action.edit')">
+      <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)"
             data-testid="edit-event-button">
@@ -65,7 +65,7 @@
           </v-btn>
         </template>
       </v-tooltip>
-      <v-tooltip :text="t('common.action.delete')">
+      <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
             data-testid="delete-event-button"> <v-icon>mdi-delete</v-icon>
@@ -82,14 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import FamilyName from '@/components/common/FamilyName.vue';
 import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
 import { useEventListComposable } from '@/composables';
 import { CalendarType } from '@/types/enums'; // Import CalendarType enum
 
 const props = defineProps<{
-  events: Event[];
+  events: EventDto[];
   totalEvents: number;
   loading: boolean;
   search: string;

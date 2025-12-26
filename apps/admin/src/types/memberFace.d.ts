@@ -40,7 +40,7 @@ interface SearchResult {
   confidence: number; // Matching confidence (0.0 - 1.0)
 }
 
-export interface FaceDetectionRessult {
+export interface FaceDetectionResult {
   imageId: string;
   originalImageUrl: string | null;
   resizedImageUrl: string | null;
@@ -48,7 +48,7 @@ export interface FaceDetectionRessult {
 }
 
 export interface MemberFace {
-  id: string; 
+  id: string;
   memberId: string;
   faceId: string;
   boundingBox: BoundingBox;
@@ -56,21 +56,23 @@ export interface MemberFace {
   thumbnailUrl?: string;
   thumbnail?: string; // NEW: Add thumbnail (base64)
   originalImageUrl?: string | null;
-  embedding: number[] | string; 
+  embedding: number[] | string;
   emotion?: string;
   emotionConfidence?: number;
   isVectorDbSynced: boolean;
   vectorDbId?: string;
   memberName?: string;
-  memberGender?: string; 
-  memberAvatarUrl?: string; 
+  memberGender?: string;
+  memberAvatarUrl?: string;
   familyId?: string;
   familyName?: string;
   familyAvatarUrl?: string; // NEW
 }
 
-export interface MemberFaceFilter {
-  memberId?: string;
+export type AddMemberFaceDto = CreateMemberFaceCommand;
+export type UpdateMemberFaceDto = UpdateMemberFaceCommand;
+
+export interface MemberFaceFilter {  memberId?: string;
   familyId?: string;
   searchQuery?: string;
   emotion?: string; 

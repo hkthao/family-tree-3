@@ -1,4 +1,5 @@
 using backend.Application.Common.Dtos;
+using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
@@ -132,6 +133,12 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
 
+        // New mapping for PaginatedList<Family> to PaginatedList<FamilyDto>
+        CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
+            .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))
+            .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages));
+
         // FamilyMedia mappings
         CreateMap<FamilyMedia, FamilyMediaDto>()
             .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.ToString() : null)) // Placeholder, will need a resolver for actual user name
@@ -144,7 +151,7 @@ public class MappingProfile : Profile
 
         // FamilyLocation mappings
         CreateMap<FamilyLocation, FamilyLocationDto>();
-        CreateMap<FamilyLocation, FamilyLocationListDto>();
+        CreateMap<FamilyLocation, FamilyLocationDto>();
         CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
         CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
 

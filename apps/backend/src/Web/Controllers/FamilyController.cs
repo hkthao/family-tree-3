@@ -3,9 +3,10 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.GenerateFamilyData; // ADDED: New using directive
+using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
-using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
@@ -13,6 +14,7 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
+using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,6 +72,19 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     /// <returns>Một PaginatedList chứa danh sách các gia đình tìm được.</returns>
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] SearchFamiliesQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để tìm kiếm gia đình công khai dựa trên các tiêu chí được cung cấp.
+    /// </summary>
+    /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
+    /// <returns>Một PaginatedList chứa danh sách các gia đình công khai tìm được.</returns>
+    [HttpGet("public-search")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchPublic([FromQuery] SearchPublicFamiliesQuery query)
     {
         var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);
@@ -215,6 +230,24 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Tạo nội dung AI dựa trên đầu vào của người dùng và loại yêu cầu.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình liên quan đến yêu cầu.</param>
+    /// <param name="command">Lệnh chứa FamilyId, ChatInput, và ContentType.</param>
+    /// <returns>Nội dung được tạo bởi AI (JSON hoặc văn bản).</returns>
+    [HttpPost("{familyId}/generate-data")]
+    public async Task<IActionResult> GenerateFamilyData([FromRoute] Guid familyId, [FromBody] GenerateFamilyDataCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyId}) and command body ({CommandFamilyId}) for GenerateFamilyDataCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest("FamilyId in URL does not match command body.");
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 
     /// <summary>

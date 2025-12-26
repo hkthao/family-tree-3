@@ -15,7 +15,7 @@ public class SearchUsersQueryHandler(IApplicationDbContext context, IMapper mapp
     {
         var query = _context.Users.Include(e => e.Profile).AsQueryable();
 
-        query = query.WithSpecification(new UserSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new UserSearchQuerySpecification(request.SearchQuery));
 
         var paginatedList = await query
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)

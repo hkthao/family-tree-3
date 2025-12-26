@@ -1,7 +1,7 @@
 // src/composables/face/mutations/useDetectFacesMutation.ts
 import { useMutation, type UseMutationOptions, type UseMutationReturnType, useQueryClient } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
-import type { FaceDetectionRessult, ApiError } from '@/types';
+import type { FaceDetectionResult, ApiError } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
 import { queryKeys } from '@/constants/queryKeys';
 
@@ -32,7 +32,7 @@ export function useDetectFacesMutation(
   const memberFaceService = getMemberFaceService();
   const queryClient = injectedUseQueryClient();
 
-  return injectedUseMutation<FaceDetectionRessult, ApiError, DetectFacesCommand>({
+  return injectedUseMutation<FaceDetectionResult, ApiError, DetectFacesCommand>({
     mutationFn: async (command: DetectFacesCommand) => {
       const response = await memberFaceService.detect(command.imageFile, command.familyId, command.resize);
       if (response.ok) {

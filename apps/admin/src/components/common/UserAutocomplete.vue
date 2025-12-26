@@ -37,7 +37,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const internalValue = ref<UserDto | UserDto[] | null>(null);
 const search = ref('');
-const debouncedSearchTerm = ref('');
+const debouncedSearchQuery = ref('');
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -76,16 +76,16 @@ watch(preloadedUsers, (newUsers) => {
 }, { immediate: true });
 
 const { data: searchResults, isLoading: isLoadingSearch } = useQuery<UserDto[], Error>({
-  queryKey: ['users', 'search', debouncedSearchTerm],
+  queryKey: ['users', 'search', debouncedSearchQuery],
   queryFn: async () => {
-    const result = await userService.search(debouncedSearchTerm.value, 1, 10);
+    const result = await userService.search(debouncedSearchQuery.value, 1, 10);
     if (result.ok) {
       return result.value.items;
     }
     console.error('Error fetching users:', result.error);
     throw result.error;
   },
-  enabled: computed(() => !!debouncedSearchTerm.value),
+  enabled: computed(() => !!debouncedSearchQuery.value),
   staleTime: 1000 * 30, // 30 seconds
 });
 
@@ -93,12 +93,12 @@ const items = computed(() => searchResults.value || []);
 
 const loading = computed(() => isLoadingPreload.value || isLoadingSearch.value);
 
-watch(search, (newSearchTerm) => {
+watch(search, (newSearchQuery) => {
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
-    debouncedSearchTerm.value = newSearchTerm;
+    debouncedSearchQuery.value = newSearchQuery;
   }, props.debounceTime);
 });
 

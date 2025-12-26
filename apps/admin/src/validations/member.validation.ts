@@ -1,9 +1,9 @@
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
-import type { Member } from '@/types';
+import type { MemberAddDto, MemberUpdateDto } from '@/types';
 
-export function useMemberRules(formData: Omit<Member, 'id'> | Member) {
+export function useMemberRules(formData: MemberAddDto | MemberUpdateDto) {
   const { t } = useI18n();
   const rulesVuetify = useRules();
 

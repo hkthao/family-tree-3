@@ -17,7 +17,8 @@ export interface RelatedMember {
   gender: Gender;
 }
 
-export interface Event {
+// EventDto as the main representation of an event, returned by services and used for display
+export interface EventDto {
   id: string;
   name: string;
   code: string;
@@ -29,14 +30,18 @@ export interface Event {
   relatedMemberIds?: string[];
   type: EventType;
   color?: string;
-  // New fields
   calendarType: CalendarType;
   solarDate?: Date | null;
   lunarDate?: LunarDate | null;
   repeatRule: RepeatRule;
-  // color property
-  validationErrors?: string[];
+  validationErrors?: string[]; // Includes validation errors for display
 }
+
+// DTO for adding a new event (without id or validationErrors)
+export type AddEventDto = Omit<EventDto, 'id' | 'validationErrors'>;
+
+// DTO for updating an existing event (with id, but without validationErrors as it's input)
+export type UpdateEventDto = Omit<EventDto, 'validationErrors'>;
 
 export interface EventFilter extends ListOptions {
   searchQuery?: string;
@@ -49,4 +54,3 @@ export interface EventFilter extends ListOptions {
   calendarType?: CalendarType | null;
   lunarMonthRange?: number[]; // New property
 }
-

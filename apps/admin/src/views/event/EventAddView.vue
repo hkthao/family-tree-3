@@ -10,6 +10,7 @@
         data-testid="event-form"
         :family-id="props.familyId"
         :allow-family-edit="true"
+        :initial-event-data="props.initialEventData"
       />
     </v-card-text>
     <v-card-actions>
@@ -22,12 +23,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import EventForm from '@/components/event/EventForm.vue';
 import { useEventAdd } from '@/composables'; // Import useEventAdd
 
 interface EventAddViewProps {
   familyId?: string;
+  initialEventData?: EventDto | null; // New prop for initial data
 }
 
 const props = defineProps<EventAddViewProps>();
@@ -49,7 +51,7 @@ const handleAddEvent = async () => {
   if (!isValid) return;
 
   const eventData = eventFormRef.value.getFormData();
-  handleAddEventComposable(eventData as Omit<Event, 'id'>);
+  handleAddEventComposable(eventData as Omit<EventDto, 'id'>);
 };
 
 </script>

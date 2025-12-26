@@ -25,9 +25,9 @@ public class SearchMemoryItemsQueryHandler : IRequestHandler<SearchMemoryItemsQu
                 .ThenInclude(mp => mp.Member)
             .AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
-            var searchTermLower = request.SearchTerm.ToLower();
+            var searchTermLower = request.SearchQuery.ToLower();
             query = query.Where(mi => mi.Title.ToLower().Contains(searchTermLower) ||
                                       (mi.Description != null && mi.Description.ToLower().Contains(searchTermLower)));
         }

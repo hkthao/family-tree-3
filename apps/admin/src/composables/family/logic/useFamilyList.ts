@@ -1,7 +1,7 @@
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer, useFamilyTour } from '@/composables';
-import type { FamilyFilter, Family } from '@/types';
+import type { FamilyFilter, FamilyDto } from '@/types';
 import { useFamilyListFilters, useFamiliesQuery, useDeleteFamilyMutation } from '@/composables';
 
 interface UseFamilyListDeps {
@@ -78,7 +78,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
     setFilters(newFilters);
   };
 
-  const navigateToFamilyDetail = (item: Family) => {
+  const navigateToFamilyDetail = (item: FamilyDto) => {
     router.push({ name: 'FamilyDetail', params: { id: item.id } });
   };
 
@@ -96,7 +96,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
     setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
   };
 
-  const confirmDelete = async (family: Family) => {
+  const confirmDelete = async (family: FamilyDto) => {
     const confirmed = await showConfirmDialog({
       title: t('confirmDelete.title'),
       message: t('confirmDelete.message', { name: family.name || '' }),

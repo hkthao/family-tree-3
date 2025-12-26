@@ -41,11 +41,11 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="primary" :disabled="!selectedCoordinates.latitude || !selectedCoordinates.longitude"
+      <v-btn color="primary" :disabled="!isConfirmEnabled"
         @click="copyCoordinates">
         {{ t('map.copyCoordinates') }}
       </v-btn>
-      <v-btn color="success" :disabled="!selectedCoordinates.latitude || !selectedCoordinates.longitude"
+      <v-btn color="success" :disabled="!isConfirmEnabled"
         @click="confirmSelection">
         {{ t('common.confirm') }}
       </v-btn>
@@ -54,29 +54,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useMapPicker } from '@/composables/map/useMapPicker';
 import MapPicker from '@/components/map/MapPicker.vue';
-import { useGlobalSnackbar } from '@/composables';
-import { getEnvVariable } from '@/utils/api.util';
+import { useI18n } from 'vue-i18n';
+
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
 
 const emit = defineEmits(['confirm-selection']);
+const props = defineProps<{
+  initialLocation?: LocationData;
+}>();
 
 const { t } = useI18n();
-const { showSnackbar } = useGlobalSnackbar();
-const mapboxAccessToken = ref(getEnvVariable('VITE_MAPBOX_ACCESS_TOKEN'));
-const searchQuery = ref('');
-const searchResultCoordinates = ref<{ latitude: number; longitude: number }>({ latitude: 0, longitude: 0 });
-const selectedCoordinates = ref({ latitude: 0, longitude: 0 });
-const suggestions = ref<any[]>([]); // To store autocomplete suggestions
-const loadingSuggestions = ref(false); // Loading indicator for suggestions
-const selectedItem = ref(null);
-
-let abortController: AbortController | null = null; // To cancel previous fetch requests
-
-const handleCoordinatesUpdate = (coords: { longitude: number; latitude: number }) => {
-  selectedCoordinates.value = coords;
-};
+const {
+  mapboxAccessToken,
+  searchQuery,
+  selectedCoordinates,
+  suggestions,
+  loadingSuggestions,
+  selectedItem,
+  isConfirmEnabled,
+  handleCoordinatesUpdate,
+  fetchSuggestions,
+  selectSuggestion,
+  copyCoordinates,
+} = useMapPicker({ initialLocation: props.initialLocation });
 
 const confirmSelection = () => {
   emit('confirm-selection', {
@@ -84,69 +90,6 @@ const confirmSelection = () => {
     location: selectedItem.value ? (selectedItem.value as any).place_name : ''
   });
 };
-
-const fetchSuggestions = async (query: string) => {
-  if (abortController) {
-    abortController.abort(); // Cancel previous request
-  }
-  if (!query) {
-    suggestions.value = [];
-    return;
-  }
-
-  loadingSuggestions.value = true;
-  abortController = new AbortController();
-  const signal = abortController.signal;
-
-  try {
-    const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        query
-      )}.json?access_token=${mapboxAccessToken.value}&autocomplete=true`, { signal }
-    );
-    const data = await response.json();
-
-    if (data.features) {
-      suggestions.value = data.features;
-    }
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('Error fetching suggestions:', error);
-      showSnackbar(t('map.suggestionFetchError'), 'error');
-    }
-  } finally {
-    loadingSuggestions.value = false;
-  }
-};
-
-const selectSuggestion = (selectedFeature: any) => {
-  if (!selectedFeature) {
-    selectedCoordinates.value = { latitude: 0, longitude: 0 };
-    searchResultCoordinates.value = { latitude: 0, longitude: 0 };
-    return;
-  }
-  if (selectedFeature && selectedFeature.center) {
-    const [longitude, latitude] = selectedFeature.center;
-    searchResultCoordinates.value = { latitude, longitude };
-    selectedCoordinates.value = { latitude, longitude };
-    showSnackbar(t('map.searchSuccess'), 'success');
-  } else {
-    console.warn('selectSuggestion received an invalid feature:', selectedFeature);
-    showSnackbar(t('map.searchNoResults'), 'info'); // Or a more specific error
-  }
-};
-
-const copyCoordinates = async () => {
-  const coordsText = `${selectedCoordinates.value.latitude}, ${selectedCoordinates.value.longitude}`;
-  try {
-    await navigator.clipboard.writeText(coordsText);
-    showSnackbar(t('map.coordinatesCopied'), 'success');
-  } catch (err) {
-    console.error('Failed to copy coordinates: ', err);
-    showSnackbar(t('map.copyFailed'), 'error');
-  }
-};
-
 </script>
 
 <style scoped>

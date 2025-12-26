@@ -1,11 +1,11 @@
 import { ref, onMounted, onUnmounted, watch, nextTick, toRef } from 'vue';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 import { transformFamilyData, determineMainChartId } from './hierarchicalTreeChart.logic';
 import { createDefaultF3Adapter, type IF3Adapter } from './f3.adapter';
 
 interface UseHierarchicalTreeChartProps {
   familyId: string | null;
-  members: Member[];
+  members: MemberDto[];
   relationships: Relationship[];
   rootId: string | null;
 }
@@ -35,7 +35,7 @@ export function useHierarchicalTreeChart(
   const { f3Adapter, t } = { ...defaultDeps, ...deps };
 
 
-  const renderChart = async (currentMembers: Member[]) => {
+  const renderChart = async (currentMembers: MemberDto[]) => {
     if (!chartContainer.value) {
       return;
     }

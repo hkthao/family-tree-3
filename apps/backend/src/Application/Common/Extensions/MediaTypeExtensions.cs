@@ -35,7 +35,7 @@ public static class MediaTypeExtensions
             return MediaType.Other;
         }
 
-        Uri? uri = null;
+        Uri? uri;
         if (Uri.TryCreate(url, UriKind.Absolute, out uri))
         {
             string path = uri.AbsolutePath;

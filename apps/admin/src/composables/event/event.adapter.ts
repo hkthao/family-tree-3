@@ -2,7 +2,7 @@
 import { ApiEventService } from '@/services/event/api.event.service';
 import type { IEventService } from '@/services/event/event.service.interface';
 import { apiClient } from '@/plugins/axios';
-import type { Event, Result } from '@/types'; // Import Result type
+import type { EventDto, AddEventDto, UpdateEventDto, Result } from '@/types'; // Import Result type and new DTOs
 
 /**
  * @interface EventServiceAdapter
@@ -15,14 +15,14 @@ export interface EventServiceAdapter extends IEventService {
    * @param eventData The event data to add.
    * @returns A Result object containing either the added Event or an ApiError.
    */
-  add(eventData: Omit<Event, 'id'>): Promise<Result<Event>>;
+  add(eventData: AddEventDto): Promise<Result<EventDto>>;
 
   /**
    * Updates an existing event.
    * @param updatedEvent The event data to update.
    * @returns A Result object containing either the updated Event or an ApiError.
    */
-  update(updatedEvent: Event): Promise<Result<Event>>;
+  update(updatedEvent: UpdateEventDto): Promise<Result<EventDto>>;
 
   /**
    * Deletes an event by its ID.
@@ -36,7 +36,7 @@ export interface EventServiceAdapter extends IEventService {
    * @param eventId The ID of the event to retrieve.
    * @returns A Result object containing either the Event or an ApiError.
    */
-  getById(eventId: string): Promise<Result<Event | undefined>>;
+  getById(eventId: string): Promise<Result<EventDto | undefined>>;
 
   /**
    * Searches for events based on provided list and filter options.
@@ -51,7 +51,8 @@ export interface EventServiceAdapter extends IEventService {
    * @param familyId The ID of the family.
    * @returns A promise that resolves to a Result object containing an array of Event objects or an ApiError.
    */
-  getEventsByFamilyId(familyId: string): Promise<Result<Event[]>>;
+  getEventsByFamilyId(familyId: string): Promise<Result<EventDto[]>>;
+  getByIds(ids: string[]): Promise<Result<EventDto[]>>;
 }
 
 /**
@@ -66,11 +67,11 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
     this.apiEventService = apiEventService;
   }
 
-  async add(eventData: Omit<Event, 'id'>): Promise<Result<Event>> {
+  async add(eventData: AddEventDto): Promise<Result<EventDto>> {
     return this.apiEventService.add(eventData);
   }
 
-  async update(updatedEvent: Event): Promise<Result<Event>> {
+  async update(updatedEvent: UpdateEventDto): Promise<Result<EventDto>> {
     return this.apiEventService.update(updatedEvent);
   }
 
@@ -78,7 +79,7 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
     return this.apiEventService.delete(eventId);
   }
 
-  async getById(eventId: string): Promise<Result<Event | undefined>> {
+  async getById(eventId: string): Promise<Result<EventDto | undefined>> {
     return this.apiEventService.getById(eventId);
   }
 
@@ -86,11 +87,11 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
     return this.apiEventService.search(listOptions, filterOptions);
   }
 
-  async getEventsByFamilyId(familyId: string): Promise<Result<Event[]>> {
+  async getEventsByFamilyId(familyId: string): Promise<Result<EventDto[]>> {
     return this.apiEventService.getEventsByFamilyId(familyId);
   }
 
-  async getByIds(ids: string[]): Promise<Result<Event[]>> {
+  async getByIds(ids: string[]): Promise<Result<EventDto[]>> {
     return this.apiEventService.getByIds(ids);
   }
 }

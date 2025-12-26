@@ -27,7 +27,7 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
         query = query.WithSpecification(new EventAccessSpecification(isAdmin, currentUserId));
 
         // Apply individual specifications
-        query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new EventSearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate, request.LunarStartDay, request.LunarStartMonth, request.LunarEndDay, request.LunarEndMonth));
         query = query.WithSpecification(new EventTypeSpecification(request.Type));
         query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));

@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Gender, type Member } from '@/types';
+import { Gender, type MemberDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member';
@@ -110,7 +110,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
 const props = defineProps<{
-  items: Member[];
+  items: MemberDto[];
   totalItems: number;
   loading: boolean;
   search?: string;
@@ -205,7 +205,7 @@ const headers = computed<DataTableHeader[]>(() => {
       sortable: false,
       align: 'center',
       minWidth: '120px',
-      fixed: "end"
+      fixed: "end",
     });
   }
   return baseHeaders;
@@ -219,15 +219,15 @@ const loadMembers = (options: {
   emit('update:options', options);
 };
 
-const viewMember = (member: Member) => {
+const viewMember = (member: MemberDto) => {
   emit('view', member.id);
 };
 
-const editMember = (member: Member) => {
+const editMember = (member: MemberDto) => {
   emit('edit', member.id);
 };
 
-const confirmDelete = (member: Member) => {
+const confirmDelete = (member: MemberDto) => {
   emit('delete', member.id);
 };
 

@@ -5,7 +5,7 @@ export enum FamilyVisibility {
   Shared = 'Shared',
 }
 
-export interface Family {
+export interface FamilyDto {
   id: string;
   name: string;
   code?: string;
@@ -20,7 +20,7 @@ export interface Family {
   managerIds: string[]; // Changed to string[]
   viewerIds: string[]; // Changed to string[]
   familyLimitConfiguration?: FamilyLimitConfiguration;
-
+  validationErrors?: string[];
 }
 
 export interface FamilyAddDto {
@@ -135,10 +135,4 @@ export interface FamilyExportDto {
   members: MemberExportDto[];
   relationships: RelationshipExportDto[];
   events: EventExportDto[];
-}
-
-export interface GenerateFamilyDataCommand {
-  content: string;
-  sessionId: string;
-  familyId: string;
 }

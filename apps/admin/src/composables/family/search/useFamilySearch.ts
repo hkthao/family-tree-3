@@ -1,6 +1,6 @@
 import { ref, watch, computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { useServices } from '@/plugins/services.plugin';
 
@@ -12,17 +12,17 @@ interface UseFamilySearchOptions {
 export function useFamilySearch(options?: UseFamilySearchOptions) {
   const { debounceTime = 300, service = useServices().family } = options || {};
 
-  const searchTerm = ref('');
-  const debouncedSearchTerm = ref('');
+  const searchQuery = ref('');
+  const debouncedSearchQuery = ref('');
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const { data, isLoading, isFetching, error } = useQuery<Family[], Error>({
-    queryKey: ['families', debouncedSearchTerm],
+  const { data, isLoading, isFetching, error } = useQuery<FamilyDto[], Error>({
+    queryKey: ['families', debouncedSearchQuery],
     queryFn: async () => {
-      if (!debouncedSearchTerm.value) {
+      if (!debouncedSearchQuery.value) {
         return [];
       }
-      const result = await service.search({ page: 1, itemsPerPage: 10 }, { name: debouncedSearchTerm.value });
+      const result = await service.search({ page: 1, itemsPerPage: 10 }, { name: debouncedSearchQuery.value });
       if (result.ok) {
         return result.value.items;
       }
@@ -30,26 +30,26 @@ export function useFamilySearch(options?: UseFamilySearchOptions) {
     },
     // Keep data fresh for a short period, but not too long for search results
     staleTime: 1000 * 60 * 1, // 1 minute
-    // Only fetch if debouncedSearchTerm has a value
-    enabled: computed(() => !!debouncedSearchTerm.value),
+    // Only fetch if debouncedSearchQuery has a value
+    enabled: computed(() => !!debouncedSearchQuery.value),
   });
 
-  watch(searchTerm, (newSearchTerm) => {
+  watch(searchQuery, (newSearchQuery) => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
     debounceTimer = setTimeout(() => {
-      debouncedSearchTerm.value = newSearchTerm;
+      debouncedSearchQuery.value = newSearchQuery;
     }, debounceTime);
   });
 
   return {
     state: {
-      searchTerm,
+      searchQuery,
       families: data,
       isLoading: computed(() => isLoading.value || isFetching.value),
       error,
     },
-    actions: {}, // No explicit actions defined within this composable beyond updating searchTerm
+    actions: {}, // No explicit actions defined within this composable beyond updating searchQuery
   };
 }

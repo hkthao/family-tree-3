@@ -5,23 +5,17 @@
         <div v-for="(message, index) in state.messages" :key="index"
           :class="['d-flex align-center my-1', message.sender === 'user' ? 'justify-end' : 'justify-start']">
           <template v-if="message.sender === 'user'">
-            <v-sheet class="ma-1 pa-2 text-wrap" color="primary" rounded="lg">
-              {{ message.text }}
-            </v-sheet>
-            <v-avatar cover class="ml-1" size="36">
-              <v-img v-if="state.userProfile?.value?.avatar"
-                :src="getAvatarUrl(state.userProfile.value.avatar, undefined)"
-                :alt="state.userProfile.value.name || 'User'" />
-              <v-icon v-else>mdi-account-circle</v-icon>
-            </v-avatar>
+            <UserChatMessage :message="message" :userProfile="state.userProfile" />
           </template>
           <template v-else>
-            <v-avatar class="mr-1" size="36">
-              <v-icon>mdi-robot-outline</v-icon>
-            </v-avatar>
-            <v-sheet class="ma-1 pa-2 text-wrap" color="secondary" rounded="lg">
-              {{ message.text }}
-            </v-sheet>
+            <AiChatMessage
+              :message="message"
+              :familyId="props.familyId"
+              @open-relationship-detection="(familyId: string) => emit('open-relationship-detection', familyId)"
+              @add-generated-member="(member: MemberDto) => emit('add-generated-member', member)"
+              @add-generated-event="(event: EventDto) => emit('add-generated-event', event)"
+              @add-generated-location="(location: FamilyLocation) => emit('add-generated-location', location)"
+            />
           </template>
           <template v-if="!message.text">
             <!-- Debugging: log message if text is empty or not a string -->
@@ -34,48 +28,63 @@
             <span class="ml-2">{{ t('aiChat.typing') }}</span>
           </v-chip>
         </div>
-        <v-btn
-          v-if="showScrollToBottomButton"
-          icon
-          variant="flat"
-          size="small"
-          color="primary"
-          class="scroll-to-bottom-button"
-          @click="scrollToBottom"
-        >
+        <v-btn v-if="showScrollToBottomButton" icon variant="flat" size="small" color="primary"
+          class="scroll-to-bottom-button" @click="scrollToBottom">
           <v-icon>mdi-arrow-down-circle</v-icon>
         </v-btn>
       </div>
     </v-card-text>
     <v-card-actions class="d-flex justify-center pa-0 chat-input-area">
-      <v-textarea no-resize :auto-grow="false" counter :rows="2" :model-value="state.newMessage.value"
-        @update:model-value="newValue => state.newMessage.value = newValue" :placeholder="t('aiChat.placeholder')"
-        variant="outlined" @keyup.enter="actions.sendMessage" :disabled="state.loading.value">
-        <template v-slot:append-inner>
-          <v-btn icon flat :disabled="state.loading.value || !state.newMessage.value.trim()"
-            @click="actions.sendMessage">
-            <v-icon>mdi-send</v-icon>
-          </v-btn>
-        </template>
-      </v-textarea>
+      <ChatInput
+        :model-value="state.newMessage.value"
+        @update:model-value="handleUpdateNewMessage"
+        :placeholder="t('aiChat.placeholder')"
+        @sendMessage="handleSendMessage"
+        :disabled="state.loading.value"
+        :loading="state.loading.value"
+        @addLocation="handleAddLocation"
+      />
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'; // Added onMounted for debugging
-import { useI18n } from 'vue-i18n'; // Keep useI18n for `t` function in template
-import { getAvatarUrl } from '@/utils/avatar.utils'; // Keep getAvatarUrl as it's a utility
-import { useChatView } from '@/composables/ai/useChatView'; // Import the new composable
+import { ref, watch, nextTick, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useChatView } from '@/composables/ai/useChatView';
+import UserChatMessage from '@/components/chat/UserChatMessage.vue';
+import AiChatMessage from '@/components/chat/AiChatMessage.vue';
+import ChatInput from '@/components/chat/ChatInput.vue';
+import type { UploadedFile } from '@/composables/chat/useChatInput'; // Import UploadedFile
+import type { MemberDto, EventDto, FamilyLocation } from '@/types'; // Import necessary DTOs
 
 const props = defineProps<{
   familyId: string;
 }>();
 
+const emit = defineEmits([
+  'open-relationship-detection',
+  'add-generated-member', // NEW
+  'add-generated-event', // NEW
+  'add-generated-location', // NEW
+]);
+
 const { t } = useI18n(); // Keep t for template
 const chatMessagesContainer = ref<HTMLElement | null>(null);
 const { state, actions } = useChatView(props.familyId);
 const showScrollToBottomButton = ref(false); // New ref for button visibility
+
+const handleUpdateNewMessage = (newValue: string) => {
+  state.newMessage.value = newValue;
+};
+
+const handleSendMessage = (attachments?: UploadedFile[]) => {
+  actions.sendMessage(attachments);
+};
+
+const handleAddLocation = (location: { latitude: number; longitude: number; address?: string }) => {
+  actions.handleAddLocation(location);
+};
 
 const SCROLL_THRESHOLD = 100; // Pixels from the bottom to consider "near bottom"
 
@@ -136,7 +145,8 @@ onUnmounted(() => {
 
 .chat-messages {
   overflow-y: auto;
-  max-height: calc(100vh - 215px); /* Adjusted for larger input area */
+  max-height: calc(100vh - 230px);
+  /* Adjusted for larger input area */
 }
 
 .chat-input-area {
@@ -149,8 +159,17 @@ onUnmounted(() => {
 
 .scroll-to-bottom-button {
   position: absolute;
-  bottom: 120px; /* Adjust as needed to be above the input field */
+  bottom: 135px;
+  /* Adjust as needed to be above the input field */
   right: 32px;
-  z-index: 10; /* Ensure it's above other content */
+  z-index: 10;
+  /* Ensure it's above other content */
+}
+
+.message-content {
+  white-space: pre-wrap;
+  /* Preserves whitespace and wraps text */
+  word-break: break-word;
+  /* Ensures long words break to prevent overflow */
 }
 </style>

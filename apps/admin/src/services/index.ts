@@ -1,20 +1,14 @@
 export * from './family/family.service.interface';
 export * from './family/api.family.service';
-export * from './family/public.service.interface';
-export * from './family/publicApi.family.service';
 
 export * from './member/member.service.interface';
 export * from './member/api.member.service';
-export * from './member/public.service.interface';
-export * from './member/publicApi.member.service';
 
 export * from './event/event.service.interface';
 export * from './event/api.event.service';
 
 export * from './relationship/relationship.service.interface';
 export * from './relationship/api.relationship.service';
-export * from './relationship/public.service.interface';
-export * from './relationship/publicApi.relationship.service';
 
 export * from './dashboard/dashboard.service.interface';
 export * from './dashboard/api.dashboard.service';

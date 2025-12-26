@@ -1,6 +1,6 @@
 import { toRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import { type UseGlobalSnackbarReturn } from '@/composables/ui/useGlobalSnackbar';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useEventQuery, type UseEventQueryReturn } from '@/composables/event/queries/useEventQuery';
@@ -45,7 +45,7 @@ export function useEventEdit(
   const { event: eventData, isLoading: isLoadingEvent } = useEventQuery(eventIdRef);
   const { mutate: updateEvent, isPending: isUpdatingEvent } = useUpdateEventMutation();
 
-  const handleUpdateEvent = async (eventToUpdate: Event) => {
+  const handleUpdateEvent = async (eventToUpdate: EventDto) => {
     if (!eventToUpdate.id) {
       showSnackbar(t('event.messages.saveError'), 'error');
       return;

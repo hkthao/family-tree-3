@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { useRules } from 'vuetify/labs/rules';
 import { CalendarType, type RepeatRule } from '@/types/enums';
-import type { EventType } from '@/types';
+import { EventType } from '@/types';
 import type { LunarDate } from '@/types/lunar-date';
 
 interface EventFormState {

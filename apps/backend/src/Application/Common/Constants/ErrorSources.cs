@@ -5,6 +5,7 @@ public static class ErrorSources
     public const string Forbidden = "Forbidden";
     public const string NotFound = "NotFound";
     public const string Authentication = "Authentication";
+    public const string Authorization = "Authorization"; // NEW
     public const string Database = "Database";
     public const string Exception = "Exception";
     public const string FileStorage = "FileStorage";
@@ -16,4 +17,5 @@ public static class ErrorSources
     public const string ExternalServiceError = "ExternalServiceError";
     public const string InternalError = "InternalError";
     public const string QuotaExceeded = "QuotaExceeded";
+    public const string InvalidConfiguration = "InvalidConfiguration";
 }

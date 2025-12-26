@@ -2,5 +2,5 @@ namespace backend.Application.AI.DTOs;
 
 public class GenerateRequest : ChatRequest
 {
-    public string SystemPrompt { get; set; } = string.Empty;
+    public new string SystemPrompt { get; set; } = string.Empty;
 }

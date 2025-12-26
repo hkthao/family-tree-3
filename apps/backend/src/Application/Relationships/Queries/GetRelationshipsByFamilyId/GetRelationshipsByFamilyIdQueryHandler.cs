@@ -1,12 +1,5 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
-using backend.Application.Relationships.Queries; // For RelationshipDto
 
 namespace backend.Application.Relationships.Queries.GetRelationshipsByFamilyId;
 
