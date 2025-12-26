@@ -231,13 +231,13 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                                     FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath),
                                     ContentType = attachment.ContentType,
                                     ReturnCrop = true,
-                                    ResizeImageForAnalysis = true
+                                    ResizeImageForAnalysis = false
                                 };
 
                                 var detectionResult = await _mediator.Send(detectFacesCommand, cancellationToken);
-
                                 if (detectionResult.IsSuccess && detectionResult.Value != null)
                                 {
+                                    detectionResult.Value.OriginalImageUrl = attachment.Url;
                                     faceDetectionResults.Add(detectionResult.Value);
                                 }
                                 else

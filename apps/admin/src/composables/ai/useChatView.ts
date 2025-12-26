@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables';
 import type { UserProfile } from '@/types'; // Import AiChatMessage
 import { useAiChat } from '@/composables/ai/aiChat.composable'; // This will be the actual chat logic using services
-import type { UploadedFile } from '../chat/useChatInput'; // Import UploadedFile
+import type { UploadedFile } from '@/composables/chat/useChatInput'; // Import UploadedFile
 
 interface UseChatViewDeps {
   useI18n: typeof useI18n;

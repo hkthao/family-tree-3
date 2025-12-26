@@ -99,9 +99,7 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-
 const MAX_FILE_COUNT = 3; // Re-declare for template use
 
 const {

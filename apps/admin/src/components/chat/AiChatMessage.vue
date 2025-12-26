@@ -2,7 +2,7 @@
   <v-avatar class="mr-1" size="36">
     <v-icon>mdi-robot-outline</v-icon>
   </v-avatar>
-  <v-sheet class="ma-1 pa-2 text-wrap" color="secondary" rounded="lg">
+  <v-sheet class="ma-1 pa-2 text-wrap v-sheet-message" color="secondary" rounded="lg">
     <div class="message-content">
       {{ message.text }}
     </div>
@@ -29,8 +29,7 @@
             detectionResult.originalImageUrl }}</a>
         </p>
         <FaceBoundingBoxViewer v-if="detectionResult.originalImageUrl" :imageSrc="detectionResult.originalImageUrl"
-          :faces="mapFacesForViewer(detectionResult.detectedFaces)" :selectable="false" class="mt-2"
-          style="max-width: 400px; height: auto;" />
+          :faces="mapFacesForViewer(detectionResult.detectedFaces)" :selectable="false" class="mt-2" />
         <p v-else class="text-caption">{{ t('aiChat.noImageForDisplay') }}</p>
 
         <div class="mt-2" v-if="detectionResult.detectedFaces && detectionResult.detectedFaces.length > 0">
@@ -106,8 +105,10 @@ const openOriginalImage = (imageUrl: string | null | undefined) => { // Accept s
 <style scoped>
 .message-content {
   white-space: pre-wrap;
-  /* Preserves whitespace and wraps text */
   word-break: break-word;
-  /* Ensures long words break to prevent overflow */
+}
+
+.v-sheet-message {
+  max-width: 89%;
 }
 </style>
