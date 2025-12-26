@@ -1,10 +1,15 @@
 import { ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
-import type { ApiError } from '@/types';
+import type { ApiError, ImageUploadResultDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useMutation } from '@tanstack/vue-query';
 import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for unique IDs
+
+const MAX_FILE_COUNT = 3;
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 interface LocationData {
   latitude: number;
@@ -16,6 +21,14 @@ interface SelectedLocation extends LocationData {
   source: 'current' | 'map';
 }
 
+export interface UploadedFile {
+  id: string; // Unique ID for the file chip
+  name: string;
+  url: string;
+  deleteUrl?: string; // Optional delete URL if provided by the backend
+  type: string; // Mime type or file extension
+}
+
 interface UseChatInputProps {
   modelValue?: string;
   disabled: boolean;
@@ -23,8 +36,8 @@ interface UseChatInputProps {
 
 interface UseChatInputEmits {
   (event: 'update:modelValue', value: string): void;
-  (event: 'sendMessage'): void;
-  (event: 'addAttachment', type: 'image' | 'pdf'): void;
+  (event: 'sendMessage', attachments?: UploadedFile[]): void; // Updated to include attachments
+  (event: 'addAttachment', type: 'image' | 'pdf'): void; // Keep this for now, might be removed later if addImagePdf handles everything
   (event: 'addLocation', location: LocationData): void;
 }
 
@@ -36,6 +49,7 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
   const mapDrawerStore = useMapLocationDrawerStore();
 
   const selectedLocation = ref<SelectedLocation | null>(null);
+  const uploadedFiles = ref<UploadedFile[]>([]); // New state for uploaded files
 
   const updateModelValue = (value: string) => {
     emit('update:modelValue', value);
@@ -50,36 +64,58 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
 
   const sendMessage = () => {
     const currentModelValue = modelValue?.value ?? '';
-    if ((currentModelValue.trim() || selectedLocation.value) && !disabled.value) {
+    if ((currentModelValue.trim() || selectedLocation.value || uploadedFiles.value.length > 0) && !disabled.value) {
       if (selectedLocation.value) {
         emit('addLocation', selectedLocation.value);
         clearSelectedLocation();
       }
-      emit('sendMessage');
+      emit('sendMessage', uploadedFiles.value); // Pass uploaded files
+      uploadedFiles.value = []; // Clear uploaded files after sending message
     }
   };
 
-  const ocrMutation = useMutation({
-    mutationFn: (file: File) => chatService.performOcr(file),
+  const removeUploadedFile = (id: string) => {
+    uploadedFiles.value = uploadedFiles.value.filter(file => file.id !== id);
+  };
+
+  const uploadFileMutation = useMutation({
+    mutationFn: (file: File) => chatService.uploadFile(file),
     onSuccess: (result) => {
       if (result.ok) {
-        const ocrText = result.value.text;
-        const currentModelValue = modelValue?.value ?? '';
-        emit('update:modelValue', `${currentModelValue + '\n'}${ocrText}`);
-        showSnackbar(t('chatInput.ocrSuccess'), 'success');
+        const uploadedFileDto: ImageUploadResultDto = result.value;
+        uploadedFiles.value.push({
+          id: uuidv4(), // Generate a unique ID for the chip
+          name: uploadedFileDto.title || 'Untitled File',
+          url: uploadedFileDto.url || '',
+          deleteUrl: uploadedFileDto.deleteUrl,
+          type: uploadedFileDto.mimeType || 'application/octet-stream',
+        });
+        showSnackbar(t('chatInput.uploadSuccess', { name: uploadedFileDto.title }), 'success');
       } else {
         const apiError = result.error as ApiError;
-        showSnackbar(apiError.message || t('chatInput.ocrFailed'), 'error');
+        showSnackbar(apiError.message || t('chatInput.uploadFailed'), 'error');
       }
     },
     onError: (error) => {
-      console.error('OCR API call failed:', error);
-      showSnackbar(t('chatInput.ocrFailed'), 'error');
+      console.error('File upload failed:', error);
+      showSnackbar(t('chatInput.uploadFailed'), 'error');
     },
   });
 
   const addImagePdf = (file: File) => {
-    ocrMutation.mutate(file);
+    // Validate file count
+    if (uploadedFiles.value.length >= MAX_FILE_COUNT) {
+      showSnackbar(t('chatInput.errors.maxFileCount', { count: MAX_FILE_COUNT }), 'warning');
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      showSnackbar(t('chatInput.errors.maxFileSize', { size: MAX_FILE_SIZE_MB }), 'warning');
+      return;
+    }
+
+    uploadFileMutation.mutate(file);
   };
 
   const getCurrentLocation = () => {
@@ -133,7 +169,10 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
     getCurrentLocation,
     openMapPicker,
     clearSelectedLocation,
-    isPerformingOcr: ocrMutation.isPending,
+    isPerformingOcr: uploadFileMutation.isPending, // Renamed from ocrMutation.isPending
     selectedLocation,
+    uploadedFiles, // Expose uploadedFiles
+    removeUploadedFile, // Expose removeUploadedFile
+    isUploadingFile: uploadFileMutation.isPending, // Expose isUploadingFile
   };
 }

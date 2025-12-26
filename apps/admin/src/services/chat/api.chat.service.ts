@@ -1,6 +1,6 @@
+import type { ApiError, Result, ChatResponse, GenerateFamilyDataDto, CombinedAiContentResponse, OcrResultDto, ImageUploadResultDto } from '@/types'; // Updated imports
 import type { IChatService } from './chat.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
-import type { ApiError, Result, ChatResponse, GenerateFamilyDataDto, CombinedAiContentResponse, OcrResultDto } from '@/types'; // Updated imports
 
 export class ApiChatService implements IChatService {
   constructor(private apiClient: ApiClientMethods) { }
@@ -24,6 +24,18 @@ export class ApiChatService implements IChatService {
 
     // Assuming a backend endpoint like /ocr/process
     const response = await this.apiClient.post<OcrResultDto>('/ocr/process', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  }
+
+  async uploadFile(file: File): Promise<Result<ImageUploadResultDto, ApiError>> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await this.apiClient.post<ImageUploadResultDto>('/files/upload-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

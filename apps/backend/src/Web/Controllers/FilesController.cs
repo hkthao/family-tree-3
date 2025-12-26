@@ -1,11 +1,16 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Images.Commands.UploadImage;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/files")]
+[Authorize]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FilesController : ControllerBase
 {
     private readonly IMediator _mediator;
