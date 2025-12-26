@@ -276,7 +276,8 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                     finalChatResponseResult = Result<ChatResponse>.Success(new ChatResponse
                     {
                         Output = outputMessage,
-                        FaceDetectionResults = faceDetectionResults
+                        FaceDetectionResults = faceDetectionResults,
+                        Intent = IntentConstants.IMAGE_RECOGNITION_PAGE
                     });
                 }
                 break;
