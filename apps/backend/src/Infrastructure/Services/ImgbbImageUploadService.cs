@@ -66,7 +66,7 @@ public class ImgbbImageUploadService : IImageUploadService
             Title = imgbbResponse.Data.Title,
             Url = imgbbResponse.Data.Url,
             DeleteUrl = imgbbResponse.Data.DeleteUrl,
-            MimeType = imgbbResponse.Data.Mime, // Mime type is directly available
+            MimeType = imgbbResponse.Data.Image.Mime, // Mime type is directly available
             Size = imgbbResponse.Data.Size,
             Width = imgbbResponse.Data.Image.Width,
             Height = imgbbResponse.Data.Image.Height

@@ -28,5 +28,10 @@ public enum ContextType
     /// <summary>
     /// Ngữ cảnh liên quan đến xác định mối quan hệ giữa hai thành viên.
     /// </summary>
-    RelationshipLookup = 4
+    RelationshipLookup = 4,
+
+    /// <summary>
+    /// Ngữ cảnh người dùng gửi danh sách file hình ảnh đính kèm bằng URL, và nội dung chat mô tả rằng nhận dạng những người trong hình sẽ trả về thêm ngữ cảnh nhận dạng thành viên.
+    /// </summary>
+    ImageRecognition = 5
 }

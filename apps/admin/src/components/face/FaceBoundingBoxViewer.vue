@@ -42,7 +42,6 @@ const emit = defineEmits(['face-selected']);
 
 const {
   t,
-  imageContainer,
   imageLoaded,
   onImageLoad,
   getBoxStyle,
