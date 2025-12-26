@@ -29,13 +29,16 @@
             detectionResult.originalImageUrl }}</a>
         </p>
         <FaceBoundingBoxViewer v-if="detectionResult.originalImageUrl" :imageSrc="detectionResult.originalImageUrl"
-          :faces="mapFacesForViewer(detectionResult.detectedFaces)" :selectable="false" class="mt-2" />
+          :faces="detectionResult.detectedFaces" :selectable="false" class="mt-2" />
         <p v-else class="text-caption">{{ t('aiChat.noImageForDisplay') }}</p>
 
         <div class="mt-2" v-if="detectionResult.detectedFaces && detectionResult.detectedFaces.length > 0">
           <v-chip v-for="face in detectionResult.detectedFaces.filter(f => f.status === 'recognized' && f.memberName)"
-            :key="face.id" class="ma-1" color="success" prepend-icon="mdi-account-circle"
+            :key="face.id" class="ma-1" color="success"
             @click="openOriginalImage(detectionResult.originalImageUrl)">
+            <v-avatar start size="24" v-if="face.thumbnail">
+              <v-img :src="`data:image/jpeg;base64,${face.thumbnail}`"></v-img>
+            </v-avatar>
             {{ face.memberName }}
           </v-chip>
         </div>
@@ -51,18 +54,6 @@ import type { AiChatMessage, EventDto, MemberDto } from '@/types';
 import { useI18n } from 'vue-i18n';
 import ChatGeneratedDataList from '@/components/chat/ChatGeneratedDataList.vue'; // New import
 import FaceBoundingBoxViewer from '@/components/face/FaceBoundingBoxViewer.vue';
-import type { DetectedFace as ViewerDetectedFace, FaceStatus, BoundingBox } from '@/types/memberFace.d'; // Import consistent types
-
-// Define a type for the backend's DetectedFaceDto for clear mapping
-interface BackendDetectedFaceDto {
-  faceId?: string;
-  memberId: string | null; // Changed to string | null
-  memberName?: string;
-  boundingBox: BoundingBox;
-  confidence?: number; // Changed to optional number
-  status: string; // Backend's enum comes as string
-  thumbnail?: string; // Add thumbnail for base64 image if available
-}
 
 defineProps({
   message: {
@@ -81,19 +72,6 @@ const emit = defineEmits([
   'add-generated-event',
 ]);
 const { t } = useI18n();
-
-// Helper function to map backend's DetectedFaceDto to FaceBoundingBoxViewer's expected DetectedFace
-const mapFacesForViewer = (faces: BackendDetectedFaceDto[]): ViewerDetectedFace[] => {
-  return faces.map(face => ({
-    id: face.faceId || crypto.randomUUID(), // Ensure id is always a string
-    boundingBox: face.boundingBox,
-    confidence: face.confidence,
-    memberId: face.memberId, // Directly use as it's now string | null
-    memberName: face.memberName,
-    status: face.status.toLowerCase() as FaceStatus, // Cast to the expected FaceStatus literal type
-    embedding: null, // Provide null as embedding is not provided by ChatResponse
-  }));
-};
 
 const openOriginalImage = (imageUrl: string | null | undefined) => { // Accept string | null | undefined
   if (imageUrl) {
