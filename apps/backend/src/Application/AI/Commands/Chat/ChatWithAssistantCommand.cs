@@ -27,4 +27,9 @@ public record ChatWithAssistantCommand : IRequest<Result<ChatResponse>>
     /// Metadata bổ sung cho cuộc trò chuyện.
     /// </summary>
     public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
+
+    /// <summary>
+    /// Danh sách các tệp đính kèm, bao gồm URL và loại nội dung.
+    /// </summary>
+    public ICollection<ChatAttachmentDto>? Attachments { get; init; }
 }
