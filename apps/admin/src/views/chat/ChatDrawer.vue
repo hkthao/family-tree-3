@@ -16,7 +16,7 @@
             <div class="text-h6 mb-4">{{ t('chat.drawer.selectFamilyPrompt') }}</div>
             <FamilyAutocomplete v-model="selectedFamilyForChat" :label="t('chat.drawer.selectFamilyLabel')"
               variant="outlined" class="mb-4 w-100"
-              :rules="[(v: string) => !!v || t('chat.drawer.validation.selectFamilyRequired')]" :clearable="true" />
+              :rules="validationRules.selectedFamilyForChat" :clearable="true" />
             <v-btn color="primary" :disabled="!selectedFamilyForChat" @click="startChatWithSelectedFamily">
               {{ t('chat.drawer.startChatButton') }}
             </v-btn>
@@ -57,6 +57,7 @@ import RelationshipDetector from '@/components/relationship/RelationshipDetector
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import { useGeneratedDataStore } from '@/stores/generatedData.store'; // New import
+import { useChatDrawerRules } from '@/validations/chatDrawer.validation';
 
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -98,6 +99,8 @@ const showMemberAddDrawer = ref(false);
 const memberAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with MemberDto
 const showEventAddDrawer = ref(false);
 const eventAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with EventDto
+
+const { rules: validationRules } = useChatDrawerRules();
 
 watch(() => showMemberAddDrawer.value, (newVal) => {
   if (!newVal) {

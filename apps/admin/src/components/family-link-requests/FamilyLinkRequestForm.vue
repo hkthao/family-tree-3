@@ -6,7 +6,7 @@
           v-model="formData.requestingFamilyId"
           :label="t('familyLinkRequest.form.requestingFamily')"
           :disabled="readOnly"
-          :rules="[required('requestingFamilyId')]"
+          :rules="validationRules.requestingFamilyId"
           data-testid="requesting-family-field"
         />
       </v-col>
@@ -14,7 +14,7 @@
         <FamilyAutocomplete
           v-model="formData.targetFamilyId"
           :label="t('familyLinkRequest.form.targetFamily')"
-          :rules="[required('targetFamilyId'), targetFamilyCannotBeRequestingFamily]"
+          :rules="validationRules.targetFamilyId"
           :disabled="readOnly"
           data-testid="target-family-field"
         />
@@ -28,7 +28,7 @@
           counter
           maxlength="500"
           :disabled="readOnly"
-          :rules="[required('requestMessage')]"
+          :rules="validationRules.requestMessage"
           data-testid="request-message-field"
         ></v-textarea>
       </v-col>
@@ -81,6 +81,7 @@ import { LinkStatus } from '@/types';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { format } from 'date-fns';
+import { useFamilyLinkRequestRules } from '@/validations/familyLinkRequest.validation';
 
 interface FamilyLinkRequestFormProps {
   initialFamilyLinkRequestData?: Partial<FamilyLinkRequestDto>;
@@ -102,17 +103,13 @@ const formData = reactive<Partial<FamilyLinkRequestDto>>({
   responseDate: '',
 });
 
+const { rules: validationRules } = useFamilyLinkRequestRules(formData);
+
 const linkStatusOptions = computed(() => [
   { title: t('familyLinkRequest.status.pending'), value: 0 },
   { title: t('familyLinkRequest.status.approved'), value: 1 },
   { title: t('familyLinkRequest.status.rejected'), value: 2 },
 ]);
-
-const required = (propertyType: string) => (value: string | null | undefined) =>
-  !!value || t(`familyLinkRequest.form.rules.${propertyType}Required`);
-
-const targetFamilyCannotBeRequestingFamily = (value: string | null | undefined) =>
-  value !== formData.requestingFamilyId || t('familyLinkRequest.form.rules.targetCannotBeRequesting');
 
 onMounted(() => {
   if (props.initialFamilyLinkRequestData) {

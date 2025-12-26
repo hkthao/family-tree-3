@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="12">
         <FamilyAutocomplete v-model="selectedFamilyId" :label="t('relationshipDetection.familyLabel')"
-          :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.familyRequired')]" clearable
+          :rules="validationRules.familyId" clearable
           :disabled="!!initialFamilyId"
           required />
       </v-col>
@@ -14,14 +14,14 @@
         <MemberAutocomplete v-model="selectedMemberAId" :label="t('relationshipDetection.memberALabel')"
           :family-id="selectedFamilyId"
           :disabled="!selectedFamilyId"
-          :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.memberARequired')]" clearable
+          :rules="validationRules.memberAId" clearable
           required />
       </v-col>
       <v-col cols="12" :md="memberColCols">
         <MemberAutocomplete v-model="selectedMemberBId" :label="t('relationshipDetection.memberBLabel')"
           :family-id="selectedFamilyId"
           :disabled="!selectedFamilyId"
-          :rules="[(v: string | undefined | null) => !!v || t('relationshipDetection.memberBRequired')]" clearable
+          :rules="validationRules.memberBId" clearable
           required />
       </v-col>
     </v-row>
@@ -60,6 +60,7 @@ import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useRelationshipDetector } from '@/composables/relationship/useRelationshipDetector';
+import { useRelationshipDetectorRules } from '@/validations/relationshipDetector.validation';
 
 const props = defineProps<{
   initialFamilyId?: string; // Optional familyId prop to initialize the detector
@@ -73,6 +74,8 @@ const {
   state: { selectedFamilyId, selectedMemberAId, selectedMemberBId, result, loading, error },
   actions: { detectRelationship },
 } = useRelationshipDetector(props.initialFamilyId, t);
+
+const { rules: validationRules } = useRelationshipDetectorRules();
 
 watch(() => props.initialFamilyId, (newFamilyId) => {
   selectedFamilyId.value = newFamilyId;

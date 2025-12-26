@@ -17,6 +17,8 @@
     :auto-grow="true"
     :max-rows="5"
     counter
+    maxlength="1500"
+    :rules="chatInputRules.chatInput"
     :rows="2"
     :model-value="modelValue"
     @update:model-value="updateModelValue"
@@ -56,9 +58,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useChatInput } from '@/composables/chat/useChatInput';
+import { useChatInputRules } from '@/validations/chat.validation';
 
 const props = defineProps({
   modelValue: String,
@@ -79,6 +82,18 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const { updateModelValue, handleEnterKey, sendMessage, addImagePdf, getCurrentLocation, openMapPicker, clearSelectedLocation, selectedLocation } = useChatInput(props, emit);
+
+// Validation
+const chatInputState = reactive({
+  chatInput: props.modelValue,
+});
+
+const { rules: chatInputRules } = useChatInputRules(chatInputState);
+
+// Watch for changes in modelValue and update chatInputState
+watch(() => props.modelValue, (newValue) => {
+  chatInputState.chatInput = newValue;
+});
 
 const triggerFileInput = () => {
   fileInput.value?.click();
