@@ -7,7 +7,7 @@ using backend.Domain.Enums;
 
 namespace backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 
-public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyLocationListDto>>>
+public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyLocationDto>>>
 {
     public Guid? FamilyId { get; init; }
     public string? SearchQuery { get; init; }
@@ -15,19 +15,19 @@ public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<Pagin
     public LocationSource? Source { get; init; }
 }
 
-public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationListDto>>>
+public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
-    public async Task<Result<PaginatedList<FamilyLocationListDto>>> Handle(SearchFamilyLocationsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<FamilyLocationDto>>> Handle(SearchFamilyLocationsQuery request, CancellationToken cancellationToken)
     {
         // 1. Kiểm tra xác thực người dùng
         if (!_currentUser.IsAuthenticated)
         {
-            return Result<PaginatedList<FamilyLocationListDto>>.Success(PaginatedList<FamilyLocationListDto>.Empty());
+            return Result<PaginatedList<FamilyLocationDto>>.Success(PaginatedList<FamilyLocationDto>.Empty());
         }
 
         var currentUserId = _currentUser.UserId;
@@ -45,7 +45,7 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
             // If a specific FamilyId is requested, check if the user has access to it
             if (!_authorizationService.CanAccessFamily(request.FamilyId.Value))
             {
-                return Result<PaginatedList<FamilyLocationListDto>>.Success(PaginatedList<FamilyLocationListDto>.Empty());
+                return Result<PaginatedList<FamilyLocationDto>>.Success(PaginatedList<FamilyLocationDto>.Empty());
             }
             query = query.WithSpecification(new FamilyLocationByFamilyIdSpecification(request.FamilyId));
         }
@@ -61,9 +61,9 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
         query = query.WithSpecification(new FamilyLocationOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedList = await query
-            .ProjectTo<FamilyLocationListDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<FamilyLocationDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
-        return Result<PaginatedList<FamilyLocationListDto>>.Success(paginatedList);
+        return Result<PaginatedList<FamilyLocationDto>>.Success(paginatedList);
     }
 }

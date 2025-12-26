@@ -151,7 +151,7 @@ public class MappingProfile : Profile
 
         // FamilyLocation mappings
         CreateMap<FamilyLocation, FamilyLocationDto>();
-        CreateMap<FamilyLocation, FamilyLocationListDto>();
+        CreateMap<FamilyLocation, FamilyLocationDto>();
         CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
         CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
 
