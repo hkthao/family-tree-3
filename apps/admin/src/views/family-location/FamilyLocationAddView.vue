@@ -5,7 +5,7 @@
     </v-card-title>
     <v-progress-linear v-if="isAddingFamilyLocation" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLocationForm ref="familyLocationFormRef" :family-id="props.familyId" />
+      <FamilyLocationForm ref="familyLocationFormRef" :family-id="props.familyId" :initial-family-location-data="props.initialLocationData" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -33,6 +33,7 @@ import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
 
 interface FamilyLocationAddViewProps {
   familyId: string;
+  initialLocationData?: FamilyLocation | null; // Add initialLocationData prop
 }
 const props = defineProps<FamilyLocationAddViewProps>();
 const emit = defineEmits(['close', 'saved']);
