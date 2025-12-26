@@ -123,7 +123,7 @@ const chatInputState = reactive({
   chatInput: props.modelValue,
 });
 
-const { rules: chatInputRules } = useChatInputRules(chatInputState);
+const { rules: chatInputRules } = useChatInputRules();
 
 // Watch for changes in modelValue and update chatInputState
 watch(() => props.modelValue, (newValue) => {
