@@ -76,8 +76,7 @@ const handleSendMessage = (attachments?: UploadedFile[]) => {
 };
 
 const handleAddLocation = (location: { latitude: number; longitude: number; address?: string }) => {
-  console.log('Location received:', location);
-  // Implement logic to use the received location, e.g., display on map, send to AI
+  actions.handleAddLocation(location);
 };
 
 const SCROLL_THRESHOLD = 100; // Pixels from the bottom to consider "near bottom"

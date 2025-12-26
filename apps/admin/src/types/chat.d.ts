@@ -1,6 +1,12 @@
 import type { CombinedAiContentDto } from '@/types/ai.d';
 import type { FaceDetectionResult } from '@/types/memberFace.d'; // Changed import
 
+export interface ChatLocation {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
 export interface AiChatMessage {
   sender: 'user' | 'ai';
   text: string;
@@ -8,6 +14,7 @@ export interface AiChatMessage {
   generatedData?: CombinedAiContentDto; // Also add generatedData for consistency
   faceDetectionResults?: FaceDetectionResult[]; // Using FaceDetectionResult
   attachments?: ChatAttachmentDto[]; // NEW: Add attachments for user messages
+  location?: ChatLocation; // NEW: Add location for user messages
 }
 
 export interface ChatMessage {

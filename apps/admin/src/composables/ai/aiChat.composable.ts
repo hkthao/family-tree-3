@@ -2,7 +2,7 @@ import { ref } from 'vue'; // Keep watch for local effects that are still needed
 import { useI18n } from 'vue-i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import v4 for uuid generation
 import { useSendMessageMutation } from '@/composables/ai/mutations/useSendMessageMutation'; // NEW
-import type { AiChatMessage, ChatAttachmentDto } from '@/types'; // Import the new message type and ChatAttachmentDto
+import type { AiChatMessage, ChatAttachmentDto, ChatLocation } from '@/types'; // Import the new message type and ChatAttachmentDto, ChatLocation
 import type { UploadedFile } from '../chat/useChatInput'; // Import UploadedFile
 
 // Define dependencies for useAiChat composable
@@ -588,16 +588,16 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
     isPending: isSendingMessage,
   } = useSendMessageMutation();
 
-  const sendMessage = async (messageText: string, attachments?: UploadedFile[]) => {
+  const sendMessage = async (messageText: string, attachments?: UploadedFile[], location?: ChatLocation) => {
     const chatAttachments: ChatAttachmentDto[] | undefined = attachments?.map(att => ({
       url: att.url,
       contentType: att.type,
     }));
 
-    messages.value.push({ sender: 'user', text: messageText, attachments: chatAttachments }); // Include attachments
+    messages.value.push({ sender: 'user', text: messageText, attachments: chatAttachments, location: location }); // Include attachments and location
 
     sendAiMessageMutation(
-      { familyId, sessionId, chatInput: messageText, attachments: chatAttachments },
+      { familyId, sessionId, chatInput: messageText, attachments: chatAttachments, location: location },
       {
         onSuccess: (responseAiMessage) => {
           messages.value.push(responseAiMessage);

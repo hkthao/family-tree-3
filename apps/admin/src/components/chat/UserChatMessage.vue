@@ -4,11 +4,17 @@
       <div class="message-content">
         {{ message.text }}
       </div>
-      <!-- NEW: Display attachments -->
+      <!-- Display attachments -->
       <div v-if="message.attachments && message.attachments.length > 0" class="mt-2">
-        <v-chip v-for="(attachment, index) in message.attachments" :key="index" class="ma-1" 
+        <v-chip v-for="(attachment, index) in message.attachments" :key="index" class="ma-1"
           :prepend-icon="getAttachmentIcon(attachment.contentType)" @click="openAttachment(attachment.url)">
           {{ getFileNameFromUrl(attachment.url) }}
+        </v-chip>
+      </div>
+      <!-- NEW: Display location -->
+      <div v-if="message.location" class="mt-2">
+        <v-chip class="ma-1" prepend-icon="mdi-map-marker" @click="openMapLink(message.location)">
+          {{ message.location.address || `Lat: ${message.location.latitude}, Lng: ${message.location.longitude}` }}
         </v-chip>
       </div>
       <!-- END NEW -->
@@ -23,7 +29,7 @@
 
 <script setup lang="ts">
 import type { PropType, Ref } from 'vue';
-import type { AiChatMessage } from '@/types/chat.d'; // Import ChatAttachmentDto
+import type { AiChatMessage, ChatAttachmentDto, ChatLocation } from '@/types/chat.d'; // Import ChatAttachmentDto and ChatLocation
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import type { UserProfile } from '@/types/user.d';
 
@@ -41,7 +47,7 @@ defineProps({
 // Function to get attachment icon based on content type
 const getAttachmentIcon = (contentType?: string) => {
   if (contentType?.startsWith('image/')) return 'mdi-file-image';
-  if (contentType === 'application/pdf') return 'mdi-file-pdf-box'; // Use mdi-file-pdf-box for a clearer PDF icon
+  if (contentType === 'application/pdf') return 'mdi-file-pdf-box';
   return 'mdi-file';
 };
 
@@ -53,7 +59,7 @@ const getFileNameFromUrl = (url?: string) => {
     const pathSegments = urlObj.pathname.split('/');
     return pathSegments[pathSegments.length - 1] || 'File';
   } catch {
-    return url; // Fallback to full URL if parsing fails
+    return url;
   }
 };
 
@@ -61,6 +67,14 @@ const getFileNameFromUrl = (url?: string) => {
 const openAttachment = (url?: string) => {
   if (url) {
     window.open(url, '_blank');
+  }
+};
+
+// Function to open map link
+const openMapLink = (location: ChatLocation) => {
+  if (location.latitude && location.longitude) {
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+    window.open(mapUrl, '_blank');
   }
 };
 </script>
