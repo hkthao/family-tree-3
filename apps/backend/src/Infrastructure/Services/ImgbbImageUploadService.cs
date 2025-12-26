@@ -58,10 +58,7 @@ public class ImgbbImageUploadService : IImageUploadService
             throw new Exception($"Imgbb upload failed: {imgbbResponse?.Error?.Message ?? responseString}");
         }
 
-        // Parse Size from string to long
-        long.TryParse(imgbbResponse.Data.Size, out long parsedSize);
-        int.TryParse(imgbbResponse.Data.Image.Width, out int parsedWidth);
-        int.TryParse(imgbbResponse.Data.Image.Height, out int parsedHeight);
+        // No longer need manual parsing as DTO properties are now correct types
 
         return new ImageUploadResultDto
         {
@@ -70,9 +67,9 @@ public class ImgbbImageUploadService : IImageUploadService
             Url = imgbbResponse.Data.Url,
             DeleteUrl = imgbbResponse.Data.DeleteUrl,
             MimeType = imgbbResponse.Data.Mime, // Mime type is directly available
-            Size = parsedSize,
-            Width = parsedWidth,
-            Height = parsedHeight
+            Size = imgbbResponse.Data.Size,
+            Width = imgbbResponse.Data.Image.Width,
+            Height = imgbbResponse.Data.Image.Height
         };
     }
 
@@ -98,7 +95,7 @@ public class ImgbbImageUploadService : IImageUploadService
         public string UrlViewer { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty; // The actual image URL
         public string DisplayUrl { get; set; } = string.Empty;
-        public string Size { get; set; } = string.Empty; // imgbb returns size as string
+        public long Size { get; set; } // imgbb returns size as string
         public string Mime { get; set; } = string.Empty; // imgbb returns mime as string
         public string Extension { get; set; } = string.Empty;
         public string DeleteUrl { get; set; } = string.Empty;
@@ -114,7 +111,7 @@ public class ImgbbImageUploadService : IImageUploadService
         public string Mime { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
-        public string Width { get; set; } = string.Empty; // Width as string
-        public string Height { get; set; } = string.Empty; // Height as string
+        public int Width { get; set; } // Width as string
+        public int Height { get; set; } // Height as string
     }
 }
