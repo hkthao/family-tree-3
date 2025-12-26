@@ -27,8 +27,6 @@ export function usePublicFamilyList(deps: UsePublicFamilyListDeps = defaultDeps)
   const {
     useI18n,
     useRouter,
-    useConfirmDialog,
-    useGlobalSnackbar,
     useFamilyListFilters,
     usePublicFamiliesQuery,
   } = deps;
@@ -36,8 +34,6 @@ export function usePublicFamilyList(deps: UsePublicFamilyListDeps = defaultDeps)
   const router = useRouter();
   const { t } = useI18n();
 
-  const { showConfirmDialog } = useConfirmDialog(); // Keep if needed for other purposes, but not delete
-  const { showSnackbar } = useGlobalSnackbar();
 
   const familyListFiltersComposables = useFamilyListFilters();
   const {
@@ -56,7 +52,7 @@ export function usePublicFamilyList(deps: UsePublicFamilyListDeps = defaultDeps)
     }
   } = familyListFiltersComposables;
 
-  const { families, totalItems, loading, refetch } = usePublicFamiliesQuery(filters); // Use public query
+  const { families, totalItems, loading } = usePublicFamiliesQuery(filters); // Use public query
 
   const handleFilterUpdate = (newFilters: FamilyFilter) => {
     setFilters(newFilters);

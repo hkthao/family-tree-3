@@ -85,6 +85,7 @@ const emit = defineEmits([
 const { t } = useI18n();
 
 // Helper function to map backend's DetectedFaceDto to FaceBoundingBoxViewer's expected DetectedFace
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const mapFacesForViewer = (faces: BackendDetectedFaceDto[]): ViewerDetectedFace[] => {
   return faces.map(face => ({
     id: face.faceId || crypto.randomUUID(), // Ensure id is always a string
