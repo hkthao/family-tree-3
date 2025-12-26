@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFaceMemberSelectDialog } from '@/composables/face/logic/useFaceMemberSelectDialog';
 import { useQuery } from '@tanstack/vue-query';
 import { ref, nextTick, reactive, type Ref } from 'vue';
-import { type DetectedFace, type Member, type ApiError, Gender } from '@/types';
+import { type DetectedFace, type MemberDto, type ApiError, Gender } from '@/types';
 import type { IMemberService } from '@/services/member/member.service.interface';
 
 import type { Composer } from 'vue-i18n';
@@ -81,7 +81,7 @@ describe('useFaceMemberSelectDialog', () => {
     status: "unrecognized", // Changed to FaceStatus enum
   };
 
-  const mockMember: Member = {
+  const mockMember: MemberDto = {
     id: 'member1',
     fullName: 'John Doe',
     gender: Gender.Male, // Changed to Gender enum
@@ -142,7 +142,7 @@ describe('useFaceMemberSelectDialog', () => {
   });
 
   it('should call memberService.getById in queryFn when selectedMemberId is defined', async () => {
-    let capturedQueryFn: (() => Promise<Member | undefined>) | undefined;
+    let capturedQueryFn: (() => Promise<MemberDto | undefined>) | undefined;
 
     (useQuery as Mock).mockImplementation((options: any) => {
       capturedQueryFn = options.queryFn;
@@ -195,7 +195,7 @@ describe('useFaceMemberSelectDialog', () => {
   });
 
   it('should handle query error and set selectedMemberDetails to undefined', async () => {
-    const mockError: ApiError = { message: 'Member not found', statusCode: 404, name: 'ApiError' };
+    const mockError: ApiError = { message: 'MemberDto not found', statusCode: 404, name: 'ApiError' };
     (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {

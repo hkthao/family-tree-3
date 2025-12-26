@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useEventQuery } from '@/composables/event/queries/useEventQuery';
 import { useQuery } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import { ref, type Ref } from 'vue';
 import { EventType, CalendarType, RepeatRule } from '@/types';
@@ -24,9 +24,9 @@ const mockEventService: EventServiceAdapter = {
 };
 
 describe('useEventQuery', () => {
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: 'event1',
-    name: 'Test Event',
+    name: 'Test EventDto',
     code: 'TE001',
     type: EventType.Other,
     familyId: 'family1',
@@ -98,7 +98,7 @@ describe('useEventQuery', () => {
 
   it('should throw an error if event ID is missing in queryFn', async () => {
     const eventIdRef = ref(undefined);
-    const mockError = new Error('Event ID is required');
+    const mockError = new Error('EventDto ID is required');
     (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {
@@ -111,12 +111,12 @@ describe('useEventQuery', () => {
 
     const { query } = useEventQuery(eventIdRef, { eventService: mockEventService });
     
-    expect(query.error.value?.message).toBe('Event ID is required');
+    expect(query.error.value?.message).toBe('EventDto ID is required');
   });
 
   it('should throw an error if event not found (response.value is undefined)', async () => {
     const eventIdRef = ref('event1');
-    const mockError = new Error('Event not found');
+    const mockError = new Error('EventDto not found');
     (useQuery as Mock).mockImplementation((options: any) => {
       options.queryFn = vi.fn(() => Promise.reject(mockError));
       return {
@@ -130,7 +130,7 @@ describe('useEventQuery', () => {
 
     const { query } = useEventQuery(eventIdRef, { eventService: mockEventService });
 
-    expect(query.error.value?.message).toBe('Event not found');
+    expect(query.error.value?.message).toBe('EventDto not found');
   });
 
   it('should set enabled to false if eventId is undefined', () => {

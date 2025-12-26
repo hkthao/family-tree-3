@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useHierarchicalTreeChart } from '@/composables/charts/useHierarchicalTreeChart';
 import { transformFamilyData, determineMainChartId } from '@/composables/charts/hierarchicalTreeChart.logic';
 import { createDefaultF3Adapter } from '@/composables/charts/f3.adapter';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 
 // Mock the logic and adapter modules
@@ -31,7 +31,7 @@ vi.mock('@/composables/charts/f3.adapter', () => ({
 describe('useHierarchicalTreeChart', () => {
   const mockEmit = vi.fn();
   const mockT = vi.fn((key) => key);
-  const mockMembers: Member[] = [
+  const mockMembers: MemberDto[] = [
     { id: '1', firstName: 'John', lastName: 'Doe', fullName: 'John Doe', gender: Gender.Male, isRoot: true, familyId: 'f1' },
     { id: '2', firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', gender: Gender.Female, isRoot: false, familyId: 'f1' },
   ];

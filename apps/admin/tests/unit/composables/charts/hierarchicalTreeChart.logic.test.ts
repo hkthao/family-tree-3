@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { transformFamilyData, determineMainChartId } from '@/composables/charts/hierarchicalTreeChart.logic';
 import { Gender, RelationshipType } from '@/types';
-import type { Member, Relationship } from '@/types';
+import type { MemberDto, Relationship } from '@/types';
 
 
 // Mock getAvatarUrl since it's an external utility and not part of the logic being tested directly
@@ -10,7 +10,7 @@ vi.mock('@/utils/avatar.utils', () => ({
 }));
 
 describe('hierarchicalTreeChart.logic', () => {
-  const mockMembers: Member[] = [
+  const mockMembers: MemberDto[] = [
     { id: '1', firstName: 'John', lastName: 'Doe', fullName: 'John Doe', gender: Gender.Male, isRoot: true, familyId: 'f1' },
     { id: '2', firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', gender: Gender.Female, isRoot: false, familyId: 'f1' },
     { id: '3', firstName: 'Child', lastName: 'Doe', fullName: 'Child Doe', gender: Gender.Male, isRoot: false, familyId: 'f1' },
@@ -69,7 +69,7 @@ describe('hierarchicalTreeChart.logic', () => {
     });
 
     it('should handle members with no relationships', () => {
-      const loneMember: Member[] = [
+      const loneMember: MemberDto[] = [
         { id: '5', firstName: 'Lone', lastName: 'Wolf', fullName: 'Lone Wolf', gender: Gender.Male, isRoot: false, familyId: 'f1' },
       ];
       const transformed = transformFamilyData(loneMember, [], null);
@@ -86,7 +86,7 @@ describe('hierarchicalTreeChart.logic', () => {
     });
 
     it('should handle gender undefined', () => {
-      const unknownGenderMember: Member[] = [
+      const unknownGenderMember: MemberDto[] = [
         { id: '6', firstName: 'Unknown', lastName: 'Gender', fullName: 'Unknown Gender', gender: Gender.Other, familyId: 'f1' },
       ];
       const transformed = transformFamilyData(unknownGenderMember, [], null);
@@ -98,7 +98,7 @@ describe('hierarchicalTreeChart.logic', () => {
     const transformedData = [
       { id: '1', data: { fullName: 'John Doe', gender: 'M' }, rels: { spouses: [], children: [] } },
       { id: '2', data: { fullName: 'Jane Doe', gender: 'F' }, rels: { spouses: [], children: [] } },
-      { id: 'root', data: { fullName: 'Root Member', gender: 'M', main: true }, rels: { spouses: [], children: [] } },
+      { id: 'root', data: { fullName: 'Root MemberDto', gender: 'M', main: true }, rels: { spouses: [], children: [] } },
     ] as any; // Cast to any to simplify mock type
 
     it('should return providedRootId if it exists in transformedData', () => {
@@ -112,7 +112,7 @@ describe('hierarchicalTreeChart.logic', () => {
     });
 
     it('should return the first transformedData ID if no root member and no providedRootId', () => {
-      const noRootMembers: Member[] = mockMembers.map(m => ({ ...m, isRoot: false }));
+      const noRootMembers: MemberDto[] = mockMembers.map(m => ({ ...m, isRoot: false }));
       const result = determineMainChartId(noRootMembers, transformedData, null);
       expect(result).toBe('1'); // First item in transformedData is '1'
     });

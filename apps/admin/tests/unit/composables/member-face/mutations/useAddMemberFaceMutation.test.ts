@@ -3,7 +3,7 @@ import { useAddMemberFaceMutation } from '@/composables/member-face/mutations/us
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { ref } from 'vue';
 import { queryKeys } from '@/constants/queryKeys';
-import type { MemberFace } from '@/types';
+import type { MemberFace, CreateMemberFaceCommand } from '@/types';
 import type { IMemberFaceService } from '@/services/member-face/member-face.service.interface';
 
 // Mock the external dependencies
@@ -67,7 +67,7 @@ const mockQueryClient = {
 };
 
 describe('useAddMemberFaceMutation', () => {
-  const mockMemberFaceData: Omit<MemberFace, 'id'> = {
+  const mockMemberFaceData: CreateMemberFaceCommand = {
     memberId: 'member1',
     faceId: 'face1',
     boundingBox: { x: 10, y: 10, width: 20, height: 20 },
@@ -79,9 +79,9 @@ describe('useAddMemberFaceMutation', () => {
     emotion: 'happy',
     emotionConfidence: 0.8,
     isVectorDbSynced: false,
-    familyId: 'family1',
+    familyId: 'family1' as string,
   };
-  const mockMemberFace: MemberFace = { id: 'memberFace1', ...mockMemberFaceData };
+  const mockMemberFace: MemberFace = { id: 'memberFace1', ...mockMemberFaceData, isVectorDbSynced: mockMemberFaceData.isVectorDbSynced || false };
 
   beforeEach(() => {
     vi.clearAllMocks();

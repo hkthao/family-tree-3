@@ -75,7 +75,7 @@ describe('f3.adapter', () => {
 
       // Test the onCardClick logic within the CardRenderer
       const onCardUpdateFunction = chart.setOnCardUpdate.mock.calls[0][0];
-      const mockCardData = { data: { id: 'mockId', data: { fullName: 'Mock Member', gender: 'M' }, rels: {} } };
+      const mockCardData = { data: { id: 'mockId', data: { fullName: 'Mock MemberDto', gender: 'M' }, rels: {} } };
       const mockCardElement = document.createElement('div');
       
       // Simulate the onCardUpdate function being called, which sets up the event listener

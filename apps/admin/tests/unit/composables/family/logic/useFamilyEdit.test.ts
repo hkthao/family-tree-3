@@ -9,7 +9,7 @@ const mockUseI18n = vi.fn(() => ({ t: mockT }));
 const mockShowSnackbar = vi.fn();
 const mockUseGlobalSnackbar = vi.fn(() => ({ showSnackbar: mockShowSnackbar }));
 
-const mockFamily = ref({ id: 'family1', name: 'Test Family' });
+const mockFamily = ref({ id: 'family1', name: 'Test FamilyDto' });
 const mockIsLoadingFamily = ref(false);
 const mockErrorFamily = ref<Error | null>(null);
 const mockUseFamilyQuery = vi.fn(() => ({
@@ -27,7 +27,7 @@ const mockUseUpdateFamilyMutation = vi.fn(() => ({
 
 const mockFamilyFormRef: Ref<any | null> = ref({
   validate: vi.fn(() => true),
-  getFormData: vi.fn(() => ({ id: 'family1', name: 'Updated Family' })),
+  getFormData: vi.fn(() => ({ id: 'family1', name: 'Updated FamilyDto' })),
 });
 
 describe('useFamilyEdit', () => {
@@ -38,12 +38,12 @@ describe('useFamilyEdit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     emit = vi.fn();
-    mockFamily.value = { id: 'family1', name: 'Test Family' };
+    mockFamily.value = { id: 'family1', name: 'Test FamilyDto' };
     mockIsLoadingFamily.value = false;
     mockErrorFamily.value = null;
     mockIsUpdatingFamily.value = false;
     mockFamilyFormRef.value.validate.mockResolvedValue(true);
-    mockFamilyFormRef.value.getFormData.mockReturnValue({ id: 'family1', name: 'Updated Family' });
+    mockFamilyFormRef.value.getFormData.mockReturnValue({ id: 'family1', name: 'Updated FamilyDto' });
 
     deps = {
       useI18n: mockUseI18n,
@@ -59,7 +59,7 @@ describe('useFamilyEdit', () => {
     const { state } = useFamilyEdit(mockProps, emit, mockFamilyFormRef, deps);
 
     expect(mockUseFamilyQuery).toHaveBeenCalledWith(expect.any(Object)); // Expecting toRef result
-    expect(state.family.value).toEqual({ id: 'family1', name: 'Test Family' });
+    expect(state.family.value).toEqual({ id: 'family1', name: 'Test FamilyDto' });
     expect(state.isLoading.value).toBe(true);
     expect(state.error.value).toEqual(new Error('Test Error'));
     expect(state.isUpdatingFamily.value).toBe(false);
@@ -86,7 +86,7 @@ describe('useFamilyEdit', () => {
   });
 
   it('should call updateFamily with correct data on successful validation', async () => {
-    const mockFormData = { id: 'family1', name: 'New Updated Family' };
+    const mockFormData = { id: 'family1', name: 'New Updated FamilyDto' };
     mockFamilyFormRef.value.getFormData.mockReturnValueOnce(mockFormData);
     const { actions } = useFamilyEdit(mockProps, emit, mockFamilyFormRef, deps);
 

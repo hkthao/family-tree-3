@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useAddEventMutation } from '@/composables/event/mutations/useAddEventMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 
 // Mock the external dependencies
@@ -28,8 +28,8 @@ const mockQueryClient = {
 };
 
 describe('useAddEventMutation', () => {
-  const mockEventData: Omit<Event, 'id'> = {
-    name: 'Test Event',
+  const mockEventData: Omit<EventDto, 'id'> = {
+    name: 'Test EventDto',
     code: 'TE001',
     type: 0, // EventType.Other
     familyId: 'family1',
@@ -41,7 +41,7 @@ describe('useAddEventMutation', () => {
     color: '#FF0000',
     relatedMemberIds: ['member1'],
   };
-  const mockEvent: Event = { id: 'event1', ...mockEventData };
+  const mockEvent: EventDto = { id: 'event1', ...mockEventData };
 
   beforeEach(() => {
     vi.clearAllMocks();

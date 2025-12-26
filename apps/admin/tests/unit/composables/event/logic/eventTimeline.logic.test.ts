@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mapFiltersToQueryOptions, sortEventsBySolarDateDesc } from '@/composables/event/logic/eventTimeline.logic';
-import type { Event, EventFilter, ListOptions, Paginated } from '@/types';
+import type { EventDto, EventFilter, ListOptions, Paginated } from '@/types';
 import { EventType, CalendarType } from '@/types';
 
 describe('eventTimeline.logic', () => {
@@ -94,13 +94,13 @@ describe('eventTimeline.logic', () => {
   });
 
   describe('sortEventsBySolarDateDesc', () => {
-    const event1: Event = { id: '1', solarDate: new Date('2023-03-15'), name: 'Event 1' } as Event;
-    const event2: Event = { id: '2', solarDate: new Date('2023-01-20'), name: 'Event 2' } as Event;
-    const event3: Event = { id: '3', solarDate: new Date('2023-05-01'), name: 'Event 3' } as Event;
-    const eventWithNoDate: Event = { id: '4', solarDate: null, name: 'Event 4' } as Event;
+    const event1: EventDto = { id: '1', solarDate: new Date('2023-03-15'), name: 'EventDto 1' } as EventDto;
+    const event2: EventDto = { id: '2', solarDate: new Date('2023-01-20'), name: 'EventDto 2' } as EventDto;
+    const event3: EventDto = { id: '3', solarDate: new Date('2023-05-01'), name: 'EventDto 3' } as EventDto;
+    const eventWithNoDate: EventDto = { id: '4', solarDate: null, name: 'EventDto 4' } as EventDto;
 
     it('should sort events by solarDate in descending order', () => {
-      const paginatedData: Paginated<Event> = {
+      const paginatedData: Paginated<EventDto> = {
         items: [event1, event2, event3],
         totalItems: 3,
         totalPages: 1,
@@ -112,7 +112,7 @@ describe('eventTimeline.logic', () => {
     });
 
     it('should place events with null or undefined solarDate at the end', () => {
-      const paginatedData: Paginated<Event> = {
+      const paginatedData: Paginated<EventDto> = {
         items: [event1, eventWithNoDate, event2],
         totalItems: 3,
         totalPages: 1,
@@ -125,7 +125,7 @@ describe('eventTimeline.logic', () => {
 
     it('should not mutate the original items array', () => {
       const originalItems = [event1, event2, event3];
-      const paginatedData: Paginated<Event> = {
+      const paginatedData: Paginated<EventDto> = {
         items: originalItems,
         totalItems: 3,
         totalPages: 1,
@@ -144,7 +144,7 @@ describe('eventTimeline.logic', () => {
     });
 
     it('should return the same object structure with sorted items', () => {
-      const paginatedData: Paginated<Event> = {
+      const paginatedData: Paginated<EventDto> = {
         items: [event1, event2],
         totalItems: 2,
         totalPages: 1,
