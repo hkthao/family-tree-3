@@ -1,21 +1,24 @@
-using System.Net.Http; // Add this
+using System.Net.Http;
+using System.Text; // NEW
+using System.IO; // NEW
 using backend.Application.AI.Commands.Chat.CallAiChatService;
 using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting; // Add this
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Common.Queries.ValidateUserAuthentication;
 using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
-using backend.Application.MemberFaces.Commands.DetectFaces; // Add this
+using backend.Application.MemberFaces.Commands.DetectFaces;
+using backend.Application.OCR.Commands; // NEW
 using backend.Application.Prompts.Queries.GetPromptById;
-using Microsoft.Extensions.Http; // Add this
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options; // Add this
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.AI.Chat;
 
@@ -169,11 +172,69 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 break;
 
             case ContextType.DataGeneration:
-                _logger.LogInformation("Ngữ cảnh là DataGeneration. Gọi lệnh tạo dữ liệu gia đình.");
+                _logger.LogInformation("Ngữ cảnh là DataGeneration. Xử lý tệp đính kèm và gọi lệnh tạo dữ liệu gia đình.");
+
+                var combinedChatInput = new StringBuilder(request.ChatInput ?? string.Empty);
+
+                if (request.Attachments != null && request.Attachments.Any())
+                {
+                    foreach (var attachment in request.Attachments)
+                    {
+                        if (attachment.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                            attachment.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                var fileBytes = await DownloadImageBytesAsync(attachment.Url, cancellationToken); // This method can also download PDFs
+                                if (fileBytes != null && fileBytes.Length > 0)
+                                {
+                                    _logger.LogInformation("Đang xử lý tệp đính kèm qua OCR: {FileName} ({ContentType})", attachment.Url, attachment.ContentType);
+                                    var ocrResult = await _mediator.Send(new ProcessOcrFileCommand
+                                    {
+                                        FileBytes = fileBytes,
+                                        ContentType = attachment.ContentType,
+                                        FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
+                                    }, cancellationToken);
+
+                                    if (ocrResult.IsSuccess && !string.IsNullOrWhiteSpace(ocrResult.Value?.Text))
+                                    {
+                                        combinedChatInput.AppendLine().AppendLine("--- Nội dung được trích xuất từ tệp đính kèm ---");
+                                        combinedChatInput.AppendLine(ocrResult.Value.Text);
+                                        combinedChatInput.AppendLine("--------------------------------------------------");
+                                        _logger.LogInformation("Đã trích xuất thành công nội dung từ tệp đính kèm {FileName}. Độ dài: {Length}", attachment.Url, ocrResult.Value.Text.Length);
+                                    }
+                                    else
+                                    {
+                                        _logger.LogWarning("Không thể trích xuất nội dung từ tệp đính kèm {FileName} qua OCR: {Error}", attachment.Url, ocrResult.Error ?? "Kết quả Text rỗng");
+                                    }
+                                }
+                                else
+                                {
+                                    _logger.LogWarning("Không thể tải xuống hoặc tệp đính kèm rỗng từ URL: {Url}", attachment.Url);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi xử lý tệp đính kèm {FileName} (OCR) từ URL {Url}", attachment.Url, attachment.ContentType);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Tệp đính kèm '{FileName}' không phải là hình ảnh/PDF và sẽ bị bỏ qua trong ngữ cảnh DataGeneration.", attachment.Url);
+                        }
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(combinedChatInput.ToString()))
+                {
+                    finalChatResponseResult = Result<ChatResponse>.Failure("Không có nội dung chat hoặc nội dung được trích xuất từ tệp đính kèm nào để tạo dữ liệu gia đình.", "DataGenerationError");
+                    break;
+                }
+
                 var generateDataCommand = new GenerateFamilyDataCommand
                 {
                     FamilyId = request.FamilyId,
-                    ChatInput = request.ChatInput
+                    ChatInput = combinedChatInput.ToString()
                 };
                 var generatedDataResult = await _mediator.Send(generateDataCommand, cancellationToken);
 
