@@ -14,7 +14,7 @@ export function useChatInputRules(state: ChatInputFormState) {
     return {
       chatInput: [
         (value: string | null | undefined) =>
-          (value && value.length <= 1500) || t('common.validation.max', { max: 1500 }),
+          (value && value.length <= 1500) || t('common.validations.maxLength', { max: 1500 }),
       ],
     };
   });

@@ -12,7 +12,7 @@ export const useValidationRules = () => {
     min: (length: number) => (value: string) =>
       (value && value.length >= length) || t('validation.min', { length }),
     max: (length: number) => (value: string) =>
-      (value && value.length <= length) || t('validation.max', { length }),
+      (value && value.length <= length) || t('common.validations.maxLength', { max: length }),
     url: (value: string) => { // New URL validation rule
       const pattern = /^(https?:\/\/|ftp:\/\/)[^\s/$.?#].[^\s]*$/i;
       return pattern.test(value) || t('validation.url');
