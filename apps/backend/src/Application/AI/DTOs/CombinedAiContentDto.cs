@@ -1,5 +1,6 @@
 using backend.Application.Events.Queries;
 using backend.Application.Families.Queries;
+using backend.Application.FamilyLocations; // NEW
 using backend.Application.Members.Queries;
 
 namespace backend.Application.AI.DTOs;
@@ -9,7 +10,8 @@ namespace backend.Application.AI.DTOs;
 /// </summary>
 public class CombinedAiContentDto
 {
-    public List<FamilyDto>? Families { get; set; }
+    // Removed: public List<FamilyDto>? Families { get; set; }
     public List<MemberDto>? Members { get; set; }
     public List<EventDto>? Events { get; set; }
+    public List<FamilyLocationDto>? Locations { get; set; } // NEW
 }

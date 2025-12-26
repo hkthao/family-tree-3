@@ -6,6 +6,7 @@ using backend.Application.Events.Queries;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries;
+using backend.Application.FamilyLocations; // NEW
 using backend.Application.Members.Queries;
 using backend.Application.Prompts.DTOs; // ADDED: Missing using directive
 using backend.Application.Prompts.Queries.GetPromptById;
@@ -15,6 +16,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+
 
 namespace backend.Application.UnitTests.Families.Commands.GenerateFamilyData;
 
@@ -87,9 +89,10 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
 
         var aiResponseDto = new CombinedAiContentDto
         {
-            Families = new List<FamilyDto> { new FamilyDto { Id = familyId, Name = "Generated Family", Description = "Family description" } },
+            // Families = new List<FamilyDto> { new FamilyDto { Id = familyId, Name = "Generated Family", Description = "Family description" } }, // Removed
             Members = new List<MemberDto> { new MemberDto { Id = memberId, FirstName = "Generated", LastName = "Member", DateOfBirth = new DateTime(1990, 1, 1), DateOfDeath = new DateTime(2050, 1, 1) } },
-            Events = new List<EventDto> { new EventDto { Id = eventId, Name = "Generated Event", Description = "Event description", SolarDate = new DateTime(2023, 1, 1) } }
+            Events = new List<EventDto> { new EventDto { Id = eventId, Name = "Generated Event", Description = "Event description", SolarDate = new DateTime(2023, 1, 1) } },
+            Locations = new List<FamilyLocationDto> { new FamilyLocationDto { Name = "Generated Location", Latitude = 10.0, Longitude = 20.0 } } // Added
         };
 
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))

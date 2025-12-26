@@ -17,16 +17,6 @@ Bạn PHẢI trả về một đối tượng JSON tuân thủ cấu trúc của
 
 ```json
 {
-  "families": [
-    {
-      "name": "string",
-      "code": "string",
-      "description": "string | null",
-      "address": "string | null",
-      "visibility": "FamilyVisibility (Public, Private)",
-      "avatarUrl": "string | null"
-    }
-  ],
   "members": [
     {
       "firstName": "string",
@@ -63,6 +53,18 @@ Bạn PHẢI trả về một đối tượng JSON tuân thủ cấu trúc của
       "repeatRule": "RepeatRule (None = 0, Yearly = 1)",
       "type": "EventType (Birth = 0, Marriage = 1, Death = 2, Anniversary = 3, Other = 4)",
       "color": "string | null"
+    }
+  ],
+  "locations": [
+    {
+      "name": "string",
+      "description": "string | null",
+      "latitude": "double | null",
+      "longitude": "double | null",
+      "address": "string | null",
+      "locationType": "LocationType (BirthPlace = 0, Residence = 1, EventLocation = 2, BurialPlace = 3, Other = 4)",
+      "accuracy": "LocationAccuracy (High = 0, Medium = 1, Low = 2)",
+      "source": "LocationSource (User = 0, AiGenerated = 1, Imported = 2)"
     }
   ]
 }
