@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables';
 import type { UserProfile } from '@/types'; // Import AiChatMessage
 import { useAiChat } from '@/composables/ai/aiChat.composable'; // This will be the actual chat logic using services
+import type { UploadedFile } from '../chat/useChatInput'; // Import UploadedFile
 
 interface UseChatViewDeps {
   useI18n: typeof useI18n;
@@ -32,11 +33,11 @@ export function useChatView(familyId: string, deps: UseChatViewDeps = defaultDep
     t('aiChat.suggestions.tellMeAboutFamily'),
   ]);
 
-  const sendMessage = async () => {
-    if (newMessage.value.trim() && !loading.value) {
+  const sendMessage = async (attachments?: UploadedFile[]) => {
+    if ((newMessage.value.trim() || (attachments && attachments.length > 0)) && !loading.value) {
       const messageText = newMessage.value;
       newMessage.value = '';
-      await sendAiMessage(messageText);
+      await sendAiMessage(messageText, attachments);
     }
   };
 

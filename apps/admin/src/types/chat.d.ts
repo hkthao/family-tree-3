@@ -35,3 +35,8 @@ export interface ChatResponse {
   generatedData?: CombinedAiContentDto;
   intent?: string;
 }
+
+export interface ChatAttachmentDto {
+  url?: string;
+  contentType?: string; // MimeType
+}

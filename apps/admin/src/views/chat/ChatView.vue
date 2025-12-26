@@ -39,7 +39,6 @@
         @sendMessage="handleSendMessage"
         :disabled="state.loading.value"
         :loading="state.loading.value"
-        @addAttachment="handleAddAttachment"
         @addLocation="handleAddLocation"
       />
     </v-card-actions>
@@ -52,8 +51,8 @@ import { useI18n } from 'vue-i18n';
 import { useChatView } from '@/composables/ai/useChatView';
 import UserChatMessage from '@/components/chat/UserChatMessage.vue';
 import AiChatMessage from '@/components/chat/AiChatMessage.vue';
-
 import ChatInput from '@/components/chat/ChatInput.vue';
+import type { UploadedFile } from '@/composables/chat/useChatInput'; // Import UploadedFile
 
 const props = defineProps<{
   familyId: string;
@@ -72,14 +71,8 @@ const handleUpdateNewMessage = (newValue: string) => {
   state.newMessage.value = newValue;
 };
 
-const handleSendMessage = () => {
-  actions.sendMessage();
-};
-
-const handleAddAttachment = (type: 'image' | 'pdf') => {
-  console.log(`Attachment type requested: ${type}`);
-  // Implement logic to handle attachment upload
-  // This will likely involve opening a file input dialog
+const handleSendMessage = (attachments?: UploadedFile[]) => {
+  actions.sendMessage(attachments);
 };
 
 const handleAddLocation = (location: { latitude: number; longitude: number; address?: string }) => {

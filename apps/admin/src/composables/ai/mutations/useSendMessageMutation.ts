@@ -1,13 +1,14 @@
 import { useMutation } from '@tanstack/vue-query';
 import type { UseMutationOptions } from '@tanstack/vue-query';
-import type { ApiError, AiChatMessage, Result, ChatResponse } from '@/types';
+import type { ApiError, AiChatMessage, Result, ChatResponse, ChatAttachmentDto } from '@/types';
 import type { IChatService } from '@/services/chat/chat.service.interface';
 import { useServices } from '@/plugins/services.plugin';
 
 interface SendMessagePayload {
   familyId: string;
   sessionId: string;
-  message: string;
+  chatInput: string; // Changed from message to chatInput
+  attachments?: ChatAttachmentDto[]; // New property for attachments
 }
 
 export function useSendMessageMutation(
@@ -19,7 +20,7 @@ export function useSendMessageMutation(
   return useMutation<AiChatMessage, ApiError, SendMessagePayload>(
     {
       mutationFn: async (payload: SendMessagePayload) => {
-        const result: Result<ChatResponse, ApiError> = await chatService.sendMessage(payload.familyId, payload.sessionId, payload.message);
+        const result: Result<ChatResponse, ApiError> = await chatService.sendMessage(payload.familyId, payload.sessionId, payload.chatInput, payload.attachments);
         if (result.ok) {
           return {
             sender: 'ai',
