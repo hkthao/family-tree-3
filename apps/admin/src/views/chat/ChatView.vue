@@ -12,6 +12,9 @@
               :message="message"
               :familyId="props.familyId"
               @open-relationship-detection="(familyId: string) => emit('open-relationship-detection', familyId)"
+              @add-generated-member="(member: MemberDto) => emit('add-generated-member', member)"
+              @add-generated-event="(event: EventDto) => emit('add-generated-event', event)"
+              @add-generated-location="(location: FamilyLocation) => emit('add-generated-location', location)"
             />
           </template>
           <template v-if="!message.text">
@@ -53,6 +56,7 @@ import UserChatMessage from '@/components/chat/UserChatMessage.vue';
 import AiChatMessage from '@/components/chat/AiChatMessage.vue';
 import ChatInput from '@/components/chat/ChatInput.vue';
 import type { UploadedFile } from '@/composables/chat/useChatInput'; // Import UploadedFile
+import type { MemberDto, EventDto, FamilyLocation } from '@/types'; // Import necessary DTOs
 
 const props = defineProps<{
   familyId: string;
@@ -60,6 +64,9 @@ const props = defineProps<{
 
 const emit = defineEmits([
   'open-relationship-detection',
+  'add-generated-member', // NEW
+  'add-generated-event', // NEW
+  'add-generated-location', // NEW
 ]);
 
 const { t } = useI18n(); // Keep t for template

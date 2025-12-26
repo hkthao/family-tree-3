@@ -7,8 +7,14 @@
       </v-card-title>
       <v-card-text class="pa-0">
         <template v-if="currentFamilyId">
-          <ChatView :family-id="String(currentFamilyId)" @close-chat-drawer="emit('update:modelValue', false)"
-            @open-relationship-detection="openRelationshipDetection" />
+          <ChatView
+            :family-id="String(currentFamilyId)"
+            @close-chat-drawer="emit('update:modelValue', false)"
+            @open-relationship-detection="openRelationshipDetection"
+            @add-generated-member="handleGeneratedMember"
+            @add-generated-event="handleGeneratedEvent"
+            @add-generated-location="handleGeneratedLocation"
+          />
         </template>
         <template v-else>
           <div class="d-flex flex-column justify-center align-center">
@@ -43,6 +49,12 @@
     <EventAddView :family-id="String(currentFamilyId)" :initial-event-data="eventAddInitialData"
       @close="handleEventFormCloseOrSaved" @saved="handleEventFormCloseOrSaved" :key="eventAddInitialData?.id" />
   </v-navigation-drawer>
+
+  <!-- Location Add Drawer -->
+  <v-navigation-drawer v-model="showLocationAddDrawer" location="right" temporary :width="drawerWidth">
+    <FamilyLocationAddView :family-id="String(currentFamilyId)" :initial-location-data="locationAddInitialData"
+      @close="handleLocationFormCloseOrSaved" @saved="handleLocationFormCloseOrSaved" :key="locationAddInitialData?.id" />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
@@ -56,8 +68,10 @@ import { useFamilyName } from '@/composables/family';
 import RelationshipDetector from '@/components/relationship/RelationshipDetector.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
-import { useGeneratedDataStore } from '@/stores/generatedData.store'; // New import
+import FamilyLocationAddView from '@/views/family-location/FamilyLocationAddView.vue'; // NEW Import
+import { useGeneratedDataStore } from '@/stores/generatedData.store';
 import { useChatDrawerRules } from '@/validations/chatDrawer.validation';
+import type { EventDto, MemberDto, FamilyLocation } from '@/types'; // NEW Import
 
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -94,11 +108,13 @@ const relationshipDetectionFamilyId = ref<string | undefined>(undefined);
 // Use the generated data store
 const generatedDataStore = useGeneratedDataStore();
 
-// Reactive variables for member and event add drawers
+// Reactive variables for member, event, and location add drawers
 const showMemberAddDrawer = ref(false);
-const memberAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with MemberDto
+const memberAddInitialData = ref<MemberDto | null>(null); // Use actual DTO type
 const showEventAddDrawer = ref(false);
-const eventAddInitialData = ref<any | null>(null); // Use any for now to avoid type issues with EventDto
+const eventAddInitialData = ref<EventDto | null>(null); // Use actual DTO type
+const showLocationAddDrawer = ref(false); // NEW
+const locationAddInitialData = ref<FamilyLocation | null>(null); // NEW
 
 const { rules: validationRules } = useChatDrawerRules();
 
@@ -108,7 +124,8 @@ watch(() => showMemberAddDrawer.value, (newVal) => {
     generatedDataStore.clearMemberToAdd();
   }
   else{
-    handleEventFormCloseOrSaved()
+    handleEventFormCloseOrSaved(); // Close other drawers if member add opens
+    handleLocationFormCloseOrSaved(); // Close other drawers if member add opens
   }
 });
 
@@ -118,7 +135,19 @@ watch(() => showEventAddDrawer.value, (newVal) => {
     generatedDataStore.clearEventToAdd();
   }
   else{
-    handleMemberFormCloseOrSaved()
+    handleMemberFormCloseOrSaved(); // Close other drawers if event add opens
+    handleLocationFormCloseOrSaved(); // Close other drawers if event add opens
+  }
+});
+
+watch(() => showLocationAddDrawer.value, (newVal) => { // NEW watch
+  if (!newVal) {
+    locationAddInitialData.value = null;
+    generatedDataStore.clearLocationToAdd();
+  }
+  else{
+    handleMemberFormCloseOrSaved(); // Close other drawers if location add opens
+    handleEventFormCloseOrSaved(); // Close other drawers if location add opens
   }
 });
 
@@ -137,6 +166,15 @@ watch(() => generatedDataStore.eventToAdd, (newVal) => {
     showEventAddDrawer.value = true;
   } else {
     showEventAddDrawer.value = false;
+  }
+});
+
+watch(() => generatedDataStore.locationToAdd, (newVal) => { // NEW watch
+  if (newVal) {
+    locationAddInitialData.value = { ...newVal, familyId: currentFamilyId.value, id: uuidv4() };
+    showLocationAddDrawer.value = true;
+  } else {
+    showLocationAddDrawer.value = false;
   }
 });
 
@@ -163,12 +201,28 @@ const startChatWithSelectedFamily = () => {
   }
 };
 
+const handleGeneratedMember = (member: MemberDto) => {
+  generatedDataStore.setMemberToAdd(member);
+};
+
+const handleGeneratedEvent = (event: EventDto) => {
+  generatedDataStore.setEventToAdd(event);
+};
+
+const handleGeneratedLocation = (location: FamilyLocation) => { // NEW
+  generatedDataStore.setLocationToAdd(location);
+};
+
 const handleMemberFormCloseOrSaved = () => {
   generatedDataStore.clearMemberToAdd();
 };
 
 const handleEventFormCloseOrSaved = () => {
   generatedDataStore.clearEventToAdd();
+};
+
+const handleLocationFormCloseOrSaved = () => { // NEW
+  generatedDataStore.clearLocationToAdd();
 };
 
 </script>

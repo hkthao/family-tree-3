@@ -14,10 +14,11 @@
     </template>
 
     <ChatGeneratedDataList
-      v-if="message.generatedData && (message.generatedData.members.length > 0 || message.generatedData.events.length > 0)"
+      v-if="message.generatedData && (message.generatedData.members.length > 0 || message.generatedData.events.length > 0 || (message.generatedData.locations?.length || 0) > 0)"
       :generatedData="message.generatedData" :familyId="familyId"
       @add-generated-member="(member: MemberDto) => emit('add-generated-member', member)"
-      @add-generated-event="(event: EventDto) => emit('add-generated-event', event)" />
+      @add-generated-event="(event: EventDto) => emit('add-generated-event', event)"
+      @add-generated-location="(location: FamilyLocation) => emit('add-generated-location', location)" />
 
     <AiFaceRecognitionDisplay
       v-if="message.intent === 'IMAGE_RECOGNITION_PAGE'"
@@ -29,7 +30,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import type { AiChatMessage, EventDto, MemberDto } from '@/types';
+import type { AiChatMessage, EventDto, MemberDto, FamilyLocation } from '@/types';
 import { useI18n } from 'vue-i18n';
 import ChatGeneratedDataList from '@/components/chat/ChatGeneratedDataList.vue';
 import AiFaceRecognitionDisplay from '@/components/chat/AiFaceRecognitionDisplay.vue'; // NEW import
@@ -49,6 +50,7 @@ const emit = defineEmits([
   'open-relationship-detection',
   'add-generated-member',
   'add-generated-event',
+  'add-generated-location', // NEW
 ]);
 const { t } = useI18n();
 </script>
