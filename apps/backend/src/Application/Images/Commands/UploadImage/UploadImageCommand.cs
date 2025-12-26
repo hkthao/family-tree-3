@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
 using Microsoft.AspNetCore.Http; // For IFormFile
 
 namespace backend.Application.Images.Commands.UploadImage;

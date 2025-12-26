@@ -1,6 +1,5 @@
 using backend.Application.Common.Models;
 using backend.Application.Files.DTOs;
-using MediatR;
 
 namespace backend.Application.OCR.Commands;
 

@@ -1,10 +1,8 @@
-using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants; // Add this for PromptConstants
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Prompts.Queries.GetPromptById; // Add this for GetPromptByIdQuery
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Commands.DetermineChatContext;

@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
