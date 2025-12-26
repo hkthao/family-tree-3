@@ -245,7 +245,7 @@ public class ChatWithAssistantCommandHandlerTestsV2
     {
         // Arrange
         var initialChatInput = "original chat input";
-        var location = new ChatLocation { Latitude = 10.0, Longitude = 20.0, Address = "Test Address" };
+        var location = new ChatLocation { Latitude = 10.0, Longitude = 20.0, Address = "Test Address", Source = "current" }; // MODIFIED
         var familyId = Guid.NewGuid();
 
         var command = new ChatWithAssistantCommand
@@ -279,12 +279,11 @@ public class ChatWithAssistantCommandHandlerTestsV2
         // Address is optional, so check for it if present
         if (!string.IsNullOrWhiteSpace(location.Address))
         {
-            capturedCommand.ChatInput.Should().Contain($", Address={location.Address}]");
+            capturedCommand!.ChatInput.Should().Contain($", Address={location.Address}");
         }
-        else
-        {
-            capturedCommand.ChatInput.Should().Contain("]"); // Ensure the closing bracket is there
-        }
+        // MODIFIED: Add source check
+        capturedCommand!.ChatInput.Should().Contain($", Source={location.Source}]"); // MODIFIED
+
         _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 

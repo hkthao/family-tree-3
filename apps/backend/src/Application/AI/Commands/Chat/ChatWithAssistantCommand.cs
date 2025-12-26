@@ -58,4 +58,9 @@ public record ChatLocation
     /// Địa chỉ (tùy chọn).
     /// </summary>
     public string? Address { get; init; }
+
+    /// <summary>
+    /// Nguồn vị trí (ví dụ: 'current', 'user-input').
+    /// </summary>
+    public string? Source { get; init; }
 }

@@ -182,6 +182,10 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                     {
                         combinedChatInput.Append($", Address={request.Location.Address}");
                     }
+                    if (!string.IsNullOrWhiteSpace(request.Location.Source)) // NEW
+                    {
+                        combinedChatInput.Append($", Source={request.Location.Source}"); // NEW
+                    }
                     combinedChatInput.AppendLine("]");
                     combinedChatInput.AppendLine("------------------------------------");
                     _logger.LogInformation("Đã thêm thông tin vị trí vào ChatInput: Latitude={Latitude}, Longitude={Longitude}, Address={Address}",
