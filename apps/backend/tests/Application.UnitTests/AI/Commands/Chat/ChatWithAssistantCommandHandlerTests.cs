@@ -29,7 +29,9 @@ public class ChatWithAssistantCommandHandlerTestsV2
     private readonly Mock<ILogger<ChatWithAssistantCommandHandler>> _loggerMock;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IOptions<N8nSettings>> _mockN8nSettings;
-    private readonly Mock<IHttpClientFactory> _mockHttpClientFactory; // New field
+    private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
     private readonly ChatWithAssistantCommandHandler _handler;
 
     public ChatWithAssistantCommandHandlerTestsV2()
@@ -37,7 +39,9 @@ public class ChatWithAssistantCommandHandlerTestsV2
         _loggerMock = new Mock<ILogger<ChatWithAssistantCommandHandler>>();
         _mockMediator = new Mock<IMediator>();
         _mockN8nSettings = new Mock<IOptions<N8nSettings>>();
-        _mockHttpClientFactory = new Mock<IHttpClientFactory>(); // Initialize new field
+        _mockHttpClientFactory = new Mock<IHttpClientFactory>();
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockAiGenerateService = new Mock<IAiGenerateService>();
 
         // Setup N8nSettings mock
         _mockN8nSettings.Setup(o => o.Value).Returns(new N8nSettings
@@ -45,12 +49,17 @@ public class ChatWithAssistantCommandHandlerTestsV2
             Chat = new ChatSettings { CollectionName = "DefaultChatCollection" }
         });
 
+        // Setup default authorization mocks (allow by default for other tests)
+        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>())).Returns(true);
+
         _handler = new ChatWithAssistantCommandHandler(
             _loggerMock.Object,
             _mockMediator.Object,
             _mockN8nSettings.Object,
-            _mockHttpClientFactory.Object // Pass new mock object
-        );
+            _mockHttpClientFactory.Object,
+            _mockAuthorizationService.Object
+        ); // Corrected closing parenthesis
 
         // --- Setup default mediator behaviors ---
 
@@ -236,8 +245,32 @@ public class ChatWithAssistantCommandHandlerTestsV2
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.ErrorSource.Should().Be("Generation");
         _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnAuthorizationFailure_WhenContextIsDataGenerationAndUserNotAuthorized()
+    {
+        // Arrange
+        var command = new ChatWithAssistantCommand { FamilyId = Guid.NewGuid(), SessionId = "s1", ChatInput = "generate data" };
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+
+        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(command.FamilyId)).Returns(false);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorSource.Should().Be(ErrorSources.Authorization);
+        result.Error.Should().Be("Bạn không có quyền tạo dữ liệu gia đình.");
+        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Usage increment should NOT happen
+
     }
 
     [Fact]

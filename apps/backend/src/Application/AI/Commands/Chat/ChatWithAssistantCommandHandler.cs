@@ -4,6 +4,7 @@ using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces; // NEW
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Common.Queries.ValidateUserAuthentication;
@@ -28,18 +29,21 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
     private readonly ILogger<ChatWithAssistantCommandHandler> _logger;
     private readonly IMediator _mediator;
     private readonly N8nSettings _n8nSettings;
-    private readonly IHttpClientFactory _httpClientFactory; // New field
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IAuthorizationService _authorizationService; // NEW
 
     public ChatWithAssistantCommandHandler(
         ILogger<ChatWithAssistantCommandHandler> logger,
         IMediator mediator,
         IOptions<N8nSettings> n8nSettings,
-        IHttpClientFactory httpClientFactory) // New parameter
+        IHttpClientFactory httpClientFactory,
+        IAuthorizationService authorizationService) // NEW parameter
     {
         _logger = logger;
         _mediator = mediator;
         _n8nSettings = n8nSettings.Value;
-        _httpClientFactory = httpClientFactory; // Assign to field
+        _httpClientFactory = httpClientFactory;
+        _authorizationService = authorizationService; // Assign to field
     }
 
 
@@ -170,6 +174,15 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 
             case ContextType.DataGeneration:
                 _logger.LogInformation("Ngữ cảnh là DataGeneration. Xử lý tệp đính kèm và gọi lệnh tạo dữ liệu gia đình.");
+
+                // Kiểm tra quyền: Chỉ admin hoặc quản lý gia đình mới được tạo dữ liệu
+                var isAdmin = _authorizationService.IsAdmin();
+                var canManageFamily = _authorizationService.CanManageFamily(request.FamilyId);
+
+                if (!isAdmin && !canManageFamily)
+                {
+                    return Result<ChatResponse>.Failure("Bạn không có quyền tạo dữ liệu gia đình.", ErrorSources.Authorization);
+                }
 
                 var combinedChatInput = new StringBuilder(request.ChatInput ?? string.Empty);
 
