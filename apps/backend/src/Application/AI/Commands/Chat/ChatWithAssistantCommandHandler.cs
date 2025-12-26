@@ -1,3 +1,4 @@
+using System.Net.Http; // Add this
 using backend.Application.AI.Commands.Chat.CallAiChatService;
 using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
@@ -10,7 +11,9 @@ using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
+using backend.Application.MemberFaces.Commands.DetectFaces; // Add this
 using backend.Application.Prompts.Queries.GetPromptById;
+using Microsoft.Extensions.Http; // Add this
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options; // Add this
 
@@ -25,15 +28,18 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
     private readonly ILogger<ChatWithAssistantCommandHandler> _logger;
     private readonly IMediator _mediator;
     private readonly N8nSettings _n8nSettings;
+    private readonly IHttpClientFactory _httpClientFactory; // New field
 
     public ChatWithAssistantCommandHandler(
         ILogger<ChatWithAssistantCommandHandler> logger,
         IMediator mediator,
-        IOptions<N8nSettings> n8nSettings)
+        IOptions<N8nSettings> n8nSettings,
+        IHttpClientFactory httpClientFactory) // New parameter
     {
         _logger = logger;
         _mediator = mediator;
         _n8nSettings = n8nSettings.Value;
+        _httpClientFactory = httpClientFactory; // Assign to field
     }
 
 
@@ -198,6 +204,77 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 });
                 break;
 
+            case ContextType.ImageRecognition:
+                _logger.LogInformation("Ngữ cảnh là ImageRecognition. Xử lý nhận dạng khuôn mặt từ tệp đính kèm.");
+
+                if (request.Attachments == null || !request.Attachments.Any())
+                {
+                    finalChatResponseResult = Result<ChatResponse>.Failure("Không tìm thấy tệp đính kèm để nhận dạng hình ảnh.", "ImageRecognitionError");
+                    break;
+                }
+
+                var faceDetectionResults = new List<FaceDetectionResponseDto>();
+                foreach (var attachment in request.Attachments)
+                {
+                    // Basic check for image content types
+                    if (attachment.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            var imageBytes = await DownloadImageBytesAsync(attachment.Url, cancellationToken);
+                            if (imageBytes != null && imageBytes.Length > 0)
+                            {
+                                var detectFacesCommand = new DetectFacesCommand
+                                {
+                                    FamilyId = request.FamilyId,
+                                    ImageBytes = imageBytes,
+                                    FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath),
+                                    ContentType = attachment.ContentType,
+                                    ReturnCrop = true,
+                                    ResizeImageForAnalysis = true
+                                };
+
+                                var detectionResult = await _mediator.Send(detectFacesCommand, cancellationToken);
+
+                                if (detectionResult.IsSuccess && detectionResult.Value != null)
+                                {
+                                    faceDetectionResults.Add(detectionResult.Value);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning("Không thể nhận dạng khuôn mặt từ URL {ImageUrl}: {Error}", attachment.Url, detectionResult.Error);
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Không thể tải xuống hoặc tệp hình ảnh rỗng từ URL: {ImageUrl}", attachment.Url);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi xử lý tệp đính kèm hình ảnh từ URL {ImageUrl}", attachment.Url);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Tệp đính kèm '{FileName}' không phải là hình ảnh và sẽ bị bỏ qua trong ngữ cảnh ImageRecognition.", attachment.Url);
+                    }
+                }
+
+                if (!faceDetectionResults.Any())
+                {
+                    finalChatResponseResult = Result<ChatResponse>.Failure("Không tìm thấy khuôn mặt nào hoặc không thể xử lý bất kỳ hình ảnh nào có thể nhận dạng.", "ImageRecognitionError");
+                }
+                else
+                {
+                    finalChatResponseResult = Result<ChatResponse>.Success(new ChatResponse
+                    {
+                        Output = "Đã hoàn thành nhận dạng hình ảnh.",
+                        FaceDetectionResults = faceDetectionResults
+                    });
+                }
+                break;
+
             default:
                 _logger.LogWarning("Ngữ cảnh không được xử lý: {Context}. Mặc định về QA.", determinedContext);
                 goto case ContextType.QA;
@@ -216,4 +293,24 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 
         return finalChatResponseResult;
     }
+
+    private async Task<byte[]?> DownloadImageBytesAsync(string imageUrl, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var httpClient = _httpClientFactory.CreateClient();
+            return await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
+        }
+        catch (HttpRequestException httpEx)
+        {
+            _logger.LogError(httpEx, "Lỗi HTTP khi tải xuống hình ảnh từ URL: {ImageUrl}", imageUrl);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi tải xuống hình ảnh từ URL: {ImageUrl}", imageUrl);
+            return null;
+        }
+    }
 }
+

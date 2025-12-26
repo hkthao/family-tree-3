@@ -1,3 +1,4 @@
+using System.Net.Http; // Add this
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands.Chat.CallAiChatService;
 using backend.Application.AI.Commands.DetermineChatContext;
@@ -28,6 +29,7 @@ public class ChatWithAssistantCommandHandlerTestsV2
     private readonly Mock<ILogger<ChatWithAssistantCommandHandler>> _loggerMock;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IOptions<N8nSettings>> _mockN8nSettings;
+    private readonly Mock<IHttpClientFactory> _mockHttpClientFactory; // New field
     private readonly ChatWithAssistantCommandHandler _handler;
 
     public ChatWithAssistantCommandHandlerTestsV2()
@@ -35,6 +37,7 @@ public class ChatWithAssistantCommandHandlerTestsV2
         _loggerMock = new Mock<ILogger<ChatWithAssistantCommandHandler>>();
         _mockMediator = new Mock<IMediator>();
         _mockN8nSettings = new Mock<IOptions<N8nSettings>>();
+        _mockHttpClientFactory = new Mock<IHttpClientFactory>(); // Initialize new field
 
         // Setup N8nSettings mock
         _mockN8nSettings.Setup(o => o.Value).Returns(new N8nSettings
@@ -45,7 +48,8 @@ public class ChatWithAssistantCommandHandlerTestsV2
         _handler = new ChatWithAssistantCommandHandler(
             _loggerMock.Object,
             _mockMediator.Object,
-            _mockN8nSettings.Object
+            _mockN8nSettings.Object,
+            _mockHttpClientFactory.Object // Pass new mock object
         );
 
         // --- Setup default mediator behaviors ---
