@@ -1,6 +1,7 @@
 <template>
-  <BaseCrudDrawer v-model="mapDrawerStore.drawer"  @close="mapDrawerStore.closeDrawer">
-    <FamilyMapPicker v-if="mapDrawerStore.drawer" :initial-location="mapDrawerStore.initialLocation" @confirm-selection="handleConfirmSelection" />
+  <BaseCrudDrawer class="map-drawer" v-model="mapDrawerStore.drawer" @close="mapDrawerStore.closeDrawer">
+    <FamilyMapPicker v-if="mapDrawerStore.drawer" :initial-location="mapDrawerStore.initialLocation"
+      @confirm-selection="handleConfirmSelection" />
   </BaseCrudDrawer>
 </template>
 
@@ -17,3 +18,9 @@ const handleConfirmSelection = (payload: { coordinates: { latitude: number, long
   mapDrawerStore.confirmSelection(payload.coordinates, payload.location);
 };
 </script>
+
+<style>
+.map-drawer {
+  z-index: 1015 !important;
+}
+</style>

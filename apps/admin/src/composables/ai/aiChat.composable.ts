@@ -23,6 +23,29 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
       sender: 'ai', text: t('aiChat.welcomeMessage')
     },
     // {
+    //   sender: 'ai', text: "test location",
+    //   generatedData: {
+    //     locations: [
+    //       {
+    //         "id": "00000000-0000-0000-0000-000000000000",
+    //         "familyId": "00000000-0000-0000-0000-000000000000",
+    //         "name": "Nhà của tôi",
+    //         "description": "Vị trí nhà của người dùng được lấy từ bản đồ",
+    //         "latitude": 10.794605724277142,
+    //         "longitude": 106.67887877989956,
+    //         "address": undefined,
+    //         "locationType": 1,
+    //         "accuracy": 2,
+    //         "source": 0
+    //       }
+    //     ],
+    //     families: [],
+    //     members: [],
+    //     events: []
+    //   }
+    // }
+
+    // {
     //   sender: 'user', text: "test",
     //   attachments: [
     //     {
