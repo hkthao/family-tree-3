@@ -1,4 +1,4 @@
-import type { MemberFace, Result, FaceDetectionRessult, ApiError, AddMemberFaceDto, UpdateMemberFaceDto } from '@/types';
+import type { MemberFace, Result, FaceDetectionResult, ApiError, AddMemberFaceDto, UpdateMemberFaceDto } from '@/types';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IMemberFaceService extends ICrudService<MemberFace, AddMemberFaceDto, UpdateMemberFaceDto> {
@@ -6,5 +6,5 @@ export interface IMemberFaceService extends ICrudService<MemberFace, AddMemberFa
     imageFile: File,
     familyId: string,
     resizeImageForAnalysis: boolean,
-  ): Promise<Result<FaceDetectionRessult, ApiError>>;
+  ): Promise<Result<FaceDetectionResult, ApiError>>;
 }

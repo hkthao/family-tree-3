@@ -1,4 +1,4 @@
-import type { MemberFace, FaceDetectionRessult, ApiError, AddMemberFaceDto, UpdateMemberFaceDto } from '@/types';
+import type { MemberFace, FaceDetectionResult, ApiError, AddMemberFaceDto, UpdateMemberFaceDto } from '@/types';
 import type { Result } from '@/types';
 import type { IMemberFaceService } from './member-face.service.interface';
 import { type ApiClientMethods } from '@/plugins/axios';
@@ -13,7 +13,7 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
     familyId: string,
     resizeImageForAnalysis?: boolean,
     returnCrop?: boolean,
-  ): Promise<Result<FaceDetectionRessult, ApiError>> {
+  ): Promise<Result<FaceDetectionResult, ApiError>> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -26,7 +26,7 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
       params.append('returnCrop', returnCrop.toString());
     }
 
-    return await this.http.post<FaceDetectionRessult>(`/member-faces/detect?${params.toString()}`, formData, {
+    return await this.http.post<FaceDetectionResult>(`/member-faces/detect?${params.toString()}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

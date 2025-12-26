@@ -1,10 +1,12 @@
-import type { CombinedAiContentDto } from '@/types/ai.d'; // Import CombinedAiContentDto from ai.d.ts
+import type { CombinedAiContentDto } from '@/types/ai.d';
+import type { FaceDetectionResult } from '@/types/memberFace.d'; // Changed import
 
 export interface AiChatMessage {
   sender: 'user' | 'ai';
   text: string;
   intent?: string; // New property
   generatedData?: CombinedAiContentDto; // Also add generatedData for consistency
+  faceDetectionResults?: FaceDetectionResult[]; // Using FaceDetectionResult
 }
 
 export interface ChatMessage {

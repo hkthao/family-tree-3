@@ -40,7 +40,7 @@ interface SearchResult {
   confidence: number; // Matching confidence (0.0 - 1.0)
 }
 
-export interface FaceDetectionRessult {
+export interface FaceDetectionResult {
   imageId: string;
   originalImageUrl: string | null;
   resizedImageUrl: string | null;
