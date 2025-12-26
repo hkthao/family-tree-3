@@ -27,6 +27,7 @@ export function useSendMessageMutation(
             text: result.value.output || '',
             intent: result.value.intent,
             generatedData: result.value.generatedData,
+            faceDetectionResults: result.value.faceDetectionResults
           } as AiChatMessage;
         } else {
           throw result.error;

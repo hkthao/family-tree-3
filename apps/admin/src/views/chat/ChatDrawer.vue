@@ -72,7 +72,7 @@ const props = defineProps({
   },
   width: {
     type: [String, Number],
-    default: 450,
+    default: 550,
   },
   drawerClass: {
     type: String,

@@ -33,6 +33,7 @@ export interface MessageItem {
 export interface ChatResponse {
   output?: string;
   generatedData?: CombinedAiContentDto;
+  faceDetectionResults?: FaceDetectionResult[];
   intent?: string;
 }
 
