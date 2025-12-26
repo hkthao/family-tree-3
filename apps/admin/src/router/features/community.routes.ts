@@ -8,6 +8,7 @@ export const communityRoutes = [
     meta: {
       requiresAuth: true,
       title: 'menu.community', // Use i18n key for title
+      icon: 'mdi-account-group', // Add icon for the route
     },
   },
 ];

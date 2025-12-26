@@ -41,21 +41,16 @@ const rawMenu: MenuSection[] = [
         exact: true,
       },
       {
+        titleKey: 'menu.community', // This is now the item title
+        icon: 'mdi-account-group',
+        to: '/community/families',
+        exact: true,
+      },
+      {
         titleKey: 'relationshipDetection.title',
         icon: 'mdi-graph-outline',
         to: '/relationship-detection',
         roles: ['Admin', 'Manager'],
-      },
-    ],
-  },
-  {
-    titleKey: 'menu.community', // New section for Community
-    items: [
-      {
-        titleKey: 'community.publicFamilies', // New item for Public Families
-        icon: 'mdi-account-group',
-        to: '/community/families', // New route
-        exact: true,
       },
     ],
   },
