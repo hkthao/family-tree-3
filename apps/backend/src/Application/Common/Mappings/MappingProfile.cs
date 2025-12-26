@@ -1,4 +1,5 @@
 using backend.Application.Common.Dtos;
+using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
@@ -29,7 +30,6 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
-using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Mappings;
 

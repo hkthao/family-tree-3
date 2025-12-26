@@ -1,5 +1,5 @@
-using FluentValidation;
 using backend.Application.AI.Commands.DetermineChatContext; // Update using directive for the command
+using FluentValidation;
 
 namespace backend.Application.AI.Commands.DetermineChatContext; // New namespace
 

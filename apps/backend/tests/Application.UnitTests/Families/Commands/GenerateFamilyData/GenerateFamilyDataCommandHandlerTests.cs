@@ -3,10 +3,11 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
+using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries;
-using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Members.Queries;
+using backend.Application.Prompts.DTOs; // ADDED: Missing using directive
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
@@ -14,7 +15,6 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.Prompts.DTOs; // ADDED: Missing using directive
 
 namespace backend.Application.UnitTests.Families.Commands.GenerateFamilyData;
 

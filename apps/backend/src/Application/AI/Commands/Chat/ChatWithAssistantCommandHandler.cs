@@ -1,18 +1,18 @@
+using backend.Application.AI.Commands.Chat.CallAiChatService;
+using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
+using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
-using backend.Application.AI.Commands.DetermineChatContext;
-using backend.Application.AI.Enums;
-using backend.Application.Families.Commands.GenerateFamilyData;
-using Microsoft.Extensions.Options; // Add this
 using backend.Application.Common.Models.AppSetting; // Add this
-using backend.Application.Prompts.Queries.GetPromptById;
-using backend.Application.AI.Commands.Chat.CallAiChatService;
-using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
-using backend.Application.Families.Queries.CheckAiChatQuota;
 using backend.Application.Common.Queries.ValidateUserAuthentication;
+using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
+using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
+using backend.Application.Families.Queries.CheckAiChatQuota;
+using backend.Application.Prompts.Queries.GetPromptById;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // Add this
 
 namespace backend.Application.AI.Chat;
 
@@ -98,7 +98,7 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         {
             qaSystemPromptContent = qaPromptResult.Value.Content;
         }
-        
+
         if (string.IsNullOrWhiteSpace(qaSystemPromptContent))
         {
             return Result<ChatResponse>.Failure("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.", ErrorSources.InvalidConfiguration);
@@ -111,7 +111,7 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         {
             familyDataLookupSystemPromptContent = familyDataLookupPromptResult.Value.Content;
         }
-        
+
         if (string.IsNullOrWhiteSpace(familyDataLookupSystemPromptContent))
         {
             _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database và không có prompt mặc định. Trả về lỗi.", PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT);

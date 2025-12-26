@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Infrastructure.Services;
 using backend.Infrastructure.Auth;
+using backend.Infrastructure.Services;
 using backend.Web.Filters; // Add this using directive for the filter
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;

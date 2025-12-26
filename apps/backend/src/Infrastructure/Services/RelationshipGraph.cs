@@ -36,7 +36,7 @@ public class RelationshipGraph : IRelationshipGraph
             // Add reverse relationship to allow bidirectional traversal
             // Only add reverse relationship for types that are 'forward' definitions
             // Child is inherently a reverse relationship (from child to parent), so we don't need to reverse it again.
-            if (relationship.Type != RelationshipType.Child) 
+            if (relationship.Type != RelationshipType.Child)
             {
                 var reverseType = GetReverseRelationshipType(relationship.Type);
                 _adjacencyList[relationship.TargetMemberId].Add(new GraphEdge(relationship.TargetMemberId, relationship.SourceMemberId, reverseType));

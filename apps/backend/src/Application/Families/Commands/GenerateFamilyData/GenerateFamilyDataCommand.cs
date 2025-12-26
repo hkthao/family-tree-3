@@ -1,5 +1,5 @@
-using backend.Application.Common.Models;
 using backend.Application.AI.DTOs; // Add this using directive
+using backend.Application.Common.Models;
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 

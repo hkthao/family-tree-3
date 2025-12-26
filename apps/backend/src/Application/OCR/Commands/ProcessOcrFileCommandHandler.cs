@@ -1,7 +1,7 @@
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.DTOs;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.OCR.Commands;

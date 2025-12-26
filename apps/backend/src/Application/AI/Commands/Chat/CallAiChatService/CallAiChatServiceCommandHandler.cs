@@ -1,8 +1,8 @@
-using MediatR;
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Commands.Chat.CallAiChatService;
