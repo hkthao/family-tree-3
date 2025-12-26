@@ -4,6 +4,14 @@
       <div class="message-content">
         {{ message.text }}
       </div>
+      <!-- NEW: Display attachments -->
+      <div v-if="message.attachments && message.attachments.length > 0" class="mt-2">
+        <v-chip v-for="(attachment, index) in message.attachments" :key="index" class="ma-1" 
+          :prepend-icon="getAttachmentIcon(attachment.contentType)" @click="openAttachment(attachment.url)">
+          {{ getFileNameFromUrl(attachment.url) }}
+        </v-chip>
+      </div>
+      <!-- END NEW -->
     </v-sheet>
     <v-avatar cover class="ml-1" size="36">
       <v-img v-if="userProfile?.value?.avatar" :src="getAvatarUrl(userProfile.value.avatar, undefined)"
@@ -14,10 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType, Ref } from 'vue'; // Use type import for PropType and Ref
-import type { AiChatMessage } from '@/types/chat.d'; // Use type import
+import type { PropType, Ref } from 'vue';
+import type { AiChatMessage } from '@/types/chat.d'; // Import ChatAttachmentDto
 import { getAvatarUrl } from '@/utils/avatar.utils';
-import type { UserProfile } from '@/types/user.d'; // Import UserProfile
+import type { UserProfile } from '@/types/user.d';
 
 defineProps({
   message: {
@@ -25,17 +33,41 @@ defineProps({
     required: true,
   },
   userProfile: {
-    type: Object as PropType<Ref<UserProfile | null>>, // Use imported UserProfile
+    type: Object as PropType<Ref<UserProfile | null>>,
     default: null,
   },
 });
+
+// Function to get attachment icon based on content type
+const getAttachmentIcon = (contentType?: string) => {
+  if (contentType?.startsWith('image/')) return 'mdi-file-image';
+  if (contentType === 'application/pdf') return 'mdi-file-pdf-box'; // Use mdi-file-pdf-box for a clearer PDF icon
+  return 'mdi-file';
+};
+
+// Function to extract file name from URL
+const getFileNameFromUrl = (url?: string) => {
+  if (!url) return 'Unknown File';
+  try {
+    const urlObj = new URL(url);
+    const pathSegments = urlObj.pathname.split('/');
+    return pathSegments[pathSegments.length - 1] || 'File';
+  } catch {
+    return url; // Fallback to full URL if parsing fails
+  }
+};
+
+// Function to open attachment in a new tab
+const openAttachment = (url?: string) => {
+  if (url) {
+    window.open(url, '_blank');
+  }
+};
 </script>
 
 <style scoped>
 .message-content {
   white-space: pre-wrap;
-  /* Preserves whitespace and wraps text */
   word-break: break-word;
-  /* Ensures long words break to prevent overflow */
 }
 </style>

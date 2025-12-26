@@ -7,6 +7,7 @@ export interface AiChatMessage {
   intent?: string; // New property
   generatedData?: CombinedAiContentDto; // Also add generatedData for consistency
   faceDetectionResults?: FaceDetectionResult[]; // Using FaceDetectionResult
+  attachments?: ChatAttachmentDto[]; // NEW: Add attachments for user messages
 }
 
 export interface ChatMessage {

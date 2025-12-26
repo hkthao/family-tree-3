@@ -23,6 +23,15 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
       sender: 'ai', text: t('aiChat.welcomeMessage')
     },
     // {
+    //   sender: 'user', text: "test",
+    //   attachments: [
+    //     {
+    //       "url": "https://i.ibb.co/0RSfqj54/fce9077ef705.jpg",
+    //       "contentType": "image/jpeg"
+    //     }
+    //   ]
+    // }
+    // {
     //   sender: 'ai',
     //   text: "Đã hoàn thành nhận dạng hình ảnh. Tìm thấy tổng cộng 2 khuôn mặt. Trong đó, 2 khuôn mặt được nhận dạng là thành viên gia đình.",
     //   intent: 'IMAGE_RECOGNITION_PAGE',
@@ -580,12 +589,12 @@ export function useAiChat(familyId: string, deps: UseAiChatDeps = defaultAiChatD
   } = useSendMessageMutation();
 
   const sendMessage = async (messageText: string, attachments?: UploadedFile[]) => {
-    messages.value.push({ sender: 'user', text: messageText });
-
     const chatAttachments: ChatAttachmentDto[] | undefined = attachments?.map(att => ({
       url: att.url,
       contentType: att.type,
     }));
+
+    messages.value.push({ sender: 'user', text: messageText, attachments: chatAttachments }); // Include attachments
 
     sendAiMessageMutation(
       { familyId, sessionId, chatInput: messageText, attachments: chatAttachments },
