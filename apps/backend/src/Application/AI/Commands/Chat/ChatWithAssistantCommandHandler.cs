@@ -1,6 +1,4 @@
-using System.Net.Http;
 using System.Text; // NEW
-using System.IO; // NEW
 using backend.Application.AI.Commands.Chat.CallAiChatService;
 using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
@@ -16,7 +14,6 @@ using backend.Application.Families.Queries.CheckAiChatQuota;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.OCR.Commands; // NEW
 using backend.Application.Prompts.Queries.GetPromptById;
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -175,6 +172,21 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 _logger.LogInformation("Ngữ cảnh là DataGeneration. Xử lý tệp đính kèm và gọi lệnh tạo dữ liệu gia đình.");
 
                 var combinedChatInput = new StringBuilder(request.ChatInput ?? string.Empty);
+
+                // NEW: Xử lý thông tin vị trí nếu được cung cấp
+                if (request.Location != null)
+                {
+                    combinedChatInput.AppendLine().AppendLine("--- Thông tin vị trí được cung cấp ---");
+                    combinedChatInput.Append($"[Location: Latitude={request.Location.Latitude}, Longitude={request.Location.Longitude}");
+                    if (!string.IsNullOrWhiteSpace(request.Location.Address))
+                    {
+                        combinedChatInput.Append($", Address={request.Location.Address}");
+                    }
+                    combinedChatInput.AppendLine("]");
+                    combinedChatInput.AppendLine("------------------------------------");
+                    _logger.LogInformation("Đã thêm thông tin vị trí vào ChatInput: Latitude={Latitude}, Longitude={Longitude}, Address={Address}",
+                        request.Location.Latitude, request.Location.Longitude, request.Location.Address);
+                }
 
                 if (request.Attachments != null && request.Attachments.Any())
                 {

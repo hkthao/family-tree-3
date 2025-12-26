@@ -241,6 +241,54 @@ public class ChatWithAssistantCommandHandlerTestsV2
     }
 
     [Fact]
+    public async Task Handle_ShouldAppendLocationToChatInput_WhenContextIsDataGenerationAndLocationProvided()
+    {
+        // Arrange
+        var initialChatInput = "original chat input";
+        var location = new ChatLocation { Latitude = 10.0, Longitude = 20.0, Address = "Test Address" };
+        var familyId = Guid.NewGuid();
+
+        var command = new ChatWithAssistantCommand
+        {
+            FamilyId = familyId,
+            SessionId = "s1",
+            ChatInput = initialChatInput,
+            Location = location
+        };
+
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<DetermineChatContextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ContextClassificationDto>.Success(new ContextClassificationDto { Context = ContextType.DataGeneration }));
+
+        // Capture the GenerateFamilyDataCommand sent to mediator
+        GenerateFamilyDataCommand? capturedCommand = null;
+        _mockMediator.Setup(m => m.Send(
+            It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<CombinedAiContentDto>>, CancellationToken>((req, ct) => capturedCommand = (GenerateFamilyDataCommand)req)
+            .ReturnsAsync(Result<CombinedAiContentDto>.Success(new CombinedAiContentDto()));
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        capturedCommand.Should().NotBeNull();
+        capturedCommand!.FamilyId.Should().Be(familyId);
+        capturedCommand!.ChatInput.Should().Contain(initialChatInput);
+        capturedCommand!.ChatInput.Should().Contain($"--- Thông tin vị trí được cung cấp ---");
+        capturedCommand!.ChatInput.Should().Contain($"[Location: Latitude={location.Latitude}, Longitude={location.Longitude}");
+        // Address is optional, so check for it if present
+        if (!string.IsNullOrWhiteSpace(location.Address))
+        {
+            capturedCommand.ChatInput.Should().Contain($", Address={location.Address}]");
+        }
+        else
+        {
+            capturedCommand.ChatInput.Should().Contain("]"); // Ensure the closing bracket is there
+        }
+        _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task Handle_ShouldIncrementUsage_Always()
     {
         // Arrange
