@@ -14,16 +14,28 @@ interface MapboxFeature {
   // Add other properties if needed
 }
 
-export function useMapPicker() {
+interface MapPickerOptions {
+  initialLocation?: { latitude: number; longitude: number; address?: string };
+}
+
+export function useMapPicker(options?: MapPickerOptions) {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
 
   const mapboxAccessToken = ref(getEnvVariable('VITE_MAPBOX_ACCESS_TOKEN'));
   const searchQuery = ref('');
-  const selectedCoordinates = ref<Coordinates>({ latitude: 0, longitude: 0 });
+  const selectedCoordinates = ref<Coordinates>(
+    options?.initialLocation
+      ? { latitude: options.initialLocation.latitude, longitude: options.initialLocation.longitude }
+      : { latitude: 0, longitude: 0 },
+  );
   const suggestions = ref<MapboxFeature[]>([]);
   const loadingSuggestions = ref(false);
-  const selectedItem = ref<MapboxFeature | null>(null);
+  const selectedItem = ref<MapboxFeature | null>(
+    options?.initialLocation?.address
+      ? { place_name: options.initialLocation.address, center: [options.initialLocation.longitude, options.initialLocation.latitude] } as MapboxFeature
+      : null,
+  );
 
   let abortController: AbortController | null = null;
 

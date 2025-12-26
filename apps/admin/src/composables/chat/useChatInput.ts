@@ -6,6 +6,16 @@ import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useMutation } from '@tanstack/vue-query';
 import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
 
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
+interface SelectedLocation extends LocationData {
+  source: 'current' | 'map';
+}
+
 interface UseChatInputProps {
   modelValue?: string;
   disabled: boolean;
@@ -15,7 +25,7 @@ interface UseChatInputEmits {
   (event: 'update:modelValue', value: string): void;
   (event: 'sendMessage'): void;
   (event: 'addAttachment', type: 'image' | 'pdf'): void;
-  (event: 'addLocation', location: { latitude: number; longitude: number; address?: string }): void;
+  (event: 'addLocation', location: LocationData): void;
 }
 
 export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) {
@@ -25,7 +35,7 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
   const { showSnackbar } = useGlobalSnackbar();
   const mapDrawerStore = useMapLocationDrawerStore();
 
-  const selectedLocation = ref<{ latitude: number; longitude: number; address?: string } | null>(null);
+  const selectedLocation = ref<SelectedLocation | null>(null);
 
   const updateModelValue = (value: string) => {
     emit('update:modelValue', value);
@@ -79,7 +89,7 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
         (position) => {
           const { latitude, longitude } = position.coords;
           console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-          selectedLocation.value = { latitude, longitude };
+          selectedLocation.value = { latitude, longitude, source: 'current' };
           showSnackbar(t('chatInput.locationSelected'), 'success');
         },
         (error) => {
@@ -93,14 +103,15 @@ export function useChatInput(props: UseChatInputProps, emit: UseChatInputEmits) 
     }
   };
 
-  const openMapPicker = async () => {
+  const openMapPicker = async (initialLocation?: LocationData) => {
     try {
-      const result = await mapDrawerStore.openDrawer();
+      const result = await mapDrawerStore.openDrawer(initialLocation);
       if (result.coordinates) {
         selectedLocation.value = {
           latitude: result.coordinates.latitude,
           longitude: result.coordinates.longitude,
           address: result.location,
+          source: 'map',
         };
         showSnackbar(t('chatInput.locationSelectedFromMap'), 'success');
       }

@@ -52,9 +52,7 @@
         <v-window-item value="memory-items">
           <MemoryItemListView :family-id="familyId" />
         </v-window-item>
-        <v-window-item value="ai-assistant">
-          <AIAssistantView :family-id="familyId" />
-        </v-window-item>
+
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
@@ -93,13 +91,11 @@ import MemberListView from '@/views/member/MemberListView.vue';
 import MemberFaceListView from '@/views/member-face/MemberFaceListView.vue';
 import EventListView from '@/views/event/EventListView.vue';
 import FaceSearchView from '@/views/member-face/FaceSearchView.vue'; // NEW
-
 import { useAuth } from '@/composables';
 import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
 import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
 import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
-import AIAssistantView from '@/views/ai-assistant/AIAssistantView.vue'; // NEW: AI Assistant View
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 
@@ -153,7 +149,7 @@ const allTabDefinitions = computed(() => [
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
   { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
-  { value: 'ai-assistant', text: t('aiChat.title'), condition: true as boolean },
+
   { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
   { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
 

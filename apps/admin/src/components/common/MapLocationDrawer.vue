@@ -1,6 +1,6 @@
 <template>
   <BaseCrudDrawer v-model="mapDrawerStore.drawer"  @close="mapDrawerStore.closeDrawer">
-    <FamilyMapPicker v-if="mapDrawerStore.drawer" @confirm-selection="handleConfirmSelection" />
+    <FamilyMapPicker v-if="mapDrawerStore.drawer" :initial-location="mapDrawerStore.initialLocation" @confirm-selection="handleConfirmSelection" />
   </BaseCrudDrawer>
 </template>
 

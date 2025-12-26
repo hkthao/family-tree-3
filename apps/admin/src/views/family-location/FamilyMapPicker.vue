@@ -58,7 +58,16 @@ import { useMapPicker } from '@/composables/map/useMapPicker';
 import MapPicker from '@/components/map/MapPicker.vue';
 import { useI18n } from 'vue-i18n';
 
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
 const emit = defineEmits(['confirm-selection']);
+const props = defineProps<{
+  initialLocation?: LocationData;
+}>();
 
 const { t } = useI18n();
 const {
@@ -73,7 +82,7 @@ const {
   fetchSuggestions,
   selectSuggestion,
   copyCoordinates,
-} = useMapPicker();
+} = useMapPicker({ initialLocation: props.initialLocation });
 
 const confirmSelection = () => {
   emit('confirm-selection', {

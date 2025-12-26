@@ -7,8 +7,9 @@
     color="primary"
     prepend-icon="mdi-map-marker"
     @update:modelValue="clearSelectedLocation"
+    @click="openMapPicker(selectedLocation)"
   >
-    {{ t('chatInput.locationChip') }}
+    {{ selectedLocation.source === 'current' ? t('chatInput.locationChipCurrent') : t('chatInput.locationChipMap') }}
   </v-chip>
   <v-textarea
     ref="textareaRef"
@@ -38,7 +39,7 @@
           <v-list-item @click="getCurrentLocation">
             <v-list-item-title>{{ t('chatInput.menu.getCurrentLocation') }}</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="openMapPicker">
+          <v-list-item @click="() => openMapPicker()">
             <v-list-item-title>{{ t('chatInput.menu.selectFromMap') }}</v-list-item-title>
           </v-list-item>
         </v-list>
