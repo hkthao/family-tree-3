@@ -49,6 +49,17 @@ const rawMenu: MenuSection[] = [
     ],
   },
   {
+    titleKey: 'menu.community', // New section for Community
+    items: [
+      {
+        titleKey: 'community.publicFamilies', // New item for Public Families
+        icon: 'mdi-account-group',
+        to: '/community/families', // New route
+        exact: true,
+      },
+    ],
+  },
+  {
     titleKey: 'menu.dictionary',
     items: [
       {

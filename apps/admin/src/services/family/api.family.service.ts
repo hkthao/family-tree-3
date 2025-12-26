@@ -10,6 +10,7 @@ import {
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
 import { ApiCrudService } from '../common/api.crud.service';
+import type { ListOptions, FilterOptions, Paginated } from '@/types'; // NEW
 
 export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, FamilyUpdateDto> implements IFamilyService {
   constructor(protected http: ApiClientMethods) {
@@ -54,4 +55,18 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
     const payload = { familyId, publicMemberProperties };
     return this.http.put<void>(`/family/${familyId}/privacy-configuration`, payload);
   }
+
+  async searchPublic(listOptions: ListOptions, filterOptions: FilterOptions): Promise<Result<Paginated<FamilyDto>>> {
+    const params = {
+      page: listOptions.page,
+      itemsPerPage: listOptions.itemsPerPage,
+      sortBy: listOptions.sortBy?.map(s => `${s.key}:${s.order}`).join(','),
+      searchQuery: filterOptions.searchQuery,
+    };
+    // Clean up undefined/null values from params
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null));
+
+    return this.http.get<Paginated<FamilyDto>>(`/family/public-search`, { params: cleanParams });
+  }
 }
+

@@ -1,4 +1,4 @@
-import type { ApiError, FamilyDto, PrivacyConfiguration, Result, FamilyAddDto, FamilyUpdateDto } from "@/types";
+import type { ApiError, FamilyDto, PrivacyConfiguration, Result, FamilyAddDto, FamilyUpdateDto, ListOptions, FilterOptions, Paginated } from "@/types";
 import type { ICrudService } from "../common/crud.service.interface";
 import type { FamilyExportDto, IFamilyAccess } from '@/types/family';
 
@@ -10,5 +10,7 @@ export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, Fa
   getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>>;
   updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>>;
   getUserFamilyAccess(): Promise<Result<IFamilyAccess[], ApiError>> ;
+  searchPublic(listOptions: ListOptions, filterOptions: FilterOptions): Promise<Result<Paginated<FamilyDto>, ApiError>>;
 }
+
 
