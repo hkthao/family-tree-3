@@ -92,5 +92,57 @@ class TestTextCleaner(unittest.TestCase):
         expected_text = "Hello\nWorld"
         self.assertEqual(cleaned_text, expected_text)
 
+    def test_clean_ocr_text_special_characters_and_spaces(self):
+        dirty_text = "T@est S!tring w!th $pec!@l Ch@r@cter$ and   extra    spaces."
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "T est S tring w th pec l Ch r cter and extra spaces."
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_vietnamese_unicode_and_special_chars(self):
+        dirty_text = "Tiếng Việt! có_dấu. @#$%^&*() "
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "Tiếng Việt có dấu. % ()"
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_unicode_normalization(self):
+        # Example of decomposed unicode (NFD) that should be normalized to NFC
+        dirty_text = "Tiếng Việt\u0323" # e + combining dot below
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "Tiếng Việṭ" # e with dot below as a single character
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_complex_case(self):
+        dirty_text = "  Hello, W@rld!  \n\n  Đây là T!ếxt_tiếng Việt.  123$%^  \t\n  New Line.  "
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "Hello, W rld\nĐây là T ếxt tiếng Việt. 123 %\nNew Line."
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_repeated_noise(self):
+        dirty_text = "Text....with----noise|||here***and"
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "Text with noise here and"
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_unallowed_characters(self):
+        dirty_text = "This is some text with @#$^*_ illegal chars. And some % allowed."
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "This is some text with illegal chars. And some % allowed."
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_low_alpha_ratio_removed(self):
+        # Line with low alpha ratio (e.g., mostly numbers or symbols) should be removed
+        dirty_text = "This is a valid line.\n1234567890\n---++++===\nAnother good line."
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "This is a valid line.\nAnother good line."
+        self.assertEqual(cleaned_text, expected_text)
+
+    def test_clean_ocr_text_sufficient_alpha_ratio_kept(self):
+        # Line with sufficient alpha ratio should be kept, even if it has numbers
+        dirty_text = "This line has 123 numbers and letters."
+        cleaned_text = clean_ocr_text(dirty_text)
+        expected_text = "This line has 123 numbers and letters."
+        self.assertEqual(cleaned_text, expected_text)
+
+
 if __name__ == '__main__':
     unittest.main()
