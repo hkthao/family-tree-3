@@ -7,17 +7,14 @@ export function useFamilyLinkRequestRules(formData: Partial<FamilyLinkRequestDto
   const { t } = useI18n();
   const rulesVuetify = useRules();
 
-  const required = (propertyType: string) => (value: string | null | undefined) =>
-    !!value || t(`familyLinkRequest.form.rules.${propertyType}Required`);
-
   const targetFamilyCannotBeRequestingFamily = (value: string | null | undefined) =>
     value !== formData.requestingFamilyId || t('familyLinkRequest.form.rules.targetCannotBeRequesting');
 
   const rules = computed(() => {
     return {
-      requestingFamilyId: [required('requestingFamilyId')],
-      targetFamilyId: [required('targetFamilyId'), targetFamilyCannotBeRequestingFamily],
-      requestMessage: [required('requestMessage')],
+      requestingFamilyId: [rulesVuetify.required()],
+      targetFamilyId: [rulesVuetify.required(), targetFamilyCannotBeRequestingFamily],
+      requestMessage: [rulesVuetify.required()],
     };
   });
 
