@@ -267,9 +267,15 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 }
                 else
                 {
+                    int totalDetectedFaces = faceDetectionResults.Sum(res => res.DetectedFaces.Count);
+                    int mappedMembers = faceDetectionResults.SelectMany(res => res.DetectedFaces)
+                                                            .Count(face => face.MemberId.HasValue);
+
+                    string outputMessage = $"Đã hoàn thành nhận dạng hình ảnh. Tìm thấy tổng cộng {totalDetectedFaces} khuôn mặt. Trong đó, {mappedMembers} khuôn mặt được nhận dạng là thành viên gia đình.";
+
                     finalChatResponseResult = Result<ChatResponse>.Success(new ChatResponse
                     {
-                        Output = "Đã hoàn thành nhận dạng hình ảnh.",
+                        Output = outputMessage,
                         FaceDetectionResults = faceDetectionResults
                     });
                 }
