@@ -27,7 +27,7 @@ describe('useFamilyAdd', () => {
     mockFamilyFormRef = ref(null);
     mockFamilyFormRef.value = {
       validate: vi.fn(() => true),
-      getFormData: vi.fn(() => ({ name: 'Test Family' })),
+      getFormData: vi.fn(() => ({ name: 'Test FamilyDto' })),
     };
     deps = {
       useI18n: mockUseI18n,
@@ -59,7 +59,7 @@ describe('useFamilyAdd', () => {
   });
 
   it('should call addFamily with correct data on successful validation', async () => {
-    const mockFormData = { name: 'New Family' };
+    const mockFormData = { name: 'New FamilyDto' };
     mockFamilyFormRef.value.getFormData.mockReturnValueOnce(mockFormData);
     const { actions } = useFamilyAdd(emit, mockFamilyFormRef, deps);
 

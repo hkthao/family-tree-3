@@ -41,7 +41,7 @@ describe('eventForm.logic', () => {
     it('should return initial event data when provided', () => {
       const initialEvent = {
         id: '1',
-        name: 'Existing Event',
+        name: 'Existing EventDto',
         code: 'EVT001',
         type: EventType.Birth,
         familyId: 'fam1',
@@ -61,7 +61,7 @@ describe('eventForm.logic', () => {
     it('should ensure lunarDate is always initialized with default values if missing in initialEventData', () => {
       const initialEvent = {
         id: '1',
-        name: 'Existing Event',
+        name: 'Existing EventDto',
         code: 'EVT001',
         type: EventType.Birth,
         familyId: 'fam1',
@@ -140,7 +140,7 @@ describe('eventForm.logic', () => {
     it('should set lunarDate to null if calendarType is Solar', () => {
       const formData = {
         id: '1',
-        name: 'Solar Event',
+        name: 'Solar EventDto',
         code: 'SE001',
         type: EventType.Other,
         familyId: 'fam1',
@@ -160,7 +160,7 @@ describe('eventForm.logic', () => {
     it('should set solarDate to null if calendarType is Lunar', () => {
       const formData = {
         id: '1',
-        name: 'Lunar Event',
+        name: 'Lunar EventDto',
         code: 'LE001',
         type: EventType.Other,
         familyId: 'fam1',
@@ -180,7 +180,7 @@ describe('eventForm.logic', () => {
     it('should convert solarDate string to Date object if it is a string', () => {
       const formData = {
         id: '1',
-        name: 'Solar String Date Event',
+        name: 'Solar String Date EventDto',
         code: 'SSDE001',
         type: EventType.Other,
         familyId: 'fam1',
@@ -200,7 +200,7 @@ describe('eventForm.logic', () => {
     it('should clone the formData to avoid modifying the original object', () => {
       const formData = {
         id: '1',
-        name: 'Original Event',
+        name: 'Original EventDto',
         code: 'OE001',
         type: EventType.Other,
         familyId: 'fam1',

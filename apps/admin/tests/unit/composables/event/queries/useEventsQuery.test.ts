@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useEventsQuery } from '@/composables/event/queries/useEventsQuery';
 import { useQuery } from '@tanstack/vue-query';
 import { ref, type Ref } from 'vue';
-import type { Event, EventFilter, Paginated } from '@/types';
+import type { EventDto, EventFilter, Paginated } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import { queryKeys } from '@/constants/queryKeys';
 import { EventType, CalendarType, RepeatRule } from '@/types'; // Import necessary enums
@@ -24,9 +24,9 @@ const mockEventService: EventServiceAdapter = {
 };
 
 describe('useEventsQuery', () => {
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: 'event1',
-    name: 'Test Event',
+    name: 'Test EventDto',
     code: 'TE001',
     type: EventType.Other,
     familyId: 'family1',
@@ -39,7 +39,7 @@ describe('useEventsQuery', () => {
     relatedMemberIds: ['member1'],
   };
 
-  const mockPaginatedEvents: Paginated<Event> = {
+  const mockPaginatedEvents: Paginated<EventDto> = {
     items: [mockEvent],
     totalItems: 1,
     totalPages: 1,
@@ -124,11 +124,11 @@ describe('useEventsQuery', () => {
 
   it('should handle placeholderData correctly', () => {
     const filtersRef: Ref<EventFilter> = ref({ page: 1, itemsPerPage: 10 });
-    const previousData: Paginated<Event> = {
+    const previousData: Paginated<EventDto> = {
       items: [{ ...mockEvent, id: 'previous1' }],
       totalItems: 1, totalPages: 1, page: 1
     };
-    let placeholderDataFn: ((previousData: Paginated<Event> | undefined) => Paginated<Event> | undefined) | undefined;
+    let placeholderDataFn: ((previousData: Paginated<EventDto> | undefined) => Paginated<EventDto> | undefined) | undefined;
 
     (useQuery as Mock).mockImplementation((options: any) => {
       placeholderDataFn = options.placeholderData;

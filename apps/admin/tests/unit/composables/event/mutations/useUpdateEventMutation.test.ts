@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useUpdateEventMutation } from '@/composables/event/mutations/useUpdateEventMutation';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { queryKeys } from '@/constants/queryKeys';
-import type { Event } from '@/types';
+import type { EventDto } from '@/types';
 import type { EventServiceAdapter } from '@/composables/event/event.adapter';
 import { EventType, CalendarType, RepeatRule } from '@/types'; // Import necessary enums
 
@@ -29,9 +29,9 @@ const mockQueryClient = {
 };
 
 describe('useUpdateEventMutation', () => {
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: 'event1',
-    name: 'Updated Event',
+    name: 'Updated EventDto',
     code: 'UE001',
     type: EventType.Other,
     familyId: 'family1',
@@ -86,8 +86,8 @@ describe('useUpdateEventMutation', () => {
     const { mutate } = useUpdateEventMutation({ eventService: mockEventService });
 
     await expect(
-      mutate(eventWithoutId, { onError: (error) => expect(error.message).toBe('Event ID is required for update') }),
-    ).rejects.toThrow('Event ID is required for update');
+      mutate(eventWithoutId, { onError: (error) => expect(error.message).toBe('EventDto ID is required for update') }),
+    ).rejects.toThrow('EventDto ID is required for update');
   });
 
   it('should call onSuccess and invalidate queries on successful mutation', async () => {

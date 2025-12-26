@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 import { ref } from 'vue';
-import type { Family } from '@/types';
+import type { FamilyDto } from '@/types';
 
 // Mock dependencies
 const mockT = vi.fn((key: string) => key);
@@ -20,7 +20,7 @@ const mockUseAuth = vi.fn(() => ({
   },
 }));
 
-const mockFamily = ref<Family | null>(null);
+const mockFamily = ref<FamilyDto | null>(null);
 const mockIsLoading = ref(false);
 const mockError = ref<Error | null>(null);
 const mockUseFamilyQuery = vi.fn(() => ({
@@ -40,7 +40,7 @@ describe('useFamilyDetail', () => {
     emit = vi.fn();
     mockIsAdmin.value = false;
     mockIsFamilyManagerFn.mockReturnValue(false); // Corrected
-    mockFamily.value = { id: mockFamilyId, name: 'Test Family', managerIds: [], viewerIds: [] };
+    mockFamily.value = { id: mockFamilyId, name: 'Test FamilyDto', managerIds: [], viewerIds: [] };
     mockIsLoading.value = false;
     mockError.value = null;
 
@@ -58,7 +58,7 @@ describe('useFamilyDetail', () => {
     const { state: { familyData, isLoading, error } } = useFamilyDetail({ familyId: mockFamilyId, readOnly: mockReadOnly }, emit, deps);
 
     expect(mockUseFamilyQuery).toHaveBeenCalledWith(expect.any(Object));
-    expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test Family', managerIds: [], viewerIds: [] });
+    expect(familyData.value).toEqual({ id: mockFamilyId, name: 'Test FamilyDto', managerIds: [], viewerIds: [] });
     expect(isLoading.value).toBe(true);
     expect(error.value).toEqual(new Error('Test Error'));
   });

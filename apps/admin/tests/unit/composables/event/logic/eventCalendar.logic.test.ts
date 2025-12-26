@@ -9,7 +9,7 @@ import {
   getCalendarTitleLogic,
 } from '@/composables/event/logic/eventCalendar.logic';
 import type { DateAdapter, LunarDateAdapter, LunarInstance, SolarInstance } from '@/composables/event/eventCalendar.adapter';
-import { type Event, type LunarDate, EventType } from '@/types';
+import { type EventDto, type LunarDate, EventType } from '@/types';
 import { CalendarType } from '@/types/enums';
 
 // Mock implementations for DateAdapter
@@ -277,16 +277,16 @@ describe('eventCalendar.logic', () => {
   });
 
   describe('formatEventsForCalendarLogic', () => {
-    const mockEvent1: Event = {
-      id: '1', name: 'Solar Event', type: EventType.Other, solarDate: new Date(2023, 6, 10),
+    const mockEvent1: EventDto = {
+      id: '1', name: 'Solar EventDto', type: EventType.Other, solarDate: new Date(2023, 6, 10),
       familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
     };
-    const mockEvent2: Event = {
-      id: '2', name: 'Lunar Event', type: EventType.Other, lunarDate: { day: 28, month: 5, isLeapMonth: false },
+    const mockEvent2: EventDto = {
+      id: '2', name: 'Lunar EventDto', type: EventType.Other, lunarDate: { day: 28, month: 5, isLeapMonth: false },
       familyId: '', calendarType: CalendarType.Lunar, solarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
     };
-    const mockEventOutsideMonth: Event = {
-      id: '3', name: 'Outside Event', type: EventType.Other, solarDate: new Date(2023, 5, 1),
+    const mockEventOutsideMonth: EventDto = {
+      id: '3', name: 'Outside EventDto', type: EventType.Other, solarDate: new Date(2023, 5, 1),
       familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
     };
 
@@ -297,7 +297,7 @@ describe('eventCalendar.logic', () => {
       const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
 
       expect(result).toHaveLength(1);
-      expect(result[0].title).toBe('Solar Event');
+      expect(result[0].title).toBe('Solar EventDto');
       expect(result[0].start.getMonth()).toBe(6); // July
       expect(result[0].start.getDate()).toBe(10);
       expect(result[0].eventObject).toEqual(mockEvent1);
@@ -312,7 +312,7 @@ describe('eventCalendar.logic', () => {
       const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
 
       expect(result).toHaveLength(1);
-      expect(result[0].title).toBe('Lunar Event');
+      expect(result[0].title).toBe('Lunar EventDto');
       expect(result[0].start.getMonth()).toBe(6); // July
       expect(result[0].start.getDate()).toBe(15);
       expect(result[0].eventObject).toEqual(mockEvent2);
@@ -325,7 +325,7 @@ describe('eventCalendar.logic', () => {
       const result = formatEventsForCalendarLogic(events, selectedDate, mockDateAdapter, mockLunarDateAdapter);
 
       expect(result).toHaveLength(1);
-      expect(result[0].title).toBe('Solar Event');
+      expect(result[0].title).toBe('Solar EventDto');
     });
 
     it('should return empty array if no events are provided', () => {
@@ -335,8 +335,8 @@ describe('eventCalendar.logic', () => {
     });
 
     it('should handle events without valid dates', () => {
-      const eventWithoutDate: Event = {
-        id: '4', name: 'No Date Event', type: EventType.Other, solarDate: null,
+      const eventWithoutDate: EventDto = {
+        id: '4', name: 'No Date EventDto', type: EventType.Other, solarDate: null,
         familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
       };
       const selectedDate = new Date(2023, 6, 15);

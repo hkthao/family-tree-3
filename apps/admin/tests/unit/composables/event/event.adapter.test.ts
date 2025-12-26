@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApiEventServiceAdapter } from '@/composables/event/event.adapter';
 import type { IEventService } from '@/services/event/event.service.interface';
 import { CalendarType, RepeatRule, EventType } from '@/types';
-import type { Event, Result, ApiError } from '@/types';
+import type { EventDto, Result, ApiError } from '@/types';
 
 // Mock ApiEventService
 const mockApiEventService: IEventService = {
@@ -24,9 +24,9 @@ describe('ApiEventServiceAdapter', () => {
     adapter = new ApiEventServiceAdapter(mockApiEventService);
   });
 
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: '1',
-    name: 'Test Event',
+    name: 'Test EventDto',
     code: 'TE001',
     type: EventType.Other,
     familyId: 'family1',
@@ -54,8 +54,8 @@ describe('ApiEventServiceAdapter', () => {
   it('nên gọi apiEventService.add và trả về kết quả', async () => {
     mockApiEventService.add = vi.fn().mockResolvedValue(successResult(mockEvent));
 
-    const eventDataWithoutId: Omit<Event, 'id'> = {
-      name: 'Test Event',
+    const eventDataWithoutId: Omit<EventDto, 'id'> = {
+      name: 'Test EventDto',
       code: 'TE001',
       type: EventType.Other,
       familyId: 'family1',
@@ -76,8 +76,8 @@ describe('ApiEventServiceAdapter', () => {
   it('nên xử lý lỗi từ apiEventService.add', async () => {
     mockApiEventService.add = vi.fn().mockResolvedValue(errorResult(mockError));
 
-    const eventDataWithoutId: Omit<Event, 'id'> = {
-      name: 'Test Event',
+    const eventDataWithoutId: Omit<EventDto, 'id'> = {
+      name: 'Test EventDto',
       code: 'TE001',
       type: EventType.Other,
       familyId: 'family1',
