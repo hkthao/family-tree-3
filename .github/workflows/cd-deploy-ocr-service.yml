@@ -1,0 +1,23 @@
+name: CD Deploy OCR Service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-ocr-service:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy OCR Service to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          docker compose -f docker-compose.prod.yml pull ocr-service
+          docker compose -f docker-compose.prod.yml up -d --no-deps ocr-service
+          echo "OCR Service deployment completed successfully!"
