@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.Extensions.Localization" />
+    <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
 
   <ItemGroup>
