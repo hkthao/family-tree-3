@@ -278,7 +278,7 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                     finalChatResponseResult = generatedDataResult.Value != null
                         ? Result<ChatResponse>.Success(new ChatResponse
                         {
-                            Output = "Dữ liệu gia đình đã được tạo thành công.",
+                            Output = "Dữ liệu gia đình đã được AI phân tích thành công. Vui lòng kiểm tra kỹ tính chính xác của dữ liệu trước khi sử dụng.",
                             GeneratedData = generatedDataResult.Value
                         })
                         : Result<ChatResponse>.Failure("Lỗi không xác định khi tạo dữ liệu gia đình: Kết quả rỗng.", "InternalError");
