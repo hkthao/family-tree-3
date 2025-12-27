@@ -19,15 +19,16 @@ public class FamilyLocationAccessSpecification : Specification<FamilyLocation>
         else if (currentUserId.HasValue && currentUserId != Guid.Empty)
         {
             // For authenticated non-admin users, show family locations belonging to families
-            // they created OR are associated with as a FamilyUser with Manager or Viewer role.
+            // they created OR are associated with as a FamilyUser with Manager or Viewer role, OR if the family is public.
             Query.Where(l => l.Family != null &&
                               (l.Family.CreatedBy == currentUserId.Value.ToString() ||
-                               l.Family.FamilyUsers.Any(fu => fu.UserId == currentUserId.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer))));
+                               l.Family.FamilyUsers.Any(fu => fu.UserId == currentUserId.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer)) ||
+                               l.Family.Visibility == FamilyVisibility.Public.ToString()));
         }
         else // Not admin and not authenticated
         {
-            // Unauthenticated users should not see any family locations.
-            Query.Where(l => false);
+            // Unauthenticated users should only see family locations belonging to public families.
+            Query.Where(l => l.Family != null && l.Family.Visibility == FamilyVisibility.Public.ToString());
         }
     }
 }
