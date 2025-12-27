@@ -221,7 +221,7 @@ public class ChatWithAssistantCommandHandlerTestsV2
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value!.Output.Should().Be("Dữ liệu gia đình đã được tạo thành công.");
+        result.Value!.Output.Should().Be("Dữ liệu gia đình đã được AI phân tích thành công. Vui lòng kiểm tra kỹ tính chính xác của dữ liệu trước khi sử dụng.");
         result.Value.GeneratedData.Should().NotBeNull();
         _mockMediator.Verify(m => m.Send(It.IsAny<CallAiChatServiceCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         _mockMediator.Verify(m => m.Send(It.IsAny<GenerateFamilyDataCommand>(), It.IsAny<CancellationToken>()), Times.Once);
