@@ -57,9 +57,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const authService = useAuthService();
-
   // Handle Auth0 redirect callback
-  if (to.name === 'Auth0Callback' && (to.query.code || to.query.state)) {
+  if (to.name === 'Dashboard' && (to.query.code || to.query.state)) {
     try {
       const appState = (await authService.handleRedirectCallback()) as AppState;
       // Redirect to the original target or dashboard

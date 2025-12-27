@@ -1,5 +1,6 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.Events.Specifications;
 
@@ -10,6 +11,6 @@ public class EventAccessSpecification : Specification<Event>
         Query.Include(e => e.Family!);
         Query.Include(e => e.Family!.FamilyUsers!);
         if (!isAdmin)
-            Query.Where(e => e.Family != null && e.Family.FamilyUsers!.Any(fu => fu.UserId == currentUserId));
+            Query.Where(e => e.Family != null && (e.Family.FamilyUsers!.Any(fu => fu.UserId == currentUserId) || e.Family.Visibility == FamilyVisibility.Public.ToString()));
     }
 }

@@ -8,6 +8,7 @@ using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.Members.Specifications;
 using Microsoft.Extensions.Logging;
+using backend.Application.Common.Utils;
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
@@ -36,8 +37,16 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
 
             string uploadFolder = UploadConstants.TemporaryUploadsFolder;
 
+            int? imageWidth = null;
+            int? imageHeight = null;
+
             if (request.ImageBytes != null && request.ImageBytes.Length > 0)
             {
+                // Identify image dimensions
+                var (width, height) = ImageUtils.GetImageDimensions(request.ImageBytes, _logger);
+                imageWidth = width;
+                imageHeight = height;
+
                 var originalUploadCommand = new UploadFileCommand
                 {
                     ImageData = request.ImageBytes,
@@ -148,6 +157,8 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 ImageId = imageId,
                 OriginalImageUrl = originalImageUrl,
                 ResizedImageUrl = null,
+                ImageWidth = imageWidth,
+                ImageHeight = imageHeight,
                 DetectedFaces = detectedFaceDtos
             });
         }

@@ -20,16 +20,17 @@ public class MemberFaceAccessSpecification : Specification<MemberFace>
         else if (currentUserId.HasValue && currentUserId != Guid.Empty)
         {
             // For authenticated non-admin users, show member faces belonging to families
-            // they created OR are associated with as a FamilyUser with Manager or Viewer role.
+            // they created OR are associated with as a FamilyUser with Manager or Viewer role, OR if the family is public.
             Query.Where(mf => mf.Member != null &&
                               mf.Member.Family != null &&
                               (mf.Member.Family.CreatedBy == currentUserId.Value.ToString() ||
-                               mf.Member.Family.FamilyUsers.Any(fu => fu.UserId == currentUserId.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer))));
+                               mf.Member.Family.FamilyUsers.Any(fu => fu.UserId == currentUserId.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Viewer)) ||
+                               mf.Member.Family.Visibility == FamilyVisibility.Public.ToString()));
         }
         else // Not admin and not authenticated
         {
-            // Unauthenticated users should not see any member faces.
-            Query.Where(mf => false);
+            // Unauthenticated users should only see member faces belonging to public families.
+            Query.Where(mf => mf.Member != null && mf.Member.Family != null && mf.Member.Family.Visibility == FamilyVisibility.Public.ToString());
         }
     }
 }

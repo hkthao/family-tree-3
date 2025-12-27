@@ -24,7 +24,6 @@ const initAuth0 = async () => {
       audience: AUTH0_AUDIENCE
     }
   });
-
   return auth0;
 };
 
@@ -117,6 +116,8 @@ export const auth0Service: AuthService = {
   handleRedirectCallback: async (): Promise<AppState> => {
     const client = await initAuth0();
     const appState = await client.handleRedirectCallback();
+    console.log("appState", appState);
+
     return appState as AppState;
   },
 }

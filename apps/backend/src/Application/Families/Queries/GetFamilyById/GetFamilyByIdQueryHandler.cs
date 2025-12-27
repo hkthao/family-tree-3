@@ -24,7 +24,7 @@ public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper ma
         var authorizedQuery = _context.Families.AsQueryable();
 
         // Apply FamilyAccessSpecification to filter families based on user's access
-        authorizedQuery = authorizedQuery.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
+        // authorizedQuery = authorizedQuery.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
         authorizedQuery = authorizedQuery.WithSpecification(new FamilyByIdSpecification(request.Id)); // Apply the FamilyByIdSpecification after access control
 
         // Fetch the Family entity, including its limit configuration
