@@ -1,9 +1,5 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.DTOs; // Changed to DTOs for full MemberDto
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace backend.Application.Members.Queries.ExportMembers;

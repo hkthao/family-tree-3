@@ -1,5 +1,3 @@
-using backend.Domain.Enums;
-
 namespace backend.Application.Members.DTOs;
 
 public class MemberImportDto
