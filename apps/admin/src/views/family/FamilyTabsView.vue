@@ -19,7 +19,8 @@
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer" @open-update-family-limit-drawer="handleOpenUpdateFamilyLimitDrawer" />
+          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer"
+            @open-update-family-limit-drawer="handleOpenUpdateFamilyLimitDrawer" />
         </v-window-item>
         <v-window-item value="timeline">
           <EventTimeline :family-id="familyId" />
@@ -78,11 +79,10 @@
 
   <!-- Update Family Limit Drawer -->
   <BaseCrudDrawer :model-value="showUpdateFamilyLimitDrawer" @update:model-value="showUpdateFamilyLimitDrawer = $event"
-    @close="handleCloseUpdateFamilyLimitDrawer" :title="t('family.updateLimits')">
-    <UpdateFamilyLimitView v-if="updateFamilyLimitFamilyId" :family-id="updateFamilyLimitFamilyId"
-      @close="handleCloseUpdateFamilyLimitDrawer" @saved="handleUpdateFamilyLimitSaved" />
+    @close="handleCloseUpdateFamilyLimitDrawer">
+    <UpdateFamilyLimitView v-if="familyId && showUpdateFamilyLimitDrawer" :family-id="familyId" @close="handleCloseUpdateFamilyLimitDrawer"
+      @saved="handleUpdateFamilyLimitSaved" />
   </BaseCrudDrawer>
-
 
 </template>
 <script setup lang="ts">
@@ -120,9 +120,8 @@ const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.
 
 const showEditDrawer = ref(false);
 const showUpdateFamilyLimitDrawer = ref(false); // NEW
-const updateFamilyLimitFamilyId = ref(''); // NEW
 
-const handleOpenEditDrawer = (_id: string) => {
+const handleOpenEditDrawer = () => {
   showEditDrawer.value = true;
 };
 
@@ -130,14 +129,12 @@ const handleCloseEditDrawer = () => {
   showEditDrawer.value = false;
 };
 
-const handleOpenUpdateFamilyLimitDrawer = (id: string) => { // NEW
-  updateFamilyLimitFamilyId.value = id;
+const handleOpenUpdateFamilyLimitDrawer = () => { // NEW
   showUpdateFamilyLimitDrawer.value = true;
 };
 
 const handleCloseUpdateFamilyLimitDrawer = () => { // NEW
   showUpdateFamilyLimitDrawer.value = false;
-  updateFamilyLimitFamilyId.value = '';
 };
 
 const handleFamilySaved = () => {

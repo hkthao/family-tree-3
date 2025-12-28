@@ -34,8 +34,6 @@ const props = defineProps<{
   isSaving: boolean;
 }>();
 
-const emit = defineEmits(['update:familyLimitData', 'save']);
-
 const formRef = ref<VForm | null>(null);
 
 const internalFamilyLimitData = reactive<FamilyLimitConfiguration>({ ...props.familyLimitData });
@@ -44,13 +42,6 @@ watch(() => props.familyLimitData, (newVal) => {
   Object.assign(internalFamilyLimitData, newVal);
 }, { deep: true });
 
-const handleSave = async () => {
-  const { valid } = await formRef.value!.validate();
-  if (valid) {
-    emit('save', internalFamilyLimitData);
-  }
-};
-
 const validate = async () => {
   const { valid } = await formRef.value!.validate();
   return valid;
@@ -58,7 +49,7 @@ const validate = async () => {
 
 defineExpose({
   validate,
-  handleSave, // Expose handleSave to be called by parent
+  formData: internalFamilyLimitData, // Expose internalFamilyLimitData for parent access
 });
 </script>
 

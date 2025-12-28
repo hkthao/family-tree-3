@@ -81,6 +81,7 @@ export interface FamilyLimitConfiguration {
 }
 
 export interface UpdateFamilyLimitConfigurationDto {
+  familyId: string;
   maxMembers: number;
   maxStorageMb: number;
   aiChatMonthlyLimit: number;
