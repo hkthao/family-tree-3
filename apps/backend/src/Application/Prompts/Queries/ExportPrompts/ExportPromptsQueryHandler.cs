@@ -1,8 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using backend.Application.Prompts.DTOs;
 using AutoMapper; // Added
@@ -14,14 +12,14 @@ public class ExportPromptsQueryHandler : IRequestHandler<ExportPromptsQuery, Res
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<ExportPromptsQueryHandler> _logger;
-    private readonly IMapper _mapper; // Added
+    private readonly IMapper _mapper;
 
-    public ExportPromptsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportPromptsQueryHandler> logger, IMapper mapper) // Added IMapper
+    public ExportPromptsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportPromptsQueryHandler> logger, IMapper mapper)
     {
         _context = context;
         _authorizationService = authorizationService;
         _logger = logger;
-        _mapper = mapper; // Assigned
+        _mapper = mapper;
     }
 
     public async Task<Result<List<PromptDto>>> Handle(ExportPromptsQuery request, CancellationToken cancellationToken)

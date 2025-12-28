@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
 using backend.Application.Prompts.DTOs; // Added
 
 namespace backend.Application.Prompts.Commands.ImportPrompts;

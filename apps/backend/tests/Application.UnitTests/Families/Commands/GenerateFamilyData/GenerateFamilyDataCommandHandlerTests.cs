@@ -5,7 +5,6 @@ using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
-using backend.Application.Families.Queries;
 using backend.Application.FamilyLocations; // NEW
 using backend.Application.Members.Queries;
 using backend.Application.Prompts.DTOs; // ADDED: Missing using directive

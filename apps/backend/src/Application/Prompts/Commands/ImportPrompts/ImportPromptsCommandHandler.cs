@@ -2,11 +2,12 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using MediatR;
+using MediatR; // Added
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using backend.Application.Prompts.DTOs;
 using AutoMapper; // Added
+using System.Linq; // Added
 
 namespace backend.Application.Prompts.Commands.ImportPrompts;
 
@@ -15,14 +16,14 @@ public class ImportPromptsCommandHandler : IRequestHandler<ImportPromptsCommand,
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<ImportPromptsCommandHandler> _logger;
-    private readonly IMapper _mapper; // Added
+    private readonly IMapper _mapper;
 
-    public ImportPromptsCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ImportPromptsCommandHandler> logger, IMapper mapper) // Added IMapper
+    public ImportPromptsCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ImportPromptsCommandHandler> logger, IMapper mapper)
     {
         _context = context;
         _authorizationService = authorizationService;
         _logger = logger;
-        _mapper = mapper; // Assigned
+        _mapper = mapper;
     }
 
     public async Task<Result<List<PromptDto>>> Handle(ImportPromptsCommand request, CancellationToken cancellationToken)
@@ -32,6 +33,12 @@ public class ImportPromptsCommandHandler : IRequestHandler<ImportPromptsCommand,
         {
             _logger.LogWarning("Người dùng không có quyền cố gắng nhập prompts.");
             return Result<List<PromptDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
+        // Handle empty import list explicitly
+        if (request.Prompts == null || !request.Prompts.Any())
+        {
+            return Result<List<PromptDto>>.Success(new List<PromptDto>());
         }
 
         var importedPrompts = new List<Prompt>();

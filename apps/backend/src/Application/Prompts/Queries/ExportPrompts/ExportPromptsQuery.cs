@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Models; // Added
 using backend.Application.Prompts.DTOs; // Added
 

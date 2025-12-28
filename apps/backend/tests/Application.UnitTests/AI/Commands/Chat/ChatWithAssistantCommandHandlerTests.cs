@@ -1,4 +1,3 @@
-using System.Net.Http; // Add this
 using backend.Application.AI.Chat;
 using backend.Application.AI.Commands.Chat.CallAiChatService;
 using backend.Application.AI.Commands.DetermineChatContext;
