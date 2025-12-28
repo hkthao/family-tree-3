@@ -3,5 +3,6 @@
 import type { Prompt, AddPromptDto, UpdatePromptDto } from '@/types/prompt';
 import type { ICrudService } from '../common/crud.service.interface';
 export interface IPromptService extends ICrudService<Prompt, AddPromptDto, UpdatePromptDto> {
-  
+  exportPrompts(): Promise<Result<Prompt[], ApiError>>;
+  importPrompts(prompts: AddPromptDto[]): Promise<Result<Prompt[], ApiError>>;
 }

@@ -9,4 +9,12 @@ export class ApiPromptService extends ApiCrudService<Prompt, AddPromptDto, Updat
   constructor(protected http: ApiClientMethods) {
     super(http, '/prompts');
   }
+
+  async exportPrompts(): Promise<Result<Prompt[], ApiError>> {
+    return this.http.get<Prompt[]>('/prompts');
+  }
+
+  async importPrompts(prompts: AddPromptDto[]): Promise<Result<Prompt[], ApiError>> {
+    return this.http.post<Prompt[], AddPromptDto[]>('/prompts/import', prompts);
+  }
 }

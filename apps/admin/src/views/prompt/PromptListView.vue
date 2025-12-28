@@ -1,9 +1,65 @@
 <template>
   <div data-testid="prompt-list-view">
     <PromptList :items="items" :total-items="totalItems" :loading="loading"
-      :items-per-page="(listOptions.itemsPerPage as number)" :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer">
+      :items-per-page="(listOptions.itemsPerPage as number)" :search="searchQuery" @update:search="handleSearchUpdate"
+      @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
+      @create="openAddDrawer">
+      <template #top>
+        <ListToolbar
+          :title="t('prompt.list.title')"
+          :create-button-tooltip="t('prompt.management.addPrompt')"
+          create-button-test-id="add-new-prompt-button"
+          :hide-create-button="!canPerformActions"
+          :search-query="searchQuery"
+          :search-label="t('common.search')"
+          @create="openAddDrawer"
+          @update:search="handleSearchUpdate"
+        >
+          <template #custom-buttons>
+            <!-- Export Button -->
+            <v-btn color="secondary" class="mr-2" :loading="isExporting" :disabled="!canPerformActions" @click="exportPrompts" icon>
+              <v-tooltip :text="t('common.export')">
+                <template v-slot:activator="{ props }">
+                  <v-icon v-bind="props">mdi-export</v-icon>
+                </template>
+              </v-tooltip>
+            </v-btn>
+            <!-- Import Button -->
+            <v-btn color="secondary" class="mr-2" :loading="isImporting" :disabled="!canPerformActions" @click="importDialog = true" icon>
+              <v-tooltip :text="t('common.import')">
+                <template v-slot:activator="{ props }">
+                  <v-icon v-bind="props">mdi-import</v-icon>
+                </template>
+              </v-tooltip>
+            </v-btn>
+          </template>
+        </ListToolbar>
+      </template>
     </PromptList>
+
+    <!-- Import Dialog -->
+    <v-dialog v-model="importDialog" max-width="500px">
+      <v-card>
+        <v-card-title>{{ t('prompt.import.title') }}</v-card-title>
+        <v-card-text>
+          <v-file-input v-model="importedFile" :label="t('prompt.import.selectFile')" accept=".json"
+            prepend-icon="mdi-paperclip" @change="handleFileChange"></v-file-input>
+          <v-alert v-if="importedFile && importedFile.type !== 'application/json'" type="warning" class="mt-2">
+            {{ t('prompt.import.invalidFileType') }}
+          </v-alert>
+          <v-alert v-if="importedFile && importedFile.size > 1024 * 1024 * 5" type="warning" class="mt-2">
+            {{ t('prompt.import.fileTooLarge') }}
+          </v-alert>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey" @click="importDialog = false">{{ t('common.cancel') }}</v-btn>
+          <v-btn color="primary" :loading="isImporting" :disabled="!importedFile || importedFile.type !== 'application/json' || importedFile.size > 1024 * 1024 * 5" @click="triggerImport">
+            {{ t('common.import') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-alert v-if="listError" type="error" dismissible class="mt-4">
       {{ listError?.message || t('prompt.list.loadError') }}
@@ -36,11 +92,13 @@ import type { Prompt } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, reactive, computed } from 'vue';
 import { usePromptsQuery, useDeletePromptMutation } from '@/composables';
+import { usePromptImportExport } from '@/composables/prompt/usePromptImportExport';
 import type { PromptListOptions } from '@/composables';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import PromptAddView from './PromptAddView.vue';
 import PromptEditView from './PromptEditView.vue';
 import PromptDetailView from './PromptDetailView.vue';
+import ListToolbar from '@/components/common/ListToolbar.vue';
 
 const { t } = useI18n();
 
@@ -53,8 +111,44 @@ const listOptions = reactive<PromptListOptions>({
   searchQuery: searchQuery.value,
 });
 
-const { state: { prompts: promptsData, totalItems, isLoading: isListLoading, error: listError } } = usePromptsQuery(listOptions);
+const { state: { prompts: promptsData, totalItems, isLoading: isListLoading, error: listError }, actions: { refetch: refetchPrompts } } = usePromptsQuery(listOptions);
 const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt } } = useDeletePromptMutation();
+const { isExporting, isImporting, exportPrompts, importPrompts } = usePromptImportExport();
+
+const importDialog = ref(false);
+const importedFile = ref<File | null>(null);
+
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    importedFile.value = target.files[0];
+  } else {
+    importedFile.value = null;
+  }
+};
+
+const triggerImport = async () => {
+  if (!importedFile.value) {
+    showSnackbar(t('prompt.messages.noFileSelected'), 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const jsonContent = JSON.parse(e.target?.result as string);
+      const success = await importPrompts(jsonContent);
+      if (success) {
+        importDialog.value = false;
+        importedFile.value = null;
+        refetchPrompts(); // Refresh the list after successful import
+      }
+    } catch (error: any) {
+      showSnackbar(error.message || t('prompt.messages.invalidJson'), 'error');
+    }
+  };
+  reader.readAsText(importedFile.value);
+};
 
 const items = computed(() => promptsData.value || []);
 
@@ -76,6 +170,11 @@ const {
 
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
+
+import { useAuth } from '@/composables';
+const { state: authState } = useAuth();
+
+const canPerformActions = computed(() => authState.isAdmin.value);
 
 const handleSearchUpdate = (search: string) => {
   searchQuery.value = search;
