@@ -5,16 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.Queries.SearchPublicFamilies;
 
-public class SearchPublicFamiliesQueryHandler : IRequestHandler<SearchPublicFamiliesQuery, Result<PaginatedList<FamilyDto>>>
+public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<SearchPublicFamiliesQuery, Result<PaginatedList<FamilyDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchPublicFamiliesQuery request, CancellationToken cancellationToken)
     {
@@ -28,8 +23,23 @@ public class SearchPublicFamiliesQueryHandler : IRequestHandler<SearchPublicFami
             query = query.Where(f => f.Name.Contains(searchQuery) || (f.Description != null && f.Description.Contains(searchQuery)));
         }
 
-        var paginatedList = await PaginatedList<Family>.CreateAsync(query, request.Page, request.ItemsPerPage);
+        var paginatedFamilyEntities = await PaginatedList<Family>.CreateAsync(query, request.Page, request.ItemsPerPage);
 
-        return Result<PaginatedList<FamilyDto>>.Success(_mapper.Map<PaginatedList<FamilyDto>>(paginatedList));
+        var familyDtos = _mapper.Map<List<FamilyDto>>(paginatedFamilyEntities.Items);
+
+        var filteredFamilyDtos = new List<FamilyDto>();
+        foreach (var familyDto in familyDtos)
+        {
+            filteredFamilyDtos.Add(await _privacyService.ApplyPrivacyFilter(familyDto, familyDto.Id, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<FamilyDto>(
+            filteredFamilyDtos,
+            paginatedFamilyEntities.TotalItems,
+            paginatedFamilyEntities.Page,
+            paginatedFamilyEntities.TotalPages
+        );
+
+        return Result<PaginatedList<FamilyDto>>.Success(filteredPaginatedList);
     }
 }

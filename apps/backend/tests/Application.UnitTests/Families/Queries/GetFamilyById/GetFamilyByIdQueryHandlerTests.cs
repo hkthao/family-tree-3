@@ -1,16 +1,31 @@
+using Moq;
 using backend.Application.Common.Constants;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Families.Queries; // For FamilyDto
+using backend.Application.Families.Dtos; // For FamilyUserDto
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
 public class GetFamilyByIdQueryHandlerTests : TestBase
 {
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
+
     public GetFamilyByIdQueryHandlerTests()
     {
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyDetailDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyDetailDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
         // TestBase already sets up _mockUser and _mockAuthorizationService
         // Set default authenticated user for specific scenarios if needed
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
@@ -34,7 +49,7 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetFamilyByIdQuery(testFamily.Id);
-        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -56,7 +71,7 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetFamilyByIdQuery(Guid.NewGuid());
-        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -80,7 +95,7 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Simulate admin user
 
-        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         var testFamily = new Family { Id = Guid.NewGuid(), Name = "Admin Family", Code = "ADM1", CreatedBy = Guid.NewGuid().ToString(), Visibility = "Private" };
         _context.Families.Add(testFamily);
@@ -110,7 +125,7 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         _mockUser.Setup(c => c.IsAuthenticated).Returns(false);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
 
-        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamilyByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         var privateFamily = new Family { Id = Guid.NewGuid(), Name = "Private Family", Code = "PVT1", CreatedBy = Guid.NewGuid().ToString(), Visibility = "Private" };
         _context.Families.Add(privateFamily);

@@ -7,6 +7,8 @@ using backend.Application.Members.Queries.GetMemberById; // For MemberDetailDto
 using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
+using backend.Application.Families.Queries; // For FamilyDto
+using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -290,5 +292,79 @@ public class PrivacyService : IPrivacyService
         };
 
         return FilterDto(eventDetailDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<FamilyDto> ApplyPrivacyFilter(FamilyDto familyDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return familyDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Created,
+            PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
+            PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
+            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy
+        };
+
+        return FilterDto(familyDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<FamilyDto>> ApplyPrivacyFilter(List<FamilyDto> familyDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<FamilyDto>();
+        foreach (var familyDto in familyDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(familyDto, familyId, cancellationToken));
+        }
+        return filteredList;
+    }
+
+    public async Task<FamilyDetailDto> ApplyPrivacyFilter(FamilyDetailDto familyDetailDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return familyDetailDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDetailDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Created,
+            PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
+            PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
+            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy
+        };
+
+        return FilterDto(familyDetailDto, publicProperties, alwaysIncludeProps);
     }
 }

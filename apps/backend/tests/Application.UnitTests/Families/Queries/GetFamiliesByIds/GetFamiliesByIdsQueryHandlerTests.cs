@@ -1,16 +1,28 @@
+using Moq;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Families.Queries; // For FamilyDto
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamiliesByIds;
 
 public class GetFamiliesByIdsQueryHandlerTests : TestBase
 {
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
+
     public GetFamiliesByIdsQueryHandlerTests()
     {
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
         // Set up authenticated user by default for most tests
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
@@ -37,7 +49,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         _context.Families.AddRange(family1, family2, family3);
         await _context.SaveChangesAsync();
 
-        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new GetFamiliesByIdsQuery(new List<Guid> { family1.Id, family3.Id });
 
         // Act
@@ -60,7 +72,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new GetFamiliesByIdsQuery(new List<Guid>());
 
         // Act
@@ -81,7 +93,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new GetFamiliesByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
 
         // Act
@@ -107,7 +119,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Simulate admin user
 
-        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 1", Code = "ADM1", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Private.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 2", Code = "ADM2", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Public.ToString() };
@@ -140,7 +152,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         _mockUser.Setup(c => c.IsAuthenticated).Returns(false);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
 
-        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetFamiliesByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Private Family 1", Code = "PVT1", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Private.ToString() };
         _context.Families.Add(family1);

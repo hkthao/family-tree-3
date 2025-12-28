@@ -11,6 +11,9 @@ public class PrivacyConfiguration : BaseAuditableEntity
     // Stores a comma-separated string of public event property names
     public string PublicEventProperties { get; private set; } = "";
 
+    // Stores a comma-separated string of public family property names
+    public string PublicFamilyProperties { get; private set; } = "";
+
     public PrivacyConfiguration(Guid familyId)
     {
         FamilyId = familyId;
@@ -34,5 +37,15 @@ public class PrivacyConfiguration : BaseAuditableEntity
     public List<string> GetPublicEventPropertiesList()
     {
         return PublicEventProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    public void UpdatePublicFamilyProperties(List<string> publicFamilyProperties)
+    {
+        PublicFamilyProperties = string.Join(",", publicFamilyProperties.OrderBy(p => p));
+    }
+
+    public List<string> GetPublicFamilyPropertiesList()
+    {
+        return PublicFamilyProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 }

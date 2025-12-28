@@ -1,8 +1,10 @@
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
-using backend.Application.Members.Queries.GetMembers; // For MemberDetailDto
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
+using backend.Application.Families.Queries; // For FamilyDto
+using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 
 namespace backend.Application.Common.Interfaces;
 
@@ -87,4 +89,34 @@ public interface IPrivacyService
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>EventDetailDto đã được lọc.</returns>
     Task<EventDetailDto> ApplyPrivacyFilter(EventDetailDto eventDetailDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của FamilyDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="familyDto">FamilyDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>FamilyDto đã được lọc.</returns>
+    Task<FamilyDto> ApplyPrivacyFilter(FamilyDto familyDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc danh sách các FamilyDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="familyDtos">Danh sách FamilyDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách FamilyDto đã được lọc.</returns>
+    Task<List<FamilyDto>> ApplyPrivacyFilter(List<FamilyDto> familyDtos, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của FamilyDetailDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="familyDetailDto">FamilyDetailDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>FamilyDetailDto đã được lọc.</returns>
+    Task<FamilyDetailDto> ApplyPrivacyFilter(FamilyDetailDto familyDetailDto, Guid familyId, CancellationToken cancellationToken);
 }

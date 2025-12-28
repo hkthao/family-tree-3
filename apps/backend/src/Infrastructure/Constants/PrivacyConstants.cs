@@ -166,4 +166,66 @@ public static class PrivacyConstants
             AlwaysIncludeEventProps.LastModifiedBy
         };
     }
+
+    // Common Family Properties
+    public static class FamilyProps
+    {
+        public const string Name = "Name";
+        public const string Code = "Code";
+        public const string Description = "Description";
+        public const string Address = "Address";
+        public const string TotalMembers = "TotalMembers";
+        public const string TotalGenerations = "TotalGenerations";
+        public const string Visibility = "Visibility";
+        public const string AvatarUrl = "AvatarUrl";
+        public const string FamilyUsers = "FamilyUsers"; // Contains sensitive data like UserId, Email, Role
+        public const string ManagerIds = "ManagerIds";
+        public const string ViewerIds = "ViewerIds";
+        public const string FamilyLimitConfiguration = "FamilyLimitConfiguration"; // Contains sensitive data like AI quotas
+    }
+
+    // Always Included Family Properties
+    public static class AlwaysIncludeFamilyProps
+    {
+        public const string Id = "Id";
+
+        // Auditable properties
+        public const string Created = "Created";
+        public const string CreatedBy = "CreatedBy";
+        public const string LastModified = "LastModified";
+        public const string LastModifiedBy = "LastModifiedBy";
+    }
+
+    public static class DefaultPublicFamilyProperties
+    {
+        public static readonly List<string> FamilyDto = new List<string>
+        {
+            FamilyProps.Name,
+            FamilyProps.Code,
+            FamilyProps.Description,
+            FamilyProps.Address,
+            FamilyProps.TotalMembers,
+            FamilyProps.TotalGenerations,
+            FamilyProps.Visibility,
+            FamilyProps.AvatarUrl,
+        };
+
+        public static readonly List<string> FamilyDetailDto = new List<string>
+        {
+            FamilyProps.Name,
+            FamilyProps.Code,
+            FamilyProps.Description,
+            FamilyProps.Address,
+            FamilyProps.AvatarUrl,
+            FamilyProps.Visibility,
+            FamilyProps.TotalMembers,
+            FamilyProps.TotalGenerations,
+            // FamilyUsers and FamilyLimitConfiguration should generally be private or handled separately
+            // as they contain more granular sensitive data.
+            AlwaysIncludeFamilyProps.Created,
+            AlwaysIncludeFamilyProps.CreatedBy,
+            AlwaysIncludeFamilyProps.LastModified,
+            AlwaysIncludeFamilyProps.LastModifiedBy
+        };
+    }
 }
