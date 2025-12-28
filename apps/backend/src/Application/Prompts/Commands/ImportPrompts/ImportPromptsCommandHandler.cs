@@ -2,12 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using MediatR; // Added
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using backend.Application.Prompts.DTOs;
-using AutoMapper; // Added
-using System.Linq; // Added
 
 namespace backend.Application.Prompts.Commands.ImportPrompts;
 

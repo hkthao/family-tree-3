@@ -6,6 +6,8 @@ using backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 using backend.Application.MemoryItems.DTOs;
 using backend.Application.MemoryItems.Queries.GetMemoryItemDetail;
 using backend.Application.MemoryItems.Queries.SearchMemoryItems;
+using backend.Application.MemoryItems.Queries.ExportMemoryItems; // New using
+using backend.Application.MemoryItems.Commands.ImportMemoryItems; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -76,5 +78,33 @@ public class MemoryItemsController : ControllerBase
     {
         var result = await _mediator.Send(query);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Xuất tất cả các kỷ vật cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách kỷ vật.</returns>
+    [HttpGet("export")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportMemoryItems([FromQuery] Guid familyId)
+    {
+        var result = await _mediator.Send(new ExportMemoryItemsQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách kỷ vật cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="command">Lệnh nhập kỷ vật với thông tin chi tiết.</param>
+    /// <returns>Danh sách kỷ vật vừa được nhập.</returns>
+    [HttpPost("import")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportMemoryItems([FromBody] ImportMemoryItemsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }

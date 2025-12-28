@@ -1,12 +1,8 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MediatR;
-using AutoMapper.QueryableExtensions;
 
 namespace backend.Application.MemberFaces.Queries.ExportMemberFaces;
 

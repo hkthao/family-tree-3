@@ -1,6 +1,5 @@
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
-using MediatR;
 
 namespace backend.Application.MemberFaces.Queries.ExportMemberFaces;
 

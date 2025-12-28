@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using backend.Application.Prompts.DTOs;
-using AutoMapper; // Added
 
 namespace backend.Application.Prompts.Queries.ExportPrompts;
 
