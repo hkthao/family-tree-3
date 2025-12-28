@@ -1,23 +1,49 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy"
     :headers="headers" :items="items" :items-length="totalItems" :loading="loading" class="elevation-0"
-    item-value="id" @update:options="handleUpdateOptions">
+    item-value="id" @update:options="props.readOnly ? null : handleUpdateOptions($event)">
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title>{{ t('memberFace.list.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn v-if="!props.readOnly" color="primary" icon @click="emit('create')"
-          data-testid="create-member-face-button">
-          <v-tooltip :text="t('common.create')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-plus</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify"
-          single-line hide-details clearable class="mr-2"
-          data-test-id="member-face-list-search-input"></v-text-field>
-      </v-toolbar>
+      <ListToolbar
+        :title="t('memberFace.list.title')"
+        :search-query="searchQuery"
+        @update:search="debouncedSearch = $event"
+        :create-button-tooltip="t('common.create')"
+        create-button-test-id="create-member-face-button"
+        :hide-create-button="props.readOnly"
+      >
+        <template #custom-buttons>
+          <v-btn
+            v-if="props.canPerformActions && !props.readOnly"
+            color="primary"
+            icon
+            @click="props.onExport()"
+            data-testid="export-member-face-button"
+            :aria-label="t('common.export')"
+            :loading="props.isExporting"
+          >
+            <v-tooltip :text="t('common.export')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-export</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <v-btn
+            v-if="props.canPerformActions && !props.readOnly"
+            color="primary"
+            icon
+            @click="props.onImportClick()"
+            data-testid="import-member-face-button"
+            :aria-label="t('common.import')"
+            :loading="props.isImporting"
+          >
+            <v-tooltip :text="t('common.import')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-import</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </ListToolbar>
     </template>
     <template v-slot:item.thumbnail="{ item }">
       <div class="d-flex justify-center align-center" style="height: 100%;">
@@ -63,34 +89,40 @@ import { useI18n } from 'vue-i18n';
 import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
 import FamilyName from '@/components/common/FamilyName.vue';
+import ListToolbar from '@/components/common/ListToolbar.vue';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { DataTableHeader } from 'vuetify'; // NEW
+import type { DataTableHeader } from 'vuetify';
 
 interface MemberFaceListProps {
   items: MemberFace[];
   totalItems: number;
   loading: boolean;
-  search?: string; // NEW
-  readOnly?: boolean; // NEW
+  search?: string;
+  readOnly?: boolean;
+  isExporting: boolean;
+  isImporting: boolean;
+  canPerformActions: boolean;
+  onExport: () => void; // Added
+  onImportClick: () => void; // Added
 }
 
 const props = defineProps<MemberFaceListProps>();
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'ai-create', 'update:search']); // NEW emits
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 'ai-create', 'update:search']);
 
 const { t } = useI18n();
 
 const page = ref(1);
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE); // Use constant
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const sortBy = ref<any[]>([]);
 
-const searchQuery = ref(props.search); // NEW
-let debounceTimer: ReturnType<typeof setTimeout>; // NEW
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
 
-const debouncedSearch = computed({ // NEW
+const debouncedSearch = computed({
   get() {
     return searchQuery.value;
   },
-  set(newValue: string) {
+  set(newValue: string | undefined) { // Allow undefined for clearable
     searchQuery.value = newValue;
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
@@ -99,7 +131,7 @@ const debouncedSearch = computed({ // NEW
   },
 });
 
-watch(() => props.search, (newSearch) => { // NEW
+watch(() => props.search, (newSearch) => {
   if (newSearch !== searchQuery.value) {
     searchQuery.value = newSearch;
   }
@@ -114,17 +146,17 @@ const headers = computed<DataTableHeader[]>(() => [
 ]);
 
 
-watch([page, itemsPerPage, sortBy, debouncedSearch], () => { // ADD debouncedSearch
+watch([page, itemsPerPage, sortBy, searchQuery], () => { // Watch searchQuery
   emit('update:options', {
     page: page.value,
     itemsPerPage: itemsPerPage.value,
     sortBy: sortBy.value,
-    search: debouncedSearch.value, // Pass search query
+    search: searchQuery.value, // Pass search query
   });
 }, { deep: true });
 
 
-const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; search?: string; }) => { // Update interface
+const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; search?: string; }) => {
   page.value = options.page;
   itemsPerPage.value = options.itemsPerPage;
   sortBy.value = options.sortBy;

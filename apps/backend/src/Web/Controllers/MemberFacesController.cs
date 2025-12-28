@@ -102,12 +102,16 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
     /// </summary>
     /// <param name="familyId">ID của gia đình.</param>
     /// <returns>Danh sách khuôn mặt thành viên.</returns>
-    [HttpGet("export/{familyId}")]
+    [HttpGet("export")] // Changed route
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ExportMemberFaces(Guid familyId)
+    public async Task<IActionResult> ExportMemberFaces([FromQuery] Guid? familyId) // Changed to FromQuery and optional
     {
-        var result = await _mediator.Send(new ExportMemberFacesQuery(familyId));
+        if (!familyId.HasValue)
+        {
+            return BadRequest(Result.Failure("familyId is required for export if not provided in the route.", ErrorSources.Validation));
+        }
+        var result = await _mediator.Send(new ExportMemberFacesQuery(familyId.Value));
         return result.ToActionResult(this, _logger);
     }
 
@@ -117,16 +121,12 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
     /// <param name="familyId">ID của gia đình.</param>
     /// <param name="command">Lệnh nhập khuôn mặt thành viên với thông tin chi tiết.</param>
     /// <returns>Danh sách khuôn mặt thành viên vừa được nhập.</returns>
-    [HttpPost("import/{familyId}")]
+    [HttpPost("import")] // Changed route
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ImportMemberFaces(Guid familyId, [FromBody] ImportMemberFacesCommand command)
+    public async Task<IActionResult> ImportMemberFaces([FromBody] ImportMemberFacesCommand command) // Removed familyId from path
     {
-        if (familyId != command.FamilyId)
-        {
-            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyIdInUrl}) and request body ({FamilyIdInBody}) for ImportMemberFacesCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
-            return BadRequest(Result.Failure("FamilyId trong URL và FamilyId trong body không khớp."));
-        }
+        // Validation check for familyId is now done within the command handler or implicitly by model binding
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201);
     }

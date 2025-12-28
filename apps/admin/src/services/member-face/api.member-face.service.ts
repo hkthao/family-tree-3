@@ -32,4 +32,18 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
       },
     });
   }
+
+  async exportMemberFaces(memberId?: string, familyId?: string): Promise<Result<string, ApiError>> {
+    const params: Record<string, string> = {};
+    if (memberId) params.memberId = memberId;
+    if (familyId) params.familyId = familyId;
+    return await this.http.get<string>(`${this.baseUrl}/export`, { params });
+  }
+
+  async importMemberFaces(memberId: string | undefined, familyId: string | undefined, data: any): Promise<Result<null, ApiError>> {
+    const params: Record<string, string> = {};
+    if (memberId) params.memberId = memberId;
+    if (familyId) params.familyId = familyId;
+    return await this.http.post<null>(`${this.baseUrl}/import`, data, { params });
+  }
 }
