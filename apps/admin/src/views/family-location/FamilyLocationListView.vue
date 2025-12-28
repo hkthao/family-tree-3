@@ -115,7 +115,7 @@ const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
 // Import/Export functionality
-const { isExporting, isImporting, exportFamilyLocations, importFamilyLocations } = useFamilyLocationImportExport(props.familyId);
+const { isExporting, isImporting, exportFamilyLocations, importFamilyLocations } = useFamilyLocationImportExport(toRef(props, 'familyId'));
 const importDialog = ref(false);
 
 const triggerImport = async (file: File) => { // Modified to accept file directly

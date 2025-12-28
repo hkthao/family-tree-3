@@ -1,5 +1,5 @@
 import type {
-  FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto,
+  FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto, Result, ApiError,
 } from '@/types';
 import type { ICrudService } from '@/services/common/crud.service.interface'; // Updated import
 

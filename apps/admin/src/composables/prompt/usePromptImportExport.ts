@@ -4,8 +4,7 @@ import { ref, computed } from 'vue';
 import { useServices } from '@/plugins/services.plugin';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
-import type { Prompt, AddPromptDto } from '@/types/prompt';
-import type { ApiError } from '@/types/api';
+import type { AddPromptDto, Result, ApiError } from '@/types';
 
 export function usePromptImportExport() {
   const { t } = useI18n();

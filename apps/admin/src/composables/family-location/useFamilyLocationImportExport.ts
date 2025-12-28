@@ -1,11 +1,10 @@
-import { ref, computed } from 'vue';
+import { ref, computed, toValue, type Ref } from 'vue';
 import { useServices } from '@/plugins/services.plugin';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
-import type { FamilyLocationDto } from '@/types/familyLocation';
-import type { ApiError } from '@/types/api';
+import type { ApiError } from '@/types';
 
-export function useFamilyLocationImportExport(familyId: string) {
+export function useFamilyLocationImportExport(familyIdRef: Ref<string>) {
   const { t } = useI18n();
   const { familyLocation: familyLocationService } = useServices();
   const { showSnackbar } = useGlobalSnackbar();
@@ -16,6 +15,11 @@ export function useFamilyLocationImportExport(familyId: string) {
   const importError = ref<ApiError | null>(null);
 
   const exportFamilyLocations = async () => {
+    const familyId = toValue(familyIdRef); // Access the value of the ref
+    if (!familyId) {
+        showSnackbar(t('familyLocation.messages.noFamilyIdProvided'), 'error'); // NEW: Specific error message
+        return;
+    }
     isExporting.value = true;
     exportError.value = null;
     try {
@@ -46,6 +50,11 @@ export function useFamilyLocationImportExport(familyId: string) {
   };
 
   const importFamilyLocations = async (locations: any[]) => { // Use any for now, will map to DTO later
+    const familyId = toValue(familyIdRef); // Access the value of the ref
+    if (!familyId) {
+        showSnackbar(t('familyLocation.messages.noFamilyIdProvided'), 'error'); // NEW: Specific error message
+        return false;
+    }
     isImporting.value = true;
     importError.value = null;
     try {

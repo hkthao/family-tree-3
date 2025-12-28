@@ -23,7 +23,7 @@
         <v-btn
           color="primary"
           :loading="loading"
-          :disabled="disabled || !internalFile || internalFile.type !== 'application/json' || (maxFileSize && internalFile.size > maxFileSize)"
+          :disabled="!!(disabled || !internalFile || (internalFile && internalFile.type !== 'application/json') || (maxFileSize && internalFile && internalFile.size > maxFileSize))"
           @click="emit('import', internalFile)"
         >
           {{ $t('common.import') }}
