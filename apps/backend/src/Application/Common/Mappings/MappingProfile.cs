@@ -15,6 +15,7 @@ using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLocations; // Added for FamilyLocationDto and FamilyLocationListDto
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation; // Added for CreateFamilyLocationCommand
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation; // Added for UpdateFamilyLocationCommand
+using backend.Application.FamilyLocations.Commands.ImportFamilyLocations; // Added
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
@@ -151,9 +152,9 @@ public class MappingProfile : Profile
 
         // FamilyLocation mappings
         CreateMap<FamilyLocation, FamilyLocationDto>();
-        CreateMap<FamilyLocation, FamilyLocationDto>();
         CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
         CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
+        CreateMap<ImportFamilyLocationItemDto, FamilyLocation>(); // Added
 
         // MemoryItem mappings
         CreateMap<MemoryItem, MemoryItemDto>()

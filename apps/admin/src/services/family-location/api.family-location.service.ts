@@ -7,5 +7,12 @@ export class ApiFamilyLocationService extends ApiCrudService<FamilyLocation, Add
   constructor(apiClient: ApiClientMethods) {
     super(apiClient, 'family-locations');
   }
-  // Implement other specific methods here if any
+
+  async exportFamilyLocations(familyId: string): Promise<Result<FamilyLocation[], ApiError>> {
+    return this.apiClient.get<FamilyLocation[]>(`${this.basePath}/export/${familyId}`);
+  }
+
+  async importFamilyLocations(familyId: string, locations: FamilyLocation[]): Promise<Result<FamilyLocation[], ApiError>> {
+    return this.apiClient.post<FamilyLocation[]>(`${this.basePath}/import/${familyId}`, locations);
+  }
 }

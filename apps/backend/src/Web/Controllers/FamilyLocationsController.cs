@@ -3,8 +3,10 @@ using backend.Application.Common.Models;
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
 using backend.Application.FamilyLocations.Commands.DeleteFamilyLocation;
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
+using backend.Application.FamilyLocations.Commands.ImportFamilyLocations;
 using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
+using backend.Application.FamilyLocations.Queries.ExportFamilyLocations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -96,5 +98,39 @@ public class FamilyLocationsController(IMediator mediator, ILogger<FamilyLocatio
     {
         var result = await _mediator.Send(new DeleteFamilyLocationCommand(id));
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Xuất tất cả FamilyLocation cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách FamilyLocation.</returns>
+    [HttpGet("export/{familyId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportFamilyLocations(Guid familyId)
+    {
+        var result = await _mediator.Send(new ExportFamilyLocationsQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách FamilyLocation cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="command">Lệnh nhập FamilyLocation với thông tin chi tiết.</param>
+    /// <returns>Danh sách FamilyLocation vừa được nhập.</returns>
+    [HttpPost("import/{familyId}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportFamilyLocations(Guid familyId, [FromBody] ImportFamilyLocationsCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyIdInUrl}) and request body ({FamilyIdInBody}) for ImportFamilyLocationsCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest(Result.Failure("FamilyId trong URL và FamilyId trong body không khớp."));
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }

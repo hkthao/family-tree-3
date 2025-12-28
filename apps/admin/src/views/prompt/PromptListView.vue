@@ -38,28 +38,15 @@
     </PromptList>
 
     <!-- Import Dialog -->
-    <v-dialog v-model="importDialog" max-width="500px">
-      <v-card>
-        <v-card-title>{{ t('prompt.import.title') }}</v-card-title>
-        <v-card-text>
-          <v-file-input v-model="importedFile" :label="t('prompt.import.selectFile')" accept=".json"
-            prepend-icon="mdi-paperclip" @change="handleFileChange"></v-file-input>
-          <v-alert v-if="importedFile && importedFile.type !== 'application/json'" type="warning" class="mt-2">
-            {{ t('prompt.import.invalidFileType') }}
-          </v-alert>
-          <v-alert v-if="importedFile && importedFile.size > 1024 * 1024 * 5" type="warning" class="mt-2">
-            {{ t('prompt.import.fileTooLarge') }}
-          </v-alert>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" @click="importDialog = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="isImporting" :disabled="!importedFile || importedFile.type !== 'application/json' || importedFile.size > 1024 * 1024 * 5" @click="triggerImport">
-            {{ t('common.import') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <BaseImportDialog
+      v-model="importDialog"
+      :title="t('prompt.import.title')"
+      :label="t('prompt.import.selectFile')"
+      :loading="isImporting"
+      :max-file-size="5 * 1024 * 1024"
+      @update:model-value="importDialog = $event"
+      @import="triggerImport"
+    />
 
     <v-alert v-if="listError" type="error" dismissible class="mt-4">
       {{ listError?.message || t('prompt.list.loadError') }}
@@ -99,6 +86,7 @@ import PromptAddView from './PromptAddView.vue';
 import PromptEditView from './PromptEditView.vue';
 import PromptDetailView from './PromptDetailView.vue';
 import ListToolbar from '@/components/common/ListToolbar.vue';
+import BaseImportDialog from '@/components/common/BaseImportDialog.vue'; // Added
 
 const { t } = useI18n();
 
@@ -116,19 +104,9 @@ const { state: { isPending: isDeletingPrompt }, actions: { deletePrompt } } = us
 const { isExporting, isImporting, exportPrompts, importPrompts } = usePromptImportExport();
 
 const importDialog = ref(false);
-const importedFile = ref<File | null>(null);
 
-const handleFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
-    importedFile.value = target.files[0];
-  } else {
-    importedFile.value = null;
-  }
-};
-
-const triggerImport = async () => {
-  if (!importedFile.value) {
+const triggerImport = async (file: File) => { // Modified to accept file directly
+  if (!file) {
     showSnackbar(t('prompt.messages.noFileSelected'), 'warning');
     return;
   }
@@ -140,14 +118,13 @@ const triggerImport = async () => {
       const success = await importPrompts(jsonContent);
       if (success) {
         importDialog.value = false;
-        importedFile.value = null;
-        refetchPrompts(); // Refresh the list after successful import
+        refetchPrompts(); // Refetch the list after successful import
       }
     } catch (error: any) {
       showSnackbar(error.message || t('prompt.messages.invalidJson'), 'error');
     }
   };
-  reader.readAsText(importedFile.value);
+  reader.readAsText(file); // Use the passed file
 };
 
 const items = computed(() => promptsData.value || []);
