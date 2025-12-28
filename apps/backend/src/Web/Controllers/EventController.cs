@@ -6,6 +6,8 @@ using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.SearchEvents;
+using backend.Application.Events.Queries.ExportEvents; // New using
+using backend.Application.Events.Commands.ImportEvents; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -142,5 +144,33 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xuất tất cả các sự kiện cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách sự kiện.</returns>
+    [HttpGet("export")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportEvents([FromQuery] Guid familyId)
+    {
+        var result = await _mediator.Send(new Application.Events.Queries.ExportEvents.ExportEventsQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách sự kiện cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="command">Lệnh nhập sự kiện với thông tin chi tiết.</param>
+    /// <returns>Danh sách sự kiện vừa được nhập.</returns>
+    [HttpPost("import")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportEvents([FromBody] Application.Events.Commands.ImportEvents.ImportEventsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }

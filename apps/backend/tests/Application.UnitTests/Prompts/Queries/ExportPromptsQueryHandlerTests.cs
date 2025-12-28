@@ -1,6 +1,4 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
-using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.ExportPrompts;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

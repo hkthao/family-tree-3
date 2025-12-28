@@ -185,5 +185,15 @@ public class MappingProfile : Profile
         CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
 
+        // Event mappings for importing
+        CreateMap<EventDto, Event>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be generated
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
+            .ForMember(dest => dest.Family, opt => opt.Ignore())
+            .ForMember(dest => dest.EventMembers, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.SolarDate, opt => opt.Ignore()) // Handled manually in handler (using SetSolarDate)
+            .ForMember(dest => dest.LunarDate, opt => opt.Ignore()); // Handled manually in handler (using SetLunarDate)
+        CreateMap<LunarDateDto, LunarDate>();
+
     }
 }

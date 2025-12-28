@@ -1,7 +1,5 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Prompts.Commands.ImportPrompts;
-using backend.Application.Prompts.DTOs;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
