@@ -11,13 +11,15 @@ public class ExportFamilyLocationsQueryHandler : IRequestHandler<ExportFamilyLoc
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<ExportFamilyLocationsQueryHandler> _logger;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public ExportFamilyLocationsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportFamilyLocationsQueryHandler> logger, IMapper mapper)
+    public ExportFamilyLocationsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportFamilyLocationsQueryHandler> logger, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _logger = logger;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<List<FamilyLocationDto>>> Handle(ExportFamilyLocationsQuery request, CancellationToken cancellationToken)
@@ -35,6 +37,12 @@ public class ExportFamilyLocationsQueryHandler : IRequestHandler<ExportFamilyLoc
             .ProjectTo<FamilyLocationDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
-        return Result<List<FamilyLocationDto>>.Success(familyLocations);
+        var filteredFamilyLocations = new List<FamilyLocationDto>();
+        foreach (var familyLocationDto in familyLocations)
+        {
+            filteredFamilyLocations.Add(await _privacyService.ApplyPrivacyFilter(familyLocationDto, request.FamilyId, cancellationToken));
+        }
+
+        return Result<List<FamilyLocationDto>>.Success(filteredFamilyLocations);
     }
 }

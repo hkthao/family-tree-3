@@ -228,4 +228,39 @@ public static class PrivacyConstants
             AlwaysIncludeFamilyProps.LastModifiedBy
         };
     }
+
+    // Common FamilyLocation Properties
+    public static class FamilyLocationProps
+    {
+        public const string Name = "Name";
+        public const string Description = "Description";
+        public const string Latitude = "Latitude";
+        public const string Longitude = "Longitude";
+        public const string Address = "Address";
+        public const string LocationType = "LocationType";
+        public const string Accuracy = "Accuracy";
+        public const string Source = "Source";
+    }
+
+    // Always Included FamilyLocation Properties
+    public static class AlwaysIncludeFamilyLocationProps
+    {
+        public const string Id = "Id";
+        public const string FamilyId = "FamilyId";
+    }
+
+    public static class DefaultPublicFamilyLocationProperties
+    {
+        public static readonly List<string> FamilyLocationDto = new List<string>
+        {
+            FamilyLocationProps.Name,
+            FamilyLocationProps.Description,
+            FamilyLocationProps.Latitude,
+            FamilyLocationProps.Longitude,
+            FamilyLocationProps.Address,
+            FamilyLocationProps.LocationType,
+            FamilyLocationProps.Accuracy,
+            FamilyLocationProps.Source
+        };
+    }
 }

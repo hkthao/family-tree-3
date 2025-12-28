@@ -9,6 +9,7 @@ using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
+using backend.Application.FamilyLocations; // For FamilyLocationDto
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -366,5 +367,44 @@ public class PrivacyService : IPrivacyService
         };
 
         return FilterDto(familyDetailDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<FamilyLocationDto> ApplyPrivacyFilter(FamilyLocationDto familyLocationDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return familyLocationDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicFamilyLocationProperties(PrivacyConstants.DefaultPublicFamilyLocationProperties.FamilyLocationDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicFamilyLocationPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeFamilyLocationProps.Id,
+            PrivacyConstants.AlwaysIncludeFamilyLocationProps.FamilyId
+        };
+
+        return FilterDto(familyLocationDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<FamilyLocationDto>> ApplyPrivacyFilter(List<FamilyLocationDto> familyLocationDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<FamilyLocationDto>();
+        foreach (var familyLocationDto in familyLocationDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(familyLocationDto, familyId, cancellationToken));
+        }
+        return filteredList;
     }
 }

@@ -6,12 +6,13 @@ namespace backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 
 public record GetFamilyLocationByIdQuery(Guid Id) : IRequest<Result<FamilyLocationDto>>;
 
-public class GetFamilyLocationByIdQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<GetFamilyLocationByIdQuery, Result<FamilyLocationDto>>
+public class GetFamilyLocationByIdQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService, IPrivacyService privacyService) : IRequestHandler<GetFamilyLocationByIdQuery, Result<FamilyLocationDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<FamilyLocationDto>> Handle(GetFamilyLocationByIdQuery request, CancellationToken cancellationToken)
     {
@@ -37,6 +38,11 @@ public class GetFamilyLocationByIdQueryHandler(IApplicationDbContext context, IM
             return Result<FamilyLocationDto>.NotFound();
         }
 
-        return Result<FamilyLocationDto>.Success(_mapper.Map<FamilyLocationDto>(entity));
+        var familyLocationDto = _mapper.Map<FamilyLocationDto>(entity);
+
+        // Apply privacy filter
+        var filteredFamilyLocationDto = await _privacyService.ApplyPrivacyFilter(familyLocationDto, entity.FamilyId, cancellationToken);
+
+        return Result<FamilyLocationDto>.Success(filteredFamilyLocationDto);
     }
 }

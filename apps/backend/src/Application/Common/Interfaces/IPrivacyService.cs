@@ -5,6 +5,7 @@ using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
+using backend.Application.FamilyLocations; // For FamilyLocationDto
 
 namespace backend.Application.Common.Interfaces;
 
@@ -119,4 +120,24 @@ public interface IPrivacyService
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>FamilyDetailDto đã được lọc.</returns>
     Task<FamilyDetailDto> ApplyPrivacyFilter(FamilyDetailDto familyDetailDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của FamilyLocationDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="familyLocationDto">FamilyLocationDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>FamilyLocationDto đã được lọc.</returns>
+    Task<FamilyLocationDto> ApplyPrivacyFilter(FamilyLocationDto familyLocationDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc danh sách các FamilyLocationDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="familyLocationDtos">Danh sách FamilyLocationDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách FamilyLocationDto đã được lọc.</returns>
+    Task<List<FamilyLocationDto>> ApplyPrivacyFilter(List<FamilyLocationDto> familyLocationDtos, Guid familyId, CancellationToken cancellationToken);
 }

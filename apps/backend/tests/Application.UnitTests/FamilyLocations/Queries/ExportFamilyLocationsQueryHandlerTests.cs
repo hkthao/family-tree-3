@@ -6,6 +6,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.FamilyLocations; // For FamilyLocationDto
 
 namespace backend.Application.UnitTests.FamilyLocations.Queries;
 
@@ -13,14 +15,21 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
 {
     private readonly ExportFamilyLocationsQueryHandler _handler;
     private readonly Mock<ILogger<ExportFamilyLocationsQueryHandler>> _mockLogger;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     private readonly Guid _testFamilyId = Guid.NewGuid();
 
     public ExportFamilyLocationsQueryHandlerTests()
     {
         _mockLogger = new Mock<ILogger<ExportFamilyLocationsQueryHandler>>();
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyLocationDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyLocationDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyLocationDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<FamilyLocationDto> dtos, Guid familyId, CancellationToken token) => dtos);
 
-        _handler = new ExportFamilyLocationsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper);
+        _handler = new ExportFamilyLocationsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper, _mockPrivacyService.Object);
     }
 
     [Fact]

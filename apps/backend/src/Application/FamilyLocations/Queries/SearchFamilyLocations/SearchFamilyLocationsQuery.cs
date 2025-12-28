@@ -15,12 +15,13 @@ public record SearchFamilyLocationsQuery : PaginatedQuery, IRequest<Result<Pagin
     public LocationSource? Source { get; init; }
 }
 
-public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationDto>>>
+public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService, IPrivacyService privacyService) : IRequestHandler<SearchFamilyLocationsQuery, Result<PaginatedList<FamilyLocationDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<FamilyLocationDto>>> Handle(SearchFamilyLocationsQuery request, CancellationToken cancellationToken)
     {
@@ -60,10 +61,24 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
         query = query.WithSpecification(new FamilyLocationBySourceSpecification(request.Source));
         query = query.WithSpecification(new FamilyLocationOrderingSpecification(request.SortBy, request.SortOrder));
 
-        var paginatedList = await query
-            .ProjectTo<FamilyLocationDto>(_mapper.ConfigurationProvider)
+        var paginatedFamilyLocationEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
-        return Result<PaginatedList<FamilyLocationDto>>.Success(paginatedList);
+        var familyLocationDtos = _mapper.Map<List<FamilyLocationDto>>(paginatedFamilyLocationEntities.Items);
+
+        var filteredFamilyLocationDtos = new List<FamilyLocationDto>();
+        foreach (var familyLocationDto in familyLocationDtos)
+        {
+            filteredFamilyLocationDtos.Add(await _privacyService.ApplyPrivacyFilter(familyLocationDto, familyLocationDto.FamilyId, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<FamilyLocationDto>(
+            filteredFamilyLocationDtos,
+            paginatedFamilyLocationEntities.TotalItems,
+            paginatedFamilyLocationEntities.Page,
+            paginatedFamilyLocationEntities.TotalPages
+        );
+
+        return Result<PaginatedList<FamilyLocationDto>>.Success(filteredPaginatedList);
     }
 }

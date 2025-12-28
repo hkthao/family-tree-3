@@ -1,3 +1,4 @@
+using Moq;
 using backend.Application.Common.Constants; // Added for ErrorSources
 using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
 using backend.Application.UnitTests.Common;
@@ -5,16 +6,24 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.FamilyLocations; // For FamilyLocationDto
 
 namespace backend.Application.UnitTests.FamilyLocations.Queries.GetFamilyLocationById;
 
 public class GetFamilyLocationByIdQueryHandlerTests : TestBase
 {
     private readonly GetFamilyLocationByIdQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public GetFamilyLocationByIdQueryHandlerTests()
     {
-        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyLocationDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyLocationDto dto, Guid familyId, CancellationToken token) => dto);
+
+        _handler = new GetFamilyLocationByIdQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
     }
 
     private Family CreateTestFamily(Guid familyId)
