@@ -6,6 +6,7 @@ import {
   type FamilyExportDto,
   type FamilyAddDto,
   type FamilyUpdateDto,
+  type FamilyLimitConfiguration, // NEW
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
@@ -67,6 +68,14 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
     const cleanParams = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null));
 
     return this.http.get<Paginated<FamilyDto>>(`/family/public-search`, { params: cleanParams });
+  }
+
+  async getFamilyLimitConfiguration(familyId: string): Promise<Result<FamilyLimitConfiguration>> {
+    return this.http.get<FamilyLimitConfiguration>(`/family/${familyId}/limit-configuration`);
+  }
+
+  async updateFamilyLimitConfiguration(familyId: string, payload: { maxMembers: number; maxStorageMb: number; aiChatMonthlyLimit: number }): Promise<Result<void>> {
+    return this.http.put<void>(`/family/${familyId}/limit-configuration`, payload);
   }
 }
 
