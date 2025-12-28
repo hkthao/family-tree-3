@@ -46,6 +46,36 @@
       </v-col>
     </v-row>
 
+    <v-row v-if="stats">
+      <v-col cols="12" sm="6" md="3">
+        <v-card height="100%" class="pa-3 text-center" elevation="1">
+          <div class="d-flex flex-column align-center justify-center fill-height">
+            <v-icon size="40" color="red">mdi-database</v-icon>
+            <div class="text-h5 font-weight-bold mt-2">{{ (stats.usedStorageMb || 0).toFixed(2) }} MB / {{ (stats.maxStorageMb || 0).toFixed(2) }} MB</div>
+            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.storageUsed') }}</div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card height="100%" class="pa-3 text-center" elevation="1">
+          <div class="d-flex flex-column align-center justify-center fill-height">
+            <v-icon size="40" color="teal">mdi-account-multiple-outline</v-icon>
+            <div class="text-h5 font-weight-bold mt-2">{{ stats.totalMembers || 0 }} / {{ stats.maxMembers || 0 }}</div>
+            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.membersLimit') }}</div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card height="100%" class="pa-3 text-center" elevation="1">
+          <div class="d-flex flex-column align-center justify-center fill-height">
+            <v-icon size="40" color="blue-grey">mdi-robot</v-icon>
+            <div class="text-h5 font-weight-bold mt-2">{{ stats.aiChatMonthlyUsage || 0 }} / {{ stats.aiChatMonthlyLimit || 0 }}</div>
+            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.aiChatMonthly') }}</div>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <!-- New Stats Section -->
     <v-row v-if="stats">
       <v-col cols="12" md="4">
