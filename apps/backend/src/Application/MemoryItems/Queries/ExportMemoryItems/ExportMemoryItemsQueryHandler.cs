@@ -9,11 +9,13 @@ public class ExportMemoryItemsQueryHandler : IRequestHandler<ExportMemoryItemsQu
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public ExportMemoryItemsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public ExportMemoryItemsQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<string>> Handle(ExportMemoryItemsQuery request, CancellationToken cancellationToken)
@@ -29,7 +31,12 @@ public class ExportMemoryItemsQueryHandler : IRequestHandler<ExportMemoryItemsQu
         }
 
         var memoryItemDtos = _mapper.Map<List<MemoryItemDto>>(memoryItems);
-        var json = JsonConvert.SerializeObject(memoryItemDtos, Formatting.Indented);
+        var filteredMemoryItemDtos = new List<MemoryItemDto>();
+        foreach (var memoryItemDto in memoryItemDtos)
+        {
+            filteredMemoryItemDtos.Add(await _privacyService.ApplyPrivacyFilter(memoryItemDto, request.FamilyId, cancellationToken));
+        }
+        var json = JsonConvert.SerializeObject(filteredMemoryItemDtos, Formatting.Indented);
 
         return Result<string>.Success(json);
     }

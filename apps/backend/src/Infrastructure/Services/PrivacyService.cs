@@ -407,4 +407,44 @@ public class PrivacyService : IPrivacyService
         }
         return filteredList;
     }
+
+    public async Task<MemoryItemDto> ApplyPrivacyFilter(MemoryItemDto memoryItemDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return memoryItemDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemoryItemProperties(PrivacyConstants.DefaultPublicMemoryItemProperties.MemoryItemDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicMemoryItemPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeMemoryItemProps.Id,
+            PrivacyConstants.AlwaysIncludeMemoryItemProps.FamilyId
+        };
+
+        return FilterDto(memoryItemDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<MemoryItemDto>> ApplyPrivacyFilter(List<MemoryItemDto> memoryItemDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<MemoryItemDto>();
+        foreach (var memoryItemDto in memoryItemDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(memoryItemDto, familyId, cancellationToken));
+        }
+        return filteredList;
+    }
+}
 }

@@ -263,4 +263,33 @@ public static class PrivacyConstants
             FamilyLocationProps.Source
         };
     }
+
+    // Common MemoryItem Properties
+    public static class MemoryItemProps
+    {
+        public const string Title = "Title";
+        public const string Description = "Description";
+        public const string HappenedAt = "HappenedAt";
+        public const string EmotionalTag = "EmotionalTag";
+        public const string MemoryMedia = "MemoryMedia"; // Potentially contains sensitive media
+        public const string MemoryPersons = "MemoryPersons"; // Links to members, potentially sensitive
+    }
+
+    // Always Included MemoryItem Properties
+    public static class AlwaysIncludeMemoryItemProps
+    {
+        public const string Id = "Id";
+        public const string FamilyId = "FamilyId";
+    }
+
+    public static class DefaultPublicMemoryItemProperties
+    {
+        public static readonly List<string> MemoryItemDto = new List<string>
+        {
+            MemoryItemProps.Title,
+            MemoryItemProps.Description,
+            MemoryItemProps.HappenedAt,
+            MemoryItemProps.EmotionalTag,
+        };
+    }
 }

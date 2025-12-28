@@ -12,13 +12,15 @@ public class GetMemoryItemDetailQueryHandler : IRequestHandler<GetMemoryItemDeta
     private readonly IMapper _mapper;
     private readonly ICurrentUser _currentUser;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IPrivacyService _privacyService;
 
-    public GetMemoryItemDetailQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService)
+    public GetMemoryItemDetailQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IAuthorizationService authorizationService, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
         _currentUser = currentUser;
         _authorizationService = authorizationService;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<MemoryItemDto>> Handle(GetMemoryItemDetailQuery request, CancellationToken cancellationToken)
@@ -84,6 +86,10 @@ public class GetMemoryItemDetailQueryHandler : IRequestHandler<GetMemoryItemDeta
         }
 
         var dto = _mapper.Map<MemoryItemDto>(fullMemoryItem);
-        return Result<MemoryItemDto>.Success(dto);
+
+        // Apply privacy filter
+        var filteredDto = await _privacyService.ApplyPrivacyFilter(dto, family.Id, cancellationToken);
+
+        return Result<MemoryItemDto>.Success(filteredDto);
     }
 }
