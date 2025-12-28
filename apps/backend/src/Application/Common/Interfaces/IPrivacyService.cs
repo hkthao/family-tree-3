@@ -7,6 +7,8 @@ using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 using backend.Application.FamilyLocations; // For FamilyLocationDto
 using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
+using backend.Application.MemberFaces.Common; // For MemberFaceDto
+using backend.Application.MemberFaces.Queries.SearchVectorFace; // For FoundFaceDto
 
 namespace backend.Application.Common.Interfaces;
 
@@ -161,4 +163,44 @@ public interface IPrivacyService
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách MemoryItemDto đã được lọc.</returns>
     Task<List<MemoryItemDto>> ApplyPrivacyFilter(List<MemoryItemDto> memoryItemDtos, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của MemberFaceDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="memberFaceDto">MemberFaceDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>MemberFaceDto đã được lọc.</returns>
+    Task<MemberFaceDto> ApplyPrivacyFilter(MemberFaceDto memberFaceDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc danh sách các MemberFaceDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="memberFaceDtos">Danh sách MemberFaceDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách MemberFaceDto đã được lọc.</returns>
+    Task<List<MemberFaceDto>> ApplyPrivacyFilter(List<MemberFaceDto> memberFaceDtos, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của FoundFaceDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="foundFaceDto">FoundFaceDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>FoundFaceDto đã được lọc.</returns>
+    Task<FoundFaceDto> ApplyPrivacyFilter(FoundFaceDto foundFaceDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc danh sách các FoundFaceDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="foundFaceDtos">Danh sách FoundFaceDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách FoundFaceDto đã được lọc.</returns>
+    Task<List<FoundFaceDto>> ApplyPrivacyFilter(List<FoundFaceDto> foundFaceDtos, Guid familyId, CancellationToken cancellationToken);
 }

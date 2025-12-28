@@ -292,4 +292,86 @@ public static class PrivacyConstants
             MemoryItemProps.EmotionalTag,
         };
     }
+
+    // Common MemberFace Properties
+    public static class MemberFaceProps
+    {
+        public const string FaceId = "FaceId";
+        public const string Confidence = "Confidence";
+        public const string ThumbnailUrl = "ThumbnailUrl";
+        public const string OriginalImageUrl = "OriginalImageUrl";
+        public const string Emotion = "Emotion";
+        public const string EmotionConfidence = "EmotionConfidence";
+        public const string MemberName = "MemberName";
+        public const string MemberGender = "MemberGender";
+        public const string MemberAvatarUrl = "MemberAvatarUrl";
+        public const string BirthYear = "BirthYear";
+        public const string DeathYear = "DeathYear";
+        public const string FamilyName = "FamilyName";
+        public const string FamilyAvatarUrl = "FamilyAvatarUrl";
+    }
+
+    // Always Included MemberFace Properties
+    public static class AlwaysIncludeMemberFaceProps
+    {
+        public const string Id = "Id";
+        public const string MemberId = "MemberId";
+        public const string FamilyId = "FamilyId";
+        public const string BoundingBox = "BoundingBox"; // Bounding box is always included as it's part of face identification
+    }
+
+    public static class DefaultPublicMemberFaceProperties
+    {
+        public static readonly List<string> MemberFaceDto = new List<string>
+        {
+            MemberFaceProps.FaceId,
+            MemberFaceProps.Confidence,
+            MemberFaceProps.ThumbnailUrl,
+            MemberFaceProps.OriginalImageUrl,
+            MemberFaceProps.Emotion,
+            MemberFaceProps.EmotionConfidence,
+            MemberFaceProps.MemberName,
+            MemberFaceProps.MemberGender,
+            MemberFaceProps.MemberAvatarUrl,
+            MemberFaceProps.BirthYear,
+            MemberFaceProps.DeathYear,
+            MemberFaceProps.FamilyName,
+            MemberFaceProps.FamilyAvatarUrl,
+        };
+    }
+
+    // Common FoundFace Properties (for search results)
+    public static class FoundFaceProps
+    {
+        public const string FaceId = "FaceId";
+        public const string MemberName = "MemberName";
+        public const string Score = "Score";
+        public const string ThumbnailUrl = "ThumbnailUrl";
+        public const string OriginalImageUrl = "OriginalImageUrl";
+        public const string Emotion = "Emotion";
+        public const string EmotionConfidence = "EmotionConfidence";
+        public const string FamilyAvatarUrl = "FamilyAvatarUrl";
+    }
+
+    // Always Included FoundFace Properties
+    public static class AlwaysIncludeFoundFaceProps
+    {
+        public const string MemberFaceId = "MemberFaceId";
+        public const string MemberId = "MemberId";
+    }
+
+    public static class DefaultPublicFoundFaceProperties
+    {
+        public static readonly List<string> FoundFaceDto = new List<string>
+        {
+            FoundFaceProps.FaceId,
+            FoundFaceProps.MemberName,
+            FoundFaceProps.Score,
+            FoundFaceProps.ThumbnailUrl,
+            FoundFaceProps.OriginalImageUrl,
+            FoundFaceProps.Emotion,
+            FoundFaceProps.EmotionConfidence,
+            FoundFaceProps.FamilyAvatarUrl
+        };
+    }
 }

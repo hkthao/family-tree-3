@@ -11,6 +11,8 @@ using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 using backend.Application.FamilyLocations; // For FamilyLocationDto
 using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
+using backend.Application.MemberFaces.Common; // For MemberFaceDto
+using backend.Application.MemberFaces.Queries.SearchVectorFace; // For FoundFaceDto
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -444,6 +446,88 @@ public class PrivacyService : IPrivacyService
         foreach (var memoryItemDto in memoryItemDtos)
         {
             filteredList.Add(await ApplyPrivacyFilter(memoryItemDto, familyId, cancellationToken));
+        }
+        return filteredList;
+    }
+
+    public async Task<MemberFaceDto> ApplyPrivacyFilter(MemberFaceDto memberFaceDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return memberFaceDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberFaceProperties(PrivacyConstants.DefaultPublicMemberFaceProperties.MemberFaceDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicMemberFacePropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeMemberFaceProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberFaceProps.MemberId,
+            PrivacyConstants.AlwaysIncludeMemberFaceProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeMemberFaceProps.BoundingBox
+        };
+
+        return FilterDto(memberFaceDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<MemberFaceDto>> ApplyPrivacyFilter(List<MemberFaceDto> memberFaceDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<MemberFaceDto>();
+        foreach (var memberFaceDto in memberFaceDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(memberFaceDto, familyId, cancellationToken));
+        }
+        return filteredList;
+    }
+
+    public async Task<FoundFaceDto> ApplyPrivacyFilter(FoundFaceDto foundFaceDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return foundFaceDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            // FoundFaceDto should rely on MemberFace properties for privacy, or have its own
+            // For now, let's assume it has its own default public properties.
+            privacyConfig.UpdatePublicFoundFaceProperties(PrivacyConstants.DefaultPublicFoundFaceProperties.FoundFaceDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicFoundFacePropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeFoundFaceProps.MemberFaceId,
+            PrivacyConstants.AlwaysIncludeFoundFaceProps.MemberId
+        };
+
+        return FilterDto(foundFaceDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<FoundFaceDto>> ApplyPrivacyFilter(List<FoundFaceDto> foundFaceDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<FoundFaceDto>();
+        foreach (var foundFaceDto in foundFaceDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(foundFaceDto, familyId, cancellationToken));
         }
         return filteredList;
     }

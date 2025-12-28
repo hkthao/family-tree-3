@@ -20,6 +20,12 @@ public class PrivacyConfiguration : BaseAuditableEntity
     // Stores a comma-separated string of public memory item property names
     public string PublicMemoryItemProperties { get; private set; } = "";
 
+    // Stores a comma-separated string of public member face property names
+    public string PublicMemberFaceProperties { get; private set; } = "";
+
+    // Stores a comma-separated string of public found face property names
+    public string PublicFoundFaceProperties { get; private set; } = "";
+
     public PrivacyConfiguration(Guid familyId)
     {
         FamilyId = familyId;
@@ -73,5 +79,25 @@ public class PrivacyConfiguration : BaseAuditableEntity
     public List<string> GetPublicMemoryItemPropertiesList()
     {
         return PublicMemoryItemProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    public void UpdatePublicMemberFaceProperties(List<string> publicMemberFaceProperties)
+    {
+        PublicMemberFaceProperties = string.Join(",", publicMemberFaceProperties.OrderBy(p => p));
+    }
+
+    public List<string> GetPublicMemberFacePropertiesList()
+    {
+        return PublicMemberFaceProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    public void UpdatePublicFoundFaceProperties(List<string> publicFoundFaceProperties)
+    {
+        PublicFoundFaceProperties = string.Join(",", publicFoundFaceProperties.OrderBy(p => p));
+    }
+
+    public List<string> GetPublicFoundFacePropertiesList()
+    {
+        return PublicFoundFaceProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 }
