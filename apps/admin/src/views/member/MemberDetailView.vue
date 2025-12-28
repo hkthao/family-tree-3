@@ -27,8 +27,6 @@
       <v-btn color="grey" @click="handleClose" :disabled="isLoadingMember || isDeletingMember">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" @click="handleEdit" :disabled="!member || isLoadingMember || isDeletingMember" v-if="canEditOrDelete">{{
         t('common.edit') }}</v-btn>
-      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || isLoadingMember || isDeletingMember"
-        v-if="canEditOrDelete">{{ t('ai.bioSuggestShort') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || isLoadingMember || isDeletingMember" v-if="canEditOrDelete">{{
         t('common.delete') }}</v-btn>
     </v-card-actions>
@@ -47,7 +45,7 @@ interface MemberDetailViewProps {
 }
 
 const props = defineProps<MemberDetailViewProps>();
-const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship', 'edit-member', 'generate-biography']);
+const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship', 'edit-member']);
 
 const { t } = useI18n();
 const { showConfirmDialog } = useConfirmDialog();
@@ -71,12 +69,6 @@ const handleClose = () => {
 const handleEdit = () => {
   if (member.value) {
     emit('edit-member', member.value.id);
-  }
-};
-
-const handleGenerateBiography = () => {
-  if (member.value) {
-    emit('generate-biography', member.value.id);
   }
 };
 
