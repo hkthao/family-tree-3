@@ -16,44 +16,14 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
 {
     private readonly ImportFamilyLocationsCommandHandler _handler;
     private readonly Mock<ILogger<ImportFamilyLocationsCommandHandler>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
 
     private readonly Guid _testFamilyId = Guid.NewGuid();
 
     public ImportFamilyLocationsCommandHandlerTests()
     {
         _mockLogger = new Mock<ILogger<ImportFamilyLocationsCommandHandler>>();
-        _mockMapper = new Mock<IMapper>();
 
-        _mockMapper.Setup(m => m.Map<FamilyLocation>(It.IsAny<ImportFamilyLocationItemDto>()))
-                   .Returns((ImportFamilyLocationItemDto dto) => new FamilyLocation
-                   {
-                       Name = dto.Name,
-                       Description = dto.Description,
-                       Address = dto.Address,
-                       Latitude = dto.Latitude,
-                       Longitude = dto.Longitude,
-                       LocationType = dto.LocationType,
-                       Accuracy = dto.Accuracy,
-                       Source = dto.Source
-                   });
-        _mockMapper.Setup(m => m.Map<List<FamilyLocationDto>>(It.IsAny<List<FamilyLocation>>()))
-                   .Returns((List<FamilyLocation> locations) => locations.Select(fl => new FamilyLocationDto
-                   {
-                       Id = fl.Id,
-                       FamilyId = fl.FamilyId,
-                       Name = fl.Name,
-                       Description = fl.Description,
-                       Address = fl.Address,
-                       Latitude = fl.Latitude,
-                       Longitude = fl.Longitude,
-                       LocationType = fl.LocationType,
-                       Accuracy = fl.Accuracy,
-                       Source = fl.Source
-                   }).ToList());
-
-
-        _handler = new ImportFamilyLocationsCommandHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mockMapper.Object);
+        _handler = new ImportFamilyLocationsCommandHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper);
     }
 
     [Fact]

@@ -1,5 +1,7 @@
 using backend.Application.Common.Dtos;
 using backend.Application.Common.Models;
+using backend.Application.Prompts.Commands.ImportPrompts;
+using backend.Application.Prompts.DTOs;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
@@ -19,6 +21,7 @@ using backend.Application.FamilyLocations.Commands.ImportFamilyLocations; // Add
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
+using backend.Application.MemberFaces.Commands.ImportMemberFaces; // Added
 using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
@@ -88,6 +91,9 @@ public class MappingProfile : Profile
         CreateMap<FamilyUser, FamilyUserDto>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
 
+        CreateMap<Prompt, PromptDto>();
+        CreateMap<ImportPromptItemDto, Prompt>();
+
         // FamilyDict
         CreateMap<FamilyDict, FamilyDictDto>();
         CreateMap<NamesByRegion, NamesByRegionDto>();
@@ -117,6 +123,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Member != null && src.Member.Family != null ? src.Member.Family.AvatarUrl : null))
             .ForMember(dest => dest.BirthYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfBirth.HasValue ? src.Member.DateOfBirth.Value.Year : (int?)null))
             .ForMember(dest => dest.DeathYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfDeath.HasValue ? src.Member.DateOfDeath.Value.Year : (int?)null));
+        CreateMap<ImportMemberFaceItemDto, MemberFace>(); // Added
 
         _ = CreateMap<Domain.ValueObjects.BoundingBox, BoundingBoxDto>();
 

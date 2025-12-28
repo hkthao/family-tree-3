@@ -15,20 +15,12 @@ public class ExportPromptsQueryHandlerTests : TestBase
 {
     private readonly ExportPromptsQueryHandler _handler;
     private readonly Mock<ILogger<ExportPromptsQueryHandler>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
 
     public ExportPromptsQueryHandlerTests()
     {
         _mockLogger = new Mock<ILogger<ExportPromptsQueryHandler>>();
-        _mockMapper = new Mock<IMapper>();
 
-        // Setup the mapper for ProjectTo
-        _mockMapper.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Prompt, PromptDto>();
-        }));
-
-        _handler = new ExportPromptsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mockMapper.Object);
+        _handler = new ExportPromptsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper);
     }
 
     [Fact]

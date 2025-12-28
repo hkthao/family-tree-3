@@ -15,14 +15,12 @@ public class ImportPromptsCommandHandlerTests : TestBase
 {
     private readonly ImportPromptsCommandHandler _handler;
     private readonly Mock<ILogger<ImportPromptsCommandHandler>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
 
     public ImportPromptsCommandHandlerTests()
     {
         _mockLogger = new Mock<ILogger<ImportPromptsCommandHandler>>();
-        _mockMapper = new Mock<IMapper>();
 
-        _handler = new ImportPromptsCommandHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mockMapper.Object);
+        _handler = new ImportPromptsCommandHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper);
     }
 
     [Fact]
@@ -30,10 +28,7 @@ public class ImportPromptsCommandHandlerTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        _mockMapper.Setup(m => m.Map<Prompt>(It.IsAny<ImportPromptItemDto>()))
-                   .Returns((ImportPromptItemDto dto) => new Prompt { Code = dto.Code, Title = dto.Title, Content = dto.Content, Description = dto.Description });
-        _mockMapper.Setup(m => m.Map<List<PromptDto>>(It.IsAny<List<Prompt>>()))
-                   .Returns((List<Prompt> prompts) => prompts.Select(p => new PromptDto { Id = p.Id, Code = p.Code, Title = p.Title, Content = p.Content, Description = p.Description }).ToList());
+
 
         var importItems = new List<ImportPromptItemDto>
         {
@@ -60,10 +55,7 @@ public class ImportPromptsCommandHandlerTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        _mockMapper.Setup(m => m.Map<Prompt>(It.IsAny<ImportPromptItemDto>()))
-                   .Returns((ImportPromptItemDto dto) => new Prompt { Code = dto.Code, Title = dto.Title, Content = dto.Content, Description = dto.Description });
-        _mockMapper.Setup(m => m.Map<List<PromptDto>>(It.IsAny<List<Prompt>>()))
-                   .Returns((List<Prompt> prompts) => prompts.Select(p => new PromptDto { Id = p.Id, Code = p.Code, Title = p.Title, Content = p.Content, Description = p.Description }).ToList());
+
 
 
         await _context.Prompts.AddAsync(new Prompt { Code = "EXISTING_CODE", Title = "Existing Title", Content = "Existing Content" });

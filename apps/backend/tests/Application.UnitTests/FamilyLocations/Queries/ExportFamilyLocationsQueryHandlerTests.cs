@@ -16,22 +16,14 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
 {
     private readonly ExportFamilyLocationsQueryHandler _handler;
     private readonly Mock<ILogger<ExportFamilyLocationsQueryHandler>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
 
     private readonly Guid _testFamilyId = Guid.NewGuid();
 
     public ExportFamilyLocationsQueryHandlerTests()
     {
         _mockLogger = new Mock<ILogger<ExportFamilyLocationsQueryHandler>>();
-        _mockMapper = new Mock<IMapper>();
 
-        // Setup the mapper for ProjectTo
-        _mockMapper.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<FamilyLocation, FamilyLocationDto>();
-        }));
-
-        _handler = new ExportFamilyLocationsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mockMapper.Object);
+        _handler = new ExportFamilyLocationsQueryHandler(_context, _mockAuthorizationService.Object, _mockLogger.Object, _mapper);
     }
 
     [Fact]

@@ -50,7 +50,8 @@ public abstract class TestBase : IDisposable
         // Cấu hình AutoMapper
         var mapperConfiguration = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<Application.Common.Mappings.MappingProfile>(); // Explicitly add the profile
+            cfg.AddProfile<backend.Application.Common.Mappings.MappingProfile>(); // Explicitly add the profile
+            cfg.CreateMap<backend.Application.MemberFaces.Common.BoundingBoxDto, backend.Domain.ValueObjects.BoundingBox>();
             // Add other profiles if needed
         });
         _mapper = mapperConfiguration.CreateMapper();

@@ -4,14 +4,18 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.UpdateMemberFace;
+using backend.Application.MemberFaces.Commands.ImportMemberFaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
+using backend.Application.MemberFaces.Queries.ExportMemberFaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // Added
 
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;
 
+[Authorize] // Added explicit Authorize attribute
 [ApiController]
 [Route("api/member-faces")]
 [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
@@ -47,7 +51,7 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
         if (id != command.Id)
         {
             _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberFaceCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
-            return Result<Unit>.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).ToActionResult(this, _logger);
+            return Result.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).ToActionResult(this, _logger); // Changed Result<Unit> to Result
         }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 204);
@@ -91,5 +95,39 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
 
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xuất tất cả khuôn mặt thành viên cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách khuôn mặt thành viên.</returns>
+    [HttpGet("export/{familyId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportMemberFaces(Guid familyId)
+    {
+        var result = await _mediator.Send(new ExportMemberFacesQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách khuôn mặt thành viên cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="command">Lệnh nhập khuôn mặt thành viên với thông tin chi tiết.</param>
+    /// <returns>Danh sách khuôn mặt thành viên vừa được nhập.</returns>
+    [HttpPost("import/{familyId}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportMemberFaces(Guid familyId, [FromBody] ImportMemberFacesCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({FamilyIdInUrl}) and request body ({FamilyIdInBody}) for ImportMemberFacesCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest(Result.Failure("FamilyId trong URL và FamilyId trong body không khớp."));
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }
