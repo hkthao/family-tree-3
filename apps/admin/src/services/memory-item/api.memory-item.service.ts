@@ -10,8 +10,8 @@ export class ApiMemoryItemService extends ApiCrudService<MemoryItem, AddMemoryIt
   }
 
   async exportMemoryItems(familyId?: string): Promise<Result<string, ApiError>> {
-    const url = familyId ? `${this.baseUrl}/export/${familyId}` : `${this.baseUrl}/export`;
-    return this.api.get<string>(url);
+    const url = `${this.baseUrl}/export`;
+    return this.api.get<string>(url, { params: { familyId } });
   }
 
   async importMemoryItems(familyId: string, payload: any): Promise<Result<void, ApiError>> {
