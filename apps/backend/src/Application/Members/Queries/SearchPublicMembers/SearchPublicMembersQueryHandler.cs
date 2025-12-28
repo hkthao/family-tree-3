@@ -5,10 +5,11 @@ using backend.Application.Members.Queries.GetMembers;
 
 namespace backend.Application.Members.Queries.SearchPublicMembers;
 
-public class SearchPublicMembersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchPublicMembersQuery, Result<PaginatedList<MemberListDto>>>
+public class SearchPublicMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<SearchPublicMembersQuery, Result<PaginatedList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchPublicMembersQuery request, CancellationToken cancellationToken)
     {
@@ -44,10 +45,24 @@ public class SearchPublicMembersQueryHandler(IApplicationDbContext context, IMap
             _ => query.OrderBy(m => m.LastName).ThenBy(m => m.FirstName) // Default sort
         };
 
-        var paginatedList = await query
-            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
+        var paginatedMemberEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage); // Use request.Page and request.ItemsPerPage
 
-        return Result<PaginatedList<MemberListDto>>.Success(paginatedList);
+        var memberListDtos = _mapper.Map<List<MemberListDto>>(paginatedMemberEntities.Items);
+
+        var filteredMemberListDtos = new List<MemberListDto>();
+        foreach (var memberListDto in memberListDtos)
+        {
+            filteredMemberListDtos.Add(await _privacyService.ApplyPrivacyFilter(memberListDto, request.FamilyId, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<MemberListDto>(
+            filteredMemberListDtos,
+            paginatedMemberEntities.TotalItems,
+            paginatedMemberEntities.Page,
+            paginatedMemberEntities.TotalPages
+        );
+
+        return Result<PaginatedList<MemberListDto>>.Success(filteredPaginatedList);
     }
 }

@@ -72,7 +72,7 @@ public class SearchMemoryItemsQueryHandler : IRequestHandler<SearchMemoryItemsQu
         }
 
         var paginatedMemoryItemEntities = await query
-            .PaginatedListAsync(request.Page, request.ItemsPerPage, cancellationToken);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
         var memoryItemDtos = _mapper.Map<List<MemoryItemDto>>(paginatedMemoryItemEntities.Items);
 

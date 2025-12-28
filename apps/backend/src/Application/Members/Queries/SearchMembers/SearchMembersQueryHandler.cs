@@ -7,12 +7,13 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
-public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser) : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
+public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, IPrivacyService privacyService) : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
@@ -37,10 +38,24 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
         query = query.WithSpecification(new MemberByWifeIdSpecification(request.WifeId));
         query = query.WithSpecification(new MemberOrderingSpecification(request.SortBy, request.SortOrder));
 
-        var paginatedList = await query
-            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
+        var paginatedMemberEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
-        return Result<PaginatedList<MemberListDto>>.Success(paginatedList);
+        var memberListDtos = _mapper.Map<List<MemberListDto>>(paginatedMemberEntities.Items);
+
+        var filteredMemberListDtos = new List<MemberListDto>();
+        foreach (var memberListDto in memberListDtos)
+        {
+            filteredMemberListDtos.Add(await _privacyService.ApplyPrivacyFilter(memberListDto, memberListDto.FamilyId, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<MemberListDto>(
+            filteredMemberListDtos,
+            paginatedMemberEntities.TotalItems,
+            paginatedMemberEntities.Page,
+            paginatedMemberEntities.TotalPages
+        );
+
+        return Result<PaginatedList<MemberListDto>>.Success(filteredPaginatedList);
     }
 }

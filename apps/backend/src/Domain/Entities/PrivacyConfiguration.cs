@@ -17,6 +17,9 @@ public class PrivacyConfiguration : BaseAuditableEntity
     // Stores a comma-separated string of public family location property names
     public string PublicFamilyLocationProperties { get; private set; } = "";
 
+    // Stores a comma-separated string of public memory item property names
+    public string PublicMemoryItemProperties { get; private set; } = "";
+
     public PrivacyConfiguration(Guid familyId)
     {
         FamilyId = familyId;
@@ -60,5 +63,15 @@ public class PrivacyConfiguration : BaseAuditableEntity
     public List<string> GetPublicFamilyLocationPropertiesList()
     {
         return PublicFamilyLocationProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    public void UpdatePublicMemoryItemProperties(List<string> publicMemoryItemProperties)
+    {
+        PublicMemoryItemProperties = string.Join(",", publicMemoryItemProperties.OrderBy(p => p));
+    }
+
+    public List<string> GetPublicMemoryItemPropertiesList()
+    {
+        return PublicMemoryItemProperties.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 }

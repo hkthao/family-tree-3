@@ -1,3 +1,4 @@
+using Moq;
 using AutoMapper;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries; // MemberDto is here
@@ -9,16 +10,25 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
 
 namespace backend.Application.UnitTests.Members.Queries.ExportMembers;
 
 public class ExportMembersQueryHandlerTests : TestBase
 {
     private readonly ExportMembersQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public ExportMembersQueryHandlerTests()
     {
-        _handler = new ExportMembersQueryHandler(_context, _mapper);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<MemberDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MemberDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<MemberDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<MemberDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
+        _handler = new ExportMembersQueryHandler(_context, _mapper, _mockPrivacyService.Object);
     }
 
     /// <summary>

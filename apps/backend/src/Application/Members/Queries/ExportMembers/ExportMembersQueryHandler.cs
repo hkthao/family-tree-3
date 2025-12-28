@@ -8,11 +8,13 @@ public class ExportMembersQueryHandler : IRequestHandler<ExportMembersQuery, Res
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public ExportMembersQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public ExportMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<string>> Handle(ExportMembersQuery request, CancellationToken cancellationToken)
@@ -28,7 +30,12 @@ public class ExportMembersQueryHandler : IRequestHandler<ExportMembersQuery, Res
         }
 
         var memberDtos = _mapper.Map<List<MemberDto>>(members); // Changed to MemberDto
-        var json = JsonConvert.SerializeObject(memberDtos, Formatting.Indented);
+        var filteredMemberDtos = new List<MemberDto>();
+        foreach (var memberDto in memberDtos)
+        {
+            filteredMemberDtos.Add(await _privacyService.ApplyPrivacyFilter(memberDto, request.FamilyId, cancellationToken));
+        }
+        var json = JsonConvert.SerializeObject(filteredMemberDtos, Formatting.Indented);
 
         return Result<string>.Success(json);
     }

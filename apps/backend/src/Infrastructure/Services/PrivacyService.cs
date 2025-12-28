@@ -10,6 +10,7 @@ using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 using backend.Application.FamilyLocations; // For FamilyLocationDto
+using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -446,5 +447,4 @@ public class PrivacyService : IPrivacyService
         }
         return filteredList;
     }
-}
 }
