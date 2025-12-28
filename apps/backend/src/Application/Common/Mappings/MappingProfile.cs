@@ -29,6 +29,7 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
 using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
 using backend.Application.MemoryItems.DTOs; // Added
+using backend.Application.Members.DTOs; // Added for MemberImportDto
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
@@ -195,5 +196,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.LunarDate, opt => opt.Ignore()); // Handled manually in handler (using SetLunarDate)
         CreateMap<LunarDateDto, LunarDate>();
 
+        // Member mappings for importing
+        CreateMap<MemberImportDto, Member>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be generated
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
+            .ForMember(dest => dest.Family, opt => opt.Ignore())
+            .ForMember(dest => dest.FullName, opt => opt.Ignore()) // Calculated property
+            .ForMember(dest => dest.FatherId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.MotherId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.HusbandId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.WifeId, opt => opt.Ignore()); // Handled manually in handler
     }
 }

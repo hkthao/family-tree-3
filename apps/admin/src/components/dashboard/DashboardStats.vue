@@ -51,8 +51,8 @@
         <v-card height="100%" class="pa-3 text-center" elevation="1">
           <div class="d-flex flex-column align-center justify-center fill-height">
             <v-icon size="40" color="red">mdi-database</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ (stats.usedStorageMb || 0).toFixed(2) }} MB / {{ (stats.maxStorageMb || 0).toFixed(2) }} MB</div>
-            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.storageUsed') }}</div>
+            <div class="text-h5 font-weight-bold mt-2">{{ (stats.usedStorageMb || 0).toFixed(0) }} / {{ (stats.maxStorageMb || 0).toFixed(0) }}</div>
+            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.storageUsed') }} (MB)</div>
           </div>
         </v-card>
       </v-col>
