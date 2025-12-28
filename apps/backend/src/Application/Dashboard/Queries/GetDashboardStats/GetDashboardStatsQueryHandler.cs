@@ -98,6 +98,11 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         double totalUsedStorageMb = 0;
         double totalMaxStorageMb = 0;
 
+        // Calculate Family Limits
+        int totalMaxMembers = 0;
+        int totalAiChatMonthlyLimit = 0;
+        int totalAiChatMonthlyUsage = 0;
+
         foreach (var family in data.FamiliesInScope)
         {
             var familyLimitConfigResult = await _mediator.Send(new Families.Queries.GetFamilyLimitConfigurationQuery { FamilyId = family.Id }, cancellationToken);
@@ -112,11 +117,20 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
                     .SumAsync(fm => fm.FileSize, cancellationToken);
 
                 totalUsedStorageMb += (double)currentFamilyStorageBytes / (1024 * 1024); // Convert bytes to MB
+
+                totalMaxMembers += familyLimitConfigResult.Value.MaxMembers;
+                totalAiChatMonthlyLimit += familyLimitConfigResult.Value.AiChatMonthlyLimit;
+                totalAiChatMonthlyUsage += familyLimitConfigResult.Value.AiChatMonthlyUsage;
             }
         }
 
         stats.UsedStorageMb = totalUsedStorageMb;
         stats.MaxStorageMb = totalMaxStorageMb;
+
+        // Calculate Family Limits
+        stats.MaxMembers = totalMaxMembers;
+        stats.AiChatMonthlyLimit = totalAiChatMonthlyLimit;
+        stats.AiChatMonthlyUsage = totalAiChatMonthlyUsage;
 
         return Result<DashboardStatsDto>.Success(stats);
     }
