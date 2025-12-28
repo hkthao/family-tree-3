@@ -7,7 +7,7 @@
     </div>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" :rules="rules.name" required
+        <v-text-field v-model="formData.name" :label="$t('family.form.name')" :rules="rules.name" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -17,14 +17,14 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')"
+        <v-text-field v-model="formData.address" :label="$t('family.form.address')"
           data-testid="family-address-input"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <v-textarea v-model="formData.description" :rows="2" :auto-grow="true"
-          :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+          :label="$t('family.form.description')" data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
     <v-row v-if="props.displayLimitConfig">

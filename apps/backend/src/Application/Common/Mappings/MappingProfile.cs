@@ -132,7 +132,19 @@ public class MappingProfile : Profile
         // PrivacyConfiguration mapping (already exists, ensuring no duplication)
         CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()
             .ForMember(dest => dest.PublicMemberProperties,
-                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()));
+                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()))
+            .ForMember(dest => dest.PublicEventProperties,
+                       opt => opt.MapFrom(src => src.GetPublicEventPropertiesList()))
+            .ForMember(dest => dest.PublicFamilyProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFamilyPropertiesList()))
+            .ForMember(dest => dest.PublicFamilyLocationProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFamilyLocationPropertiesList()))
+            .ForMember(dest => dest.PublicMemoryItemProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemoryItemPropertiesList()))
+            .ForMember(dest => dest.PublicMemberFaceProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemberFacePropertiesList()))
+            .ForMember(dest => dest.PublicFoundFaceProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFoundFacePropertiesList()));
 
         CreateMap<FamilyLinkRequest, FamilyLinkRequestDto>()
             .ForMember(dest => dest.RequestingFamilyName, opt => opt.MapFrom(src => src.RequestingFamily.Name))

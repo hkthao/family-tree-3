@@ -8,7 +8,7 @@ export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, Fa
   importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>;
   exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob, ApiError>>;
   getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration, ApiError>>;
-  updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void, ApiError>>;
+  updatePrivacyConfiguration(familyId: string, settings: PrivacyConfiguration): Promise<Result<void, ApiError>>;
   getUserFamilyAccess(): Promise<Result<IFamilyAccess[], ApiError>> ;
   searchPublic(listOptions: ListOptions, filterOptions: FilterOptions): Promise<Result<Paginated<FamilyDto>, ApiError>>;
   getFamilyLimitConfiguration(familyId: string): Promise<Result<FamilyLimitConfiguration, ApiError>>;

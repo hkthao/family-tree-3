@@ -47,13 +47,29 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
   async getPrivacyConfiguration(familyId: string): Promise<Result<PrivacyConfiguration>> {
     const result = await this.http.get<PrivacyConfiguration>(`/family/${familyId}/privacy-configuration`);
     if (result.ok) {
+      // Ensure all property arrays are initialized, even if backend returns null/undefined for some
       result.value.publicMemberProperties = result.value.publicMemberProperties || [];
+      result.value.publicEventProperties = result.value.publicEventProperties || [];
+      result.value.publicFamilyProperties = result.value.publicFamilyProperties || [];
+      result.value.publicFamilyLocationProperties = result.value.publicFamilyLocationProperties || [];
+      result.value.publicMemoryItemProperties = result.value.publicMemoryItemProperties || [];
+      result.value.publicMemberFaceProperties = result.value.publicMemberFaceProperties || [];
+      result.value.publicFoundFaceProperties = result.value.publicFoundFaceProperties || [];
     }
     return result;
   }
 
-  async updatePrivacyConfiguration(familyId: string, publicMemberProperties: string[]): Promise<Result<void>> {
-    const payload = { familyId, publicMemberProperties };
+  async updatePrivacyConfiguration(familyId: string, settings: PrivacyConfiguration): Promise<Result<void>> {
+    const payload = {
+      familyId,
+      publicMemberProperties: settings.publicMemberProperties,
+      publicEventProperties: settings.publicEventProperties,
+      publicFamilyProperties: settings.publicFamilyProperties,
+      publicFamilyLocationProperties: settings.publicFamilyLocationProperties,
+      publicMemoryItemProperties: settings.publicMemoryItemProperties,
+      publicMemberFaceProperties: settings.publicMemberFaceProperties,
+      publicFoundFaceProperties: settings.publicFoundFaceProperties,
+    };
     return this.http.put<void>(`/family/${familyId}/privacy-configuration`, payload);
   }
 

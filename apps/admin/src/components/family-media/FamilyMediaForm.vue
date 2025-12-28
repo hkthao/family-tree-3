@@ -7,7 +7,7 @@
           :disabled="readOnly"></VFileUpload>
       </v-col>
       <v-col cols="12">
-        <v-textarea v-model="description" :label="t('familyMedia.form.descriptionLabel')" rows="3" clearable
+        <v-textarea v-model="description" :label="t('familyMedia.form.description')" rows="3" clearable
           :disabled="readOnly"></v-textarea>
       </v-col>
     </v-row>

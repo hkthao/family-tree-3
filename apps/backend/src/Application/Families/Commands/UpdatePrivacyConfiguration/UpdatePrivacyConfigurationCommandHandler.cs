@@ -27,6 +27,12 @@ public class UpdatePrivacyConfigurationCommandHandler(IApplicationDbContext cont
         }
 
         privacyConfig.UpdatePublicMemberProperties(request.PublicMemberProperties);
+        privacyConfig.UpdatePublicEventProperties(request.PublicEventProperties);
+        privacyConfig.UpdatePublicFamilyProperties(request.PublicFamilyProperties);
+        privacyConfig.UpdatePublicFamilyLocationProperties(request.PublicFamilyLocationProperties);
+        privacyConfig.UpdatePublicMemoryItemProperties(request.PublicMemoryItemProperties);
+        privacyConfig.UpdatePublicMemberFaceProperties(request.PublicMemberFaceProperties);
+        privacyConfig.UpdatePublicFoundFaceProperties(request.PublicFoundFaceProperties);
 
         await _context.SaveChangesAsync(cancellationToken);
 

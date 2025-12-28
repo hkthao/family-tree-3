@@ -42,9 +42,12 @@ export const FAMILY_PROPS = {
   PROPERTIES: [
     'name',
     'description',
-    'headOfFamilyId',
-    'foundingDate',
-    'foundingPlace',
+    'address',
+    'totalMembers',
+    'totalGenerations',
+    'visibility',
+    'avatarUrl',
+    // 'familyUsers' and 'familyLimitConfiguration' are complex objects and not directly handled by simple checkboxes
   ],
 };
 
@@ -53,11 +56,20 @@ export const FAMILY_PROPS = {
  */
 export const EVENT_PROPS = {
   PROPERTIES: [
-    'title',
+    'name',
+    'code',
     'description',
-    'date',
-    'location',
+    'calendarType',
+    'solarDate',
+    'lunarDate',
+    'repeatRule',
     'type',
+    'color',
+    'familyId',
+    'familyName',
+    'familyAvatarUrl',
+    // 'relatedMembers' (complex type)
+    // 'relatedMemberIds' (derived)
   ],
 };
 
@@ -67,10 +79,13 @@ export const EVENT_PROPS = {
 export const FAMILY_LOCATION_PROPS = {
   PROPERTIES: [
     'name',
-    'address',
+    'description',
     'latitude',
     'longitude',
-    'description',
+    'address',
+    'locationType',
+    'accuracy',
+    'source',
   ],
 };
 
@@ -81,35 +96,51 @@ export const MEMORY_ITEM_PROPS = {
   PROPERTIES: [
     'title',
     'description',
-    'date',
-    'location',
-    'type',
-    'mediaUrl', // Ví dụ: URL hình ảnh, video
+    'happenedAt',
+    'emotionalTag',
+    // 'memoryMedia' (complex type)
+    // 'memoryPersons' (complex type)
   ],
 };
 
 /**
- * Thuộc tính liên quan đến khuôn mặt (Face).
+ * Thuộc tính liên quan đến khuôn mặt thành viên (MemberFace).
  */
-export const FACE_PROPS = {
+export const MEMBER_FACE_PROPS = {
   PROPERTIES: [
-    'faceUrl', // URL của ảnh khuôn mặt
-    'x',
-    'y',
-    'width',
-    'height',
-    'personId', // ID người được nhận diện
+    'faceId',
+    'confidence',
+    'thumbnailUrl',
+    'originalImageUrl',
+    'emotion',
+    'emotionConfidence',
+    'isVectorDbSynced',
+    'vectorDbId',
+    'memberName',
+    'memberGender',
+    'memberAvatarUrl',
+    'birthYear',
+    'deathYear',
+    'familyId',
+    'familyName',
+    'familyAvatarUrl',
+    // 'boundingBox' (complex type)
+    // 'embedding' (complex type)
   ],
 };
 
 /**
- * Thuộc tính liên quan đến bản đồ (Map).
+ * Thuộc tính liên quan đến khuôn mặt được tìm thấy (FoundFace).
  */
-export const MAP_PROPS = {
+export const FOUND_FACE_PROPS = {
   PROPERTIES: [
-    'centerLatitude',
-    'centerLongitude',
-    'zoomLevel',
-    'mapType',
+    'faceId',
+    'memberName',
+    'score',
+    'thumbnailUrl',
+    'originalImageUrl',
+    'emotion',
+    'emotionConfidence',
+    'familyAvatarUrl',
   ],
 };

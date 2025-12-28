@@ -52,8 +52,7 @@ public class PrivacyService : IPrivacyService
         // Lấy hoặc thêm các thuộc tính của loại vào bộ nhớ đệm
         if (!_propertyCache.TryGetValue(sourceType, out var typeProperties))
         {
-            typeProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                       .ToDictionary(p => p.Name, p => (PropertyInfo?)p, StringComparer.OrdinalIgnoreCase);
+            typeProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance).ToDictionary(p => p.Name, p => (PropertyInfo?)p, StringComparer.OrdinalIgnoreCase);
             _propertyCache.TryAdd(sourceType, typeProperties);
         }
 
