@@ -78,7 +78,7 @@ const {
   selectedFile,
   cropperDialog,
   imageForCropper,
-  cropperRef,
+  cropperRef, // buoc buoc phai co neu ko se gay loi
   croppedImagePreview,
   cropperZoom,
   cropperRotate,
