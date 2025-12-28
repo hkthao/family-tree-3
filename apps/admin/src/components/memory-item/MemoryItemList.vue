@@ -16,8 +16,41 @@
         create-button-test-id="create-memory-item-button"
         @create="emit('create')"
         :hide-create-button="!props.allowAdd"
-        :hide-search="true"
-      />
+        :hide-search="false"
+      >
+        <template #custom-buttons>
+          <v-btn
+            v-if="props.canPerformActions"
+            color="primary"
+            icon
+            @click="props.onExport?.()"
+            data-testid="export-memory-item-button"
+            :aria-label="t('common.export')"
+            :loading="props.isExporting"
+          >
+            <v-tooltip :text="t('common.export')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-export</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <v-btn
+            v-if="props.canPerformActions"
+            color="primary"
+            icon
+            @click="props.onImportClick?.()"
+            data-testid="import-memory-item-button"
+            :aria-label="t('common.import')"
+            :loading="props.isImporting"
+          >
+            <v-tooltip :text="t('common.import')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-import</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </ListToolbar>
     </template>
     <template #item.title="{ item }">
       <span class="text-primary cursor-pointer text-decoration-underline" @click="emit('view', item.id)">
@@ -62,6 +95,11 @@ interface MemoryItemListProps {
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  isExporting?: boolean; // New prop
+  isImporting?: boolean; // New prop
+  canPerformActions?: boolean; // New prop
+  onExport?: () => void; // New prop
+  onImportClick?: () => void; // New prop
 }
 
 const props = defineProps<MemoryItemListProps>();
