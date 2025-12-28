@@ -19,7 +19,7 @@
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer" />
+          <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer" @open-update-family-limit-drawer="handleOpenUpdateFamilyLimitDrawer" />
         </v-window-item>
         <v-window-item value="timeline">
           <EventTimeline :family-id="familyId" />
@@ -76,6 +76,13 @@
     <FamilyEditView v-if="familyId" :family-id="familyId" @close="handleCloseEditDrawer" @saved="handleFamilySaved" />
   </BaseCrudDrawer>
 
+  <!-- Update Family Limit Drawer -->
+  <BaseCrudDrawer :model-value="showUpdateFamilyLimitDrawer" @update:model-value="showUpdateFamilyLimitDrawer = $event"
+    @close="handleCloseUpdateFamilyLimitDrawer" :title="t('family.updateLimits')">
+    <UpdateFamilyLimitView v-if="updateFamilyLimitFamilyId" :family-id="updateFamilyLimitFamilyId"
+      @close="handleCloseUpdateFamilyLimitDrawer" @saved="handleUpdateFamilyLimitSaved" />
+  </BaseCrudDrawer>
+
 
 </template>
 <script setup lang="ts">
@@ -98,7 +105,7 @@ import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
-
+import UpdateFamilyLimitView from '@/views/family/UpdateFamilyLimitView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
@@ -112,6 +119,8 @@ const allowEdit = computed(() => state.isAdmin.value || state.isFamilyManager.va
 const allowDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(familyId.value));
 
 const showEditDrawer = ref(false);
+const showUpdateFamilyLimitDrawer = ref(false); // NEW
+const updateFamilyLimitFamilyId = ref(''); // NEW
 
 const handleOpenEditDrawer = (_id: string) => {
   showEditDrawer.value = true;
@@ -121,8 +130,23 @@ const handleCloseEditDrawer = () => {
   showEditDrawer.value = false;
 };
 
+const handleOpenUpdateFamilyLimitDrawer = (id: string) => { // NEW
+  updateFamilyLimitFamilyId.value = id;
+  showUpdateFamilyLimitDrawer.value = true;
+};
+
+const handleCloseUpdateFamilyLimitDrawer = () => { // NEW
+  showUpdateFamilyLimitDrawer.value = false;
+  updateFamilyLimitFamilyId.value = '';
+};
+
 const handleFamilySaved = () => {
   handleCloseEditDrawer();
+  queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyId.value] });
+};
+
+const handleUpdateFamilyLimitSaved = () => { // NEW
+  handleCloseUpdateFamilyLimitDrawer();
   queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyId.value] });
 };
 

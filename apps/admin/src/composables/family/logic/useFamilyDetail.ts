@@ -1,4 +1,4 @@
-import { computed, toRef, type Ref } from 'vue';
+import { computed, toRef, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables';
@@ -26,6 +26,7 @@ export function useFamilyDetail(
   const { useRouter, useAuth, useFamilyQuery } = deps;
   const router = useRouter();
   const { state } = useAuth();
+  const showUpdateLimitsDrawer = ref(false); // New ref for update limits drawer
 
   const familyIdRef = toRef(props, 'familyId');
   const { family: familyData, isLoading, error } = useFamilyQuery(familyIdRef);
@@ -42,16 +43,28 @@ export function useFamilyDetail(
     router.push('/family');
   };
 
+  const openUpdateLimitsDrawer = () => {
+    showUpdateLimitsDrawer.value = true;
+  };
+
+  const closeUpdateLimitsDrawer = () => {
+    showUpdateLimitsDrawer.value = false;
+  };
+
+
   return {
     state: {
       familyData,
       isLoading,
       error,
       canManageFamily,
+      showUpdateLimitsDrawer,
     },
     actions: {
       openEditDrawer,
       closeView,
+      openUpdateLimitsDrawer,
+      closeUpdateLimitsDrawer,
     },
   };
 }

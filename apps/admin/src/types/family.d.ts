@@ -80,6 +80,12 @@ export interface FamilyLimitConfiguration {
   aiChatMonthlyUsage: number;
 }
 
+export interface UpdateFamilyLimitConfigurationDto {
+  maxMembers: number;
+  maxStorageMb: number;
+  aiChatMonthlyLimit: number;
+}
+
 export interface MemberExportDto {
   id: string;
   firstName: string;

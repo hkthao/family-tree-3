@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import type { PropType, Ref } from 'vue';
-import type { AiChatMessage, ChatAttachmentDto, ChatLocation } from '@/types/chat.d'; // Import ChatAttachmentDto and ChatLocation
+import type { AiChatMessage, ChatLocation } from '@/types/chat.d'; // Import ChatAttachmentDto and ChatLocation
 import { getAvatarUrl } from '@/utils/avatar.utils';
 import type { UserProfile } from '@/types/user.d';
 

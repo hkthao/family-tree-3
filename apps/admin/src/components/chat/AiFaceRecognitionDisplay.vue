@@ -14,8 +14,7 @@
 
       <div class="mt-2" v-if="detectionResult.detectedFaces && detectionResult.detectedFaces.length > 0">
         <v-chip v-for="face in detectionResult.detectedFaces.filter(f => f.status === 'recognized' && f.memberName)"
-          :key="face.id" class="ma-1" color="success"
-          @click="openOriginalImage(detectionResult.originalImageUrl)">
+          :key="face.id" class="ma-1" color="success" @click="openOriginalImage(detectionResult.originalImageUrl)">
           <v-avatar start size="24" v-if="face.thumbnail">
             <v-img :src="`data:image/jpeg;base64,${face.thumbnail}`"></v-img>
           </v-avatar>
@@ -32,7 +31,7 @@ import type { AiChatMessage } from '@/types';
 import { useI18n } from 'vue-i18n';
 import FaceBoundingBoxViewer from '@/components/face/FaceBoundingBoxViewer.vue';
 
-const props = defineProps({
+defineProps({
   message: {
     type: Object as PropType<AiChatMessage>,
     required: true,
@@ -42,11 +41,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const emit = defineEmits([
-  // If this component needs to emit, define them here.
-  // For now, only openOriginalImage is local.
-]);
 
 const { t } = useI18n();
 

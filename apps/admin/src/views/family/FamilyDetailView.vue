@@ -15,22 +15,16 @@
       <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
       </v-btn>
-      <v-btn color="info" @click="showLimitConfigDialog = true" data-testid="button-update-limits" v-if="isAdmin">
+      <v-btn color="info" @click="emit('openUpdateFamilyLimitDrawer', familyData.id)" data-testid="button-update-limits" v-if="isAdmin">
         {{ t('family.updateLimits') }}
       </v-btn>
     </v-card-actions>
-
-    <v-dialog v-model="showLimitConfigDialog" max-width="600">
-      <FamilyLimitConfigForm :family-id="props.familyId" @close="showLimitConfigDialog = false" />
-    </v-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
-import FamilyLimitConfigForm from '@/components/family/FamilyLimitConfigForm.vue'; // Placeholder import
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 import { useAuthStore } from '@/stores/auth.store'; // Import auth store
 
@@ -43,9 +37,7 @@ const props = defineProps<{
   readOnly: boolean;
 }>();
 
-const emit = defineEmits(['openEditDrawer']);
+const emit = defineEmits(['openEditDrawer', 'openUpdateFamilyLimitDrawer']);
 
 const { state: { familyData, isLoading, error, canManageFamily }, actions } = useFamilyDetail(props, emit);
-
-const showLimitConfigDialog = ref(false); // Control for the limit config dialog
 </script>

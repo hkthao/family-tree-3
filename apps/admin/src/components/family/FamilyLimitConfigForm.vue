@@ -1,97 +1,65 @@
 <template>
-  <v-card>
-    <v-card-title>{{ t('family.form.editLimitTitle') }}</v-card-title>
-    <v-card-text>
-      <v-form ref="formRef">
-        <v-text-field v-model.number="formData.maxMembers" :label="t('family.form.maxMembers')" type="number"
-          :rules="[rules.required, rules.positiveNumber]" data-testid="max-members-input"></v-text-field>
-        <v-text-field v-model.number="formData.maxStorageMb" :label="t('family.form.maxStorageMb')" type="number"
-          :rules="[rules.required, rules.positiveNumber]" data-testid="max-storage-mb-input"></v-text-field>
-        <v-text-field v-model.number="formData.aiChatMonthlyLimit" :label="t('family.form.aiChatMonthlyLimit')"
+  <v-form ref="formRef">
+    <v-row>
+      <v-col cols="6">
+        <v-text-field v-model.number="internalFamilyLimitData.maxMembers" :label="t('family.form.maxMembers')"
+          type="number" :rules="[rules.required, rules.positiveNumber]" data-testid="max-members-input"></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field v-model.number="internalFamilyLimitData.maxStorageMb" :label="t('family.form.maxStorageMb')"
           type="number" :rules="[rules.required, rules.positiveNumber]"
+          data-testid="max-storage-mb-input"></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <v-text-field v-model.number="internalFamilyLimitData.aiChatMonthlyLimit"
+          :label="t('family.form.aiChatMonthlyLimit')" type="number" :rules="[rules.required, rules.positiveNumber]"
           data-testid="ai-chat-monthly-limit-input"></v-text-field>
-      </v-form>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="gray" @click="emit('close')">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="saveLimits">{{ t('common.save') }}</v-btn>
-    </v-card-actions>
-  </v-card>
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
-import { useServices } from '@/plugins/services.plugin';
 import type { FamilyLimitConfiguration } from '@/types/family.d';
-import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { rules } from '@/utils/rules';
 
 const { t } = useI18n();
-const { family: familyService } = useServices();
-const { showSnackbar } = useGlobalSnackbar();
 
 const props = defineProps<{
   familyId: string;
+  familyLimitData: FamilyLimitConfiguration;
+  isSaving: boolean;
 }>();
 
-const emit = defineEmits(['close', 'updated']);
+const emit = defineEmits(['update:familyLimitData', 'save']);
 
 const formRef = ref<VForm | null>(null);
-const formData = ref<FamilyLimitConfiguration>({
-  id: '',
-  familyId: props.familyId,
-  maxMembers: 0,
-  maxStorageMb: 0,
-  aiChatMonthlyLimit: 0,
-  aiChatMonthlyUsage: 0, // This is usage, not editable here
-});
 
-const isLoading = ref(false);
+const internalFamilyLimitData = reactive<FamilyLimitConfiguration>({ ...props.familyLimitData });
 
-const loadFamilyLimits = async () => {
-  isLoading.value = true;
-  const result = await familyService.getFamilyLimitConfiguration(props.familyId);
-  if (result.ok && result.value) {
-    formData.value = { ...result.value };
-  } else {
-    showSnackbar(t('family.form.errorLoadLimits'), 'error');
-  }
-  isLoading.value = false;
-};
+watch(() => props.familyLimitData, (newVal) => {
+  Object.assign(internalFamilyLimitData, newVal);
+}, { deep: true });
 
-const saveLimits = async () => {
+const handleSave = async () => {
   const { valid } = await formRef.value!.validate();
-  if (!valid) return;
-
-  isLoading.value = true;
-  const result = await familyService.updateFamilyLimitConfiguration(props.familyId, {
-    maxMembers: formData.value.maxMembers,
-    maxStorageMb: formData.value.maxStorageMb,
-    aiChatMonthlyLimit: formData.value.aiChatMonthlyLimit,
-  });
-
-  if (result.ok) {
-    showSnackbar(t('family.form.saveLimitSuccess'), 'success');
-    emit('updated');
-    emit('close');
-  } else {
-    showSnackbar(result.error.message || t('family.form.errorSaveLimits'), 'error');
+  if (valid) {
+    emit('save', internalFamilyLimitData);
   }
-  isLoading.value = false;
 };
 
-onMounted(() => {
-  if (props.familyId) {
-    loadFamilyLimits();
-  }
-});
+const validate = async () => {
+  const { valid } = await formRef.value!.validate();
+  return valid;
+};
 
-watch(() => props.familyId, (newFamilyId) => {
-  if (newFamilyId) {
-    loadFamilyLimits();
-  }
+defineExpose({
+  validate,
+  handleSave, // Expose handleSave to be called by parent
 });
 </script>
+
+<style scoped></style>
