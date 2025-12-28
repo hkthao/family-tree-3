@@ -1,6 +1,8 @@
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers; // For MemberDetailDto
+using backend.Application.Events.Queries; // For EventDto
+using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 
 namespace backend.Application.Common.Interfaces;
 
@@ -55,4 +57,34 @@ public interface IPrivacyService
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách MemberListDto đã được lọc.</returns>
     Task<List<MemberListDto>> ApplyPrivacyFilter(List<MemberListDto> memberListDtos, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của EventDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="eventDto">EventDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình mà sự kiện thuộc về.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>EventDto đã được lọc.</returns>
+    Task<EventDto> ApplyPrivacyFilter(EventDto eventDto, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc danh sách các EventDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="eventDtos">Danh sách EventDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình mà các sự kiện thuộc về.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách EventDto đã được lọc.</returns>
+    Task<List<EventDto>> ApplyPrivacyFilter(List<EventDto> eventDtos, Guid familyId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lọc các thuộc tính của EventDetailDto dựa trên cấu hình quyền riêng tư của gia đình.
+    /// Admin sẽ luôn thấy toàn bộ dữ liệu.
+    /// </summary>
+    /// <param name="eventDetailDto">EventDetailDto cần lọc.</param>
+    /// <param name="familyId">ID của gia đình mà sự kiện thuộc về.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>EventDetailDto đã được lọc.</returns>
+    Task<EventDetailDto> ApplyPrivacyFilter(EventDetailDto eventDetailDto, Guid familyId, CancellationToken cancellationToken);
 }

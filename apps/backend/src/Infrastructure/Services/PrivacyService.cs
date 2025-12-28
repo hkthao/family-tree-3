@@ -1,9 +1,12 @@
 using System.Reflection;
+using backend.Infrastructure.Constants;
 using AutoMapper;
 using backend.Application.Common.Interfaces; // For ICurrentUserService
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById; // For MemberDetailDto
 using backend.Application.Members.Queries.GetMembers; // For MemberListDto
+using backend.Application.Events.Queries; // For EventDto
+using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +20,7 @@ public class PrivacyService : IPrivacyService
     private readonly IMapper _mapper;
 
     // Cache PropertyInfo objects to improve performance
-    private static readonly Dictionary<Type, Dictionary<string, PropertyInfo?>> _propertyCache = new();
+    private static readonly Dictionary<Type, Dictionary<string, PropertyInfo?>> _propertyCache = [];
 
     public PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService, IMapper mapper)
     {
@@ -93,23 +96,18 @@ public class PrivacyService : IPrivacyService
         {
             // If no config, create a default privacy config with predefined public properties
             privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicMemberProperties(new List<string>
-            {
-                "LastName",
-                "FirstName",
-                "Nickname",
-                "Gender",
-                "DateOfBirth",
-                "DateOfDeath",
-                "PlaceOfBirth",
-                "PlaceOfDeath",
-                "Occupation",
-                "Biography",
-            });
+            privacyConfig.UpdatePublicMemberProperties(PrivacyConstants.DefaultPublicMemberProperties.MemberDto);
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
-        var alwaysIncludeProps = new List<string> { "Id", "FamilyId", "Code", "IsRoot", "AvatarUrl" };
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeMemberProps.Code,
+            PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
+            PrivacyConstants.AlwaysIncludeMemberProps.AvatarUrl
+        };
 
         return FilterDto(memberDto, publicProperties, alwaysIncludeProps);
     }
@@ -140,34 +138,23 @@ public class PrivacyService : IPrivacyService
         {
             // If no config, create a default privacy config with predefined public properties
             privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicMemberProperties(new List<string>
-            {
-                "LastName",
-                "FirstName",
-                "Nickname",
-                "Gender",
-                "DateOfBirth",
-                "DateOfDeath",
-                "PlaceOfBirth",
-                "PlaceOfDeath",
-                "Occupation",
-                "Biography",
-                "FatherFullName",
-                "MotherFullName",
-                "HusbandFullName",
-                "WifeFullName"
-            });
+            privacyConfig.UpdatePublicMemberProperties(PrivacyConstants.DefaultPublicMemberProperties.MemberDetailDto);
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
         var alwaysIncludeProps = new List<string>
         {
-            "Id", "FamilyId", "IsRoot", "AvatarUrl",
-            "SourceRelationships", "TargetRelationships"
+            PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
+            PrivacyConstants.AlwaysIncludeMemberProps.AvatarUrl,
+            PrivacyConstants.AlwaysIncludeMemberProps.SourceRelationships,
+            PrivacyConstants.AlwaysIncludeMemberProps.TargetRelationships
         };
 
         return FilterDto(memberDetailDto, publicProperties, alwaysIncludeProps);
     }
+
     public async Task<MemberListDto> ApplyPrivacyFilter(MemberListDto memberListDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
@@ -184,36 +171,28 @@ public class PrivacyService : IPrivacyService
         {
             // If no config, create a default privacy config with predefined public properties
             privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicMemberProperties(new List<string>
-            {
-                "LastName",
-                "FirstName",
-                "Nickname",
-                "Gender",
-                "DateOfBirth",
-                "DateOfDeath",
-                "PlaceOfBirth",
-                "PlaceOfDeath",
-                "Occupation",
-                "Biography",
-                "FatherFullName",
-                "MotherFullName",
-                "HusbandFullName",
-                "WifeFullName"
-            });
+            privacyConfig.UpdatePublicMemberProperties(PrivacyConstants.DefaultPublicMemberProperties.MemberListDto);
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
         var alwaysIncludeProps = new List<string>
         {
-            "Id", "Code", "IsRoot", "AvatarUrl", "FamilyId", "FamilyName",
-            "FatherId", "MotherId", "HusbandId", "WifeId"
+            PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.Code,
+            PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
+            PrivacyConstants.AlwaysIncludeMemberProps.AvatarUrl,
+            PrivacyConstants.AlwaysIncludeMemberProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeMemberProps.FamilyName,
+            PrivacyConstants.AlwaysIncludeMemberProps.FatherId,
+            PrivacyConstants.AlwaysIncludeMemberProps.MotherId,
+            PrivacyConstants.AlwaysIncludeMemberProps.HusbandId,
+            PrivacyConstants.AlwaysIncludeMemberProps.WifeId
         };
 
         var filteredMemberListDto = FilterDto(memberListDto, publicProperties, alwaysIncludeProps);
 
         // Special handling for FullName if FirstName or LastName are private
-        if (!publicProperties.Contains(nameof(MemberListDto.FirstName)) || !publicProperties.Contains(nameof(MemberListDto.LastName)))
+        if (!publicProperties.Contains(PrivacyConstants.MemberProps.FirstName) || !publicProperties.Contains(PrivacyConstants.MemberProps.LastName))
         {
             filteredMemberListDto.FirstName = string.Empty;
             filteredMemberListDto.LastName = string.Empty;
@@ -231,5 +210,85 @@ public class PrivacyService : IPrivacyService
             filteredList.Add(await ApplyPrivacyFilter(memberListDto, familyId, cancellationToken));
         }
         return filteredList;
+    }
+
+    public async Task<EventDto> ApplyPrivacyFilter(EventDto eventDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return eventDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicEventProperties(PrivacyConstants.DefaultPublicEventProperties.EventDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicEventPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeEventProps.Id,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyName,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyAvatarUrl,
+            PrivacyConstants.AlwaysIncludeEventProps.RelatedMembers,
+            PrivacyConstants.AlwaysIncludeEventProps.RelatedMemberIds
+        };
+
+        return FilterDto(eventDto, publicProperties, alwaysIncludeProps);
+    }
+
+    public async Task<List<EventDto>> ApplyPrivacyFilter(List<EventDto> eventDtos, Guid familyId, CancellationToken cancellationToken)
+    {
+        var filteredList = new List<EventDto>();
+        foreach (var eventDto in eventDtos)
+        {
+            filteredList.Add(await ApplyPrivacyFilter(eventDto, familyId, cancellationToken));
+        }
+        return filteredList;
+    }
+
+    public async Task<EventDetailDto> ApplyPrivacyFilter(EventDetailDto eventDetailDto, Guid familyId, CancellationToken cancellationToken)
+    {
+        // Admin always sees full data
+        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        {
+            return eventDetailDto;
+        }
+
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+
+        if (privacyConfig == null)
+        {
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicEventProperties(PrivacyConstants.DefaultPublicEventProperties.EventDetailDto);
+        }
+
+        var publicProperties = privacyConfig.GetPublicEventPropertiesList();
+        var alwaysIncludeProps = new List<string>
+        {
+            PrivacyConstants.AlwaysIncludeEventProps.Id,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyId,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyName,
+            PrivacyConstants.AlwaysIncludeEventProps.FamilyAvatarUrl,
+            PrivacyConstants.AlwaysIncludeEventProps.RelatedMembers,
+            PrivacyConstants.AlwaysIncludeEventProps.RelatedMemberIds,
+            PrivacyConstants.AlwaysIncludeEventProps.Created,
+            PrivacyConstants.AlwaysIncludeEventProps.CreatedBy,
+            PrivacyConstants.AlwaysIncludeEventProps.LastModified,
+            PrivacyConstants.AlwaysIncludeEventProps.LastModifiedBy
+        };
+
+        return FilterDto(eventDetailDto, publicProperties, alwaysIncludeProps);
     }
 }

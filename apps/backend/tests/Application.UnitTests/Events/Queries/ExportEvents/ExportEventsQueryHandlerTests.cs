@@ -1,3 +1,4 @@
+using Moq;
 using backend.Application.Events.Queries; // EventDto is here now
 using backend.Application.Events.Queries.ExportEvents;
 using backend.Application.UnitTests.Common;
@@ -7,16 +8,25 @@ using backend.Domain.ValueObjects;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
 
 namespace backend.Application.UnitTests.Events.Queries.ExportEvents;
 
 public class ExportEventsQueryHandlerTests : TestBase
 {
     private readonly ExportEventsQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public ExportEventsQueryHandlerTests()
     {
-        _handler = new ExportEventsQueryHandler(_context, _mapper);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<EventDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<EventDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
+        _handler = new ExportEventsQueryHandler(_context, _mapper, _mockPrivacyService.Object);
     }
 
     /// <summary>

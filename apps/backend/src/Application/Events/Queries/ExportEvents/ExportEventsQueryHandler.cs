@@ -8,11 +8,13 @@ public class ExportEventsQueryHandler : IRequestHandler<ExportEventsQuery, Resul
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public ExportEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public ExportEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<string>> Handle(ExportEventsQuery request, CancellationToken cancellationToken)
@@ -31,7 +33,14 @@ public class ExportEventsQueryHandler : IRequestHandler<ExportEventsQuery, Resul
         }
 
         var eventDtos = _mapper.Map<List<EventDto>>(events);
-        var json = JsonConvert.SerializeObject(eventDtos, Formatting.Indented);
+        var filteredEventDtos = new List<EventDto>();
+        foreach (var eventDto in eventDtos)
+        {
+            // Apply privacy filter to each EventDto
+            filteredEventDtos.Add(await _privacyService.ApplyPrivacyFilter(eventDto, request.FamilyId, cancellationToken));
+        }
+
+        var json = JsonConvert.SerializeObject(filteredEventDtos, Formatting.Indented);
 
         return Result<string>.Success(json);
     }

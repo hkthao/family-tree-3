@@ -1,3 +1,4 @@
+using Moq;
 using backend.Application.Common.Constants;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.UnitTests.Common;
@@ -5,13 +6,28 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // For EventDto
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto, etc.
 
 namespace backend.Application.UnitTests.Events.Queries.GetEventById;
 
 public class GetEventByIdQueryHandlerTests : TestBase
 {
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
+
     public GetEventByIdQueryHandlerTests()
     {
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDetailDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventDetailDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<MemberListDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MemberListDto dto, Guid familyId, CancellationToken token) => dto);
+
+
         // TestBase already sets up _mockUser and _mockAuthorizationService
         // Set default authenticated user for specific scenarios if needed
         _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
@@ -30,7 +46,7 @@ public class GetEventByIdQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetEventByIdQuery(testEvent.Id);
-        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -48,7 +64,7 @@ public class GetEventByIdQueryHandlerTests : TestBase
         // Arrange
         var nonExistentEventId = Guid.NewGuid();
         var query = new GetEventByIdQuery(nonExistentEventId);
-        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -67,7 +83,7 @@ public class GetEventByIdQueryHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
 
         var eventId = Guid.NewGuid();
-        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new GetEventByIdQuery(eventId);
 
         // Act
@@ -103,7 +119,7 @@ public class GetEventByIdQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new GetEventByIdQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new GetEventByIdQuery(inaccessibleEvent.Id); // Try to get the inaccessible event
 
         // Act

@@ -68,7 +68,7 @@ const memberProperties = computed(() => [
   { text: t('member.form.dateOfBirth'), value: 'DateOfBirth' },
   { text: t('member.form.dateOfDeath'), value: 'DateOfDeath' },
   { text: t('member.form.placeOfBirth'), value: 'PlaceOfBirth' },
-  { text: t('member.form.placeOfDeath'), value: 'PlaceOfBirth' },
+  { text: t('member.form.placeOfDeath'), value: 'PlaceOfDeath' },
   { text: t('member.form.phone'), value: 'Phone' },
   { text: t('member.form.email'), value: 'Email' },
   { text: t('member.form.address'), value: 'Address' },
@@ -78,6 +78,10 @@ const memberProperties = computed(() => [
   { text: t('member.form.motherFullName'), value: 'MotherFullName' },
   { text: t('member.form.husbandFullName'), value: 'HusbandFullName' },
   { text: t('member.form.wifeFullName'), value: 'WifeFullName' },
+  { text: t('familyLocation.list.title'), value: 'MapData' }, // New
+  { text: t('event.list.title'), value: 'Events' }, // New
+  { text: t('memberFace.list.title'), value: 'MemberFaces' }, // New
+  { text: t('memoryItem.list.title'), value: 'MemoryItems' }, // New
 ]);
 
 // Watch for changes in privacyConfiguration fetched by the composable

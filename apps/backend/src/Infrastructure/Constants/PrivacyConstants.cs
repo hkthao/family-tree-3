@@ -1,0 +1,169 @@
+namespace backend.Infrastructure.Constants;
+
+public static class PrivacyConstants
+{
+    // Common Member Properties
+    public static class MemberProps
+    {
+        public const string LastName = "LastName";
+        public const string FirstName = "FirstName";
+        public const string Nickname = "Nickname";
+        public const string Gender = "Gender";
+        public const string DateOfBirth = "DateOfBirth";
+        public const string DateOfDeath = "DateOfDeath";
+        public const string PlaceOfBirth = "PlaceOfBirth";
+        public const string PlaceOfDeath = "PlaceOfDeath";
+        public const string Occupation = "Occupation";
+        public const string Biography = "Biography";
+        public const string Education = "Education";
+        public const string Religion = "Religion";
+        public const string PhoneNumber = "PhoneNumber";
+        public const string Email = "Email";
+        public const string Address = "Address";
+        public const string Identification = "Identification";
+        public const string SocialMedia = "SocialMedia";
+        public const string Notes = "Notes";
+        public const string FatherId = "FatherId";
+        public const string MotherId = "MotherId";
+        public const string HusbandId = "HusbandId";
+        public const string WifeId = "WifeId";
+    }
+
+    // Always Included Member Properties (Common to all DTOs for members)
+    public static class AlwaysIncludeMemberProps
+    {
+        public const string Id = "Id";
+        public const string FamilyId = "FamilyId";
+        public const string IsRoot = "IsRoot";
+        public const string AvatarUrl = "AvatarUrl";
+        public const string Code = "Code"; // Specific to MemberDto and MemberListDto
+        public const string FamilyName = "FamilyName"; // Specific to MemberListDto
+        public const string FatherFullName = "FatherFullName"; // Specific to MemberDetailDto and MemberListDto default public props
+        public const string MotherFullName = "MotherFullName"; // Specific to MemberDetailDto and MemberListDto default public props
+        public const string HusbandFullName = "HusbandFullName"; // Specific to MemberDetailDto and MemberListDto default public props
+        public const string WifeFullName = "WifeFullName"; // Specific to MemberDetailDto and MemberListDto default public props
+        public const string SourceRelationships = "SourceRelationships"; // Specific to MemberDetailDto
+        public const string TargetRelationships = "TargetRelationships"; // Specific to MemberDetailDto
+        public const string FatherId = "FatherId"; // Specific to MemberListDto
+        public const string MotherId = "MotherId"; // Specific to MemberListDto
+        public const string HusbandId = "HusbandId"; // Specific to MemberListDto
+        public const string WifeId = "WifeId"; // Specific to MemberListDto
+    }
+
+    public static class DefaultPublicMemberProperties
+    {
+        public static readonly List<string> MemberDto = new List<string>
+        {
+            MemberProps.LastName,
+            MemberProps.FirstName,
+            MemberProps.Nickname,
+            MemberProps.Gender,
+            MemberProps.DateOfBirth,
+            MemberProps.DateOfDeath,
+            MemberProps.PlaceOfBirth,
+            MemberProps.PlaceOfDeath,
+            MemberProps.Occupation,
+            MemberProps.Biography,
+        };
+
+        public static readonly List<string> MemberDetailDto = new List<string>
+        {
+            MemberProps.LastName,
+            MemberProps.FirstName,
+            MemberProps.Nickname,
+            MemberProps.Gender,
+            MemberProps.DateOfBirth,
+            MemberProps.DateOfDeath,
+            MemberProps.PlaceOfBirth,
+            MemberProps.PlaceOfDeath,
+            MemberProps.Occupation,
+            MemberProps.Biography,
+            AlwaysIncludeMemberProps.FatherFullName,
+            AlwaysIncludeMemberProps.MotherFullName,
+            AlwaysIncludeMemberProps.HusbandFullName,
+            AlwaysIncludeMemberProps.WifeFullName
+        };
+
+        public static readonly List<string> MemberListDto = new List<string>
+        {
+            MemberProps.LastName,
+            MemberProps.FirstName,
+            MemberProps.Nickname,
+            MemberProps.Gender,
+            MemberProps.DateOfBirth,
+            MemberProps.DateOfDeath,
+            MemberProps.PlaceOfBirth,
+            MemberProps.PlaceOfDeath,
+            MemberProps.Occupation,
+            MemberProps.Biography,
+            AlwaysIncludeMemberProps.FatherFullName,
+            AlwaysIncludeMemberProps.MotherFullName,
+            AlwaysIncludeMemberProps.HusbandFullName,
+            AlwaysIncludeMemberProps.WifeFullName
+        };
+    }
+
+    // Common Event Properties
+    public static class EventProps
+    {
+        public const string Name = "Name";
+        public const string Code = "Code";
+        public const string Description = "Description";
+        public const string CalendarType = "CalendarType";
+        public const string SolarDate = "SolarDate";
+        public const string LunarDate = "LunarDate";
+        public const string RepeatRule = "RepeatRule";
+        public const string Type = "Type";
+        public const string Color = "Color";
+    }
+
+    // Always Included Event Properties
+    public static class AlwaysIncludeEventProps
+    {
+        public const string Id = "Id";
+        public const string FamilyId = "FamilyId";
+        public const string FamilyName = "FamilyName";
+        public const string FamilyAvatarUrl = "FamilyAvatarUrl";
+        public const string RelatedMembers = "RelatedMembers";
+        public const string RelatedMemberIds = "RelatedMemberIds";
+
+        // Auditable properties
+        public const string Created = "Created";
+        public const string CreatedBy = "CreatedBy";
+        public const string LastModified = "LastModified";
+        public const string LastModifiedBy = "LastModifiedBy";
+    }
+
+    public static class DefaultPublicEventProperties
+    {
+        public static readonly List<string> EventDto = new List<string>
+        {
+            EventProps.Name,
+            EventProps.Code,
+            EventProps.Description,
+            EventProps.CalendarType,
+            EventProps.SolarDate,
+            EventProps.LunarDate,
+            EventProps.RepeatRule,
+            EventProps.Type,
+            EventProps.Color,
+        };
+
+        public static readonly List<string> EventDetailDto = new List<string>
+        {
+            EventProps.Name,
+            EventProps.Code,
+            EventProps.Description,
+            EventProps.CalendarType,
+            EventProps.SolarDate,
+            EventProps.LunarDate,
+            EventProps.RepeatRule,
+            EventProps.Type,
+            EventProps.Color,
+            AlwaysIncludeEventProps.Created,
+            AlwaysIncludeEventProps.CreatedBy,
+            AlwaysIncludeEventProps.LastModified,
+            AlwaysIncludeEventProps.LastModifiedBy
+        };
+    }
+}

@@ -6,12 +6,13 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.SearchEvents;
 
-public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUserService) : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
+public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUserService, IPrivacyService privacyService) : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUserService = currentUserService;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
@@ -42,10 +43,24 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
             _ => query.OrderBy(e => e.Name) // Default sort if no sortBy is provided or relevant date fields are not applicable
         };
 
-        var paginatedList = await query
-            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
+        var paginatedEventEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
-        return Result<PaginatedList<EventDto>>.Success(paginatedList);
+        var eventDtos = _mapper.Map<List<EventDto>>(paginatedEventEntities.Items);
+
+        var filteredEventDtos = new List<EventDto>();
+        foreach (var eventDto in eventDtos)
+        {
+            filteredEventDtos.Add(await _privacyService.ApplyPrivacyFilter(eventDto, eventDto.FamilyId ?? Guid.Empty, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<EventDto>(
+            filteredEventDtos,
+            paginatedEventEntities.TotalItems,
+            paginatedEventEntities.Page,
+            paginatedEventEntities.TotalPages
+        );
+
+        return Result<PaginatedList<EventDto>>.Success(filteredPaginatedList);
     }
 }
