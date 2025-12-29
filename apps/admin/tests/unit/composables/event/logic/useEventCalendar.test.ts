@@ -6,9 +6,6 @@ import type { EventDto } from '@/types';
 import { CalendarType, RepeatRule, EventType } from '@/types';
 import type { IEventService } from '@/services/event/event.service.interface';
 import type { DateAdapter, LunarDateAdapter } from '@/composables/event/eventCalendar.adapter';
-
-// Mock dependencies
-import type { Composer } from 'vue-i18n';
 import type { Mock } from 'vitest';
 
 const mockT = vi.fn((key: string) => key); // Mock i18n translation function
@@ -91,7 +88,7 @@ const mockLunarDateAdapter: LunarDateAdapter = { // Add as LunarDateAdapter
     getMonth: () => solar.getMonth(),
     getDay: () => solar.getDay(),
   })) as Mock,
-  getLunarDaysInMonth: vi.fn((year, month) => 30) as Mock, // Default to 30 days
+  getLunarDaysInMonth: vi.fn((_year, _month) => 30) as Mock, // Default to 30 days
 } as LunarDateAdapter; // Explicitly cast here
 
 

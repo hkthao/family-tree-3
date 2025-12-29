@@ -1,16 +1,16 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, unref, type Ref } from 'vue';
 import { useFamilyLocationsQuery } from './queries/useFamilyLocationsQuery';
 import type { FamilyLocation, FamilyLocationFilter, ListOptions } from '@/types';
 import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
-export function useFamilyLocationSearch(familyId: string) {
+export function useFamilyLocationSearch(familyIdRef: Ref<string | null>) {
   const { state: debouncedSearchState } = useDebouncedSearch('', 300); // Use useDebouncedSearch
   const page = ref(1);
   const itemsPerPage = ref(10);
   const sortBy = ref<ListOptions['sortBy']>([]);
 
   const filterOptions = computed<FamilyLocationFilter>(() => ({
-    familyId: familyId,
+    familyId: unref(familyIdRef) || undefined, // Use unref and handle null/empty string
     searchQuery: debouncedSearchState.debouncedSearchQuery.value, // Use debounced value
   }));
 
@@ -32,9 +32,9 @@ export function useFamilyLocationSearch(familyId: string) {
   );
   const totalItems = computed(() => paginatedFamilyLocations.value?.totalItems || 0);
 
-  // Watch for changes in familyId to reset pagination and refetch
+  // Watch for changes in familyIdRef to reset pagination and refetch
   watch(
-    () => familyId,
+    familyIdRef,
     () => {
       page.value = 1;
       sortBy.value = [];

@@ -18,7 +18,8 @@
     <v-row>
       <v-col cols="12">
         <v-text-field v-model="formData.address" :label="$t('family.form.address')"
-          data-testid="family-address-input"></v-text-field>
+          data-testid="family-address-input" :append-inner-icon="props.readOnly ? '' : 'mdi-map-marker'"
+          @click:append-inner="openLocationPicker" :readonly="props.readOnly"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -81,6 +82,7 @@ import type { FamilyDto } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useFamilyForm } from '@/composables';
+import { useLocationDrawerStore } from '@/stores/locationDrawer.store'; // Import the store
 
 const props = defineProps<{
   data?: FamilyDto;
@@ -91,11 +93,24 @@ const props = defineProps<{
 defineEmits(['submit']);
 
 const formRef = ref<VForm | null>(null);
+const locationDrawerStore = useLocationDrawerStore(); // Initialize the store
 
 const {
   state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
   actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
+
+const openLocationPicker = async () => {
+  if (props.readOnly) return;
+  try {
+    const selectedLocation = await locationDrawerStore.openDrawer((formData as FamilyDto).id || undefined); // Pass familyId, handle undefined
+    if (selectedLocation && selectedLocation.address) {
+      formData.address = selectedLocation.address;
+    }
+  } catch (error) {
+    console.error('Location selection cancelled or failed:', error);
+  }
+};
 
 defineExpose({
   validate,

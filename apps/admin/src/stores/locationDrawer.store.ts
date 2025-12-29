@@ -10,8 +10,8 @@ export const useLocationDrawerStore = defineStore('locationDrawer', () => {
   let resolvePromise: ((value: FamilyLocation) => void) | null = null;
   let rejectPromise: ((reason?: any) => void) | null = null;
 
-  function openDrawer(familyId: string): Promise<FamilyLocation> {
-    initialFamilyId.value = familyId;
+  function openDrawer(familyId?: string | null): Promise<FamilyLocation> {
+    initialFamilyId.value = familyId || null;
     drawer.value = true;
     return new Promise((resolve, reject) => {
       resolvePromise = resolve;
