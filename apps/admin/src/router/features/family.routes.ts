@@ -1,4 +1,5 @@
 import { MainRouterView, FamilyAddView, FamilyTabsView, FamilyEditView, FamilyListView } from '@/views';
+import PublicFamilyListView from '@/views/family/PublicFamilyListView.vue'; // Added for community routes
 import type { RouteRecordRaw } from 'vue-router';
 
 export const familyRoutes: RouteRecordRaw[] = [
@@ -33,5 +34,23 @@ export const familyRoutes: RouteRecordRaw[] = [
         meta: { breadcrumb: 'family.form.editTitle' },
       },
     ],
+  },
+  {
+    path: '/community/families', // Note the absolute path here, as it's a top-level route
+    name: 'community',
+    component: MainRouterView,
+    children: [
+      {
+      path: '',
+      name:"PublicFamilyList",
+      component: PublicFamilyListView,
+      meta: {
+        requiresAuth: true,
+        title: 'menu.community', // Use i18n key for title
+        icon: 'mdi-account-group', // Add icon for the route
+        breadcrumb: 'menu.community', // Add breadcrumb for the route
+      },
+    }
+    ]
   },
 ];
