@@ -45,6 +45,7 @@ public class ExportMembersQueryHandlerTests : TestBase
         // Arrange
         var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF" };
         _context.Families.Add(family);
+        await _context.SaveChangesAsync(); 
 
         var member1 = new Member(
             "John", "Doe", "JD1", family.Id, "Johnny", "Male",
@@ -57,7 +58,17 @@ public class ExportMembersQueryHandlerTests : TestBase
             "Place B", null, "987-654-3210", "jane@example.com", "Address B", "Doctor", "avatar2.png", "Biography 2", 2, false
         );
         _context.Members.AddRange(member1, member2);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(); 
+
+        // Get the actual IDs assigned by the database after SaveChanges
+        var dbMember1 = _context.Members.AsNoTracking().First(m => m.Code == member1.Code);
+        var dbMember2 = _context.Members.AsNoTracking().First(m => m.Code == member2.Code);
+
+        // Assert that the members were found and have non-empty IDs (sanity check)
+        dbMember1.Should().NotBeNull();
+        dbMember2.Should().NotBeNull();
+        dbMember1.Id.Should().NotBe(Guid.Empty);
+        dbMember2.Id.Should().NotBe(Guid.Empty);
 
         var query = new ExportMembersQuery(family.Id);
 
@@ -71,25 +82,26 @@ public class ExportMembersQueryHandlerTests : TestBase
         var exportedMembers = JsonConvert.DeserializeObject<List<MemberDto>>(result.Value!)!;
         exportedMembers.Should().HaveCount(2);
 
-        var exportedMember1 = exportedMembers.FirstOrDefault(m => m.FirstName == member1.FirstName)!;
+        // Find exported members by a unique non-Id property (Code or FirstName)
+        var exportedMember1 = exportedMembers.FirstOrDefault(m => m.Code == dbMember1.Code)!;
         exportedMember1.Should().NotBeNull();
-        exportedMember1.Id.Should().Be(member1.Id);
-        exportedMember1.LastName.Should().Be(member1.LastName);
-        exportedMember1.FirstName.Should().Be(member1.FirstName);
-        exportedMember1.FamilyId.Should().Be(member1.FamilyId);
-        exportedMember1.DateOfBirth.Should().Be(member1.DateOfBirth);
-        exportedMember1.Occupation.Should().Be(member1.Occupation);
-        exportedMember1.Biography.Should().Be(member1.Biography);
+        exportedMember1.Id.Should().Be(dbMember1.Id); // Compare with actual DB ID
+        exportedMember1.LastName.Should().Be(dbMember1.LastName);
+        exportedMember1.FirstName.Should().Be(dbMember1.FirstName);
+        exportedMember1.FamilyId.Should().Be(dbMember1.FamilyId);
+        exportedMember1.DateOfBirth.Should().Be(dbMember1.DateOfBirth);
+        exportedMember1.Occupation.Should().Be(dbMember1.Occupation);
+        exportedMember1.Biography.Should().Be(dbMember1.Biography);
 
-        var exportedMember2 = exportedMembers.FirstOrDefault(m => m.FirstName == member2.FirstName)!;
+        var exportedMember2 = exportedMembers.FirstOrDefault(m => m.Code == dbMember2.Code)!;
         exportedMember2.Should().NotBeNull();
-        exportedMember2.Id.Should().Be(member2.Id);
-        exportedMember2.LastName.Should().Be(member2.LastName);
-        exportedMember2.FirstName.Should().Be(member2.FirstName);
-        exportedMember2.FamilyId.Should().Be(member2.FamilyId);
-        exportedMember2.DateOfBirth.Should().Be(member2.DateOfBirth);
-        exportedMember2.Occupation.Should().Be(member2.Occupation);
-        exportedMember2.Biography.Should().Be(member2.Biography);
+        exportedMember2.Id.Should().Be(dbMember2.Id); // Compare with actual DB ID
+        exportedMember2.LastName.Should().Be(dbMember2.LastName);
+        exportedMember2.FirstName.Should().Be(dbMember2.FirstName);
+        exportedMember2.FamilyId.Should().Be(dbMember2.FamilyId);
+        exportedMember2.DateOfBirth.Should().Be(dbMember2.DateOfBirth);
+        exportedMember2.Occupation.Should().Be(dbMember2.Occupation);
+        exportedMember2.Biography.Should().Be(dbMember2.Biography);
     }
 
     /// <summary>
