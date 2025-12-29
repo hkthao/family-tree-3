@@ -62,8 +62,8 @@
     </BaseCrudDrawer>
 
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed"
-        @edit="handleDetailEdit" />
+      <EventDetailView v-if="detailDrawer" :event-id="selectedEventId ?? undefined"
+        :event="selectedEventDtoForDetail ?? undefined" @close="handleDetailClosed" @edit="handleDetailEdit" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -98,6 +98,7 @@ const {
   addDrawer,
   detailDrawer,
   selectedEventId,
+  selectedEventDtoForDetail, // Import the new ref
   isDatePickerOpen,
   calendarRef,
   calendarType,
