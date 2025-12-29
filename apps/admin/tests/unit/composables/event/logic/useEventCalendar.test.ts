@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, computed } from 'vue'; // Added computed
 import { useEventCalendar } from '@/composables/event/logic/useEventCalendar';
 import type { EventDto } from '@/types';
 import { CalendarType, RepeatRule, EventType } from '@/types';
@@ -8,28 +8,49 @@ import type { IEventService } from '@/services/event/event.service.interface';
 import type { DateAdapter, LunarDateAdapter } from '@/composables/event/eventCalendar.adapter';
 
 // Mock dependencies
+import type { Composer } from 'vue-i18n';
+import type { Mock } from 'vitest';
+
 const mockT = vi.fn((key: string) => key); // Mock i18n translation function
 const mockLocale = ref('en'); // Mock i18n locale
-const mockUseI18n = vi.fn(() => ({ t: mockT, locale: mockLocale }));
+const mockUseI18n = vi.fn(() => ({
+  t: mockT,
+  locale: mockLocale,
+})) as any; // Cast to any to bypass strict Composer typing for simple mock
 
 const mockIsAdmin = ref(false);
 const mockIsFamilyManagerFn = vi.fn((familyId: string) => familyId === 'family1');
 const mockIsFamilyManager = ref(mockIsFamilyManagerFn); // It's a ref holding a function
 const mockUseAuth = vi.fn(() => ({
   state: {
-    isAdmin: mockIsAdmin,
-    isFamilyManager: mockIsFamilyManager, // This is a ref
+    isLoggedIn: computed(() => true), // Added
+    userRoles: computed(() => []), // Added
+    isAdmin: computed(() => mockIsAdmin.value), // Adjusted to ComputedRef<boolean>
+    isFamilyManager: computed(() => mockIsFamilyManager.value), // Adjusted to ComputedRef<Function>
+    currentUser: computed(() => ({
+      id: 'user1',
+      name: 'Test User',
+      externalId: 'ext1',
+      email: 'test@example.com',
+    })), // More complete mock for User
+    userFamilyAccess: computed(() => []), // Changed to an empty array
+  },
+  actions: { // Add actions to mockUseAuth
+    hasRole: vi.fn(),
+    hasFamilyRole: vi.fn(),
   },
 }));
 
 const mockEventService: IEventService = {
-  add: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-  getById: vi.fn(),
-  search: vi.fn(),
-  getEventsByFamilyId: vi.fn(),
-  getByIds: vi.fn(),
+  add: vi.fn() as Mock,
+  update: vi.fn() as Mock,
+  delete: vi.fn() as Mock,
+  getById: vi.fn() as Mock,
+  search: vi.fn() as Mock,
+  getEventsByFamilyId: vi.fn() as Mock, // Explicitly cast here
+  getByIds: vi.fn() as Mock,
+  exportEvents: vi.fn() as Mock,
+  importEvents: vi.fn() as Mock,
 };
 
 const mockDateAdapter = {
@@ -38,39 +59,40 @@ const mockDateAdapter = {
       return new Date(year, month, day);
     }
     return new Date('2024-01-15T12:00:00.000Z'); // Fixed date for testing
-  }),
-  getFullYear: vi.fn((date: Date) => date.getFullYear()),
-  getMonth: vi.fn((date: Date) => date.getMonth()),
-  getDate: vi.fn((date: Date) => date.getDate()),
-  startOfMonth: vi.fn((date: Date) => new Date(date.getFullYear(), date.getMonth(), 1)),
-  endOfMonth: vi.fn((date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0)),
+  }) as Mock,
+  getFullYear: vi.fn((date: Date) => date.getFullYear()) as Mock,
+  getMonth: vi.fn((date: Date) => date.getMonth()) as Mock,
+  getDate: vi.fn((date: Date) => date.getDate()) as Mock,
+  startOfMonth: vi.fn((date: Date) => new Date(date.getFullYear(), date.getMonth(), 1)) as Mock,
+  endOfMonth: vi.fn((date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0)) as Mock,
+  isSameDay: vi.fn((date1: Date, date2: Date) => date1.toDateString() === date2.toDateString()) as Mock, // ADDED isSameDay
 };
 
-const mockLunarDateAdapter = {
+const mockLunarDateAdapter: LunarDateAdapter = { // Add as LunarDateAdapter
   lunarFromYmd: vi.fn((year, month, day) => ({
     getYear: () => year,
     getMonth: () => month,
     getDay: () => day,
-  })),
+  })) as Mock,
   getSolar: vi.fn((lunar) => ({
     getYear: () => lunar.getYear(),
     getMonth: () => lunar.getMonth(),
     getDay: () => lunar.getDay(),
-  })),
+  })) as Mock,
   solarFromYmd: vi.fn((year, month, day) => ({
     getLunar: () => ({
       getYear: () => year,
       getMonth: () => month,
       getDay: () => day,
     }),
-  })),
+  })) as Mock,
   fromSolar: vi.fn((solar) => ({
     getYear: () => solar.getYear(),
     getMonth: () => solar.getMonth(),
     getDay: () => solar.getDay(),
-  })),
-  getLunarDaysInMonth: vi.fn((year, month) => 30), // Default to 30 days
-};
+  })) as Mock,
+  getLunarDaysInMonth: vi.fn((year, month) => 30) as Mock, // Default to 30 days
+} as LunarDateAdapter; // Explicitly cast here
 
 
 const TestComponent = defineComponent({
@@ -103,7 +125,7 @@ describe('useEventCalendar', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockEventService.getEventsByFamilyId.mockResolvedValue({ ok: true, value: [mockEventDto] });
+    (mockEventService.getEventsByFamilyId as Mock<any>).mockResolvedValue({ ok: true, value: [mockEventDto] });
     mockIsAdmin.value = false;
     mockUseI18n.mockClear();
     mockUseAuth.mockClear();
@@ -143,7 +165,7 @@ describe('useEventCalendar', () => {
   });
 
   it('should handle error when fetching events', async () => {
-    mockEventService.getEventsByFamilyId.mockResolvedValue({ ok: false, error: new Error('Failed to fetch') });
+    (mockEventService.getEventsByFamilyId as Mock<any>).mockResolvedValue({ ok: false, error: new Error('Failed to fetch') });
     const wrapper = mount(TestComponent, { props: { familyId: mockFamilyId } });
     const { state } = wrapper.vm;
     await vi.dynamicImportSettled();
@@ -235,7 +257,7 @@ describe('useEventCalendar', () => {
     const { actions } = wrapper.vm;
     await vi.dynamicImportSettled();
 
-    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date() };
+    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date(), title: 'Mock Title' };
     wrapper.vm.state.calendarRef.value = mockCalendarRef;
 
     actions.prev();
@@ -247,7 +269,7 @@ describe('useEventCalendar', () => {
     const { actions } = wrapper.vm;
     await vi.dynamicImportSettled();
 
-    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date() };
+    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date(), title: 'Mock Title' };
     wrapper.vm.state.calendarRef.value = mockCalendarRef;
 
     actions.next();
@@ -259,7 +281,7 @@ describe('useEventCalendar', () => {
     const { actions } = wrapper.vm;
     await vi.dynamicImportSettled();
 
-    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date() };
+    const mockCalendarRef = { prev: vi.fn(), next: vi.fn(), value: new Date(), title: 'Mock Title' };
     wrapper.vm.state.calendarRef.value = mockCalendarRef;
     mockDateAdapter.newDate.mockReturnValueOnce(new Date('2024-03-01T12:00:00.000Z')); // Mock today's date
 

@@ -42,4 +42,5 @@ export interface FamilyLocationFilter extends PaginationFilter {
   familyId?: string;
   locationType?: LocationType;
   locationSource?: LocationSource;
+  searchQuery?: string;
 }
