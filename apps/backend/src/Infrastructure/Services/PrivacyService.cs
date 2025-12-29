@@ -108,6 +108,8 @@ public class PrivacyService : IPrivacyService
         var alwaysIncludeProps = new List<string>
         {
             PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.FirstName,
+            PrivacyConstants.AlwaysIncludeMemberProps.LastName,
             PrivacyConstants.AlwaysIncludeMemberProps.FamilyId,
             PrivacyConstants.AlwaysIncludeMemberProps.Code,
             PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
@@ -150,6 +152,8 @@ public class PrivacyService : IPrivacyService
         var alwaysIncludeProps = new List<string>
         {
             PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.FirstName,
+            PrivacyConstants.AlwaysIncludeMemberProps.LastName,
             PrivacyConstants.AlwaysIncludeMemberProps.FamilyId,
             PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
             PrivacyConstants.AlwaysIncludeMemberProps.AvatarUrl,
@@ -183,6 +187,8 @@ public class PrivacyService : IPrivacyService
         var alwaysIncludeProps = new List<string>
         {
             PrivacyConstants.AlwaysIncludeMemberProps.Id,
+            PrivacyConstants.AlwaysIncludeMemberProps.FirstName,
+            PrivacyConstants.AlwaysIncludeMemberProps.LastName,
             PrivacyConstants.AlwaysIncludeMemberProps.Code,
             PrivacyConstants.AlwaysIncludeMemberProps.IsRoot,
             PrivacyConstants.AlwaysIncludeMemberProps.AvatarUrl,
@@ -194,17 +200,7 @@ public class PrivacyService : IPrivacyService
             PrivacyConstants.AlwaysIncludeMemberProps.WifeId
         };
 
-        var filteredMemberListDto = FilterDto(memberListDto, publicProperties, alwaysIncludeProps);
-
-        // Special handling for FullName if FirstName or LastName are private
-        if (!publicProperties.Contains(PrivacyConstants.MemberProps.FirstName) || !publicProperties.Contains(PrivacyConstants.MemberProps.LastName))
-        {
-            filteredMemberListDto.FirstName = string.Empty;
-            filteredMemberListDto.LastName = string.Empty;
-            // FullName is derived, so it will be empty if FirstName/LastName are empty
-        }
-
-        return filteredMemberListDto;
+        return FilterDto(memberListDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<List<MemberListDto>> ApplyPrivacyFilter(List<MemberListDto> memberListDtos, Guid familyId, CancellationToken cancellationToken)
@@ -320,6 +316,9 @@ public class PrivacyService : IPrivacyService
         var alwaysIncludeProps = new List<string>
         {
             PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Name,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Code,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
             PrivacyConstants.AlwaysIncludeFamilyProps.Created,
             PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
@@ -362,6 +361,9 @@ public class PrivacyService : IPrivacyService
         var alwaysIncludeProps = new List<string>
         {
             PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Name,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Code,
+            PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
             PrivacyConstants.AlwaysIncludeFamilyProps.Created,
             PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,

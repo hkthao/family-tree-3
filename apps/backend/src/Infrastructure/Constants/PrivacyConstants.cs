@@ -33,6 +33,8 @@ public static class PrivacyConstants
     public static class AlwaysIncludeMemberProps
     {
         public const string Id = "Id";
+        public const string FirstName = "FirstName"; // Added for always include
+        public const string LastName = "LastName";   // Added for always include
         public const string FamilyId = "FamilyId";
         public const string IsRoot = "IsRoot";
         public const string AvatarUrl = "AvatarUrl";
@@ -188,6 +190,9 @@ public static class PrivacyConstants
     public static class AlwaysIncludeFamilyProps
     {
         public const string Id = "Id";
+        public const string Name = "Name";
+        public const string Code = "Code";
+        public const string Visibility = "Visibility";
 
         // Auditable properties
         public const string Created = "Created";
