@@ -24,4 +24,5 @@ public class MemberFaceDto
     public Guid? FamilyId { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }

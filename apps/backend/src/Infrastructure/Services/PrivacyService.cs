@@ -48,6 +48,7 @@ public class PrivacyService : IPrivacyService
     {
         var filteredDto = new T();
         var sourceType = typeof(T);
+        var isAnyPropertyFiltered = false;
 
         // Lấy hoặc thêm các thuộc tính của loại vào bộ nhớ đệm
         if (!_propertyCache.TryGetValue(sourceType, out var typeProperties))
@@ -56,9 +57,11 @@ public class PrivacyService : IPrivacyService
             _propertyCache.TryAdd(sourceType, typeProperties);
         }
 
-        // Luôn bao gồm các thuộc tính thiết yếu hoặc nhận dạng
+        // Collect all properties that are explicitly allowed or always included
+        var explicitlyIncludedProps = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var propName in alwaysProps)
         {
+            explicitlyIncludedProps.Add(propName);
             if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
             {
                 var value = propertyInfo.GetValue(sourceDto);
@@ -66,19 +69,39 @@ public class PrivacyService : IPrivacyService
             }
         }
 
-        // Sao chép động các thuộc tính được đánh dấu là công khai
         foreach (var propName in allowedProps)
         {
-            // Tránh sao chép lại các thuộc tính đã được sao chép trong alwaysProps
-            if (alwaysProps.Contains(propName, StringComparer.OrdinalIgnoreCase))
+            if (explicitlyIncludedProps.Add(propName)) // Add only if not already present
             {
-                continue;
+                if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
+                {
+                    var value = propertyInfo.GetValue(sourceDto);
+                    propertyInfo.SetValue(filteredDto, value);
+                }
             }
+        }
 
-            if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
+        // Determine if any property was filtered out
+        foreach (var propInfo in typeProperties.Values)
+        {
+            if (propInfo != null && propInfo.CanRead && propInfo.CanWrite)
             {
-                var value = propertyInfo.GetValue(sourceDto);
-                propertyInfo.SetValue(filteredDto, value);
+                // If a property is not explicitly included and is not 'IsPrivate' itself, it means it was filtered out
+                if (!explicitlyIncludedProps.Contains(propInfo.Name) && propInfo.Name != "IsPrivate")
+                {
+                    isAnyPropertyFiltered = true;
+                    break;
+                }
+            }
+        }
+        
+        // Set IsPrivate flag if applicable
+        if (isAnyPropertyFiltered)
+        {
+            var isPrivateProperty = filteredDto.GetType().GetProperty("IsPrivate");
+            if (isPrivateProperty != null && isPrivateProperty.CanWrite && isPrivateProperty.PropertyType == typeof(bool))
+            {
+                isPrivateProperty.SetValue(filteredDto, true);
             }
         }
 
