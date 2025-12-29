@@ -2,7 +2,8 @@
   <v-autocomplete v-bind="$attrs" v-model="internalValue" v-model:search="search" :items="items" :loading="loading"
     @update:model-value="handleUpdateModelValue" :label="label" :rules="rules" :readonly="readOnly"
     :clearable="clearable" :multiple="multiple" :item-title="(item: MemberDto) => item.fullName || ''" item-value="id"
-    density="compact" :disabled="disabled" :return-object="true" :closable-chips="!disabled" :custom-filter="()=> true">
+    hide-no-data density="compact" :disabled="disabled" :return-object="true" :closable-chips="!disabled"
+    :custom-filter="() => true">
     <template #chip="{ props: chipProps, item }" v-if="!hideChips">
       <v-chip v-bind="chipProps" size="small" v-if="item.raw"
         :prepend-avatar="getAvatarUrl(item.raw.avatarUrl, item.raw.gender)" :text="item.raw.fullName"></v-chip>

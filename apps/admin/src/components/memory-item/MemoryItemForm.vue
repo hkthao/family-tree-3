@@ -26,6 +26,14 @@
         <v-textarea v-model="form.description" :label="t('memoryItem.form.description')" rows="3"
           data-testid="memory-item-description" :readonly="props.readOnly"></v-textarea>
       </v-col>
+      <v-col cols="12">
+        <LocationInputField
+          v-model="form.location"
+          :label="t('memoryItem.form.location')"
+          :family-id="props.familyId"
+          :read-only="props.readOnly"
+        ></LocationInputField>
+      </v-col>
       <v-col cols="12" md="6">
         <VDateInput v-model="form.happenedAt" :label="t('memoryItem.form.happenedAt')"
           data-testid="memory-item-happened-at" :readonly="props.readOnly" clearable append-inner-icon="mdi-calendar">
@@ -52,6 +60,7 @@ import type { MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
 import { useMemoryItemForm } from '@/composables/memory-item/useMemoryItemForm';
 import type { LocalMemoryMedia } from '@/composables/memory-item/useMemoryItemForm'; // Type-only import
 

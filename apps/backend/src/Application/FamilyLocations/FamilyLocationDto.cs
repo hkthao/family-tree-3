@@ -16,5 +16,6 @@ public class FamilyLocationDto : IMapFrom<FamilyLocation>
     public LocationType LocationType { get; set; }
     public LocationAccuracy Accuracy { get; set; }
     public LocationSource Source { get; set; }
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }
 

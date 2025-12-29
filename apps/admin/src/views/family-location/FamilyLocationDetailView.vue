@@ -3,37 +3,32 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('familyLocation.detail.title') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="isLoadingFamilyLocation || isDeletingFamilyLocation" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="isLoadingFamilyLocation || isDeletingFamilyLocation" indeterminate
+      color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLocationForm
-        v-if="familyLocation"
-        :initial-family-location-data="familyLocation"
-        :family-id="familyLocation.familyId"
-        :read-only="true"
-      />
-      <v-alert v-else-if="familyLocationError" type="error" class="mt-4">{{
-        familyLocationError.message || t('familyLocation.detail.notFound')
-      }}</v-alert>
-      <v-alert v-else type="info" class="mt-4">{{ t('familyLocation.detail.notFound') }}</v-alert>
+      <div v-if="isLoadingFamilyLocation">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        {{ t('common.loading') }}
+      </div>
+      <div v-else-if="familyLocationError">
+        <v-alert type="error" :text="familyLocationError.message || t('familyLocation.detail.notFound')"></v-alert>
+      </div>
+      <div v-else-if="familyLocation">
+        <PrivacyAlert :is-private="familyLocation.isPrivate" />
+        <FamilyLocationForm :initial-family-location-data="familyLocation" :family-id="familyLocation.familyId"
+          :read-only="true" />
+      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose" :disabled="isLoadingFamilyLocation || isDeletingFamilyLocation">{{
         t('common.close')
-      }}</v-btn>
-      <v-btn
-        color="primary"
-        @click="handleEdit"
-        :disabled="!familyLocation || isLoadingFamilyLocation || isDeletingFamilyLocation"
-        v-if="canEditOrDelete"
-        >{{ t('common.edit') }}</v-btn
-      >
-      <v-btn
-        color="error"
-        @click="handleDelete"
-        :disabled="!familyLocation || isLoadingFamilyLocation || isDeletingFamilyLocation"
-        v-if="canEditOrDelete"
-        >{{ t('common.delete') }}</v-btn
-      >
+        }}</v-btn>
+      <v-btn color="primary" @click="handleEdit"
+        :disabled="!familyLocation || isLoadingFamilyLocation || isDeletingFamilyLocation" v-if="canEditOrDelete">{{
+          t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDelete"
+        :disabled="!familyLocation || isLoadingFamilyLocation || isDeletingFamilyLocation" v-if="canEditOrDelete">{{
+          t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -44,6 +39,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { useFamilyLocationQuery, useDeleteFamilyLocationMutation } from '@/composables';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface FamilyLocationDetailViewProps {
   familyLocationId: string;

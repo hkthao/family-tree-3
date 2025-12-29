@@ -20,6 +20,8 @@ const mockEventService: EventServiceAdapter = {
   search: vi.fn(),
   getEventsByFamilyId: vi.fn(),
   getByIds: vi.fn(),
+  exportEvents: vi.fn(),
+  importEvents: vi.fn(),
 };
 
 // Mock queryClient

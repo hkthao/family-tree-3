@@ -78,6 +78,10 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<string>("Location")
+                        .HasColumnType("longtext")
+                        .HasColumnName("location");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1207,11 +1211,41 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<string>("PublicEventProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_event_properties");
+
+                    b.Property<string>("PublicFamilyLocationProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_family_location_properties");
+
+                    b.Property<string>("PublicFamilyProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_family_properties");
+
+                    b.Property<string>("PublicFoundFaceProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_found_face_properties");
+
+                    b.Property<string>("PublicMemberFaceProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_member_face_properties");
+
                     b.Property<string>("PublicMemberProperties")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)")
                         .HasColumnName("public_member_properties");
+
+                    b.Property<string>("PublicMemoryItemProperties")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("public_memory_item_properties");
 
                     b.HasKey("Id")
                         .HasName("pk_privacy_configurations");
@@ -1840,12 +1874,14 @@ namespace backend.Infrastructure.Migrations
 
             modelBuilder.Entity("backend.Domain.Entities.MemoryItem", b =>
                 {
-                    b.HasOne("backend.Domain.Entities.Family", null)
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
                         .WithMany()
                         .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_memory_items_families_family_id");
+
+                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MemoryMedia", b =>

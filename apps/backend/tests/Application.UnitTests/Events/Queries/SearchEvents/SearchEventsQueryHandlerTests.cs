@@ -1,16 +1,28 @@
+using Moq;
 using backend.Application.Events.Queries.SearchEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // Add this using statement for EventDto
 
 namespace backend.Application.UnitTests.Events.Queries.SearchEvents
 {
     public class SearchEventsQueryHandlerTests : TestBase
     {
+        private readonly Mock<IPrivacyService> _mockPrivacyService;
+
         public SearchEventsQueryHandlerTests()
         {
+            _mockPrivacyService = new Mock<IPrivacyService>();
+            // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<EventDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((List<EventDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
             // Set up authenticated user by default for most tests
             _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
             _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
@@ -31,7 +43,7 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new SearchEventsQuery { Page = 1, ItemsPerPage = 2 };
 
             // Act
@@ -60,7 +72,7 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new SearchEventsQuery { SearchQuery = "Party", Page = 1, ItemsPerPage = 10 };
 
             // Act
@@ -92,7 +104,7 @@ namespace backend.Application.UnitTests.Events.Queries.SearchEvents
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new SearchEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new SearchEventsQuery { Page = 1, ItemsPerPage = 2 };
 
             // Act

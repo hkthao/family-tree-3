@@ -1,5 +1,6 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.Families.Specifications;
 
@@ -22,7 +23,7 @@ public class FamilyAccessSpecification : Specification<Family>
         else // Not admin and not authenticated (currentUserId is null or Guid.Empty)
         {
             // Unauthenticated users should not see any families.
-            Query.Where(f => false);
+            Query.Where(f => f.Visibility == FamilyVisibility.Public.ToString());
         }
     }
 }

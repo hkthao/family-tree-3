@@ -1,16 +1,28 @@
+using Moq;
 using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // For EventDto
 
 namespace backend.Application.UnitTests.Events.Queries.GetAllEventsByFamilyId
 {
     public class GetAllEventsByFamilyIdQueryHandlerTests : TestBase
     {
+        private readonly Mock<IPrivacyService> _mockPrivacyService;
+
         public GetAllEventsByFamilyIdQueryHandlerTests()
         {
+            _mockPrivacyService = new Mock<IPrivacyService>();
+            // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<EventDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((List<EventDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
             // Setup authenticated user and admin roles for tests by default
             _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
             _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
@@ -30,7 +42,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetAllEventsByFamilyId
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper);
+            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper, _mockPrivacyService.Object);
             var query = new GetAllEventsByFamilyIdQuery { FamilyId = familyId };
 
             // Act
@@ -57,7 +69,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetAllEventsByFamilyId
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper);
+            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper, _mockPrivacyService.Object);
             var query = new GetAllEventsByFamilyIdQuery { FamilyId = familyId };
 
             // Act
@@ -86,7 +98,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetAllEventsByFamilyId
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper);
+            var handler = new GetAllEventsByFamilyIdQueryHandler(_context, _mapper, _mockPrivacyService.Object);
             var query = new GetAllEventsByFamilyIdQuery { FamilyId = targetFamilyId };
 
             // Act

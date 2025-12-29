@@ -13,6 +13,11 @@
       :allow-add="true"
       :allow-edit="true"
       :allow-delete="true"
+      :is-exporting="isExporting"
+      :is-importing="isImporting"
+      :can-perform-actions="true"
+      :on-export="exportMemoryItems"
+      :on-import-click="() => importDialog = true"
     />
 
     <!-- Add Memory Item Drawer -->
@@ -32,6 +37,17 @@
       <MemoryItemDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId"
         :memory-item-id="selectedItemId" @close="handleMemoryItemClosed" />
     </BaseCrudDrawer>
+
+    <!-- Import Dialog -->
+    <BaseImportDialog
+      v-model="importDialog"
+      :title="t('memoryItem.import.title')"
+      :label="t('memoryItem.import.selectFile')"
+      :loading="isImporting"
+      :max-file-size="5 * 1024 * 1024"
+      @update:model-value="importDialog = $event"
+      @import="triggerImport"
+    />
   </div>
 </template>
 
@@ -47,6 +63,8 @@ import MemoryItemList from '@/components/memory-item/MemoryItemList.vue';
 import MemoryItemAddView from './MemoryItemAddView.vue';
 import MemoryItemEditView from './MemoryItemEditView.vue';
 import MemoryItemDetailView from './MemoryItemDetailView.vue';
+import BaseImportDialog from '@/components/common/BaseImportDialog.vue';
+import { useMemoryItemImportExport } from '@/composables/memory-item/useMemoryItemImportExport'; // New import
 
 interface MemoryItemListViewProps {
   familyId: string;
@@ -58,12 +76,19 @@ const queryClient = useQueryClient();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
+const importDialog = ref(false);
+
+const { isExporting, isImporting, exportMemoryItems, importMemoryItems } = useMemoryItemImportExport(computed(() => props.familyId));
+
 const {
   state: { paginationOptions, filters },
   actions: { setPage, setItemsPerPage, setSortBy },
 } = useMemoryItemDataManagement(computed(() => props.familyId));
 
-const { state: { memoryItems: queryMemoryItems, totalItems, isLoading: isLoadingMemoryItems } } = useMemoryItemsQuery(
+const {
+  state: { memoryItems: queryMemoryItems, totalItems, isLoading: isLoadingMemoryItems },
+  actions: { refetch },
+} = useMemoryItemsQuery(
   computed(() => props.familyId),
   paginationOptions,
   filters
@@ -92,6 +117,26 @@ const {
   openDetailDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
+
+const triggerImport = async (file: File) => {
+  if (!file) {
+    showSnackbar(t('memoryItem.messages.noFileSelected'), 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const jsonContent = JSON.parse(e.target?.result as string);
+      await importMemoryItems(jsonContent);
+      importDialog.value = false;
+      refetch();
+    } catch (error: any) {
+      console.error("Import operation failed:", error);
+    }
+  };
+  reader.readAsText(file);
+};
 
 const handleListOptionsUpdate = (options: {
   page: number;

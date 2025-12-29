@@ -1,15 +1,27 @@
+using Moq;
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 
 namespace backend.Application.UnitTests.Members.Queries.SearchMembers;
 
 public class SearchMembersQueryHandlerTests : TestBase
 {
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
+
     public SearchMembersQueryHandlerTests()
     {
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<MemberListDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MemberListDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<MemberListDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<MemberListDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
         // No need to initialize _mockAuthorizationService and _mockCurrentUser here, as TestBase does it.
         // We might want to override their behavior in specific tests if needed.
     }
@@ -35,7 +47,7 @@ public class SearchMembersQueryHandlerTests : TestBase
         );
         await _context.SaveChangesAsync();
 
-        var handler = new SearchMembersQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+        var handler = new SearchMembersQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
         var query = new SearchMembersQuery { Page = 1, ItemsPerPage = 2, FamilyId = familyId1 };
 
         // Act

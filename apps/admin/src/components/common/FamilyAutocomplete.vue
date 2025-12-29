@@ -67,7 +67,7 @@ const modelValueIds = computed(() => {
   if (props.multiple && Array.isArray(props.modelValue)) {
     return props.modelValue as string[];
   } else if (!props.multiple && typeof props.modelValue === 'string') {
-    return [props.modelValue as string];
+    return [props.modelValue as string].filter(e=>e);
   }
   return [];
 });

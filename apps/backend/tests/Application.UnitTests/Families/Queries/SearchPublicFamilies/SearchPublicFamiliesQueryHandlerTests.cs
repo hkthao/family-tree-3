@@ -1,19 +1,30 @@
+using Moq;
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Families.Queries; // For FamilyDto
 
 namespace backend.Application.UnitTests.Families.Queries.SearchPublicFamilies;
 
 public class SearchPublicFamiliesQueryHandlerTests : TestBase
 {
     private readonly SearchPublicFamiliesQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public SearchPublicFamiliesQueryHandlerTests()
     {
-        _handler = new SearchPublicFamiliesQueryHandler(_context, _mapper);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
+        _handler = new SearchPublicFamiliesQueryHandler(_context, _mapper, _mockPrivacyService.Object);
     }
 
     [Fact]

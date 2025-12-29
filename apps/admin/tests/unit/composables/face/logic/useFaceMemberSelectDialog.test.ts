@@ -66,7 +66,9 @@ const mockMemberService: IMemberService = {
   addItems: vi.fn() as Mock,
   updateMemberBiography: vi.fn() as Mock,
   getRelatives: vi.fn() as Mock,
-  getByIds: vi.fn() as Mock, // Added missing property
+  getByIds: vi.fn() as Mock,
+  exportMembers: vi.fn() as Mock,
+  importMembers: vi.fn() as Mock,
 };
 
 describe('useFaceMemberSelectDialog', () => {

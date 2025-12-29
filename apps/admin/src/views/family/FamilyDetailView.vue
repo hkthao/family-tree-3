@@ -7,6 +7,7 @@
     <v-alert type="error" :text="error?.message || t('family.detail.errorLoading')"></v-alert>
   </div>
   <div v-else-if="familyData">
+    <PrivacyAlert v-if="familyData" :is-private="familyData.isPrivate" />
     <FamilyForm :data="familyData" :read-only="props.readOnly" :title="t('family.detail.title')" :display-limit-config="true" />
     <v-card-actions class="justify-end pa-0">
       <v-btn color="gray" @click="actions.closeView" data-testid="button-close">
@@ -14,6 +15,9 @@
       </v-btn>
       <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
+      </v-btn>
+      <v-btn color="info" @click="emit('openUpdateFamilyLimitDrawer', familyData.id)" data-testid="button-update-limits" v-if="isAdmin">
+        {{ t('family.updateLimits') }}
       </v-btn>
     </v-card-actions>
   </div>
@@ -23,15 +27,19 @@
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
+import { useAuthStore } from '@/stores/auth.store'; // Import auth store
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 const { t } = useI18n();
+const authStore = useAuthStore();
+const isAdmin = authStore.isAdmin; // Get admin status
 
 const props = defineProps<{
   familyId: string;
   readOnly: boolean;
 }>();
 
-const emit = defineEmits(['openEditDrawer']);
+const emit = defineEmits(['openEditDrawer', 'openUpdateFamilyLimitDrawer']);
 
 const { state: { familyData, isLoading, error, canManageFamily }, actions } = useFamilyDetail(props, emit);
 </script>

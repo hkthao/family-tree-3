@@ -51,6 +51,7 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
       month: toRef(formData.lunarDate as LunarDate, 'month'),
       isLeapMonth: toRef(formData.lunarDate as LunarDate, 'isLeapMonth'),
     }),
+    location: toRef(formData, 'location'), // ADD THIS
     repeatRule: toRef(formData, 'repeatRule'),
     relatedMemberIds: toRef(formData, 'relatedMemberIds'),
   });

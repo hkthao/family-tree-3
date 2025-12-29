@@ -8,11 +8,13 @@ public class GetAllEventsByFamilyIdQueryHandler : IRequestHandler<GetAllEventsBy
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public GetAllEventsByFamilyIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetAllEventsByFamilyIdQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<Result<List<EventDto>>> Handle(GetAllEventsByFamilyIdQuery request, CancellationToken cancellationToken)
@@ -24,6 +26,13 @@ public class GetAllEventsByFamilyIdQueryHandler : IRequestHandler<GetAllEventsBy
 
         var eventDtos = _mapper.Map<List<Event>, List<EventDto>>(events);
 
-        return Result<List<EventDto>>.Success(eventDtos);
+        var filteredEventDtos = new List<EventDto>();
+        foreach (var eventDto in eventDtos)
+        {
+            // Apply privacy filter to each EventDto
+            filteredEventDtos.Add(await _privacyService.ApplyPrivacyFilter(eventDto, request.FamilyId, cancellationToken));
+        }
+
+        return Result<List<EventDto>>.Success(filteredEventDtos);
     }
 }

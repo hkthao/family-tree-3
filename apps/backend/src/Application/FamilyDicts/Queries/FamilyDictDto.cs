@@ -10,6 +10,7 @@ public class FamilyDictDto
     public string Description { get; set; } = null!;
     public FamilyDictLineage Lineage { get; set; }
     public bool SpecialRelation { get; set; }
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
     public NamesByRegionDto NamesByRegion { get; set; } = null!;
 }
 

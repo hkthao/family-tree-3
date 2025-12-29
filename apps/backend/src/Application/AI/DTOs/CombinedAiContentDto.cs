@@ -1,5 +1,4 @@
 using backend.Application.Events.Queries;
-using backend.Application.Families.Queries;
 using backend.Application.FamilyLocations; // NEW
 using backend.Application.Members.Queries;
 

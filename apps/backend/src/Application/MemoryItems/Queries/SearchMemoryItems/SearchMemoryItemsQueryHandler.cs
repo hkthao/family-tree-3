@@ -9,11 +9,13 @@ public class SearchMemoryItemsQueryHandler : IRequestHandler<SearchMemoryItemsQu
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPrivacyService _privacyService;
 
-    public SearchMemoryItemsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public SearchMemoryItemsQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
     {
         _context = context;
         _mapper = mapper;
+        _privacyService = privacyService;
     }
 
     public async Task<PaginatedList<MemoryItemDto>> Handle(SearchMemoryItemsQuery request, CancellationToken cancellationToken)
@@ -69,7 +71,24 @@ public class SearchMemoryItemsQueryHandler : IRequestHandler<SearchMemoryItemsQu
             query = query.OrderByDescending(mi => mi.HappenedAt); // Default order
         }
 
-        return await query.ProjectTo<MemoryItemDto>(_mapper.ConfigurationProvider)
+        var paginatedMemoryItemEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        var memoryItemDtos = _mapper.Map<List<MemoryItemDto>>(paginatedMemoryItemEntities.Items);
+
+        var filteredMemoryItemDtos = new List<MemoryItemDto>();
+        foreach (var memoryItemDto in memoryItemDtos)
+        {
+            filteredMemoryItemDtos.Add(await _privacyService.ApplyPrivacyFilter(memoryItemDto, request.FamilyId, cancellationToken));
+        }
+
+        var filteredPaginatedList = new PaginatedList<MemoryItemDto>(
+            filteredMemoryItemDtos,
+            paginatedMemoryItemEntities.TotalItems,
+            paginatedMemoryItemEntities.Page,
+            paginatedMemoryItemEntities.TotalPages
+        );
+
+        return filteredPaginatedList;
     }
 }

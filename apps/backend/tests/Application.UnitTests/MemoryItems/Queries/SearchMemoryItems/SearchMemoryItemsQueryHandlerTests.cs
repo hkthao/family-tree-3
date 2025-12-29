@@ -1,19 +1,30 @@
+using Moq;
 using backend.Application.MemoryItems.Queries.SearchMemoryItems;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 
 namespace backend.Application.UnitTests.MemoryItems.Queries.SearchMemoryItems;
 
 public class SearchMemoryItemsQueryHandlerTests : TestBase
 {
     private readonly SearchMemoryItemsQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public SearchMemoryItemsQueryHandlerTests()
     {
-        _handler = new SearchMemoryItemsQueryHandler(_context, _mapper);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<MemoryItemDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MemoryItemDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<MemoryItemDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<MemoryItemDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
+        _handler = new SearchMemoryItemsQueryHandler(_context, _mapper, _mockPrivacyService.Object);
     }
 
     private async Task SeedData(Guid familyId, Guid memberId)

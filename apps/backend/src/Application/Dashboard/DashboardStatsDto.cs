@@ -18,4 +18,9 @@ public class DashboardStatsDto
     // Storage Usage and Limit
     public double UsedStorageMb { get; set; }
     public double MaxStorageMb { get; set; }
+
+    // Family Limits
+    public int MaxMembers { get; set; }
+    public int AiChatMonthlyLimit { get; set; }
+    public int AiChatMonthlyUsage { get; set; }
 }

@@ -17,4 +17,5 @@ public class FamilyMediaDto
     public DateTime Created { get; set; }
 
     public ICollection<MediaLinkDto> MediaLinks { get; set; } = new List<MediaLinkDto>();
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }

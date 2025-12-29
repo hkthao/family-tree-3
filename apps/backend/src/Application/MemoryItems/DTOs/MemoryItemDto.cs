@@ -12,4 +12,5 @@ public class MemoryItemDto
     public EmotionalTag EmotionalTag { get; set; }
     public ICollection<MemoryMediaDto> MemoryMedia { get; set; } = [];
     public ICollection<MemoryPersonDto> MemoryPersons { get; set; } = [];
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }

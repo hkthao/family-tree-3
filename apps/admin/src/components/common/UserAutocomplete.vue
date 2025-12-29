@@ -3,6 +3,7 @@
     @update:model-value="handleUpdateModelValue" :label="label" :rules="rules" :readonly="readOnly"
     :clearable="clearable" :multiple="multiple" item-title="email" item-value="id" :disabled="disabled"
     density="compact" :return-object="true" :hide-details="hideDetails" chips :closable-chips="!disabled"
+    hide-no-data
     :custom-filter="() => true">
   </v-autocomplete>
 </template>

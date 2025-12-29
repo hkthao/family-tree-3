@@ -30,6 +30,7 @@ export interface FamilyLocation extends BaseAuditableEntity {
   locationType: LocationType;
   accuracy: LocationAccuracy;
   source: LocationSource;
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type AddFamilyLocationDto = Omit<FamilyLocation, 'id'>;
@@ -41,4 +42,5 @@ export interface FamilyLocationFilter extends PaginationFilter {
   familyId?: string;
   locationType?: LocationType;
   locationSource?: LocationSource;
+  searchQuery?: string;
 }

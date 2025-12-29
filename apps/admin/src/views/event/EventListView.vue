@@ -3,7 +3,12 @@
   <EventList :events="events" :total-events="totalItems" :loading="loading"
     :search="eventListSearchQuery || ''" @update:options="handleListOptionsUpdate"
     @update:search="handleSearchUpdate" @view="openDetailDrawer"
-    @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer" />
+    @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer"
+    :is-exporting="isExporting"
+    :is-importing="isImporting"
+    :can-perform-actions="true"
+    :on-export="exportEvents"
+    :on-import-click="() => importDialog = true" />
 
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
@@ -22,6 +27,17 @@
     <EventDetailView v-if="selectedItemId && detailDrawer" :event-id="selectedItemId" @close="closeDetailDrawer"
       @edit="openEditDrawer" />
   </BaseCrudDrawer>
+
+  <!-- Import Dialog -->
+  <BaseImportDialog
+    v-model="importDialog"
+    :title="t('event.import.title')"
+    :label="t('event.import.selectFile')"
+    :loading="isImporting"
+    :max-file-size="5 * 1024 * 1024"
+    @update:model-value="importDialog = $event"
+    @import="triggerImport"
+  />
 </template>
 
 <script setup lang="ts">
@@ -30,7 +46,12 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
-import { useEventList } from '@/composables'; // Import the new composable
+import BaseImportDialog from '@/components/common/BaseImportDialog.vue';
+import { useEventList } from '@/composables';
+import { useEventImportExport } from '@/composables/event/useEventImportExport';
+import { useI18n } from 'vue-i18n';
+import { useGlobalSnackbar } from '@/composables';
+import { ref } from 'vue';
 
 const props = defineProps<{
   familyId: string;
@@ -39,10 +60,19 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'saved']);
 
+const { t } = useI18n();
+const { showSnackbar } = useGlobalSnackbar();
+
+const importDialog = ref(false);
+
+const { isExporting, isImporting, exportEvents, importEvents } = useEventImportExport(ref(props.familyId));
+
 const {
   state,
   actions,
 } = useEventList(props, emit);
+
+const { refetchEvents } = actions; // Extract refetchEvents
 
 const {
   eventListSearchQuery,
@@ -61,7 +91,7 @@ const {
   handleSearchUpdate,
   handleListOptionsUpdate,
   confirmDelete,
-  handleEventSaved,
+  handleEventSaved: originalHandleEventSaved, // Rename to avoid conflict
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
@@ -69,4 +99,29 @@ const {
   closeEditDrawer,
   closeDetailDrawer,
 } = actions;
+
+const triggerImport = async (file: File) => {
+  if (!file) {
+    showSnackbar(t('event.messages.noFileSelected'), 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const jsonContent = JSON.parse(e.target?.result as string);
+      await importEvents(jsonContent);
+      importDialog.value = false;
+      refetchEvents(); // Refetch the list after successful import
+    } catch (error: any) {
+      console.error("Import operation failed:", error);
+    }
+  };
+  reader.readAsText(file);
+};
+
+const handleEventSaved = () => {
+  originalHandleEventSaved(); // Call original handler
+  refetchEvents(); // Refetch the list after successful save
+};
 </script>

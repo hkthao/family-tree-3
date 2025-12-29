@@ -1,20 +1,28 @@
+using Moq;
 using backend.Application.Common.Constants;
 using backend.Application.MemoryItems.Queries.GetMemoryItemDetail;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 
 namespace backend.Application.UnitTests.MemoryItems.Queries;
 
 public class GetMemoryItemDetailQueryHandlerTests : TestBase
 {
     private readonly GetMemoryItemDetailQueryHandler _handler;
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public GetMemoryItemDetailQueryHandlerTests()
     {
-        _handler = new GetMemoryItemDetailQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<MemoryItemDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MemoryItemDto dto, Guid familyId, CancellationToken token) => dto);
+
+        _handler = new GetMemoryItemDetailQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
     }
 
     // Helper method to create a family and a memory item for tests

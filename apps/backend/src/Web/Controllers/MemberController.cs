@@ -10,6 +10,8 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByFamilyId;
 using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
+using backend.Application.Members.Queries.ExportMembers; // New using
+using backend.Application.Members.Commands.ImportMembers; // New using
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -155,5 +157,33 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
         }
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Xuất tất cả thành viên cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách thành viên.</returns>
+    [HttpGet("export")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportMembers([FromQuery] Guid familyId)
+    {
+        var result = await _mediator.Send(new Application.Members.Queries.ExportMembers.ExportMembersQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách thành viên cho một gia đình cụ thể.
+    /// </summary>
+    /// <param name="command">Lệnh nhập thành viên với thông tin chi tiết.</param>
+    /// <returns>Danh sách thành viên vừa được nhập.</returns>
+    [HttpPost("import")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportMembers([FromBody] Application.Members.Commands.ImportMembers.ImportMembersCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }

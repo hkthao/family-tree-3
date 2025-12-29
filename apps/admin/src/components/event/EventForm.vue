@@ -83,6 +83,13 @@
 
     <v-row>
       <v-col cols="12">
+        <LocationInputField v-model="formData.location" :family-id="formData.familyId || undefined"
+          :read-only="props.readOnly"></LocationInputField>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12">
         <MemberAutocomplete v-model="formData.relatedMemberIds" :label="actions.t('event.form.relatedMembers')"
           :family-id="formData.familyId || undefined" :disabled="props.readOnly" :multiple="true"
           data-testid="event-related-members-autocomplete" />
@@ -103,6 +110,7 @@
 import type { EventDto } from '@/types'; // Import Event type
 import { CalendarType } from '@/types/enums'; // Import enums from enums.ts
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
 import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
 import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
 import { useEventForm } from '@/composables';

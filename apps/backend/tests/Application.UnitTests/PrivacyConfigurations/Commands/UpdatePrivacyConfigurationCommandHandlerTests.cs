@@ -26,7 +26,16 @@ public class UpdatePrivacyConfigurationCommandHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        var command = new UpdatePrivacyConfigurationCommand(familyId, new List<string> { "PropertyA" });
+        var command = new UpdatePrivacyConfigurationCommand(
+            familyId,
+            new List<string> { "PropertyA" }, // publicMemberProperties
+            new List<string>(), // publicEventProperties
+            new List<string>(), // publicFamilyProperties
+            new List<string>(), // publicFamilyLocationProperties
+            new List<string>(), // publicMemoryItemProperties
+            new List<string>(), // publicMemberFaceProperties
+            new List<string>() // publicFoundFaceProperties
+        );
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
 
@@ -50,7 +59,16 @@ public class UpdatePrivacyConfigurationCommandHandlerTests : TestBase
         _context.PrivacyConfigurations.Add(existingConfig);
         await _context.SaveChangesAsync();
 
-        var command = new UpdatePrivacyConfigurationCommand(familyId, new List<string> { "NewProperty1", "NewProperty2" });
+        var command = new UpdatePrivacyConfigurationCommand(
+            familyId,
+            new List<string> { "NewProperty1", "NewProperty2" }, // publicMemberProperties
+            new List<string>(), // publicEventProperties
+            new List<string>(), // publicFamilyProperties
+            new List<string>(), // publicFamilyLocationProperties
+            new List<string>(), // publicMemoryItemProperties
+            new List<string>(), // publicMemberFaceProperties
+            new List<string>() // publicFoundFaceProperties
+        );
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
@@ -70,7 +88,16 @@ public class UpdatePrivacyConfigurationCommandHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        var command = new UpdatePrivacyConfigurationCommand(familyId, new List<string> { "PropertyX", "PropertyY" });
+        var command = new UpdatePrivacyConfigurationCommand(
+            familyId,
+            new List<string> { "PropertyX", "PropertyY" }, // publicMemberProperties
+            new List<string>(), // publicEventProperties
+            new List<string>(), // publicFamilyProperties
+            new List<string>(), // publicFamilyLocationProperties
+            new List<string>(), // publicMemoryItemProperties
+            new List<string>(), // publicMemberFaceProperties
+            new List<string>() // publicFoundFaceProperties
+        );
 
         // Ensure no config exists for this familyId
         _context.PrivacyConfigurations.RemoveRange(_context.PrivacyConfigurations.Where(pc => pc.FamilyId == familyId));

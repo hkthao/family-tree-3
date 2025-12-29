@@ -5,12 +5,13 @@ using backend.Application.Events.Specifications; // Ensure this is present
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 
-public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser user) : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
+public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser user, IPrivacyService privacyService) : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _user = user;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<List<EventDto>>> Handle(GetUpcomingEventsQuery request, CancellationToken cancellationToken)
     {
@@ -32,12 +33,19 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
             e.CalendarType == backend.Domain.Enums.CalendarType.Lunar // For lunar, we don't have a simple "upcoming" filter here yet
         );
 
-        var upcomingEvents = await eventsQuery
+        var upcomingEventsEntities = await eventsQuery
             // Default ordering until EventOccurrenceService is implemented to provide a derived date for sorting
             .OrderBy(e => e.Name) // Placeholder: Order by name for now
-            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
-        return Result<List<EventDto>>.Success(upcomingEvents);
+        var upcomingEventsDtos = _mapper.Map<List<EventDto>>(upcomingEventsEntities);
+
+        var filteredEventDtos = new List<EventDto>();
+        foreach (var eventDto in upcomingEventsDtos)
+        {
+            filteredEventDtos.Add(await _privacyService.ApplyPrivacyFilter(eventDto, request.FamilyId, cancellationToken));
+        }
+
+        return Result<List<EventDto>>.Success(filteredEventDtos);
     }
 }

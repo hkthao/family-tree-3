@@ -1,11 +1,36 @@
 <template>
   <div data-testid="family-location-list-view">
     <FamilyLocationSearch @update:filters="handleFilterUpdate" />
-    <FamilyLocationList :items="familyLocations" :total-items="totalItems"
-      :loading="isLoadingFamilyLocations || isDeletingFamilyLocation" @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
-      :family-id="props.familyId" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete">
-    </FamilyLocationList>
+    <FamilyLocationList
+      :items="familyLocations"
+      :total-items="totalItems"
+      :loading="isLoadingFamilyLocations || isDeletingFamilyLocation"
+      @update:options="handleListOptionsUpdate"
+      @view="openDetailDrawer"
+      @edit="openEditDrawer"
+      @delete="confirmDelete"
+      @create="openAddDrawer()"
+      :family-id="props.familyId"
+      :allow-add="allowAdd"
+      :allow-edit="allowEdit"
+      :allow-delete="allowDelete"
+      :is-exporting="isExporting"
+      :is-importing="isImporting"
+      :can-perform-actions="allowEdit"
+      :on-export="exportFamilyLocations"
+      :on-import-click="() => importDialog = true"
+    />
+
+    <!-- Import Dialog -->
+    <BaseImportDialog
+      v-model="importDialog"
+      :title="t('familyLocation.import.title')"
+      :label="t('familyLocation.import.selectFile')"
+      :loading="isImporting"
+      :max-file-size="5 * 1024 * 1024"
+      @update:model-value="importDialog = $event"
+      @import="triggerImport"
+    />
 
     <!-- Add Family Location Drawer -->
     <BaseCrudDrawer v-if="allowAdd" v-model="addDrawer" @close="handleClosed">
@@ -39,14 +64,16 @@ import {
   useFamilyLocationDataManagement,
   type FamilyLocationSearchCriteria,
 } from '@/composables';
-import { useAuth } from '@/composables'; // Import useAuth
+import { useAuth } from '@/composables';
 import { useI18n } from 'vue-i18n';
+import { useFamilyLocationImportExport } from '@/composables/family-location/useFamilyLocationImportExport';
 
 // Import drawer related components
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import FamilyLocationAddView from '@/views/family-location/FamilyLocationAddView.vue';
 import FamilyLocationDetailView from '@/views/family-location/FamilyLocationDetailView.vue';
 import FamilyLocationEditView from '@/views/family-location/FamilyLocationEditView.vue';
+import BaseImportDialog from '@/components/common/BaseImportDialog.vue'; // Added
 
 interface FamilyLocationListViewProps {
   familyId: string;
@@ -57,7 +84,7 @@ const props = defineProps<FamilyLocationListViewProps>();
 const emit = defineEmits(['viewFamilyLocation', 'editFamilyLocation', 'createFamilyLocation', 'familyLocationDeleted']);
 const { t } = useI18n();
 
-const { state } = useAuth(); // Import useAuth
+const { state } = useAuth();
 
 const allowAdd = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
@@ -87,6 +114,32 @@ const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = us
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
+// Import/Export functionality
+const { isExporting, isImporting, exportFamilyLocations, importFamilyLocations } = useFamilyLocationImportExport(toRef(props, 'familyId'));
+const importDialog = ref(false);
+
+const triggerImport = async (file: File) => { // Modified to accept file directly
+  if (!file) {
+    showSnackbar(t('familyLocation.messages.noFileSelected'), 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const jsonContent = JSON.parse(e.target?.result as string);
+      const success = await importFamilyLocations(jsonContent);
+      if (success) {
+        importDialog.value = false;
+        refetch(); // Refetch the list after successful import
+      }
+    } catch (error: any) {
+      showSnackbar(error.message || t('familyLocation.messages.invalidJson'), 'error');
+    }
+  };
+  reader.readAsText(file); // Use the passed file
+};
+
 // CRUD Drawer related logic for Add, Detail, Edit
 const {
   addDrawer,
@@ -98,8 +151,6 @@ const {
   openEditDrawer,
   closeAllDrawers,
 } = useCrudDrawer<string>();
-
-// Refs for the Add/Edit views to call their exposed methods
 
 const handleAdded = () => {
   closeAllDrawers();
@@ -114,7 +165,6 @@ const handleEdited = () => {
 const handleClosed = () => {
   closeAllDrawers();
 };
-
 
 const handleFilterUpdate = (criteria: FamilyLocationSearchCriteria) => {
   setFilters({
@@ -165,4 +215,5 @@ const handleDeleteConfirm = (familyLocationId: string) => {
     },
   });
 };
+
 </script>

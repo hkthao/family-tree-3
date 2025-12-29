@@ -4,6 +4,7 @@
       <v-card-title class="text-center text-h5 text-uppercase mb-2">
         {{ t('memberFace.detail.title') }}
       </v-card-title>
+      <PrivacyAlert :is-private="memberFace.isPrivate" />
       <v-card-text>
         <div v-if="memberFace" class="d-flex flex-column align-center text-center">
           <!-- Face Thumbnail -->
@@ -56,6 +57,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuth } from '@/composables';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { useMemberFaceDetailQuery, useDeleteMemberFaceMutation, useMemberFaceDeletion } from '@/composables';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface MemberFaceDetailViewProps {
   memberFaceId: string;

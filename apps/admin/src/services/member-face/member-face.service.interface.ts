@@ -7,4 +7,7 @@ export interface IMemberFaceService extends ICrudService<MemberFace, AddMemberFa
     familyId: string,
     resizeImageForAnalysis: boolean,
   ): Promise<Result<FaceDetectionResult, ApiError>>;
+
+  exportMemberFaces(memberId?: string, familyId?: string): Promise<Result<string, ApiError>>;
+  importMemberFaces(memberId: string | undefined, familyId: string | undefined, data: any): Promise<Result<null, ApiError>>;
 }

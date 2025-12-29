@@ -17,12 +17,14 @@ export interface MemoryItem {
   familyId: string;
   title: string;
   description?: string;
+  location?: string; // ADD THIS
   happenedAt?: Date;
   emotionalTag: EmotionalTag;
   memoryMedia: MemoryMedia[];
   memoryPersons: MemoryPerson[];
   personIds: string[];
   deletedMediaIds?: string[];
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type AddMemoryItemDto = Omit<MemoryItem, 'id' | 'memoryMedia' | 'memoryPersons' | 'deletedMediaIds'> & {

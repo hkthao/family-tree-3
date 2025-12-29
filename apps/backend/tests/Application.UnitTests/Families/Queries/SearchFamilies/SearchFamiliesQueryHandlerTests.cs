@@ -1,18 +1,28 @@
+using Moq;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Families.Queries; // For FamilyDto
 
 namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 
 public class SearchFamiliesQueryHandlerTests : TestBase
 {
-
+    private readonly Mock<IPrivacyService> _mockPrivacyService;
 
     public SearchFamiliesQueryHandlerTests()
     {
+        _mockPrivacyService = new Mock<IPrivacyService>();
+        // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<FamilyDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FamilyDto dto, Guid familyId, CancellationToken token) => dto);
+        _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
         // Set up authenticated user by default for most tests
         _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
@@ -32,7 +42,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByOther = new Family { Id = Guid.NewGuid(), Name = "Family By Other", Code = "FBO", CreatedBy = otherUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
@@ -69,7 +79,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = authenticatedUserId.ToString() };
@@ -103,7 +113,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Alpha", Description = "Description for Alpha", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Beta", Description = "Description for Beta", Code = "FB", CreatedBy = authenticatedUserId.ToString() };
@@ -134,7 +144,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Public", Visibility = "Public", Code = "FP", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Private", Visibility = "Private", Code = "FPR", CreatedBy = authenticatedUserId.ToString() };
@@ -165,7 +175,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family C", Code = "FC", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
@@ -197,7 +207,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         var authenticatedUserId = Guid.NewGuid();
         _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByAuthenticatedUser = new Family { Id = Guid.NewGuid(), Name = "My Created Family", Code = "MYF", CreatedBy = authenticatedUserId.ToString() };
@@ -237,7 +247,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Simulate admin user
 
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 1", Code = "ADM1", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Private.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 2", Code = "ADM2", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Public.ToString() };

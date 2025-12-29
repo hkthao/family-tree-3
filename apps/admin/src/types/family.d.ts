@@ -21,6 +21,7 @@ export interface FamilyDto {
   viewerIds: string[]; // Changed to string[]
   familyLimitConfiguration?: FamilyLimitConfiguration;
   validationErrors?: string[];
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export interface FamilyAddDto {
@@ -78,6 +79,13 @@ export interface FamilyLimitConfiguration {
   maxStorageMb: number;
   aiChatMonthlyLimit: number;
   aiChatMonthlyUsage: number;
+}
+
+export interface UpdateFamilyLimitConfigurationDto {
+  familyId: string;
+  maxMembers: number;
+  maxStorageMb: number;
+  aiChatMonthlyLimit: number;
 }
 
 export interface MemberExportDto {

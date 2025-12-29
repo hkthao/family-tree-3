@@ -7,12 +7,13 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser) : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
+public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, IPrivacyService privacyService) : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<MemberDetailDto>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
@@ -37,6 +38,9 @@ public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper ma
             return Result<MemberDetailDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
         }
 
-        return Result<MemberDetailDto>.Success(memberDetailDto);
+        // Apply privacy filter
+        var filteredMemberDetailDto = await _privacyService.ApplyPrivacyFilter(memberDetailDto, memberDetailDto.FamilyId, cancellationToken);
+
+        return Result<MemberDetailDto>.Success(filteredMemberDetailDto);
     }
 }

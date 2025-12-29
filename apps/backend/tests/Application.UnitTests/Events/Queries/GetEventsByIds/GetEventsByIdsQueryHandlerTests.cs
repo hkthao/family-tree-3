@@ -1,16 +1,28 @@
+using Moq;
 using backend.Application.Events.Queries.GetEventsByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // For EventDto
 
 namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
 {
     public class GetEventsByIdsQueryHandlerTests : TestBase
     {
+        private readonly Mock<IPrivacyService> _mockPrivacyService;
+
         public GetEventsByIdsQueryHandlerTests()
         {
+            _mockPrivacyService = new Mock<IPrivacyService>();
+            // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<EventDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((List<EventDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
             // TestBase already sets up _mockUser and _mockAuthorizationService
             // Set default authenticated user for specific scenarios if needed
             _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
@@ -29,7 +41,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
             _context.Events.AddRange(event1, event2, event3);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetEventsByIdsQuery(new List<Guid> { event1.Id, event3.Id });
 
             // Act
@@ -50,7 +62,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
         public async Task Handle_ShouldReturnEmptyList_WhenGivenNoIds()
         {
             // Arrange
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetEventsByIdsQuery(new List<Guid>());
 
             // Act
@@ -66,7 +78,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
         public async Task Handle_ShouldReturnEmptyList_WhenGivenNonExistentIds()
         {
             // Arrange
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetEventsByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
 
             // Act
@@ -91,7 +103,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
             _context.Events.Add(event1);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetEventsByIdsQuery(new List<Guid> { event1.Id });
 
             // Act

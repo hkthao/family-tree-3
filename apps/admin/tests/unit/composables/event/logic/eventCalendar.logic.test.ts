@@ -28,6 +28,7 @@ const mockDateAdapter: DateAdapter = {
     }
     return new Date();
   }) as Mock,
+  isSameDay: vi.fn((date1: Date, date2: Date) => date1.toDateString() === date2.toDateString()) as Mock, // ADD THIS LINE
 };
 
 // Mock implementations for LunarDateAdapter

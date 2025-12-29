@@ -83,7 +83,6 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
     /// <returns>Một PaginatedList chứa danh sách các gia đình công khai tìm được.</returns>
     [HttpGet("public-search")]
-    [AllowAnonymous]
     public async Task<IActionResult> SearchPublic([FromQuery] SearchPublicFamiliesQuery query)
     {
         var result = await _mediator.Send(query);

@@ -2,8 +2,10 @@ using backend.Application.Common.Constants;
 using backend.Application.Prompts.Commands.CreatePrompt;
 using backend.Application.Prompts.Commands.DeletePrompt;
 using backend.Application.Prompts.Commands.UpdatePrompt;
+using backend.Application.Prompts.Commands.ImportPrompts;
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.Prompts.Queries.SearchPrompts;
+using backend.Application.Prompts.Queries.ExportPrompts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -107,5 +109,28 @@ public class PromptsController(IMediator mediator, ILogger<PromptsController> lo
     {
         var result = await _mediator.Send(new DeletePromptCommand(id));
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để xuất tất cả lời nhắc.
+    /// </summary>
+    /// <returns>Danh sách tất cả lời nhắc.</returns>
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportPrompts()
+    {
+        var result = await _mediator.Send(new ExportPromptsQuery());
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý POST request để nhập danh sách lời nhắc.
+    /// </summary>
+    /// <param name="command">Lệnh nhập lời nhắc với thông tin chi tiết.</param>
+    /// <returns>Danh sách lời nhắc vừa được nhập.</returns>
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportPrompts([FromBody] ImportPromptsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201);
     }
 }

@@ -23,6 +23,7 @@ export interface EventDto {
   name: string;
   code: string;
   description?: string;
+  location?: string; // ADD THIS
   familyId: string | null;
   familyName?: string;
   familyAvatarUrl?: string;
@@ -35,6 +36,7 @@ export interface EventDto {
   lunarDate?: LunarDate | null;
   repeatRule: RepeatRule;
   validationErrors?: string[]; // Includes validation errors for display
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 // DTO for adding a new event (without id or validationErrors)

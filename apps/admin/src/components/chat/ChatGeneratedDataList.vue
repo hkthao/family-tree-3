@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import type { CombinedAiContentDto, FamilyLocation } from '@/types'; // Import FamilyLocation
+import type { CombinedAiContentDto } from '@/types'; // Import FamilyLocation
 import { Gender } from '@/types/member.d';
 import { useI18n } from 'vue-i18n';
 import { useGeneratedDataStore } from '@/stores/generatedData.store'; // Import the new store

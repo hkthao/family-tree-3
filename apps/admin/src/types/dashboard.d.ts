@@ -45,6 +45,15 @@ export interface DashboardStats {
   deceasedMembersCount?: number;
   averageAge?: number;
   membersPerGeneration?: { [key: number]: number };
+
+  // Storage Usage and Limit
+  usedStorageMb?: number;
+  maxStorageMb?: number;
+
+  // Family Limits
+  maxMembers?: number;
+  aiChatMonthlyLimit?: number;
+  aiChatMonthlyUsage?: number;
 }
 
 export interface RecentActivityItem {

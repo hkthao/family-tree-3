@@ -9,12 +9,13 @@ namespace backend.Application.Members.Queries.GetMembersByFamilyId;
 /// <summary>
 /// Xử lý truy vấn để lấy danh sách các thành viên thuộc một gia đình cụ thể.
 /// </summary>
-public class GetMembersByFamilyIdQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser, IMapper mapper) : IRequestHandler<GetMembersByFamilyIdQuery, Result<List<MemberDto>>>
+public class GetMembersByFamilyIdQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<GetMembersByFamilyIdQuery, Result<List<MemberDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     /// <summary>
     /// Xử lý logic để lấy danh sách thành viên theo FamilyId.
@@ -31,6 +32,12 @@ public class GetMembersByFamilyIdQueryHandler(IApplicationDbContext context, IAu
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
-        return Result<List<MemberDto>>.Success(members);
+        var filteredMembers = new List<MemberDto>();
+        foreach (var memberDto in members)
+        {
+            filteredMembers.Add(await _privacyService.ApplyPrivacyFilter(memberDto, request.FamilyId, cancellationToken));
+        }
+
+        return Result<List<MemberDto>>.Success(filteredMembers);
     }
 }

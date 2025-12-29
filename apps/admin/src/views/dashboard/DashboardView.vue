@@ -35,18 +35,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables';
 import { useDashboardStats, useRecentActivities } from '@/composables';
+import { useAuthStore } from '@/stores/auth.store'; // Import auth store
+import type { IFamilyAccess } from '@/types'; // Import IFamilyAccess type
 
 const { t } = useI18n();
 useOnboardingTour();
 
+const authStore = useAuthStore(); // Use auth store
+
 const selectedFamilyId = ref<string | null>(null);
+
+// Watch for userFamilyAccess changes and set default selectedFamilyId
+watch(() => authStore.userFamilyAccess, (newAccess: IFamilyAccess[]) => {
+  if (newAccess && newAccess.length > 0 && !selectedFamilyId.value) {
+    selectedFamilyId.value = newAccess[0].familyId;
+  }
+}, { immediate: true }); // immediate: true ensures this runs on component mount as well
 
 const familyIdForQueries = computed(() => selectedFamilyId.value || undefined);
 

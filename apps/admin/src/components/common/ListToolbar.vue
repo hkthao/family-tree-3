@@ -2,6 +2,7 @@
   <v-toolbar flat>
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer></v-spacer>
+    <slot name="custom-buttons"></slot>
 
     <!-- New Add Link Button -->
     <v-btn

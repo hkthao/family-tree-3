@@ -1,4 +1,4 @@
-import { ref, computed, unref, type MaybeRef } from 'vue';
+import { computed, unref, type MaybeRef, reactive } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
@@ -10,7 +10,18 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
   const { family } = useServices(); // Assuming 'family' service handles privacy config
   const queryClient = useQueryClient();
 
-  const initialPublicProperties = ref<string[]>([]);
+  // Store the initial state of all public properties for rollback on error
+  const initialPublicProperties = reactive<PrivacyConfiguration>({
+    id: '',
+    familyId: unref(familyId) || '',
+    publicMemberProperties: [],
+    publicEventProperties: [],
+    publicFamilyProperties: [],
+    publicFamilyLocationProperties: [],
+    publicMemoryItemProperties: [],
+    publicMemberFaceProperties: [],
+    publicFoundFaceProperties: [],
+  });
 
   // Fetch privacy configuration
   const { data: privacyConfiguration, isLoading, error } = useQuery<PrivacyConfiguration, Error>({
@@ -20,7 +31,8 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
       if (!currentFamilyId) return Promise.reject(new Error(t('family.privacy.familyIdRequired')));
       const result = await family.getPrivacyConfiguration(currentFamilyId); // Assuming service method
       if (result.ok) {
-        initialPublicProperties.value = result.value.publicMemberProperties;
+        // Populate initialPublicProperties with fetched data
+        Object.assign(initialPublicProperties, result.value);
         return result.value;
       } else {
         throw result.error;
@@ -31,9 +43,9 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
   });
 
   // Mutation for updating privacy configuration
-  const { mutateAsync: updatePrivacyMutation, isPending: isUpdating } = useMutation<void, Error, { familyId: string; publicMemberProperties: string[] }>({
-    mutationFn: async ({ familyId: mutationFamilyId, publicMemberProperties }) => {
-      const result = await family.updatePrivacyConfiguration(mutationFamilyId, publicMemberProperties);
+  const { mutateAsync: updatePrivacyMutation, isPending: isUpdating } = useMutation<void, Error, PrivacyConfiguration>({
+    mutationFn: async (settingsToSave) => {
+      const result = await family.updatePrivacyConfiguration(settingsToSave.familyId, settingsToSave); // Pass the whole object
       if (result.ok) {
         return; // Return void
       } else {
@@ -44,29 +56,30 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
       // Manually update the cache with the new properties
       queryClient.setQueryData([queryKeys.privacyConfiguration.detail(variables.familyId)], (old: PrivacyConfiguration | undefined) => {
         if (old) {
-          return { ...old, publicMemberProperties: variables.publicMemberProperties };
+          return { ...old, ...variables }; // Merge all updated properties
         }
-        return undefined; // Or some default if old data is not found
+        return undefined;
       });
-      initialPublicProperties.value = variables.publicMemberProperties;
+      // Update initial state to reflect successful save
+      Object.assign(initialPublicProperties, variables);
     },
     onError: (_err) => {
       // Revert to initial state on error
       queryClient.setQueryData([queryKeys.privacyConfiguration.detail(unref(familyId))], (oldData: PrivacyConfiguration | undefined) => {
         if (oldData) {
-          return { ...oldData, publicMemberProperties: initialPublicProperties.value };
+          return { ...oldData, ...initialPublicProperties }; // Revert all properties
         }
         return oldData;
       });
     },
   });
 
-  const updatePrivacySettings = async (publicMemberProperties: string[]) => {
+  const updatePrivacySettings = async (settingsToSave: Omit<PrivacyConfiguration, 'id'>) => {
     const currentFamilyId = unref(familyId);
     if (!currentFamilyId) {
       throw new Error(t('family.privacy.familyIdRequired'));
     }
-    await updatePrivacyMutation({ familyId: currentFamilyId, publicMemberProperties });
+    await updatePrivacyMutation({ id: privacyConfiguration.value?.id || '', ...settingsToSave });
   };
 
   return {
@@ -75,7 +88,6 @@ export function usePrivacyConfiguration(familyId: MaybeRef<string>) {
       isLoading,
       isUpdating,
       error,
-      initialPublicProperties,
     },
     actions: {
       updatePrivacySettings,

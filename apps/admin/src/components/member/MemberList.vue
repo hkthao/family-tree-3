@@ -6,6 +6,38 @@
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
+
+        <v-btn
+          v-if="props.canPerformActions"
+          color="primary"
+          icon
+          @click="props.onExport?.()"
+          data-testid="export-member-button"
+          :aria-label="t('common.export')"
+          :loading="props.isExporting"
+        >
+          <v-tooltip :text="t('common.export')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-export</v-icon>
+            </template>
+          </v-tooltip>
+        </v-btn>
+        <v-btn
+          v-if="props.canPerformActions"
+          color="primary"
+          icon
+          @click="props.onImportClick?.()"
+          data-testid="import-member-button"
+          :aria-label="t('common.import')"
+          :loading="props.isImporting"
+        >
+          <v-tooltip :text="t('common.import')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-import</v-icon>
+            </template>
+          </v-tooltip>
+        </v-btn>
+
         <v-btn v-if="props.allowAdd" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
@@ -118,6 +150,11 @@ const props = defineProps<{
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  isExporting?: boolean; // New prop
+  isImporting?: boolean; // New prop
+  canPerformActions?: boolean; // New prop
+  onExport?: () => void; // New prop
+  onImportClick?: () => void; // New prop
 }>();
 
 const emit = defineEmits([

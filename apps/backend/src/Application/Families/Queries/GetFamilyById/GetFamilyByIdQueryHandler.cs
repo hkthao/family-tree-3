@@ -6,12 +6,13 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser) : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
+public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, IPrivacyService privacyService) : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUser = currentUser;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<FamilyDetailDto>> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
@@ -54,6 +55,9 @@ public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper ma
             };
         }
 
-        return Result<FamilyDetailDto>.Success(familyDetailDto);
+        // Apply privacy filter
+        var filteredFamilyDetailDto = await _privacyService.ApplyPrivacyFilter(familyDetailDto, family.Id, cancellationToken);
+
+        return Result<FamilyDetailDto>.Success(filteredFamilyDetailDto);
     }
 }

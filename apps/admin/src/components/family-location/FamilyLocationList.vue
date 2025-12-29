@@ -3,12 +3,30 @@
     item-value="id" @update:options="props.readOnly ? null : emit('update:options', $event)"
     data-testid="family-location-list" class="elevation-1">
     <template #top>
-      <ListToolbar :title="t('familyLocation.list.title')"
-        :create-button-tooltip="t('familyLocation.list.add')"
-        create-button-test-id="create-family-location-button"
-        @create="emit('create')"
-        :hide-create-button="!props.allowAdd"
-        :hide-search="true" />
+      <ListToolbar :title="t('familyLocation.list.title')" :create-button-tooltip="t('familyLocation.list.add')"
+        create-button-test-id="create-family-location-button" @create="emit('create')"
+        :hide-create-button="!props.allowAdd" :hide-search="false">
+        <template #custom-buttons>
+          <!-- Export Button -->
+          <v-btn color="secondary" class="mr-2" :loading="props.isExporting" :disabled="!props.canPerformActions"
+            @click="props.onExport" icon>
+            <v-tooltip :text="t('common.export')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-export</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <!-- Import Button -->
+          <v-btn color="secondary" class="mr-2" :loading="props.isImporting" :disabled="!props.canPerformActions"
+            @click="props.onImportClick" icon>
+            <v-tooltip :text="t('common.import')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-import</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </ListToolbar>
     </template>
     <template #item.name="{ item }">
       <span class="text-primary cursor-pointer text-decoration-underline" @click="emit('view', item.id)">
@@ -51,6 +69,11 @@ interface FamilyLocationListProps {
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  isExporting?: boolean; // New prop
+  isImporting?: boolean; // New prop
+  canPerformActions?: boolean; // New prop for controlling export/import button visibility
+  onExport?: () => void; // New prop for export action
+  onImportClick?: () => void; // New prop for import dialog click
 }
 
 const props = defineProps<FamilyLocationListProps>();
@@ -94,5 +117,4 @@ const headers = computed<DataTableHeader[]>(() => {
 
   return baseHeaders;
 });
-
 </script>

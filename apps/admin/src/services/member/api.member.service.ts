@@ -69,4 +69,14 @@ export class ApiMemberService extends ApiCrudService<MemberDto, MemberAddDto, Me
   async getRelatives(memberId: string): Promise<Result<MemberDto[], ApiError>> {
     return await this.http.get<MemberDto[]>(`/member/${memberId}/relatives`);
   }
+
+  async exportMembers(familyId?: string): Promise<Result<string, ApiError>> {
+    const url = `${this.baseUrl}/export`;
+    return this.http.get<string>(url, { params: { familyId } });
+  }
+
+  async importMembers(familyId: string, payload: any): Promise<Result<void, ApiError>> {
+    const url = `${this.baseUrl}/import`;
+    return this.http.post<void>(url, payload, { params: { familyId } });
+  }
 }

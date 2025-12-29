@@ -24,6 +24,7 @@ export function getInitialEventFormData(props: GetInitialEventFormDataProps): Ad
     const updateData: UpdateEventDto = {
       ...cloneDeep(props.initialEventData),
       lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
+      location: props.initialEventData.location, // ADD THIS
     };
     return updateData;
   } else {
@@ -38,6 +39,7 @@ export function getInitialEventFormData(props: GetInitialEventFormDataProps): Ad
       lunarDate: { day: 1, month: 1, isLeapMonth: false } as LunarDate,
       repeatRule: RepeatRule.None,
       description: '',
+      location: '', // ADD THIS
       color: '#1976D2',
       relatedMemberIds: [],
     };

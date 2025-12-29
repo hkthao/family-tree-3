@@ -48,6 +48,7 @@ export interface MemberDto {
   wifeAvatarUrl?: string;
 
   order?: number; // New: Order of the member in the family
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type MemberAddDto = Omit<

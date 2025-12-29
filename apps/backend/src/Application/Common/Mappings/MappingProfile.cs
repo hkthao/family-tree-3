@@ -1,5 +1,7 @@
 using backend.Application.Common.Dtos;
 using backend.Application.Common.Models;
+using backend.Application.Prompts.Commands.ImportPrompts;
+using backend.Application.Prompts.DTOs;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
@@ -15,9 +17,11 @@ using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLocations; // Added for FamilyLocationDto and FamilyLocationListDto
 using backend.Application.FamilyLocations.Commands.CreateFamilyLocation; // Added for CreateFamilyLocationCommand
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation; // Added for UpdateFamilyLocationCommand
+using backend.Application.FamilyLocations.Commands.ImportFamilyLocations; // Added
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries; // Updated
 using backend.Application.Identity.UserProfiles.Queries;
+using backend.Application.MemberFaces.Commands.ImportMemberFaces; // Added
 using backend.Application.MemberFaces.Common;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
@@ -25,6 +29,7 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.MemoryItems.Commands.CreateMemoryItem; // Added
 using backend.Application.MemoryItems.Commands.UpdateMemoryItem; // Added
 using backend.Application.MemoryItems.DTOs; // Added
+using backend.Application.Members.DTOs; // Added for MemberImportDto
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
@@ -87,6 +92,9 @@ public class MappingProfile : Profile
         CreateMap<FamilyUser, FamilyUserDto>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
 
+        CreateMap<Prompt, PromptDto>();
+        CreateMap<ImportPromptItemDto, Prompt>();
+
         // FamilyDict
         CreateMap<FamilyDict, FamilyDictDto>();
         CreateMap<NamesByRegion, NamesByRegionDto>();
@@ -116,6 +124,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Member != null && src.Member.Family != null ? src.Member.Family.AvatarUrl : null))
             .ForMember(dest => dest.BirthYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfBirth.HasValue ? src.Member.DateOfBirth.Value.Year : (int?)null))
             .ForMember(dest => dest.DeathYear, opt => opt.MapFrom(src => src.Member != null && src.Member.DateOfDeath.HasValue ? src.Member.DateOfDeath.Value.Year : (int?)null));
+        CreateMap<ImportMemberFaceItemDto, MemberFace>(); // Added
 
         _ = CreateMap<Domain.ValueObjects.BoundingBox, BoundingBoxDto>();
 
@@ -123,7 +132,19 @@ public class MappingProfile : Profile
         // PrivacyConfiguration mapping (already exists, ensuring no duplication)
         CreateMap<PrivacyConfiguration, PrivacyConfigurationDto>()
             .ForMember(dest => dest.PublicMemberProperties,
-                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()));
+                       opt => opt.MapFrom(src => src.GetPublicMemberPropertiesList()))
+            .ForMember(dest => dest.PublicEventProperties,
+                       opt => opt.MapFrom(src => src.GetPublicEventPropertiesList()))
+            .ForMember(dest => dest.PublicFamilyProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFamilyPropertiesList()))
+            .ForMember(dest => dest.PublicFamilyLocationProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFamilyLocationPropertiesList()))
+            .ForMember(dest => dest.PublicMemoryItemProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemoryItemPropertiesList()))
+            .ForMember(dest => dest.PublicMemberFaceProperties,
+                       opt => opt.MapFrom(src => src.GetPublicMemberFacePropertiesList()))
+            .ForMember(dest => dest.PublicFoundFaceProperties,
+                       opt => opt.MapFrom(src => src.GetPublicFoundFacePropertiesList()));
 
         CreateMap<FamilyLinkRequest, FamilyLinkRequestDto>()
             .ForMember(dest => dest.RequestingFamilyName, opt => opt.MapFrom(src => src.RequestingFamily.Name))
@@ -151,9 +172,9 @@ public class MappingProfile : Profile
 
         // FamilyLocation mappings
         CreateMap<FamilyLocation, FamilyLocationDto>();
-        CreateMap<FamilyLocation, FamilyLocationDto>();
         CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
         CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
+        CreateMap<ImportFamilyLocationItemDto, FamilyLocation>(); // Added
 
         // MemoryItem mappings
         CreateMap<MemoryItem, MemoryItemDto>()
@@ -177,5 +198,25 @@ public class MappingProfile : Profile
         CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
 
+        // Event mappings for importing
+        CreateMap<EventDto, Event>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be generated
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
+            .ForMember(dest => dest.Family, opt => opt.Ignore())
+            .ForMember(dest => dest.EventMembers, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.SolarDate, opt => opt.Ignore()) // Handled manually in handler (using SetSolarDate)
+            .ForMember(dest => dest.LunarDate, opt => opt.Ignore()); // Handled manually in handler (using SetLunarDate)
+        CreateMap<LunarDateDto, LunarDate>();
+
+        // Member mappings for importing
+        CreateMap<MemberImportDto, Member>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be generated
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
+            .ForMember(dest => dest.Family, opt => opt.Ignore())
+            .ForMember(dest => dest.FullName, opt => opt.Ignore()) // Calculated property
+            .ForMember(dest => dest.FatherId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.MotherId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.HusbandId, opt => opt.Ignore()) // Handled manually in handler
+            .ForMember(dest => dest.WifeId, opt => opt.Ignore()); // Handled manually in handler
     }
 }

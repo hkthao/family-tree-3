@@ -1,6 +1,7 @@
 import type { MemoryItem, EmotionalTag, AddMemoryItemDto, UpdateMemoryItemDto } from '@/types';
 import type { ICrudService } from '@/services/common/crud.service.interface';
-import type { FilterOptions } from '@/types'; // Import FilterOptions
+import type { FilterOptions } from '@/types';
+import type { Result, ApiError } from '@/types';
 
 export interface MemoryItemFilter extends FilterOptions {
   searchQuery?: string;
@@ -11,8 +12,6 @@ export interface MemoryItemFilter extends FilterOptions {
 }
 
 export interface IMemoryItemService extends ICrudService<MemoryItem, AddMemoryItemDto, UpdateMemoryItemDto> {
-  // `ICrudService` already provides search, getById, add, update, delete, getByIds
-  // If specific search functionality with MemoryItemFilter is needed, it would be added here
-  // but for now, we're strictly following the user's instruction to be like family-location
-  // which implies no additional methods beyond ICrudService.
+  exportMemoryItems(familyId?: string): Promise<Result<string, ApiError>>;
+  importMemoryItems(familyId: string, payload: any): Promise<Result<void, ApiError>>;
 }

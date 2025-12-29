@@ -12,6 +12,7 @@ export interface DateAdapter {
   getMonth(date: Date): number; // 0-indexed
   getDate(date: Date): number;
   newDate(year?: number, month?: number, day?: number): Date;
+  isSameDay(date1: Date, date2: Date): boolean;
 }
 
 /**
@@ -39,6 +40,9 @@ export class DayjsDateAdapter implements DateAdapter {
       return dayjs().year(year).month(month).date(day).toDate();
     }
     return dayjs().toDate();
+  }
+  isSameDay(date1: Date, date2: Date): boolean {
+    return dayjs(date1).isSame(date2, 'day');
   }
 }
 

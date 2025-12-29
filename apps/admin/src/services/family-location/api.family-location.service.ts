@@ -1,11 +1,20 @@
 import type { ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '@/services/common/api.crud.service';
 import type { IFamilyLocationService } from './family-location.service.interface';
-import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
+import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto, Result, ApiError } from '@/types';
 
 export class ApiFamilyLocationService extends ApiCrudService<FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto> implements IFamilyLocationService {
-  constructor(apiClient: ApiClientMethods) {
-    super(apiClient, 'family-locations');
+  protected basePath: string; // Added explicit declaration
+  constructor(protected http: ApiClientMethods) {
+    super(http, 'family-locations');
+    this.basePath = 'family-locations'; // Explicitly assign in constructor
   }
-  // Implement other specific methods here if any
+
+  async exportFamilyLocations(familyId: string): Promise<Result<FamilyLocation[], ApiError>> {
+    return this.http.get<FamilyLocation[]>(`${this.basePath}/export/${familyId}`);
+  }
+
+  async importFamilyLocations(familyId: string, locations: FamilyLocation[]): Promise<Result<FamilyLocation[], ApiError>> {
+    return this.http.post<FamilyLocation[]>(`${this.basePath}/import/${familyId}`, locations);
+  }
 }

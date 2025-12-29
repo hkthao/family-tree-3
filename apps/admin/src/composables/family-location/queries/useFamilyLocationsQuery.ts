@@ -12,7 +12,7 @@ export const useFamilyLocationsQuery = (
     queryKey: ['familyLocations', 'list', paginationOptions, filters],
     queryFn: async () => {
       const { page, itemsPerPage, sortBy } = unref(paginationOptions);
-      const { familyId } = unref(filters);
+      const { familyId, searchQuery } = unref(filters); // Destructure searchQuery
 
       const listOptions: ListOptions = {
         page: page,
@@ -24,6 +24,7 @@ export const useFamilyLocationsQuery = (
         familyId: familyId,
         locationType: unref(filters).locationType,
         locationSource: unref(filters).locationSource,
+        searchQuery: searchQuery, // Add searchQuery here
       };
 
       const response = await familyLocationService.search(listOptions, filterOptions);

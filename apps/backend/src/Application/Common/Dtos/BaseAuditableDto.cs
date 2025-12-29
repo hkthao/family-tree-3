@@ -21,4 +21,5 @@ public abstract class BaseAuditableDto
     /// Người chỉnh sửa bản ghi gần nhất.
     /// </summary>
     public string? LastModifiedBy { get; set; }
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }

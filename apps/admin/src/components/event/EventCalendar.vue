@@ -33,7 +33,7 @@
         :weekdays="weekdays">
         <template #day-label="{ date, day }">
           <div class="d-flex flex-column align-center day-item">
-            <div class="text-solar-day">{{ day }}</div>
+            <div class="text-solar-day" :class="{ 'text-primary rounded border px-2': actions.isToday(new Date(date)) }">{{ day }}</div>
             <div class="text-lunar-day text-grey-darken-1">
               <!-- Placeholder for Lunar Date -->
               {{ getLunarDateForSolarDay(new Date(date)) }}
@@ -62,8 +62,8 @@
     </BaseCrudDrawer>
 
     <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed"
-        @edit="handleDetailEdit" />
+      <EventDetailView v-if="detailDrawer" :event-id="selectedEventId ?? undefined"
+        :event="selectedEventDtoForDetail ?? undefined" @close="handleDetailClosed" @edit="handleDetailEdit" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -98,6 +98,7 @@ const {
   addDrawer,
   detailDrawer,
   selectedEventId,
+  selectedEventDtoForDetail, // Import the new ref
   isDatePickerOpen,
   calendarRef,
   calendarType,
@@ -131,17 +132,19 @@ const {
 
 .text-lunar-day {
   position: absolute;
-  right: 0px;
-  top: 0px;
+  right: 3px;
+  bottom: 3px;
   font-size: 0.8em;
-
 }
 
 .v-calendar.v-calendar-events .v-calendar-weekly__day {
-  padding: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 25px;
 }
 
 .day-item {
-  min-height: 80px;
+  min-height: 60px;
 }
+
 </style>

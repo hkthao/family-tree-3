@@ -10,6 +10,7 @@
     <GlobalSnackbar />
     <ConfirmDialog />
     <MapLocationDrawer />
+    <LocationDrawer />
   </v-app>
 </template>
 
@@ -22,6 +23,8 @@ import GlobalSnackbar from '@/components/common/GlobalSnackbar.vue';
 import DonateMessage from '@/components/common/DonateMessage.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 import MapLocationDrawer from '@/components/common/MapLocationDrawer.vue';
+import LocationDrawer from '@/components/common/LocationDrawer.vue'; // NEW
+
 import { useAuthStore } from '@/stores';
 
 const drawer = ref(true);

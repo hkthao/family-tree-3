@@ -1,16 +1,28 @@
+using Moq;
 using backend.Application.Events.Queries.GetUpcomingEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // For EventDto
 
 namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
 {
     public class GetUpcomingEventsQueryHandlerTests : TestBase
     {
+        private readonly Mock<IPrivacyService> _mockPrivacyService;
+
         public GetUpcomingEventsQueryHandlerTests()
         {
+            _mockPrivacyService = new Mock<IPrivacyService>();
+            // Default setup for privacy service to return the DTO as is (no filtering for basic tests)
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<EventDto>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((EventDto dto, Guid familyId, CancellationToken token) => dto);
+            _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<EventDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((List<EventDto> dtos, Guid familyId, CancellationToken token) => dtos);
+
             // TestBase already sets up _mockUser and _mockAuthorizationService
             // Set default authenticated user for specific scenarios if needed
             _mockUser.Setup(x => x.IsAuthenticated).Returns(true);
@@ -33,7 +45,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
 
             _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Explicitly set admin for this test
 
-            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetUpcomingEventsQuery { FamilyId = familyId };
 
             // Act
@@ -70,7 +82,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetUpcomingEventsQuery { FamilyId = accessibleFamily.Id };
 
             // Act
@@ -102,7 +114,7 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
             });
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object);
+            var handler = new GetUpcomingEventsQueryHandler(_context, _mapper, _mockAuthorizationService.Object, _mockUser.Object, _mockPrivacyService.Object);
             var query = new GetUpcomingEventsQuery { FamilyId = familyId };
 
             // Act

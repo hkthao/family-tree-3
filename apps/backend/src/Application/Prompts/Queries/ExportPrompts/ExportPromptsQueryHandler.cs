@@ -1,0 +1,40 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using Microsoft.Extensions.Logging;
+using backend.Application.Prompts.DTOs;
+
+namespace backend.Application.Prompts.Queries.ExportPrompts;
+
+public class ExportPromptsQueryHandler : IRequestHandler<ExportPromptsQuery, Result<List<PromptDto>>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ILogger<ExportPromptsQueryHandler> _logger;
+    private readonly IMapper _mapper;
+
+    public ExportPromptsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportPromptsQueryHandler> logger, IMapper mapper)
+    {
+        _context = context;
+        _authorizationService = authorizationService;
+        _logger = logger;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<List<PromptDto>>> Handle(ExportPromptsQuery request, CancellationToken cancellationToken)
+    {
+        // Kiểm tra quyền: Chỉ admin mới có thể xuất prompts
+        if (!_authorizationService.IsAdmin())
+        {
+            _logger.LogWarning("Người dùng không có quyền cố gắng xuất prompts.");
+            return Result<List<PromptDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
+        var prompts = await _context.Prompts
+            .AsNoTracking()
+            .ProjectTo<PromptDto>(_mapper.ConfigurationProvider) // Use AutoMapper
+            .ToListAsync(cancellationToken);
+
+        return Result<List<PromptDto>>.Success(prompts);
+    }
+}

@@ -37,6 +37,7 @@ export interface LocalMemoryMedia extends BaseMemoryMedia {
 interface LocalMemoryItem extends Omit<MemoryItem, 'persons' | 'memoryMedia' | 'deletedMediaIds'> {
   personIds: string[]; // Use personIds for autocomplete
   uploadedFiles?: File[]; // To hold files from VFileUpload
+  location?: string; // ADD THIS
 }
 
 interface UseMemoryItemFormOptions {
@@ -100,6 +101,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
     personIds: [],
     memoryPersons: [],
     uploadedFiles: [],
+    location: '', // ADD THIS
   };
   const form = reactive<LocalMemoryItem>(
     options.initialMemoryItemData
@@ -107,6 +109,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
         ...options.initialMemoryItemData,
         personIds: options.initialMemoryItemData.memoryPersons ? options.initialMemoryItemData.memoryPersons.map(p => p.memberId) : [],
         uploadedFiles: [], // Initialize uploaded files as empty for existing items
+        location: options.initialMemoryItemData.location, // ADD THIS
       }
       : { ...defaultNewMemoryItem },
   );
@@ -162,6 +165,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
       description: form.description,
       happenedAt: form.happenedAt,
       emotionalTag: form.emotionalTag,
+      location: form.location, // ADD THIS
       memoryMedia: existingMedias,
       personIds: form.personIds,
       deletedMediaIds: deletedMediaIds.value, // Direct usage

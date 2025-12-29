@@ -7,7 +7,7 @@
     </div>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" :rules="rules.name" required
+        <v-text-field v-model="formData.name" :label="$t('family.form.name')" :rules="rules.name" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -17,14 +17,17 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')"
-          data-testid="family-address-input"></v-text-field>
+        <LocationInputField
+          v-model="formData.address"
+          :family-id="(formData as FamilyDto).id || undefined"
+          :read-only="props.readOnly"
+        ></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <v-textarea v-model="formData.description" :rows="2" :auto-grow="true"
-          :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+          :label="$t('family.form.description')" data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
     <v-row v-if="props.displayLimitConfig">
@@ -80,7 +83,10 @@ import type { VForm } from 'vuetify/components';
 import type { FamilyDto } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
+import LocationInputField from '@/components/common/LocationInputField.vue'; // Import the new component
 import { useFamilyForm } from '@/composables';
+// Removed useLocationDrawerStore as its logic is now in LocationInputField
+// import { useLocationDrawerStore } from '@/stores/locationDrawer.store'; 
 
 const props = defineProps<{
   data?: FamilyDto;
@@ -91,11 +97,26 @@ const props = defineProps<{
 defineEmits(['submit']);
 
 const formRef = ref<VForm | null>(null);
+// Removed locationDrawerStore as its logic is now in LocationInputField
+// const locationDrawerStore = useLocationDrawerStore(); 
 
 const {
   state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
   actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
+
+// Removed openLocationPicker as its logic is now in LocationInputField
+/* const openLocationPicker = async () => {
+  if (props.readOnly) return;
+  try {
+    const selectedLocation = await locationDrawerStore.openDrawer((formData as FamilyDto).id || undefined); // Pass familyId, handle undefined
+    if (selectedLocation && selectedLocation.address) {
+      formData.address = selectedLocation.address;
+    }
+  } catch (error) {
+    console.error('Location selection cancelled or failed:', error);
+  }
+}; */
 
 defineExpose({
   validate,
