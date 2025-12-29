@@ -12,6 +12,7 @@
         <v-alert type="error" :text="error?.message || t('memoryItem.detail.errorLoading')"></v-alert>
       </div>
       <div v-else-if="memoryItem">
+        <PrivacyAlert :is-private="memoryItem.isPrivate" />
         <MemoryItemForm :initial-memory-item-data="memoryItem" :family-id="props.familyId" :read-only="true" />
       </div>
     </v-card-text>
@@ -29,6 +30,7 @@ import { type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemDetail } from '@/composables';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 const props = defineProps({
   familyId: {

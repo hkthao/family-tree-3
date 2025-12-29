@@ -5,12 +5,24 @@
     </v-card-title>
     <v-progress-linear v-if="loading || isDeletingFamilyDict" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyDictForm v-if="familyDict" :initial-family-dict-data="familyDict" :read-only="true" />
+      <div v-if="loading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        {{ t('common.loading') }}
+      </div>
+      <div v-else-if="error">
+        <v-alert type="error" :text="error?.message || t('familyDict.detail.notFound')"></v-alert>
+      </div>
+      <div v-else-if="familyDict">
+        <PrivacyAlert :is-private="familyDict.isPrivate" />
+        <FamilyDictForm :initial-family-dict-data="familyDict" :read-only="true" />
+      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose" :disabled="isDeletingFamilyDict">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!familyDict || loading || isDeletingFamilyDict" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!familyDict || loading || isDeletingFamilyDict" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!familyDict || loading || isDeletingFamilyDict"
+        v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!familyDict || loading || isDeletingFamilyDict"
+        v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -21,6 +33,7 @@ import { useI18n } from 'vue-i18n';
 import { FamilyDictForm } from '@/components/family-dict';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { useFamilyDictQuery, useDeleteFamilyDictMutation } from '@/composables';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface FamilyDictDetailViewProps {
   familyDictId: string;
@@ -35,7 +48,7 @@ const { state } = useAuth();
 const { showSnackbar } = useGlobalSnackbar();
 
 const { familyDictId } = toRefs(props);
-const { familyDict, loading } = useFamilyDictQuery(familyDictId);
+const { familyDict, loading, error } = useFamilyDictQuery(familyDictId);
 const { mutate: deleteFamilyDict, isPending: isDeletingFamilyDict } = useDeleteFamilyDictMutation();
 
 const canEditOrDelete = computed(() => {

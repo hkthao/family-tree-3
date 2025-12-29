@@ -15,6 +15,7 @@ export interface Prompt {
   title: string;
   content: string;
   description?: string;
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type AddPromptDto = Omit<Prompt, 'id'>;

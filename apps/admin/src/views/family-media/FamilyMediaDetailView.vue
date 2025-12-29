@@ -4,13 +4,9 @@
       <span class="text-h5 text-uppercase">{{ t('familyMedia.detail.title') }}</span>
     </v-card-title>
     <v-progress-linear v-if="isLoadingFamilyMedia || isDeleting" indeterminate color="primary"></v-progress-linear>
+    <PrivacyAlert v-if="familyMedia" :is-private="familyMedia.isPrivate" />
     <v-img v-if="familyMedia && familyMedia.mediaType === MediaType.Image && familyMedia.filePath"
-           :src="familyMedia.filePath"
-           :alt="familyMedia.fileName"
-           class="my-4"
-           contain
-           height="200"
-    ></v-img>
+      :src="familyMedia.filePath" :alt="familyMedia.fileName" class="my-4" contain height="200"></v-img>
     <v-card-text class="pa-0">
       <v-list density="compact" v-if="familyMedia">
         <v-list-item>
@@ -37,7 +33,8 @@
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!familyMedia || isLoadingFamilyMedia || isDeleting">{{ t('common.delete') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!familyMedia || isLoadingFamilyMedia || isDeleting">{{
+        t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -49,6 +46,7 @@ import { useFamilyMediaQuery, useDeleteFamilyMediaMutation, useFamilyMediaDeleti
 import { formatBytes, formatLocalizedDateTime } from '@/utils/format.utils';
 import { MediaType } from '@/types/enums';
 import { getMediaTypeOptions } from '@/composables/utils/mediaTypeOptions'; // Import getMediaTypeOptions
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface FamilyMediaDetailViewProps {
   familyId: string;

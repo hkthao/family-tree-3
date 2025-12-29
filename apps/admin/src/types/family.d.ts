@@ -21,6 +21,7 @@ export interface FamilyDto {
   viewerIds: string[]; // Changed to string[]
   familyLimitConfiguration?: FamilyLimitConfiguration;
   validationErrors?: string[];
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export interface FamilyAddDto {

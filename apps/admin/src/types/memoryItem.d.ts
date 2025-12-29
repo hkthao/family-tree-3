@@ -23,6 +23,7 @@ export interface MemoryItem {
   memoryPersons: MemoryPerson[];
   personIds: string[];
   deletedMediaIds?: string[];
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type AddMemoryItemDto = Omit<MemoryItem, 'id' | 'memoryMedia' | 'memoryPersons' | 'deletedMediaIds'> & {

@@ -7,4 +7,5 @@ public class PromptDto
     public string Title { get; set; } = null!;
     public string Content { get; set; } = null!;
     public string? Description { get; set; }
+    public bool IsPrivate { get; set; } = false; // Flag to indicate if some properties were hidden due to privacy
 }

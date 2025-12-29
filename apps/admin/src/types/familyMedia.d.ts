@@ -10,6 +10,7 @@ export interface FamilyMedia extends BaseAuditableEntity {
   description?: string;
   thumbnailPath?: string; // URL to the thumbnail, if applicable
   uploadedBy?: string; // User ID
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export interface MediaLink extends BaseAuditableEntity {

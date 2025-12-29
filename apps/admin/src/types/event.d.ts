@@ -35,6 +35,7 @@ export interface EventDto {
   lunarDate?: LunarDate | null;
   repeatRule: RepeatRule;
   validationErrors?: string[]; // Includes validation errors for display
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 // DTO for adding a new event (without id or validationErrors)

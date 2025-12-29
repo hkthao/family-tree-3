@@ -67,6 +67,7 @@ export interface MemberFace {
   familyId?: string;
   familyName?: string;
   familyAvatarUrl?: string; // NEW
+  isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
 export type AddMemberFaceDto = CreateMemberFaceCommand;

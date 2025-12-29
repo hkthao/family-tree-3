@@ -12,6 +12,7 @@
         <v-alert type="error" :text="error?.message || t('event.detail.errorLoading')"></v-alert>
       </div>
       <div v-else-if="eventData">
+        <PrivacyAlert :is-private="eventData.isPrivate" />
         <EventForm ref="eventFormRef" v-if="eventData" :initial-event-data="eventData" :read-only="true"
           data-testid="event-detail-form" />
       </div>
@@ -28,6 +29,7 @@ import { watch, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EventForm } from '@/components/event';
 import { useEventQuery } from '@/composables'; // Import useEventQuery
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface EventDetailViewProps {
   eventId: string;

@@ -8,12 +8,24 @@
       {{ error?.message || t('prompt.detail.errorLoading') }}
     </v-alert>
     <v-card-text>
-      <PromptForm v-if="prompt" :initial-prompt-data="prompt" :read-only="true" />
+      <div v-if="isLoading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        {{ t('common.loading') }}
+      </div>
+      <div v-else-if="error">
+        <v-alert type="error" :text="error?.message || t('prompt.detail.errorLoading')"></v-alert>
+      </div>
+      <div v-else-if="prompt">
+        <PrivacyAlert :is-private="prompt.isPrivate" />
+        <PromptForm :initial-prompt-data="prompt" :read-only="true" />
+      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!prompt || isLoading || isDeletingPrompt" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!prompt || isLoading || isDeletingPrompt" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!prompt || isLoading || isDeletingPrompt"
+        v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!prompt || isLoading || isDeletingPrompt"
+        v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -24,6 +36,7 @@ import { useI18n } from 'vue-i18n';
 import { PromptForm } from '@/components/prompt';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { usePromptQuery, useDeletePromptMutation } from '@/composables';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
 
 interface PromptDetailViewProps {
   promptId: string;
