@@ -14,6 +14,7 @@ export const communityRoutes = [
         requiresAuth: true,
         title: 'menu.community', // Use i18n key for title
         icon: 'mdi-account-group', // Add icon for the route
+        breadcrumb: 'menu.community', // Add breadcrumb for the route
       },
     }
     ]
