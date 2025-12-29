@@ -15,6 +15,7 @@
           <v-expansion-panel v-for="(group, groupName) in privacyGroups" :key="groupName">
             <v-expansion-panel-title class="font-weight-medium">
               {{ group.title }}
+              <span class="text-caption ml-2">({{ checkedCount(groupName) }}/{{ totalCount(groupName) }})</span>
               <v-spacer></v-spacer>
               <v-btn v-if="!allChecked(groupName)" density="compact" flat @click.stop="checkAll(groupName)">
                 {{ t('common.checkAll') }}
@@ -162,6 +163,14 @@ const uncheckAll = (groupName: keyof typeof privacyGroups.value) => {
 
 const allChecked = (groupName: keyof typeof privacyGroups.value) => {
   return selectedProperties[groupName]?.length === privacyGroups.value[groupName].properties.length;
+};
+
+const checkedCount = (groupName: keyof typeof privacyGroups.value) => {
+  return selectedProperties[groupName]?.length || 0;
+};
+
+const totalCount = (groupName: keyof typeof privacyGroups.value) => {
+  return privacyGroups.value[groupName].properties.length;
 };
 
 const savePrivacySettings = async () => {
