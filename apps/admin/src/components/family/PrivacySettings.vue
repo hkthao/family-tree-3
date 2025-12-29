@@ -16,34 +16,20 @@
             <v-expansion-panel-title class="font-weight-medium">
               {{ group.title }}
               <v-spacer></v-spacer>
-              <v-btn
-                v-if="!allChecked(groupName)"
-                density="compact"
-                flat
-                @click.stop="checkAll(groupName)"
-              >
+              <v-btn v-if="!allChecked(groupName)" density="compact" flat @click.stop="checkAll(groupName)">
                 {{ t('common.checkAll') }}
               </v-btn>
-              <v-btn
-                v-else
-                density="compact"
-                flat
-                @click.stop="uncheckAll(groupName)"
-              >
+              <v-btn v-else density="compact" flat @click.stop="uncheckAll(groupName)">
                 {{ t('common.uncheckAll') }}
               </v-btn>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12" sm="6" md="4" v-for="prop in group.properties" :key="prop.value">
-                                      <v-checkbox
-                                      v-model="selectedProperties[groupName]"
-                                      :label="prop.text"
-                                      :value="prop.value"
-                                      hide-details
-                                      density="compact"
-                                      :indeterminate="selectedProperties[groupName]?.length > 0 && selectedProperties[groupName]?.length < group.properties.length"
-                                    ></v-checkbox>                </v-col>
+                  <v-checkbox v-model="selectedProperties[groupName]" :label="prop.text" :value="prop.value"
+                    hide-details density="compact"
+                    :indeterminate="selectedProperties[groupName]?.length > 0 && selectedProperties[groupName]?.length < group.properties.length"></v-checkbox>
+                </v-col>
               </v-row>
             </v-expansion-panel-text>
           </v-expansion-panel>
@@ -52,12 +38,8 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn
-        color="primary"
-        :loading="isLoading || isUpdating"
-        @click="savePrivacySettings"
-        data-testid="save-privacy-settings-button"
-      >
+      <v-btn color="primary" :loading="isLoading || isUpdating" @click="savePrivacySettings"
+        data-testid="save-privacy-settings-button">
         {{ t('common.save') }}
       </v-btn>
     </v-card-actions>
@@ -184,16 +166,16 @@ const allChecked = (groupName: keyof typeof privacyGroups.value) => {
 
 const savePrivacySettings = async () => {
   // Flatten the selectedProperties object into a single object with entity-specific arrays
-      const settingsToSave = {
-        familyId: props.familyId,
-        publicMemberProperties: selectedProperties.member,
-        publicFamilyProperties: selectedProperties.family,
-        publicEventProperties: selectedProperties.event,
-        publicFamilyLocationProperties: selectedProperties.familyLocation,
-        publicMemoryItemProperties: selectedProperties.memoryItem,
-        publicMemberFaceProperties: selectedProperties.memberFace,
-        publicFoundFaceProperties: selectedProperties.foundFace,
-      };
+  const settingsToSave = {
+    familyId: props.familyId,
+    publicMemberProperties: selectedProperties.member,
+    publicFamilyProperties: selectedProperties.family,
+    publicEventProperties: selectedProperties.event,
+    publicFamilyLocationProperties: selectedProperties.familyLocation,
+    publicMemoryItemProperties: selectedProperties.memoryItem,
+    publicMemberFaceProperties: selectedProperties.memberFace,
+    publicFoundFaceProperties: selectedProperties.foundFace,
+  };
   try {
     await updatePrivacySettings(settingsToSave);
     showSnackbar(t('family.privacy.saveSuccess'), 'success');

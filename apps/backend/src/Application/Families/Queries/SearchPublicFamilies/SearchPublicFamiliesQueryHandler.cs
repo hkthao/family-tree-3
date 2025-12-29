@@ -1,5 +1,7 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
@@ -13,15 +15,19 @@ public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMa
 
     public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchPublicFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Families
-            .AsNoTracking()
-            .Where(f => f.Visibility == FamilyVisibility.Public.ToString());
+        IQueryable<Family> query = _context.Families.AsNoTracking();
 
+        // Apply FamilyVisibilitySpecification for public families
+        query = query.WithSpecification(new FamilyVisibilitySpecification(FamilyVisibility.Public.ToString()));
+
+        // Apply FamilySearchQuerySpecification if a search query is provided
         if (!string.IsNullOrWhiteSpace(request.SearchQuery))
         {
-            var searchQuery = request.SearchQuery;
-            query = query.Where(f => f.Name.Contains(searchQuery) || (f.Description != null && f.Description.Contains(searchQuery)));
+            query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
         }
+
+        // Apply FamilyOrderingSpecification
+        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedFamilyEntities = await PaginatedList<Family>.CreateAsync(query, request.Page, request.ItemsPerPage);
 
@@ -43,3 +49,4 @@ public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMa
         return Result<PaginatedList<FamilyDto>>.Success(filteredPaginatedList);
     }
 }
+

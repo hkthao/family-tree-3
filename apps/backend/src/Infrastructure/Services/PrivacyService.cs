@@ -323,7 +323,7 @@ public class PrivacyService : IPrivacyService
             PrivacyConstants.AlwaysIncludeFamilyProps.Created,
             PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
-            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy
+            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy,
         };
 
         return FilterDto(familyDto, publicProperties, alwaysIncludeProps);

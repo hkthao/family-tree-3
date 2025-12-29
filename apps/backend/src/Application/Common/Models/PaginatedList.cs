@@ -40,6 +40,7 @@ public class PaginatedList<T>(List<T> items, int count, int page, int itemsPerPa
 
         return new PaginatedList<T>(items, count, page, itemsPerPage);
     }
+
     /// <summary>
     /// Tạo một PaginatedList rỗng.
     /// </summary>
