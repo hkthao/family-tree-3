@@ -15,6 +15,7 @@ public class Event : BaseAuditableEntity, IAggregateRoot
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
     public string? Description { get; private set; }
+    public string? Location { get; private set; }
 
     public CalendarType CalendarType { get; private set; }
 
@@ -43,11 +44,12 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         string name,
         string code,
         EventType type,
-        DateTime solarDate,
+        DateTime solarDate, // ADDED BACK
         RepeatRule repeatRule,
         Guid? familyId,
         string? description = null,
-        string? color = null
+        string? color = null,
+        string? location = null
     )
     {
         // Validation: Solar event must have a SolarDate
@@ -67,7 +69,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
             RepeatRule = repeatRule,
             Type = type,
             Color = color,
-            FamilyId = familyId
+            FamilyId = familyId,
+            Location = location
         };
         eventEntity.AddDomainEvent(new EventCreatedEvent(eventEntity));
         return eventEntity;
@@ -82,7 +85,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         RepeatRule repeatRule,
         Guid? familyId,
         string? description = null,
-        string? color = null
+        string? color = null,
+        string? location = null
     )
     {
         // Validation: Lunar event must have a LunarDate
@@ -102,7 +106,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
             RepeatRule = repeatRule,
             Type = type,
             Color = color,
-            FamilyId = familyId
+            FamilyId = familyId,
+            Location = location
         };
         eventEntity.AddDomainEvent(new EventCreatedEvent(eventEntity));
         return eventEntity;
@@ -116,7 +121,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         DateTime solarDate,
         RepeatRule repeatRule,
         EventType type,
-        string? color
+        string? color,
+        string? location = null
     )
     {
         // Validation: Must be a Solar event
@@ -136,6 +142,7 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         RepeatRule = repeatRule;
         Type = type;
         Color = color;
+        Location = location;
         AddDomainEvent(new EventUpdatedEvent(this));
     }
 
@@ -147,7 +154,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         LunarDate lunarDate,
         RepeatRule repeatRule,
         EventType type,
-        string? color
+        string? color,
+        string? location = null
     )
     {
         // Validation: Must be a Lunar event
@@ -167,6 +175,7 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         RepeatRule = repeatRule;
         Type = type;
         Color = color;
+        Location = location;
         AddDomainEvent(new EventUpdatedEvent(this));
     }
 
