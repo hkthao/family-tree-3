@@ -64,7 +64,7 @@
     "color": "red"
   },
   {
-    "name": "Tết Nguyên Tiêu (Rằm tháng Giêng)",
+    "name": "Tết Nguyên Tiêu (Lễ Thượng nguyên)",
     "description": "Lễ truyền thống",
     "calendarType": "lunar",
     "lunarDay": 15,
@@ -98,7 +98,7 @@
     "color": "orange"
   },
   {
-    "name": "Tết Đoan Ngọ (diệt sâu bọ)",
+    "name": "Tết Đoan Ngọ",
     "description": "Lễ truyền thống",
     "calendarType": "lunar",
     "lunarDay": 5,
@@ -334,6 +334,250 @@
     "description": "Ngày kỷ niệm",
     "calendarType": "solar",
     "date": "12-22",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Lễ Thất tịch",
+    "description": "Lễ truyền thống",
+    "calendarType": "lunar",
+    "lunarDay": 7,
+    "lunarMonth": 7,
+    "isLeapMonth": false,
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Traditional Holiday",
+    "color": "orange"
+  },
+  {
+    "name": "Tết Hạ Nguyên",
+    "description": "Lễ truyền thống",
+    "calendarType": "lunar",
+    "lunarDay": 15,
+    "lunarMonth": 10,
+    "isLeapMonth": false,
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Traditional Holiday",
+    "color": "orange"
+  },
+  {
+    "name": "Ngày truyền thống học sinh, sinh viên Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "01-09",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Lễ tình nhân (Valentine)",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "02-14",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày Quốc tế Hạnh phúc",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "03-20",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày Cá tháng Tư",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "04-01",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày chiến thắng Điện Biên Phủ",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "05-07",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày của mẹ",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "05-13",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày sinh Chủ tịch Hồ Chí Minh",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "05-19",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày của cha",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "06-17",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày báo chí Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "06-21",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày dân số thế giới",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "07-11",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày thành lập công đoàn Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "07-28",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày thành lập Mặt trận Tổ quốc Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "09-10",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày quốc tế người cao tuổi",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "10-01",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày giải phóng thủ đô",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "10-10",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày doanh nhân Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "10-13",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày Halloween",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "10-31",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày pháp luật Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "11-09",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày Quốc tế Nam giới",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "11-19",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày thành lập Hội chữ thập đỏ Việt Nam",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "11-23",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày thế giới phòng chống AIDS",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "12-01",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày toàn quốc kháng chiến",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "12-19",
+    "repeatRule": "yearly",
+    "isEditable": false,
+    "type": "Social/Commemorative Day",
+    "color": "green"
+  },
+  {
+    "name": "Ngày lễ Giáng sinh",
+    "description": "Ngày kỷ niệm",
+    "calendarType": "solar",
+    "date": "12-24",
     "repeatRule": "yearly",
     "isEditable": false,
     "type": "Social/Commemorative Day",
