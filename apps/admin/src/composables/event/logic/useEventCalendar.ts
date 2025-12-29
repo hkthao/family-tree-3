@@ -157,6 +157,8 @@ export function useEventCalendar(
   const selectedEventDtoForDetail = ref<EventDto | null>(null); // New ref for passing full EventDto
   const isDatePickerOpen = ref(false);
 
+  const todayDate = computed(() => dateAdapter.newDate()); // Current date
+
   const calendarRef = ref<{
     title: string;
     prev: () => void;
@@ -250,6 +252,10 @@ export function useEventCalendar(
     return getLunarDateForSolarDay(solarDate, lunarDateAdapter, dateAdapter);
   };
 
+  const isToday = (date: Date): boolean => {
+    return dateAdapter.isSameDay(date, todayDate.value);
+  };
+
   // No need for watch(events, ...) and watch(formattedEvents, ...) as they were empty
 
   return {
@@ -286,6 +292,7 @@ export function useEventCalendar(
       handleDetailClosed,
       handleDetailEdit,
       getLunarDateForSolarDay: getLunarDateForSolarDayAction,
+      isToday, // Expose isToday function
       refetch, // Expose the new refetch function
     },
   };
