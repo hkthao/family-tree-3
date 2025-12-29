@@ -15,18 +15,35 @@
           <v-expansion-panel v-for="(group, groupName) in privacyGroups" :key="groupName">
             <v-expansion-panel-title class="font-weight-medium">
               {{ group.title }}
+              <v-spacer></v-spacer>
+              <v-btn
+                v-if="!allChecked(groupName)"
+                density="compact"
+                flat
+                @click.stop="checkAll(groupName)"
+              >
+                {{ t('common.checkAll') }}
+              </v-btn>
+              <v-btn
+                v-else
+                density="compact"
+                flat
+                @click.stop="uncheckAll(groupName)"
+              >
+                {{ t('common.uncheckAll') }}
+              </v-btn>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12" sm="6" md="4" v-for="prop in group.properties" :key="prop.value">
-                  <v-checkbox
-                    v-model="selectedProperties[groupName]"
-                    :label="prop.text"
-                    :value="prop.value"
-                    hide-details
-                    density="compact"
-                  ></v-checkbox>
-                </v-col>
+                                      <v-checkbox
+                                      v-model="selectedProperties[groupName]"
+                                      :label="prop.text"
+                                      :value="prop.value"
+                                      hide-details
+                                      density="compact"
+                                      :indeterminate="selectedProperties[groupName]?.length > 0 && selectedProperties[groupName]?.length < group.properties.length"
+                                    ></v-checkbox>                </v-col>
               </v-row>
             </v-expansion-panel-text>
           </v-expansion-panel>
@@ -152,6 +169,18 @@ watch(privacyConfiguration, (newConfig) => {
     });
   }
 }, { immediate: true });
+
+const checkAll = (groupName: keyof typeof privacyGroups.value) => {
+  selectedProperties[groupName] = privacyGroups.value[groupName].properties.map((p: { text: string; value: string }) => p.value);
+};
+
+const uncheckAll = (groupName: keyof typeof privacyGroups.value) => {
+  selectedProperties[groupName] = [];
+};
+
+const allChecked = (groupName: keyof typeof privacyGroups.value) => {
+  return selectedProperties[groupName]?.length === privacyGroups.value[groupName].properties.length;
+};
 
 const savePrivacySettings = async () => {
   // Flatten the selectedProperties object into a single object with entity-specific arrays
