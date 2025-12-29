@@ -25,7 +25,7 @@
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-row>
-                <v-col cols="12" sm="6" md="4" v-for="prop in group.properties" :key="prop.value">
+                <v-col cols="12" sm="6" md="3" v-for="prop in group.properties" :key="prop.value">
                   <v-checkbox v-model="selectedProperties[groupName]" :label="prop.text" :value="prop.value"
                     hide-details density="compact"
                     :indeterminate="selectedProperties[groupName]?.length > 0 && selectedProperties[groupName]?.length < group.properties.length"></v-checkbox>

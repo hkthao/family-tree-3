@@ -4,11 +4,12 @@ import PublicFamilyListView from '@/views/family/PublicFamilyListView.vue';
 export const communityRoutes = [
   {
     path: '/community/families',
-    name: 'PublicFamilyList',
+    name: 'community',
     component: MainRouterView,
     children: [
       {
       path: '',
+      name:"PublicFamilyList",
       component: PublicFamilyListView,
       meta: {
         requiresAuth: true,

@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using System.Collections.Generic; // Add this using directive for List
 
 namespace backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 
