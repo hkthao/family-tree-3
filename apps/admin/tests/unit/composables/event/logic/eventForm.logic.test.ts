@@ -28,6 +28,7 @@ describe('eventForm.logic', () => {
         lunarDate: { day: 1, month: 1, isLeapMonth: false },
         repeatRule: RepeatRule.None,
         description: '',
+        location: '', // ADD THIS
         color: '#1976D2',
         relatedMemberIds: [],
       });

@@ -17,9 +17,11 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.address" :label="$t('family.form.address')"
-          data-testid="family-address-input" :append-inner-icon="props.readOnly ? '' : 'mdi-map-marker'"
-          @click:append-inner="openLocationPicker" :readonly="props.readOnly"></v-text-field>
+        <LocationInputField
+          v-model="formData.address"
+          :family-id="(formData as FamilyDto).id || undefined"
+          :read-only="props.readOnly"
+        ></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
@@ -81,8 +83,10 @@ import type { VForm } from 'vuetify/components';
 import type { FamilyDto } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
+import LocationInputField from '@/components/common/LocationInputField.vue'; // Import the new component
 import { useFamilyForm } from '@/composables';
-import { useLocationDrawerStore } from '@/stores/locationDrawer.store'; // Import the store
+// Removed useLocationDrawerStore as its logic is now in LocationInputField
+// import { useLocationDrawerStore } from '@/stores/locationDrawer.store'; 
 
 const props = defineProps<{
   data?: FamilyDto;
@@ -93,14 +97,16 @@ const props = defineProps<{
 defineEmits(['submit']);
 
 const formRef = ref<VForm | null>(null);
-const locationDrawerStore = useLocationDrawerStore(); // Initialize the store
+// Removed locationDrawerStore as its logic is now in LocationInputField
+// const locationDrawerStore = useLocationDrawerStore(); 
 
 const {
   state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
   actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
 
-const openLocationPicker = async () => {
+// Removed openLocationPicker as its logic is now in LocationInputField
+/* const openLocationPicker = async () => {
   if (props.readOnly) return;
   try {
     const selectedLocation = await locationDrawerStore.openDrawer((formData as FamilyDto).id || undefined); // Pass familyId, handle undefined
@@ -110,7 +116,7 @@ const openLocationPicker = async () => {
   } catch (error) {
     console.error('Location selection cancelled or failed:', error);
   }
-};
+}; */
 
 defineExpose({
   validate,

@@ -23,6 +23,7 @@ export interface EventDto {
   name: string;
   code: string;
   description?: string;
+  location?: string; // ADD THIS
   familyId: string | null;
   familyName?: string;
   familyAvatarUrl?: string;

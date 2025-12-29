@@ -63,18 +63,32 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.address" :label="t('member.form.address')" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" data-testid="member-address-input"></v-text-field>
+        <LocationInputField
+          v-model="formData.address"
+          :family-id="formData.familyId"
+          :read-only="isFormReadOnly"
+          data-testid="member-address-input"
+        ></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.placeOfBirth" :label="t('member.form.placeOfBirth')" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" data-testid="member-place-of-birth-input"></v-text-field>
+        <LocationInputField
+          v-model="formData.placeOfBirth"
+          :label="t('member.form.placeOfBirth')"
+          :family-id="formData.familyId"
+          :read-only="isFormReadOnly"
+          data-testid="member-place-of-birth-input"
+        ></LocationInputField>
       </v-col>
       <v-col cols="12">
-        <v-text-field v-model="formData.placeOfDeath" :label="t('member.form.placeOfDeath')" :readonly="isFormReadOnly"
-          :disabled="isFormReadOnly" data-testid="member-place-of-death-input"></v-text-field>
+        <LocationInputField
+          v-model="formData.placeOfDeath"
+          :label="t('member.form.placeOfDeath')"
+          :family-id="formData.familyId"
+          :read-only="isFormReadOnly"
+          data-testid="member-place-of-death-input"
+        ></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
@@ -133,6 +147,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemberDto } from '@/types';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
 import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
 
 const props = defineProps<{
