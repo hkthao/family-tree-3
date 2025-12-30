@@ -26,6 +26,6 @@ export class ApiEventService extends ApiCrudService<EventDto, AddEventDto, Updat
 
   async importEvents(familyId: string, payload: any): Promise<Result<void, ApiError>> {
     const url = `${this.baseUrl}/import`;
-    return this.http.post<void>(url, payload, { params: { familyId } });
+        return this.http.post<void>(url, { familyId: familyId, events: payload });
   }
 }
