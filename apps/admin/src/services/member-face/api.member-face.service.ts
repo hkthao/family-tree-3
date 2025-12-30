@@ -44,6 +44,5 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
     const params: Record<string, string> = {};
     if (memberId) params.memberId = memberId;
     if (familyId) params.familyId = familyId;
-    return await this.http.post<null>(`${this.baseUrl}/import`, data, { params });
-  }
+            return await this.http.post<null>(`${this.baseUrl}/import`, { familyId: familyId, faces: data }, { params });  }
 }

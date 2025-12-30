@@ -15,6 +15,5 @@ export class ApiFamilyLocationService extends ApiCrudService<FamilyLocation, Add
   }
 
   async importFamilyLocations(familyId: string, locations: FamilyLocation[]): Promise<Result<FamilyLocation[], ApiError>> {
-    return this.http.post<FamilyLocation[]>(`${this.basePath}/import/${familyId}`, locations);
-  }
+            return this.http.post<FamilyLocation[]>(`${this.basePath}/import/${familyId}`, { familyId: familyId, locations: locations });  }
 }

@@ -77,6 +77,5 @@ export class ApiMemberService extends ApiCrudService<MemberDto, MemberAddDto, Me
 
   async importMembers(familyId: string, payload: any): Promise<Result<void, ApiError>> {
     const url = `${this.baseUrl}/import`;
-    return this.http.post<void>(url, payload, { params: { familyId } });
-  }
+            return this.http.post<void>(url, { familyId: familyId, members: payload });  }
 }

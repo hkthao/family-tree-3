@@ -16,6 +16,5 @@ export class ApiPromptService extends ApiCrudService<Prompt, AddPromptDto, Updat
   }
 
   async importPrompts(prompts: AddPromptDto[]): Promise<Result<Prompt[], ApiError>> {
-    return this.http.post<Prompt[]>('/prompts/import', prompts);
-  }
+            return this.http.post<Prompt[]>('/prompts/import', { prompts: prompts });  }
 }
