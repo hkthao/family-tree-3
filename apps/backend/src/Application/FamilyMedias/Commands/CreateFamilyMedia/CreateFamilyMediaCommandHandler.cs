@@ -99,15 +99,21 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             return Result<FamilyMediaDto>.Failure(uploadResult.Error ?? "File upload failed.", ErrorSources.ExternalServiceError);
         }
 
+        if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FileUrl))
+        {
+            return Result<FamilyMediaDto>.Failure("File upload failed, no valid URL returned.", ErrorSources.ExternalServiceError);
+        }
+
         var familyMedia = new Domain.Entities.FamilyMedia
         {
             FamilyId = request.FamilyId,
             FileName = request.FileName, // Store original file name
-            FilePath = uploadResult.Value!, // The URL returned by the storage service
+            FilePath = uploadResult.Value.FileUrl!, // The URL returned by the storage service
             MediaType = request.MediaType ?? request.FileName.InferMediaType(), // Infer from FileName
             FileSize = request.File.Length,
             Description = request.Description,
-            UploadedBy = _currentUser.UserId // Current user uploading the file
+            UploadedBy = _currentUser.UserId, // Current user uploading the file
+            DeleteHash = uploadResult.Value.DeleteHash // Store DeleteHash from Imgur (if any)
         };
 
         _context.FamilyMedia.Add(familyMedia);

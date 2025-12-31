@@ -10,6 +10,7 @@ public class FamilyMedia : BaseAuditableEntity, ISoftDelete
     public MediaType MediaType { get; set; }
     public long FileSize { get; set; } // in bytes
     public string? Description { get; set; }
+    public string? DeleteHash { get; set; }
     public Guid? UploadedBy { get; set; } // User who uploaded the file
 
     // Navigation properties

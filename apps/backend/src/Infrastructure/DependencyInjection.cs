@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
@@ -66,6 +67,18 @@ public static class DependencyInjection
                     httpClient.BaseAddress = new Uri(imgbbSettings.BaseUrl);
                 });
 
+        // Register ImgurSettings
+        services.Configure<ImgurSettings>(configuration.GetSection(nameof(ImgurSettings)));
+
+        // Register ImgurFileStorageService and configure its HttpClient
+        services.AddHttpClient<IFileStorageService, ImgurFileStorageService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var imgurSettings = serviceProvider.GetRequiredService<IOptions<ImgurSettings>>().Value;
+                    httpClient.BaseAddress = new Uri("https://api.imgur.com/3/");
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", imgurSettings.ClientId);
+                });
+
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
 
@@ -111,8 +124,9 @@ public static class DependencyInjection
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 
-        // Register File Storage Service
-        services.AddScoped<IFileStorageService, N8nFileStorageService>();
+        // If you want to use N8nFileStorageService instead, comment out the Imgur registration above
+        // and uncomment the line below.
+        // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
         services.AddNovuServices(configuration);

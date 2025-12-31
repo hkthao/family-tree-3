@@ -2,6 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.DTOs; // Moved DTOs
+
 namespace backend.Application.Files.UploadFile;
 
 public class UploadFileCommandHandler(
@@ -25,18 +26,18 @@ public class UploadFileCommandHandler(
             return Result<ImageUploadResponseDto>.Failure(uploadResult.Error ?? ErrorMessages.FileUploadFailed, uploadResult.ErrorSource ?? ErrorSources.ExternalServiceError);
         }
 
-        if (string.IsNullOrEmpty(uploadResult.Value))
+        if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FileUrl))
         {
             return Result<ImageUploadResponseDto>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.ExternalServiceError);
         }
 
-        // The IFileStorageService returns the URL directly.
+        // The IFileStorageService returns the URL and DeleteHash.
         // We construct a response similar to the original n8n webhook response.
         var responseDto = new ImageUploadResponseDto
         {
-            Url = uploadResult.Value,
-            DisplayUrl = uploadResult.Value, // Assuming display URL is the same for direct access
-            Filename = request.FileName, // Use Filename property
+            Url = uploadResult.Value.FileUrl,
+            DisplayUrl = uploadResult.Value.FileUrl,
+            Filename = request.FileName,
             ContentType = request.ContentType,
             Extension = Path.GetExtension(request.FileName)
         };

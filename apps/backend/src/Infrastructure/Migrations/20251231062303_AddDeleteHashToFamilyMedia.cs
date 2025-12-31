@@ -5,11 +5,18 @@
 namespace backend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLocationToEvent : Migration
+    public partial class AddDeleteHashToFamilyMedia : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "delete_hash",
+                table: "family_media",
+                type: "longtext",
+                nullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.AlterColumn<Guid>(
                 name: "id",
                 table: "family_dicts",
@@ -21,21 +28,14 @@ namespace backend.Infrastructure.Migrations
                 oldType: "char(50)",
                 oldMaxLength: 50)
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "location",
-                table: "events",
-                type: "longtext",
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "location",
-                table: "events");
+                name: "delete_hash",
+                table: "family_media");
 
             migrationBuilder.AlterColumn<string>(
                 name: "id",
