@@ -67,17 +67,38 @@ public static class DependencyInjection
                     httpClient.BaseAddress = new Uri(imgbbSettings.BaseUrl);
                 });
 
-        // Register ImgurSettings
+        // Register ImgurSettings (đã có)
         services.Configure<ImgurSettings>(configuration.GetSection(nameof(ImgurSettings)));
 
-        // Register ImgurFileStorageService and configure its HttpClient
-        services.AddHttpClient<IFileStorageService, ImgurFileStorageService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var imgurSettings = serviceProvider.GetRequiredService<IOptions<ImgurSettings>>().Value;
-                    httpClient.BaseAddress = new Uri("https://api.imgur.com/3/");
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", imgurSettings.ClientId);
-                });
+        // Register FileStorageSettings
+        services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
+        services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
+
+        // Configure HttpClient for ImgurFileStorageService
+        services.AddHttpClient<ImgurFileStorageService>(httpClient =>
+        {
+            var serviceProvider = services.BuildServiceProvider(); // Temporarily build provider to get settings
+            var imgurSettings = serviceProvider.GetRequiredService<IOptions<ImgurSettings>>().Value;
+            httpClient.BaseAddress = new Uri("https://api.imgur.com/3/");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", imgurSettings.ClientId);
+        });
+
+        // Register N8nService if it's used by N8nFileStorageService
+        services.AddScoped<IN8nService, N8nService>();
+
+        // Dynamically register IFileStorageService based on configuration
+        services.AddScoped<IFileStorageService>(serviceProvider =>
+        {
+            var fileStorageSettings = serviceProvider.GetRequiredService<IOptions<FileStorageSettings>>().Value;
+
+            return fileStorageSettings.Provider switch
+            {
+                "Imgur" => serviceProvider.GetRequiredService<ImgurFileStorageService>(), // Get already configured ImgurFileStorageService
+                "CloudflareR2" => new CloudflareR2FileStorageService(serviceProvider.GetRequiredService<IOptions<CloudflareR2Settings>>()),
+                "N8n" => new N8nFileStorageService(serviceProvider.GetRequiredService<IN8nService>()),
+                _ => throw new ArgumentException($"Unknown file storage provider: {fileStorageSettings.Provider}")
+            };
+        });
 
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();

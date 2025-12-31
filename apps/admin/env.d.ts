@@ -9,7 +9,7 @@ declare module '*.vue' {
 interface ImportMetaEnv {
   readonly VITE_APP_USE_MOCK_API: string;
   readonly VITE_API_BASE_URL?: string;
-  readonly VITE_API_PUBLIC_KEY?: string; // New: Public API Key
+  readonly VITE_MAPBOX_ACCESS_TOKEN?: string;
   // Add other environment variables here as needed
 }
 
@@ -27,7 +27,7 @@ interface RuntimeConfig {
   VITE_APP_BUILD_DATE: string;
   VITE_APP_ENVIRONMENT: string;
   VITE_APP_COMMIT_ID: string;
-  VITE_API_PUBLIC_KEY?: string; // New: Public API Key
+  VITE_MAPBOX_ACCESS_TOKEN: string;
 }
 
 interface Window {
