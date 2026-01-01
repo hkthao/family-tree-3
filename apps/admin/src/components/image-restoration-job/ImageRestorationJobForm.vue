@@ -1,5 +1,12 @@
 <template>
   <v-form ref="formRef">
+    <v-alert
+      type="warning"
+      variant="tonal"
+      class="mb-4"
+    >
+      {{ t('imageRestorationJob.claim.alertMessage') }}
+    </v-alert>
     <v-row>
       <v-col cols="12">
         <v-text-field
