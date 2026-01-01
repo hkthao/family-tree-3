@@ -52,8 +52,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     FamilyId = request.FamilyId, // Add FamilyId
                     File = imageData,
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png",
-                    Folder = UploadConstants.UserImagesFolder, // UserImagesFolder does not use familyId, as it's a general folder for all users
-
+                    Folder = string.Format(UploadConstants.ImagesFolder, request.FamilyId), // UserImagesFolder does not use familyId, as it's a general folder for all users
                     MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
                 };
 

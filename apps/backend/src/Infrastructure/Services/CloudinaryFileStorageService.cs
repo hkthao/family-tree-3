@@ -39,7 +39,7 @@ public class CloudinaryFileStorageService : IFileStorageService
 
     public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
     {
-        var publicId = GetPublicId(fileName, folder);
+        var publicId = GetPublicId(fileName);
         var uploadParams = new ImageUploadParams()
         {
             File = new FileDescription(fileName, fileStream),
@@ -48,7 +48,8 @@ public class CloudinaryFileStorageService : IFileStorageService
             // Caching is handled by Cloudinary by default.
             // If you need specific transformations or eager transformations, configure them here.
             UseFilename = true,
-            UniqueFilename = false
+            UniqueFilename = false,
+            Folder = Path.Combine(_cloudinarySettings.RootFolder, folder ?? "")
         };
 
         try
@@ -156,12 +157,11 @@ public class CloudinaryFileStorageService : IFileStorageService
         return _cloudinary.Api.UrlImgUp.Transform(transformation).BuildUrl(filePath);
     }
 
-    private string GetPublicId(string fileName, string? folder)
+    private string GetPublicId(string fileName)
     {
         // Remove extension from filename to use as public ID
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-        var path = string.IsNullOrEmpty(folder) ? nameWithoutExtension : $"{folder.Trim('/')}/{nameWithoutExtension}";
-        return !string.IsNullOrEmpty(_rootFolder) ? $"{_rootFolder}/{path}" : path;
+        return $"{_rootFolder}_{nameWithoutExtension}";
     }
 
     private string? ExtractPublicIdFromUrl(string fileUrl)
