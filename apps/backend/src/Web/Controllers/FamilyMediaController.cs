@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions; // NEW
-using backend.Application.Common.Interfaces; // NEW
 using backend.Application.Common.Models.ImageRestoration; // NEW
 using backend.Application.FamilyMedias.Commands.StartImageRestoration;
 using backend.Application.FamilyMedias.Queries.GetImageRestorationStatus;
