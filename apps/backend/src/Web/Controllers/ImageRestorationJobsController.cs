@@ -1,5 +1,4 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Extensions;
 using backend.Application.Common.Models; // Added for PaginatedList
 using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob; // Added
 using backend.Application.ImageRestorationJobs.Commands.DeleteImageRestorationJob;
@@ -8,7 +7,6 @@ using backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobByI
 using backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobs;
 using backend.Application.ImageRestorationJobs.Queries.SearchImageRestorationJobs; // Added
 using backend.Application.ImageRestorationJobs.Common; // Added
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
