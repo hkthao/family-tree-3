@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
-import { type ImageRestorationJobDto, type CreateImageRestorationJobCommand } from '@/types';
+import { type ImageRestorationJobDto, type CreateImageRestorationJobDto } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 
 export const useCreateImageRestorationJobMutation = () => {
@@ -10,7 +10,7 @@ export const useCreateImageRestorationJobMutation = () => {
   const { t } = useI18n();
   const services = useServices();
 
-  return useMutation<ImageRestorationJobDto, Error, CreateImageRestorationJobCommand>({
+  return useMutation<ImageRestorationJobDto, Error, CreateImageRestorationJobDto>({
     mutationFn: async (command) => {
       const result = await services.imageRestorationJob.add(command);
       if (result.ok) {

@@ -1,9 +1,7 @@
-import { type Result, type Paginated, type ListOptions, type FilterOptions, type ImageRestorationJobDto, type CreateImageRestorationJobCommand, type UpdateImageRestorationJobCommand } from '@/types';
+import { type ImageRestorationJobDto, type CreateImageRestorationJobDto, type UpdateImageRestorationJobDto } from '@/types';
+import { type ICrudService } from '../common/crud.service.interface';
 
-export interface IImageRestorationJobService {
-  search(familyId: string, options?: ListOptions, filters?: FilterOptions): Promise<Result<Paginated<ImageRestorationJobDto>>>;
-  getById(familyId: string, id: string): Promise<Result<ImageRestorationJobDto | undefined>>;
-  add(newItem: CreateImageRestorationJobCommand): Promise<Result<ImageRestorationJobDto>>;
-  update(updatedItem: UpdateImageRestorationJobCommand): Promise<Result<ImageRestorationJobDto>>;
-  delete(familyId: string, id: string): Promise<Result<void>>;
+export interface IImageRestorationJobService extends ICrudService<ImageRestorationJobDto, CreateImageRestorationJobDto, UpdateImageRestorationJobDto> {
+  // search method will implicitly handle familyId via FilterOptions
+  // getById and delete methods are used as defined in ICrudService
 }

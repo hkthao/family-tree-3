@@ -1,38 +1,24 @@
 import { type ApiClientMethods } from '@/plugins/axios';
-import { type Result, type Paginated, type ListOptions, type FilterOptions, type ImageRestorationJobDto, type CreateImageRestorationJobCommand, type UpdateImageRestorationJobCommand } from '@/types';
+import { type Result, type Paginated, type ListOptions, type FilterOptions, type ImageRestorationJobDto, type CreateImageRestorationJobDto, type UpdateImageRestorationJobDto } from '@/types';
 import { type IImageRestorationJobService } from './image-restoration-job.service.interface';
-import { buildSearchParams } from '@/utils/list.utils';
+import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiImageRestorationJobService implements IImageRestorationJobService {
-  private readonly RESOURCE_BASE_URL = '/api/image-restoration-jobs';
+export class ApiImageRestorationJobService
+  extends ApiCrudService<ImageRestorationJobDto, CreateImageRestorationJobDto, UpdateImageRestorationJobDto>
+  implements IImageRestorationJobService
+{
+  constructor(protected http: ApiClientMethods) {
+    super(http, '/image-restoration-jobs');
+  }
 
-  constructor(protected http: ApiClientMethods) {}
-
+  // Override search to include familyId in the filters parameter for ApiCrudService.search
   async search(
-    familyId: string,
     options?: ListOptions,
     filters?: FilterOptions,
   ): Promise<Result<Paginated<ImageRestorationJobDto>>> {
-    const params: Record<string, any> = {
-      ...buildSearchParams(options, filters),
-      familyId: familyId, // Add familyId to query params
-    };
-    return await this.http.get<Paginated<ImageRestorationJobDto>>(`${this.RESOURCE_BASE_URL}/search`, { params });
+    return await super.search(options, filters);
   }
 
-  async getById(familyId: string, id: string): Promise<Result<ImageRestorationJobDto | undefined>> {
-    return await this.http.get<ImageRestorationJobDto>(`${this.RESOURCE_BASE_URL}/${id}?familyId=${familyId}`);
-  }
-
-  async add(newItem: CreateImageRestorationJobCommand): Promise<Result<ImageRestorationJobDto>> {
-    return await this.http.post<ImageRestorationJobDto>(this.RESOURCE_BASE_URL, newItem);
-  }
-
-  async update(updatedItem: UpdateImageRestorationJobCommand): Promise<Result<ImageRestorationJobDto>> {
-    return await this.http.put<ImageRestorationJobDto>(`${this.RESOURCE_BASE_URL}/${updatedItem.jobId}`, updatedItem);
-  }
-
-  async delete(familyId: string, id: string): Promise<Result<void>> {
-    return await this.http.delete<void>(`${this.RESOURCE_BASE_URL}/${id}?familyId=${familyId}`);
-  }
+  // getById, add, update, delete methods will now use the base ApiCrudService implementation
+  // as the backend ImageRestorationJobsController does not expect familyId in route/query for these.
 }

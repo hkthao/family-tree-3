@@ -1,8 +1,8 @@
-import { ref, watch, reactive, computed, type Ref } from 'vue';
+import { watch, reactive, type Ref } from 'vue';
 import { useImageRestorationJobQuery } from './useImageRestorationJobQuery';
 import { useUpdateImageRestorationJobMutation } from './useUpdateImageRestorationJobMutation';
 import { type IImageRestorationJobFormInstance } from '@/components/image-restoration-job/ImageRestorationJobForm.vue';
-import { type ImageRestorationJobDto, type UpdateImageRestorationJobCommand } from '@/types';
+import { type UpdateImageRestorationJobDto } from '@/types';
 
 interface UseImageRestorationJobEditOptions {
   familyId: Ref<string>;
@@ -33,8 +33,9 @@ export const useImageRestorationJobEdit = (options: UseImageRestorationJobEditOp
 
     try {
       const formData = formRef.value.getFormData();
-      const command: UpdateImageRestorationJobCommand = {
+      const command: UpdateImageRestorationJobDto = {
         jobId: imageRestorationJobId.value,
+        originalImageUrl: formData.originalImageUrl,
       };
       await updateImageRestorationJob(command);
       onSaveSuccess?.();

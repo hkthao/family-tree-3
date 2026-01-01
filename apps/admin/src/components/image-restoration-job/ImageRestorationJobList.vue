@@ -11,19 +11,13 @@
     data-testid="image-restoration-job-list"
   >
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title>{{ t('imageRestorationJob.list.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          dark
-          class="mb-2"
-          @click="emit('create')"
-          data-testid="button-create-image-restoration-job"
-        >
-          {{ t('imageRestorationJob.list.add') }}
-        </v-btn>
-      </v-toolbar>
+      <ListToolbar
+        :title="t('imageRestorationJob.list.title')"
+        :create-button-tooltip="t('imageRestorationJob.list.add')"
+        create-button-test-id="button-create-image-restoration-job"
+        @create="emit('create')"
+      >
+      </ListToolbar>
     </template>
     <template #item.status="{ item }">
       <v-chip :color="getStatusColor(item.status)" small>
@@ -55,10 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, type PropType } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { type ImageRestorationJobDto } from '@/types/imageRestorationJob';
 import { formatDate } from '@/utils/format.utils';
+import ListToolbar from '@/components/common/ListToolbar.vue'; // Import ListToolbar
 
 interface ImageRestorationJobListProps {
   items: ImageRestorationJobDto[];
@@ -71,7 +66,7 @@ interface ImageRestorationJobListProps {
   canPerformActions?: boolean;
 }
 
-const props = defineProps<ImageRestorationJobListProps>();
+defineProps<ImageRestorationJobListProps>();
 const emit = defineEmits(['update:options', 'create', 'view', 'edit', 'delete']);
 
 const { t } = useI18n();

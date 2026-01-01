@@ -1,4 +1,4 @@
-import { computed, reactive, type Ref } from 'vue';
+import { reactive, type Ref } from 'vue';
 import { useImageRestorationJobQuery } from './useImageRestorationJobQuery';
 
 interface UseImageRestorationJobDetailOptions {

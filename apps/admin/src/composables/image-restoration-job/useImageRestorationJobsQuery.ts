@@ -16,7 +16,7 @@ export const useImageRestorationJobsQuery = (
         return { items: [], page: 1, totalItems: 0, totalPages: 0 }; // Return empty paginated object
       }
       const allFilters = { ...filters.value, familyId: familyId.value }; // Add familyId to filters
-      const result = await services.imageRestorationJob.search(familyId.value, options.value, allFilters);
+      const result = await services.imageRestorationJob.search(options.value, allFilters);
       if (result.ok) {
         return result.value;
       }

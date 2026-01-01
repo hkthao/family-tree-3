@@ -10,7 +10,7 @@ export const useImageRestorationJobQuery = (familyId: Ref<string>, jobId: Ref<st
       if (!familyId.value || !jobId.value) {
         return undefined;
       }
-      const result = await services.imageRestorationJob.getById(jobId.value, familyId.value);
+      const result = await services.imageRestorationJob.getById(jobId.value);
       if (result.ok) {
         return result.value;
       }

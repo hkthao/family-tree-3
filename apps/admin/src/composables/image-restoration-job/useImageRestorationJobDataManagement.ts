@@ -4,7 +4,7 @@ import { type ListOptions, type FilterOptions } from '@/types';
 
 type SortOrder = 'asc' | 'desc'; // Define SortOrder type
 
-export const useImageRestorationJobDataManagement = (familyId: Ref<string>) => {
+export const useImageRestorationJobDataManagement = (_familyId: Ref<string>) => {
   const route = useRoute();
   const router = useRouter();
 

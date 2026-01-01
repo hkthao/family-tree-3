@@ -1,7 +1,7 @@
 import { ref, reactive, type Ref } from 'vue';
 import { useCreateImageRestorationJobMutation } from './useCreateImageRestorationJobMutation';
 import { type IImageRestorationJobFormInstance } from '@/components/image-restoration-job/ImageRestorationJobForm.vue';
-import { type ImageRestorationJobDto, type CreateImageRestorationJobCommand } from '@/types';
+import { type CreateImageRestorationJobDto } from '@/types';
 
 interface UseImageRestorationJobAddOptions {
   familyId: string;
@@ -25,7 +25,7 @@ export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOpti
     isAddingImageRestorationJob.value = true;
     try {
       const formData = formRef.value.getFormData();
-      const command: CreateImageRestorationJobCommand = {
+      const command: CreateImageRestorationJobDto = {
         originalImageUrl: formData.originalImageUrl,
         familyId: familyId,
       };
