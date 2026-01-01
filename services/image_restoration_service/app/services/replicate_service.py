@@ -129,4 +129,10 @@ class ReplicateService:
             "status": "completed" if (restored_face_url or upscaled_url) else "failed"
         }
 
-replicate_service = ReplicateService()
+_replicate_service_instance: Optional[ReplicateService] = None
+
+def get_replicate_service() -> ReplicateService:
+    global _replicate_service_instance
+    if _replicate_service_instance is None:
+        _replicate_service_instance = ReplicateService()
+    return _replicate_service_instance

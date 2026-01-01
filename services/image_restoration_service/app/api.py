@@ -3,7 +3,8 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from app.models.job import RestorationJob, RestorationStatus
-from app.services.replicate_service import replicate_service
+from app.services.replicate_service import get_replicate_service, ReplicateService
+from app.services.backend_api_service import get_backend_api_service, BackendApiService
 
 router = APIRouter()
 
@@ -31,7 +32,13 @@ async def start_restoration_job(
     jobs[job_id] = job
 
     # Run the restoration pipeline in the background
-    background_tasks.add_task(_run_restoration_pipeline, job_id, image_url)
+    background_tasks.add_task(
+        _run_restoration_pipeline,
+        job_id,
+        image_url,
+        get_replicate_service(), # Get the instance
+        get_backend_api_service() # Get the instance
+    )
 
     return job
 
@@ -47,7 +54,12 @@ async def get_restoration_job_status(job_id: UUID):
     return job
 
 
-async def _run_restoration_pipeline(job_id: UUID, image_url: str):
+async def _run_restoration_pipeline(
+    job_id: UUID,
+    image_url: str,
+    replicate_service: ReplicateService, # Injected dependency
+    backend_api_service: BackendApiService # Injected dependency
+):
     """
     Internal function to run the image restoration pipeline.
     Updates the job status and results in the global jobs dictionary.
@@ -57,7 +69,8 @@ async def _run_restoration_pipeline(job_id: UUID, image_url: str):
         result = await replicate_service.restore_image_pipeline(image_url)
         job.restored_url = result.get("restoredUrl")
         job.pipeline = result.get("pipeline", [])
-        job.status = result.get("status", RestorationStatus.COMPLETED)
+        status_from_replicate = result.get("status", RestorationStatus.COMPLETED.value)
+        job.status = RestorationStatus(status_from_replicate)
         job.error = result.get("error")
     except Exception as e:
         job.status = RestorationStatus.FAILED
@@ -67,3 +80,11 @@ async def _run_restoration_pipeline(job_id: UUID, image_url: str):
         if job.status == RestorationStatus.PROCESSING:
             job.status = RestorationStatus.FAILED
             job.error = job.error or "Unknown error occurred during processing."
+        
+        # Notify backend about the final status
+        await backend_api_service.update_image_restoration_job_status(
+            job.job_id,
+            job.status,
+            job.restored_url,
+            job.error
+        )
