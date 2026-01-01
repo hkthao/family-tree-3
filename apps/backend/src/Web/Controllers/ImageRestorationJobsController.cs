@@ -94,6 +94,24 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// </summary>
     /// <param name="jobId">ID của job phục hồi ảnh cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
+    [HttpPatch("{jobId}/status")]
+    [AllowAnonymous] // Allow external service to call back without authentication
+    public async Task<IActionResult> UpdateImageRestorationJobStatus([FromRoute] string jobId, [FromBody] UpdateImageRestorationJobCommand command)
+    {
+        if (jobId != command.JobId)
+        {
+            return BadRequest($"JobId in route ({jobId}) does not match JobId in body ({command.JobId}).");
+        }
+
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204); // 204 No Content for successful status update
+    }
+
+    /// <summary>
+    /// Xóa một job phục hồi ảnh.
+    /// </summary>
+    /// <param name="jobId">ID của job phục hồi ảnh cần xóa.</param>
+    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("{jobId}")]
     public async Task<IActionResult> DeleteImageRestorationJob([FromRoute] string jobId)
     {
