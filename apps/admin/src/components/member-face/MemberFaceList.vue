@@ -10,6 +10,7 @@
         :create-button-tooltip="t('common.create')"
         create-button-test-id="create-member-face-button"
         :hide-create-button="props.readOnly"
+        @create="emit('create')"
       >
         <template #custom-buttons>
           <v-btn
