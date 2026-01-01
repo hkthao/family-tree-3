@@ -14,4 +14,24 @@ public class ImageRestorationJob : BaseAuditableEntity
     public RestorationStatus Status { get; set; }
     public string? ErrorMessage { get; set; }
     public string? RestoredImageUrl { get; set; }
+
+    /// <summary>
+    /// Marks the image restoration job as failed with a given error message.
+    /// </summary>
+    /// <param name="errorMessage">The error message describing the failure.</param>
+    public void MarkAsFailed(string errorMessage)
+    {
+        Status = RestorationStatus.Failed;
+        ErrorMessage = errorMessage;
+    }
+
+    /// <summary>
+    /// Marks the image restoration job as processing and sets the external job ID.
+    /// </summary>
+    /// <param name="jobId">The ID provided by the external image restoration service.</param>
+    public void MarkAsProcessing(string jobId)
+    {
+        JobId = jobId;
+        Status = RestorationStatus.Processing;
+    }
 }

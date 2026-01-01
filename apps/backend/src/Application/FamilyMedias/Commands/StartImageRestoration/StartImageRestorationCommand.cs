@@ -2,6 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Application.Common.Models.ImageRestoration; // Added
 
 namespace backend.Application.FamilyMedias.Commands.StartImageRestoration;
 

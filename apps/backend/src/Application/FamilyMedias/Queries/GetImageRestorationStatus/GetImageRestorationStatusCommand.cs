@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.ImageRestoration; // Added
 
 namespace backend.Application.FamilyMedias.Queries.GetImageRestorationStatus;
 

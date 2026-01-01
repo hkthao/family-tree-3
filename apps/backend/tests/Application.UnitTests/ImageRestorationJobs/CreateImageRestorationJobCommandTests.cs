@@ -7,6 +7,8 @@ using backend.Application.UnitTests.Common;
 using Moq;
 using Xunit;
 using Microsoft.Extensions.Logging;
+using backend.Application.Common.Models.ImageRestoration; // Added
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.UnitTests.ImageRestorationJobs;
 
@@ -14,12 +16,14 @@ public class CreateImageRestorationJobCommandTests : TestBase
 {
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<ILogger<CreateImageRestorationJobCommandHandler>> _loggerMock;
+    private readonly Mock<IImageRestorationService> _imageRestorationServiceMock;
     private readonly DateTime _fixedDateTime; // To ensure consistent time for Now
 
     public CreateImageRestorationJobCommandTests()
     {
         _currentUserMock = _mockUser; // Use the mock from TestBase
         _loggerMock = new Mock<ILogger<CreateImageRestorationJobCommandHandler>>();
+        _imageRestorationServiceMock = new Mock<IImageRestorationService>();
 
         _fixedDateTime = DateTime.Now; // Fix the DateTime for the test run
         _mockDateTime.Setup(d => d.Now).Returns(_fixedDateTime); // Set the Now property of TestBase's _mockDateTime
@@ -37,12 +41,25 @@ public class CreateImageRestorationJobCommandTests : TestBase
             FamilyId: Guid.NewGuid()
         );
 
+        var successfulRestorationResponse = new backend.Application.Common.Models.ImageRestoration.StartImageRestorationResponseDto
+        {
+            JobId = Guid.NewGuid(),
+            Status = RestorationStatus.Processing,
+            OriginalUrl = command.OriginalImageUrl
+        };
+        var successfulRestorationResult = backend.Application.Common.Models.Result<backend.Application.Common.Models.ImageRestoration.StartImageRestorationResponseDto>
+            .Success(successfulRestorationResponse);
+
+        _imageRestorationServiceMock.Setup(s => s.StartRestorationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(successfulRestorationResult));
+
         var handler = new CreateImageRestorationJobCommandHandler(
             _context,
             _mapper,
             _currentUserMock.Object,
             _mockDateTime.Object,
-            _loggerMock.Object
+            _loggerMock.Object,
+            _imageRestorationServiceMock.Object
         );
 
         // Act
@@ -79,7 +96,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mapper,
             _currentUserMock.Object,
             _mockDateTime.Object, // Use _mockDateTime from TestBase
-            _loggerMock.Object
+            _loggerMock.Object,
+            _imageRestorationServiceMock.Object // Pass the mock here
         );
 
         // Act

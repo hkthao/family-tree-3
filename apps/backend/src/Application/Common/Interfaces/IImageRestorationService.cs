@@ -1,4 +1,5 @@
 using backend.Application.Common.Models; // For Result
+using backend.Application.Common.Models.ImageRestoration; // Added
 
 namespace backend.Application.Common.Interfaces;
 

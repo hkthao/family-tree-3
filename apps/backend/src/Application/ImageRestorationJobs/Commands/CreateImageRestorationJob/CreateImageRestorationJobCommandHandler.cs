@@ -61,17 +61,15 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
         _logger.LogInformation("Attempting to start image restoration for job {JobId} with original image URL {OriginalImageUrl}", entity.Id, entity.OriginalImageUrl);
         var restorationResult = await _imageRestorationService.StartRestorationAsync(entity.OriginalImageUrl, cancellationToken);
 
-        if (!restorationResult.Succeeded)
+        if (!restorationResult.IsSuccess)
         {
-            _logger.LogError("Failed to start image restoration for job {JobId}: {ErrorMessage}", entity.Id, restorationResult.ErrorMessage);
-            entity.Status = Domain.Enums.RestorationStatus.Failed;
-            entity.ErrorMessage = restorationResult.ErrorMessage;
+            _logger.LogError("Failed to start image restoration for job {JobId}: {ErrorMessage}", entity.Id, restorationResult.Error);
+            entity.MarkAsFailed(restorationResult.Error ?? string.Empty);
             await _context.SaveChangesAsync(cancellationToken);
-            return Result<ImageRestorationJobDto>.Failure($"Failed to start image restoration: {restorationResult.ErrorMessage}");
+            return Result<ImageRestorationJobDto>.Failure($"Failed to start image restoration: {restorationResult.Error}");
         }
 
-        entity.JobId = restorationResult.Data.JobId;
-        entity.Status = Domain.Enums.RestorationStatus.Submitted; // Update status after successful submission
+        entity.MarkAsProcessing(restorationResult.Value!.JobId.ToString());
         await _context.SaveChangesAsync(cancellationToken);
 
         var dto = _mapper.Map<ImageRestorationJobDto>(entity);

@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.ImageRestoration; // Added
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

@@ -181,26 +181,4 @@ public class Result
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 409 };
 }
 
-// Combined DTOs
-public class StartImageRestorationRequestDto
-{
-    public string ImageUrl { get; set; } = string.Empty;
-}
 
-public class StartImageRestorationResponseDto
-{
-    public Guid JobId { get; set; }
-    public RestorationStatus Status { get; set; }
-    public string OriginalUrl { get; set; } = string.Empty;
-    public string? Error { get; set; }
-}
-
-public class ImageRestorationJobStatusDto
-{
-    public Guid JobId { get; set; }
-    public RestorationStatus Status { get; set; }
-    public string OriginalUrl { get; set; } = string.Empty;
-    public string? RestoredUrl { get; set; }
-    public List<string> Pipeline { get; set; } = new List<string>();
-    public string? Error { get; set; }
-}
