@@ -60,6 +60,7 @@ npm run dev
 Đây là cách nhanh nhất và được khuyến nghị để chạy tất cả các ứng dụng và Database trong môi trường phát triển.
 
 1.  **Cấu hình biến môi trường**: Khi chạy với Docker Compose, các biến môi trường được định nghĩa trực tiếp trong tệp `infra/docker-compose.yml`. Các tệp `.env` trong các thư mục `apps/backend` và `apps/admin` chỉ được sử dụng khi chạy các ứng dụng riêng lẻ mà không thông qua Docker Compose.
+    *   `REPLICATE_API_TOKEN`: Required for the `image-restoration-service`. Obtain your API token from [Replicate](https://replicate.com/account).
 2.  **Chạy Docker Compose:**
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
