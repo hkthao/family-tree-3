@@ -34,7 +34,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Arrange
         var command = new CreateImageRestorationJobCommand(
             OriginalImageUrl: "http://example.com/original.jpg",
-            FamilyId: Guid.NewGuid().ToString()
+            FamilyId: Guid.NewGuid()
         );
 
         var handler = new CreateImageRestorationJobCommandHandler(
@@ -71,7 +71,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
 
         var command = new CreateImageRestorationJobCommand(
             OriginalImageUrl: "http://example.com/original.jpg",
-            FamilyId: Guid.NewGuid().ToString()
+            FamilyId: Guid.NewGuid()
         );
 
         var handler = new CreateImageRestorationJobCommandHandler(
@@ -96,7 +96,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Arrange
         var command = new CreateImageRestorationJobCommand(
             OriginalImageUrl: "", // Empty URL
-            FamilyId: Guid.NewGuid().ToString()
+            FamilyId: Guid.NewGuid()
         );
 
         var validator = new CreateImageRestorationJobCommandValidator();
@@ -115,7 +115,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Arrange
         var command = new CreateImageRestorationJobCommand(
             OriginalImageUrl: "not-a-valid-url", // Invalid URL
-            FamilyId: Guid.NewGuid().ToString()
+            FamilyId: Guid.NewGuid()
         );
 
         var validator = new CreateImageRestorationJobCommandValidator();
@@ -134,7 +134,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Arrange
         var command = new CreateImageRestorationJobCommand(
             OriginalImageUrl: "http://example.com/original.jpg",
-            FamilyId: "" // Empty FamilyId
+            FamilyId: Guid.Empty
         );
 
         var validator = new CreateImageRestorationJobCommandValidator();

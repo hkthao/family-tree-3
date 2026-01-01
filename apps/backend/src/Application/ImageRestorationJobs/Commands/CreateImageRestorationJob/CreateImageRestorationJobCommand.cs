@@ -1,3 +1,4 @@
+using System;
 using backend.Application.Common.Models;
 using backend.Application.ImageRestorationJobs.Common;
 
@@ -5,5 +6,5 @@ namespace backend.Application.ImageRestorationJobs.Commands.CreateImageRestorati
 
 public record CreateImageRestorationJobCommand(
     string OriginalImageUrl,
-    string FamilyId
+    Guid FamilyId
 ) : IRequest<Result<ImageRestorationJobDto>>;
