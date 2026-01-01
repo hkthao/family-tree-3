@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization; // Added
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.ImageRestoration; // Added
@@ -13,12 +14,19 @@ public class ImageRestorationService : IImageRestorationService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ImageRestorationService> _logger;
     private readonly ImageRestorationServiceSettings _settings;
+    private readonly JsonSerializerOptions _jsonSerializerOptions; // Added
 
     public ImageRestorationService(HttpClient httpClient, ILogger<ImageRestorationService> logger, IOptions<ImageRestorationServiceSettings> settings)
     {
         _httpClient = httpClient;
         _logger = logger;
         _settings = settings.Value;
+        // Configure JsonSerializerOptions to handle enum as strings
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true, // To handle camelCase properties from API
+            Converters = { new JsonStringEnumConverter() } // To convert enum strings (e.g., "Processing")
+        };
 
         if (string.IsNullOrWhiteSpace(_settings.BaseUrl))
         {
@@ -37,7 +45,7 @@ public class ImageRestorationService : IImageRestorationService
 
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<StartImageRestorationResponseDto>(cancellationToken: cancellationToken);
+            var result = await response.Content.ReadFromJsonAsync<StartImageRestorationResponseDto>(_jsonSerializerOptions, cancellationToken);
             
             if (result == null)
             {
@@ -73,7 +81,7 @@ public class ImageRestorationService : IImageRestorationService
 
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<ImageRestorationJobStatusDto>(cancellationToken: cancellationToken);
+            var result = await response.Content.ReadFromJsonAsync<ImageRestorationJobStatusDto>(_jsonSerializerOptions, cancellationToken);
             
             if (result == null)
             {
