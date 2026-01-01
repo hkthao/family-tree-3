@@ -1,9 +1,13 @@
+import logging
 import httpx
 import json
 from uuid import UUID
 from typing import Optional
 from app.config import settings
 from app.models.job import RestorationStatus
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 class BackendApiService:
     def __init__(self):
@@ -14,7 +18,7 @@ class BackendApiService:
         self, job_id: UUID, status: RestorationStatus, restored_url: Optional[str], error_message: Optional[str]
     ):
         if not self.backend_api_url:
-            print("WARNING: BACKEND_API_URL is not set. Skipping backend status update.")
+            logger.warning("BACKEND_API_URL is not set. Skipping backend status update for job %s.", job_id)
             return
 
         endpoint = f"{self.backend_api_url}/api/image-restoration-jobs/{job_id}/status"
@@ -25,18 +29,19 @@ class BackendApiService:
             "errorMessage": error_message,
         }
         headers = {"Content-Type": "application/json"}
+        logger.info("Attempting to update backend status for job %s at %s with payload: %s", job_id, endpoint, payload)
 
         try:
             # The backend expects a PATCH, but httpx uses patch()
             response = await self.client.patch(endpoint, headers=headers, content=json.dumps(payload))
             response.raise_for_status()  # Raise an exception for 4xx or 5xx responses
-            print(f"Successfully updated backend for job {job_id}. Status: {response.status_code}")
+            logger.info("Successfully updated backend for job %s. Status: %s", job_id, response.status_code)
         except httpx.RequestError as e:
-            print(f"ERROR: An error occurred while requesting {e.request.url!r}: {e}")
+            logger.error("ERROR: An error occurred while requesting backend %s for job %s: %s", e.request.url, job_id, e, exc_info=True)
         except httpx.HTTPStatusError as e:
-            print(f"ERROR: Received error response {e.response.status_code} -- {e.response.text}")
+            logger.error("ERROR: Received error response %s from backend for job %s: %s", e.response.status_code, job_id, e.response.text)
         except Exception as e:
-            print(f"ERROR: An unexpected error occurred during backend status update: {e}")
+            logger.error("ERROR: An unexpected error occurred during backend status update for job %s: %s", job_id, e, exc_info=True)
 
 _backend_api_service_instance: Optional[BackendApiService] = None
 
