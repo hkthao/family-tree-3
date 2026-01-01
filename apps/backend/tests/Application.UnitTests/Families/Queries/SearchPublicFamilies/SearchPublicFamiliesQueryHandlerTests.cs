@@ -1,12 +1,12 @@
-using Moq;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.Families.Queries; // For FamilyDto
 
 namespace backend.Application.UnitTests.Families.Queries.SearchPublicFamilies;
 

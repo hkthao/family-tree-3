@@ -1,10 +1,10 @@
-using Moq;
+using backend.Application.Common.Interfaces; // Add this using statement
 using backend.Application.Members.Queries.GetMemberById; // For MemberDetailDto
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 

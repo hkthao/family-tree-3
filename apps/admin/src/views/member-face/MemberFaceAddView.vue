@@ -9,7 +9,7 @@
       <FamilyAutocomplete v-model="selectedFamilyId" :label="t('memberFace.form.family')" class="mb-4"
         :disabled="!!props.familyId" />
       <div v-if="selectedFamilyId">
-        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
+        <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" :disabled="!selectedFamilyId" />
 
         <div v-if="uploadedImage && detectedFaces.length > 0" class="mt-4">
           <FaceBoundingBoxViewer :image-src="uploadedImage" :faces="detectedFaces" selectable

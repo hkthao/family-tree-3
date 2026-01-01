@@ -6,15 +6,13 @@ using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Events.Members;
-using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberCommandHandler> localizer, IMemberRelationshipService memberRelationshipService, IMediator mediator) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMemberRelationshipService memberRelationshipService, IMediator mediator) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IStringLocalizer<UpdateMemberCommandHandler> _localizer = localizer;
     private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
     private readonly IMediator _mediator = mediator;
 
@@ -54,7 +52,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     FamilyId = request.FamilyId, // Add FamilyId
                     File = imageData,
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png",
-                    Folder = string.Format(UploadConstants.MemberAvatarFolder, member.FamilyId),
+                    Folder = string.Format(UploadConstants.ImagesFolder, request.FamilyId), // UserImagesFolder does not use familyId, as it's a general folder for all users
                     MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
                 };
 

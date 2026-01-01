@@ -33,7 +33,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Success("http://mockurl.com/uploaded/file.jpg"));
+        )).ReturnsAsync(Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = "http://mockurl.com/uploaded/file.jpg", DeleteHash = "mockdeletehash" }));
 
         // Default authorization setup: allow all family management
         _mockAuthorizationService.Setup(x => x.CanManageFamily(It.IsAny<Guid>())).Returns(true);
@@ -82,7 +82,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             FileName = "image.jpg",
             MediaType = MediaType.Image,
             Description = "A test image",
-            Folder = "photos"
+            Folder = string.Format(UploadConstants.ImagesFolder, familyId)
         };
 
         // Act
@@ -104,7 +104,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
         _fileStorageServiceMock.Verify(s => s.UploadFileAsync(
             It.IsAny<Stream>(),
             It.IsAny<string>(),
-            It.Is<string>(f => f.Contains($"family-media/{familyId}/photos")),
+            It.Is<string>(f => f.Contains(string.Format(UploadConstants.ImagesFolder, familyId))),
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }
@@ -196,7 +196,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<string>.Failure("Storage service unavailable.")); // Simulate failure
+        )).ReturnsAsync(Result<FileStorageResultDto>.Failure("Storage service unavailable.")); // Simulate failure
 
         var command = new CreateFamilyMediaCommand
         {

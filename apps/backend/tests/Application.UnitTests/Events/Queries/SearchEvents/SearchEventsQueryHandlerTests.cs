@@ -1,12 +1,12 @@
-using Moq;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // Add this using statement for EventDto
 using backend.Application.Events.Queries.SearchEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.Events.Queries; // Add this using statement for EventDto
 
 namespace backend.Application.UnitTests.Events.Queries.SearchEvents
 {

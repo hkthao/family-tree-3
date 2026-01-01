@@ -5,7 +5,7 @@ import axios, {
 } from 'axios';
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
-import { getApiBaseUrl, getEnvVariable } from '@/utils/api.util';
+import { getApiBaseUrl } from '@/utils/api.util';
 import type { ApiError } from '@/types/apiError';
 
 // Helper function to create an ApiError from an AxiosError
@@ -49,18 +49,6 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-  const publicApiKey = getEnvVariable('VITE_API_PUBLIC_KEY');
-
-  // Check if the request is for a public API endpoint
-  if (config.url && config.url.startsWith('/public/')) {
-    // For public endpoints, add the API Key header if available
-    if (publicApiKey) {
-      config.headers['X-App-Key'] = publicApiKey;
-    }
-    // Do not add the Authorization header for public endpoints
-    return config;
-  }
-
   // For non-public (authenticated) endpoints, add the Authorization header
   const token = await auth0Service.getAccessToken();
   if (token) {

@@ -8,13 +8,11 @@ namespace backend.Application.Members.Commands.ImportMembers;
 public class ImportMembersCommandHandler : IRequestHandler<ImportMembersCommand, Result<Unit>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
 
-    public ImportMembersCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
+    public ImportMembersCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
     {
         _context = context;
-        _mapper = mapper;
         _authorizationService = authorizationService;
     }
 

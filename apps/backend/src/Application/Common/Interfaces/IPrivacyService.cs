@@ -1,14 +1,14 @@
-using backend.Application.Members.Queries;
-using backend.Application.Members.Queries.GetMemberById;
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById; // For FamilyDetailDto
 using backend.Application.FamilyLocations; // For FamilyLocationDto
-using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 using backend.Application.MemberFaces.Common; // For MemberFaceDto
 using backend.Application.MemberFaces.Queries.SearchVectorFace; // For FoundFaceDto
+using backend.Application.Members.Queries;
+using backend.Application.Members.Queries.GetMemberById;
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto
+using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 
 namespace backend.Application.Common.Interfaces;
 

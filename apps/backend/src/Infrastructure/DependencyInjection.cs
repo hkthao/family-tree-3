@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
@@ -66,6 +67,50 @@ public static class DependencyInjection
                     httpClient.BaseAddress = new Uri(imgbbSettings.BaseUrl);
                 });
 
+        // Register ImgurSettings (đã có)
+        services.Configure<ImgurSettings>(configuration.GetSection(nameof(ImgurSettings)));
+
+        // Register CloudinarySettings
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+
+
+        // Register FileStorageSettings
+        services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
+        services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
+
+        // Configure HttpClient for ImgurFileStorageService
+        services.AddHttpClient<ImgurFileStorageService>(httpClient =>
+        {
+            var serviceProvider = services.BuildServiceProvider(); // Temporarily build provider to get settings
+            var imgurSettings = serviceProvider.GetRequiredService<IOptions<ImgurSettings>>().Value;
+            httpClient.BaseAddress = new Uri("https://api.imgur.com/3/");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", imgurSettings.ClientId);
+        });
+
+        // Register N8nService if it's used by N8nFileStorageService
+        services.AddScoped<IN8nService, N8nService>();
+
+        // Dynamically register IFileStorageService based on configuration
+        services.AddScoped<IFileStorageService>(serviceProvider =>
+        {
+            var fileStorageSettings = serviceProvider.GetRequiredService<IOptions<FileStorageSettings>>().Value;
+
+            return fileStorageSettings.Provider switch
+            {
+                "Imgur" => serviceProvider.GetRequiredService<ImgurFileStorageService>(), // Get already configured ImgurFileStorageService
+                "CloudflareR2" => new CloudflareR2FileStorageService(
+                                        serviceProvider.GetRequiredService<IOptions<CloudflareR2Settings>>(),
+                                        serviceProvider.GetRequiredService<ILogger<CloudflareR2FileStorageService>>()
+                                    ),
+                "Cloudinary" => new CloudinaryFileStorageService(
+                                        serviceProvider.GetRequiredService<IOptions<CloudinarySettings>>(),
+                                        serviceProvider.GetRequiredService<ILogger<CloudinaryFileStorageService>>()
+                                    ),
+                "N8n" => new N8nFileStorageService(serviceProvider.GetRequiredService<IN8nService>()),
+                _ => throw new ArgumentException($"Unknown file storage provider: {fileStorageSettings.Provider}")
+            };
+        });
+
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
 
@@ -80,7 +125,6 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         services.AddScoped<IPrivacyService, PrivacyService>();
-        services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
         services.AddScoped<IFamilyTreeService, FamilyTreeService>(); // NEW: Register IFamilyTreeService
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
@@ -111,8 +155,9 @@ public static class DependencyInjection
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 
-        // Register File Storage Service
-        services.AddScoped<IFileStorageService, N8nFileStorageService>();
+        // If you want to use N8nFileStorageService instead, comment out the Imgur registration above
+        // and uncomment the line below.
+        // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Add Novu services
         services.AddNovuServices(configuration);

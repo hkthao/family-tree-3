@@ -3,14 +3,13 @@ using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
-using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
+using backend.Application.MemberFaces.Commands.UpdateMemberFace;
+using backend.Application.MemberFaces.Queries.ExportMemberFaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
-using backend.Application.MemberFaces.Queries.ExportMemberFaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization; // Added
-
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace backend.Web.Controllers;

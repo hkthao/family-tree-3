@@ -1,11 +1,11 @@
+using backend.Application.Common.Constants;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.UnitTests.Common;
-using backend.Application.Common.Constants;
 
 namespace Application.UnitTests.MemberFaces.Commands.ImportMemberFaces;
 

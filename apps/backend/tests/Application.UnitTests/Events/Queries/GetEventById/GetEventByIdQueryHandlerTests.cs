@@ -1,14 +1,14 @@
-using Moq;
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById;
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto, etc.
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.Events.Queries; // For EventDto
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto, etc.
 
 namespace backend.Application.UnitTests.Events.Queries.GetEventById;
 

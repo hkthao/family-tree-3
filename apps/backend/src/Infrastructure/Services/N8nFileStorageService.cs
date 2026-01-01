@@ -14,7 +14,7 @@ public class N8nFileStorageService : IFileStorageService
         _n8nService = n8nService;
     }
 
-    public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
+    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
     {
         // Convert Stream to byte array
         using var memoryStream = new MemoryStream();
@@ -36,15 +36,15 @@ public class N8nFileStorageService : IFileStorageService
 
         if (!n8nUploadResult.IsSuccess)
         {
-            return Result<string>.Failure(n8nUploadResult.Error ?? "File upload failed via n8n.", n8nUploadResult.ErrorSource ?? "ExternalServiceError");
+            return Result<FileStorageResultDto>.Failure(n8nUploadResult.Error ?? "File upload failed via n8n.", n8nUploadResult.ErrorSource ?? "ExternalServiceError");
         }
 
         if (n8nUploadResult.Value == null || string.IsNullOrEmpty(n8nUploadResult.Value.Url))
         {
-            return Result<string>.Failure("N8n webhook did not return a valid file URL.", "ExternalServiceError");
+            return Result<FileStorageResultDto>.Failure("N8n webhook did not return a valid file URL.", "ExternalServiceError");
         }
 
-        return Result<string>.Success(n8nUploadResult.Value.Url);
+        return Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = n8nUploadResult.Value.Url, DeleteHash = null });
     }
 
     public Task<Stream> GetFileAsync(string filePath, CancellationToken cancellationToken = default)

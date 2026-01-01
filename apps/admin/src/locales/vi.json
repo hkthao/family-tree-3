@@ -1161,6 +1161,8 @@
   "memberFace.messages.uploadedImageDescription": "Hình ảnh được tải lên từ tính năng nhận diện khuôn mặt",
   "memberFace.messages.uploadThumbnailFailed": "Tải lên ảnh thu nhỏ thất bại:",
   "memberFace.messages.updateSuccess": "Cập nhật Khuôn mặt Thành viên thành công!",
+  "memberFace.import.title": "Nhập Khuôn mặt Thành viên",
+  "memberFace.import.selectFile": "Chọn tệp JSON",
   "memberFace.search.title": "Tìm kiếm Khuôn mặt",
   "memberFace.validation.boundingBoxRequired": "Thuộc tính hộp giới hạn là bắt buộc.",
   "memberFace.validation.confidenceRequired": "Độ tin cậy là bắt buộc.",
