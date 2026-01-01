@@ -11,11 +11,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire application code to the container
-COPY app/ .
+COPY app /app/app
 
 # Expose the port that FastAPI will run on
 EXPOSE 8000
 
 # Run the FastAPI application using Uvicorn
 # Use 0.0.0.0 to listen on all available network interfaces
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

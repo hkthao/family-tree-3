@@ -1,12 +1,8 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Extensions; // Added
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.ImageRestorationJobs.Common;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.ImageRestorationJobs.Queries.SearchImageRestorationJobs;
 

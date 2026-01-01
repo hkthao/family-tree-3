@@ -95,8 +95,6 @@ services:
     env_file:
       - ./.env.dev # To load REPLICATE_API_TOKEN
     restart: always # Always restart if it stops
-    depends_on:
-      - backend # Assuming it might depend on backend for some reason, or just a logical grouping
     logging:
       driver: json-file
       options:

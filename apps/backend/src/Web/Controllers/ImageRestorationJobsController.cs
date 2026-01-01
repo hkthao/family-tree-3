@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Models; // Added for PaginatedList
+using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob; // Added
 using backend.Application.ImageRestorationJobs.Commands.DeleteImageRestorationJob;
 using backend.Application.ImageRestorationJobs.Commands.UpdateImageRestorationJob;
 using backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobById;
@@ -56,6 +57,18 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     {
         var result = await _mediator.Send(new GetImageRestorationJobByIdQuery(jobId));
         return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Tạo một job phục hồi ảnh mới.
+    /// </summary>
+    /// <param name="command">Dữ liệu để tạo job phục hồi ảnh.</param>
+    /// <returns>ImageRestorationJobDto của job đã tạo.</returns>
+    [HttpPost]
+    public async Task<IActionResult> CreateImageRestorationJob([FromBody] CreateImageRestorationJobCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 201); // 201 Created
     }
 
     /// <summary>

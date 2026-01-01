@@ -2,6 +2,7 @@ import type { ICrudService } from './crud.service.interface';
 import type { Result } from '@/types';
 import type { Paginated, ListOptions, FilterOptions } from '@/types';
 import type { ApiClientMethods } from '@/plugins/axios';
+import { buildSearchParams } from '@/utils/list.utils'; // Import the utility function
 
 export class ApiCrudService<TGet extends { id?: string }, TAdd, TUpdate extends { id?: string }> implements ICrudService<TGet, TAdd, TUpdate> {
   constructor(protected api: ApiClientMethods, protected baseUrl: string) { }
@@ -10,20 +11,7 @@ export class ApiCrudService<TGet extends { id?: string }, TAdd, TUpdate extends 
     options: ListOptions = { page: 1, itemsPerPage: 10, sortBy: [] },
     filters: FilterOptions = {},
   ): Promise<Result<Paginated<TGet>>> {
-    const params: Record<string, any> = {
-      page: options.page,
-      itemsPerPage: options.itemsPerPage,
-    };
-    if (options.sortBy && options.sortBy.length > 0) {
-      params.sortBy = options.sortBy[0].key;
-      params.sortOrder = options.sortBy[0].order;
-    }
-
-    for (const key in filters) {
-      if (filters[key] !== undefined) {
-        params[key] = filters[key];
-      }
-    }
+    const params = buildSearchParams(options, filters); // Use the utility function
     return await this.api.get<Paginated<TGet>>(`${this.baseUrl}/search`, { params });
   }
 
