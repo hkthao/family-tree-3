@@ -82,7 +82,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             FileName = "image.jpg",
             MediaType = MediaType.Image,
             Description = "A test image",
-            Folder = "photos"
+            Folder = string.Format(UploadConstants.ImagesFolder, familyId)
         };
 
         // Act
@@ -104,7 +104,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
         _fileStorageServiceMock.Verify(s => s.UploadFileAsync(
             It.IsAny<Stream>(),
             It.IsAny<string>(),
-            It.Is<string>(f => f.Contains($"family-media/{familyId}/photos")),
+            It.Is<string>(f => f.Contains(string.Format(UploadConstants.ImagesFolder, familyId))),
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }

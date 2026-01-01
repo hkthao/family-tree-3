@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using SixLabors.ImageSharp;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 
 namespace backend.Application.Common.Utils;
 

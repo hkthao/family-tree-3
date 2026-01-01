@@ -2,8 +2,8 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Services;
 

@@ -37,7 +37,7 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMed
                 {
                     ImageData = imageData,
                     FileName = $"User_Avatar_{Guid.NewGuid()}.png",
-                    Folder = string.Format(UploadConstants.UserAvatarFolder), // Use UserAvatarFolder
+                    Folder = string.Format(UploadConstants.UserImagesFolder), // Use UserAvatarFolder
                     ContentType = "image/png" // Assuming PNG for now
                 };
 

@@ -82,14 +82,13 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
 
         // --- End Storage Limit Check ---
 
-        string folderPath = Path.Combine("family-media", request.FamilyId.ToString(), request.Folder ?? "");
         string fileNameInStorage = $"{Guid.NewGuid()}{Path.GetExtension(request.FileName)}"; // Use original file extension from FileName property
 
         using var fileStream = new MemoryStream(request.File); // Create MemoryStream from byte array
         var uploadResult = await _fileStorageService.UploadFileAsync(
             fileStream,
             fileNameInStorage,
-            folderPath,
+            request.Folder,
             cancellationToken
         );
 

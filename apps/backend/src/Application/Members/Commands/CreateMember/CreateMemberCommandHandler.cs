@@ -67,8 +67,8 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 {
                     FamilyId = request.FamilyId, // Add FamilyId
                     File = imageData,
-                    FileName = $"Member_Avatar_{Guid.NewGuid().ToString()}.png", // Use FileName property
-                    Folder = string.Format(UploadConstants.MemberAvatarFolder, member.FamilyId),
+                    FileName = $"Member_Avatar_{Guid.NewGuid()}.png", // Use FileName property
+                    Folder = string.Format(UploadConstants.ImagesFolder, member.FamilyId),
                     MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
                 };
 

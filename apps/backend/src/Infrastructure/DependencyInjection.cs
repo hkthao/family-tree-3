@@ -70,6 +70,10 @@ public static class DependencyInjection
         // Register ImgurSettings (đã có)
         services.Configure<ImgurSettings>(configuration.GetSection(nameof(ImgurSettings)));
 
+        // Register CloudinarySettings
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+
+
         // Register FileStorageSettings
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
         services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
@@ -94,7 +98,14 @@ public static class DependencyInjection
             return fileStorageSettings.Provider switch
             {
                 "Imgur" => serviceProvider.GetRequiredService<ImgurFileStorageService>(), // Get already configured ImgurFileStorageService
-                "CloudflareR2" => new CloudflareR2FileStorageService(serviceProvider.GetRequiredService<IOptions<CloudflareR2Settings>>()),
+                "CloudflareR2" => new CloudflareR2FileStorageService(
+                                        serviceProvider.GetRequiredService<IOptions<CloudflareR2Settings>>(),
+                                        serviceProvider.GetRequiredService<ILogger<CloudflareR2FileStorageService>>()
+                                    ),
+                "Cloudinary" => new CloudinaryFileStorageService(
+                                        serviceProvider.GetRequiredService<IOptions<CloudinarySettings>>(),
+                                        serviceProvider.GetRequiredService<ILogger<CloudinaryFileStorageService>>()
+                                    ),
                 "N8n" => new N8nFileStorageService(serviceProvider.GetRequiredService<IN8nService>()),
                 _ => throw new ArgumentException($"Unknown file storage provider: {fileStorageSettings.Provider}")
             };
@@ -114,7 +125,6 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         services.AddScoped<IPrivacyService, PrivacyService>();
-        services.AddScoped<IThumbnailUploadService, ThumbnailUploadService>(); // NEW: Register Thumbnail Upload Service
         services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
         services.AddScoped<IFamilyTreeService, FamilyTreeService>(); // NEW: Register IFamilyTreeService
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService

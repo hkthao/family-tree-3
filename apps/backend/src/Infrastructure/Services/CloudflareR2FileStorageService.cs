@@ -1,9 +1,10 @@
+using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using Microsoft.Extensions.Logging; // Added for ILogger
 using Microsoft.Extensions.Options;
-using System.Net;
 
 namespace backend.Infrastructure.Services;
 
@@ -12,17 +13,31 @@ public class CloudflareR2FileStorageService : IFileStorageService
     private readonly IAmazonS3 _s3Client;
     private readonly CloudflareR2Settings _r2Settings;
     private readonly string _bucketName;
+    private readonly ILogger<CloudflareR2FileStorageService> _logger; // Injected ILogger
 
-    public CloudflareR2FileStorageService(IOptions<CloudflareR2Settings> r2Settings)
+    public CloudflareR2FileStorageService(IOptions<CloudflareR2Settings> r2Settings, ILogger<CloudflareR2FileStorageService> logger)
     {
         _r2Settings = r2Settings.Value;
-        _bucketName = _r2Settings.BucketName ?? throw new ArgumentNullException(nameof(_r2Settings.BucketName));
+
+        if (string.IsNullOrWhiteSpace(_r2Settings.AccountId))
+            throw new ArgumentNullException(nameof(_r2Settings.AccountId), "Cloudflare R2 AccountId is not configured.");
+        if (string.IsNullOrWhiteSpace(_r2Settings.AccessKeyId))
+            throw new ArgumentNullException(nameof(_r2Settings.AccessKeyId), "Cloudflare R2 AccessKeyId is not configured.");
+        if (string.IsNullOrWhiteSpace(_r2Settings.SecretAccessKey))
+            throw new ArgumentNullException(nameof(_r2Settings.SecretAccessKey), "Cloudflare R2 SecretAccessKey is not configured.");
+        if (string.IsNullOrWhiteSpace(_r2Settings.BucketName))
+            throw new ArgumentNullException(nameof(_r2Settings.BucketName), "Cloudflare R2 BucketName is not configured.");
+        if (string.IsNullOrWhiteSpace(_r2Settings.EndpointUrl))
+            throw new ArgumentNullException(nameof(_r2Settings.EndpointUrl), "Cloudflare R2 EndpointUrl is not configured.");
+
+        _bucketName = _r2Settings.BucketName;
+        _logger = logger;
 
         var s3Config = new AmazonS3Config
         {
             ServiceURL = _r2Settings.EndpointUrl,
-            AuthenticationRegion = "auto", // R2 uses 'auto' region
-            ForcePathStyle = true // Required for R2
+            // AuthenticationRegion = "", // Explicitly empty for R2
+            //  ForcePathStyle = true // Required for R2
         };
 
         _s3Client = new AmazonS3Client(
@@ -38,13 +53,23 @@ public class CloudflareR2FileStorageService : IFileStorageService
 
         try
         {
+            // Read the file stream into a MemoryStream to get the content length.
+            // This is necessary because Cloudflare R2 does not support STREAMING-AWS4-HMAC-SHA256-PAYLOAD-TRAILER
+            // which the AWS SDK might use if the input stream length is not known.
+            using var memoryStream = new MemoryStream();
+            await fileStream.CopyToAsync(memoryStream, cancellationToken);
+            memoryStream.Position = 0; // Reset position to the beginning for upload
+
             var putRequest = new PutObjectRequest
             {
                 BucketName = _bucketName,
                 Key = objectKey,
-                InputStream = fileStream,
+                InputStream = memoryStream,
                 ContentType = GetContentType(fileName),
-                CannedACL = S3CannedACL.PublicRead // Make object publicly accessible
+                DisablePayloadSigning = true,
+                DisableDefaultChecksumValidation = true
+                // CannedACL = S3CannedACL.PublicRead, // Make object publicly accessible
+                // DisablePayloadSigning = true
             };
 
             var response = await _s3Client.PutObjectAsync(putRequest, cancellationToken);
@@ -56,15 +81,18 @@ public class CloudflareR2FileStorageService : IFileStorageService
             }
             else
             {
+                _logger.LogError("Failed to upload file to Cloudflare R2. Status: {StatusCode}. Response: {Response}", response.HttpStatusCode, System.Text.Json.JsonSerializer.Serialize(response));
                 return Result<FileStorageResultDto>.Failure($"Failed to upload file to Cloudflare R2. Status: {response.HttpStatusCode}", "CloudflareR2UploadError");
             }
         }
         catch (AmazonS3Exception s3Ex)
         {
+            _logger.LogError(s3Ex, "Cloudflare R2 S3 error during upload: {Message}. InnerException: {@InnerException}", s3Ex.Message, s3Ex.InnerException);
             return Result<FileStorageResultDto>.Failure($"Cloudflare R2 S3 error: {s3Ex.Message}", "CloudflareR2S3Exception");
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An unexpected error occurred during R2 upload: {Message}. InnerException: {@InnerException}", ex.Message, ex.InnerException);
             return Result<FileStorageResultDto>.Failure($"An unexpected error occurred during R2 upload: {ex.Message}", "CloudflareR2UnexpectedError");
         }
     }
@@ -86,10 +114,12 @@ public class CloudflareR2FileStorageService : IFileStorageService
         }
         catch (AmazonS3Exception s3Ex) when (s3Ex.StatusCode == HttpStatusCode.NotFound)
         {
+            _logger.LogWarning("File not found in Cloudflare R2: {FilePath}. S3 Message: {Message}", filePath, s3Ex.Message);
             throw new FileNotFoundException($"File not found in Cloudflare R2: {filePath}", s3Ex);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to retrieve file from Cloudflare R2: {FilePath}. Message: {Message}. InnerException: {InnerException}", filePath, ex.Message, ex.InnerException?.Message);
             throw new InvalidOperationException($"Failed to retrieve file from Cloudflare R2: {filePath}", ex);
         }
     }
@@ -114,15 +144,18 @@ public class CloudflareR2FileStorageService : IFileStorageService
             }
             else
             {
+                _logger.LogError("Failed to delete file from Cloudflare R2. Status: {StatusCode}. Response: {Response}", response.HttpStatusCode, System.Text.Json.JsonSerializer.Serialize(response));
                 return Result.Failure($"Failed to delete file from Cloudflare R2. Status: {response.HttpStatusCode}", "CloudflareR2DeleteError");
             }
         }
         catch (AmazonS3Exception s3Ex)
         {
+            _logger.LogError(s3Ex, "Cloudflare R2 S3 error during deletion: {Message}. InnerException: {InnerException}", s3Ex.Message, s3Ex.InnerException?.Message);
             return Result.Failure($"Cloudflare R2 S3 error during deletion: {s3Ex.Message}", "CloudflareR2S3Exception");
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "An unexpected error occurred during R2 deletion: {Message}. InnerException: {InnerException}", ex.Message, ex.InnerException?.Message);
             return Result.Failure($"An unexpected error occurred during R2 deletion: {ex.Message}", "CloudflareR2UnexpectedError");
         }
     }

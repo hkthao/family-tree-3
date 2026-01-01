@@ -52,7 +52,7 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                     FamilyId = entity.Id, // Link media to the newly created Family
                     File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
-                    Folder = string.Format(UploadConstants.FamilyAvatarFolder, entity.Id),
+                    Folder = string.Format(UploadConstants.ImagesFolder, entity.Id),
                     MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType
                 };
 

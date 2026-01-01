@@ -66,7 +66,9 @@ public class ImportMemberFacesCommandHandler : IRequestHandler<ImportMemberFaces
                     _logger.LogWarning("Không tìm thấy MemberId '{MemberId}' trong FamilyId '{FamilyId}'. Bỏ qua nhập khuôn mặt.", importFaceItemDto.MemberId, request.FamilyId);
                     continue;
                 }
-            } else {
+            }
+            else
+            {
                 // Nếu MemberId không được cung cấp, khuôn mặt không thể liên kết với thành viên nào
                 // Có thể xử lý bằng cách bỏ qua hoặc tạo khuôn mặt không liên kết (tùy thuộc vào yêu cầu nghiệp vụ)
                 _logger.LogWarning("Khuôn mặt với FaceId '{FaceId}' không có MemberId được cung cấp. Bỏ qua nhập.", importFaceItemDto.FaceId);

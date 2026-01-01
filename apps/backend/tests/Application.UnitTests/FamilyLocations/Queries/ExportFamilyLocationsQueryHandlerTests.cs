@@ -1,4 +1,6 @@
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.FamilyLocations; // For FamilyLocationDto
 using backend.Application.FamilyLocations.Queries.ExportFamilyLocations;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -6,8 +8,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.FamilyLocations; // For FamilyLocationDto
 
 namespace backend.Application.UnitTests.FamilyLocations.Queries;
 

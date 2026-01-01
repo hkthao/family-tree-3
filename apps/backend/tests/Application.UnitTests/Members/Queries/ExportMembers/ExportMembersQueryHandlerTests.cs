@@ -1,5 +1,5 @@
-using Moq;
 using AutoMapper;
+using backend.Application.Common.Interfaces; // Add this using statement
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries; // MemberDto is here
 using backend.Application.Members.Queries.ExportMembers;
@@ -8,9 +8,9 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Newtonsoft.Json;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
 
 namespace backend.Application.UnitTests.Members.Queries.ExportMembers;
 
@@ -45,7 +45,7 @@ public class ExportMembersQueryHandlerTests : TestBase
         // Arrange
         var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF" };
         _context.Families.Add(family);
-        await _context.SaveChangesAsync(); 
+        await _context.SaveChangesAsync();
 
         var member1 = new Member(
             "John", "Doe", "JD1", family.Id, "Johnny", "Male",
@@ -58,7 +58,7 @@ public class ExportMembersQueryHandlerTests : TestBase
             "Place B", null, "987-654-3210", "jane@example.com", "Address B", "Doctor", "avatar2.png", "Biography 2", 2, false
         );
         _context.Members.AddRange(member1, member2);
-        await _context.SaveChangesAsync(); 
+        await _context.SaveChangesAsync();
 
         // Get the actual IDs assigned by the database after SaveChanges
         var dbMember1 = _context.Members.AsNoTracking().First(m => m.Code == member1.Code);

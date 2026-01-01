@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.ImportMembers;
@@ -22,7 +21,7 @@ public class ImportMembersCommandHandlerTests : TestBase
     public ImportMembersCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new ImportMembersCommandHandler(_context, _mapper, _authorizationServiceMock.Object);
+        _handler = new ImportMembersCommandHandler(_context, _authorizationServiceMock.Object);
     }
 
     /// <summary>

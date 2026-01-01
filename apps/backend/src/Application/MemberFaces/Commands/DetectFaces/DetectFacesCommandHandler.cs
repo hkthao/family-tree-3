@@ -3,12 +3,12 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Utils;
 using backend.Application.Files.UploadFile;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.Members.Specifications;
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Utils;
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
@@ -35,7 +35,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string? originalImageUrl = null;
 
 
-            string uploadFolder = UploadConstants.TemporaryUploadsFolder;
+            string uploadFolder = string.Format(UploadConstants.FaceImagesFolder, request.FamilyId);
 
             int? imageWidth = null;
             int? imageHeight = null;

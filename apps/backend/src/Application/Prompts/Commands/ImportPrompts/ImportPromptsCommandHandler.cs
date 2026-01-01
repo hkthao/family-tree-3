@@ -1,9 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Prompts.DTOs;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using backend.Application.Prompts.DTOs;
 
 namespace backend.Application.Prompts.Commands.ImportPrompts;
 
@@ -48,7 +48,7 @@ public class ImportPromptsCommandHandler : IRequestHandler<ImportPromptsCommand,
             if (existingPrompt != null)
             {
                 _logger.LogInformation("Prompt với Code '{PromptCode}' đã tồn tại. Bỏ qua nhập.", importPromptItemDto.Code);
-                continue; 
+                continue;
             }
 
             var newPrompt = _mapper.Map<Prompt>(importPromptItemDto); // Use AutoMapper

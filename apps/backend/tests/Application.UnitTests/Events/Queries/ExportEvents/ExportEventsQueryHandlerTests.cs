@@ -1,4 +1,4 @@
-using Moq;
+using backend.Application.Common.Interfaces; // Add this using statement
 using backend.Application.Events.Queries; // EventDto is here now
 using backend.Application.Events.Queries.ExportEvents;
 using backend.Application.UnitTests.Common;
@@ -6,9 +6,9 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using Moq;
 using Newtonsoft.Json;
 using Xunit;
-using backend.Application.Common.Interfaces; // Add this using statement
 
 namespace backend.Application.UnitTests.Events.Queries.ExportEvents;
 
