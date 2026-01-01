@@ -945,6 +945,7 @@
   "help.gettingStarted.useAIAssistant.subtitle": "Trợ lý AI có thể giúp bạn làm phong phú tiểu sử thành viên, gợi ý các sự kiện lịch sử và xác thực dữ liệu. Tìm biểu tượng AI bên cạnh các trường nhập liệu.",
   "help.gettingStarted.useAIAssistant.title": "Sử dụng Trợ lý AI",
   "help.title": "Trung tâm trợ giúp",
+
   "lifeStage.adulthood": "Trưởng thành",
   "lifeStage.childhood": "Tuổi thơ",
   "lifeStage.deceased": "Qua đời",
@@ -1228,6 +1229,8 @@
   "memberStory.studio.addMemory": "Thêm Câu chuyện",
   "memberStory.studio.loadingMember": "Đang tải chi tiết thành viên...",
   "memberStory.studio.title": "AI Memorial Studio cho {memberName}",
+  "menu.utilitiesAndAI": "Tiện ích & AI",
+  "menu.imageRestoration": "Phục chế ảnh cũ",
   "menu.admin": "Quản trị",
   "menu.aiMemorialStudio": "Phòng Ký Ức",
   "menu.applicationInfo": "Thông tin ứng dụng",

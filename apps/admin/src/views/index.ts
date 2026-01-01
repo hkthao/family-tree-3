@@ -24,6 +24,9 @@ export { default as FamilyTabsView } from './family/FamilyTabsView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as FamilyListView } from './family/FamilyListView.vue';
 
+// Export pages from image-restoration
+export { default as ImageRestorationView } from './image-restoration/ImageRestorationView.vue';
+
 // Export pages from member
 export { default as MemberAddView } from './member/MemberAddView.vue';
 

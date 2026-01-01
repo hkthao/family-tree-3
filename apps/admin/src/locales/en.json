@@ -977,6 +977,8 @@
   "memberStory.studio.addMemory": "Add Memory",
   "memberStory.studio.loadingMember": "Loading member details...",
   "memberStory.studio.title": "AI Memorial Studio for {memberName}",
+  "menu.utilitiesAndAI": "Utilities & AI",
+  "menu.imageRestoration": "Old Photo Restoration",
   "menu.admin": "Admin",
   "menu.aiMemorialStudio": "AI Memorial Studio",
   "menu.cultureAndTraditions": "Culture & Traditions",
