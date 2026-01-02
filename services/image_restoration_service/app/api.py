@@ -36,16 +36,15 @@ async def start_restoration_job(
     )
     jobs[job_id] = job
 
-    # Run the restoration pipeline in the background
-    background_tasks.add_task(
-        _run_restoration_pipeline,
+    # Run the restoration pipeline directly and await its completion
+    final_job = await _run_restoration_pipeline(
         job_id,
         image_url,
         get_replicate_service(), # Get the instance
         get_backend_api_service() # Get the instance
     )
-    logger.info("Restoration job %s started in background.", job_id)
-    return job
+    logger.info("Restoration job %s completed. Final status: %s", final_job.job_id, final_job.status)
+    return final_job
 
 
 @router.get("/restore/{job_id}", response_model=RestorationJob)
@@ -95,13 +94,13 @@ async def _run_restoration_pipeline(
             job.error = job.error or "Unknown error occurred during processing."
             logger.warning("Job %s was still in PROCESSING, marking as FAILED in finally block.", job_id)
         
-        # Notify backend about the final status
-        logger.info("Notifying backend of final status for job %s. Status: %s, Restored URL: %s, Error: %s",
-                    job.job_id, job.status, job.restored_url, job.error)
-        await backend_api_service.update_image_restoration_job_status(
-            job.job_id,
-            job.status,
-            job.restored_url,
-            job.error
-        )
-        logger.info("Backend notification completed for job %s.", job_id)
+        # Notify backend about the final status - NOT needed if not background job
+        logger.info("Backend notification removed as job is not run in background for job %s.", job_id)
+        # await backend_api_service.update_image_restoration_job_status(
+        #     job.job_id,
+        #     job.status,
+        #     job.restored_url,
+        #     job.error
+        # )
+        # logger.info("Backend notification completed for job %s.", job_id)
+    return job

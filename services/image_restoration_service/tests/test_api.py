@@ -58,12 +58,7 @@ async def test_successful_restoration_updates_backend(mock_getters):
         mock_backend_api_service # Pass the mock instance
     )
 
-    mock_backend_api_service.update_image_restoration_job_status.assert_called_once_with(
-        job_id,
-        RestorationStatus.COMPLETED,
-        restored_url,
-        None,
-    )
+    mock_backend_api_service.update_image_restoration_job_status.assert_not_called()
     assert jobs[job_id].status == RestorationStatus.COMPLETED
     assert jobs[job_id].restored_url == restored_url
     assert jobs[job_id].error is None
@@ -93,12 +88,7 @@ async def test_failed_restoration_updates_backend(mock_getters):
         mock_backend_api_service
     )
 
-    mock_backend_api_service.update_image_restoration_job_status.assert_called_once_with(
-        job_id,
-        RestorationStatus.FAILED,
-        None,
-        error_message,
-    )
+    mock_backend_api_service.update_image_restoration_job_status.assert_not_called()
     assert jobs[job_id].status == RestorationStatus.FAILED
     assert jobs[job_id].restored_url is None
     assert jobs[job_id].error == error_message
@@ -123,12 +113,7 @@ async def test_exception_during_restoration_updates_backend(mock_getters):
         mock_backend_api_service
     )
 
-    mock_backend_api_service.update_image_restoration_job_status.assert_called_once_with(
-        job_id,
-        RestorationStatus.FAILED,
-        None,
-        exception_message,
-    )
+    mock_backend_api_service.update_image_restoration_job_status.assert_not_called()
     assert jobs[job_id].status == RestorationStatus.FAILED
     assert jobs[job_id].restored_url is None
     assert jobs[job_id].error == exception_message

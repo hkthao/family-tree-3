@@ -78,77 +78,75 @@ class ReplicateService:
 
     async def restore_image_pipeline(self, original_image_url: str) -> dict:
         """
-        Executes the full image restoration pipeline: GFPGAN (face) -> Real-ESRGAN (upscale).
+        Executes the full image restoration pipeline based on user's defined steps.
+        1. Clean & Enhance (Real-ESRGAN)
+        2. Face Restore (GFPGAN) - applied to the enhanced image
+        3. (Implicit) Blend + Sharpen is handled by Real-ESRGAN's nature.
         Returns a dictionary with restoration details.
         """
         logger.info("Starting full image restoration pipeline for original image: %s", original_image_url)
-        restored_face_url = None
-        upscaled_url = None
+        processed_image_url = original_image_url # The image URL to be passed to the next step
         pipeline_steps = []
+        error_message = None
+        final_status = "completed"
 
-        # Step 1: Face Restoration with GFPGAN
+        # Step 1: Clean & Enhance (toàn ảnh) - using Real-ESRGAN
         try:
-            logger.info("Pipeline Step 1: GFPGAN face restoration.")
-            restored_face_url = await self.gfpgan_restore_face(original_image_url)
-            if restored_face_url:
-                pipeline_steps.append("GFPGAN")
-                logger.info("GFPGAN restored image URL: %s", restored_face_url)
+            logger.info("Pipeline Step 1: Real-ESRGAN for Clean & Enhance on original image.")
+            upscaled_original_url = await self.real_esrgan_upscale(original_image_url)
+            if upscaled_original_url:
+                processed_image_url = upscaled_original_url
+                pipeline_steps.append("Real-ESRGAN (Clean & Enhance)")
+                logger.info("Real-ESRGAN (Clean & Enhance) completed. Processed URL: %s", processed_image_url)
             else:
-                logger.warning("GFPGAN did not return a restored image URL. Skipping upscale for %s.", original_image_url)
+                logger.warning("Real-ESRGAN (Clean & Enhance) did not return an output for %s. Skipping subsequent steps.", original_image_url)
                 return {
                     "originalUrl": original_image_url,
                     "restoredUrl": None,
                     "pipeline": pipeline_steps,
                     "status": "failed",
-                    "error": "GFPGAN did not return a valid image URL."
+                    "error": "Real-ESRGAN (Clean & Enhance) did not return a valid image URL."
                 }
         except ValueError as e:
-            logger.error("GFPGAN restoration failed for %s: %s", original_image_url, e)
+            logger.error("Real-ESRGAN (Clean & Enhance) failed for %s: %s", original_image_url, e)
             return {
                 "originalUrl": original_image_url,
                 "restoredUrl": None,
                 "pipeline": [],
                 "status": "failed",
-                "error": f"GFPGAN failed: {e}"
+                "error": f"Real-ESRGAN (Clean & Enhance) failed: {e}"
             }
 
-        # Step 2: Upscale Image with Real-ESRGAN (using GFPGAN output)
-        if restored_face_url:
-            try:
-                logger.info("Pipeline Step 2: Real-ESRGAN upscale using GFPGAN output: %s", restored_face_url)
-                upscaled_url = await self.real_esrgan_upscale(restored_face_url)
-                if upscaled_url:
-                    pipeline_steps.append("Real-ESRGAN")
-                    logger.info("Real-ESRGAN upscaled image URL: %s", upscaled_url)
-                else:
-                    logger.warning("Real-ESRGAN did not return an upscaled image URL for %s. Returning GFPGAN result.", original_image_url)
-                    # If upscale fails but face restoration succeeded, return the GFPGAN result
-                    return {
-                        "originalUrl": original_image_url,
-                        "restoredUrl": restored_face_url,
-                        "pipeline": pipeline_steps,
-                        "status": "completed", # Completed up to GFPGAN
-                        "error": "Real-ESRGAN did not return a valid image URL."
-                    }
-            except ValueError as e:
-                logger.error("Real-ESRGAN upscaling failed for %s: %s. Returning GFPGAN result.", original_image_url, e)
-                # If upscale fails but face restoration succeeded, return the GFPGAN result
-                return {
-                    "originalUrl": original_image_url,
-                    "restoredUrl": restored_face_url,
-                    "pipeline": pipeline_steps,
-                    "status": "completed", # Completed up to GFPGAN
-                    "error": f"Real-ESRGAN failed: {e}"
-                }
+        # Step 2: Face Restore (chỉ vùng mặt) - using GFPGAN on the processed image
+        restored_face_url = None
+        try:
+            logger.info("Pipeline Step 2: GFPGAN for Face Restore on processed image: %s", processed_image_url)
+            restored_face_url = await self.gfpgan_restore_face(processed_image_url)
+            if restored_face_url:
+                processed_image_url = restored_face_url
+                pipeline_steps.append("GFPGAN (Face Restore)")
+                logger.info("GFPGAN (Face Restore) completed. Processed URL: %s", processed_image_url)
+            else:
+                logger.warning("GFPGAN (Face Restore) did not return a restored image. Returning enhanced image.", original_image_url)
+                # If face restoration fails, return the already enhanced image
+                final_status = "completed"
+                error_message = "GFPGAN (Face Restore) did not return a valid image URL."
+        except ValueError as e:
+            logger.error("GFPGAN (Face Restore) failed for %s: %s. Returning enhanced image.", original_image_url, e)
+            final_status = "completed" # Mark as completed up to the previous step
+            error_message = f"GFPGAN (Face Restore) failed: {e}"
+
+        # If everything went well, processed_image_url holds the final restored image.
+        # If face restoration failed but enhancement succeeded, processed_image_url will hold the enhanced image.
         
-        final_status = "completed" if (restored_face_url or upscaled_url) else "failed"
         logger.info("Full pipeline completed for %s. Final status: %s, Restored URL: %s", 
-                    original_image_url, final_status, upscaled_url if upscaled_url else restored_face_url)
+                    original_image_url, final_status, processed_image_url)
         return {
             "originalUrl": original_image_url,
-            "restoredUrl": upscaled_url if upscaled_url else restored_face_url, # Return upscaled if available, else gfpgan
+            "restoredUrl": processed_image_url,
             "pipeline": pipeline_steps,
-            "status": final_status
+            "status": final_status,
+            "error": error_message
         }
 
 _replicate_service_instance: Optional[ReplicateService] = None
