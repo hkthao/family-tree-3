@@ -6,6 +6,7 @@ using backend.Application.VoiceProfiles.Commands.ActivateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfileById;
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfilesByMemberId;
+using backend.Application.VoiceProfiles.Queries.SearchVoiceProfiles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -154,5 +155,18 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     {
         var result = await _mediator.Send(new GetVoiceGenerationHistoryQuery { VoiceProfileId = id });
         return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Tìm kiếm các hồ sơ giọng nói dựa trên các tiêu chí tìm kiếm.
+    /// </summary>
+    /// <param name="query">Các tiêu chí tìm kiếm và phân trang.</param>
+    /// <returns>Danh sách hồ sơ giọng nói đã được phân trang.</returns>
+    [HttpGet("voice-profiles/search")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedList<backend.Application.VoiceProfiles.Queries.VoiceProfileDto>>> SearchVoiceProfiles([FromQuery] SearchVoiceProfilesQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 }
