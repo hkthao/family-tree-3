@@ -45,7 +45,10 @@ public class ImageRestorationService : IImageRestorationService
 
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<StartImageRestorationResponseDto>(_jsonSerializerOptions, cancellationToken);
+            var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogInformation("Received JSON response from image restoration service: {JsonResponse}", jsonResponse);
+
+            var result = JsonSerializer.Deserialize<StartImageRestorationResponseDto>(jsonResponse, _jsonSerializerOptions);
             
             if (result == null)
             {

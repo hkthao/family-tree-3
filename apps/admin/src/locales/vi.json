@@ -881,6 +881,8 @@
   "imageRestorationJob.form.originalImageUrl": "URL Ảnh gốc",
   "imageRestorationJob.form.restoredImageUrl": "URL Ảnh đã phục hồi",
   "imageRestorationJob.form.status": "Trạng thái",
+  "imageRestorationJob.form.imageFileLabel": "Tệp ảnh",
+  "imageRestorationJob.form.useCodeformerLabel": "Sử dụng Codeformer (nâng cao chất lượng khuôn mặt)",
   "imageRestorationJob.detail.title": "Chi tiết Job Phục hồi ảnh",
   "imageRestorationJob.detail.noImagesForComparison": "Không có ảnh gốc hoặc ảnh đã phục chế để so sánh.",
   "imageRestorationJob.detail.noOriginalImage": "Không có ảnh gốc để hiển thị.",

@@ -5,7 +5,7 @@
     </v-card-title>
     <v-card-text>
       <v-form ref="formRef" @submit.prevent>
-        <v-file-input
+        <VFileUpload
           v-model="file"
           :label="t('imageRestorationJob.form.imageFileLabel')"
           prepend-icon="mdi-camera"
@@ -29,6 +29,18 @@
       <v-btn color="primary" data-testid="button-save" @click="handleAddItem"
         :loading="isAddingImageRestorationJob" :disabled="isAddingImageRestorationJob">{{ t('common.save') }}</v-btn>
     </v-card-actions>
+    <v-overlay
+      :model-value="isAddingImageRestorationJob"
+      class="align-center justify-center"
+      persistent
+      data-testid="loading-overlay"
+    >
+      <v-progress-circular
+        color="primary"
+        indeterminate
+        size="64"
+      ></v-progress-circular>
+    </v-overlay>
   </v-card>
 </template>
 
@@ -36,7 +48,7 @@
 import { ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useImageRestorationJobAdd } from '@/composables';
-// import { VFileUpload } from 'vuetify/labs/VFileUpload'; // VFileUpload is typically provided by Vuetify itself and doesn't need explicit import from labs in script setup context.
+
 
 const props = defineProps({
   familyId: {
@@ -49,7 +61,7 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 
-const file = ref<File | null>(null);
+const file = ref<File | undefined>(undefined);
 const useCodeformer = ref<boolean>(false);
 const formRef = ref<any>(null); // Ref for VForm validation
 

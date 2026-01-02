@@ -12,6 +12,9 @@ using backend.Application.Common.Models;
 using MediatR; // Added
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // Added
 using backend.Application.FamilyMedias.DTOs; // Added
+using System.Net.Http; // Added for IHttpClientFactory
+using Moq.Protected; // Added for mocking protected methods of HttpClient
+using System.Net; // Added for HttpStatusCode
 
 namespace backend.Application.UnitTests.ImageRestorationJobs;
 
@@ -21,6 +24,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
     private readonly Mock<ILogger<CreateImageRestorationJobCommandHandler>> _loggerMock;
     private readonly Mock<IImageRestorationService> _imageRestorationServiceMock;
     private readonly Mock<IMediator> _mediatorMock; // Added
+    private readonly Mock<IHttpClientFactory> _httpClientFactoryMock; // Added
     private readonly DateTime _fixedDateTime;
 
     public CreateImageRestorationJobCommandTests()
@@ -29,6 +33,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         _loggerMock = new Mock<ILogger<CreateImageRestorationJobCommandHandler>>();
         _imageRestorationServiceMock = new Mock<IImageRestorationService>();
         _mediatorMock = new Mock<IMediator>(); // Initialized
+        _httpClientFactoryMock = new Mock<IHttpClientFactory>(); // Initialized
 
         _fixedDateTime = DateTime.Now;
         _mockDateTime.Setup(d => d.Now).Returns(_fixedDateTime);
@@ -38,6 +43,23 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Setup for mediator to handle CreateFamilyMediaCommand
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { FilePath = "http://uploaded.image/url" })); // Mock successful upload
+
+        // Setup a mock HttpClient for _httpClientFactoryMock
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri == new Uri("http://restored.image/url") && req.Method == HttpMethod.Get), // More specific setup
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new ByteArrayContent(new byte[] { 0x01, 0x02, 0x03 }) // Dummy image data
+            });
+        
+        var mockHttpClient = new HttpClient(mockHttpMessageHandler.Object) { BaseAddress = new Uri("http://dummy-restoration-service.com") };
+        _httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(mockHttpClient);
     }
 
     [Fact]
@@ -71,9 +93,6 @@ public class CreateImageRestorationJobCommandTests : TestBase
                 IsResized = false
             }));
 
-        _imageRestorationServiceMock.Setup(s => s.StartRestorationAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(successfulRestorationResult);
-
         var handler = new CreateImageRestorationJobCommandHandler(
             _context,
             _mapper,
@@ -81,7 +100,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mockDateTime.Object,
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
-            _mediatorMock.Object // Pass mediator mock
+            _mediatorMock.Object,
+            _httpClientFactoryMock.Object // Pass httpClientFactory mock
         );
 
         // Act
@@ -132,7 +152,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mockDateTime.Object,
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
-            _mediatorMock.Object // Pass mediator mock
+            _mediatorMock.Object,
+            _httpClientFactoryMock.Object // Pass httpClientFactory mock
         );
 
         // Act
@@ -252,7 +273,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mockDateTime.Object,
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
-            _mediatorMock.Object
+            _mediatorMock.Object,
+            _httpClientFactoryMock.Object // Pass httpClientFactory mock
         );
 
         // Act
@@ -295,7 +317,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mockDateTime.Object,
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
-            _mediatorMock.Object
+            _mediatorMock.Object,
+            _httpClientFactoryMock.Object // Pass httpClientFactory mock
         );
 
         // Act
@@ -338,7 +361,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _mockDateTime.Object,
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
-            _mediatorMock.Object
+            _mediatorMock.Object,
+            _httpClientFactoryMock.Object // Pass httpClientFactory mock
         );
 
         // Act

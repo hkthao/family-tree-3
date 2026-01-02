@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
@@ -5,6 +6,7 @@ using backend.Application.ImageRestorationJobs.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Net.Http; // Added
 
 namespace backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob;
 
@@ -17,6 +19,7 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
     private readonly ILogger<CreateImageRestorationJobCommandHandler> _logger;
     private readonly IImageRestorationService _imageRestorationService;
     private readonly IMediator _mediator;
+    private readonly IHttpClientFactory _httpClientFactory; // Added
 
     public CreateImageRestorationJobCommandHandler(
         IApplicationDbContext context,
@@ -25,7 +28,8 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
         IDateTime dateTime,
         ILogger<CreateImageRestorationJobCommandHandler> logger,
         IImageRestorationService imageRestorationService,
-        IMediator mediator)
+        IMediator mediator,
+        IHttpClientFactory httpClientFactory) // Added
     {
         _context = context;
         _mapper = mapper;
@@ -34,6 +38,7 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
         _logger = logger;
         _imageRestorationService = imageRestorationService;
         _mediator = mediator;
+        _httpClientFactory = httpClientFactory; // Added
     }
 
     public async Task<Result<ImageRestorationJobDto>> Handle(CreateImageRestorationJobCommand request, CancellationToken cancellationToken)
@@ -71,28 +76,29 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
                 _logger.LogError("Preprocessed image result value is null.");
                 return Result<ImageRestorationJobDto>.Failure("Preprocessed image result is null.");
             }
-            
+
             byte[] imageDataToUpload;
 
             if (preprocessedImage.IsResized)
             {
-                                _logger.LogInformation("Image was resized during preprocessing. Preparing resized image for upload.");
-                                string? base64Data = null;
-                                if (!string.IsNullOrEmpty(preprocessedImage.ProcessedImageBase64))
-                                {
-                                    var parts = preprocessedImage.ProcessedImageBase64.Split(',');
-                                    if (parts.Length == 2)
-                                    {
-                                        base64Data = parts[1];
-                                    }
-                                }
-                
-                                if (string.IsNullOrEmpty(base64Data))
-                                {
-                                    _logger.LogError("Invalid base64 data received from preprocessed image.");
-                                    return Result<ImageRestorationJobDto>.Failure("Invalid base64 data from preprocessed image.");
-                                }
-                                imageDataToUpload = Convert.FromBase64String(base64Data);            }
+                _logger.LogInformation("Image was resized during preprocessing. Preparing resized image for upload.");
+                string? base64Data = null;
+                if (!string.IsNullOrEmpty(preprocessedImage.ProcessedImageBase64))
+                {
+                    var parts = preprocessedImage.ProcessedImageBase64.Split(',');
+                    if (parts.Length == 2)
+                    {
+                        base64Data = parts[1];
+                    }
+                }
+
+                if (string.IsNullOrEmpty(base64Data))
+                {
+                    _logger.LogError("Invalid base64 data received from preprocessed image.");
+                    return Result<ImageRestorationJobDto>.Failure("Invalid base64 data from preprocessed image.");
+                }
+                imageDataToUpload = Convert.FromBase64String(base64Data);
+            }
             else
             {
                 _logger.LogInformation("Image was not resized during preprocessing. Preparing original image for upload.");
@@ -106,6 +112,7 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
                 File = imageDataToUpload,
                 FileName = request.FileName,
                 MediaType = MediaType.Image,
+                Folder = string.Format(UploadConstants.ImagesFolder, request.FamilyId),
                 Description = $"Image for restoration job {Guid.NewGuid()}"
             };
 
@@ -118,7 +125,7 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
             }
             imageUrlForRestoration = mediaUploadResult.Value!.FilePath;
         }
-        
+
         var entity = new ImageRestorationJob();
         entity.Initialize(imageUrlForRestoration, userId, request.FamilyId); // Using domain method to initialize
 
@@ -144,10 +151,63 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
         }
 
         entity.MarkAsProcessing(restorationResult.Value!.JobId.ToString());
+
+        // If RestoredUrl is returned, download and upload it
         if (!string.IsNullOrEmpty(restorationResult.Value.RestoredUrl))
         {
-            entity.MarkAsCompleted(restorationResult.Value.RestoredUrl); // Using domain method to mark as completed
+            try
+            {
+                _logger.LogInformation("RestoredUrl received for job {JobId}. Downloading restored image from {RestoredUrl} for final upload.", entity.Id, restorationResult.Value.RestoredUrl);
+
+                var httpClient = _httpClientFactory.CreateClient();
+                var restoredImageData = await httpClient.GetByteArrayAsync(restorationResult.Value.RestoredUrl, cancellationToken);
+
+                var finalCreateMediaCommand = new CreateFamilyMediaCommand
+                {
+                    FamilyId = request.FamilyId,
+                    File = restoredImageData,
+                    FileName = $"restored_{request.FileName}", // Use a distinct name
+                    MediaType = MediaType.Image,
+                    Folder = string.Format(UploadConstants.ImagesFolder, request.FamilyId),
+                    Description = $"Restored image for job {entity.Id}"
+                };
+
+                var finalMediaUploadResult = await _mediator.Send(finalCreateMediaCommand, cancellationToken);
+
+                if (!finalMediaUploadResult.IsSuccess)
+                {
+                    _logger.LogError("Failed to upload final restored image via CreateFamilyMediaCommand for job {JobId}: {ErrorMessage}", entity.Id, finalMediaUploadResult.Error);
+                    entity.MarkAsFailed($"Failed to upload final restored image: {finalMediaUploadResult.Error}");
+                    await _context.SaveChangesAsync(cancellationToken);
+                    return Result<ImageRestorationJobDto>.Failure($"Failed to upload final restored image: {finalMediaUploadResult.Error}");
+                }
+
+                entity.MarkAsCompleted(finalMediaUploadResult.Value!.FilePath);
+                _logger.LogInformation("Final restored image uploaded for job {JobId}. Final URL: {FinalUrl}", entity.Id, finalMediaUploadResult.Value.FilePath);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request failed when downloading restored image for job {JobId} from {RestoredUrl}: {Message}", entity.Id, restorationResult.Value.RestoredUrl, ex.Message);
+                entity.MarkAsFailed($"Failed to download restored image: {ex.Message}");
+                await _context.SaveChangesAsync(cancellationToken);
+                return Result<ImageRestorationJobDto>.Failure($"Failed to download restored image: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred when handling restored image for job {JobId}: {Message}", entity.Id, ex.Message);
+                entity.MarkAsFailed($"Unexpected error handling restored image: {ex.Message}");
+                await _context.SaveChangesAsync(cancellationToken);
+                return Result<ImageRestorationJobDto>.Failure($"Unexpected error handling restored image: {ex.Message}");
+            }
         }
+        else
+        {
+            // If no RestoredUrl is provided by the service, mark the job as completed with the original image URL
+            // or perhaps as failed if it implies a problem. For now, mark as completed with original.
+            _logger.LogWarning("Image restoration service did not return a RestoredUrl for job {JobId}. Marking job as completed with original image URL.", entity.Id);
+            entity.MarkAsCompleted(entity.OriginalImageUrl);
+        }
+        
         await _context.SaveChangesAsync(cancellationToken);
 
         var dto = _mapper.Map<ImageRestorationJobDto>(entity);
