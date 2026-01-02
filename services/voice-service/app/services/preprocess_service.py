@@ -1,15 +1,15 @@
-import os
 import tempfile
 from typing import List, Tuple
 from loguru import logger
 from app.utils import audio_utils
-from app.services.storage_service import S3StorageService, get_s3_storage_service
 from pathlib import Path
+import uuid
+import os
+from app.config import settings
 
 
 class PreprocessService:
     def __init__(self):
-        self.storage_service = get_s3_storage_service()
         logger.info("PreprocessService initialized.")
 
     async def process_audio_pipeline(self, audio_urls: List[str]) -> Tuple[str, float]:
@@ -46,16 +46,21 @@ class PreprocessService:
                 processed_paths.append(processed_file)
 
             # 3. Concatenate all processed audios
-            merged_audio_file = temp_dir_path / "merged_output.wav"
+            merged_audio_temp_file = temp_dir_path / "merged_output.wav"
             total_duration = await audio_utils.concatenate_audios(
-                [str(p) for p in processed_paths], str(merged_audio_file)
+                [str(p) for p in processed_paths], str(merged_audio_temp_file)
             )
 
-            # 4. Upload the final WAV file to object storage
-            object_name = f"processed_voices/{Path(merged_audio_file).name}"
-            processed_audio_url = await self.storage_service.upload_file(
-                str(merged_audio_file), object_name, content_type="audio/wav"
-            )
+            # Generate a unique filename for the publicly accessible static file
+            unique_filename = f"{uuid.uuid4()}.wav"
+            final_static_filepath = settings.STATIC_FILES_DIR / unique_filename
+
+            # Move the merged audio file to the static files directory
+            os.rename(merged_audio_temp_file, final_static_filepath)
+            logger.info(f"Moved merged audio to static directory: {final_static_filepath}")
+
+            # Construct the absolute URL for the processed audio file
+            processed_audio_url = f"{settings.VOICE_SERVICE_BASE_URL}/static/{unique_filename}"
 
             logger.info(f"Audio preprocessing pipeline completed. Final URL: {processed_audio_url}, Duration: {total_duration:.2f}s")
             return processed_audio_url, total_duration
@@ -64,9 +69,9 @@ class PreprocessService:
             logger.error(f"Error during audio preprocessing pipeline: {e}")
             raise
         finally:
-            # 5. Clean up temporary files and directory
+            # Clean up temporary downloaded and processed files in the temp_dir_path
             if temp_dir_path and temp_dir_path.exists():
-                for path in downloaded_paths + processed_paths + [merged_audio_file]:
+                for path in downloaded_paths + processed_paths: # merged_audio_temp_file is moved, not deleted here
                     if path.exists():
                         os.remove(path)
                 os.rmdir(temp_dir_path)
