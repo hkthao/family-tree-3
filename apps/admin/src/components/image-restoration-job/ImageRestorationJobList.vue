@@ -41,7 +41,7 @@
       <v-icon small class="me-2" @click="emit('edit', item.jobId)" data-testid="button-edit">
         mdi-pencil
       </v-icon>
-      <v-icon small @click="emit('delete', item.jobId)" data-testid="button-delete">
+      <v-icon small @click="emit('delete', item.id)" data-testid="button-delete">
         mdi-delete
       </v-icon>
     </template>

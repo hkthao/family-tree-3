@@ -1,20 +1,9 @@
 <template>
   <div data-testid="image-restoration-job-list-view">
-    <ImageRestorationJobList
-      :items="imageRestorationJobs"
-      :total-items="currentTotalItems"
-      :loading="isLoadingImageRestorationJobs"
-      :family-id="props.familyId"
-      @update:options="handleListOptionsUpdate"
-      @create="openAddDrawer()"
-      @view="openDetailDrawer"
-      @edit="openEditDrawer"
-      @delete="confirmDelete"
-      :allow-add="true"
-      :allow-edit="true"
-      :allow-delete="true"
-      :can-perform-actions="true"
-    />
+    <ImageRestorationJobList :items="imageRestorationJobs" :total-items="currentTotalItems"
+      :loading="isLoadingImageRestorationJobs" :family-id="props.familyId" @update:options="handleListOptionsUpdate"
+      @create="openAddDrawer()" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
+      :allow-add="true" :allow-edit="true" :allow-delete="true" :can-perform-actions="true" />
 
     <!-- Add Image Restoration Job Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleImageRestorationJobClosed">
@@ -107,22 +96,16 @@ const handleListOptionsUpdate = (options: {
 };
 
 const confirmDelete = async (id: string) => {
-  const jobToDelete = imageRestorationJobs.value.find(job => job.jobId === id);
-  if (!jobToDelete) {
-    showSnackbar(t('imageRestorationJob.messages.notFound'), 'error');
-    return;
-  }
-
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
-    message: t('imageRestorationJob.list.confirmDelete', { jobId: jobToDelete.jobId }),
+    message: t('imageRestorationJob.list.confirmDelete', { jobId: id }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     confirmColor: 'error',
   });
 
   if (confirmed) {
-    handleDeleteConfirm(jobToDelete.jobId);
+    handleDeleteConfirm(id);
   }
 };
 

@@ -48,12 +48,12 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <summary>
     /// Lấy thông tin chi tiết của một job phục hồi ảnh theo ID.
     /// </summary>
-    /// <param name="jobId">ID của job phục hồi ảnh.</param>
+    /// <param name="id">ID của job phục hồi ảnh.</param>
     /// <returns>ImageRestorationJobDto.</returns>
-    [HttpGet("{jobId}")]
-    public async Task<IActionResult> GetImageRestorationJobById([FromRoute] string jobId)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetImageRestorationJobById([FromRoute] string id)
     {
-        var result = await _mediator.Send(new GetImageRestorationJobByIdQuery(jobId));
+        var result = await _mediator.Send(new GetImageRestorationJobByIdQuery(id));
         return result.ToActionResult(this, _logger);
     }
 
@@ -72,15 +72,15 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <summary>
     /// Cập nhật thông tin của một job phục hồi ảnh.
     /// </summary>
-    /// <param name="jobId">ID của job phục hồi ảnh cần cập nhật.</param>
+    /// <param name="id">ID của job phục hồi ảnh cần cập nhật.</param>
     /// <param name="command">Dữ liệu cập nhật.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpPut("{jobId}")]
-    public async Task<IActionResult> UpdateImageRestorationJob([FromRoute] string jobId, [FromBody] UpdateImageRestorationJobCommand command)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateImageRestorationJob([FromRoute] Guid id, [FromBody] UpdateImageRestorationJobCommand command)
     {
-        if (jobId != command.JobId)
+        if (id != command.Id)
         {
-            return BadRequest($"JobId in route ({jobId}) does not match JobId in body ({command.JobId}).");
+            return BadRequest($"Id in route ({id}) does not match Id in body ({command.Id}).");
         }
 
         var result = await _mediator.Send(command);
@@ -90,15 +90,15 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <summary>
     /// Xóa một job phục hồi ảnh.
     /// </summary>
-    /// <param name="jobId">ID của job phục hồi ảnh cần xóa.</param>
+    /// <param name="id">ID của job phục hồi ảnh cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpPatch("{jobId}/status")]
+    [HttpPatch("{id}/status")]
     [AllowAnonymous] // Allow external service to call back without authentication
-    public async Task<IActionResult> UpdateImageRestorationJobStatus([FromRoute] string jobId, [FromBody] UpdateImageRestorationJobCommand command)
+    public async Task<IActionResult> UpdateImageRestorationJobStatus([FromRoute] Guid id, [FromBody] UpdateImageRestorationJobCommand command)
     {
-        if (jobId != command.JobId)
+        if (id != command.Id)
         {
-            return BadRequest($"JobId in route ({jobId}) does not match JobId in body ({command.JobId}).");
+            return BadRequest($"Id in route ({id}) does not match Id in body ({command.Id}).");
         }
 
         var result = await _mediator.Send(command);
@@ -108,12 +108,12 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <summary>
     /// Xóa một job phục hồi ảnh.
     /// </summary>
-    /// <param name="jobId">ID của job phục hồi ảnh cần xóa.</param>
+    /// <param name="id">ID của job phục hồi ảnh cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
-    [HttpDelete("{jobId}")]
-    public async Task<IActionResult> DeleteImageRestorationJob([FromRoute] string jobId)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteImageRestorationJob([FromRoute] Guid id)
     {
-        var result = await _mediator.Send(new DeleteImageRestorationJobCommand(jobId));
+        var result = await _mediator.Send(new DeleteImageRestorationJobCommand(id));
         return result.ToActionResult(this, _logger, 204); // 204 No Content for successful deletion
     }
 }

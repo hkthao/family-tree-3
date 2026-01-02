@@ -19,12 +19,12 @@ public class DeleteImageRestorationJobCommandHandler(
         }
 
         var job = await _context.ImageRestorationJobs
-            .Where(j => j.UserId == userId && j.JobId == request.JobId)
+            .Where(j => j.UserId == userId && j.Id == request.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (job == null)
         {
-            return Result<Unit>.NotFound($"Image restoration job with ID '{request.JobId}' not found or you do not have access.", "ImageRestorationJob");
+            return Result<Unit>.NotFound($"Image restoration job with ID '{request.Id}' not found or you do not have access.", "ImageRestorationJob");
         }
 
         _context.ImageRestorationJobs.Remove(job);
