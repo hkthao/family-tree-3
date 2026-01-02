@@ -1,240 +1,195 @@
-# 📌 TASK: Implement Python Image Restoration Service using Replicate
 
-## 1. Mục tiêu
-
-Xây dựng **một service Python** dùng để **phục chế ảnh cũ (ảnh tổ tiên)** cho ứng dụng gia phả, sử dụng **Replicate API** với các model AI chuyên phục hồi ảnh.
-
-Service này **không xử lý UI**, chỉ chịu trách nhiệm:
-
-* Nhận URL ảnh gốc
-* Gọi AI phục chế
-* Trả về URL ảnh đã phục chế
-* Lưu metadata phục vụ backend app
+> Mục tiêu:
+> **Backend quản lý “con người + giọng nói + lịch sử sinh audio”**
+> Python service chỉ là worker, **không nằm trong domain**.
 
 ---
 
-## 2. Công nghệ & ràng buộc
+# 1. TƯ DUY DOMAIN ĐÚNG (CHỐT TRƯỚC)
 
-* Ngôn ngữ: **Python 3.10+**
-* AI provider: **Replicate**
-* Framework API: **FastAPI**
-* Không self-host GPU
-* API key lấy từ biến môi trường:
+Trong backend, bạn **KHÔNG quản lý AI**, bạn quản lý:
 
-  ```
-  REPLICATE_API_TOKEN
-  ```
+> **GiỌNG NÓI = TÀI SẢN SỐ CỦA MỘT NHÂN VẬT GIA PHẢ**
 
----
+Nên domain phải xoay quanh:
 
-## 3. Chức năng chính cần implement
-
-### 3.1 Image Restoration Pipeline
-
-Pipeline mặc định gồm 2 bước theo thứ tự:
-
-1. **Face Restoration**
-
-   * Model: `tencentarc/gfpgan`
-   * Mục tiêu: khôi phục khuôn mặt bị mờ, nứt, nhiễu
-2. **Upscale Image**
-
-   * Model: `nightmareai/real-esrgan`
-   * Mục tiêu: tăng độ phân giải ảnh sau khi phục chế
-
-📌 Không được overwrite ảnh gốc.
+* Member (nhân vật)
+* Voice (giọng nói)
+* Voice usage (audio sinh ra)
 
 ---
 
-### 3.2 Input
+# 2. DOMAIN CORE (BẮT BUỘC)
 
-Service nhận **URL ảnh công khai** (JPEG / PNG).
+## 2.2. VoiceProfile (GIỌNG NÓI – TRỌNG TÂM)
 
-Ví dụ input:
+> **1 Member có thể có N VoiceProfile**
 
-```json
-{
-  "imageUrl": "https://storage.example.com/original/photo.jpg"
-}
+Mỗi VoiceProfile = **1 “kiểu giọng” ổn định**
+
+```sql
+voice_profiles
+--------------
+id
+member_id
+label              -- vd: "default", "story", "elder"
+audio_url          -- merged.wav (đã preprocess)
+duration_seconds
+language
+consent            -- true/false
+status             -- active / archived
+created_at
+```
+
+📌 Đây chính là nơi backend **giữ `voice_profile_id`**
+
+---
+## 2.4. VoiceGeneration (LỊCH SỬ GIỌNG ĐÃ SINH)
+
+Mỗi lần user đọc text → sinh 1 audio.
+
+```sql
+voice_generations
+-----------------
+id
+voice_profile_id
+text
+audio_url
+duration
+created_at
+```
+
+👉 Cực kỳ quan trọng cho:
+
+* giới hạn quota
+* lịch sử
+* cache
+
+---
+
+# 3. DOMAIN RELATIONSHIP (RÕ RÀNG)
+
+```
+Family
+  └── Member
+        └── VoiceProfile
+              └── VoiceGeneration
 ```
 
 ---
 
-### 3.3 Output
+# 4. DOMAIN RULES (BUSINESS LOGIC BACKEND)
 
-Trả về **URL ảnh đã phục chế** + metadata.
+Backend PHẢI enforce:
 
-Ví dụ:
+### Rule 1
 
-```json
-{
-  "originalUrl": "...",
-  "restoredUrl": "...",
-  "pipeline": ["GFPGAN", "Real-ESRGAN"],
-  "status": "completed"
-}
+> Không generate voice nếu `consent = false`
+
+---
+
+### Rule 2
+
+> 1 VoiceProfile chỉ dùng cho 1 Member
+
+---
+
+### Rule 3
+
+> Mỗi Member nên có tối đa 1–2 VoiceProfile active
+
+---
+
+### Rule 4
+
+> VoiceProfile chỉ lưu **audio đã preprocess**
+
+❌ Không lưu raw mp3
+❌ Không lưu nhiều file rời rạc
+
+---
+
+# 5. FLOW BACKEND THEO DOMAIN
+
+## 5.1. Tạo VoiceProfile
+
+```
+FE upload audio
+   ↓
+Backend lưu raw
+   ↓
+Backend gọi Python /preprocess
+   ↓
+Nhận processed_audio_url
+   ↓
+Create VoiceProfile
 ```
 
 ---
 
-## 4. API cần xây dựng
-
-### 4.1 Endpoint: Start restoration
+## 5.2. Generate Voice
 
 ```
-POST /restore
-```
-
-#### Request body
-
-```json
-{
-  "imageUrl": "string"
-}
-```
-
-#### Response (ngay lập tức)
-
-```json
-{
-  "status": "processing",
-  "jobId": "uuid"
-}
+FE gửi voice_profile_id + text
+   ↓
+Backend validate:
+   - ownership
+   - consent
+   - quota
+   ↓
+Backend gọi Python /generate
+   ↓
+Nhận audio_url
+   ↓
+Create VoiceGeneration
 ```
 
 ---
 
-### 4.2 Job processing
-
-* Chạy xử lý AI **bất đồng bộ**
-* Có thể dùng:
-
-  * FastAPI BackgroundTasks
-  * hoặc Celery (simple setup)
-* Sau khi hoàn thành:
-
-  * Lưu kết quả vào in-memory store / simple dict (chưa cần DB)
-
----
-
-### 4.3 Endpoint: Check job status
+# 6. API BACKEND GỢI Ý (KHÔNG CODE)
 
 ```
-GET /restore/{jobId}
+POST   /members/{id}/voice-profiles
+GET    /members/{id}/voice-profiles
+POST   /voice-profiles/{id}/generate
+GET    /voice-profiles/{id}/history
 ```
 
-#### Response
-
-```json
-{
-  "status": "completed",
-  "originalUrl": "...",
-  "restoredUrl": "...",
-  "pipeline": ["GFPGAN", "Real-ESRGAN"]
-}
-```
-
-Hoặc nếu đang xử lý:
-
-```json
-{
-  "status": "processing"
-}
-```
+👉 Backend **chỉ gọi Python bằng audio_url**
 
 ---
 
-## 5. Cấu trúc project mong muốn
+# 7. NHỮNG THỨ TUYỆT ĐỐI KHÔNG ĐƯA VÀO DOMAIN
 
-```
-image_restoration_service/
-│
-├── app/
-│   ├── main.py              # FastAPI entrypoint
-│   ├── api.py               # API routes
-│   ├── services/
-│   │   └── replicate_service.py
-│   ├── models/
-│   │   └── job.py            # Job state model
-│   └── config.py            # Env config
-│
-├── requirements.txt
-└── README.md
-```
+❌ speaker embedding
+❌ replicate model id
+❌ AI config chi tiết
+❌ ffmpeg pipeline
+
+👉 Domain phải **AI-agnostic**
 
 ---
 
-## 6. Replicate Service – yêu cầu chi tiết
+# 8. CHECKLIST DOMAIN ĐÚNG
 
-### 6.1 GFPGAN call
-
-* Input:
-
-  * img: image URL
-  * version: v1.4
-  * scale: 2
-* Output:
-
-  * URL ảnh phục chế
-
-### 6.2 Real-ESRGAN call
-
-* Input:
-
-  * image: URL ảnh đã qua GFPGAN
-  * scale: 2
-* Output:
-
-  * URL ảnh cuối cùng
-
-📌 Lưu ý:
-
-* Replicate có thể trả về **list URL** → phải xử lý đúng type.
+✅ Có VoiceProfile entity
+✅ VoiceProfile gắn với Member
+✅ Backend giữ voice_profile_id
+✅ Python service không biết domain
+✅ Có VoiceGeneration log
 
 ---
 
-## 7. Yêu cầu về code quality
+# 9. TÓM TẮT CHỐT HẠ
 
-* Tách logic rõ ràng:
+> **Backend quản lý GIỌNG NÓI như 1 thực thể domain**
+> **Python chỉ là máy xử lý**
 
-  * API layer
-  * AI service layer
-* Có comment giải thích
-* Có error handling:
+Nếu sau này:
 
-  * Replicate timeout
-  * Invalid image URL
-* Không hardcode API key
+* đổi Replicate → OpenAI / local model
+* đổi XTTS → model khác
 
----
-
-## 8. Giới hạn & giả định (cho MVP)
-
-* Không authentication
-* Không rate limit
-* Không database thật
-* Chỉ phục chế **1 ảnh / request**
-* Không colorize ảnh (chưa dùng)
-
----
-
-## 9. Ghi chú đạo đức (IMPORTANT)
-
-Service chỉ **tăng độ rõ nét**, không thay đổi đặc điểm khuôn mặt.
-Không áp dụng filter làm trẻ hóa hoặc biến dạng ảnh.
-
----
-
-## 10. Output mong muốn từ Gemini CLI
-
-Gemini CLI cần:
-
-1. Generate toàn bộ code Python theo cấu trúc trên
-2. Có thể chạy bằng:
-
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-3. Có README hướng dẫn chạy local
+👉 **DOMAIN KHÔNG CẦN ĐỔI**
 
 ---
