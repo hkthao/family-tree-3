@@ -1,8 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
 import { useI18n } from 'vue-i18n';
-import { type ImageRestorationJobDto, type CreateImageRestorationJobDto } from '@/types';
+import { type ImageRestorationJobDto } from '@/types'; // Removed CreateImageRestorationJobDto
 import { useServices } from '@/plugins/services.plugin';
+
+interface CreateImageRestorationJobMutationParams {
+  file: File;
+  familyId: string;
+  useCodeformer: boolean;
+}
 
 export const useCreateImageRestorationJobMutation = () => {
   const queryClient = useQueryClient();
@@ -10,9 +16,9 @@ export const useCreateImageRestorationJobMutation = () => {
   const { t } = useI18n();
   const services = useServices();
 
-  return useMutation<ImageRestorationJobDto, Error, CreateImageRestorationJobDto>({
-    mutationFn: async (command) => {
-      const result = await services.imageRestorationJob.add(command);
+  return useMutation<ImageRestorationJobDto, Error, CreateImageRestorationJobMutationParams>({
+    mutationFn: async (params) => {
+      const result = await services.imageRestorationJob.add(params.file, params.familyId, params.useCodeformer);
       if (result.ok) {
         return result.value;
       }

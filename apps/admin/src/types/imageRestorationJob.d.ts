@@ -17,11 +17,6 @@ export interface ImageRestorationJobDto {
   lastModified?: Date;
 }
 
-export interface CreateImageRestorationJobDto {
-  originalImageUrl: string;
-  familyId: string;
-}
-
 export interface UpdateImageRestorationJobDto {
   jobId: string;
   id?: string; // Alias for jobId to satisfy ICrudService

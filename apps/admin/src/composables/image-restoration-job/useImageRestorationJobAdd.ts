@@ -1,7 +1,7 @@
-import { ref, reactive, type Ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useCreateImageRestorationJobMutation } from './useCreateImageRestorationJobMutation';
-import { type IImageRestorationJobFormInstance } from '@/components/image-restoration-job/ImageRestorationJobForm.vue';
-import { type CreateImageRestorationJobDto } from '@/types';
+// import { type IImageRestorationJobFormInstance } from '@/components/image-restoration-job/ImageRestorationJobForm.vue'; // Removed
+// import { type CreateImageRestorationJobDto } from '@/types'; // Removed
 
 // Helper function for artificial delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -10,31 +10,20 @@ interface UseImageRestorationJobAddOptions {
   familyId: string;
   onSaveSuccess?: () => void;
   onCancel?: () => void;
-  formRef: Ref<IImageRestorationJobFormInstance | null>;
+  // formRef: Ref<IImageRestorationJobFormInstance | null>; // Removed
 }
 
 export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOptions) => {
-  const { familyId, onSaveSuccess, onCancel, formRef } = options;
+  const { familyId, onSaveSuccess, onCancel } = options;
   const isAddingImageRestorationJob = ref(false);
 
   const { mutateAsync: createImageRestorationJob } = useCreateImageRestorationJobMutation();
 
-  const handleAddItem = async () => {
-    if (!formRef.value) return;
-
-    const { valid } = await formRef.value.validate();
-    if (!valid) return;
-
+  const handleAddItem = async (file: File, useCodeformer: boolean) => {
     isAddingImageRestorationJob.value = true;
     try {
-      const formData = formRef.value.getFormData();
-      const command: CreateImageRestorationJobDto = {
-        originalImageUrl: formData.originalImageUrl,
-        familyId: familyId,
-      };
-      await createImageRestorationJob(command);
+      await createImageRestorationJob({ file, familyId, useCodeformer }); // Pass new parameters
       onSaveSuccess?.();
-      formRef.value.reset();
     } finally {
       await delay(300); // Artificial delay to make loading state more visible
       isAddingImageRestorationJob.value = false;
@@ -43,7 +32,6 @@ export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOpti
 
   const closeForm = () => {
     onCancel?.();
-    formRef.value?.reset();
   };
 
   return {
@@ -54,5 +42,8 @@ export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOpti
       handleAddItem,
       closeForm,
     },
+    internal: { // Expose handleAddItem under internal for renaming in ImageRestorationJobAddView.vue
+      handleAddItem,
+    }
   };
 };

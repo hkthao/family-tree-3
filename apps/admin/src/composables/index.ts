@@ -69,7 +69,7 @@ export * from './image-restoration-job/useUpdateImageRestorationJobMutation'; //
 export * from './image-restoration-job/useDeleteImageRestorationJobMutation'; // NEW
 export * from './image-restoration-job/useImageRestorationJobDataManagement'; // NEW
 export * from './image-restoration-job/useImageRestorationJobAdd'; // NEW
-export * from './image-restoration-job/useImageRestorationJobEdit'; // NEW
+
 export * from './image-restoration-job/useImageRestorationJobDetail'; // NEW
 export * from './novu/useNovuInbox';
 export * from './novu/useNovuNotificationBell';

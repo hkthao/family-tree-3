@@ -11,17 +11,10 @@
         @saved="handleImageRestorationJobSaved" />
     </BaseCrudDrawer>
 
-    <!-- Edit Image Restoration Job Drawer -->
-    <BaseCrudDrawer v-model="editDrawer" @close="handleImageRestorationJobClosed">
-      <ImageRestorationJobEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId"
-        :image-restoration-job-id="selectedItemId" @close="handleImageRestorationJobClosed"
-        @saved="handleImageRestorationJobSaved" />
-    </BaseCrudDrawer>
-
     <!-- Detail Image Restoration Job Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleImageRestorationJobClosed">
       <ImageRestorationJobDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId"
-        :image-restoration-job-id="selectedItemId" @close="handleImageRestorationJobClosed" />
+        :id="selectedItemId" @close="handleImageRestorationJobClosed" />
     </BaseCrudDrawer>
   </div>
 </template>
@@ -36,7 +29,6 @@ import type { ImageRestorationJobDto } from '@/types/imageRestorationJob';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import ImageRestorationJobList from '@/components/image-restoration-job/ImageRestorationJobList.vue'; // Will create this
 import ImageRestorationJobAddView from './ImageRestorationJobAddView.vue';
-import ImageRestorationJobEditView from './ImageRestorationJobEditView.vue';
 import ImageRestorationJobDetailView from './ImageRestorationJobDetailView.vue';
 
 interface ImageRestorationJobListViewProps {
@@ -76,7 +68,6 @@ const { mutate: deleteImageRestorationJob } = useDeleteImageRestorationJobMutati
 
 const {
   addDrawer,
-  editDrawer,
   detailDrawer,
   selectedItemId,
   openAddDrawer,
@@ -110,7 +101,7 @@ const confirmDelete = async (id: string) => {
 };
 
 const handleDeleteConfirm = (id: string) => {
-  deleteImageRestorationJob({ jobId: id, familyId: props.familyId }, {
+  deleteImageRestorationJob({ jobId: id}, {
     onSuccess: () => {
       showSnackbar(t('imageRestorationJob.messages.deleteSuccess'), 'success');
       queryClient.invalidateQueries({ queryKey: ['image-restoration-jobs'] });

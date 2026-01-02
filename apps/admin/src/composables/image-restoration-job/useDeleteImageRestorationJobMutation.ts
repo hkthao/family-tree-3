@@ -9,9 +9,9 @@ export const useDeleteImageRestorationJobMutation = () => {
   const { t } = useI18n();
   const services = useServices();
 
-  return useMutation<void, Error, { jobId: string; familyId: string }>({
-    mutationFn: async ({ jobId, familyId }) => {
-      const result = await services.imageRestorationJob.delete(jobId); // Removed familyId
+  return useMutation<void, Error, { jobId: string }>({
+    mutationFn: async ({ jobId }) => {
+      const result = await services.imageRestorationJob.delete(jobId);
       if (result.ok) {
         return result.value;
       }

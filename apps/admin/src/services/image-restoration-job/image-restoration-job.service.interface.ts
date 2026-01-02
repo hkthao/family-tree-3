@@ -1,7 +1,8 @@
-import { type ImageRestorationJobDto, type CreateImageRestorationJobDto, type UpdateImageRestorationJobDto } from '@/types';
+import { type ImageRestorationJobDto, type UpdateImageRestorationJobDto, type Result } from '@/types';
 import { type ICrudService } from '../common/crud.service.interface';
 
-export interface IImageRestorationJobService extends ICrudService<ImageRestorationJobDto, CreateImageRestorationJobDto, UpdateImageRestorationJobDto> {
-  // search method will implicitly handle familyId via FilterOptions
-  // getById and delete methods are used as defined in ICrudService
+// Define a new interface that extends ICrudService but overrides the add method
+export interface IImageRestorationJobService extends Omit<ICrudService<ImageRestorationJobDto, any, UpdateImageRestorationJobDto>, 'add'> {
+  // Override the add method to handle file uploads
+  add(file: File, familyId: string, useCodeformer: boolean): Promise<Result<ImageRestorationJobDto>>;
 }
