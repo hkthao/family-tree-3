@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.VoiceProfiles.Queries;
 using backend.Domain.Enums;
 
 namespace backend.Application.VoiceProfiles.Queries.SearchVoiceProfiles;
