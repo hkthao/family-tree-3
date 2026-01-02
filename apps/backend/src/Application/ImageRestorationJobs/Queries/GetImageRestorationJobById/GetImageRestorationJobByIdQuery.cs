@@ -4,7 +4,7 @@ using backend.Application.ImageRestorationJobs.Common; // Added
 
 namespace backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobById;
 
-public record GetImageRestorationJobByIdQuery(string JobId) : IRequest<Result<ImageRestorationJobDto>>;
+public record GetImageRestorationJobByIdQuery(Guid Id) : IRequest<Result<ImageRestorationJobDto>>;
 
 public class GetImageRestorationJobByIdQueryHandler(
     IApplicationDbContext context,
@@ -24,13 +24,13 @@ public class GetImageRestorationJobByIdQueryHandler(
         }
 
         var job = await _context.ImageRestorationJobs
-            .Where(j => j.UserId == userId && j.JobId == request.JobId)
+            .Where(j => j.UserId == userId && j.Id == request.Id)
             .ProjectTo<ImageRestorationJobDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (job == null)
         {
-            return Result<ImageRestorationJobDto>.NotFound($"Image restoration job with ID '{request.JobId}' not found or you do not have access.", "ImageRestorationJob");
+            return Result<ImageRestorationJobDto>.NotFound($"Image restoration job with ID '{request.Id}' not found or you do not have access.", "ImageRestorationJob");
         }
 
         return Result<ImageRestorationJobDto>.Success(job);
