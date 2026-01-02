@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/vue-query';
 
-import type { IVoiceProfileService } from '@/services/voice-profile/voice-profile.service.interface';
 import type { CreateVoiceProfileCommand, VoiceProfile } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types/apiError';

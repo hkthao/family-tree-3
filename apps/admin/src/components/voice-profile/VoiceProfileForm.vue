@@ -1,69 +1,35 @@
 <template>
-  <v-form ref="form" @submit.prevent="save">
-    <v-container>
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="editableVoiceProfile.label"
-            :label="t('voiceProfile.form.name')"
-            :rules="[rules.required]"
-            :readonly="readOnly"
-            data-testid="voice-profile-name"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="editableVoiceProfile.audioUrl"
-            :label="t('voiceProfile.form.audioUrl')"
-            :rules="[rules.required, rules.url]"
-            :readonly="readOnly"
-            data-testid="voice-profile-audio-url"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model.number="editableVoiceProfile.durationSeconds"
-            :label="t('voiceProfile.form.durationSeconds')"
-            :rules="[rules.required, rules.positiveNumber]"
-            :readonly="readOnly"
-            type="number"
-            data-testid="voice-profile-duration"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-text-field
-            v-model="editableVoiceProfile.language"
-            :label="t('voiceProfile.form.language')"
-            :rules="[rules.required]"
-            :readonly="readOnly"
-            data-testid="voice-profile-language"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12">
-          <v-checkbox
-            v-model="editableVoiceProfile.consent"
-            :label="t('voiceProfile.form.consent')"
-            :readonly="readOnly"
-            data-testid="voice-profile-consent"
-          ></v-checkbox>
-        </v-col>
-        <v-col cols="12" v-if="!readOnly && initialVoiceProfileData.id">
-          <v-select
-            v-model="editableVoiceProfile.status"
-            :items="voiceProfileStatusOptions"
-            :label="t('voiceProfile.form.status')"
-            :rules="[rules.required]"
-            data-testid="voice-profile-status"
-          ></v-select>
-        </v-col>
-      </v-row>
-      <v-row v-if="!readOnly">
-        <v-col cols="12">
-          <v-btn type="submit" color="primary" class="mr-2">{{ t('common.save') }}</v-btn>
-          <v-btn color="grey" @click="cancel">{{ t('common.cancel') }}</v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
+  <v-form ref="form" >
+    <v-row>
+      <v-col cols="12">
+        <v-text-field v-model="editableVoiceProfile.label" :label="t('voiceProfile.form.name')"
+          :rules="[rules.required]" :readonly="readOnly" data-testid="voice-profile-name"></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <v-text-field v-model="editableVoiceProfile.audioUrl" :label="t('voiceProfile.form.audioUrl')"
+          :rules="[rules.required, rules.url]" :readonly="readOnly"
+          data-testid="voice-profile-audio-url"></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field v-model.number="editableVoiceProfile.durationSeconds"
+          :label="t('voiceProfile.form.durationSeconds')" :rules="[rules.required, rules.positiveNumber]"
+          :readonly="readOnly" type="number" data-testid="voice-profile-duration"></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field v-model="editableVoiceProfile.language" :label="t('voiceProfile.form.language')"
+          :rules="[rules.required]" :readonly="readOnly" data-testid="voice-profile-language"></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <v-checkbox v-model="editableVoiceProfile.consent" :label="t('voiceProfile.form.consent')" :readonly="readOnly"
+          data-testid="voice-profile-consent"></v-checkbox>
+      </v-col>
+      <v-col cols="12" v-if="!readOnly && initialVoiceProfileData.id">
+        <v-select v-model="editableVoiceProfile.status" :items="voiceProfileStatusOptions"
+          :label="t('voiceProfile.form.status')" :rules="[rules.required]"
+          data-testid="voice-profile-status"></v-select>
+      </v-col>
+    </v-row>
+
   </v-form>
 </template>
 
@@ -104,7 +70,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['save', 'cancel']);
+
 
 const { t } = useI18n();
 
@@ -132,18 +98,7 @@ const rules = {
   positiveNumber: (value: number) => value > 0 || t('common.validations.positiveNumber'),
 };
 
-const save = async () => {
-  if (form.value) {
-    const { valid } = await form.value.validate();
-    if (valid) {
-      emit('save', editableVoiceProfile);
-    }
-  }
-};
 
-const cancel = () => {
-  emit('cancel');
-};
 
 defineExpose<IVoiceProfileFormInstance>({
   validate: async () => {

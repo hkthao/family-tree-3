@@ -1,8 +1,7 @@
 import { computed, unref, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 
-import type { IVoiceProfileService } from '@/services/voice-profile/voice-profile.service.interface';
-import type { VoiceProfile, Paginated } from '@/types';
+import type { VoiceProfile, Paginated, ListOptions, FilterOptions } from '@/types'; // Add ListOptions, FilterOptions
 import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types/apiError'; // Import ApiError
 
@@ -22,17 +21,23 @@ export function useVoiceProfilesQuery(
         itemsPerPage: computed(() => paginationOptions.itemsPerPage),
         sortBy: computed(() => paginationOptions.sortBy),
         search: computed(() => filters.search),
+        queryType: 'search', // Updated queryType
       },
     ],
     queryFn: async () => {
-      const response = await voiceProfileService.getVoiceProfilesByMemberId(
-        unref(memberId),
-        paginationOptions.page,
-        paginationOptions.itemsPerPage,
-        filters.search,
-        paginationOptions.sortBy[0]?.key,
-        paginationOptions.sortBy[0]?.order
-      );
+      const options: ListOptions = {
+        page: paginationOptions.page,
+        itemsPerPage: paginationOptions.itemsPerPage,
+        sortBy: paginationOptions.sortBy.map(item => ({
+          key: item.key,
+          order: item.order === 'desc' ? 'desc' : 'asc', // Ensure order is 'asc' or 'desc'
+        })),
+      };
+      const queryFilters: FilterOptions = {
+        search: filters.search,
+        memberId: unref(memberId), // Pass memberId as a filter
+      };
+      const response = await voiceProfileService.search(options, queryFilters);
       if (response.ok) {
         return response.value;
       }

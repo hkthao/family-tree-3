@@ -37,13 +37,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType, type Ref, computed } from 'vue';
+import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import VoiceProfileForm from '@/components/voice-profile/VoiceProfileForm.vue';
 import { type IVoiceProfileFormInstance } from '@/components/voice-profile/VoiceProfileForm.vue';
 import { useVoiceProfileEdit } from '@/composables/voice-profile/useVoiceProfileEdit';
-import { type VoiceProfile } from '@/types';
-
 
 const props = defineProps({
   memberId: {

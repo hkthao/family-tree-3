@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/vue-query';
 
-import type { IVoiceProfileService } from '@/services/voice-profile/voice-profile.service.interface';
 import type { UpdateVoiceProfileCommand, VoiceProfile } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types/apiError';
@@ -10,7 +9,7 @@ export function useUpdateVoiceProfileMutation() {
 
   return useMutation<VoiceProfile, ApiError, { id: string; memberId: string; data: UpdateVoiceProfileCommand }>({
     mutationFn: async ({ id, memberId, data }) => {
-      const response = await voiceProfileService.updateVoiceProfile(memberId, id, data);
+      const response = await voiceProfileService.update(data);
       if (response.ok) {
         return response.value;
       }

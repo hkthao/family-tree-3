@@ -1,4 +1,4 @@
-import { computed, ref, watch, type Ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import type { IVoiceProfileFormInstance } from '@/components/voice-profile/VoiceProfileForm.vue';

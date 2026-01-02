@@ -1,31 +1,15 @@
 import type { Result } from '@/types';
-import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand, Paginated } from '@/types';
-export interface IVoiceProfileService {
-  getVoiceProfilesByMemberId(
-    memberId: string,
-    page: number,
-    itemsPerPage: number,
-    search?: string,
-    sortBy?: string,
-    sortOrder?: string
-  ): Promise<Result<Paginated<VoiceProfile>>>;
+import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand } from '@/types';
+import type { ICrudService } from '../common/crud.service.interface';
 
-  getVoiceProfileById(memberId: string, id: string): Promise<Result<VoiceProfile>>;
-
+export interface IVoiceProfileService extends ICrudService<VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand> {
   createVoiceProfile(
     memberId: string,
     command: CreateVoiceProfileCommand
   ): Promise<Result<VoiceProfile>>;
 
-  updateVoiceProfile(
-    memberId: string,
-    id: string,
-    command: UpdateVoiceProfileCommand
-  ): Promise<Result<VoiceProfile>>;
-
-  deleteVoiceProfile(memberId: string, id: string): Promise<Result<void>>;
-
   exportVoiceProfiles(memberId: string): Promise<Result<VoiceProfile[]>>;
 
   importVoiceProfiles(memberId: string, data: VoiceProfile[]): Promise<Result<void>>;
+
 }

@@ -18,6 +18,8 @@
       :can-perform-actions="true"
       :on-export="exportVoiceProfiles"
       :on-import-click="() => importDialog = true"
+      :search-query="filters.search"
+      @update:search="setSearch"
     />
 
     <!-- Add Voice Profile Drawer -->
@@ -84,7 +86,7 @@ const { isExporting, isImporting, exportVoiceProfiles, importVoiceProfiles } = u
 
 const {
   state: { paginationOptions, filters },
-  actions: { setPage, setItemsPerPage, setSortBy },
+  actions: { setPage, setItemsPerPage, setSortBy, setSearch },
 } = useVoiceProfileDataManagement(computed(() => props.memberId));
 
 const {
