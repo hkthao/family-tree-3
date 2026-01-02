@@ -1,90 +1,86 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12">
-        <v-card>
-          <v-card-title class="d-flex align-center">
-            {{ t('voiceProfile.list.title') }}
-            <v-spacer></v-spacer>
-            <v-btn
-              v-if="allowAdd"
-              color="primary"
-              data-testid="button-create-voice-profile"
-              @click="emit('create')"
-            >
-              {{ t('voiceProfile.list.add') }}
-            </v-btn>
-            <v-btn
-              v-if="canPerformActions"
-              class="ml-2"
-              color="info"
-              data-testid="button-import-voice-profile"
-              :loading="isImporting"
-              @click="emit('on-import-click')"
-            >
-              {{ t('common.import') }}
-            </v-btn>
-            <v-btn
-              v-if="canPerformActions"
-              class="ml-2"
-              color="info"
-              data-testid="button-export-voice-profile"
-              :loading="isExporting"
-              @click="emit('on-export')"
-            >
-              {{ t('common.export') }}
-            </v-btn>
-          </v-card-title>
+  <div>
+    <ListToolbar
+      :title="t('voiceProfile.list.title')"
+      :create-button-tooltip="t('voiceProfile.list.add')"
+      create-button-test-id="button-create-voice-profile"
+      @create="emit('create')"
+    >
+      <template #append-buttons>
+        <v-btn
+          v-if="canPerformActions"
+          class="ml-2"
+          color="info"
+          data-testid="button-import-voice-profile"
+          :loading="isImporting"
+          @click="emit('on-import-click')"
+        >
+          {{ t('common.import') }}
+        </v-btn>
+        <v-btn
+          v-if="canPerformActions"
+          class="ml-2"
+          color="info"
+          data-testid="button-export-voice-profile"
+          :loading="isExporting"
+          @click="emit('on-export')"
+        >
+          {{ t('common.export') }}
+        </v-btn>
+      </template>
+    </ListToolbar>
 
-          <v-card-text>
-            <v-data-table-server
-              :headers="headers"
-              :items="items"
-              :items-length="totalItems"
-              :loading="loading"
-              item-value="id"
-              @update:options="handleUpdateOptions"
-              class="elevation-1"
-            >
-              <template v-slot:item.actions="{ item }">
-                <v-icon
-                  small
-                  class="mr-2"
-                  @click="emit('view', item.id)"
-                  data-testid="button-view"
-                >
-                  mdi-eye
-                </v-icon>
-                <v-icon
-                  v-if="allowEdit"
-                  small
-                  class="mr-2"
-                  @click="emit('edit', item.id)"
-                  data-testid="button-edit"
-                >
-                  mdi-pencil
-                </v-icon>
-                <v-icon
-                  v-if="allowDelete"
-                  small
-                  @click="emit('delete', item.id)"
-                  data-testid="button-delete"
-                >
-                  mdi-delete
-                </v-icon>
-              </template>
-            </v-data-table-server>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+    <v-card-text>
+      <v-data-table-server
+        v-model:items-per-page="itemsPerPage"
+        v-model:page="page"
+        v-model:sort-by="sortBy"
+        :headers="headers"
+        :items="items"
+        :items-length="totalItems"
+        :loading="loading"
+        item-value="id"
+        class="elevation-1"
+      >
+        <template v-slot:item.actions="{ item }">
+          <v-tooltip :text="t('common.viewDetails')" location="top">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <v-btn icon v-bind="tooltipProps" @click="emit('view', item.id)" variant="text" data-testid="button-view" size="small">
+                <v-icon>mdi-eye</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip v-if="allowEdit" :text="t('common.edit')" location="top">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <v-btn icon v-bind="tooltipProps" @click="emit('edit', item.id)" variant="text" data-testid="button-edit" size="small">
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip v-if="allowDelete" :text="t('common.delete')" location="top">
+            <template v-slot:activator="{ props: tooltipProps }">
+              <v-btn icon v-bind="tooltipProps" @click="emit('delete', item.id)" variant="text" data-testid="button-delete" size="small">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </template>
+        <template #item.status="{ item }">
+          <v-chip :color="getStatusColor(item.status)" small>
+            {{ item.status !== undefined ? t(`voiceProfile.status.${VoiceProfileStatus[item.status].toLowerCase()}`) : '' }}
+          </v-chip>
+        </template>
+      </v-data-table-server>
+    </v-card-text>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoiceProfile } from '@/types';
+import { VoiceProfileStatus } from '@/types/voice-profile'; // Import VoiceProfileStatus
+import ListToolbar from '@/components/common/ListToolbar.vue';
 
 interface VoiceProfileListProps {
   items: VoiceProfile[];
@@ -97,8 +93,6 @@ interface VoiceProfileListProps {
   isExporting?: boolean;
   isImporting?: boolean;
   canPerformActions?: boolean;
-  onExport?: () => void;
-  onImportClick?: () => void;
 }
 
 const props = withDefaults(defineProps<VoiceProfileListProps>(), {
@@ -108,8 +102,6 @@ const props = withDefaults(defineProps<VoiceProfileListProps>(), {
   isExporting: false,
   isImporting: false,
   canPerformActions: true,
-  onExport: () => {},
-  onImportClick: () => {},
 });
 
 const emit = defineEmits([
@@ -124,16 +116,44 @@ const emit = defineEmits([
 
 const { t } = useI18n();
 
-const headers = ref([
+// Define the Header type with explicit align literal types
+interface DataTableHeader {
+  title: string;
+  key: string;
+  sortable?: boolean;
+  align?: 'start' | 'end' | 'center';
+  width?: string | number;
+}
+
+const itemsPerPage = ref(10);
+const page = ref(1);
+const sortBy = ref<any[]>([]);
+
+const headers = computed<DataTableHeader[]>(() => [
   { title: t('voiceProfile.list.headers.name'), key: 'label' },
   { title: t('voiceProfile.list.headers.status'), key: 'status' },
   { title: t('voiceProfile.list.headers.created'), key: 'created' },
   { title: t('voiceProfile.list.headers.actions'), key: 'actions', sortable: false },
 ]);
 
-const handleUpdateOptions = (options: any) => {
-  emit('update:options', options);
+const getStatusColor = (status: VoiceProfileStatus) => {
+  switch (status) {
+    case VoiceProfileStatus.Active:
+      return 'green';
+    case VoiceProfileStatus.Archived:
+      return 'grey';
+    default:
+      return 'grey';
+  }
 };
+
+watch([itemsPerPage, page, sortBy], () => {
+  emit('update:options', {
+    page: page.value,
+    itemsPerPage: itemsPerPage.value,
+    sortBy: sortBy.value,
+  });
+});
 </script>
 
 <style scoped></style>
