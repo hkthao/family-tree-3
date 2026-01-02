@@ -29,6 +29,8 @@ import type { IMemoryItemService } from './memory-item/memory-item.service.inter
 import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
 import type { IImageRestorationJobService } from './image-restoration-job/image-restoration-job.service.interface'; // NEW
 import { ApiImageRestorationJobService } from './image-restoration-job/api.image-restoration-job.service'; // NEW
+import type { IVoiceProfileService } from './voice-profile/voice-profile.service.interface';
+import { ApiVoiceProfileService } from './voice-profile/api.voice-profile.service';
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -48,6 +50,7 @@ export interface AppServices {
   familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
   memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
   imageRestorationJob: IImageRestorationJobService; // NEW
+  voiceProfile: IVoiceProfileService;
 }
 import apiClient from '@/plugins/axios';
 import type { IEventService } from './event/event.service.interface';
@@ -118,5 +121,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiImageRestorationJobService(apiClient)
         : testServices?.imageRestorationJob || new ApiImageRestorationJobService(apiClient),
+    voiceProfile:
+      mode === 'real'
+        ? new ApiVoiceProfileService(apiClient)
+        : testServices?.voiceProfile || new ApiVoiceProfileService(apiClient),
   };
 }

@@ -29,3 +29,4 @@ export * from './apiError.d';
 export * from './ai.d';
 export * from './ocr.d'; // NEW
 export * from './file.d'; // NEW
+export * from './voice-profile.d';
