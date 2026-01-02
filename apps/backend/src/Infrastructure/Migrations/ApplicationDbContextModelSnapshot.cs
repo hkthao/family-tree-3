@@ -700,6 +700,81 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("family_users");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.ImageRestorationJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("longtext")
+                        .HasColumnName("error_message");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("JobId")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("job_id");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("OriginalImageUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("original_image_url");
+
+                    b.Property<string>("RestoredImageUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("restored_image_url");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_image_restoration_jobs");
+
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_image_restoration_jobs_family_id");
+
+                    b.ToTable("image_restoration_jobs");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.MediaLink", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1838,6 +1913,18 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Family");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.ImageRestorationJob", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_image_restoration_jobs_families_family_id");
+
+                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MediaLink", b =>

@@ -53,6 +53,10 @@
         <v-window-item value="memory-items">
           <MemoryItemListView :family-id="familyId" />
         </v-window-item>
+        <!-- NEW: Image Restoration Jobs Tab -->
+        <v-window-item value="image-restoration-jobs">
+          <ImageRestorationJobListView :family-id="familyId" />
+        </v-window-item>
 
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
@@ -103,6 +107,7 @@ import FamilyMediaListView from '@/views/family-media/FamilyMediaListView.vue';
 import FamilyLocationListView from '@/views/family-location/FamilyLocationListView.vue'; // NEW
 import FamilyMapView from '@/views/family-location/FamilyMapView.vue';
 import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // NEW: MemoryItemListView
+import ImageRestorationJobListView from '@/views/image-restoration-job/ImageRestorationJobListView.vue'; // NEW: ImageRestorationJobListView
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 import UpdateFamilyLimitView from '@/views/family/UpdateFamilyLimitView.vue'; // NEW
@@ -169,6 +174,7 @@ const allTabDefinitions = computed(() => [
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
+  { value: 'image-restoration-jobs', text: t('menu.imageRestorationJobs'), condition: true as boolean }, // NEW Image Restoration Jobs Tab
   { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
 
   { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },

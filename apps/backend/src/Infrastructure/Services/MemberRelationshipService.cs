@@ -127,6 +127,14 @@ public class MemberRelationshipService : IMemberRelationshipService
             CreateBidirectionalRelationship(wifeId.Value, memberId, RelationshipType.Wife, RelationshipType.Husband);
         }
 
+        // cac moi quan he lien quan
+        var childs = await _context.Members.Where(e=>e.FatherId == memberId || e.MotherId == memberId).AsNoTracking().ToListAsync();
+        foreach (var child in childs)
+        {
+            var relationshipType = child.FatherId == memberId ? RelationshipType.Father : RelationshipType.Mother;
+            CreateBidirectionalRelationship(memberId, child.Id, relationshipType, RelationshipType.Child);
+        }
+
         _context.Relationships.AddRange(relationshipsToCreate);
         await _context.SaveChangesAsync(cancellationToken);
 

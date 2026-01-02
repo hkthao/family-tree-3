@@ -85,6 +85,22 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  image-restoration-service:
+    build:
+      context: ../services/image_restoration_service
+      dockerfile: Dockerfile
+    container_name: family-tree-image-restoration-service
+    ports:
+      - "8002:8000" # Expose port 8000 for the FastAPI app internally, map to 8002 externally
+    env_file:
+      - ./.env.dev # To load REPLICATE_API_TOKEN
+    restart: always # Always restart if it stops
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   promtail:
     image: grafana/promtail:2.6.1 # Use a specific version of Promtail
     container_name: family-tree-promtail

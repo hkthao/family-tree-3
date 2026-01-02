@@ -11,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { useLocationDrawerStore } from '@/stores/locationDrawer.store';
 import type { FamilyLocation } from '@/types'; // Import FamilyLocation type
 
@@ -23,7 +22,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 
-const { t } = useI18n();
 const locationDrawerStore = useLocationDrawerStore();
 
 const updateAddress = (value: string) => {

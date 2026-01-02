@@ -1,3 +1,4 @@
+using backend.Domain.Enums; // Assuming RestorationStatus enum is defined here or similar
 
 namespace backend.Application.Common.Models;
 
@@ -179,3 +180,5 @@ public class Result
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource, StatusCode = 409 };
 }
+
+

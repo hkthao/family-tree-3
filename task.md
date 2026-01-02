@@ -1,54 +1,240 @@
-Triển khai một OCR service bằng Python, sử dụng FastAPI, để backend khác có thể upload file và nhận về text đã OCR.
+# 📌 TASK: Implement Python Image Restoration Service using Replicate
 
-Mục tiêu:
-- Nhận file đính kèm (ảnh hoặc PDF)
-- Thực hiện OCR để trích xuất nội dung văn bản
-- Trả về text thuần (plain text) cho backend xử lý tiếp
-- Service này KHÔNG xử lý logic nghiệp vụ gia phả
+## 1. Mục tiêu
 
-Yêu cầu kỹ thuật:
-- Ngôn ngữ: Python
-- Framework: FastAPI
-- OCR engine: Tesseract OCR (qua pytesseract)
-- Hỗ trợ tiếng Việt và tiếng Anh
-- Chạy được độc lập như một microservice
+Xây dựng **một service Python** dùng để **phục chế ảnh cũ (ảnh tổ tiên)** cho ứng dụng gia phả, sử dụng **Replicate API** với các model AI chuyên phục hồi ảnh.
 
-Endpoint:
-POST /ocr
-- Nhận multipart/form-data
-- Field: file (PDF hoặc image: jpg, png)
-- Response: JSON chứa text OCR
+Service này **không xử lý UI**, chỉ chịu trách nhiệm:
 
-Luồng xử lý:
-1. Nhận file upload
-2. Xác định loại file
-   - Nếu PDF: convert từng trang sang image
-   - Nếu image: xử lý trực tiếp
-3. Preprocess image (grayscale, threshold cơ bản)
-4. OCR từng trang / ảnh
-5. Gộp kết quả thành một chuỗi text
-6. Làm sạch text (loại bỏ dòng trống dư thừa)
-7. Trả kết quả cho client
+* Nhận URL ảnh gốc
+* Gọi AI phục chế
+* Trả về URL ảnh đã phục chế
+* Lưu metadata phục vụ backend app
 
-Cấu trúc project đề xuất:
-- main.py: FastAPI app + routing
-- services/ocr_service.py: logic OCR chính
-- utils/file_loader.py: load PDF / image
-- utils/image_preprocess.py: tiền xử lý ảnh
-- utils/text_cleaner.py: làm sạch text
+---
 
-Yêu cầu code:
-- Code rõ ràng, dễ đọc
-- Tách logic OCR khỏi layer API
-- Có xử lý lỗi cơ bản (file không hỗ trợ, OCR fail)
-- Không lưu file upload lâu dài (xử lý tạm thời)
+## 2. Công nghệ & ràng buộc
 
-Response format ví dụ:
+* Ngôn ngữ: **Python 3.10+**
+* AI provider: **Replicate**
+* Framework API: **FastAPI**
+* Không self-host GPU
+* API key lấy từ biến môi trường:
+
+  ```
+  REPLICATE_API_TOKEN
+  ```
+
+---
+
+## 3. Chức năng chính cần implement
+
+### 3.1 Image Restoration Pipeline
+
+Pipeline mặc định gồm 2 bước theo thứ tự:
+
+1. **Face Restoration**
+
+   * Model: `tencentarc/gfpgan`
+   * Mục tiêu: khôi phục khuôn mặt bị mờ, nứt, nhiễu
+2. **Upscale Image**
+
+   * Model: `nightmareai/real-esrgan`
+   * Mục tiêu: tăng độ phân giải ảnh sau khi phục chế
+
+📌 Không được overwrite ảnh gốc.
+
+---
+
+### 3.2 Input
+
+Service nhận **URL ảnh công khai** (JPEG / PNG).
+
+Ví dụ input:
+
+```json
 {
-  "success": true,
-  "text": "Nội dung văn bản sau OCR..."
+  "imageUrl": "https://storage.example.com/original/photo.jpg"
 }
+```
 
-Ghi chú:
-- Service này được dùng để hỗ trợ nhập liệu số lượng lớn
-- OCR không cần chính xác tuyệt đối, ưu tiên giữ đúng cấu trúc dòng và năm tháng
+---
+
+### 3.3 Output
+
+Trả về **URL ảnh đã phục chế** + metadata.
+
+Ví dụ:
+
+```json
+{
+  "originalUrl": "...",
+  "restoredUrl": "...",
+  "pipeline": ["GFPGAN", "Real-ESRGAN"],
+  "status": "completed"
+}
+```
+
+---
+
+## 4. API cần xây dựng
+
+### 4.1 Endpoint: Start restoration
+
+```
+POST /restore
+```
+
+#### Request body
+
+```json
+{
+  "imageUrl": "string"
+}
+```
+
+#### Response (ngay lập tức)
+
+```json
+{
+  "status": "processing",
+  "jobId": "uuid"
+}
+```
+
+---
+
+### 4.2 Job processing
+
+* Chạy xử lý AI **bất đồng bộ**
+* Có thể dùng:
+
+  * FastAPI BackgroundTasks
+  * hoặc Celery (simple setup)
+* Sau khi hoàn thành:
+
+  * Lưu kết quả vào in-memory store / simple dict (chưa cần DB)
+
+---
+
+### 4.3 Endpoint: Check job status
+
+```
+GET /restore/{jobId}
+```
+
+#### Response
+
+```json
+{
+  "status": "completed",
+  "originalUrl": "...",
+  "restoredUrl": "...",
+  "pipeline": ["GFPGAN", "Real-ESRGAN"]
+}
+```
+
+Hoặc nếu đang xử lý:
+
+```json
+{
+  "status": "processing"
+}
+```
+
+---
+
+## 5. Cấu trúc project mong muốn
+
+```
+image_restoration_service/
+│
+├── app/
+│   ├── main.py              # FastAPI entrypoint
+│   ├── api.py               # API routes
+│   ├── services/
+│   │   └── replicate_service.py
+│   ├── models/
+│   │   └── job.py            # Job state model
+│   └── config.py            # Env config
+│
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 6. Replicate Service – yêu cầu chi tiết
+
+### 6.1 GFPGAN call
+
+* Input:
+
+  * img: image URL
+  * version: v1.4
+  * scale: 2
+* Output:
+
+  * URL ảnh phục chế
+
+### 6.2 Real-ESRGAN call
+
+* Input:
+
+  * image: URL ảnh đã qua GFPGAN
+  * scale: 2
+* Output:
+
+  * URL ảnh cuối cùng
+
+📌 Lưu ý:
+
+* Replicate có thể trả về **list URL** → phải xử lý đúng type.
+
+---
+
+## 7. Yêu cầu về code quality
+
+* Tách logic rõ ràng:
+
+  * API layer
+  * AI service layer
+* Có comment giải thích
+* Có error handling:
+
+  * Replicate timeout
+  * Invalid image URL
+* Không hardcode API key
+
+---
+
+## 8. Giới hạn & giả định (cho MVP)
+
+* Không authentication
+* Không rate limit
+* Không database thật
+* Chỉ phục chế **1 ảnh / request**
+* Không colorize ảnh (chưa dùng)
+
+---
+
+## 9. Ghi chú đạo đức (IMPORTANT)
+
+Service chỉ **tăng độ rõ nét**, không thay đổi đặc điểm khuôn mặt.
+Không áp dụng filter làm trẻ hóa hoặc biến dạng ảnh.
+
+---
+
+## 10. Output mong muốn từ Gemini CLI
+
+Gemini CLI cần:
+
+1. Generate toàn bộ code Python theo cấu trúc trên
+2. Có thể chạy bằng:
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+3. Có README hướng dẫn chạy local
+
+---
