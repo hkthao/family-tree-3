@@ -1,7 +1,7 @@
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http; // Added back
 using Microsoft.Extensions.Options;
 
 namespace FamilyTree.Infrastructure.Services;

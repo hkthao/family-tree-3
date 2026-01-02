@@ -1,12 +1,12 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Models; // Added for PaginatedList
-using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob; // Added
+using backend.Application.Common.Models;
+using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob;
 using backend.Application.ImageRestorationJobs.Commands.DeleteImageRestorationJob;
 using backend.Application.ImageRestorationJobs.Commands.UpdateImageRestorationJob;
 using backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobById;
 using backend.Application.ImageRestorationJobs.Queries.GetImageRestorationJobs;
-using backend.Application.ImageRestorationJobs.Queries.SearchImageRestorationJobs; // Added
-using backend.Application.ImageRestorationJobs.Common; // Added
+using backend.Application.ImageRestorationJobs.Queries.SearchImageRestorationJobs;
+using backend.Application.ImageRestorationJobs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -51,7 +51,7 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <param name="id">ID của job phục hồi ảnh.</param>
     /// <returns>ImageRestorationJobDto.</returns>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetImageRestorationJobById([FromRoute] string id)
+    public async Task<IActionResult> GetImageRestorationJobById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetImageRestorationJobByIdQuery(id));
         return result.ToActionResult(this, _logger);
@@ -60,11 +60,38 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     /// <summary>
     /// Tạo một job phục hồi ảnh mới.
     /// </summary>
-    /// <param name="command">Dữ liệu để tạo job phục hồi ảnh.</param>
+    /// <param name="imageFile">File ảnh cần phục hồi.</param>
+    /// <param name="familyId">ID của gia đình liên quan.</param>
+    /// <param name="useCodeformer">Sử dụng CodeFormer để phục hồi ảnh (mặc định là false).</param>
     /// <returns>ImageRestorationJobDto của job đã tạo.</returns>
     [HttpPost]
-    public async Task<IActionResult> CreateImageRestorationJob([FromBody] CreateImageRestorationJobCommand command)
+    [Consumes("multipart/form-data")] // Specify content type for file uploads
+    public async Task<IActionResult> CreateImageRestorationJob(
+        IFormFile imageFile,
+        [FromForm] Guid familyId,
+        [FromForm] bool useCodeformer = false)
     {
+        if (imageFile == null || imageFile.Length == 0)
+        {
+            return BadRequest("Image file is required.");
+        }
+
+        // Read the image file into a byte array
+        byte[] imageData;
+        using (var memoryStream = new MemoryStream())
+        {
+            await imageFile.CopyToAsync(memoryStream);
+            imageData = memoryStream.ToArray();
+        }
+
+        var command = new CreateImageRestorationJobCommand(
+            ImageData: imageData,
+            FileName: imageFile.FileName,
+            ContentType: imageFile.ContentType,
+            FamilyId: familyId,
+            UseCodeformer: useCodeformer
+        );
+
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201); // 201 Created
     }
@@ -88,9 +115,10 @@ public class ImageRestorationJobsController(IMediator mediator, ILogger<ImageRes
     }
 
     /// <summary>
-    /// Xóa một job phục hồi ảnh.
+    /// Cập nhật trạng thái của một job phục hồi ảnh.
     /// </summary>
-    /// <param name="id">ID của job phục hồi ảnh cần xóa.</param>
+    /// <param name="id">ID của job phục hồi ảnh cần cập nhật trạng thái.</param>
+    /// <param name="command">Dữ liệu cập nhật trạng thái.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPatch("{id}/status")]
     [AllowAnonymous] // Allow external service to call back without authentication

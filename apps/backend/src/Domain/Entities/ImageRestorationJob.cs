@@ -16,6 +16,17 @@ public class ImageRestorationJob : BaseAuditableEntity
     public string? RestoredImageUrl { get; set; }
 
     /// <summary>
+    /// Initializes the image restoration job with basic details.
+    /// </summary>
+    public void Initialize(string originalImageUrl, string userId, Guid familyId)
+    {
+        OriginalImageUrl = originalImageUrl;
+        UserId = userId;
+        FamilyId = familyId;
+        Status = RestorationStatus.Processing;
+    }
+
+    /// <summary>
     /// Marks the image restoration job as failed with a given error message.
     /// </summary>
     /// <param name="errorMessage">The error message describing the failure.</param>
@@ -33,5 +44,15 @@ public class ImageRestorationJob : BaseAuditableEntity
     {
         JobId = jobId;
         Status = RestorationStatus.Processing;
+    }
+
+    /// <summary>
+    /// Marks the image restoration job as completed and sets the restored image URL.
+    /// </summary>
+    /// <param name="restoredImageUrl">The URL of the restored image.</param>
+    public void MarkAsCompleted(string restoredImageUrl)
+    {
+        RestoredImageUrl = restoredImageUrl;
+        Status = RestorationStatus.Completed;
     }
 }

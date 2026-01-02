@@ -1,8 +1,12 @@
 import logging
-from typing import Dict
+from typing import Any, Dict
 from uuid import UUID, uuid4
+from io import BytesIO
+import base64
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File
+from PIL import Image
+
 from app.models.job import RestorationJob, RestorationStatus
 from app.services.replicate_service import get_replicate_service, ReplicateService
 from app.services.backend_api_service import get_backend_api_service, BackendApiService
@@ -12,20 +16,66 @@ router = APIRouter()
 # Setup logger
 logger = logging.getLogger(__name__)
 
+# Constants
+MAX_PIXELS_FOR_PREPROCESSING = 2096704 # Example max pixels for preprocessing
+
 # In-memory store for jobs
 # In a real application, this would be a database (Redis, PostgreSQL, etc.)
 jobs: Dict[UUID, RestorationJob] = {}
 
+@router.post("/preprocess-image")
+async def preprocess_image_endpoint(file: UploadFile = File(...)):
+    """
+    Receives an image file, resizes it if its pixel count exceeds a maximum,
+    and returns the processed image as a base64 string.
+    """
+    logger.info("Received file %s for preprocessing.", file.filename)
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Only image files are allowed.")
+
+    try:
+        content = await file.read()
+        img_data = BytesIO(content)
+        img = Image.open(img_data).convert("RGB")
+
+        width, height = img.size
+        current_pixels = width * height
+        is_resized = False
+
+        if current_pixels > MAX_PIXELS_FOR_PREPROCESSING:
+            logger.warning("Image dimensions %sx%s (%s pixels) exceed max_pixels %s. Resizing...",
+                           width, height, current_pixels, MAX_PIXELS_FOR_PREPROCESSING)
+            
+            # Calculate new dimensions
+            scale_factor = (MAX_PIXELS_FOR_PREPROCESSING / current_pixels)**0.5
+            new_width = int(width * scale_factor)
+            new_height = int(height * scale_factor)
+
+            img = img.resize((new_width, new_height), Image.LANCZOS)
+            is_resized = True
+            logger.info("Image resized to %sx%s (%s pixels).", new_width, new_height, new_width * new_height)
+
+        buffered = BytesIO()
+        img.save(buffered, format="JPEG") # Use JPEG for base64 encoding
+        base64_image = base64.b64encode(buffered.getvalue()).decode()
+        
+        return {"processedImageBase64": f"data:image/jpeg;base64,{base64_image}", "is_resized": is_resized}
+    except Exception as e:
+        logger.error("Error during image preprocessing: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error processing image: {e}")
+
 
 @router.post("/restore", response_model=RestorationJob)
 async def start_restoration_job(
-    image_data: Dict[str, str], background_tasks: BackgroundTasks
+    image_data: Dict[str, Any], # Changed from str to Any to accommodate boolean
+    background_tasks: BackgroundTasks
 ):
     """
     Starts an asynchronous image restoration job.
     The response is returned immediately with a job_id.
     """
     image_url = image_data.get("imageUrl")
+    use_codeformer = image_data.get("useCodeformer", False) # Get optional useCodeformer flag
     if not image_url:
         raise HTTPException(status_code=400, detail="imageUrl is required")
 
@@ -41,7 +91,8 @@ async def start_restoration_job(
         job_id,
         image_url,
         get_replicate_service(), # Get the instance
-        get_backend_api_service() # Get the instance
+        get_backend_api_service(), # Get the instance
+        use_codeformer # Pass use_codeformer
     )
     logger.info("Restoration job %s completed. Final status: %s", final_job.job_id, final_job.status)
     return final_job
@@ -64,7 +115,8 @@ async def _run_restoration_pipeline(
     job_id: UUID,
     image_url: str,
     replicate_service: ReplicateService, # Injected dependency
-    backend_api_service: BackendApiService # Injected dependency
+    backend_api_service: BackendApiService, # Injected dependency
+    use_codeformer: bool = False
 ):
     """
     Internal function to run the image restoration pipeline.
@@ -74,7 +126,7 @@ async def _run_restoration_pipeline(
     job = jobs[job_id]
     try:
         logger.info("Calling ReplicateService for image restoration for job %s", job_id)
-        result = await replicate_service.restore_image_pipeline(image_url)
+        result = await replicate_service.restore_image_pipeline(image_url, use_codeformer=use_codeformer)
         logger.info("ReplicateService returned result for job %s: %s", job_id, result)
 
         job.restored_url = result.get("restoredUrl")

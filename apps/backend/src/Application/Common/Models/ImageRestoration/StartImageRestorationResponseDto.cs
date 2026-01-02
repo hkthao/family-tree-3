@@ -7,5 +7,6 @@ public class StartImageRestorationResponseDto
     public Guid JobId { get; set; }
     public RestorationStatus Status { get; set; }
     public string OriginalUrl { get; set; } = string.Empty;
+    public string? RestoredUrl { get; set; } // Added
     public string? Error { get; set; }
 }

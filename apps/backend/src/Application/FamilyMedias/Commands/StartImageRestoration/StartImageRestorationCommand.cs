@@ -6,7 +6,7 @@ using backend.Application.Common.Models.ImageRestoration; // Added
 
 namespace backend.Application.FamilyMedias.Commands.StartImageRestoration;
 
-public record StartImageRestorationCommand(string ImageUrl) : IRequest<Result<StartImageRestorationResponseDto>>;
+public record StartImageRestorationCommand(string ImageUrl, bool UseCodeformer = false) : IRequest<Result<StartImageRestorationResponseDto>>;
 
 public class StartImageRestorationCommandHandler(
     IImageRestorationService imageRestorationService,
@@ -39,14 +39,14 @@ public class StartImageRestorationCommandHandler(
         await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Call external service
-        var serviceResult = await _imageRestorationService.StartRestorationAsync(request.ImageUrl, cancellationToken);
+        var serviceResult = await _imageRestorationService.StartRestorationAsync(request.ImageUrl, request.UseCodeformer, cancellationToken);
 
         // 3. Update job record based on service result
-        if (serviceResult.IsSuccess)
+        if (serviceResult.IsSuccess && serviceResult.Value != null)
         {
-            job.JobId = serviceResult.Value!.JobId.ToString(); // Update with actual job ID from external service and convert to string
+            job.JobId = serviceResult.Value.JobId.ToString(); // Update with actual job ID from external service and convert to string
             job.Status = serviceResult.Value.Status;
-            job.RestoredImageUrl = serviceResult.Value.OriginalUrl; // 'OriginalUrl' from serviceResult is likely the restored URL after processing.
+            job.RestoredImageUrl = serviceResult.Value.RestoredUrl; // Corrected to RestoredUrl
         }
         else
         {
@@ -56,7 +56,7 @@ public class StartImageRestorationCommandHandler(
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Return the service result, which might contain the external job ID and status
+        // Return the service result
         return serviceResult;
     }
 }

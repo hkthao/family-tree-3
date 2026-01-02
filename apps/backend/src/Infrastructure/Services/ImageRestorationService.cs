@@ -1,9 +1,9 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization; // Added
+using System.Text.Json.Serialization;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.ImageRestoration; // Added
+using backend.Application.Common.Models.ImageRestoration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +14,7 @@ public class ImageRestorationService : IImageRestorationService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ImageRestorationService> _logger;
     private readonly ImageRestorationServiceSettings _settings;
-    private readonly JsonSerializerOptions _jsonSerializerOptions; // Added
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public ImageRestorationService(HttpClient httpClient, ILogger<ImageRestorationService> logger, IOptions<ImageRestorationServiceSettings> settings)
     {
@@ -35,12 +35,12 @@ public class ImageRestorationService : IImageRestorationService
         _httpClient.BaseAddress = new Uri(_settings.BaseUrl!);
     }
 
-    public async Task<Result<StartImageRestorationResponseDto>> StartRestorationAsync(string imageUrl, CancellationToken cancellationToken = default)
+    public async Task<Result<StartImageRestorationResponseDto>> StartRestorationAsync(string imageUrl, bool useCodeformer, CancellationToken cancellationToken = default)
     {
         try
         {
-            var requestDto = new StartImageRestorationRequestDto { ImageUrl = imageUrl };
-            _logger.LogInformation("Sending StartImageRestorationRequest for imageUrl: {ImageUrl}", imageUrl);
+            var requestDto = new StartImageRestorationRequestDto { ImageUrl = imageUrl, UseCodeformer = useCodeformer };
+            _logger.LogInformation("Sending StartImageRestorationRequest for imageUrl: {ImageUrl}, useCodeformer: {UseCodeformer}", imageUrl, useCodeformer);
             var response = await _httpClient.PostAsJsonAsync("/restore", requestDto, cancellationToken);
 
             response.EnsureSuccessStatusCode();
@@ -105,6 +105,48 @@ public class ImageRestorationService : IImageRestorationService
         {
             _logger.LogError(ex, "An unexpected error occurred when getting job status for JobId {JobId}: {Message}", jobId, ex.Message);
             return Result<ImageRestorationJobStatusDto>.Failure($"Unexpected error: {ex.Message}", "ImageRestorationService");
+        }
+    }
+
+    public async Task<Result<PreprocessImageResponseDto>> PreprocessImageAsync(Stream imageStream, string fileName, string contentType, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Sending image for preprocessing: {FileName}", fileName);
+
+            using var content = new MultipartFormDataContent();
+            using var streamContent = new StreamContent(imageStream);
+            streamContent.Headers.Add("Content-Type", contentType);
+            content.Add(streamContent, "file", fileName);
+
+            var response = await _httpClient.PostAsync("/preprocess-image", content, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadFromJsonAsync<PreprocessImageResponseDto>(_jsonSerializerOptions, cancellationToken);
+
+            if (responseContent == null || string.IsNullOrEmpty(responseContent.ProcessedImageBase64))
+            {
+                _logger.LogError("Received invalid response from image preprocessing service.");
+                return Result<PreprocessImageResponseDto>.Failure("Invalid response from image preprocessing service.", "ImageRestorationService");
+            }
+
+            _logger.LogInformation("Image preprocessing successful. Received base64 image data. Image resized: {IsResized}", responseContent.IsResized);
+            return Result<PreprocessImageResponseDto>.Success(responseContent);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request failed during image preprocessing for {FileName}: {Message}", fileName, ex.Message);
+            return Result<PreprocessImageResponseDto>.Failure($"HTTP request failed: {ex.Message}", "ImageRestorationService");
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization failed during image preprocessing for {FileName}: {Message}", fileName, ex.Message);
+            return Result<PreprocessImageResponseDto>.Failure($"Invalid response format: {ex.Message}", "ImageRestorationService");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred during image preprocessing for {FileName}: {Message}", fileName, ex.Message);
+            return Result<PreprocessImageResponseDto>.Failure($"Unexpected error: {ex.Message}", "ImageRestorationService");
         }
     }
 }
