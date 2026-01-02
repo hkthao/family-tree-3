@@ -3,7 +3,7 @@
     <ImageRestorationJobList :items="imageRestorationJobs" :total-items="currentTotalItems"
       :loading="isLoadingImageRestorationJobs" :family-id="props.familyId" @update:options="handleListOptionsUpdate"
       @create="openAddDrawer()" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
-      :allow-add="true" :allow-edit="true" :allow-delete="true" :can-perform-actions="true" />
+      :allow-add="true" :allow-edit="false" :allow-delete="true" :can-perform-actions="true" />
 
     <!-- Add Image Restoration Job Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleImageRestorationJobClosed">

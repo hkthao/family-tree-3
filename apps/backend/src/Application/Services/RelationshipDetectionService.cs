@@ -45,8 +45,8 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
         _relationshipGraph.BuildGraph(members, relationships);
 
-        var pathToB = _relationshipGraph.FindShortestPath(memberAId, memberBId);
-        var pathToA = _relationshipGraph.FindShortestPath(memberBId, memberAId);
+        var pathToB = _relationshipGraph.FindShortestPath(memberAId, memberBId) ?? new RelationshipPath();
+        var pathToA = _relationshipGraph.FindShortestPath(memberBId, memberAId) ?? new RelationshipPath();
 
         string inferredDescription = "unknown";
 
@@ -63,33 +63,7 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             };
         }
 
-        // --- Step 1: Try to infer relationships using local rules first ---
-        string localFromAToB = "unknown";
-        string localFromBToA = "unknown";
 
-        if (pathToB.NodeIds.Any())
-        {
-            localFromAToB = _ruleEngine.InferRelationship(pathToB, allMembers);
-        }
-        if (pathToA.NodeIds.Any())
-        {
-            localFromBToA = _ruleEngine.InferRelationship(pathToA, allMembers);
-        }
-
-        // If both relationships are found by local rules and are not "unknown", return immediately
-        if (localFromAToB != "unknown" && localFromBToA != "unknown")
-        {
-            // Construct a descriptive string from local results
-            inferredDescription = $"{memberA.FullName} là {localFromAToB} của {memberB.FullName} và {memberB.FullName} là {localFromBToA} của {memberA.FullName}.";
-
-            return new RelationshipDetectionResult
-            {
-                Description = inferredDescription,
-                Path = pathToB.NodeIds,
-                Edges = pathToB.Edges.Select(e => e.Type.ToString()).ToList()
-            };
-        }
-        // --- End of local inference ---
 
 
         var combinedPromptBuilder = new StringBuilder();
@@ -182,12 +156,12 @@ public class RelationshipDetectionService : IRelationshipDetectionService
         }
 
 
-        var edgesToString = pathToB.Edges.Select(e => e.Type.ToString()).ToList();
+        var edgesToString = pathToB?.Edges?.Select(e => e.Type.ToString()).ToList() ?? new List<string>();
 
         return new RelationshipDetectionResult
         {
             Description = inferredDescription,
-            Path = pathToB.NodeIds,
+            Path = pathToB?.NodeIds ?? new List<Guid>(),
             Edges = edgesToString
         };
     }
