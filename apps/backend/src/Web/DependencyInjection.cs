@@ -1,6 +1,6 @@
+using backend.Application.Common.Configurations; // Added for VoiceAISettings
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Common.Configurations; // Added for VoiceAISettings
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Services;
 using backend.Web.Filters; // Add this using directive for the filter
@@ -64,7 +64,7 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri(configuration.GetSection(nameof(OcrSettings))["BaseUrl"] ?? throw new InvalidOperationException("OCR BaseUrl is not configured."));
         });
-        
+
         // Register VoiceAISettings
         services.Configure<VoiceAISettings>(configuration.GetSection(nameof(VoiceAISettings)));
         services.AddHttpClient<IVoiceAIService, VoiceAIService>(client =>

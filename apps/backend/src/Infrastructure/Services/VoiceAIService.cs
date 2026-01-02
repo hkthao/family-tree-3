@@ -1,9 +1,9 @@
 using System.Net.Http.Json;
-using Microsoft.Extensions.Options;
 using backend.Application.Common.Configurations;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Voice.DTOs;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Services;
 
@@ -30,7 +30,7 @@ public class VoiceAIService : IVoiceAIService
         try
         {
             var response = await _httpClient.PostAsJsonAsync("/voice/preprocess", request);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();

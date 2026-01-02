@@ -128,7 +128,7 @@ public class MemberRelationshipService : IMemberRelationshipService
         }
 
         // cac moi quan he lien quan
-        var childs = await _context.Members.Where(e=>e.FatherId == memberId || e.MotherId == memberId).AsNoTracking().ToListAsync();
+        var childs = await _context.Members.Where(e => e.FatherId == memberId || e.MotherId == memberId).AsNoTracking().ToListAsync();
         foreach (var child in childs)
         {
             var relationshipType = child.FatherId == memberId ? RelationshipType.Father : RelationshipType.Mother;

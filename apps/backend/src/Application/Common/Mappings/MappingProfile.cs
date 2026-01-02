@@ -198,6 +198,12 @@ public class MappingProfile : Profile
         CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
 
+        // Voice Profile mappings
+        CreateMap<Domain.Entities.VoiceProfile, Application.VoiceProfiles.Queries.VoiceProfileDto>();
+
+        // Voice Generation mappings
+        CreateMap<Domain.Entities.VoiceGeneration, Application.VoiceGenerations.Queries.VoiceGenerationDto>();
+
         // Event mappings for importing
         CreateMap<EventDto, Event>()
             .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID will be generated

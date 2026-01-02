@@ -1,6 +1,6 @@
+using System;
 using backend.Domain.Common;
 using backend.Domain.Enums;
-using System;
 
 namespace backend.Domain.Entities;
 

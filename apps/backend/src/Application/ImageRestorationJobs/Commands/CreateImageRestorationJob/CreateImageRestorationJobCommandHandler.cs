@@ -6,7 +6,6 @@ using backend.Application.ImageRestorationJobs.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using System.Net.Http; // Added
 
 namespace backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob;
 
@@ -207,7 +206,7 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
             _logger.LogWarning("Image restoration service did not return a RestoredUrl for job {JobId}. Marking job as completed with original image URL.", entity.Id);
             entity.MarkAsCompleted(entity.OriginalImageUrl);
         }
-        
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var dto = _mapper.Map<ImageRestorationJobDto>(entity);

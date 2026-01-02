@@ -1,20 +1,20 @@
-using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob;
-using backend.Application.ImageRestorationJobs.Common;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
+using System.Net; // Added for HttpStatusCode
+using System.Net.Http; // Added for IHttpClientFactory
 using backend.Application.Common.Interfaces;
-using backend.Application.UnitTests.Common;
-using Moq;
-using Xunit;
-using Microsoft.Extensions.Logging;
-using backend.Application.Common.Models.ImageRestoration;
 using backend.Application.Common.Models;
-using MediatR; // Added
+using backend.Application.Common.Models.ImageRestoration;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // Added
 using backend.Application.FamilyMedias.DTOs; // Added
-using System.Net.Http; // Added for IHttpClientFactory
+using backend.Application.ImageRestorationJobs.Commands.CreateImageRestorationJob;
+using backend.Application.ImageRestorationJobs.Common;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using MediatR; // Added
+using Microsoft.Extensions.Logging;
+using Moq;
 using Moq.Protected; // Added for mocking protected methods of HttpClient
-using System.Net; // Added for HttpStatusCode
+using Xunit;
 
 namespace backend.Application.UnitTests.ImageRestorationJobs;
 
@@ -57,7 +57,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
                 StatusCode = HttpStatusCode.OK,
                 Content = new ByteArrayContent(new byte[] { 0x01, 0x02, 0x03 }) // Dummy image data
             });
-        
+
         var mockHttpClient = new HttpClient(mockHttpMessageHandler.Object) { BaseAddress = new Uri("http://dummy-restoration-service.com") };
         _httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(mockHttpClient);
     }

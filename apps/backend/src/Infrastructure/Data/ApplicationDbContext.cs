@@ -87,6 +87,16 @@ public class ApplicationDbContext(
     public DbSet<Prompt> Prompts { get; set; } = null!;
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceProfile.
+    /// </summary>
+    public DbSet<VoiceProfile> VoiceProfiles => Set<VoiceProfile>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceGeneration.
+    /// </summary>
+    public DbSet<VoiceGeneration> VoiceGenerations => Set<VoiceGeneration>();
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
     /// </summary>
     public DbSet<FamilyLinkRequest> FamilyLinkRequests => Set<FamilyLinkRequest>();

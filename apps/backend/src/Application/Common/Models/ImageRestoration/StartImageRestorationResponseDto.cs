@@ -1,5 +1,5 @@
-using backend.Domain.Enums; // Assuming RestorationStatus enum is defined here or similar
 using System.Text.Json.Serialization; // Added for JsonPropertyName
+using backend.Domain.Enums; // Assuming RestorationStatus enum is defined here or similar
 
 namespace backend.Application.Common.Models.ImageRestoration;
 

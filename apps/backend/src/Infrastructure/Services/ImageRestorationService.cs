@@ -49,7 +49,7 @@ public class ImageRestorationService : IImageRestorationService
             _logger.LogInformation("Received JSON response from image restoration service: {JsonResponse}", jsonResponse);
 
             var result = JsonSerializer.Deserialize<StartImageRestorationResponseDto>(jsonResponse, _jsonSerializerOptions);
-            
+
             if (result == null)
             {
                 _logger.LogError("Received null response from image restoration service when starting job.");
@@ -85,7 +85,7 @@ public class ImageRestorationService : IImageRestorationService
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<ImageRestorationJobStatusDto>(_jsonSerializerOptions, cancellationToken);
-            
+
             if (result == null)
             {
                 _logger.LogError("Received null response from image restoration service when getting job status for JobId: {JobId}", jobId);

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace backend.Application.Voice.DTOs;
 
 public class VoicePreprocessRequest
