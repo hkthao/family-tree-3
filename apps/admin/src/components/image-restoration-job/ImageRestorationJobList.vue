@@ -1,49 +1,37 @@
 <template>
-  <v-data-table-server
-    v-model:items-per-page="itemsPerPage"
-    v-model:page="page"
-    v-model:sort-by="sortBy"
-    :items="items"
-    :items-length="totalItems"
-    :loading="loading"
-    :headers="headers"
-    class="elevation-0"
-    data-testid="image-restoration-job-list"
-  >
+  <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy" :items="items"
+    :items-length="totalItems" :loading="loading" :headers="headers" class="elevation-0"
+    data-testid="image-restoration-job-list">
     <template #top>
-      <ListToolbar
-        :title="t('imageRestorationJob.list.title')"
+      <ListToolbar :title="t('imageRestorationJob.list.title')"
         :create-button-tooltip="t('imageRestorationJob.list.add')"
-        create-button-test-id="button-create-image-restoration-job"
-        @create="emit('create')"
-      >
+        create-button-test-id="button-create-image-restoration-job" @create="emit('create')">
       </ListToolbar>
     </template>
     <template #item.status="{ item }">
       <v-chip :color="getStatusColor(item.status)" small>
-        {{ item.status }}
+        {{ item.status ? t(`imageRestorationJob.status.${String(item.status).toLowerCase()}`) : '' }}
       </v-chip>
     </template>
     <template #item.originalImageUrl="{ item }">
       <v-img :src="item.originalImageUrl" height="50" width="50" cover class="my-1"></v-img>
     </template>
     <template #item.restoredImageUrl="{ item }">
-      <v-img v-if="item.restoredImageUrl" :src="item.restoredImageUrl" height="50" width="50" cover class="my-1"></v-img>
+      <v-img v-if="item.restoredImageUrl" :src="item.restoredImageUrl" height="50" width="50" cover
+        class="my-1"></v-img>
       <span v-else>{{ t('common.na') }}</span>
     </template>
     <template #item.created="{ item }">
       {{ formatDate(item.created) }}
     </template>
     <template #item.actions="{ item }">
-      <v-icon small class="me-2" @click="emit('view', item.jobId)" data-testid="button-view">
-        mdi-eye
-      </v-icon>
-      <v-icon small class="me-2" @click="emit('edit', item.jobId)" data-testid="button-edit">
-        mdi-pencil
-      </v-icon>
-      <v-icon small @click="emit('delete', item.id)" data-testid="button-delete">
-        mdi-delete
-      </v-icon>
+      <v-tooltip :text="t('common.delete')" location="top">
+        <template v-slot:activator="{ props }">
+          <v-icon v-bind="props" small @click="emit('delete', item.id)" data-testid="button-delete">
+            mdi-delete
+          </v-icon>
+        </template>
+      </v-tooltip>
     </template>
   </v-data-table-server>
 </template>
@@ -75,12 +63,24 @@ const itemsPerPage = ref(10);
 const page = ref(1);
 const sortBy = ref<any[]>([]);
 
-const headers = computed(() => [
+// Define the Header type with explicit align literal types
+interface DataTableHeader {
+  title: string;
+  key: string;
+  sortable?: boolean;
+  align?: 'start' | 'end' | 'center';
+  width?: string | number;
+}
+
+const headers = computed<DataTableHeader[]>(() => [
   { title: t('imageRestorationJob.list.headers.originalImageUrl'), key: 'originalImageUrl', sortable: false },
   { title: t('imageRestorationJob.list.headers.status'), key: 'status', sortable: true },
   { title: t('imageRestorationJob.list.headers.restoredImageUrl'), key: 'restoredImageUrl', sortable: false },
   { title: t('imageRestorationJob.list.headers.created'), key: 'created', sortable: true },
-  { title: t('common.actions'), key: 'actions', sortable: false },
+  {
+    title: t('common.actions'), key: 'actions', sortable: false,
+    align: 'center',
+  },
 ]);
 
 const getStatusColor = (status: string) => {
