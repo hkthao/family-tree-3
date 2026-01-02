@@ -31,7 +31,7 @@
     <v-row v-if="readOnly && jobData.status">
       <v-col cols="12">
         <v-text-field
-          v-model="jobData.status"
+          :value="jobData.status !== undefined ? t(`imageRestorationJob.status.${RestorationStatus[jobData.status].toLowerCase()}`) : ''"
           :label="t('imageRestorationJob.form.status')"
           readonly
           data-testid="status-field"
@@ -55,13 +55,14 @@
 import { ref, watch, reactive, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRules } from '@/composables/validation/useRules'; // Assuming a useRules composable for common validation rules
+import { RestorationStatus } from '@/types';
 
 // Define the shape of the ImageRestorationJob data
 export interface ImageRestorationJobFormData {
   originalImageUrl: string;
   familyId: string;
   restoredImageUrl?: string;
-  status?: string; // Assuming status is string for display
+  status?: RestorationStatus;
   errorMessage?: string;
 }
 
