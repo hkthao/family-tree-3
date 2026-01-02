@@ -61,6 +61,9 @@
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
+        <v-window-item v-if="canManageFamily" value="voice-profile">
+          <VoiceProfileListView :member-id="familyId" />
+        </v-window-item>
         <!-- NEW: AI Chat Tab -->
 
         <!-- NEW: Family Location Tab -->
@@ -111,6 +114,7 @@ import ImageRestorationJobListView from '@/views/image-restoration-job/ImageRest
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 import UpdateFamilyLimitView from '@/views/family/UpdateFamilyLimitView.vue'; // NEW
+import VoiceProfileListView from '@/views/voice-profile/VoiceProfileListView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
@@ -174,13 +178,14 @@ const allTabDefinitions = computed(() => [
   { value: 'calendar', text: t('event.view.calendar'), condition: true as boolean },
   { value: 'timeline', text: t('member.form.tab.timeline'), condition: true as boolean },
   { value: 'family-media', text: t('familyMedia.list.pageTitle'), condition: true as boolean },
-  { value: 'image-restoration-jobs', text: t('menu.imageRestorationJobs'), condition: true as boolean }, // NEW Image Restoration Jobs Tab
+  { value: 'image-restoration-jobs', text: t('menu.imageRestorationJobs'), condition: canManageFamily.value as boolean }, // NEW Image Restoration Jobs Tab
   { value: 'memory-items', text: t('memoryItem.title'), condition: true as boolean }, // NEW Memory Item Tab
 
   { value: 'locations', text: t('familyLocation.list.title'), condition: true as boolean },
   { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
 
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
+  { value: 'voice-profile', text: t('voiceProfile.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));
 const visibleTabs = ref<TabItem[]>([]);
