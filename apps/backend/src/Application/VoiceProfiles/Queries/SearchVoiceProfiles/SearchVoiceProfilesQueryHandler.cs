@@ -1,11 +1,6 @@
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.VoiceProfiles.Queries;
-using backend.Domain.Entities;
-using AutoMapper;
-using MediatR;
-using Microsoft.EntityFrameworkCore; // Added for Include
 
 namespace backend.Application.VoiceProfiles.Queries.SearchVoiceProfiles;
 
@@ -46,9 +41,10 @@ public class SearchVoiceProfilesQueryHandler : IRequestHandler<SearchVoiceProfil
         // Default sorting
         query = query.OrderByDescending(vp => vp.Created);
 
-        var paginatedVoiceProfileEntities = await query
+        var paginatedList = await query
+            .ProjectTo<VoiceProfileDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
-        return _mapper.Map<PaginatedList<VoiceProfileDto>>(paginatedVoiceProfileEntities);
+        return paginatedList;
     }
 }
