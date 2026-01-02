@@ -3,6 +3,9 @@ import { useCreateImageRestorationJobMutation } from './useCreateImageRestoratio
 import { type IImageRestorationJobFormInstance } from '@/components/image-restoration-job/ImageRestorationJobForm.vue';
 import { type CreateImageRestorationJobDto } from '@/types';
 
+// Helper function for artificial delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 interface UseImageRestorationJobAddOptions {
   familyId: string;
   onSaveSuccess?: () => void;
@@ -12,7 +15,7 @@ interface UseImageRestorationJobAddOptions {
 
 export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOptions) => {
   const { familyId, onSaveSuccess, onCancel, formRef } = options;
-  const isAddingImageRestorationJob = ref(false); // Renamed from isAddingMemoryItem
+  const isAddingImageRestorationJob = ref(false);
 
   const { mutateAsync: createImageRestorationJob } = useCreateImageRestorationJobMutation();
 
@@ -33,6 +36,7 @@ export const useImageRestorationJobAdd = (options: UseImageRestorationJobAddOpti
       onSaveSuccess?.();
       formRef.value.reset();
     } finally {
+      await delay(300); // Artificial delay to make loading state more visible
       isAddingImageRestorationJob.value = false;
     }
   };
