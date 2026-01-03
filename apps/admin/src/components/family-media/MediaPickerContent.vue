@@ -2,10 +2,7 @@
   <div>
     <!-- Tabs for media type filtering -->
     <v-tabs v-model="mediaTypeFilter" show-arrows>
-      <v-tab :value="MediaType.Image">{{ t('common.mediaType.Image') }}</v-tab>
-      <v-tab :value="MediaType.Audio">{{ t('common.mediaType.Audio') }}</v-tab>
-      <v-tab :value="MediaType.Document">{{ t('common.mediaType.Document') }}</v-tab>
-      <v-tab :value="MediaType.Video">{{ t('common.mediaType.Video') }}</v-tab>
+      <v-tab v-for="type in visibleMediaTypes" :key="type" :value="type">{{ t(`common.mediaType.${MediaType[type]}`) }}</v-tab>
     </v-tabs>
 
     <v-window v-model="mediaTypeFilter">
@@ -14,7 +11,12 @@
           <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
         </div>
         <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <v-alert
+          v-else-if="familyMedia.length === 0"
+          type="info"
+          variant="tonal"
+          class="ma-2"
+        >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
           <v-card
             v-for="mediaItem in familyMedia"
@@ -61,7 +63,12 @@
           <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
         </div>
         <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <v-alert
+          v-else-if="familyMedia.length === 0"
+          type="info"
+          variant="tonal"
+          class="ma-2"
+        >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
           <v-card
             v-for="mediaItem in familyMedia"
@@ -102,7 +109,12 @@
           <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
         </div>
         <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <v-alert
+          v-else-if="familyMedia.length === 0"
+          type="info"
+          variant="tonal"
+          class="ma-2"
+        >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
           <v-card
             v-for="mediaItem in familyMedia"
@@ -128,7 +140,7 @@
               icon
               size="small"
               color="error"
-              variant="flat"
+              variant="text"
               :disabled="isDeleting"
               @click.stop="handleDeleteMedia(mediaItem)"
             >
@@ -143,7 +155,12 @@
           <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
         </div>
         <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <v-alert
+          v-else-if="familyMedia.length === 0"
+          type="info"
+          variant="tonal"
+          class="ma-2"
+        >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
           <v-card
             v-for="mediaItem in familyMedia"
@@ -209,6 +226,7 @@ const props = defineProps<{
   selectedMedia: string[]; // For v-model, array of media IDs
   selectionMode?: 'single' | 'multiple';
   allowDelete?: boolean; // New prop
+  initialMediaType?: MediaType | null; // New prop
 }>();
 
 const emit = defineEmits<{
@@ -220,7 +238,7 @@ const queryClient = useQueryClient(); // Initialize queryClient
 const { showConfirmDialog } = useConfirmDialog(); // Initialize confirm dialog
 const { showSnackbar } = useGlobalSnackbar(); // Initialize snackbar
 
-const mediaTypeFilter = ref<MediaType>(MediaType.Image); // Default to Image
+const mediaTypeFilter = ref<MediaType>(props.initialMediaType || MediaType.Image); // Default to Image
 const { currentPage, itemsPerPage, totalItems } = usePagination(1, 10);
 
 const listOptions = computed(() => ({
@@ -250,6 +268,13 @@ watch(mediaTypeFilter, () => {
 // Computed property to get the full FamilyMedia objects for the selected IDs
 const selectedMediaObjects = computed<FamilyMedia[]>(() => {
   return familyMedia.value.filter(media => props.selectedMedia.includes(media.id));
+});
+
+const visibleMediaTypes = computed(() => {
+  if (props.initialMediaType !== null && props.initialMediaType !== undefined) {
+    return [props.initialMediaType];
+  }
+  return [MediaType.Image, MediaType.Video, MediaType.Audio, MediaType.Document];
 });
 
 const toggleMediaSelection = (mediaId: string) => {

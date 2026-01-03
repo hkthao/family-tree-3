@@ -19,7 +19,8 @@
 
       <MediaPickerContent v-if="mediaPickerStore.familyId" :family-id="mediaPickerStore.familyId"
         :selection-mode="mediaPickerStore.selectionMode" v-model:selectedMedia="selectedMediaIds"
-        @update:selectedMedia="handleSelectionUpdate" :allow-delete="mediaPickerStore.allowDelete" />
+        @update:selectedMedia="handleSelectionUpdate" :allow-delete="mediaPickerStore.allowDelete"
+        :initial-media-type="mediaPickerStore.initialMediaType" />
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
       <v-btn variant="text" @click="mediaPickerStore.closeDrawer()">{{ t('common.cancel') }}</v-btn>
