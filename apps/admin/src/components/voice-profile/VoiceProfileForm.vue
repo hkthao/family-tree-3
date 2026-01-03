@@ -16,6 +16,7 @@
           data-testid="voice-profile-audio-urls"
           :disabled="readOnly"
           :allow-upload="true"
+          :allow-delete="true"
         ></MediaInput>
       </v-col>
       <v-col cols="6">

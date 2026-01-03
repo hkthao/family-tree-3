@@ -10,19 +10,20 @@
 
     <v-window v-model="mediaTypeFilter">
       <v-window-item :value="MediaType.Image">
-        <div class="media-grid">
-          <div v-if="queryLoading">
-            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
-          </div>
-          <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-          <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-if="queryLoading" class="full-width-skeleton-container">
+          <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+        </div>
+        <div v-else-if="queryError">Error: {{ queryError.message }}</div>
+        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-else class="media-grid">
           <v-card
-            v-else
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
             class="media-item"
+            variant="outlined"
+            color="primary"
           >
             <v-img
               v-if="mediaItem.mediaType === MediaType.Image"
@@ -45,7 +46,8 @@
               icon
               size="small"
               color="error"
-              variant="flat"
+              variant="text"
+              :disabled="isDeleting"
               @click.stop="handleDeleteMedia(mediaItem)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -55,16 +57,17 @@
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Video">
-        <div class="media-grid">
-          <div v-if="queryLoading">
-            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
-          </div>
-          <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-          <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-if="queryLoading" class="full-width-skeleton-container">
+          <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+        </div>
+        <div v-else-if="queryError">Error: {{ queryError.message }}</div>
+        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-else class="media-grid">
           <v-card
-            v-else
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
+            variant="outlined"
+            color="primary"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
             class="media-item"
@@ -84,7 +87,8 @@
               icon
               size="small"
               color="error"
-              variant="flat"
+              variant="text"
+              :disabled="isDeleting"
               @click.stop="handleDeleteMedia(mediaItem)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -94,16 +98,17 @@
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Audio">
-        <div class="media-grid">
-          <div v-if="queryLoading">
-            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
-          </div>
-          <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-          <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-if="queryLoading" class="full-width-skeleton-container">
+          <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+        </div>
+        <div v-else-if="queryError">Error: {{ queryError.message }}</div>
+        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-else class="media-grid">
           <v-card
-            v-else
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
+            variant="outlined"
+            color="primary"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
             class="media-item"
@@ -124,6 +129,7 @@
               size="small"
               color="error"
               variant="flat"
+              :disabled="isDeleting"
               @click.stop="handleDeleteMedia(mediaItem)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -133,16 +139,17 @@
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Document">
-        <div class="media-grid">
-          <div v-if="queryLoading">
-            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
-          </div>
-          <div v-else-if="queryError">Error: {{ queryError.message }}</div>
-          <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-if="queryLoading" class="full-width-skeleton-container">
+          <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+        </div>
+        <div v-else-if="queryError">Error: {{ queryError.message }}</div>
+        <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
+        <div v-else class="media-grid">
           <v-card
-            v-else
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
+            variant="outlined"
+            color="primary"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
             class="media-item"
@@ -162,7 +169,8 @@
               icon
               size="small"
               color="error"
-              variant="flat"
+              variant="text"
+              :disabled="isDeleting"
               @click.stop="handleDeleteMedia(mediaItem)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -272,7 +280,7 @@ const toggleMediaSelection = (mediaId: string) => {
 };
 
 // --- Delete functionality ---
-const { mutate: deleteMedia } = useFamilyMediaDeleteMutation();
+const { mutate: deleteMedia, isPending: isDeleting } = useFamilyMediaDeleteMutation();
 
 const handleDeleteMedia = async (mediaItem: FamilyMedia) => {
   const confirmed = await showConfirmDialog({
@@ -313,7 +321,6 @@ const handleDeleteMedia = async (mediaItem: FamilyMedia) => {
 .media-grid .media-item {
   cursor: pointer;
   position: relative; /* Ensure check icon positions correctly */
-  border: 2px solid transparent;
 }
 
 .media-grid .media-item.selected-media {
@@ -334,6 +341,10 @@ const handleDeleteMedia = async (mediaItem: FamilyMedia) => {
   position: absolute;
   top: 4px;
   left: 4px;
-  z-index: 1; /* Ensure it's above other content */
+  z-index: 2; /* Ensure it's above other content */
+}
+
+.full-width-skeleton-container {
+  width: 100%;
 }
 </style>

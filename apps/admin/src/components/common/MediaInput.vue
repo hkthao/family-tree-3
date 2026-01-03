@@ -15,16 +15,22 @@
         v-for="media in selectedMediaLocal"
         :key="media.id"
         class="ma-1"
-        closable
+        :closable="!isDeleting"
         @click:close="removeMedia(media.id)"
       >
+        <span v-if="isDeleting" class="mr-2">
+          <v-progress-circular indeterminate size="16" width="2"></v-progress-circular>
+        </span>
         {{ media.fileName }}
       </v-chip>
     </div>
 
     <div v-else-if="selectedMediaLocal.length === 1 && selectionMode === 'single'" class="mt-2">
       <v-img :src="selectedMediaLocal[0].filePath" height="100px" contain></v-img>
-      <v-chip class="ma-1" closable @click:close="clearSelection">
+      <v-chip class="ma-1" :closable="!isDeleting" @click:close="clearSelection">
+        <span v-if="isDeleting" class="mr-2">
+          <v-progress-circular indeterminate size="16" width="2"></v-progress-circular>
+        </span>
         {{ selectedMediaLocal[0].fileName }}
       </v-chip>
     </div>
@@ -33,9 +39,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n'; // Import useI18n
 import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
+import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
+import { useFamilyMediaDeleteMutation } from '@/composables/family-media/useFamilyMediaDeleteMutation';
 
 type SelectionMode = 'single' | 'multiple';
 
@@ -45,17 +54,23 @@ const props = withDefaults(defineProps<{
   selectionMode?: SelectionMode;
   modelValue: FamilyMedia[] | FamilyMedia | null; // v-model
   initialMediaType?: MediaType;
-  allowUpload?: boolean; // New prop
+  allowUpload?: boolean;
+  allowDelete?: boolean; // New prop
 }>(), {
   label: 'Select Media',
   selectionMode: 'single',
   modelValue: null,
-  allowUpload: false, // Default to false
+  allowUpload: false,
+  allowDelete: false, // Default to false
 });
 
 const emit = defineEmits(['update:modelValue']);
 
 const mediaPickerStore = useMediaPickerDrawerStore();
+const { t } = useI18n(); // Initialize t
+const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar();
+const { mutate: deleteMedia, isPending: isDeleting } = useFamilyMediaDeleteMutation();
 const selectedMediaLocal = ref<FamilyMedia[]>([]);
 
 onMounted(() => {
@@ -93,6 +108,7 @@ const openMediaPicker = async () => {
       initialSelection: initialSelectionIds,
       initialMediaType: props.initialMediaType,
       allowUpload: props.allowUpload,
+      allowDelete: props.allowDelete, // Pass allowDelete prop
     });
 
     if (props.selectionMode === 'single') {
@@ -120,9 +136,38 @@ const clearSelection = () => {
   emit('update:modelValue', props.selectionMode === 'single' ? null : []);
 };
 
-const removeMedia = (idToRemove: string) => {
-  selectedMediaLocal.value = selectedMediaLocal.value.filter(media => media.id !== idToRemove);
-  emit('update:modelValue', props.selectionMode === 'single' ? (selectedMediaLocal.value[0] || null) : selectedMediaLocal.value);
+const removeMedia = async (idToRemove: string) => {
+  const mediaItemToRemove = selectedMediaLocal.value.find(media => media.id === idToRemove);
+  if (!mediaItemToRemove) return;
+
+  if (props.allowDelete) {
+    const confirmed = await showConfirmDialog({
+      title: t('confirmDelete.title'),
+      message: t('familyMedia.list.confirmDelete', { fileName: mediaItemToRemove.fileName }),
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      confirmColor: 'error',
+    });
+
+    if (!confirmed) {
+      return; // Stop if not confirmed
+    }
+
+    deleteMedia(idToRemove, {
+      onSuccess: () => {
+        showSnackbar(t('familyMedia.messages.deleteSuccess'), 'success');
+        selectedMediaLocal.value = selectedMediaLocal.value.filter(media => media.id !== idToRemove);
+        emit('update:modelValue', props.selectionMode === 'single' ? (selectedMediaLocal.value[0] || null) : selectedMediaLocal.value);
+      },
+      onError: (error) => {
+        showSnackbar(error.message || t('familyMedia.messages.deleteError'), 'error');
+      },
+    });
+  } else {
+    // If deletion is not allowed, just remove from local selection
+    selectedMediaLocal.value = selectedMediaLocal.value.filter(media => media.id !== idToRemove);
+    emit('update:modelValue', props.selectionMode === 'single' ? (selectedMediaLocal.value[0] || null) : selectedMediaLocal.value);
+  }
 };
 </script>
 
