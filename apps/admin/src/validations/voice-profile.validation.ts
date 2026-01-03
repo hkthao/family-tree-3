@@ -6,6 +6,7 @@ export function useVoiceProfileValidation() {
 
   const voiceProfileRules = {
     label: [(value: string) => !!value || t('common.validations.required')],
+    memberId: [(value: string) => !!value || t('common.validations.required')],
     rawAudioUrls: [
       (value: FamilyMedia[]) => (value && value.length > 0) || t('common.validations.required'),
     ],

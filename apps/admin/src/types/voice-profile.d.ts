@@ -9,7 +9,7 @@ export enum VoiceProfileStatus {
 
 export interface VoiceProfile {
   id: string;
-  memberId: string;
+  memberId: string | null;
   label: string;
   audioUrl: string;
   durationSeconds: number;

@@ -2,8 +2,15 @@
   <v-form ref="form" >
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="editableVoiceProfile.label" :label="t('voiceProfile.form.name')"
-          :rules="voiceProfileRules.label" :readonly="readOnly" data-testid="voice-profile-name"></v-text-field>
+        <MemberAutocomplete
+          v-model="editableVoiceProfile.memberId"
+          :label="t('voiceProfile.form.member')"
+          :rules="voiceProfileRules.memberId"
+          :readOnly="readOnly"
+          :familyId="familyId"
+          prepend-inner-icon="mdi-account"
+          data-testid="voice-profile-member"
+        />
       </v-col>
       <v-col cols="12">
         <MediaInput
@@ -19,15 +26,19 @@
           :allow-delete="true"
         ></MediaInput>
       </v-col>
+      <v-col cols="12">
+        <v-text-field v-model="editableVoiceProfile.label" :label="t('voiceProfile.form.name')"
+          :rules="voiceProfileRules.label" :readonly="readOnly" data-testid="voice-profile-name" prepend-inner-icon="mdi-card-text-outline" clearable></v-text-field>
+      </v-col>
       <v-col cols="6">
         <v-text-field v-model.number="editableVoiceProfile.durationSeconds"
           :label="t('voiceProfile.form.durationSeconds')" :rules="voiceProfileRules.durationSeconds"
-          :readonly="readOnly" type="number" data-testid="voice-profile-duration" disabled></v-text-field>
+          :readonly="readOnly" type="number" data-testid="voice-profile-duration" disabled prepend-inner-icon="mdi-timer-outline" append-inner-icon="mdi-information-outline"></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-select v-model="editableVoiceProfile.language" :label="t('voiceProfile.form.language')"
           :rules="voiceProfileRules.language" :readonly="readOnly" :items="languageOptions"
-          data-testid="voice-profile-language"></v-select>
+          data-testid="voice-profile-language" prepend-inner-icon="mdi-web"></v-select>
       </v-col>
       <v-col cols="12">
         <v-checkbox v-model="editableVoiceProfile.consent" :label="t('voiceProfile.form.consent')" :readonly="readOnly"
@@ -37,7 +48,7 @@
       <v-col cols="12" v-if="!readOnly && initialVoiceProfileData.id">
         <v-select v-model="editableVoiceProfile.status" :items="voiceProfileStatusOptions"
           :label="t('voiceProfile.form.status')" :rules="voiceProfileRules.label"
-          data-testid="voice-profile-status"></v-select>
+          data-testid="voice-profile-status" prepend-inner-icon="mdi-list-status"></v-select>
       </v-col>
     </v-row>
 
@@ -51,6 +62,7 @@ import type { VoiceProfile, FamilyMedia } from '@/types'; // Import FamilyMedia
 import { VoiceProfileStatus } from '@/types'; // Import VoiceProfileStatus from '@/types'
 import { MediaType } from '@/types/enums'; // Import MediaType from '@/types/enums'
 import { MediaInput } from '@/components/common'; // Import MediaInput
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { useVoiceProfileValidation } from '@/validations/voice-profile.validation';
 
 export interface IVoiceProfileFormInstance {
@@ -58,6 +70,7 @@ export interface IVoiceProfileFormInstance {
   reset: () => void;
   getData: () => {
     label: string;
+    memberId: string | null; // Added memberId
     audioUrl: string | null; // Changed to single string
     durationSeconds: number;
     language: string;
@@ -71,7 +84,7 @@ const props = defineProps({
     type: Object as () => VoiceProfile,
     default: () => ({
       id: '',
-      memberId: '',
+      memberId: null, // Changed to null
       label: '',
       audioUrl: '', // Initial audioUrl for existing profile
       durationSeconds: 0,
@@ -103,6 +116,7 @@ const { voiceProfileRules } = useVoiceProfileValidation();
 const form = ref<HTMLFormElement | null>(null);
 const editableVoiceProfile = reactive<{
   label: string;
+  memberId: string | null; // Add memberId to type definition
   rawAudioUrls: FamilyMedia[]; // Change to FamilyMedia[]
   durationSeconds: number;
   language: string;
@@ -111,6 +125,7 @@ const editableVoiceProfile = reactive<{
   // Other VoiceProfile properties as needed for initialVoiceProfileData, but not directly for getData
 }>({
   label: props.initialVoiceProfileData.label,
+  memberId: props.initialVoiceProfileData.memberId, // Initialize memberId
   rawAudioUrls: props.initialVoiceProfileData.audioUrl ? [{
     id: 'existing-' + props.initialVoiceProfileData.audioUrl,
     familyId: props.initialVoiceProfileData.memberId,
@@ -131,6 +146,7 @@ const editableVoiceProfile = reactive<{
 watch(() => props.initialVoiceProfileData, (newData) => {
   // Only update fields that are part of the form, and map audioUrl to rawAudioUrls
   editableVoiceProfile.label = newData.label;
+  editableVoiceProfile.memberId = newData.memberId; // Update memberId
   editableVoiceProfile.rawAudioUrls = newData.audioUrl ? [{
     id: 'existing-' + newData.audioUrl, // Use a unique ID
     familyId: newData.memberId,
@@ -177,6 +193,7 @@ defineExpose<IVoiceProfileFormInstance>({
     form.value?.reset();
     Object.assign(editableVoiceProfile, {
       label: props.initialVoiceProfileData.label,
+      memberId: props.initialVoiceProfileData.memberId, // Reset memberId
       rawAudioUrls: props.initialVoiceProfileData.audioUrl ? [{
         id: 'existing-' + props.initialVoiceProfileData.audioUrl,
         familyId: props.initialVoiceProfileData.memberId,
@@ -195,6 +212,7 @@ defineExpose<IVoiceProfileFormInstance>({
   },
   getData: () => ({
     label: editableVoiceProfile.label,
+    memberId: editableVoiceProfile.memberId, // Return memberId
     audioUrl: editableVoiceProfile.rawAudioUrls.length > 0 ? editableVoiceProfile.rawAudioUrls[0].filePath : null, // Take first URL
     durationSeconds: editableVoiceProfile.durationSeconds,
     language: editableVoiceProfile.language,

@@ -2,7 +2,7 @@ import type { BaseAuditableEntity } from './base.d';
 import type { RefType, MediaType } from './enums'; // Import from enums.ts
 
 export interface FamilyMedia extends BaseAuditableEntity {
-  familyId: string;
+  familyId: string | null;
   fileName: string;
   filePath: string; // URL to the stored media file
   mediaType: MediaType;

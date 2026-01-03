@@ -2,7 +2,17 @@
   <div>
     <!-- Tabs for media type filtering -->
     <v-tabs v-model="mediaTypeFilter" show-arrows>
-      <v-tab v-for="type in visibleMediaTypes" :key="type" :value="type">{{ t(`common.mediaType.${MediaType[type]}`) }}</v-tab>
+      <v-tab v-for="type in visibleMediaTypes" :key="type" :value="type">
+        <v-icon start>
+          {{
+            type === MediaType.Image ? 'mdi-image' :
+            type === MediaType.Video ? 'mdi-video' :
+            type === MediaType.Audio ? 'mdi-music' :
+            'mdi-file-document'
+          }}
+        </v-icon>
+        {{ t(`common.mediaType.${MediaType[type]}`) }}
+      </v-tab>
     </v-tabs>
 
     <v-window v-model="mediaTypeFilter">
@@ -18,44 +28,16 @@
           class="ma-2"
         >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
-          <v-card
+          <MediaItemCard
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
-            :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
-            @click="toggleMediaSelection(mediaItem.id)"
-            class="media-item"
-            variant="outlined"
-            color="primary"
-          >
-            <v-img
-              v-if="mediaItem.mediaType === MediaType.Image"
-              :src="mediaItem.thumbnailPath || mediaItem.filePath"
-              aspect-ratio="1"
-              cover
-            ></v-img>
-            <v-icon v-else size="64">mdi-file</v-icon> <!-- Placeholder for other types if they somehow end up here -->
-            <v-icon
-              v-if="props.selectedMedia.includes(mediaItem.id)"
-              class="selected-check-icon"
-              color="primary"
-              size="24"
-            >
-              mdi-check-circle
-            </v-icon>
-            <v-btn
-              v-if="props.allowDelete"
-              class="delete-media-button"
-              icon
-              size="small"
-              color="error"
-              variant="text"
-              :disabled="isDeleting"
-              @click.stop="handleDeleteMedia(mediaItem)"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
-          </v-card>
+            :media-item="mediaItem"
+            :selected-media="props.selectedMedia"
+            :allow-delete="props.allowDelete"
+            :is-deleting="isDeleting"
+            @toggle-media-selection="toggleMediaSelection"
+            @delete-media="handleDeleteMedia"
+          />
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Video">
@@ -70,38 +52,16 @@
           class="ma-2"
         >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
-          <v-card
+          <MediaItemCard
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
-            variant="outlined"
-            color="primary"
-            :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
-            @click="toggleMediaSelection(mediaItem.id)"
-            class="media-item"
-          >
-            <v-icon size="64">mdi-video</v-icon>
-            <v-icon
-              v-if="props.selectedMedia.includes(mediaItem.id)"
-              class="selected-check-icon"
-              color="primary"
-              size="24"
-            >
-              mdi-check-circle
-            </v-icon>
-            <v-btn
-              v-if="props.allowDelete"
-              class="delete-media-button"
-              icon
-              size="small"
-              color="error"
-              variant="text"
-              :disabled="isDeleting"
-              @click.stop="handleDeleteMedia(mediaItem)"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
-          </v-card>
+            :media-item="mediaItem"
+            :selected-media="props.selectedMedia"
+            :allow-delete="props.allowDelete"
+            :is-deleting="isDeleting"
+            @toggle-media-selection="toggleMediaSelection"
+            @delete-media="handleDeleteMedia"
+          />
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Audio">
@@ -116,38 +76,16 @@
           class="ma-2"
         >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
-          <v-card
+          <MediaItemCard
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
-            variant="outlined"
-            color="primary"
-            :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
-            @click="toggleMediaSelection(mediaItem.id)"
-            class="media-item"
-          >
-            <v-icon size="64">mdi-audio</v-icon>
-            <v-icon
-              v-if="props.selectedMedia.includes(mediaItem.id)"
-              class="selected-check-icon"
-              color="primary"
-              size="24"
-            >
-              mdi-check-circle
-            </v-icon>
-            <v-btn
-              v-if="props.allowDelete"
-              class="delete-media-button"
-              icon
-              size="small"
-              color="error"
-              variant="text"
-              :disabled="isDeleting"
-              @click.stop="handleDeleteMedia(mediaItem)"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
-          </v-card>
+            :media-item="mediaItem"
+            :selected-media="props.selectedMedia"
+            :allow-delete="props.allowDelete"
+            :is-deleting="isDeleting"
+            @toggle-media-selection="toggleMediaSelection"
+            @delete-media="handleDeleteMedia"
+          />
         </div>
       </v-window-item>
       <v-window-item :value="MediaType.Document">
@@ -162,38 +100,16 @@
           class="ma-2"
         >{{ t('mediaPicker.noMedia') }}</v-alert>
         <div v-else class="media-grid">
-          <v-card
+          <MediaItemCard
             v-for="mediaItem in familyMedia"
             :key="mediaItem.id"
-            variant="outlined"
-            color="primary"
-            :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
-            @click="toggleMediaSelection(mediaItem.id)"
-            class="media-item"
-          >
-            <v-icon size="64">mdi-file-document</v-icon>
-            <v-icon
-              v-if="props.selectedMedia.includes(mediaItem.id)"
-              class="selected-check-icon"
-              color="primary"
-              size="24"
-            >
-              mdi-check-circle
-            </v-icon>
-            <v-btn
-              v-if="props.allowDelete"
-              class="delete-media-button"
-              icon
-              size="small"
-              color="error"
-              variant="text"
-              :disabled="isDeleting"
-              @click.stop="handleDeleteMedia(mediaItem)"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-            <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
-          </v-card>
+            :media-item="mediaItem"
+            :selected-media="props.selectedMedia"
+            :allow-delete="props.allowDelete"
+            :is-deleting="isDeleting"
+            @toggle-media-selection="toggleMediaSelection"
+            @delete-media="handleDeleteMedia"
+          />
         </div>
       </v-window-item>
     </v-window>
@@ -220,6 +136,7 @@ import { useFamilyMediaQuery } from '@/composables/queries/useFamilyMediaQuery';
 import { useFamilyMediaDeleteMutation } from '@/composables/family-media/useFamilyMediaDeleteMutation'; // Import delete mutation
 import { useConfirmDialog, useGlobalSnackbar } from '@/composables'; // Import for confirmation and snackbar
 import type { FamilyMedia } from '@/types'; // Import FamilyMedia type
+import MediaItemCard from './MediaItemCard.vue'; // Import the new component
 
 const props = defineProps<{
   familyId: string;
@@ -343,33 +260,9 @@ const handleDeleteMedia = async (mediaItem: FamilyMedia) => {
   padding: 16px 0;
 }
 
-.media-grid .media-item {
-  cursor: pointer;
-  position: relative; /* Ensure check icon positions correctly */
-}
-
-.media-grid .media-item.selected-media {
-  border-color: rgb(var(--v-theme-primary));
-}
-
-.selected-check-icon {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: white; /* Optional: for better visibility */
-  border-radius: 50%; /* Makes the background circular */
-  padding: 2px; /* Add some padding around the icon */
-  z-index: 1; /* Ensure it's above other content */
-}
-
-.delete-media-button {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  z-index: 2; /* Ensure it's above other content */
-}
-
 .full-width-skeleton-container {
   width: 100%;
 }
+
+
 </style>

@@ -1612,6 +1612,7 @@
   "voiceProfile.form.addTitle": "Thêm Hồ sơ giọng nói mới",
   "voiceProfile.form.editTitle": "Chỉnh sửa Hồ sơ giọng nói",
   "voiceProfile.form.name": "Tên hồ sơ",
+  "voiceProfile.form.member": "Thành viên",
   "voiceProfile.form.description": "Mô tả",
   "voiceProfile.form.audioUrl": "URL âm thanh",
   "voiceProfile.form.audioUrls": "URL tệp âm thanh",
