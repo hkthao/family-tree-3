@@ -45,10 +45,12 @@ const props = withDefaults(defineProps<{
   selectionMode?: SelectionMode;
   modelValue: FamilyMedia[] | FamilyMedia | null; // v-model
   initialMediaType?: MediaType;
+  allowUpload?: boolean; // New prop
 }>(), {
   label: 'Select Media',
   selectionMode: 'single',
   modelValue: null,
+  allowUpload: false, // Default to false
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -90,6 +92,7 @@ const openMediaPicker = async () => {
       selectionMode: props.selectionMode,
       initialSelection: initialSelectionIds,
       initialMediaType: props.initialMediaType,
+      allowUpload: props.allowUpload,
     });
 
     if (props.selectionMode === 'single') {

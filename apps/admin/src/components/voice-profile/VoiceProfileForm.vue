@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field v-model="editableVoiceProfile.label" :label="t('voiceProfile.form.name')"
-          :rules="[rules.required]" :readonly="readOnly" data-testid="voice-profile-name"></v-text-field>
+          :rules="voiceProfileRules.label" :readonly="readOnly" data-testid="voice-profile-name"></v-text-field>
       </v-col>
       <v-col cols="12">
         <MediaInput
@@ -12,27 +12,30 @@
           :family-id="familyId"
           selection-mode="multiple"
           :initial-media-type="MediaType.Audio"
-          :rules="[rules.rawAudioUrlsRequired]"
+          :rules="voiceProfileRules.rawAudioUrls"
           data-testid="voice-profile-audio-urls"
           :disabled="readOnly"
+          :allow-upload="true"
         ></MediaInput>
       </v-col>
       <v-col cols="6">
         <v-text-field v-model.number="editableVoiceProfile.durationSeconds"
-          :label="t('voiceProfile.form.durationSeconds')" :rules="[rules.required, rules.positiveNumber]"
-          :readonly="readOnly" type="number" data-testid="voice-profile-duration"></v-text-field>
+          :label="t('voiceProfile.form.durationSeconds')" :rules="voiceProfileRules.durationSeconds"
+          :readonly="readOnly" type="number" data-testid="voice-profile-duration" disabled></v-text-field>
       </v-col>
       <v-col cols="6">
-        <v-text-field v-model="editableVoiceProfile.language" :label="t('voiceProfile.form.language')"
-          :rules="[rules.required]" :readonly="readOnly" data-testid="voice-profile-language"></v-text-field>
+        <v-select v-model="editableVoiceProfile.language" :label="t('voiceProfile.form.language')"
+          :rules="voiceProfileRules.language" :readonly="readOnly" :items="languageOptions"
+          data-testid="voice-profile-language"></v-select>
       </v-col>
       <v-col cols="12">
         <v-checkbox v-model="editableVoiceProfile.consent" :label="t('voiceProfile.form.consent')" :readonly="readOnly"
+          :rules="voiceProfileRules.consent"
           data-testid="voice-profile-consent"></v-checkbox>
       </v-col>
       <v-col cols="12" v-if="!readOnly && initialVoiceProfileData.id">
         <v-select v-model="editableVoiceProfile.status" :items="voiceProfileStatusOptions"
-          :label="t('voiceProfile.form.status')" :rules="[rules.required]"
+          :label="t('voiceProfile.form.status')" :rules="voiceProfileRules.label"
           data-testid="voice-profile-status"></v-select>
       </v-col>
     </v-row>
@@ -47,6 +50,7 @@ import type { VoiceProfile, FamilyMedia } from '@/types'; // Import FamilyMedia
 import { VoiceProfileStatus } from '@/types'; // Import VoiceProfileStatus from '@/types'
 import { MediaType } from '@/types/enums'; // Import MediaType from '@/types/enums'
 import { MediaInput } from '@/components/common'; // Import MediaInput
+import { useVoiceProfileValidation } from '@/validations/voice-profile.validation';
 
 export interface IVoiceProfileFormInstance {
   validate: () => Promise<{ valid: boolean; errors?: any[] }>;
@@ -93,6 +97,7 @@ const props = defineProps({
 
 
 const { t } = useI18n();
+const { voiceProfileRules } = useVoiceProfileValidation();
 
 const form = ref<HTMLFormElement | null>(null);
 const editableVoiceProfile = reactive<{
@@ -147,19 +152,16 @@ const voiceProfileStatusOptions = ref([
   { title: t('voiceProfile.status.archived'), value: VoiceProfileStatus.Archived },
 ]);
 
+const languageOptions = ref([
+  { title: t('common.language.vi'), value: 'vi' },
+  { title: t('common.language.en'), value: 'en' },
+]);
+
 onMounted(() => {
   // if (!editableVoiceProfile.id) { // Not needed for a pure add form, initialVoiceProfileData.memberId takes care
   //   editableVoiceProfile.memberId = props.memberId;
   // }
 });
-
-const rules = {
-  required: (value: string | number | FamilyMedia[]) => (value !== null && value !== undefined && (typeof value === 'string' ? value.length > 0 : (Array.isArray(value) ? value.length > 0 : true))) || t('common.validations.required'),
-  // Removed url validation as MediaInput handles it implicitly
-  positiveNumber: (value: number) => value > 0 || t('common.validations.positiveNumber'),
-  rawAudioUrlsRequired: (value: FamilyMedia[]) => value.length > 0 || t('common.validations.required'),
-};
-
 
 
 defineExpose<IVoiceProfileFormInstance>({
