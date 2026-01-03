@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json; // Added for JsonElement
 using backend.Application.Common.Configurations;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -37,12 +38,34 @@ public class VoiceAIService : IVoiceAIService
                 return Result<VoicePreprocessResponse>.Failure($"Python Voice AI Service Preprocess failed with status {response.StatusCode}. Error: {errorContent}");
             }
 
-            var preprocessResponse = await response.Content.ReadFromJsonAsync<VoicePreprocessResponse>();
-            if (preprocessResponse == null)
+            // Deserialize the JSON array response from Python
+            // Python returns a tuple: (processed_audio_url, total_duration, quality_report)
+            using var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var root = doc.RootElement;
+
+            if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() != 3)
             {
-                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned empty response.");
+                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an unexpected JSON format. Expected an array of 3 elements.");
             }
 
+            var processedAudioUrl = root[0].GetString();
+            var duration = root[1].GetDouble();
+            var qualityReportJson = root[2]; // This is the JSON object for AudioQualityReport
+
+            var qualityReportDto = JsonSerializer.Deserialize<AudioQualityReportDto>(qualityReportJson.ToString());
+
+            if (processedAudioUrl == null || qualityReportDto == null)
+            {
+                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an invalid response content.");
+            }
+
+            var preprocessResponse = new VoicePreprocessResponse
+            {
+                ProcessedAudioUrl = processedAudioUrl,
+                Duration = duration,
+                QualityReport = qualityReportDto
+            };
+            
             return Result<VoicePreprocessResponse>.Success(preprocessResponse);
         }
         catch (HttpRequestException ex)

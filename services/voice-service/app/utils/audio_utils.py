@@ -4,11 +4,7 @@ import tempfile
 from typing import List
 from pydub import AudioSegment
 from loguru import logger
-import numpy as np
-import soundfile as sf
-import noisereduce as nr
-import webrtcvad
-import collections
+
 
 
 # Suppress pydub's warning about ffmpeg path if it's in PATH
@@ -56,79 +52,41 @@ async def get_audio_duration(file_path: str) -> float:
         raise ValueError(f"Failed to get duration for {file_path}: {e}")
 
 
-async def remove_low_energy(audio_path: str, output_path: str, threshold_dbfs: int = -40):
+async def check_for_human_speech(audio_path: str) -> bool:
     """
-    Removes segments of audio that fall below a certain energy threshold.
+    Checks if an audio file contains human speech using WebRTC VAD.
+    Returns True if speech is detected, False otherwise.
     """
-    logger.info(f"Applying low energy removal to {audio_path} with threshold {threshold_dbfs} dBFS.")
+    logger.info(f"Checking for human speech in {audio_path}")
     try:
         audio = AudioSegment.from_wav(audio_path)
 
-        # If the audio is too quiet overall, it might be an empty segment or noise.
-        # This check prevents issues with splitting completely silent audio.
-        if audio.dBFS < threshold_dbfs and len(audio) < _VAD_MIN_SPEECH_LEN_MS:
-            logger.warning(f"Audio {audio_path} is too quiet ({audio.dBFS:.2f} dBFS) and short. Returning empty audio.")
-            AudioSegment.silent(duration=1, frame_rate=audio.frame_rate).export(output_path, format="wav")
-            return
+        # Ensure it's 16-bit, mono, 16kHz for VAD
+        if audio.sample_width != _VAD_BYTES_PER_SAMPLE or \
+           audio.channels != 1 or \
+           audio.frame_rate != _VAD_SAMPLE_RATE:
 
-        # Let's consider the entire audio, if its average dBFS is too low, it's mostly low energy noise
-        if audio.dBFS < threshold_dbfs:
-            logger.info(f"Audio {audio_path} average loudness {audio.dBFS:.2f} dBFS is below {threshold_dbfs}. Returning empty audio.")
-            AudioSegment.silent(duration=1, frame_rate=audio.frame_rate).export(output_path, format="wav")
-            return
+            logger.debug("Converting audio to 16-bit, mono, 16kHz for VAD check.")
+            audio = audio.set_sample_width(_VAD_BYTES_PER_SAMPLE)
+            audio = audio.set_channels(1)
+            audio = audio.set_frame_rate(_VAD_SAMPLE_RATE)
 
-        # If we got here, the audio has some energy. We can just export it.
-        # The primary filtering for low energy should ideally happen with VAD.
-        # This function might be redundant if VAD is aggressive enough, or if we want
-        # to remove very quiet speech which we might not want.
-        # For now, if the audio makes it past the VAD, and its overall energy isn't extremely low,
-        # we consider it valid. This function will act as a final filter for very quiet files.
-        audio.export(output_path, format="wav")
-        logger.info(f"Low energy removal completed for {audio_path}. Output saved to {output_path}.")
+        # Export to raw PCM for VAD
+        raw_audio_data = audio.raw_data
+
+        vad = webrtcvad.Vad(1)  # Aggressiveness mode 1
+        frames = _frame_generator(raw_audio_data, _VAD_SAMPLE_RATE, _VAD_FRAME_DURATION_MS, _VAD_BYTES_PER_SAMPLE)
+
+        # Iterate through frames and check for speech
+        for frame in frames:
+            if vad.is_speech(frame.bytes, _VAD_SAMPLE_RATE):
+                logger.info(f"Human speech detected in {audio_path}")
+                return True
+        logger.info(f"No human speech detected in {audio_path}")
+        return False
     except Exception as e:
-        logger.error(f"Error during low energy removal for {audio_path}: {e}")
-        raise
-
-
-async def normalize_audio(audio_path: str, output_path: str, target_dbfs: int = -3):
-    """
-    Normalizes the loudness of an audio file to a target dBFS.
-    """
-    logger.info(f"Normalizing audio {audio_path} to {target_dbfs} dBFS.")
-    try:
-        audio = AudioSegment.from_wav(audio_path)
-        change_in_dbfs = target_dbfs - audio.dBFS
-        normalized_audio = audio.apply_gain(change_in_dbfs)
-        normalized_audio.export(output_path, format="wav")
-        logger.info(f"Audio {audio_path} normalized. Output saved to {output_path}.")
-    except Exception as e:
-        logger.error(f"Error during audio normalization for {audio_path}: {e}")
-        raise
-
-
-async def reduce_noise(input_path: str, output_path: str):
-    """
-    Applies noise reduction to an audio file.
-    """
-    logger.info(f"Applying noise reduction to {input_path}.")
-    try:
-        # Read audio data
-        data, sr = sf.read(input_path)
-
-        # Apply noise reduction. `sr` is the sample rate.
-        # We need to ensure the data is float for noisereduce
-        if data.dtype != np.float64:
-            data = data.astype(np.float64)
-
-        # Perform noise reduction
-        reduced_noise_data = nr.reduce_noise(y=data, sr=sr, stationary=True, prop_decrease=0.8)
-
-        # Write the processed audio to the output path
-        sf.write(output_path, reduced_noise_data, sr)
-        logger.info(f"Noise reduction applied. Output saved to {output_path}.")
-    except Exception as e:
-        logger.error(f"Error during noise reduction for {input_path}: {e}")
-        raise
+        logger.error(f"Error during human speech detection for {audio_path}: {e}")
+        return False
 
 
 async def apply_vad(input_path: str, output_path: str):
@@ -215,17 +173,8 @@ async def process_single_audio(input_path: str, output_path: str) -> float:
         current_audio_path = standardized_wav_path
         logger.info(f"Standardized audio to WAV, mono, 16kHz, 16-bit at {current_audio_path}")
 
-        # Step 2: Apply noise reduction
-        # Applying noise reduction early, after standardization, helps remove
-        # constant background noise before VAD or normalization can be affected.
-        denoised_path = tempfile.mktemp(suffix=".wav")
-        temp_files.append(denoised_path)
-        await reduce_noise(current_audio_path, denoised_path)
-        current_audio_path = denoised_path
-
-        # Step 3: Apply Voice Activity Detection (VAD)
-        # VAD is applied after noise reduction to more accurately identify speech segments
-        # and remove silent or noisy non-speech parts.
+        # Step 2: Apply Voice Activity Detection (VAD)
+        # VAD is applied after standardization to identify and keep speech segments.
         vad_processed_path = tempfile.mktemp(suffix=".wav")
         temp_files.append(vad_processed_path)
         await apply_vad(current_audio_path, vad_processed_path)
@@ -237,29 +186,7 @@ async def process_single_audio(input_path: str, output_path: str) -> float:
             AudioSegment.silent(duration=100, frame_rate=_VAD_SAMPLE_RATE).export(output_path, format="wav")
             return 0.1  # Return a minimal duration
 
-        # Step 4: Normalize audio
-        # Normalization is done after noise reduction and VAD to ensure that only
-        # relevant speech (with reduced noise) is amplified to the target loudness.
-        normalized_path = tempfile.mktemp(suffix=".wav")
-        temp_files.append(normalized_path)
-        await normalize_audio(current_audio_path, normalized_path)
-        current_audio_path = normalized_path
-
-        # Step 5: Remove low-energy segments (final guard after VAD and normalization)
-        # This step acts as a final filter to catch any residual very low-energy segments
-        # that might have slipped past VAD or resulted from aggressive noise reduction.
-        low_energy_removed_path = tempfile.mktemp(suffix=".wav")
-        temp_files.append(low_energy_removed_path)
-        await remove_low_energy(current_audio_path, low_energy_removed_path)
-        current_audio_path = low_energy_removed_path
-
-        # Check again if audio is effectively empty after low-energy removal
-        if not os.path.exists(current_audio_path) or await get_audio_duration(current_audio_path) < 0.01:
-            logger.warning(f"Low energy removal resulted in empty audio for {input_path}. Returning a short silent audio.")
-            AudioSegment.silent(duration=100, frame_rate=_VAD_SAMPLE_RATE).export(output_path, format="wav")
-            return 0.1  # Return a minimal duration
-
-        # Step 6: Move final processed audio to output_path and get duration
+        # Step 3: Move final processed audio to output_path and get duration
         os.rename(current_audio_path, output_path)
         duration = await get_audio_duration(output_path)
         logger.info(f"Finished single audio processing pipeline for {input_path}. Output saved to {output_path}. Duration: {duration:.2f}s")
