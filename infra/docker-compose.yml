@@ -111,6 +111,23 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  voice-service:
+    build:
+      context: ../services/voice-service
+      dockerfile: Dockerfile
+    container_name: family-tree-voice-service
+    ports:
+      - "8003:8000" # Expose port 8000 for the FastAPI app internally, map to 8003 externally
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+      - TZ=Asia/Ho_Chi_Minh
+    mem_limit: 2g # Set memory limit for voice service (similar to ocr-service)
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   promtail:
     image: grafana/promtail:2.6.1 # Use a specific version of Promtail
     container_name: family-tree-promtail
@@ -128,6 +145,8 @@ services:
       - admin
       - face-service
       - ocr-service
+      - image-restoration-service
+      - voice-service
 
 volumes:
   mysql-data:

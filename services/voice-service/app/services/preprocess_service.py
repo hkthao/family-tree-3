@@ -61,7 +61,7 @@ class PreprocessService:
 
             # Construct the absolute URL for the processed audio file
             processed_audio_url = f"{settings.VOICE_SERVICE_BASE_URL}/static/{unique_filename}"
-
+            logger.info(f"VOICE_SERVICE_BASE_URL: '{settings.VOICE_SERVICE_BASE_URL}', unique_filename: '{unique_filename}'")
             logger.info(f"Audio preprocessing pipeline completed. Final URL: {processed_audio_url}, Duration: {total_duration:.2f}s")
             return processed_audio_url, total_duration
 

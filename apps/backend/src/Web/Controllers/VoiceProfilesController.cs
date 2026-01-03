@@ -118,10 +118,9 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     /// <summary>
     /// Tiền xử lý các file audio thô và tạo một hồ sơ giọng nói mới cho một thành viên.
     /// </summary>
-    /// <param name="memberId">ID của thành viên.</param>
     /// <param name="command">Dữ liệu để tiền xử lý audio và tạo hồ sơ giọng nói.</param>
     /// <returns>Hồ sơ giọng nói vừa được tạo.</returns>
-    [HttpPost("preprocess")]
+    [HttpPost("preprocess-and-create")]
     public async Task<IActionResult> PreprocessAndCreateVoiceProfile([FromBody] PreprocessAndCreateVoiceProfileCommand command)
     {
         var result = await _mediator.Send(command);
