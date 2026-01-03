@@ -10,7 +10,6 @@
         ref="voiceProfileFormRef"
         v-if="voiceProfile"
         :initial-voice-profile-data="voiceProfile"
-        :member-id="props.memberId"
         :family-id="props.familyId"
         :read-only="false"
         @save="handleUpdateItem"
@@ -45,15 +44,11 @@ import { type IVoiceProfileFormInstance } from '@/components/voice-profile/Voice
 import { useVoiceProfileEdit } from '@/composables/voice-profile/useVoiceProfileEdit';
 
 const props = defineProps({
-  memberId: {
-    type: String as PropType<string>,
-    required: true,
-  },
   voiceProfileId: {
     type: String as PropType<string>,
     required: true,
   },
-  familyId: { // New prop
+  familyId: {
     type: String as PropType<string>,
     required: true,
   },
@@ -69,7 +64,6 @@ const {
   state: { voiceProfile, isLoading, isUpdatingVoiceProfile, isUploadingMedia },
   actions: { handleUpdateItem, closeForm },
 } = useVoiceProfileEdit({
-  memberId: props.memberId,
   voiceProfileId: props.voiceProfileId,
   onSaveSuccess: () => {
     emit('saved');

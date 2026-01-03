@@ -7,8 +7,8 @@ import type { ApiError } from '@/types/apiError';
 export function useUpdateVoiceProfileMutation() {
   const { voiceProfile: voiceProfileService } = useServices();
 
-  return useMutation<VoiceProfile, ApiError, { id: string; memberId: string; data: UpdateVoiceProfileCommand }>({
-    mutationFn: async ({ id, memberId, data }) => {
+  return useMutation<VoiceProfile, ApiError, { id: string; data: UpdateVoiceProfileCommand }>({
+    mutationFn: async ({ id, data }) => {
       const response = await voiceProfileService.update(data);
       if (response.ok) {
         return response.value;

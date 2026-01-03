@@ -4,7 +4,6 @@
       :items="voiceProfiles"
       :total-items="currentTotalItems"
       :loading="isLoadingVoiceProfiles"
-      :member-id="props.memberId"
       @update:options="handleListOptionsUpdate"
       @create="openAddDrawer()"
       @view="openDetailDrawer"
@@ -24,19 +23,19 @@
 
     <!-- Add Voice Profile Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileAddView v-if="addDrawer" :member-id="props.memberId" :family-id="props.familyId" @close="handleVoiceProfileClosed"
+      <VoiceProfileAddView v-if="addDrawer" :family-id="props.familyId" @close="handleVoiceProfileClosed"
         @saved="handleVoiceProfileSaved" />
     </BaseCrudDrawer>
 
     <!-- Edit Voice Profile Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileEditView v-if="selectedItemId && editDrawer" :member-id="props.memberId" :family-id="props.familyId"
+      <VoiceProfileEditView v-if="selectedItemId && editDrawer" :family-id="props.familyId"
         :voice-profile-id="selectedItemId" @close="handleVoiceProfileClosed" @saved="handleVoiceProfileSaved" />
     </BaseCrudDrawer>
 
     <!-- Detail Voice Profile Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileDetailView v-if="selectedItemId && detailDrawer" :member-id="props.memberId" :family-id="props.familyId"
+      <VoiceProfileDetailView v-if="selectedItemId && detailDrawer" :family-id="props.familyId"
         :voice-profile-id="selectedItemId" @close="handleVoiceProfileClosed" />
     </BaseCrudDrawer>
 
@@ -71,7 +70,6 @@ import BaseImportDialog from '@/components/common/BaseImportDialog.vue';
 import { useVoiceProfileImportExport } from '@/composables/voice-profile/useVoiceProfileImportExport';
 
 interface VoiceProfileListViewProps {
-  memberId: string;
   familyId: string; // New prop
 }
 
@@ -83,18 +81,18 @@ const { showSnackbar } = useGlobalSnackbar();
 
 const importDialog = ref(false);
 
-const { isExporting, isImporting, exportVoiceProfiles, importVoiceProfiles } = useVoiceProfileImportExport(computed(() => props.memberId));
+const { isExporting, isImporting, exportVoiceProfiles, importVoiceProfiles } = useVoiceProfileImportExport(computed(() => props.familyId));
 
 const {
   state: { paginationOptions, filters },
   actions: { setPage, setItemsPerPage, setSortBy, setSearch },
-} = useVoiceProfileDataManagement(computed(() => props.memberId));
+} = useVoiceProfileDataManagement(computed(() => props.familyId));
 
 const {
   state: { voiceProfiles: queryVoiceProfiles, totalItems, isLoading: isLoadingVoiceProfiles },
   actions: { refetch },
 } = useVoiceProfilesQuery(
-  computed(() => props.memberId),
+  computed(() => props.familyId),
   paginationOptions,
   filters
 );
@@ -175,7 +173,7 @@ const confirmDelete = async (id: string) => {
 };
 
 const handleDeleteConfirm = (id: string) => {
-  deleteVoiceProfile({ memberId: props.memberId, id }, {
+  deleteVoiceProfile({ id }, {
     onSuccess: () => {
       showSnackbar(t('voiceProfile.messages.deleteSuccess'), 'success');
       queryClient.invalidateQueries({ queryKey: ['voice-profiles'] });
@@ -194,6 +192,5 @@ const handleVoiceProfileSaved = () => {
 const handleVoiceProfileClosed = () => {
   closeAllDrawers();
 };
-</script>
 
-<style scoped></style>
+</script>

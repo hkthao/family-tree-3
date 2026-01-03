@@ -13,7 +13,7 @@
       </div>
       <div v-else-if="voiceProfile">
         <!-- PrivacyAlert if needed, based on backend DTO -->
-        <VoiceProfileForm :initial-voice-profile-data="voiceProfile" :member-id="props.memberId" :family-id="props.familyId" :read-only="true" />
+        <VoiceProfileForm :initial-voice-profile-data="voiceProfile" :family-id="props.familyId" :read-only="true" />
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
@@ -32,15 +32,11 @@ import { useVoiceProfileDetail } from '@/composables/voice-profile/useVoiceProfi
 // import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // TODO: Check if needed
 
 const props = defineProps({
-  memberId: {
-    type: String as PropType<string>,
-    required: true,
-  },
   voiceProfileId: {
     type: String as PropType<string>,
     required: true,
   },
-  familyId: { // New prop
+  familyId: {
     type: String as PropType<string>,
     required: true,
   },
@@ -51,7 +47,6 @@ const emit = defineEmits(['close']);
 const { t } = useI18n();
 
 const { state: { voiceProfile, isLoading, error }, actions: { closeView } } = useVoiceProfileDetail({
-  memberId: ref(props.memberId),
   voiceProfileId: ref(props.voiceProfileId),
   onClose: () => {
     emit('close');

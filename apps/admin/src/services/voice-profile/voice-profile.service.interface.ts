@@ -12,8 +12,8 @@ export interface IVoiceProfileService extends ICrudService<VoiceProfile, CreateV
     command: PreprocessAndCreateVoiceProfileDto
   ): Promise<Result<VoiceProfileDto>>;
 
-  exportVoiceProfiles(memberId: string): Promise<Result<VoiceProfile[]>>;
+  exportVoiceProfiles(familyId: string): Promise<Result<VoiceProfile[]>>;
 
-  importVoiceProfiles(memberId: string, data: VoiceProfile[]): Promise<Result<void>>;
+  importVoiceProfiles(familyId: string, data: VoiceProfile[]): Promise<Result<void>>;
 
 }

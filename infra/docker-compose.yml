@@ -64,6 +64,8 @@ services:
     container_name: family-tree-face-service
     ports:
       - "8000:8000" # Expose port 8000 for the FastAPI app
+    env_file:
+      - ./.env.dev
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
       - TZ=Asia/Ho_Chi_Minh
@@ -83,6 +85,8 @@ services:
     container_name: family-tree-ocr-service
     ports:
       - "8001:8000" # Expose port 8000 for the FastAPI app
+    env_file:
+      - ./.env.dev
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
       - TZ=Asia/Ho_Chi_Minh
@@ -118,6 +122,8 @@ services:
     container_name: family-tree-voice-service
     ports:
       - "8003:8000" # Expose port 8000 for the FastAPI app internally, map to 8003 externally
+    env_file:
+      - ./.env.dev
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
       - TZ=Asia/Ho_Chi_Minh

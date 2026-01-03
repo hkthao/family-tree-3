@@ -6,8 +6,8 @@ import type { ApiError } from '@/types/apiError';
 export function useDeleteVoiceProfileMutation() {
   const { voiceProfile: voiceProfileService } = useServices();
 
-  return useMutation<void, ApiError, { id: string; memberId: string }>({
-    mutationFn: async ({ id, memberId }) => {
+  return useMutation<void, ApiError, { id: string }>({
+    mutationFn: async ({ id }) => {
       const response = await voiceProfileService.delete(id);
       if (!response.ok) {
         throw new Error(response.error?.message || 'Failed to delete voice profile');

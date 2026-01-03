@@ -14,7 +14,7 @@ export class ApiVoiceProfileService extends ApiCrudService<VoiceProfile, CreateV
     command: CreateVoiceProfileCommand
   ): Promise<Result<VoiceProfile>> {
     return this.api.post<VoiceProfile>(
-        `/members/${memberId}/voice-profiles`,
+        `/voice-profiles/${memberId}`,
         command
       );
   }
@@ -28,12 +28,12 @@ export class ApiVoiceProfileService extends ApiCrudService<VoiceProfile, CreateV
     );
   }
 
-  async exportVoiceProfiles(memberId: string): Promise<Result<VoiceProfile[]>> {
-    return this.api.get<VoiceProfile[]>(`/members/${memberId}/voice-profiles/export`);
+  async exportVoiceProfiles(familyId: string): Promise<Result<VoiceProfile[]>> {
+    return this.api.get<VoiceProfile[]>(`/voice-profiles/${familyId}/export`);
   }
 
-  async importVoiceProfiles(memberId: string, data: VoiceProfile[]): Promise<Result<void>> {
-    return this.api.post(`/members/${memberId}/voice-profiles/import`, data);
+  async importVoiceProfiles(familyId: string, data: VoiceProfile[]): Promise<Result<void>> {
+    return this.api.post(`/voice-profiles/${familyId}/import`, data);
   }
 
 }

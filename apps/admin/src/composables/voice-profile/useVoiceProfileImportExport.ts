@@ -5,7 +5,7 @@ import { useGlobalSnackbar } from '@/composables';
 import type { VoiceProfile } from '@/types';
 import { useServices } from '@/plugins/services.plugin';
 
-export function useVoiceProfileImportExport(memberId: Ref<string>) {
+export function useVoiceProfileImportExport(familyId: Ref<string>) {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const { voiceProfile: voiceProfileService } = useServices();
@@ -16,11 +16,11 @@ export function useVoiceProfileImportExport(memberId: Ref<string>) {
   const exportVoiceProfiles = async () => {
     isExporting.value = true;
     try {
-      const response = await voiceProfileService.exportVoiceProfiles(memberId.value);
+      const response = await voiceProfileService.exportVoiceProfiles(familyId.value);
       if (response.ok) {
         const dataStr = JSON.stringify(response.value, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const exportFileDefaultName = `voice_profiles_member_${memberId.value}.json`;
+        const exportFileDefaultName = `voice_profiles_family_${familyId.value}.json`;
 
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
@@ -41,7 +41,7 @@ export function useVoiceProfileImportExport(memberId: Ref<string>) {
   const importVoiceProfiles = async (data: VoiceProfile[]) => {
     isImporting.value = true;
     try {
-      const response = await voiceProfileService.importVoiceProfiles(memberId.value, data);
+      const response = await voiceProfileService.importVoiceProfiles(familyId.value, data);
       if (response.ok) {
         showSnackbar(t('voiceProfile.messages.importSuccess'), 'success');
       } else {

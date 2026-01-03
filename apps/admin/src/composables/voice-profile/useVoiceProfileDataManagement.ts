@@ -1,7 +1,7 @@
 import { reactive, watch, type Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-export function useVoiceProfileDataManagement(memberId: Ref<string>) {
+export function useVoiceProfileDataManagement(familyId: Ref<string>) {
   const router = useRouter();
   const route = useRoute();
 
@@ -18,11 +18,11 @@ export function useVoiceProfileDataManagement(memberId: Ref<string>) {
 
   const filters = reactive({
     search: route.query.search as string || '',
-    memberId: memberId.value,
+    familyId: familyId.value,
   });
 
-  watch(memberId, (newMemberId) => {
-    filters.memberId = newMemberId;
+  watch(familyId, (newFamilyId) => {
+    filters.familyId = newFamilyId;
   }, { immediate: true });
 
   watch(
@@ -35,6 +35,7 @@ export function useVoiceProfileDataManagement(memberId: Ref<string>) {
           itemsPerPage: paginationOptions.itemsPerPage,
           sortBy: paginationOptions.sortBy.map(s => `${s.key}:${s.order}`).join(','),
           search: filters.search || undefined,
+          familyId: filters.familyId || undefined, // Add familyId to query
         },
       });
     },

@@ -6,7 +6,7 @@ import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types/apiError'; // Import ApiError
 
 export function useVoiceProfilesQuery(
-  memberId: Ref<string>,
+  familyId: Ref<string>,
   paginationOptions: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] },
   filters: { search: string }
 ) {
@@ -16,7 +16,7 @@ export function useVoiceProfilesQuery(
     queryKey: [
       'voice-profiles',
       {
-        memberId: unref(memberId),
+        familyId: unref(familyId),
         page: computed(() => paginationOptions.page),
         itemsPerPage: computed(() => paginationOptions.itemsPerPage),
         sortBy: computed(() => paginationOptions.sortBy),
@@ -35,7 +35,7 @@ export function useVoiceProfilesQuery(
       };
       const queryFilters: FilterOptions = {
         search: filters.search,
-        memberId: unref(memberId), // Pass memberId as a filter
+        familyId: unref(familyId), // Pass familyId as a filter
       };
       const response = await voiceProfileService.search(options, queryFilters);
       if (response.ok) {
@@ -43,7 +43,7 @@ export function useVoiceProfilesQuery(
       }
       throw new Error(response.error?.message || 'Failed to fetch voice profiles');
     },
-    enabled: computed(() => !!unref(memberId)),
+    enabled: computed(() => !!unref(familyId)),
   });
 
   const voiceProfiles = computed<VoiceProfile[]>(() => queryResult.data.value?.items || []);

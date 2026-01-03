@@ -17,7 +17,7 @@
           v-model="editableVoiceProfile.rawAudioUrls"
           :label="t('voiceProfile.form.audioUrls')"
           :family-id="familyId"
-          selection-mode="multiple"
+          selection-mode="single"
           :initial-media-type="MediaType.Audio"
           :rules="voiceProfileRules.rawAudioUrls"
           data-testid="voice-profile-audio-urls"
@@ -71,7 +71,7 @@ export interface IVoiceProfileFormInstance {
   getData: () => {
     label: string;
     memberId: string | null; // Added memberId
-    rawAudioUrls: string[]; // Changed to array of strings
+    audioUrl: string;
     durationSeconds: number;
     language: string;
     consent: boolean;
@@ -210,7 +210,7 @@ defineExpose<IVoiceProfileFormInstance>({
   getData: () => ({
     label: editableVoiceProfile.label,
     memberId: editableVoiceProfile.memberId, // Return memberId
-    rawAudioUrls: editableVoiceProfile.rawAudioUrls.map(media => media.filePath),
+    audioUrl: editableVoiceProfile.rawAudioUrls[0]?.filePath || '', // Get the first audio URL
     durationSeconds: editableVoiceProfile.durationSeconds,
     language: editableVoiceProfile.language,
     consent: editableVoiceProfile.consent,

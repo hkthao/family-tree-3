@@ -50,6 +50,9 @@
             '' }}
         </v-chip>
       </template>
+      <template #item.created="{ item }">
+        {{ formatDate(item.created) }}
+      </template>
     </v-data-table-server>
   </div>
 </template>
@@ -59,12 +62,13 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { VoiceProfileStatus, type VoiceProfile } from '@/types';
 import ListToolbar from '@/components/common/ListToolbar.vue';
+import { format } from 'date-fns';
 
 interface VoiceProfileListProps {
   items: VoiceProfile[];
   totalItems: number;
   loading: boolean;
-  memberId: string; // Assuming memberId is still relevant for context
+
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
@@ -95,6 +99,11 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  return format(new Date(dateString), 'dd/MM/yyyy');
+};
 
 // Define the Header type with explicit align literal types
 interface DataTableHeader {

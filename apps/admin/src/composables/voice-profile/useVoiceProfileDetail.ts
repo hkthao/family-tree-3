@@ -5,7 +5,6 @@ import { useServices } from '@/plugins/services.plugin';
 import type { ApiError } from '@/types/apiError'; // Import ApiError
 
 interface UseVoiceProfileDetailOptions {
-  memberId: Ref<string>;
   voiceProfileId: Ref<string>;
   onClose: () => void;
 }

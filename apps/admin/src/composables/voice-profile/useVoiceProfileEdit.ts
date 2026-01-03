@@ -7,7 +7,6 @@ import { useVoiceProfileDetail } from './useVoiceProfileDetail';
 import type { UpdateVoiceProfileCommand } from '@/types';
 
 interface UseVoiceProfileEditOptions {
-  memberId: string;
   voiceProfileId: string;
   onSaveSuccess: () => void;
   onCancel: () => void;
@@ -19,11 +18,9 @@ export function useVoiceProfileEdit(options: UseVoiceProfileEditOptions) {
   const { showSnackbar } = useGlobalSnackbar();
   const { mutate: updateVoiceProfile, isPending: isUpdatingVoiceProfile } = useUpdateVoiceProfileMutation();
 
-  const memberIdRef = ref(options.memberId);
   const voiceProfileIdRef = ref(options.voiceProfileId);
 
   const { state: { voiceProfile, isLoading: isLoadingVoiceProfile }, actions: { refetch } } = useVoiceProfileDetail({
-    memberId: memberIdRef,
     voiceProfileId: voiceProfileIdRef,
     onClose: options.onCancel,
   });
@@ -47,14 +44,14 @@ export function useVoiceProfileEdit(options: UseVoiceProfileEditOptions) {
     const command: UpdateVoiceProfileCommand = {
       id: options.voiceProfileId,
       label: formData.label,
-      audioUrl: formData.audioUrl || '', // Ensure it's a string, even if null from MediaInput
+      audioUrl: formData.audioUrl || '',
       durationSeconds: formData.durationSeconds,
       language: formData.language,
       consent: formData.consent,
       status: formData.status,
     };
 
-    updateVoiceProfile({ id: options.voiceProfileId, memberId: options.memberId, data: command }, {
+    updateVoiceProfile({ id: options.voiceProfileId, data: command }, {
       onSuccess: () => {
         showSnackbar(t('voiceProfile.messages.editSuccess'), 'success');
         options.onSaveSuccess();

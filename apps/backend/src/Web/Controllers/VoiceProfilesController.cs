@@ -3,9 +3,11 @@ using backend.Application.Common.Models;
 using backend.Application.VoiceGenerations.Commands.GenerateVoice;
 using backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
 using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
-using backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile; // Add this using statement
+using backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
+using backend.Application.VoiceProfiles.Commands.ImportVoiceProfiles; // Add this using statement
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfileById;
 using backend.Application.VoiceProfiles.Queries.SearchVoiceProfiles;
+using backend.Application.VoiceProfiles.Queries.ExportVoiceProfiles; // Add this using statement
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -125,5 +127,35 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201, nameof(GetVoiceProfileById), result.IsSuccess ? new { id = result.Value!.Id } : null);
+    }
+
+    /// <summary>
+    /// Xuất danh sách các hồ sơ giọng nói của một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <returns>Danh sách các hồ sơ giọng nói.</returns>
+    [HttpGet("{familyId}/export")]
+    public async Task<IActionResult> ExportVoiceProfiles(Guid familyId)
+    {
+        var result = await _mediator.Send(new ExportVoiceProfilesQuery { FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Nhập danh sách các hồ sơ giọng nói vào một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="command">Dữ liệu để nhập hồ sơ giọng nói.</param>
+    /// <returns>Kết quả của quá trình nhập.</returns>
+    [HttpPost("{familyId}/import")]
+    public async Task<IActionResult> ImportVoiceProfiles(Guid familyId, [FromBody] ImportVoiceProfilesCommand command)
+    {
+        if (familyId != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched Family ID in URL ({FamilyId}) and request body ({CommandFamilyId}) for ImportVoiceProfilesCommand from {RemoteIpAddress}", familyId, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest("Family ID trong URL và trong body không khớp.");
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 200);
     }
 }

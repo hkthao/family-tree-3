@@ -36,7 +36,7 @@ export function useVoiceProfileAdd(options: UseVoiceProfileAddOptions) {
     const command: PreprocessAndCreateVoiceProfileDto = {
       memberId: formData.memberId,
       label: formData.label,
-      rawAudioUrls: formData.rawAudioUrls, // Use rawAudioUrls directly from formData
+      audioUrl: formData.audioUrl, // Changed from rawAudioUrls
       language: formData.language,
       consent: formData.consent || false,
     };
