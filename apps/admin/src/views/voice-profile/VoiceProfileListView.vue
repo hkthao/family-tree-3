@@ -24,7 +24,7 @@
 
     <!-- Add Voice Profile Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileAddView v-if="addDrawer" :member-id="props.memberId" @close="handleVoiceProfileClosed"
+      <VoiceProfileAddView v-if="addDrawer" :member-id="props.memberId" :family-id="props.familyId" @close="handleVoiceProfileClosed"
         @saved="handleVoiceProfileSaved" />
     </BaseCrudDrawer>
 
@@ -72,6 +72,7 @@ import { useVoiceProfileImportExport } from '@/composables/voice-profile/useVoic
 
 interface VoiceProfileListViewProps {
   memberId: string;
+  familyId: string; // New prop
 }
 
 const props = defineProps<VoiceProfileListViewProps>();

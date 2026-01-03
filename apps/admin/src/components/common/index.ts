@@ -9,3 +9,4 @@ export { default as NotificationBell } from './NotificationBell.vue';
 export { default as UserAutocomplete } from './UserAutocomplete.vue';
 export { default as FaqSection } from './FaqSection.vue';
 export { default as LocationInputField } from './LocationInputField.vue';
+export { default as MediaInput } from './MediaInput.vue';

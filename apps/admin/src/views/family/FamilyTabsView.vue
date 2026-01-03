@@ -62,7 +62,7 @@
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
         <v-window-item v-if="canManageFamily" value="voice-profile">
-          <VoiceProfileListView :member-id="familyId" />
+          <VoiceProfileListView :member-id="familyId" :family-id="familyId" />
         </v-window-item>
         <!-- NEW: AI Chat Tab -->
 

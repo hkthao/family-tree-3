@@ -6,7 +6,7 @@
       }}</span>
     </v-card-title>
     <v-card-text>
-      <VoiceProfileForm ref="voiceProfileFormRef" :member-id="memberId" @cancel="closeForm" @save="handleAddItem" />
+      <VoiceProfileForm ref="voiceProfileFormRef" :member-id="memberId" :family-id="familyId" @cancel="closeForm" @save="handleAddItem" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -30,6 +30,10 @@ import { useVoiceProfileAdd } from '@/composables/voice-profile/useVoiceProfileA
 
 const props = defineProps({
   memberId: {
+    type: String as PropType<string>,
+    required: true,
+  },
+  familyId: { // New prop
     type: String as PropType<string>,
     required: true,
   },

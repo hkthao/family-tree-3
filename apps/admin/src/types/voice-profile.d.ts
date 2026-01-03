@@ -31,6 +31,14 @@ export interface CreateVoiceProfileCommand {
   consent: boolean;
 }
 
+export interface PreprocessAndCreateVoiceProfileCommand {
+  memberId: string;
+  label: string;
+  rawAudioUrls: string[];
+  language: string;
+  consent: boolean;
+}
+
 export interface UpdateVoiceProfileCommand {
   id: string;
   label: string;
@@ -40,6 +48,8 @@ export interface UpdateVoiceProfileCommand {
   consent: boolean;
   status: VoiceProfileStatus;
 }
+
+export interface VoiceProfileDto extends VoiceProfile {}
 
 export interface VoiceProfilePaginatedResponse extends Paginated<VoiceProfile> {}
 

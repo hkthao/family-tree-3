@@ -4,6 +4,7 @@ import { VContainer, VTabs, VTab, VWindow, VWindowItem, VPagination, VImg, VIcon
 import { MediaType } from '@/types/enums'; // Use MediaType enum from enums
 import { usePagination } from '@/composables/usePagination';
 import { useFamilyMediaQuery } from '@/composables/queries/useFamilyMediaQuery';
+import type { FamilyMedia } from '@/types'; // Import FamilyMedia type
 
 const props = defineProps<{
   familyId: string;
@@ -11,7 +12,9 @@ const props = defineProps<{
   selectionMode?: 'single' | 'multiple';
 }>();
 
-const emit = defineEmits(['update:selectedMedia']);
+const emit = defineEmits<{
+  (e: 'update:selectedMedia', value: FamilyMedia[]): void;
+}>();
 
 const mediaTypeFilter = ref<MediaType>(MediaType.Image); // Default to Image
 const { currentPage, itemsPerPage, totalItems } = usePagination(1, 10);
@@ -40,26 +43,36 @@ watch(mediaTypeFilter, () => {
   currentPage.value = 1;
 });
 
+// Computed property to get the full FamilyMedia objects for the selected IDs
+const selectedMediaObjects = computed<FamilyMedia[]>(() => {
+  return familyMedia.value.filter(media => props.selectedMedia.includes(media.id));
+});
+
 const toggleMediaSelection = (mediaId: string) => {
-  let newSelection: string[] = [];
+  let newSelectedIds: string[] = [];
+  let newSelectedMediaObjects: FamilyMedia[] = [];
 
   if (props.selectionMode === 'single') {
     if (props.selectedMedia.includes(mediaId)) {
-      newSelection = []; // Deselect if already selected
+      newSelectedIds = []; // Deselect if already selected
     } else {
-      newSelection = [mediaId]; // Select new item
+      newSelectedIds = [mediaId]; // Select new item
     }
   } else { // Multiple selection
-    newSelection = [...props.selectedMedia];
-    const index = newSelection.indexOf(mediaId);
+    newSelectedIds = [...props.selectedMedia];
+    const index = newSelectedIds.indexOf(mediaId);
 
     if (index > -1) {
-      newSelection.splice(index, 1); // Deselect
+      newSelectedIds.splice(index, 1); // Deselect
     } else {
-      newSelection.push(mediaId); // Select
+      newSelectedIds.push(mediaId); // Select
     }
   }
-  emit('update:selectedMedia', newSelection);
+
+  // Filter familyMedia to get the corresponding FamilyMedia objects
+  newSelectedMediaObjects = familyMedia.value.filter(media => newSelectedIds.includes(media.id));
+
+  emit('update:selectedMedia', newSelectedMediaObjects);
 };
 </script>
 
