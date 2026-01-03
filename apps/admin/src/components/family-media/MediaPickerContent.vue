@@ -11,7 +11,9 @@
     <v-window v-model="mediaTypeFilter">
       <v-window-item :value="MediaType.Image">
         <div class="media-grid">
-          <v-skeleton-loader v-if="queryLoading" type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          <div v-if="queryLoading">
+            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          </div>
           <div v-else-if="queryError">Error: {{ queryError.message }}</div>
           <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
           <v-card
@@ -54,7 +56,9 @@
       </v-window-item>
       <v-window-item :value="MediaType.Video">
         <div class="media-grid">
-          <v-skeleton-loader v-if="queryLoading" type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          <div v-if="queryLoading">
+            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          </div>
           <div v-else-if="queryError">Error: {{ queryError.message }}</div>
           <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
           <v-card
@@ -91,7 +95,9 @@
       </v-window-item>
       <v-window-item :value="MediaType.Audio">
         <div class="media-grid">
-          <v-skeleton-loader v-if="queryLoading" type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          <div v-if="queryLoading">
+            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          </div>
           <div v-else-if="queryError">Error: {{ queryError.message }}</div>
           <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
           <v-card
@@ -128,7 +134,9 @@
       </v-window-item>
       <v-window-item :value="MediaType.Document">
         <div class="media-grid">
-          <v-skeleton-loader v-if="queryLoading" type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          <div v-if="queryLoading">
+            <v-skeleton-loader type="image" :key="n" v-for="n in itemsPerPage"></v-skeleton-loader>
+          </div>
           <div v-else-if="queryError">Error: {{ queryError.message }}</div>
           <div v-else-if="familyMedia.length === 0">{{ t('mediaPicker.noMedia') }}</div>
           <v-card
