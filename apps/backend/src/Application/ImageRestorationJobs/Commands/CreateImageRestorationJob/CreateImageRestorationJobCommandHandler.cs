@@ -141,15 +141,22 @@ public class CreateImageRestorationJobCommandHandler : IRequestHandler<CreateIma
         _logger.LogInformation("Attempting to start image restoration for job {JobId} with image URL {ImageUrl}", entity.Id, entity.OriginalImageUrl);
         var restorationResult = await _imageRestorationService.StartRestorationAsync(entity.OriginalImageUrl, request.UseCodeformer, cancellationToken);
 
-        if (!restorationResult.IsSuccess)
+        if (!restorationResult.IsSuccess || restorationResult.Value == null)
         {
-            _logger.LogError("Failed to start image restoration for job {JobId}: {ErrorMessage}", entity.Id, restorationResult.Error);
-            entity.MarkAsFailed(restorationResult.Error ?? string.Empty);
+            _logger.LogError("Restoration service returned failure or a success with null value for job {JobId}: {ErrorMessage}", entity.Id, restorationResult.Error);
+            entity.MarkAsFailed(restorationResult.Error ?? "Restoration service returned an invalid state.");
             await _context.SaveChangesAsync(cancellationToken);
-            return Result<ImageRestorationJobDto>.Failure($"Failed to start image restoration: {restorationResult.Error}");
+            return Result<ImageRestorationJobDto>.Failure($"Failed to start image restoration: {restorationResult.Error ?? "Invalid service response."}");
         }
 
-        entity.MarkAsProcessing(restorationResult.Value!.JobId.ToString());
+        if (restorationResult.Value == null)
+        {
+            _logger.LogError("Restoration service returned success but value was null for job {JobId}. Marking as failed.", entity.Id);
+            entity.MarkAsFailed("Restoration service returned success but value was null.");
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result<ImageRestorationJobDto>.Failure("Restoration service returned success but value was null.");
+        }
+        entity.MarkAsProcessing(restorationResult.Value.JobId.ToString());
 
         // If RestoredUrl is returned, download and upload it
         if (!string.IsNullOrEmpty(restorationResult.Value.RestoredUrl))

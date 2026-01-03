@@ -20,7 +20,7 @@
     <PackageVersion Include="Auth0.ManagementApi" Version="7.41.0" />
     <PackageVersion Include="AutoMapper" Version="13.0.1" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.7.7" />
-    <PackageVersion Include="CloudinaryDotNet" Version="1.27.8" />
+    <PackageVersion Include="CloudinaryDotNet" Version="1.18.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

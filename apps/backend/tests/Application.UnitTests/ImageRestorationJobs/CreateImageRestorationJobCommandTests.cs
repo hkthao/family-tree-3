@@ -38,11 +38,8 @@ public class CreateImageRestorationJobCommandTests : TestBase
         _fixedDateTime = DateTime.Now;
         _mockDateTime.Setup(d => d.Now).Returns(_fixedDateTime);
 
-        _currentUserMock.Setup(s => s.IsAuthenticated).Returns(true);
-
-        // Setup for mediator to handle CreateFamilyMediaCommand
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { FilePath = "http://uploaded.image/url" })); // Mock successful upload
+        // Setup for mediator mock
+        _mediatorMock = new Mock<IMediator>();
 
         // Setup a mock HttpClient for _httpClientFactoryMock
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -83,15 +80,33 @@ public class CreateImageRestorationJobCommandTests : TestBase
         var successfulRestorationResult = Result<StartImageRestorationResponseDto>.Success(successfulRestorationResponse);
 
         _imageRestorationServiceMock.Setup(s => s.PreprocessImageAsync(
-                It.IsAny<Stream>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(Result<PreprocessImageResponseDto>.Success(new PreprocessImageResponseDto
+        {
+            ProcessedImageBase64 = "data:image/jpeg;base64,AQID",
+            IsResized = false
+        }));
+
+        // Setup for mediator to handle CreateFamilyMediaCommand (original image)
+        _mediatorMock.Setup(m => m.Send(
+                It.Is<CreateFamilyMediaCommand>(cmd => !cmd.FileName.StartsWith("restored_")),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PreprocessImageResponseDto>.Success(new PreprocessImageResponseDto
-            {
-                ProcessedImageBase64 = "data:image/jpeg;base64,AQID", // Base64 of 0x01,0x02,0x03
-                IsResized = false
-            }));
+            .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = Guid.NewGuid(), FilePath = "http://uploaded.image/url", Created = _fixedDateTime }));
+
+        // Setup for mediator to handle CreateFamilyMediaCommand (restored image)
+        _mediatorMock.Setup(m => m.Send(
+                It.Is<CreateFamilyMediaCommand>(cmd => cmd.FileName.StartsWith("restored_")),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = Guid.NewGuid(), FilePath = "http://restored.image/url", Created = _fixedDateTime }));
+
+        _imageRestorationServiceMock.Setup(s => s.StartRestorationAsync(
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(successfulRestorationResult);
 
         var handler = new CreateImageRestorationJobCommandHandler(
             _context,
@@ -101,7 +116,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
             _loggerMock.Object,
             _imageRestorationServiceMock.Object,
             _mediatorMock.Object,
-            _httpClientFactoryMock.Object // Pass httpClientFactory mock
+            _httpClientFactoryMock.Object
         );
 
         // Act
@@ -127,7 +142,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<CancellationToken>()), Times.Once);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         _imageRestorationServiceMock.Verify(s => s.StartRestorationAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -310,6 +325,7 @@ public class CreateImageRestorationJobCommandTests : TestBase
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<FamilyMediaDto>.Failure("Upload failed."));
 
+
         var handler = new CreateImageRestorationJobCommandHandler(
             _context,
             _mapper,
@@ -351,6 +367,11 @@ public class CreateImageRestorationJobCommandTests : TestBase
                 IsResized = false
             }));
 
+        _mediatorMock.Setup(m => m.Send(
+                It.Is<CreateFamilyMediaCommand>(cmd => !cmd.FileName.StartsWith("restored_")),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = Guid.NewGuid(), FilePath = "http://uploaded.image/url", Created = _fixedDateTime }));
+
         _imageRestorationServiceMock.Setup(s => s.StartRestorationAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<StartImageRestorationResponseDto>.Failure("Restoration service failed."));
 
@@ -371,6 +392,17 @@ public class CreateImageRestorationJobCommandTests : TestBase
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Contains("Failed to start image restoration", result.Error);
+
+        // Verify that preprocessing and media upload were called
+        _imageRestorationServiceMock.Verify(s => s.PreprocessImageAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        // Verify StartRestorationAsync was called
+        _imageRestorationServiceMock.Verify(s => s.StartRestorationAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
 
         // Verify job status is marked as failed
         var createdJob = _context.ImageRestorationJobs.FirstOrDefault();

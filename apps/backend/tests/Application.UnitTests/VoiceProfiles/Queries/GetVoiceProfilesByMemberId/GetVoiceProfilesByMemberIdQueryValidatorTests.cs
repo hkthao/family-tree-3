@@ -57,7 +57,9 @@ public class GetVoiceProfilesByMemberIdQueryValidatorTests : TestBase
     {
         var context = GetApplicationDbContext(); // Get fresh context
         var memberId = Guid.NewGuid();
-        context.Members.Add(new Member("Last", "First", "CODE1", memberId));
+        var familyId = Guid.NewGuid(); // Member needs a FamilyId
+        var member = new Member("Last", "First", "CODE1", familyId) { Id = memberId }; // Explicitly set Id
+        context.Members.Add(member);
         await context.SaveChangesAsync();
 
         var validator = new GetVoiceProfilesByMemberIdQueryValidator(context);

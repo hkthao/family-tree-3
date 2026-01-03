@@ -18,13 +18,16 @@ public class GetVoiceProfilesByMemberIdQueryHandlerTests : TestBase
         // Arrange
         var memberId1 = Guid.NewGuid();
         var memberId2 = Guid.NewGuid();
-        context.Members.Add(new Member("Last1", "First1", "CODE1", memberId1));
-        context.Members.Add(new Member("Last2", "First2", "CODE2", memberId2));
+        context.Members.Add(new Member("Last1", "First1", "CODE1", Guid.NewGuid()) { Id = memberId1 });
+        context.Members.Add(new Member("Last2", "First2", "CODE2", Guid.NewGuid()) { Id = memberId2 });
 
         context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile1", "http://1.wav", 5.0, "en", true));
         context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile2", "http://2.wav", 7.0, "en", true));
         context.VoiceProfiles.Add(new VoiceProfile(memberId2, "Profile3", "http://3.wav", 10.0, "fr", true));
         await context.SaveChangesAsync();
+
+        // Verify that the member exists in the context
+        (await context.Members.AnyAsync(m => m.Id == memberId1, CancellationToken.None)).Should().BeTrue("Member with memberId1 should exist in the context.");
 
         var query = new GetVoiceProfilesByMemberIdQuery { MemberId = memberId1 };
 
@@ -49,7 +52,7 @@ public class GetVoiceProfilesByMemberIdQueryHandlerTests : TestBase
 
         // Arrange
         var memberId = Guid.NewGuid();
-        context.Members.Add(new Member("Last", "First", "CODE1", memberId));
+        context.Members.Add(new Member("Last", "First", "CODE1", Guid.NewGuid()) { Id = memberId });
         await context.SaveChangesAsync();
 
         var query = new GetVoiceProfilesByMemberIdQuery { MemberId = memberId };

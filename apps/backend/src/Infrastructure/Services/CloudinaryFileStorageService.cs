@@ -40,31 +40,60 @@ public class CloudinaryFileStorageService : IFileStorageService
     public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
     {
         var publicId = GetPublicId(fileName);
-        var uploadParams = new ImageUploadParams()
+        var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
+        var resourceType = GetCloudinaryResourceType(fileExtension);
+
+        RawUploadParams uploadParams;
+        object uploadResult; // Declare as object to hold various upload result types
+
+        switch (resourceType)
         {
-            File = new FileDescription(fileName, fileStream),
-            PublicId = publicId,
-            Overwrite = true, // Overwrite if a file with the same public ID exists
-            // Caching is handled by Cloudinary by default.
-            // If you need specific transformations or eager transformations, configure them here.
-            UseFilename = true,
-            UniqueFilename = false,
-            Folder = Path.Combine(_cloudinarySettings.RootFolder, folder ?? "")
-        };
+            case ResourceType.Image:
+                uploadParams = new ImageUploadParams();
+                break;
+            case ResourceType.Video: // Handles both video and audio
+                uploadParams = new VideoUploadParams();
+                break;
+            default:
+                uploadParams = new RawUploadParams(); // Default to raw for unknown types
+                break;
+        }
+
+        uploadParams.File = new FileDescription(fileName, fileStream);
+        uploadParams.PublicId = publicId;
+        uploadParams.Overwrite = true;
+        uploadParams.UseFilename = true;
+        uploadParams.UniqueFilename = false;
+        uploadParams.Folder = Path.Combine(_cloudinarySettings.RootFolder, folder ?? "");
 
         try
         {
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams, cancellationToken);
-
-            if (uploadResult.StatusCode == HttpStatusCode.OK)
+            // Dynamically call the appropriate UploadAsync overload
+            if (uploadParams is ImageUploadParams imageUploadParams)
             {
-                // Cloudinary URL includes the public ID, which we can use as delete hash or part of it
-                return Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = uploadResult.SecureUrl.AbsoluteUri, DeleteHash = uploadResult.PublicId });
+                uploadResult = await _cloudinary.UploadAsync(imageUploadParams, cancellationToken);
+            }
+            else if (uploadParams is VideoUploadParams videoUploadParams)
+            {
+                uploadResult = await _cloudinary.UploadAsync(videoUploadParams, cancellationToken);
             }
             else
             {
-                _logger.LogError("Failed to upload file to Cloudinary. Status: {StatusCode}. Error: {Error}", uploadResult.StatusCode, uploadResult.Error?.Message);
-                return Result<FileStorageResultDto>.Failure($"Failed to upload file to Cloudinary. Status: {uploadResult.StatusCode}, Error: {uploadResult.Error?.Message}", "CloudinaryUploadError");
+                // Fallback or error if an unsupported uploadParams type is somehow used
+                throw new InvalidOperationException("Unsupported upload parameters type.");
+            }
+
+            var baseUploadResult = uploadResult as UploadResult; // Cast to common base type
+
+            if (baseUploadResult != null && baseUploadResult.StatusCode == HttpStatusCode.OK)
+            {
+                return Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = baseUploadResult.SecureUrl.AbsoluteUri, DeleteHash = baseUploadResult.PublicId });
+            }
+            else
+            {
+                var errorResult = baseUploadResult; // Use baseUploadResult if available, otherwise null
+                _logger.LogError("Failed to upload file to Cloudinary. Status: {StatusCode}. Error: {Error}", errorResult?.StatusCode, errorResult?.Error?.Message);
+                return Result<FileStorageResultDto>.Failure($"Failed to upload file to Cloudinary. Status: {errorResult?.StatusCode}, Error: {errorResult?.Error?.Message}", "CloudinaryUploadError");
             }
         }
         catch (Exception ex)
@@ -116,10 +145,11 @@ public class CloudinaryFileStorageService : IFileStorageService
         {
             return Result.Failure("Invalid file path or public ID for deletion.", "CloudinaryDeleteError");
         }
-
+        var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
+        var resourceType = GetCloudinaryResourceType(fileExtension);
         var deletionParams = new DeletionParams(publicId)
         {
-            ResourceType = ResourceType.Image // Or other resource type if needed
+            ResourceType = resourceType // Use dynamic resource type
         };
 
         try
@@ -162,6 +192,18 @@ public class CloudinaryFileStorageService : IFileStorageService
         // Remove extension from filename to use as public ID
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         return $"{_rootFolder}_{nameWithoutExtension}";
+    }
+
+    private CloudinaryDotNet.Actions.ResourceType GetCloudinaryResourceType(string fileExtension)
+    {
+        return fileExtension switch
+        {
+            ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".svg" => ResourceType.Image,
+            ".mp4" or ".avi" or ".mov" or ".webm" => ResourceType.Video,
+            ".mp3" or ".wav" or ".ogg" or ".flac" => ResourceType.Video, // Cloudinary often treats audio as video resource type
+            ".pdf" => ResourceType.Raw, // PDFs are treated as raw files in Cloudinary
+            _ => ResourceType.Raw // Default to raw for unknown types
+        };
     }
 
     private string? ExtractPublicIdFromUrl(string fileUrl)
@@ -225,20 +267,5 @@ public class CloudinaryFileStorageService : IFileStorageService
         }
     }
 
-    // Reuse the GetContentType method from CloudflareR2FileStorageService
-    private string GetContentType(string fileName)
-    {
-        var extension = Path.GetExtension(fileName).ToLowerInvariant();
-        return extension switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            ".mp4" => "video/mp4",
-            ".pdf" => "application/pdf",
-            ".webp" => "image/webp",
-            ".svg" => "image/svg+xml",
-            _ => "application/octet-stream" // Default to binary stream
-        };
-    }
+
 }

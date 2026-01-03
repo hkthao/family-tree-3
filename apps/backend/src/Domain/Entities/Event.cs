@@ -125,11 +125,6 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         string? location = null
     )
     {
-        // Validation: Must be a Solar event
-        if (CalendarType != CalendarType.Solar)
-        {
-            throw new InvalidOperationException("Cannot update Solar properties for a Lunar event.");
-        }
         if (solarDate == default)
         {
             throw new ArgumentException("Solar event must have a valid SolarDate.", nameof(solarDate));
@@ -139,6 +134,8 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         Code = code;
         Description = description;
         SolarDate = solarDate;
+        LunarDate = null; // Ensure LunarDate is null for Solar events
+        CalendarType = CalendarType.Solar; // Ensure CalendarType is Solar
         RepeatRule = repeatRule;
         Type = type;
         Color = color;
@@ -158,11 +155,6 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         string? location = null
     )
     {
-        // Validation: Must be a Lunar event
-        if (CalendarType != CalendarType.Lunar)
-        {
-            throw new InvalidOperationException("Cannot update Lunar properties for a Solar event.");
-        }
         if (lunarDate == null)
         {
             throw new ArgumentException("Lunar event must have a valid LunarDate.", nameof(lunarDate));
@@ -171,7 +163,9 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         Name = name;
         Code = code;
         Description = description;
+        SolarDate = null; // Ensure SolarDate is null for Lunar events
         LunarDate = lunarDate;
+        CalendarType = CalendarType.Lunar; // Ensure CalendarType is Lunar
         RepeatRule = repeatRule;
         Type = type;
         Color = color;
