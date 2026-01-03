@@ -1,48 +1,25 @@
 <template>
-  <v-navigation-drawer
-    v-model="mediaPickerStore.drawer"
-    location="right"
-    width="650"
-    temporary
-    class="media-picker-drawer"
-  >
+  <v-navigation-drawer v-model="mediaPickerStore.drawer" location="right" width="650" temporary
+    class="media-picker-drawer">
     <v-card-title class="d-flex align-center justify-space-between">
-     <v-btn icon variant="text" @click="mediaPickerStore.closeDrawer()">
+      <v-btn icon variant="text" @click="mediaPickerStore.closeDrawer()">
         <v-icon>mdi-close</v-icon>
       </v-btn>
       {{ t('common.selectMedia') }}
-      <v-spacer/>
+      <v-spacer />
     </v-card-title>
-    <v-card-text class="pa-0">
-      <VFileUpload
-        v-if="mediaPickerStore.allowUpload"
-        v-model="fileToUpload"
-        :label="t('familyMedia.form.fileLabel')"
-        prepend-icon="mdi-paperclip"
-        :multiple="true"
-        show-size
-        :clearable="true"
-        @update:modelValue="handleFilesUpdate"
-      ></VFileUpload>
-      <v-btn
-        v-if="mediaPickerStore.allowUpload && fileToUpload.length > 0"
-        color="primary"
-        class="mt-2"
-        :loading="isUploading"
-        :disabled="isUploading"
-        @click="uploadFiles"
-      >
+    <v-card-text>
+      <VFileUpload v-if="mediaPickerStore.allowUpload" v-model="fileToUpload" :label="t('familyMedia.form.fileLabel')"
+        prepend-icon="mdi-paperclip" :multiple="true" show-size :clearable="true"
+        @update:modelValue="handleFilesUpdate"></VFileUpload>
+      <v-btn v-if="mediaPickerStore.allowUpload && fileToUpload.length > 0" color="primary" class="mt-2"
+        :loading="isUploading" :disabled="isUploading" @click="uploadFiles">
         {{ t('familyMedia.upload.uploadButton') }}
       </v-btn>
 
-      <MediaPickerContent
-        v-if="mediaPickerStore.familyId"
-        :family-id="mediaPickerStore.familyId"
-        :selection-mode="mediaPickerStore.selectionMode"
-        v-model:selectedMedia="selectedMediaIds"
-        @update:selectedMedia="handleSelectionUpdate"
-        :allow-delete="mediaPickerStore.allowDelete"
-      />
+      <MediaPickerContent v-if="mediaPickerStore.familyId" :family-id="mediaPickerStore.familyId"
+        :selection-mode="mediaPickerStore.selectionMode" v-model:selectedMedia="selectedMediaIds"
+        @update:selectedMedia="handleSelectionUpdate" :allow-delete="mediaPickerStore.allowDelete" />
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
       <v-btn variant="text" @click="mediaPickerStore.closeDrawer()">{{ t('common.cancel') }}</v-btn>
@@ -127,6 +104,7 @@ const confirmSelection = () => {
 
 <style scoped>
 .media-picker-drawer {
-  z-index: 1000; /* Ensure it's above other content */
+  z-index: 1000;
+  /* Ensure it's above other content */
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div>
     <!-- Tabs for media type filtering -->
     <v-tabs v-model="mediaTypeFilter" show-arrows>
       <v-tab :value="MediaType.Image">{{ t('common.mediaType.Image') }}</v-tab>
@@ -174,14 +174,13 @@
         :disabled="queryLoading"
       ></v-pagination>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n'; // Import useI18n
 import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
-import { VContainer, VTabs, VTab, VWindow, VWindowItem, VPagination, VImg, VIcon, VSkeletonLoader, VCard, VCardText, VBtn } from 'vuetify/components'; // Add VBtn
 import { MediaType } from '@/types/enums'; // Use MediaType enum from enums
 import { usePagination } from '@/composables/usePagination';
 import { useFamilyMediaQuery } from '@/composables/queries/useFamilyMediaQuery';
