@@ -10,11 +10,11 @@ class ReplicateService:
         if not settings.REPLICATE_API_TOKEN:
             logger.error("REPLICATE_API_TOKEN is not set in environment variables.")
             raise ValueError("REPLICATE_API_TOKEN is not set in environment variables.")
-        
+
         replicate.api_token = settings.REPLICATE_API_TOKEN
         # XTTS model version from Coqui
         # Ensure this is the correct and desired model version
-        self.xtts_model_version = "coqui-ai/xtts-v2:da77ab6759beb2c0757476916ad17de431d105ee26d360256a42795a632bb0d7"
+        self.xtts_model_version = "coqui-ai/xtts-v2:e876df565d4d629da440ce5820d1d2c8c2adb963f52e526efc064911f841f85e"
         logger.info("ReplicateService initialized with XTTS model version: %s", self.xtts_model_version)
 
     async def generate_voice(self, speaker_wav_url: str, text: str, language: str) -> str:
