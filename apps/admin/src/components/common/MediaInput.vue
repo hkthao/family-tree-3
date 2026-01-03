@@ -1,23 +1,8 @@
 <template>
-  <div>
-    <v-text-field
-      :label="label"
-      :value="displayValue"
-      readonly
-      @click="openMediaPicker"
-      prepend-inner-icon="mdi-image-multiple"
-      clearable
-      @click:clear="clearSelection"
-    ></v-text-field>
-
+  <v-sheet class="d-flex flex-column border rounded pa-2">
     <div v-if="selectedMediaLocal.length > 0 && selectionMode === 'multiple'" class="d-flex flex-wrap mt-2">
-      <v-chip
-        v-for="media in selectedMediaLocal"
-        :key="media.id"
-        class="ma-1"
-        :closable="!isDeleting"
-        @click:close="removeMedia(media.id)"
-      >
+      <v-chip v-for="media in selectedMediaLocal" :key="media.id" class="ma-1" :closable="!isDeleting"
+        @click:close="removeMedia(media.id)">
         <span v-if="isDeleting" class="mr-2">
           <v-progress-circular indeterminate size="16" width="2"></v-progress-circular>
         </span>
@@ -34,11 +19,16 @@
         {{ selectedMediaLocal[0].fileName }}
       </v-chip>
     </div>
-  </div>
+    <div class="mt-4 text-center">
+      <v-btn :prepend-icon="'mdi-image-multiple'" @click="openMediaPicker" class="flex-grow-1 justify-start">
+        <span class="text-truncate">{{ label }}</span>
+      </v-btn>
+    </div>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n'; // Import useI18n
 import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import type { FamilyMedia } from '@/types';
@@ -87,17 +77,6 @@ watch(() => props.modelValue, (newVal) => {
     selectedMediaLocal.value = [];
   }
 }, { deep: true });
-
-
-const displayValue = computed(() => {
-  if (selectedMediaLocal.value.length === 0) {
-    return '';
-  }
-  if (props.selectionMode === 'single') {
-    return selectedMediaLocal.value[0]?.fileName || '';
-  }
-  return `${selectedMediaLocal.value.length} media selected`;
-});
 
 const openMediaPicker = async () => {
   try {

@@ -8,9 +8,8 @@
       </v-col>
       <v-col cols="12" v-if="!readOnly">
         <MediaInput v-model="editableVoiceProfile.rawAudioUrls" :label="t('voiceProfile.form.audioUrls')"
-          :family-id="familyId" selection-mode="single" :initial-media-type="MediaType.Audio"
-          :rules="voiceProfileRules.rawAudioUrls" data-testid="voice-profile-audio-urls" :allow-upload="true"
-          :allow-delete="true"></MediaInput>
+          :family-id="familyId" selection-mode="multiple" :initial-media-type="MediaType.Audio"
+          :rules="voiceProfileRules.rawAudioUrls" data-testid="voice-profile-audio-urls"></MediaInput>
       </v-col>
 
       <v-col cols="12">
