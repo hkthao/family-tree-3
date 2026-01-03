@@ -90,7 +90,7 @@ async def remove_low_energy(audio_path: str, output_path: str, threshold_dbfs: i
         raise
 
 
-async def normalize_audio(audio_path: str, output_path: str, target_dbfs: int = -1):
+async def normalize_audio(audio_path: str, output_path: str, target_dbfs: int = -3):
     """
     Normalizes the loudness of an audio file to a target dBFS.
     """
@@ -154,7 +154,7 @@ async def apply_vad(input_path: str, output_path: str):
         # Export to raw PCM for VAD
         raw_audio_data = audio.raw_data
 
-        vad = webrtcvad.Vad(3)  # Aggressiveness mode (0 to 3, 3 is most aggressive)
+        vad = webrtcvad.Vad(1)  # Aggressiveness mode (0 to 3, 1 is often a good balance for speech quality)
         frames = _frame_generator(raw_audio_data, _VAD_SAMPLE_RATE, _VAD_FRAME_DURATION_MS, _VAD_BYTES_PER_SAMPLE)
 
         # Collect speech segments
@@ -202,9 +202,8 @@ async def process_single_audio(input_path: str, output_path: str) -> float:
     current_audio_path = input_path
 
     try:
-        # Step 1 & 2: Load audio, convert to WAV, mono, 16kHz, 16-bit
-        # Pydub handles various formats on load, then we standardize.
-        # Initial conversion to standardized WAV for subsequent steps
+        # Step 1: Load audio and standardize to WAV, mono, 16kHz, 16-bit
+        # This ensures all subsequent processing steps work with a consistent audio format.
         standardized_wav_path = tempfile.mktemp(suffix=".wav")
         temp_files.append(standardized_wav_path)
 
@@ -214,27 +213,41 @@ async def process_single_audio(input_path: str, output_path: str) -> float:
         audio = audio.set_sample_width(_VAD_BYTES_PER_SAMPLE)
         audio.export(standardized_wav_path, format="wav")
         current_audio_path = standardized_wav_path
-        logger.info(f"Standardized audio to WAV, mono, 16kHz at {current_audio_path}")
+        logger.info(f"Standardized audio to WAV, mono, 16kHz, 16-bit at {current_audio_path}")
 
-        # Step 3: Apply noise reduction
+        # Step 2: Apply noise reduction
+        # Applying noise reduction early, after standardization, helps remove
+        # constant background noise before VAD or normalization can be affected.
         denoised_path = tempfile.mktemp(suffix=".wav")
         temp_files.append(denoised_path)
         await reduce_noise(current_audio_path, denoised_path)
         current_audio_path = denoised_path
 
-        # Step 4: Apply Voice Activity Detection (VAD)
+        # Step 3: Apply Voice Activity Detection (VAD)
+        # VAD is applied after noise reduction to more accurately identify speech segments
+        # and remove silent or noisy non-speech parts.
         vad_processed_path = tempfile.mktemp(suffix=".wav")
         temp_files.append(vad_processed_path)
         await apply_vad(current_audio_path, vad_processed_path)
         current_audio_path = vad_processed_path
 
-        # Check if VAD removed all audio (e.g., only noise)
-        if not os.path.exists(current_audio_path) or await get_audio_duration(current_audio_path) < 0.01:  # Check duration after VAD
+        # Check if VAD removed all audio (e.g., only noise or very faint speech)
+        if not os.path.exists(current_audio_path) or await get_audio_duration(current_audio_path) < 0.01:
             logger.warning(f"VAD removed all audio for {input_path}. Returning a short silent audio.")
             AudioSegment.silent(duration=100, frame_rate=_VAD_SAMPLE_RATE).export(output_path, format="wav")
             return 0.1  # Return a minimal duration
 
-        # Step 5: Remove low-energy segments (additional filtering after VAD)
+        # Step 4: Normalize audio
+        # Normalization is done after noise reduction and VAD to ensure that only
+        # relevant speech (with reduced noise) is amplified to the target loudness.
+        normalized_path = tempfile.mktemp(suffix=".wav")
+        temp_files.append(normalized_path)
+        await normalize_audio(current_audio_path, normalized_path)
+        current_audio_path = normalized_path
+
+        # Step 5: Remove low-energy segments (final guard after VAD and normalization)
+        # This step acts as a final filter to catch any residual very low-energy segments
+        # that might have slipped past VAD or resulted from aggressive noise reduction.
         low_energy_removed_path = tempfile.mktemp(suffix=".wav")
         temp_files.append(low_energy_removed_path)
         await remove_low_energy(current_audio_path, low_energy_removed_path)
@@ -246,13 +259,7 @@ async def process_single_audio(input_path: str, output_path: str) -> float:
             AudioSegment.silent(duration=100, frame_rate=_VAD_SAMPLE_RATE).export(output_path, format="wav")
             return 0.1  # Return a minimal duration
 
-        # Step 6: Normalize audio
-        normalized_path = tempfile.mktemp(suffix=".wav")
-        temp_files.append(normalized_path)
-        await normalize_audio(current_audio_path, normalized_path)
-        current_audio_path = normalized_path
-
-        # Step 7 & 8: Move final processed audio to output_path and get duration
+        # Step 6: Move final processed audio to output_path and get duration
         os.rename(current_audio_path, output_path)
         duration = await get_audio_duration(output_path)
         logger.info(f"Finished single audio processing pipeline for {input_path}. Output saved to {output_path}. Duration: {duration:.2f}s")

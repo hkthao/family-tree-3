@@ -1,4 +1,5 @@
 import tempfile
+import shutil
 from typing import List, Tuple
 from loguru import logger
 from app.utils import audio_utils
@@ -74,7 +75,7 @@ class PreprocessService:
                 for path in downloaded_paths + processed_paths:  # merged_audio_temp_file is moved, not deleted here
                     if path.exists():
                         os.remove(path)
-                os.rmdir(temp_dir_path)
+                shutil.rmtree(temp_dir_path)
                 logger.info(f"Cleaned up temporary directory: {temp_dir_path}")
 
 
