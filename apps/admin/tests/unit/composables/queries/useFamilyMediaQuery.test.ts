@@ -40,6 +40,10 @@ describe('useFamilyMediaQuery', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFamilyMediaService.search.mockReturnValue(Promise.resolve({
+      ok: true,
+      value: { items: [], totalItems: 0, page: 1, totalPages: 1 }
+    }));
   });
 
   it('should call useQuery with correct parameters', () => {
@@ -147,10 +151,9 @@ describe('useFamilyMediaQuery', () => {
       page: 1, // Added
       totalPages: 1, // Added
     };
-    mockFamilyMediaService.search.mockResolvedValueOnce({ ok: true, value: mockData }); // Add this line
-    let queryFn: Function | undefined;
+    let queryFn: (() => Promise<Paginated<FamilyMedia>>) | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
-      queryFn = (options as any).queryFn as Function;
+      queryFn = (options as any).queryFn as (() => Promise<Paginated<FamilyMedia>>);
       return {
         data: ref(mockData), // Ensure data is provided for the queryFn to return
         isPending: ref(false),
@@ -178,9 +181,9 @@ describe('useFamilyMediaQuery', () => {
     const errorMessage = 'Failed to fetch media from service';
     mockFamilyMediaService.search.mockResolvedValueOnce({ ok: false, error: { message: errorMessage, code: 500 } });
 
-    let queryFn: Function | undefined;
+    let queryFn: (() => Promise<Paginated<FamilyMedia>>) | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
-      queryFn = (options as any).queryFn as Function;
+      queryFn = (options as any).queryFn as (() => Promise<Paginated<FamilyMedia>>);
       return {
         data: ref(null),
         isPending: ref(false),
