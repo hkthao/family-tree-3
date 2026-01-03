@@ -136,7 +136,7 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
         // 4. Create new Event entities, using new member IDs for related members
         foreach (var eventDto in request.FamilyData.Events)
         {
-            System.Console.WriteLine($"ImportFamilyCommandHandler Debug: Processing Event DTO. CalendarType: {eventDto.CalendarType} ({(int)eventDto.CalendarType}). Type: {eventDto.CalendarType.GetType().FullName}");
+    
             Event newEvent;
             string eventCode = eventDto.Code ?? GenerateUniqueCode("EVT");
 
