@@ -41,7 +41,7 @@ class PreprocessService:
                 downloaded_paths.append(downloaded_file)
 
                 duration = await audio_utils.process_single_audio(str(downloaded_file), str(processed_file))
-                if duration < 20.0: # Check duration after processing
+                if duration < 20.0:  # Check duration after processing
                     raise ValueError(f"Processed audio from {url} is too short ({duration:.2f}s). Minimum 20s required.")
                 processed_paths.append(processed_file)
 
@@ -71,7 +71,7 @@ class PreprocessService:
         finally:
             # Clean up temporary downloaded and processed files in the temp_dir_path
             if temp_dir_path and temp_dir_path.exists():
-                for path in downloaded_paths + processed_paths: # merged_audio_temp_file is moved, not deleted here
+                for path in downloaded_paths + processed_paths:  # merged_audio_temp_file is moved, not deleted here
                     if path.exists():
                         os.remove(path)
                 os.rmdir(temp_dir_path)
@@ -79,6 +79,7 @@ class PreprocessService:
 
 
 _preprocess_service_instance: PreprocessService = None
+
 
 def get_preprocess_service() -> PreprocessService:
     global _preprocess_service_instance

@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from loguru import logger
@@ -7,23 +8,29 @@ from app.services.preprocess_service import PreprocessService, get_preprocess_se
 from app.services.replicate_service import ReplicateService, get_replicate_service
 # No need for storage_service directly in generate, as Replicate returns URL
 
+
 router = APIRouter(prefix="/voice", tags=["Voice"])
+
 
 # --- Pydantic Models ---
 class PreprocessRequest(BaseModel):
     audio_urls: List[str] = Field(..., description="List of URLs to audio files to be preprocessed.")
 
+
 class PreprocessResponse(BaseModel):
     processed_audio_url: str = Field(..., description="URL of the combined and processed audio file.")
     duration: float = Field(..., description="Total duration of the processed audio file in seconds.")
+
 
 class GenerateRequest(BaseModel):
     speaker_wav_url: str = Field(..., description="URL of the speaker's WAV audio for voice cloning.")
     text: str = Field(..., min_length=1, max_length=1000, description="Text to be converted to speech.")
     language: str = Field("vi", description="Language of the text (e.g., 'en', 'vi').")
 
+
 class GenerateResponse(BaseModel):
     audio_url: str = Field(..., description="URL of the generated audio file.")
+
 
 # --- API Endpoints ---
 @router.post("/preprocess", response_model=PreprocessResponse, status_code=200)
@@ -35,7 +42,7 @@ async def preprocess_voice(
     Tiền xử lý nhiều đoạn audio giọng nói thành 1 file WAV sạch.
     """
     logger.info(f"Received /preprocess request for {len(request.audio_urls)} audio URLs.")
-    # logger.debug(f"Audio URLs: {request.audio_urls}") # Avoid logging sensitive/long data
+    # logger.debug(f"Audio URLs: {request.audio_urls}")  # Avoid logging sensitive/long data
 
     try:
         processed_url, duration = await preprocess_service.process_audio_pipeline(request.audio_urls)
@@ -58,7 +65,7 @@ async def generate_voice(
     Sinh audio giọng nói từ text dựa trên giọng mẫu đã preprocess.
     """
     logger.info(f"Received /generate request. Speaker WAV: {request.speaker_wav_url}, Language: {request.language}")
-    # logger.debug(f"Text to generate: {request.text}") # Avoid logging sensitive/long data
+    # logger.debug(f"Text to generate: {request.text}")  # Avoid logging sensitive/long data
 
     # 1. Validate text
     if not request.text or len(request.text) > 1000:
@@ -76,7 +83,7 @@ async def generate_voice(
         )
         logger.info(f"Successfully generated voice. Audio URL: {audio_url}")
         return GenerateResponse(audio_url=audio_url)
-    except ValueError as e: # This is for Replicate API errors or custom service errors
+    except ValueError as e:  # This is for Replicate API errors or custom service errors
         logger.error(f"Error from Replicate service during voice generation: {e}")
         # Task.md specifies 502 for Replicate timeout, 400 for other errors.
         # Here we catch general ValueError from replicate_service

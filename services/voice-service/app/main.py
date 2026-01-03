@@ -19,20 +19,25 @@ logger.add(
 )
 logger.info("Starting Voice AI Service application...")
 
+
 app = FastAPI(
     title="Python Voice AI Service",
     description="A FastAPI service for voice preprocessing and AI-powered voice generation.",
     version="1.0.0",
 )
 
+
 # Mount static files directory
 app.mount("/static", StaticFiles(directory=settings.STATIC_FILES_DIR), name="static")
 
+
 app.include_router(voice_router)
+
 
 @app.get("/")
 async def root():
     return {"message": "Python Voice AI Service is running! Access API docs at /docs"}
+
 
 async def cleanup_static_files():
     """
@@ -51,7 +56,8 @@ async def cleanup_static_files():
                         logger.info(f"Deleted old static file: {filepath}")
                     except OSError as e:
                         logger.error(f"Error deleting old static file {filepath}: {e}")
-        await asyncio.sleep(600) # Run cleanup every 10 minutes
+        await asyncio.sleep(600)  # Run cleanup every 10 minutes
+
 
 @app.on_event("startup")
 async def startup_event():

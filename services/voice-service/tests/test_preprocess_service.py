@@ -1,17 +1,19 @@
 import pytest
 import os
 import tempfile
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock
 from pathlib import Path
 
 from app.services.preprocess_service import PreprocessService
 from app.config import settings
+
 
 # Fixture for a temporary directory
 @pytest.fixture
 def temp_dir():
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
+
 
 # Fixture to clear and reset STATIC_FILES_DIR before and after each test
 @pytest.fixture(autouse=True)
@@ -33,20 +35,20 @@ def setup_static_files_dir():
 async def test_process_audio_pipeline_success(temp_dir, mocker):
     service = PreprocessService()
     audio_urls = ["http://example.com/audio1.mp3", "http://example.com/audio2.m4a"]
-    
+
     # Mock audio_utils functions
     mock_download_audio = mocker.patch("app.utils.audio_utils.download_audio", new_callable=AsyncMock)
     mock_process_single_audio = mocker.patch("app.utils.audio_utils.process_single_audio", new_callable=AsyncMock)
     mock_concatenate_audios = mocker.patch("app.utils.audio_utils.concatenate_audios", new_callable=AsyncMock)
 
     # Configure mock return values
-    mock_process_single_audio.side_effect = [25.0, 30.0] # durations > 20s
-    
+    mock_process_single_audio.side_effect = [25.0, 30.0]  # durations > 20s
+
     def mock_concat_audios_side_effect(input_paths, output_path):
         # Create a dummy WAV file at the output_path
         with open(output_path, "wb") as f:
             f.write(b"dummy wav data")
-        return 55.0 # return the duration
+        return 55.0  # return the duration
 
     mock_concatenate_audios.side_effect = mock_concat_audios_side_effect
 
@@ -58,7 +60,7 @@ async def test_process_audio_pipeline_success(temp_dir, mocker):
     mock_process_single_audio.assert_called()
     assert mock_process_single_audio.call_count == 2
     mock_concatenate_audios.assert_called_once()
-    
+
     # Check if a file was moved to STATIC_FILES_DIR
     assert len(list(settings.STATIC_FILES_DIR.iterdir())) == 1
     final_file = list(settings.STATIC_FILES_DIR.iterdir())[0]
@@ -86,11 +88,11 @@ async def test_process_audio_pipeline_short_audio(temp_dir, mocker):
     mock_process_single_audio = mocker.patch("app.utils.audio_utils.process_single_audio", new_callable=AsyncMock)
     mocker.patch("app.utils.audio_utils.concatenate_audios", new_callable=AsyncMock)
 
-    mock_process_single_audio.return_value = 15.0 # duration < 20s
+    mock_process_single_audio.return_value = 15.0  # duration < 20s
 
     with pytest.raises(ValueError, match="is too short"):
         await service.process_audio_pipeline(audio_urls)
-    
+
     # Ensure no files were left in static_files_dir if processing failed early
     assert len(list(settings.STATIC_FILES_DIR.iterdir())) == 0
 

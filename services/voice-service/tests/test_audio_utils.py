@@ -1,10 +1,10 @@
 import pytest
 import os
 import tempfile
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock
 from pydub import AudioSegment
 import numpy as np
-import httpx # Added import for httpx
+import httpx  # Added import for httpx
 
 # Import the module itself, not just functions, to allow patching its attributes
 import app.utils.audio_utils as audio_utils_module
@@ -13,11 +13,11 @@ import app.utils.audio_utils as audio_utils_module
 # Helper to create an audio segment with a specified dBFS
 def create_audio_with_dbfs(duration_ms: int, frame_rate: int, target_dbfs: int) -> AudioSegment:
     # Generate a simple sine wave using numpy
-    samples = np.array([int(10000 * np.sin(2 * np.pi * 440 * i / frame_rate)) for i in range(0, frame_rate * duration_ms // 1000)]) # Reduced amplitude to avoid clipping
+    samples = np.array([int(10000 * np.sin(2 * np.pi * 440 * i / frame_rate)) for i in range(0, frame_rate * duration_ms // 1000)])  # Reduced amplitude to avoid clipping
     audio = AudioSegment(
         samples.tobytes(),
         frame_rate=frame_rate,
-        sample_width=2, # 16-bit
+        sample_width=2,  # 16-bit
         channels=1
     )
     # Adjust its gain to reach the target dBFS
@@ -51,43 +51,45 @@ def dummy_mp3_file(temp_dir):
 
 
 @pytest.mark.asyncio
-async def test_download_audio_success(temp_dir):
+async def test_download_audio_success(temp_dir, mocker):
     url = "http://example.com/audio.wav"
     output_path = os.path.join(temp_dir, "downloaded.wav")
     mock_content = b"dummy audio data"
 
-    with patch("httpx.AsyncClient") as MockAsyncClient:
-        mock_response = MagicMock()
-        mock_response.content = mock_content
-        mock_response.raise_for_status = MagicMock()
-        MockAsyncClient.return_value.__aenter__.return_value.get.return_value = (
-            mock_response
-        )
+    mock_client_instance = AsyncMock()
+    mock_client_instance.__aenter__.return_value = mock_client_instance
+    mock_response = mocker.MagicMock()
+    mock_response.raise_for_status = mocker.MagicMock()
+    mock_response.content = mock_content
+    mock_client_instance.get.return_value = mock_response
 
-        await audio_utils_module.download_audio(url, output_path)
+    mocker.patch("httpx.AsyncClient", return_value=mock_client_instance)
 
-        assert os.path.exists(output_path)
-        with open(output_path, "rb") as f:
-            assert f.read() == mock_content
-        # Corrected assertion to match actual call arguments
-        MockAsyncClient.return_value.__aenter__.return_value.get.assert_called_once_with(
-            url, follow_redirects=True, timeout=30.0 # Added these arguments
-        )
+    await audio_utils_module.download_audio(url, output_path)
+
+    assert os.path.exists(output_path)
+    with open(output_path, "rb") as f:
+        assert f.read() == mock_content
+    # Corrected assertion to match actual call arguments
+    mock_client_instance.get.assert_called_once_with(
+        url, follow_redirects=True, timeout=30.0  # Added these arguments
+    )
 
 
 @pytest.mark.asyncio
-async def test_download_audio_failure(temp_dir):
+async def test_download_audio_failure(temp_dir, mocker):
     url = "http://example.com/nonexistent.wav"
     output_path = os.path.join(temp_dir, "downloaded.wav")
 
-    with patch("httpx.AsyncClient") as MockAsyncClient:
-        MockAsyncClient.return_value.__aenter__.return_value.get.side_effect = (
-            httpx.RequestError("Download failed", request=MagicMock())
-        )
+    mock_client_instance = AsyncMock()
+    mock_client_instance.__aenter__.return_value = mock_client_instance
+    mock_client_instance.get.side_effect = httpx.RequestError("Download failed", request=mocker.MagicMock())
 
-        with pytest.raises(ValueError, match="Failed to download audio"):
-            await audio_utils_module.download_audio(url, output_path)
-        assert not os.path.exists(output_path)
+    mocker.patch("httpx.AsyncClient", return_value=mock_client_instance)
+
+    with pytest.raises(ValueError, match="Failed to download audio"):
+        await audio_utils_module.download_audio(url, output_path)
+    assert not os.path.exists(output_path)
 
 
 @pytest.mark.asyncio
@@ -100,12 +102,12 @@ async def test_process_single_audio_wav(temp_dir, dummy_mp3_file, mocker):
     mock_apply_vad = mocker.patch("app.utils.audio_utils.apply_vad", new_callable=AsyncMock)
     mock_remove_low_energy = mocker.patch("app.utils.audio_utils.remove_low_energy", new_callable=AsyncMock)
     mock_normalize_audio = mocker.patch("app.utils.audio_utils.normalize_audio", new_callable=AsyncMock)
-    mock_get_audio_duration = mocker.patch("app.utils.audio_utils.get_audio_duration", new_callable=AsyncMock, return_value=1.0) # Mock duration for checks
+    mocker.patch("app.utils.audio_utils.get_audio_duration", new_callable=AsyncMock, return_value=1.0)  # Mock duration for checks
 
     # Simulate output files for each step
     def create_dummy_wav(input_file, output_file, *args, **kwargs):
         AudioSegment.silent(duration=500, frame_rate=16000).export(output_file, format="wav")
-    
+
     mock_reduce_noise.side_effect = create_dummy_wav
     mock_apply_vad.side_effect = create_dummy_wav
     mock_remove_low_energy.side_effect = create_dummy_wav
@@ -118,12 +120,12 @@ async def test_process_single_audio_wav(temp_dir, dummy_mp3_file, mocker):
     mock_apply_vad.assert_called_once()
     mock_remove_low_energy.assert_called_once()
     mock_normalize_audio.assert_called_once()
-    
+
     # Assertions for the final output
     assert os.path.exists(output_path)
     assert isinstance(duration, float)
-    assert duration == 1.0 # Expected duration from mock_get_audio_duration
-    
+    assert duration == 1.0  # Expected duration from mock_get_audio_duration
+
     processed_audio = AudioSegment.from_wav(output_path)
     assert processed_audio.channels == 1
     assert processed_audio.frame_rate == 16000
@@ -163,7 +165,6 @@ async def test_concatenate_audios_success(temp_dir, dummy_wav_file):
     assert os.path.exists(output_path)
     assert isinstance(total_duration, float)
 
-    combined_audio = AudioSegment.from_wav(output_path)
     # Total duration should be sum of individual durations
     expected_duration = (
         len(AudioSegment.from_wav(file1))
@@ -176,11 +177,10 @@ async def test_concatenate_audios_success(temp_dir, dummy_wav_file):
 @pytest.mark.asyncio
 async def test_concatenate_audios_empty_list(temp_dir):
     output_path = os.path.join(temp_dir, "concatenated.wav")
-    combined_audio = AudioSegment.empty()
-    combined_audio.export(output_path, format="wav")
     total_duration = await audio_utils_module.concatenate_audios([], output_path)
     assert os.path.exists(output_path)
     assert isinstance(total_duration, float)
+    assert total_duration > 0  # Should return a minimal duration from silent audio
 
 
 @pytest.mark.asyncio
@@ -191,19 +191,20 @@ async def test_remove_low_energy_success(temp_dir):
 
     # Create audio: 1s silent, 1s tone, 1s silent
     silent_part = AudioSegment.silent(duration=1000, frame_rate=16000)
-    tone_part = create_audio_with_dbfs(1000, 16000, -50) # Very low dBFS for this test
+    tone_part = create_audio_with_dbfs(1000, 16000, -50)  # Very low dBFS for this test
     audio = silent_part + tone_part + silent_part
     audio.export(input_path, format="wav")
 
     # The `remove_low_energy` function is currently implemented to remove the whole audio
     # if its overall average loudness is below the threshold.
     # So, for a low volume tone, it should remove it.
-    await audio_utils_module.remove_low_energy(input_path, output_path, threshold_dbfs=-40) # Threshold also adjusted
+    await audio_utils_module.remove_low_energy(input_path, output_path, threshold_dbfs=-40)  # Threshold also adjusted
 
     assert os.path.exists(output_path)
     processed_audio = AudioSegment.from_wav(output_path)
     # Since the dummy audio is low energy, it should be replaced by a very short silent audio
     assert len(processed_audio) < audio_utils_module._VAD_MIN_SPEECH_LEN_MS
+
 
 @pytest.mark.asyncio
 async def test_remove_low_energy_high_energy(temp_dir):
@@ -222,7 +223,8 @@ async def test_remove_low_energy_high_energy(temp_dir):
     assert os.path.exists(output_path)
     processed_audio = AudioSegment.from_wav(output_path)
     # The duration should be close to original as it's not low energy
-    assert abs(len(processed_audio) - len(audio)) < 100 # Allow small discrepancy
+    assert abs(len(processed_audio) - len(audio)) < 100  # Allow small discrepancy
+
 
 @pytest.mark.asyncio
 async def test_normalize_audio_success(temp_dir):
@@ -239,7 +241,8 @@ async def test_normalize_audio_success(temp_dir):
     normalized_audio = AudioSegment.from_wav(output_path)
 
     # Check if the normalized audio's loudness is close to the target
-    assert abs(normalized_audio.dBFS - (-5)) < 3.0 # Allow for slight floating point inaccuracies
+    assert abs(normalized_audio.dBFS - (-5)) < 3.0  # Allow for slight floating point inaccuracies
+
 
 @pytest.mark.asyncio
 async def test_normalize_audio_no_change_needed(temp_dir):
@@ -256,7 +259,7 @@ async def test_normalize_audio_no_change_needed(temp_dir):
     normalized_audio = AudioSegment.from_wav(output_path)
 
     # Check if the normalized audio's loudness is close to the target
-    assert abs(normalized_audio.dBFS - (-5)) < 3.0 # Allow for slight floating point inaccuracies
+    assert abs(normalized_audio.dBFS - (-5)) < 3.0  # Allow for slight floating point inaccuracies
 
 
 @pytest.mark.asyncio
