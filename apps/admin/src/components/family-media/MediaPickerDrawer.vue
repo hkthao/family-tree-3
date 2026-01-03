@@ -14,12 +14,34 @@
       <v-spacer/>
     </v-card-title>
     <v-card-text class="pa-0">
+      <VFileUpload
+        v-if="mediaPickerStore.allowUpload"
+        v-model="fileToUpload"
+        :label="t('familyMedia.form.fileLabel')"
+        prepend-icon="mdi-paperclip"
+        :multiple="true"
+        show-size
+        :clearable="true"
+        @update:modelValue="handleFilesUpdate"
+      ></VFileUpload>
+      <v-btn
+        v-if="mediaPickerStore.allowUpload && fileToUpload.length > 0"
+        color="primary"
+        class="mt-2"
+        :loading="isUploading"
+        :disabled="isUploading"
+        @click="uploadFiles"
+      >
+        {{ t('familyMedia.upload.uploadButton') }}
+      </v-btn>
+
       <MediaPickerContent
         v-if="mediaPickerStore.familyId"
         :family-id="mediaPickerStore.familyId"
         :selection-mode="mediaPickerStore.selectionMode"
         v-model:selectedMedia="selectedMediaIds"
         @update:selectedMedia="handleSelectionUpdate"
+        :allow-delete="mediaPickerStore.allowDelete"
       />
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
@@ -31,31 +53,34 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useI18n } from 'vue-i18n'; // Import useI18n
+import { useI18n } from 'vue-i18n';
+import { useQueryClient } from '@tanstack/vue-query';
+// Removed VFileInput as VFileUpload is used
+import { VFileUpload } from 'vuetify/labs/VFileUpload'; // Import VFileUpload
+import { useGlobalSnackbar } from '@/composables';
 import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import MediaPickerContent from './MediaPickerContent.vue';
 import type { FamilyMedia } from '@/types';
+import { useFamilyMediaUploadMutation } from '@/composables/family-media/useFamilyMediaUploadMutation'; // Import new mutation
 
-const { t } = useI18n(); // Initialize t
+const { t } = useI18n();
+const queryClient = useQueryClient(); // For invalidating queries
+const { showSnackbar } = useGlobalSnackbar();
 const mediaPickerStore = useMediaPickerDrawerStore();
-const selectedMediaLocal = ref<FamilyMedia[]>([]); // Array of full FamilyMedia objects
 
-// Computed property to convert FamilyMedia[] to string[] for MediaPickerContent prop
+const fileToUpload = ref<File[]>([]); // Changed to array of File
+const { mutateAsync: uploadMedia, isPending: isUploading } = useFamilyMediaUploadMutation(); // Use mutateAsync for awaiting multiple uploads
+
+const selectedMediaLocal = ref<FamilyMedia[]>([]);
+
 const selectedMediaIds = computed(() => selectedMediaLocal.value.map(media => media.id));
 
-// Initialize selectedMediaLocal when drawer opens or initialSelection changes
 watch(
   () => mediaPickerStore.drawer,
   (newVal) => {
     if (newVal) {
-      // Need to convert initialSelection (string[] or string) to FamilyMedia[]
-      // This is a potential weakness. Ideally, initialSelection should be FamilyMedia[]
-      // For now, we assume initialSelection only contains IDs if selectionMode is multiple,
-      // or a single ID if selectionMode is single.
-      // We won't try to fetch full FamilyMedia objects for initialSelection here,
-      // as MediaPickerContent will determine selected states based on IDs.
-      // So, selectedMediaLocal for the drawer will start empty until selection happens in content.
       selectedMediaLocal.value = [];
+      fileToUpload.value = []; // Clear file input on drawer open
     }
   },
   { immediate: true }
@@ -63,6 +88,32 @@ watch(
 
 const handleSelectionUpdate = (newSelection: FamilyMedia[]) => {
   selectedMediaLocal.value = newSelection;
+};
+
+const handleFilesUpdate = (files: File[]) => {
+  fileToUpload.value = files; // Directly assign the array of files
+};
+
+const uploadFiles = async () => {
+  if (fileToUpload.value.length === 0 || !mediaPickerStore.familyId) {
+    showSnackbar(t('familyMedia.errors.noFileSelected'), 'warning');
+    return;
+  }
+
+  const currentFamilyId = mediaPickerStore.familyId as string; // Assert as string after null check
+
+  const uploadPromises = fileToUpload.value.map(file =>
+    uploadMedia({ familyId: currentFamilyId, file: file, description: '' })
+  );
+
+  try {
+    await Promise.all(uploadPromises);
+    showSnackbar(t('familyMedia.messages.uploadSuccess'), 'success');
+    fileToUpload.value = []; // Clear input after upload
+    queryClient.invalidateQueries({ queryKey: ['familyMedia'] }); // Refresh media list
+  } catch (error: any) {
+    showSnackbar(error.message || t('familyMedia.messages.saveError'), 'error');
+  }
 };
 
 const confirmSelection = () => {

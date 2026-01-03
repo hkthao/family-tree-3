@@ -13,7 +13,7 @@
       </div>
       <div v-else-if="voiceProfile">
         <!-- PrivacyAlert if needed, based on backend DTO -->
-        <VoiceProfileForm :initial-voice-profile-data="voiceProfile" :member-id="props.memberId" :read-only="true" />
+        <VoiceProfileForm :initial-voice-profile-data="voiceProfile" :member-id="props.memberId" :family-id="props.familyId" :read-only="true" />
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
@@ -37,6 +37,10 @@ const props = defineProps({
     required: true,
   },
   voiceProfileId: {
+    type: String as PropType<string>,
+    required: true,
+  },
+  familyId: { // New prop
     type: String as PropType<string>,
     required: true,
   },

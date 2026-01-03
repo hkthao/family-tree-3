@@ -11,6 +11,8 @@ interface MediaPickerOptions {
   selectionMode?: SelectionMode;
   initialSelection?: string[] | string;
   initialMediaType?: MediaType;
+  allowUpload?: boolean; // New option
+  allowDelete?: boolean; // New option
 }
 
 export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => {
@@ -19,6 +21,8 @@ export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => 
   const selectionMode = ref<SelectionMode>('single');
   const initialSelection = ref<string[] | string>([]);
   const initialMediaType = ref<MediaType | null>(null);
+  const allowUpload = ref(false); // New state
+  const allowDelete = ref(false); // New state
 
   let resolvePromise: ((value: FamilyMedia[] | FamilyMedia | null) => void) | null = null;
   let rejectPromise: ((reason?: any) => void) | null = null;
@@ -28,6 +32,8 @@ export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => 
     selectionMode.value = options.selectionMode || 'single';
     initialSelection.value = options.initialSelection || (options.selectionMode === 'single' ? '' : []);
     initialMediaType.value = options.initialMediaType || null;
+    allowUpload.value = options.allowUpload || false; // Set new state
+    allowDelete.value = options.allowDelete || false; // Set new state
     drawer.value = true;
 
     return new Promise((resolve, reject) => {
@@ -41,6 +47,8 @@ export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => 
     familyId.value = null;
     initialSelection.value = [];
     initialMediaType.value = null;
+    allowUpload.value = false; // Reset on close
+    allowDelete.value = false; // Reset on close
     if (rejectPromise) {
       rejectPromise(new Error('Media selection cancelled'));
       resolvePromise = null;
@@ -53,6 +61,8 @@ export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => 
     familyId.value = null;
     initialSelection.value = [];
     initialMediaType.value = null;
+    allowUpload.value = false; // Reset on confirm
+    allowDelete.value = false; // Reset on confirm
     if (resolvePromise) {
       resolvePromise(selectedMedia);
       resolvePromise = null;
@@ -66,6 +76,8 @@ export const useMediaPickerDrawerStore = defineStore('mediaPickerDrawer', () => 
     selectionMode,
     initialSelection,
     initialMediaType,
+    allowUpload, // Expose new state
+    allowDelete, // Expose new state
     openDrawer,
     closeDrawer,
     confirmSelection,

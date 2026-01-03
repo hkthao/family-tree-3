@@ -2,7 +2,7 @@
 import type { IVoiceProfileService } from './voice-profile.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { Result } from '@/types';
-import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand } from '@/types';
+import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand, PreprocessAndCreateVoiceProfileCommand, VoiceProfileDto } from '@/types';
 import { ApiCrudService } from '../common/api.crud.service';
 export class ApiVoiceProfileService extends ApiCrudService<VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand> implements IVoiceProfileService {
   constructor(apiClient: ApiClientMethods) {
@@ -19,6 +19,14 @@ export class ApiVoiceProfileService extends ApiCrudService<VoiceProfile, CreateV
       );
   }
 
+  async preprocessAndCreate(
+    command: PreprocessAndCreateVoiceProfileCommand
+  ): Promise<Result<VoiceProfileDto>> {
+    return this.api.post<VoiceProfileDto>(
+      `/voice-profiles/preprocess-and-create`,
+      command
+    );
+  }
 
   async exportVoiceProfiles(memberId: string): Promise<Result<VoiceProfile[]>> {
     return this.api.get<VoiceProfile[]>(`/members/${memberId}/voice-profiles/export`);

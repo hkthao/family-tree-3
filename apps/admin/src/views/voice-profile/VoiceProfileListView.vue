@@ -30,13 +30,13 @@
 
     <!-- Edit Voice Profile Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileEditView v-if="selectedItemId && editDrawer" :member-id="props.memberId"
+      <VoiceProfileEditView v-if="selectedItemId && editDrawer" :member-id="props.memberId" :family-id="props.familyId"
         :voice-profile-id="selectedItemId" @close="handleVoiceProfileClosed" @saved="handleVoiceProfileSaved" />
     </BaseCrudDrawer>
 
     <!-- Detail Voice Profile Drawer -->
     <BaseCrudDrawer v-model="detailDrawer" @close="handleVoiceProfileClosed">
-      <VoiceProfileDetailView v-if="selectedItemId && detailDrawer" :member-id="props.memberId"
+      <VoiceProfileDetailView v-if="selectedItemId && detailDrawer" :member-id="props.memberId" :family-id="props.familyId"
         :voice-profile-id="selectedItemId" @close="handleVoiceProfileClosed" />
     </BaseCrudDrawer>
 

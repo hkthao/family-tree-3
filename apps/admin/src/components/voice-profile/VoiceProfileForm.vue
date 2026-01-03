@@ -53,9 +53,11 @@ export interface IVoiceProfileFormInstance {
   reset: () => void;
   getData: () => {
     label: string;
-    rawAudioUrls: string[];
+    audioUrl: string | null; // Changed to single string
+    durationSeconds: number;
     language: string;
     consent: boolean;
+    status: VoiceProfileStatus; // Added status
   };
 }
 
@@ -66,7 +68,7 @@ const props = defineProps({
       id: '',
       memberId: '',
       label: '',
-      rawAudioUrls: [], // Changed from audioUrl
+      audioUrl: '', // Initial audioUrl for existing profile
       durationSeconds: 0,
       language: 'vi', // Default language
       consent: false,
@@ -103,7 +105,16 @@ const editableVoiceProfile = reactive<{
   // Other VoiceProfile properties as needed for initialVoiceProfileData, but not directly for getData
 }>({
   label: props.initialVoiceProfileData.label,
-  rawAudioUrls: [], // Initialize as empty array of FamilyMedia
+  rawAudioUrls: props.initialVoiceProfileData.audioUrl ? [{
+    id: 'existing-' + props.initialVoiceProfileData.audioUrl,
+    familyId: props.initialVoiceProfileData.memberId,
+    fileName: 'Existing Audio',
+    filePath: props.initialVoiceProfileData.audioUrl,
+    mediaType: MediaType.Audio,
+    fileSize: 0,
+    created: new Date(), // Changed to new Date()
+    createdBy: 'system',
+  }] : [], // Initialize from audioUrl
   durationSeconds: props.initialVoiceProfileData.durationSeconds,
   language: props.initialVoiceProfileData.language,
   consent: props.initialVoiceProfileData.consent,
@@ -114,8 +125,16 @@ const editableVoiceProfile = reactive<{
 watch(() => props.initialVoiceProfileData, (newData) => {
   // Only update fields that are part of the form, and map audioUrl to rawAudioUrls
   editableVoiceProfile.label = newData.label;
-  // If initialVoiceProfileData has audioUrl, convert it to rawAudioUrls (for editing existing profiles)
-  editableVoiceProfile.rawAudioUrls = newData.audioUrl ? [{ id: 'existing', filePath: newData.audioUrl, fileName: 'Existing Audio', mediaType: MediaType.Audio, familyId: newData.memberId, size: 0, mimeType: 'audio/*' }] : [];
+  editableVoiceProfile.rawAudioUrls = newData.audioUrl ? [{
+    id: 'existing-' + newData.audioUrl, // Use a unique ID
+    familyId: newData.memberId,
+    fileName: 'Existing Audio',
+    filePath: newData.audioUrl,
+    mediaType: MediaType.Audio,
+    fileSize: 0, // Default or fetch actual size if available
+    created: new Date(), // Changed to new Date()
+    createdBy: 'system', // Default or actual user if available
+  }] : [];
   editableVoiceProfile.durationSeconds = newData.durationSeconds;
   editableVoiceProfile.language = newData.language;
   editableVoiceProfile.consent = newData.consent;
@@ -135,7 +154,7 @@ onMounted(() => {
 });
 
 const rules = {
-  required: (value: string) => !!value || t('common.validations.required'),
+  required: (value: string | number | FamilyMedia[]) => (value !== null && value !== undefined && (typeof value === 'string' ? value.length > 0 : (Array.isArray(value) ? value.length > 0 : true))) || t('common.validations.required'),
   // Removed url validation as MediaInput handles it implicitly
   positiveNumber: (value: number) => value > 0 || t('common.validations.positiveNumber'),
   rawAudioUrlsRequired: (value: FamilyMedia[]) => value.length > 0 || t('common.validations.required'),
@@ -155,7 +174,16 @@ defineExpose<IVoiceProfileFormInstance>({
     form.value?.reset();
     Object.assign(editableVoiceProfile, {
       label: props.initialVoiceProfileData.label,
-      rawAudioUrls: [], // Reset to empty
+      rawAudioUrls: props.initialVoiceProfileData.audioUrl ? [{
+        id: 'existing-' + props.initialVoiceProfileData.audioUrl,
+        familyId: props.initialVoiceProfileData.memberId,
+        fileName: 'Existing Audio',
+        filePath: props.initialVoiceProfileData.audioUrl,
+        mediaType: MediaType.Audio,
+        fileSize: 0,
+        created: new Date(), // Changed to new Date()
+        createdBy: 'system',
+      }] : [],
       durationSeconds: props.initialVoiceProfileData.durationSeconds,
       language: props.initialVoiceProfileData.language,
       consent: props.initialVoiceProfileData.consent,
@@ -164,11 +192,15 @@ defineExpose<IVoiceProfileFormInstance>({
   },
   getData: () => ({
     label: editableVoiceProfile.label,
-    rawAudioUrls: editableVoiceProfile.rawAudioUrls.map(media => media.filePath), // Extract filePaths
+    audioUrl: editableVoiceProfile.rawAudioUrls.length > 0 ? editableVoiceProfile.rawAudioUrls[0].filePath : null, // Take first URL
+    durationSeconds: editableVoiceProfile.durationSeconds,
     language: editableVoiceProfile.language,
     consent: editableVoiceProfile.consent,
+    status: editableVoiceProfile.status,
   }),
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Add any specific styles for VoiceProfileForm here */
+</style>

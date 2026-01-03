@@ -32,8 +32,11 @@ vi.mock('@/constants/queryKeys', () => ({
 }));
 
 describe('useFamilyMediaQuery', () => {
-  const mockListOptions = ref<ListOptions>({ page: 1, itemsPerPage: 10 });
-  const mockFilters = ref<FamilyMediaFilter>({ familyId: 'family123', mediaType: MediaType.Image });
+  const mockListOptionsRef = ref<ListOptions>({ page: 1, itemsPerPage: 10 });
+  const mockFiltersRef = ref<FamilyMediaFilter>({ familyId: 'family123', mediaType: MediaType.Image });
+
+  const mockListOptions = computed(() => mockListOptionsRef.value);
+  const mockFilters = computed(() => mockFiltersRef.value);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -53,7 +56,8 @@ describe('useFamilyMediaQuery', () => {
     useFamilyMediaQuery(mockListOptions, mockFilters);
 
     expect(useQuery).toHaveBeenCalledOnce();
-    const [options] = vi.mocked(useQuery).mock.calls[0];
+    const [optionsArg] = vi.mocked(useQuery).mock.calls[0];
+    const options = optionsArg as any; // Cast to any to resolve typing issue
 
     expect(options.queryKey.value).toEqual(['familyMedia', 'list', mockListOptions.value, mockFilters.value]);
     expect(options.staleTime).toBe(1000 * 60 * 5); // 5 minutes
@@ -63,11 +67,11 @@ describe('useFamilyMediaQuery', () => {
   it('should return family media data, total items, loading and error states', async () => {
     const mockData: Paginated<FamilyMedia> = {
       items: [
-        { id: '1', fileName: 'test1.jpg', filePath: '/path/to/test1.jpg', mediaType: MediaType.Image, familyId: 'family123', fileSize: 1000, mimeType: 'image/jpeg' },
+        { id: '1', fileName: 'test1.jpg', filePath: '/path/to/test1.jpg', mediaType: MediaType.Image, familyId: 'family123', fileSize: 1000, created: new Date() }, // Changed to new Date()
       ],
       totalItems: 1,
-      page: 1,
-      itemsPerPage: 10,
+      page: 1, // Added
+      totalPages: 1, // Added
     };
 
     // Mock useQuery to return data
@@ -122,14 +126,12 @@ describe('useFamilyMediaQuery', () => {
     const mockData: Paginated<FamilyMedia> = {
       items: [],
       totalItems: 0,
-      page: 1,
-      itemsPerPage: 10,
+      page: 1, // Added
+      totalPages: 1, // Added
     };
-    mockFamilyMediaService.search.mockResolvedValueOnce({ ok: true, value: mockData });
-
     let queryFn: Function | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
-      queryFn = options.queryFn as Function;
+      queryFn = (options as any).queryFn as Function;
       return computed(() => ({
         data: ref(null),
         isPending: ref(false),
@@ -156,7 +158,7 @@ describe('useFamilyMediaQuery', () => {
 
     let queryFn: Function | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
-      queryFn = options.queryFn as Function;
+      queryFn = (options as any).queryFn as Function;
       return computed(() => ({
         data: ref(null),
         isPending: ref(false),

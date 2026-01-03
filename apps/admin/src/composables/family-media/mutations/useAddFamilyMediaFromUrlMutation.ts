@@ -16,7 +16,7 @@ export const useAddFamilyMediaFromUrlMutation = () => {
       throw response.error;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.familyMedia.list({ familyId: variables.familyId }) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.familyMedia.list({}, { familyId: variables.familyId }) });
     },
   });
 };

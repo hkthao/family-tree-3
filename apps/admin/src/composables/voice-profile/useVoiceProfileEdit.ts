@@ -45,9 +45,13 @@ export function useVoiceProfileEdit(options: UseVoiceProfileEditOptions) {
 
     const formData = options.formRef.value.getData();
     const command: UpdateVoiceProfileCommand = {
-      ...formData,
-      id: options.voiceProfileId, // Ensure ID is part of the command
-      // memberId: options.memberId, // MemberId is passed via URL, not in the body for update
+      id: options.voiceProfileId,
+      label: formData.label,
+      audioUrl: formData.audioUrl || '', // Ensure it's a string, even if null from MediaInput
+      durationSeconds: formData.durationSeconds,
+      language: formData.language,
+      consent: formData.consent,
+      status: formData.status,
     };
 
     updateVoiceProfile({ id: options.voiceProfileId, memberId: options.memberId, data: command }, {

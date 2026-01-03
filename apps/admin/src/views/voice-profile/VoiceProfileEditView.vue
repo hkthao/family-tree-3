@@ -11,6 +11,7 @@
         v-if="voiceProfile"
         :initial-voice-profile-data="voiceProfile"
         :member-id="props.memberId"
+        :family-id="props.familyId"
         :read-only="false"
         @save="handleUpdateItem"
         @cancel="closeForm"
@@ -49,6 +50,10 @@ const props = defineProps({
     required: true,
   },
   voiceProfileId: {
+    type: String as PropType<string>,
+    required: true,
+  },
+  familyId: { // New prop
     type: String as PropType<string>,
     required: true,
   },
