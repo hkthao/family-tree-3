@@ -28,13 +28,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n'; // Import useI18n
 import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import type { FamilyMedia } from '@/types';
 import { MediaType } from '@/types/enums';
 import { useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { useFamilyMediaDeleteMutation } from '@/composables/family-media/useFamilyMediaDeleteMutation';
+import { useAuth } from '@/composables'; // NEW
 
 type SelectionMode = 'single' | 'multiple';
 
@@ -44,14 +45,12 @@ const props = withDefaults(defineProps<{
   selectionMode?: SelectionMode;
   modelValue: FamilyMedia[] | FamilyMedia | null; // v-model
   initialMediaType?: MediaType;
-  allowUpload?: boolean;
-  allowDelete?: boolean; // New prop
+
 }>(), {
   label: 'Select Media',
   selectionMode: 'single',
   modelValue: null,
-  allowUpload: false,
-  allowDelete: false, // Default to false
+
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -62,6 +61,11 @@ const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 const { mutate: deleteMedia, isPending: isDeleting } = useFamilyMediaDeleteMutation();
 const selectedMediaLocal = ref<FamilyMedia[]>([]);
+
+const { state } = useAuth(); // NEW
+
+const canUpload = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId)); // NEW
+const canDelete = computed(() => state.isAdmin.value || state.isFamilyManager.value(props.familyId)); // NEW
 
 onMounted(() => {
   // Initialize local state from modelValue
@@ -86,8 +90,8 @@ const openMediaPicker = async () => {
       selectionMode: props.selectionMode,
       initialSelection: initialSelectionIds,
       initialMediaType: props.initialMediaType,
-      allowUpload: props.allowUpload,
-      allowDelete: props.allowDelete,
+      allowUpload: canUpload.value,
+      allowDelete: canDelete.value,
     });
 
     if (props.selectionMode === 'single') {
@@ -119,7 +123,7 @@ const removeMedia = async (idToRemove: string) => {
   const mediaItemToRemove = selectedMediaLocal.value.find(media => media.id === idToRemove);
   if (!mediaItemToRemove) return;
 
-  if (props.allowDelete) {
+  if (canDelete.value) {
     const confirmed = await showConfirmDialog({
       title: t('confirmDelete.title'),
       message: t('familyMedia.list.confirmDelete', { fileName: mediaItemToRemove.fileName }),

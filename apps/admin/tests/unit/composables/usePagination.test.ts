@@ -1,6 +1,6 @@
 // apps/admin/tests/unit/composables/usePagination.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import { usePagination } from '@/composables/usePagination';
 
 describe('usePagination', () => {
