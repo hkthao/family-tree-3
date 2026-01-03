@@ -63,7 +63,7 @@ export interface IVoiceProfileFormInstance {
   getData: () => {
     label: string;
     memberId: string | null; // Added memberId
-    audioUrl: string;
+    rawAudioUrls: string[];
     durationSeconds: number;
     language: string;
     consent: boolean;
@@ -202,7 +202,7 @@ defineExpose<IVoiceProfileFormInstance>({
   getData: () => ({
     label: editableVoiceProfile.label,
     memberId: editableVoiceProfile.memberId, // Return memberId
-    audioUrl: editableVoiceProfile.rawAudioUrls[0]?.filePath || '', // Get the first audio URL
+    rawAudioUrls: editableVoiceProfile.rawAudioUrls.map(media => media.filePath), // Get all raw audio URLs
     durationSeconds: editableVoiceProfile.durationSeconds,
     language: editableVoiceProfile.language,
     consent: editableVoiceProfile.consent,

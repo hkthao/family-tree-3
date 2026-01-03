@@ -44,7 +44,7 @@ export function useVoiceProfileEdit(options: UseVoiceProfileEditOptions) {
     const command: UpdateVoiceProfileCommand = {
       id: options.voiceProfileId,
       label: formData.label,
-      audioUrl: formData.audioUrl || '',
+      audioUrl: formData.rawAudioUrls[0] || '',
       durationSeconds: formData.durationSeconds,
       language: formData.language,
       consent: formData.consent,
