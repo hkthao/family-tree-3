@@ -5,6 +5,7 @@ using backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
 using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.ImportVoiceProfiles; // Add this using statement
+using backend.Application.VoiceProfiles.Commands.DeleteVoiceProfile;
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfileById;
 using backend.Application.VoiceProfiles.Queries.SearchVoiceProfiles;
 using backend.Application.VoiceProfiles.Queries.ExportVoiceProfiles; // Add this using statement
@@ -72,6 +73,18 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
         }
         Result<backend.Application.VoiceProfiles.Queries.VoiceProfileDto> result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 200); // 200 OK for successful update returning entity
+    }
+
+    /// <summary>
+    /// Xóa một hồ sơ giọng nói.
+    /// </summary>
+    /// <param name="id">ID của hồ sơ giọng nói cần xóa.</param>
+    /// <returns>Kết quả của hoạt động xóa.</returns>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteVoiceProfile(Guid id)
+    {
+        var result = await _mediator.Send(new DeleteVoiceProfileCommand(id));
+        return result.ToActionResult(this, this._logger, 204); // 204 No Content for successful deletion
     }
 
     /// <summary>
