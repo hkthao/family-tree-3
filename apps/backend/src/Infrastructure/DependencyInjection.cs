@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
+using backend.Application.Common.Configurations;
 using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
@@ -178,7 +179,7 @@ public static class DependencyInjection
         // and uncomment the line below.
         // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
-        // Add Novu services
+        // Register Novu services
         services.AddNovuServices(configuration);
         // Add Rate Limiting services
         services.AddRateLimiter(rateLimiterOptions =>
@@ -187,6 +188,23 @@ public static class DependencyInjection
             rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
+        // Register VoiceAISettings
+        services.Configure<VoiceAISettings>(configuration.GetSection(VoiceAISettings.SectionName));
+
+        // Register VoiceAIService as a typed HttpClient
+        services.AddHttpClient<IVoiceAIService, VoiceAIService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var voiceAISettings = serviceProvider.GetRequiredService<IOptions<VoiceAISettings>>().Value;
+                    if (!string.IsNullOrEmpty(voiceAISettings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(voiceAISettings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<VoiceAIService>>().LogWarning("VoiceAISettings BaseUrl is not configured.");
+                    }
+                });
 
         return services;
     }
