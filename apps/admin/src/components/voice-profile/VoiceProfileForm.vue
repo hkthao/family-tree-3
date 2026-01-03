@@ -1,54 +1,47 @@
 <template>
-  <v-form ref="form" >
+  <v-form :disabled="readOnly" ref="form">
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete
-          v-model="editableVoiceProfile.memberId"
-          :label="t('voiceProfile.form.member')"
-          :rules="voiceProfileRules.memberId"
-          :readOnly="readOnly"
-          :familyId="familyId"
-          prepend-inner-icon="mdi-account"
-          data-testid="voice-profile-member"
-        />
+        <MemberAutocomplete v-model="editableVoiceProfile.memberId" :label="t('voiceProfile.form.member')"
+          :rules="voiceProfileRules.memberId" :disabled="readOnly" :familyId="familyId" prepend-inner-icon="mdi-account"
+          data-testid="voice-profile-member" />
       </v-col>
-      <v-col cols="12">
-        <MediaInput
-          v-model="editableVoiceProfile.rawAudioUrls"
-          :label="t('voiceProfile.form.audioUrls')"
-          :family-id="familyId"
-          selection-mode="single"
-          :initial-media-type="MediaType.Audio"
-          :rules="voiceProfileRules.rawAudioUrls"
-          data-testid="voice-profile-audio-urls"
-          :disabled="readOnly"
-          :allow-upload="true"
-          :allow-delete="true"
-        ></MediaInput>
+      <v-col cols="12" v-if="!readOnly">
+        <MediaInput v-model="editableVoiceProfile.rawAudioUrls" :label="t('voiceProfile.form.audioUrls')"
+          :family-id="familyId" selection-mode="single" :initial-media-type="MediaType.Audio"
+          :rules="voiceProfileRules.rawAudioUrls" data-testid="voice-profile-audio-urls" :allow-upload="true"
+          :allow-delete="true"></MediaInput>
       </v-col>
+
       <v-col cols="12">
         <v-text-field v-model="editableVoiceProfile.label" :label="t('voiceProfile.form.name')"
-          :rules="voiceProfileRules.label" :readonly="readOnly" data-testid="voice-profile-name" prepend-inner-icon="mdi-card-text-outline" clearable></v-text-field>
+          :rules="voiceProfileRules.label" data-testid="voice-profile-name" prepend-inner-icon="mdi-card-text-outline"
+          clearable></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-text-field v-model.number="editableVoiceProfile.durationSeconds"
-          :label="t('voiceProfile.form.durationSeconds')"
-          :readonly="readOnly" type="number" data-testid="voice-profile-duration" disabled prepend-inner-icon="mdi-timer-outline" append-inner-icon="mdi-information-outline"></v-text-field>
+          :label="t('voiceProfile.form.durationSeconds')" type="number" data-testid="voice-profile-duration" disabled
+          prepend-inner-icon="mdi-timer-outline" append-inner-icon="mdi-information-outline"></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-select v-model="editableVoiceProfile.language" :label="t('voiceProfile.form.language')"
-          :rules="voiceProfileRules.language" :readonly="readOnly" :items="languageOptions"
-          data-testid="voice-profile-language" prepend-inner-icon="mdi-web"></v-select>
+          :rules="voiceProfileRules.language" :items="languageOptions" data-testid="voice-profile-language"
+          prepend-inner-icon="mdi-web"></v-select>
       </v-col>
-      <v-col cols="12">
-        <v-checkbox v-model="editableVoiceProfile.consent" :label="t('voiceProfile.form.consent')" :readonly="readOnly"
-          :rules="voiceProfileRules.consent"
-          data-testid="voice-profile-consent"></v-checkbox>
-      </v-col>
+
       <v-col cols="12" v-if="!readOnly && initialVoiceProfileData.id">
         <v-select v-model="editableVoiceProfile.status" :items="voiceProfileStatusOptions"
-          :label="t('voiceProfile.form.status')" :rules="voiceProfileRules.label"
-          data-testid="voice-profile-status" prepend-inner-icon="mdi-list-status"></v-select>
+          :label="t('voiceProfile.form.status')" :rules="voiceProfileRules.label" data-testid="voice-profile-status"
+          prepend-inner-icon="mdi-list-status"></v-select>
+      </v-col>
+
+      <v-col cols="12" v-if="readOnly && initialVoiceProfileData.audioUrl">
+        <audio :src="initialVoiceProfileData.audioUrl" controls class="w-100"></audio>
+      </v-col>
+
+      <v-col cols="12">
+        <v-checkbox v-model="editableVoiceProfile.consent" :label="t('voiceProfile.form.consent')"
+          :rules="voiceProfileRules.consent" data-testid="voice-profile-consent"></v-checkbox>
       </v-col>
     </v-row>
 

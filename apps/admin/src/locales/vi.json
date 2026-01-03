@@ -1606,6 +1606,8 @@
   "voiceProfile.list.title": "Danh sách hồ sơ giọng nói",
   "voiceProfile.list.add": "Thêm hồ sơ giọng nói mới",
   "voiceProfile.list.confirmDelete": "Bạn có chắc muốn xóa hồ sơ giọng nói '{name}' không?",
+
+  "voiceProfile.list.headers.audio": "Âm thanh",
   "voiceProfile.list.headers.name": "Tên",
   "voiceProfile.list.headers.status": "Trạng thái",
   "voiceProfile.list.headers.created": "Ngày tạo",
