@@ -98,6 +98,7 @@ const toggleMediaSelection = (mediaId: string) => {
             :key="mediaItem.id"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
+            class="media-item"
           >
             <v-img
               v-if="mediaItem.mediaType === MediaType.Image"
@@ -106,6 +107,14 @@ const toggleMediaSelection = (mediaId: string) => {
               cover
             ></v-img>
             <v-icon v-else size="64">mdi-file</v-icon> <!-- Placeholder for other types if they somehow end up here -->
+            <v-icon
+              v-if="props.selectedMedia.includes(mediaItem.id)"
+              class="selected-check-icon"
+              color="primary"
+              size="24"
+            >
+              mdi-check-circle
+            </v-icon>
             <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
           </v-card>
         </div>
@@ -121,8 +130,17 @@ const toggleMediaSelection = (mediaId: string) => {
             :key="mediaItem.id"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
+            class="media-item"
           >
             <v-icon size="64">mdi-video</v-icon>
+            <v-icon
+              v-if="props.selectedMedia.includes(mediaItem.id)"
+              class="selected-check-icon"
+              color="primary"
+              size="24"
+            >
+              mdi-check-circle
+            </v-icon>
             <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
           </v-card>
         </div>
@@ -138,8 +156,17 @@ const toggleMediaSelection = (mediaId: string) => {
             :key="mediaItem.id"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
+            class="media-item"
           >
             <v-icon size="64">mdi-audio</v-icon>
+            <v-icon
+              v-if="props.selectedMedia.includes(mediaItem.id)"
+              class="selected-check-icon"
+              color="primary"
+              size="24"
+            >
+              mdi-check-circle
+            </v-icon>
             <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
           </v-card>
         </div>
@@ -155,8 +182,17 @@ const toggleMediaSelection = (mediaId: string) => {
             :key="mediaItem.id"
             :class="{ 'selected-media': props.selectedMedia.includes(mediaItem.id) }"
             @click="toggleMediaSelection(mediaItem.id)"
+            class="media-item"
           >
             <v-icon size="64">mdi-file-document</v-icon>
+            <v-icon
+              v-if="props.selectedMedia.includes(mediaItem.id)"
+              class="selected-check-icon"
+              color="primary"
+              size="24"
+            >
+              mdi-check-circle
+            </v-icon>
             <v-card-text class="text-truncate">{{ mediaItem.fileName }}</v-card-text>
           </v-card>
         </div>
@@ -183,13 +219,22 @@ const toggleMediaSelection = (mediaId: string) => {
   padding: 16px 0;
 }
 
-.media-grid .v-card {
+.media-grid .media-item {
   cursor: pointer;
-  position: relative; /* Ensure overlay positions correctly */
+  position: relative; /* Ensure check icon positions correctly */
   border: 2px solid transparent;
 }
 
-.media-grid .v-card.selected-media {
+.media-grid .media-item.selected-media {
   border-color: rgb(var(--v-theme-primary));
+}
+
+.selected-check-icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: white; /* Optional: for better visibility */
+  border-radius: 50%; /* Makes the background circular */
+  padding: 2px; /* Add some padding around the icon */
 }
 </style>

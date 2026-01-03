@@ -1,4 +1,3 @@
-// apps/admin/src/components/media/MediaPickerDrawer.vue
 <template>
   <v-navigation-drawer
     v-model="mediaPickerStore.drawer"
@@ -7,11 +6,12 @@
     temporary
     class="media-picker-drawer"
   >
-    <v-card-title class="d-flex align-center justify-space-between bg-primary text-white">
-      <span>Chọn Media</span>
-      <v-btn icon flat @click="mediaPickerStore.closeDrawer()">
+    <v-card-title class="d-flex align-center justify-space-between">
+     <v-btn icon variant="text" @click="mediaPickerStore.closeDrawer()">
         <v-icon>mdi-close</v-icon>
       </v-btn>
+      {{ t('common.selectMedia') }}
+      <v-spacer/>
     </v-card-title>
     <v-card-text class="pa-0">
       <MediaPickerContent
@@ -23,18 +23,20 @@
       />
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
-      <v-btn variant="text" @click="mediaPickerStore.closeDrawer()">Hủy</v-btn>
-      <v-btn variant="elevated" color="primary" @click="confirmSelection()">Chọn</v-btn>
+      <v-btn variant="text" @click="mediaPickerStore.closeDrawer()">{{ t('common.cancel') }}</v-btn>
+      <v-btn variant="elevated" color="primary" @click="confirmSelection()">{{ t('common.select') }}</v-btn>
     </v-card-actions>
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n'; // Import useI18n
 import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import MediaPickerContent from './MediaPickerContent.vue';
 import type { FamilyMedia } from '@/types';
 
+const { t } = useI18n(); // Initialize t
 const mediaPickerStore = useMediaPickerDrawerStore();
 const selectedMediaLocal = ref<FamilyMedia[]>([]); // Array of full FamilyMedia objects
 
