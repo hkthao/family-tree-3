@@ -9,17 +9,17 @@
       <v-spacer />
     </v-card-title>
     <v-card-text>
-      <VFileUpload v-if="mediaPickerStore.allowUpload" v-model="fileToUpload" :label="t('familyMedia.form.fileLabel')"
+      <VFileUpload v-if="mediaPickerStore.allowUpload && canUploadMedia" v-model="fileToUpload" :label="t('familyMedia.form.fileLabel')"
         prepend-icon="mdi-paperclip" :multiple="true" show-size :clearable="true"
         @update:modelValue="handleFilesUpdate"></VFileUpload>
-      <v-btn v-if="mediaPickerStore.allowUpload && fileToUpload.length > 0" color="primary" class="mt-2"
+      <v-btn v-if="mediaPickerStore.allowUpload && canUploadMedia && fileToUpload.length > 0" color="primary" class="mt-2"
         :loading="isUploading" :disabled="isUploading" @click="uploadFiles">
         {{ t('familyMedia.upload.uploadButton') }}
       </v-btn>
 
       <MediaPickerContent v-if="mediaPickerStore.familyId" :family-id="mediaPickerStore.familyId"
         :selection-mode="mediaPickerStore.selectionMode" v-model:selectedMedia="selectedMediaIds"
-        @update:selectedMedia="handleSelectionUpdate" :allow-delete="mediaPickerStore.allowDelete"
+        @update:selectedMedia="handleSelectionUpdate" :allow-delete="mediaPickerStore.allowDelete && canDeleteMedia"
         :initial-media-type="mediaPickerStore.initialMediaType" />
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
@@ -40,11 +40,23 @@ import { useMediaPickerDrawerStore } from '@/stores/mediaPickerDrawer.store';
 import MediaPickerContent from './MediaPickerContent.vue';
 import type { FamilyMedia } from '@/types';
 import { useFamilyMediaUploadMutation } from '@/composables/family-media/useFamilyMediaUploadMutation'; // Import new mutation
+import { useAuth } from '@/composables';
 
 const { t } = useI18n();
 const queryClient = useQueryClient(); // For invalidating queries
 const { showSnackbar } = useGlobalSnackbar();
 const mediaPickerStore = useMediaPickerDrawerStore();
+const { state: authState } = useAuth(); // Renamed to authState to avoid conflict
+
+const canUploadMedia = computed(() => {
+  if (!mediaPickerStore.familyId) return false;
+  return authState.isAdmin.value || authState.isFamilyManager.value(mediaPickerStore.familyId);
+});
+
+const canDeleteMedia = computed(() => {
+  if (!mediaPickerStore.familyId) return false;
+  return authState.isAdmin.value || authState.isFamilyManager.value(mediaPickerStore.familyId);
+});
 
 const fileToUpload = ref<File[]>([]); // Changed to array of File
 const { mutateAsync: uploadMedia, isPending: isUploading } = useFamilyMediaUploadMutation(); // Use mutateAsync for awaiting multiple uploads

@@ -45,12 +45,18 @@ describe('useFamilyMediaQuery', () => {
   it('should call useQuery with correct parameters', () => {
     // Mock the return value of useQuery
     vi.mocked(useQuery).mockReturnValue(
-      computed(() => ({
+      {
         data: ref({ items: [], totalItems: 0 }),
         isPending: ref(false),
         isFetching: ref(false),
         error: ref(null),
-      })) as any
+        // Add other properties that useQuery typically returns if they are accessed
+        // in the composable. For simplicity, we'll only mock the ones accessed in this test.
+        status: ref('success'),
+        isError: ref(false),
+        isSuccess: ref(true),
+        isLoading: ref(false), // isPending is often aliased to isLoading in older versions or for convenience
+      } as any
     );
 
     useFamilyMediaQuery(mockListOptions, mockFilters);
@@ -76,12 +82,16 @@ describe('useFamilyMediaQuery', () => {
 
     // Mock useQuery to return data
     vi.mocked(useQuery).mockReturnValue(
-      computed(() => ({
+      {
         data: ref(mockData),
         isPending: ref(false),
         isFetching: ref(false),
         error: ref(null),
-      })) as any
+        status: ref('success'),
+        isError: ref(false),
+        isSuccess: ref(true),
+        isLoading: ref(false),
+      } as any
     );
 
     const { familyMedia, totalItems, queryLoading, queryError } = useFamilyMediaQuery(mockListOptions, mockFilters);
@@ -94,12 +104,16 @@ describe('useFamilyMediaQuery', () => {
 
   it('should set queryLoading to true when fetching', () => {
     vi.mocked(useQuery).mockReturnValue(
-      computed(() => ({
+      {
         data: ref(null),
         isPending: ref(true),
         isFetching: ref(true),
         error: ref(null),
-      })) as any
+        status: ref('pending'),
+        isError: ref(false),
+        isSuccess: ref(false),
+        isLoading: ref(true),
+      } as any
     );
 
     const { queryLoading } = useFamilyMediaQuery(mockListOptions, mockFilters);
@@ -109,12 +123,16 @@ describe('useFamilyMediaQuery', () => {
   it('should set queryError when fetching fails', async () => {
     const errorMessage = 'Network error';
     vi.mocked(useQuery).mockReturnValue(
-      computed(() => ({
+      {
         data: ref(null),
         isPending: ref(false),
         isFetching: ref(false),
         error: ref(new Error(errorMessage)),
-      })) as any
+        status: ref('error'),
+        isError: ref(true),
+        isSuccess: ref(false),
+        isLoading: ref(false),
+      } as any
     );
 
     const { queryError } = useFamilyMediaQuery(mockListOptions, mockFilters);
@@ -129,20 +147,24 @@ describe('useFamilyMediaQuery', () => {
       page: 1, // Added
       totalPages: 1, // Added
     };
+    mockFamilyMediaService.search.mockResolvedValueOnce({ ok: true, value: mockData }); // Add this line
     let queryFn: Function | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
       queryFn = (options as any).queryFn as Function;
-      return computed(() => ({
-        data: ref(null),
+      return {
+        data: ref(mockData), // Ensure data is provided for the queryFn to return
         isPending: ref(false),
         isFetching: ref(false),
         error: ref(null),
-      })) as any;
+        status: ref('success'),
+        isError: ref(false),
+        isSuccess: ref(true),
+        isLoading: ref(false),
+      } as any;
     });
 
     useFamilyMediaQuery(mockListOptions, mockFilters);
 
-    // Manually call the queryFn that useQuery would invoke
     if (queryFn) {
       const result = await queryFn();
       expect(mockFamilyMediaService.search).toHaveBeenCalledWith(mockListOptions.value, mockFilters.value);
@@ -159,12 +181,16 @@ describe('useFamilyMediaQuery', () => {
     let queryFn: Function | undefined;
     vi.mocked(useQuery).mockImplementation((options) => {
       queryFn = (options as any).queryFn as Function;
-      return computed(() => ({
+      return {
         data: ref(null),
         isPending: ref(false),
         isFetching: ref(false),
         error: ref(null),
-      })) as any;
+        status: ref('idle'),
+        isError: ref(false),
+        isSuccess: ref(false),
+        isLoading: ref(false),
+      } as any;
     });
 
     useFamilyMediaQuery(mockListOptions, mockFilters);

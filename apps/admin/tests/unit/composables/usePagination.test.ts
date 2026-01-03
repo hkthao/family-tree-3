@@ -1,6 +1,6 @@
 // apps/admin/tests/unit/composables/usePagination.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { usePagination } from '@/composables/usePagination';
 
 describe('usePagination', () => {
@@ -48,8 +48,7 @@ describe('usePagination', () => {
     expect(currentPage.value).toBe(3);
 
     itemsPerPage.value = 20;
-    // Vue's reactivity might be asynchronous, so a small wait or flushPromises might be needed in real tests
-    // For this simple case, direct check usually works as watch is synchronous for primitive changes
+    await nextTick();
     expect(currentPage.value).toBe(1);
   });
 

@@ -108,7 +108,7 @@ const openMediaPicker = async () => {
       initialSelection: initialSelectionIds,
       initialMediaType: props.initialMediaType,
       allowUpload: props.allowUpload,
-      allowDelete: props.allowDelete, // Pass allowDelete prop
+      allowDelete: props.allowDelete,
     });
 
     if (props.selectionMode === 'single') {
