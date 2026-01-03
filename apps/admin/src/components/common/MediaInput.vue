@@ -21,7 +21,7 @@
     </div>
     <div class="mt-4 text-center">
       <v-btn :prepend-icon="'mdi-image-multiple'" @click="openMediaPicker" class="flex-grow-1 justify-start">
-        <span class="text-truncate">{{ label }}</span>
+        <span class="text-truncate">{{ t('common.selectFile') }}</span>
       </v-btn>
     </div>
   </v-sheet>
