@@ -32,7 +32,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field v-model.number="editableVoiceProfile.durationSeconds"
-          :label="t('voiceProfile.form.durationSeconds')" :rules="voiceProfileRules.durationSeconds"
+          :label="t('voiceProfile.form.durationSeconds')"
           :readonly="readOnly" type="number" data-testid="voice-profile-duration" disabled prepend-inner-icon="mdi-timer-outline" append-inner-icon="mdi-information-outline"></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -71,7 +71,7 @@ export interface IVoiceProfileFormInstance {
   getData: () => {
     label: string;
     memberId: string | null; // Added memberId
-    audioUrl: string | null; // Changed to single string
+    rawAudioUrls: string[]; // Changed to array of strings
     durationSeconds: number;
     language: string;
     consent: boolean;
@@ -94,10 +94,7 @@ const props = defineProps({
       created: new Date().toISOString(),
     }),
   },
-  memberId: {
-    type: String,
-    required: true,
-  },
+
   familyId: { // New prop
     type: String,
     required: true,
@@ -213,7 +210,7 @@ defineExpose<IVoiceProfileFormInstance>({
   getData: () => ({
     label: editableVoiceProfile.label,
     memberId: editableVoiceProfile.memberId, // Return memberId
-    audioUrl: editableVoiceProfile.rawAudioUrls.length > 0 ? editableVoiceProfile.rawAudioUrls[0].filePath : null, // Take first URL
+    rawAudioUrls: editableVoiceProfile.rawAudioUrls.map(media => media.filePath),
     durationSeconds: editableVoiceProfile.durationSeconds,
     language: editableVoiceProfile.language,
     consent: editableVoiceProfile.consent,

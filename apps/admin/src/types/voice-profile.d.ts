@@ -31,7 +31,7 @@ export interface CreateVoiceProfileCommand {
   consent: boolean;
 }
 
-export interface PreprocessAndCreateVoiceProfileCommand {
+export interface PreprocessAndCreateVoiceProfileDto {
   memberId: string;
   label: string;
   rawAudioUrls: string[];

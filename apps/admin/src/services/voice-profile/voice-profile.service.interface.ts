@@ -1,5 +1,5 @@
 import type { Result } from '@/types';
-import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand, PreprocessAndCreateVoiceProfileCommand, VoiceProfileDto } from '@/types';
+import type { VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand, PreprocessAndCreateVoiceProfileDto, VoiceProfileDto } from '@/types';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IVoiceProfileService extends ICrudService<VoiceProfile, CreateVoiceProfileCommand, UpdateVoiceProfileCommand> {
@@ -9,7 +9,7 @@ export interface IVoiceProfileService extends ICrudService<VoiceProfile, CreateV
   ): Promise<Result<VoiceProfile>>;
 
   preprocessAndCreate(
-    command: PreprocessAndCreateVoiceProfileCommand
+    command: PreprocessAndCreateVoiceProfileDto
   ): Promise<Result<VoiceProfileDto>>;
 
   exportVoiceProfiles(memberId: string): Promise<Result<VoiceProfile[]>>;

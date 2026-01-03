@@ -3,10 +3,10 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{
         t('voiceProfile.form.addTitle')
-      }}</span>
+        }}</span>
     </v-card-title>
     <v-card-text>
-      <VoiceProfileForm ref="voiceProfileFormRef" :member-id="memberId" :family-id="familyId" @cancel="closeForm" @save="handleAddItem" />
+      <VoiceProfileForm ref="voiceProfileFormRef" :family-id="familyId" @cancel="closeForm" @save="handleAddItem" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -28,11 +28,7 @@ import VoiceProfileForm from '@/components/voice-profile/VoiceProfileForm.vue';
 import { type IVoiceProfileFormInstance } from '@/components/voice-profile/VoiceProfileForm.vue';
 import { useVoiceProfileAdd } from '@/composables/voice-profile/useVoiceProfileAdd';
 
-const props = defineProps({
-  memberId: {
-    type: String as PropType<string>,
-    required: true,
-  },
+defineProps({
   familyId: { // New prop
     type: String as PropType<string>,
     required: true,
@@ -48,7 +44,6 @@ const {
   state: { isAddingVoiceProfile, isUploadingMedia },
   actions: { handleAddItem, closeForm },
 } = useVoiceProfileAdd({
-  memberId: props.memberId,
   onSaveSuccess: () => {
     emit('close');
     emit('saved');

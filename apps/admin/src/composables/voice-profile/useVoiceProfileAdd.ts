@@ -3,10 +3,9 @@ import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import type { IVoiceProfileFormInstance } from '@/components/voice-profile/VoiceProfileForm.vue';
 import { usePreprocessAndCreateVoiceProfileMutation } from './usePreprocessAndCreateVoiceProfileMutation'; // Changed mutation
-import type { PreprocessAndCreateVoiceProfileCommand } from '@/types'; // Changed command type
+import type { PreprocessAndCreateVoiceProfileDto } from '@/types'; // Changed command type
 
 interface UseVoiceProfileAddOptions {
-  memberId: string;
   onSaveSuccess: () => void;
   onCancel: () => void;
   formRef: Ref<IVoiceProfileFormInstance | null>;
@@ -19,7 +18,6 @@ export function useVoiceProfileAdd(options: UseVoiceProfileAddOptions) {
 
   const handleAddItem = async () => {
     if (!options.formRef.value) return;
-
     const { valid, errors } = await options.formRef.value.validate();
     if (!valid) {
       console.error('Validation errors:', errors);
@@ -28,11 +26,17 @@ export function useVoiceProfileAdd(options: UseVoiceProfileAddOptions) {
     }
 
     const formData = options.formRef.value.getData();
-    // Assuming formData now contains label, rawAudioUrls, language, consent
-    const command: PreprocessAndCreateVoiceProfileCommand = {
-      memberId: options.memberId,
+
+    // Ensure memberId is present from the form data
+    if (!formData.memberId) {
+      showSnackbar(t('voiceProfile.errors.memberIdRequired'), 'error');
+      return;
+    }
+
+    const command: PreprocessAndCreateVoiceProfileDto = {
+      memberId: formData.memberId,
       label: formData.label,
-      rawAudioUrls: formData.audioUrl ? [formData.audioUrl] : [], // Use audioUrl from formData
+      rawAudioUrls: formData.rawAudioUrls, // Use rawAudioUrls directly from formData
       language: formData.language,
       consent: formData.consent || false,
     };
