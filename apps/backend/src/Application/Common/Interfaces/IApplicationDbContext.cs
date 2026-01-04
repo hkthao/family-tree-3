@@ -103,10 +103,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<FamilyMedia> FamilyMedia { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể ImageRestorationJob.
-    /// </summary>
-    DbSet<ImageRestorationJob> ImageRestorationJobs { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.

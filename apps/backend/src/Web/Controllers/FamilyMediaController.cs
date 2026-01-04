@@ -1,11 +1,11 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions; // NEW
-using backend.Application.Common.Models.ImageRestoration; // NEW
+
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Application.FamilyMedias.Commands.DeleteFamilyMedia;
-using backend.Application.FamilyMedias.Commands.StartImageRestoration;
+
 using backend.Application.FamilyMedias.Queries.GetFamilyMediaById;
-using backend.Application.FamilyMedias.Queries.GetImageRestorationStatus;
+
 using backend.Application.FamilyMedias.Queries.SearchFamilyMedia;
 using backend.Web.Models.FamilyMedia; // NEW
 using Microsoft.AspNetCore.Authorization;
@@ -120,28 +120,8 @@ public class FamilyMediaController(IMediator mediator, ILogger<FamilyMediaContro
         return result.ToActionResult(this, _logger, 201, nameof(GetFamilyMediaById), new { familyId, id = result.Value });
     }
 
-    /// <summary>
-    /// Bắt đầu một tiến trình phục hồi ảnh mới.
-    /// </summary>
-    /// <param name="request">Request chứa URL ảnh gốc.</param>
-    /// <returns>Job ID và trạng thái ban đầu.</returns>
-    [HttpPost("restore-image")]
-    public async Task<IActionResult> StartImageRestoration([FromBody] StartImageRestorationRequestDto request)
-    {
-        var result = await _mediator.Send(new StartImageRestorationCommand(request.ImageUrl));
-        return result.ToActionResult(this, _logger, 202); // 202 Accepted for asynchronous processing
-    }
 
-    /// <summary>
-    /// Lấy trạng thái của một tiến trình phục hồi ảnh.
-    /// </summary>
-    /// <param name="jobId">ID của job phục hồi ảnh.</param>
-    /// <returns>Trạng thái và kết quả của job.</returns>
-    [HttpGet("restoration-status/{jobId}")]
-    public async Task<IActionResult> GetImageRestorationStatus([FromRoute] Guid jobId)
-    {
-        var result = await _mediator.Send(new GetImageRestorationStatusCommand(jobId));
-        return result.ToActionResult(this, _logger);
-    }
+
+
 }
 
