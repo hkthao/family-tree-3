@@ -97,23 +97,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  image-restoration-service:
-    build:
-      context: ../services/image_restoration_service
-      dockerfile: Dockerfile
-    container_name: family-tree-image-restoration-service
-    ports:
-      - "8002:8000" # Expose port 8000 for the FastAPI app internally, map to 8002 externally
-    env_file:
-      - ./.env.dev # To load REPLICATE_API_TOKEN
-    environment:
-      - TZ=Asia/Ho_Chi_Minh
-    restart: always # Always restart if it stops
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   voice-service:
     build:
@@ -151,7 +134,6 @@ services:
       - admin
       - face-service
       - ocr-service
-      - image-restoration-service
       - voice-service
 
 volumes:
