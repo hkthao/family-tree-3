@@ -1,9 +1,10 @@
 <template>
   <v-text-field
+    :label="label"
+    v-bind="$attrs"
     :model-value="modelValue"
     @update:model-value="updateAddress"
-    :label="$t('family.form.address')"
-    :append-inner-icon="readOnly ? '' : 'mdi-map-marker'"
+    :append-inner-icon="readOnly ? '' : 'mdi-selection-multiple-marker'"
     @click:append-inner="openLocationPicker"
     :readonly="readOnly"
     data-testid="location-input-field"
@@ -20,6 +21,7 @@ const props = defineProps<{
   modelValue?: string; // The address string
   familyId?: string | null; // Optional familyId for filtering locations
   readOnly?: boolean; // To disable editing and the picker button
+  label?: string; // Accept label prop
 }>();
 
 const emit = defineEmits(['update:modelValue']);
