@@ -51,9 +51,7 @@
         </v-window>
       </div>
     </v-card-text>
-    <v-card-actions class="justify-end">
-      <v-btn color="grey" @click="emit('close')">{{ t('common.close') }}</v-btn>
-    </v-card-actions>
+
   </v-card>
 </template>
 
