@@ -18,6 +18,7 @@ public class GetMemberFacesByMemberIdQueryHandler : IRequestHandler<GetMemberFac
     public async Task<Result<IEnumerable<MemberFaceDto>>> Handle(GetMemberFacesByMemberIdQuery request, CancellationToken cancellationToken)
     {
         var memberFaces = await _context.MemberFaces
+            .Include(e=>e.Member)
             .Where(mf => mf.MemberId == request.MemberId)
             .OrderBy(mf => mf.Created)
             .ToListAsync(cancellationToken);
