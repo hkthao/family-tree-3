@@ -17,16 +17,16 @@ public class RelationshipDetectionService : IRelationshipDetectionService
     private readonly IApplicationDbContext _context;
     private readonly IRelationshipGraph _relationshipGraph;
     private readonly IAiGenerateService _aiGenerateService;
-    private readonly IRelationshipRuleEngine _ruleEngine;
+
     private readonly IMediator _mediator;
     private readonly ILogger<RelationshipDetectionService> _logger; // Inject ILogger
 
-    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IRelationshipRuleEngine ruleEngine, IMediator mediator, ILogger<RelationshipDetectionService> logger)
+    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IMediator mediator, ILogger<RelationshipDetectionService> logger)
     {
         _context = context;
         _relationshipGraph = relationshipGraph;
         _aiGenerateService = aiGenerateService;
-        _ruleEngine = ruleEngine;
+
         _mediator = mediator;
         _logger = logger; // Initialize _logger
     }
@@ -231,7 +231,6 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 
         return descriptionBuilder.ToString() + ".";
     }
-
 
     private string GetVietnameseRelationshipTerm(RelationshipType type)
     {
