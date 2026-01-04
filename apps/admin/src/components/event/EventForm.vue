@@ -90,7 +90,7 @@
 
     <v-row>
       <v-col cols="12">
-        <MemberAutocomplete v-model="formData.relatedMemberIds" :label="actions.t('event.form.relatedMembers')"
+        <MemberAutocomplete v-model="formData.eventMemberIds" :label="actions.t('event.form.relatedMembers')"
           :family-id="formData.familyId || undefined" :disabled="props.readOnly" :multiple="true"
           data-testid="event-related-members-autocomplete" />
       </v-col>

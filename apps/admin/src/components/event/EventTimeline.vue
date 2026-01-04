@@ -34,10 +34,10 @@
             <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
           </div>
           -->
-          <div v-if="event.relatedMembers && event.relatedMembers.length > 0" class="mt-1">
+          <div v-if="event.eventMembers && event.eventMembers.length > 0" class="mt-1">
             <MemberName
-              v-for="member in event.relatedMembers"
-              :key="member.id"
+              v-for="member in event.eventMembers"
+              :key="member.memberId"
               :full-name="member.fullName"
               :avatar-url="member.avatarUrl"
               :gender="member.gender"

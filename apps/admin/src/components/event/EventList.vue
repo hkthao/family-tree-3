@@ -78,10 +78,10 @@
       <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
     </template>
 
-    <!-- Related Members column -->
-    <template #item.relatedMembers="{ item }">
+    <!-- Event Members column -->
+    <template #item.eventMembers="{ item }">
       <div class="d-flex flex-wrap">
-        <MemberName v-for="member in item.relatedMembers" :key="member.id" :fullName="member.fullName"
+        <MemberName v-for="member in item.eventMembers" :key="member.memberId" :fullName="member.fullName"
           :avatarUrl="member.avatarUrl" :gender="member.gender" />
       </div>
     </template>
