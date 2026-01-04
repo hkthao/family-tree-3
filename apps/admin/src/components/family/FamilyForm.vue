@@ -8,11 +8,11 @@
     <v-row>
       <v-col cols="6">
         <v-text-field v-model="formData.name" :label="$t('family.form.name')" :rules="rules.name" required
-          data-testid="family-name-input"></v-text-field>
+          data-testid="family-name-input" prepend-inner-icon="mdi-home-group"></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
-          required data-testid="family-visibility-select"></v-select>
+          required data-testid="family-visibility-select" prepend-inner-icon="mdi-eye"></v-select>
       </v-col>
     </v-row>
     <v-row>
@@ -21,13 +21,15 @@
           v-model="formData.address"
           :family-id="(formData as FamilyDto).id || undefined"
           :read-only="props.readOnly"
+          prepend-inner-icon="mdi-map-marker"
         ></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <v-textarea v-model="formData.description" :rows="2" :auto-grow="true"
-          :label="$t('family.form.description')" data-testid="family-description-input"></v-textarea>
+          :label="$t('family.form.description')" data-testid="family-description-input"
+          prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
     </v-row>
     <v-row v-if="props.displayLimitConfig">
@@ -37,6 +39,7 @@
           :model-value="formData.familyLimitConfiguration?.maxMembers"
           readonly
           data-testid="family-max-members"
+          prepend-inner-icon="mdi-account-group"
         ></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -45,6 +48,7 @@
           :model-value="formData.familyLimitConfiguration?.maxStorageMb ? formData.familyLimitConfiguration.maxStorageMb + ' MB' : ''"
           readonly
           data-testid="family-max-storage-mb"
+          prepend-inner-icon="mdi-database"
         ></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -53,6 +57,7 @@
           :model-value="formData.familyLimitConfiguration?.aiChatMonthlyLimit ?? ''"
           readonly
           data-testid="family-ai-chat-monthly-limit"
+          prepend-inner-icon="mdi-robot"
         ></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -61,17 +66,20 @@
           :model-value="formData.familyLimitConfiguration?.aiChatMonthlyUsage ?? ''"
           readonly
           data-testid="family-ai-chat-monthly-usage"
+          prepend-inner-icon="mdi-chart-bar"
         ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <UserAutocomplete v-model="managers" multiple :disabled="props.readOnly" hideDetails
-          :label="$t('family.permissions.managers')" data-testid="family-managers-select" :loading="isLoadingUsers"></UserAutocomplete>
+          :label="$t('family.permissions.managers')" data-testid="family-managers-select" :loading="isLoadingUsers"
+          prepend-inner-icon="mdi-shield-account"></UserAutocomplete>
       </v-col>
       <v-col cols="12">
         <UserAutocomplete v-model="viewers" multiple :disabled="props.readOnly" hideDetails
-          :label="$t('family.permissions.viewers')" data-testid="family-viewers-select" :loading="isLoadingUsers"></UserAutocomplete>
+          :label="$t('family.permissions.viewers')" data-testid="family-viewers-select" :loading="isLoadingUsers"
+          prepend-inner-icon="mdi-account-search"></UserAutocomplete>
       </v-col>
     </v-row>
   </v-form>

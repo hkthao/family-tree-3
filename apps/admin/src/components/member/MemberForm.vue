@@ -44,12 +44,14 @@
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
           :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
-          data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
+          data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar"
+          prepend-inner-icon="mdi-calendar" />
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
           :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
-          data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar" />
+          data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar"
+          prepend-inner-icon="mdi-calendar" />
       </v-col>
     </v-row>
 
