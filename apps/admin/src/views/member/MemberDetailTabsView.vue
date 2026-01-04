@@ -36,7 +36,7 @@
               v-if="familyId"
               :family-id="familyId"
               :initial-member-id="props.memberId"
-              :read-only="props.readOnly"
+              :read-only="true"
             />
           </v-window-item>
           <v-window-item value="faces">
