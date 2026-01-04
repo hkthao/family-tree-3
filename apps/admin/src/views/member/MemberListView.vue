@@ -30,6 +30,7 @@
             @close="handleDetailClosed"
             @edit-member="openEditDrawer"
             @member-deleted="handleMemberSaved"
+            :read-only="props.readOnly"
           />
         </BaseCrudDrawer>
     

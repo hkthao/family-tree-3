@@ -30,7 +30,7 @@ describe('eventForm.logic', () => {
         description: '',
         location: '', // ADD THIS
         color: '#1976D2',
-        relatedMemberIds: [],
+        eventMemberIds: [],
       });
     });
 
@@ -51,8 +51,9 @@ describe('eventForm.logic', () => {
         lunarDate: { day: 5, month: 3, isLeapMonth: false },
         repeatRule: RepeatRule.Yearly,
         description: 'Some description',
+        location: 'Some location',
         color: '#000000',
-        relatedMemberIds: ['member1'],
+        eventMemberIds: ['member1'],
       };
       const result = getInitialEventFormData({ initialEventData: initialEvent });
       expect(result).toEqual(initialEvent);
@@ -72,7 +73,7 @@ describe('eventForm.logic', () => {
         repeatRule: RepeatRule.Yearly,
         description: 'Some description',
         color: '#000000',
-        relatedMemberIds: ['member1'],
+        eventMemberIds: ['member1'],
       };
       const result = getInitialEventFormData({ initialEventData: initialEvent });
       expect(result.lunarDate).toEqual({ day: 1, month: 1, isLeapMonth: false });
@@ -151,7 +152,7 @@ describe('eventForm.logic', () => {
         repeatRule: RepeatRule.None,
         description: '',
         color: '#000000',
-        relatedMemberIds: [],
+        eventMemberIds: [],
       };
       const result = processEventFormDataForSave(formData);
       expect(result.solarDate).toEqual(new Date('2023-01-01'));
@@ -171,7 +172,7 @@ describe('eventForm.logic', () => {
         repeatRule: RepeatRule.None,
         description: '',
         color: '#000000',
-        relatedMemberIds: [],
+        eventMemberIds: [],
       };
       const result = processEventFormDataForSave(formData);
       expect(result.solarDate).toBeNull();
@@ -191,7 +192,7 @@ describe('eventForm.logic', () => {
         repeatRule: RepeatRule.None,
         description: '',
         color: '#000000',
-        relatedMemberIds: [],
+        eventMemberIds: [],
       };
       const result = processEventFormDataForSave(formData);
       expect(result.solarDate).toEqual(new Date('2023-05-10T00:00:00.000Z'));
@@ -211,7 +212,7 @@ describe('eventForm.logic', () => {
         repeatRule: RepeatRule.None,
         description: '',
         color: '#000000',
-        relatedMemberIds: [],
+        eventMemberIds: [],
       };
       const originalFormData = { ...formData }; // Create a shallow copy to compare
       const result = processEventFormDataForSave(formData);
