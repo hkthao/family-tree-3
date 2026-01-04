@@ -1,8 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.VoiceProfiles.Commands.DeleteVoiceProfile;

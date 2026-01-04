@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 
 public class PreprocessAndCreateVoiceProfileCommandValidator : AbstractValidator<PreprocessAndCreateVoiceProfileCommand>

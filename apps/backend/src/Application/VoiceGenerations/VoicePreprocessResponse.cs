@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using System.Collections.Generic; // Required for List<string>
 
 namespace backend.Application.Voice.DTOs;
 

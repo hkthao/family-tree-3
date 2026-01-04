@@ -2,10 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Voice.DTOs;
 using backend.Application.VoiceProfiles.Queries;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Net.Http;
-using Microsoft.Extensions.Http;
 using System.Text.Json;
 using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 

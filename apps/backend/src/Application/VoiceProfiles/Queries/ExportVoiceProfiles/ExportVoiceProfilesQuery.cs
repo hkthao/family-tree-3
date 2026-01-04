@@ -1,6 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.VoiceProfiles.Queries;
-using MediatR;
 
 namespace backend.Application.VoiceProfiles.Queries.ExportVoiceProfiles;
 
