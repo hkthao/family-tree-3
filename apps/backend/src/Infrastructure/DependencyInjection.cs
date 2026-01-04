@@ -7,6 +7,7 @@ using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, A
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.Services.Background;
 using backend.Infrastructure.Services.RateLimiting;
 using FamilyTree.Infrastructure; // For ImgbbSettings
 using FamilyTree.Infrastructure.Services; // For ImgbbImageUploadService
@@ -79,8 +80,7 @@ public static class DependencyInjection
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
         services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
 
-        // Register ImageRestorationServiceSettings
-        services.Configure<ImageRestorationServiceSettings>(configuration.GetSection(ImageRestorationServiceSettings.SectionName));
+
 
         // Configure HttpClient for ImgurFileStorageService
         services.AddHttpClient<ImgurFileStorageService>(httpClient =>
@@ -94,20 +94,7 @@ public static class DependencyInjection
         // Register N8nService if it's used by N8nFileStorageService
         services.AddScoped<IN8nService, N8nService>();
 
-        // Register ImageRestorationService and configure its HttpClient
-        services.AddHttpClient<IImageRestorationService, ImageRestorationService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var settings = serviceProvider.GetRequiredService<IOptions<ImageRestorationServiceSettings>>().Value;
-                    if (!string.IsNullOrWhiteSpace(settings.BaseUrl))
-                    {
-                        httpClient.BaseAddress = new Uri(settings.BaseUrl);
-                    }
-                    else
-                    {
-                        serviceProvider.GetRequiredService<ILogger<ImageRestorationService>>().LogWarning("ImageRestorationService BaseUrl is not configured.");
-                    }
-                });
+
 
 
         // Dynamically register IFileStorageService based on configuration

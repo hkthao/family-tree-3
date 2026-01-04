@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace backend.Infrastructure.Services;
+namespace backend.Infrastructure.Services.Background;
 
 /// <summary>
 /// Dịch vụ lưu trữ chạy các tác vụ nền từ hàng đợi.
