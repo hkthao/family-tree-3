@@ -23,7 +23,7 @@ public class GetEventByIdQueryHandler(IApplicationDbContext context, IMapper map
             return Result<EventDetailDto>.Failure(ErrorMessages.Unauthorized, ErrorSources.Authentication); // Corrected error message and source
         }
 
-        var query = _context.Events.AsQueryable();
+        var query = _context.Events.Include(e => e.EventMembers).AsQueryable();
 
         // Apply EventAccessSpecification to filter events based on user's access
         query = query.WithSpecification(new EventAccessSpecification(_authorizationService.IsAdmin(), _user.UserId));

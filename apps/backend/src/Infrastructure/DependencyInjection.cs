@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
+using backend.Application.Common.Configurations;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Common.Configurations;
 using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;

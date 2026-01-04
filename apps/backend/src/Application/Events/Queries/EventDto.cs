@@ -22,12 +22,12 @@ public class EventDto
     public string? Color { get; set; }
     public string? FamilyName { get; set; }
     public string? FamilyAvatarUrl { get; set; }
-    public List<MemberListDto> RelatedMembers { get; set; } = [];
-    public List<Guid> RelatedMemberIds
+    public List<EventMemberDto> EventMembers { get; set; } = [];
+    public List<Guid> EventMemberIds
     {
         get
         {
-            return RelatedMembers.Select(e => e.Id).ToList();
+            return [.. EventMembers.Select(e => e.MemberId)];
         }
     }
 }

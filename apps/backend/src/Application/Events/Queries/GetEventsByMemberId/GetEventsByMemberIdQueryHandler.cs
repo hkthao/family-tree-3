@@ -1,16 +1,16 @@
 using Ardalis.Specification.EntityFrameworkCore; // Add this
-using backend.Application.Events.Specifications; // Add this
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
+using backend.Application.Events.Specifications; // Add this
 using backend.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Queries.GetEventsByMemberId;
 
 public class GetEventsByMemberIdQueryHandler(
     IApplicationDbContext context,
     IMapper mapper,
-    backend.Application.Common.Interfaces.IAuthorizationService authorizationService,
+    IAuthorizationService authorizationService,
     ICurrentUser user,
     IPrivacyService privacyService,
     ILogger<GetEventsByMemberIdQueryHandler> logger

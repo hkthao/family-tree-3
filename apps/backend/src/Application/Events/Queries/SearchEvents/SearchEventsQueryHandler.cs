@@ -16,7 +16,7 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events.AsQueryable();
+        var query = _context.Events.Include(e => e.EventMembers).AsQueryable();
 
         // Apply access control specification first
         var isAdmin = _authorizationService.IsAdmin();

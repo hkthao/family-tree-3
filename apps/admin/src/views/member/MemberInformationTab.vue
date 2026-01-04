@@ -1,7 +1,7 @@
 <template>
-  <v-card :elevation="0">
+  <v-card class="pa-0" :elevation="0">
     <v-progress-linear v-if="isLoadingMember || isDeletingMember" indeterminate color="primary"></v-progress-linear>
-    <v-card-text>
+    <v-card-text class="pa-0">
       <div v-if="isLoadingMember">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
         {{ t('common.loading') }}
@@ -28,12 +28,15 @@
         </div>
       </div>
     </v-card-text>
-    <v-card-actions class="justify-end">
-      <v-btn color="grey" @click="handleClose" :disabled="isLoadingMember || isDeletingMember">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!member || isLoadingMember || isDeletingMember" v-if="canEditOrDelete">{{
-        t('common.edit') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!member || isLoadingMember || isDeletingMember" v-if="canEditOrDelete">{{
-        t('common.delete') }}</v-btn>
+    <v-card-actions class="justify-end pa-0">
+      <v-btn color="grey" @click="handleClose" :disabled="isLoadingMember || isDeletingMember">{{ t('common.close')
+        }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!member || isLoadingMember || isDeletingMember"
+        v-if="canEditOrDelete">{{
+          t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!member || isLoadingMember || isDeletingMember"
+        v-if="canEditOrDelete">{{
+          t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

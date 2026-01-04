@@ -1,10 +1,10 @@
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Application.VoiceProfiles.DTOs;
 using backend.Application.VoiceProfiles.Queries;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 
 namespace backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 

@@ -44,7 +44,7 @@ public class VoiceAIService : IVoiceAIService
             {
                 return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an empty or invalid response.");
             }
-            
+
             return Result<VoicePreprocessResponse>.Success(preprocessResponse);
         }
         catch (HttpRequestException ex)
