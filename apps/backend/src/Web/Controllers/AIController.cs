@@ -1,7 +1,6 @@
 using backend.Application.AI.Chat;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces; // Added
-using backend.Application.Common.Models; // Added
 using backend.Application.Voice.DTOs; // Added
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
