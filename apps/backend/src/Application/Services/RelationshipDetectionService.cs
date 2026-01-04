@@ -63,9 +63,6 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             };
         }
 
-
-
-
         var combinedPromptBuilder = new StringBuilder();
 
         combinedPromptBuilder.AppendLine($"Bạn hãy xác định mối quan hệ gia đình giữa Thành viên {memberA.FullName}{GetVietnameseAgeTerm(memberA.DateOfBirth)} {GetVietnameseGenderTerm(memberA.Gender)} và Thành viên {memberB.FullName}{GetVietnameseAgeTerm(memberB.DateOfBirth)} {GetVietnameseGenderTerm(memberB.Gender)} trong cây gia phả dựa trên các đường dẫn sau:");
