@@ -2,7 +2,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.VoiceGenerations.Commands.GenerateVoice;
 using backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
-using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.ImportVoiceProfiles; // Add this using statement
 using backend.Application.VoiceProfiles.Commands.DeleteVoiceProfile;
@@ -26,24 +25,6 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
 {
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<VoiceProfilesController> _logger = logger;
-
-    /// <summary>
-    /// Tạo một hồ sơ giọng nói mới cho một thành viên.
-    /// </summary>
-    /// <param name="memberId">ID của thành viên.</param>
-    /// <param name="command">Dữ liệu để tạo hồ sơ giọng nói.</param>
-    /// <returns>Hồ sơ giọng nói vừa được tạo.</returns>
-    [HttpPost("{memberId}")]
-    public async Task<IActionResult> CreateVoiceProfile(Guid memberId, [FromBody] CreateVoiceProfileCommand command)
-    {
-        if (memberId != command.MemberId)
-        {
-            _logger.LogWarning("Mismatched Member ID in URL ({MemberId}) and request body ({CommandMemberId}) for CreateVoiceProfileCommand from {RemoteIpAddress}", memberId, command.MemberId, HttpContext.Connection.RemoteIpAddress);
-            return BadRequest("Member ID trong URL và trong body không khớp.");
-        }
-        Result<backend.Application.VoiceProfiles.Queries.VoiceProfileDto> result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger, 201, nameof(GetVoiceProfileById), result.IsSuccess ? new { id = result.Value!.Id } : null);
-    }
 
     /// <summary>
     /// Lấy thông tin chi tiết của một hồ sơ giọng nói.

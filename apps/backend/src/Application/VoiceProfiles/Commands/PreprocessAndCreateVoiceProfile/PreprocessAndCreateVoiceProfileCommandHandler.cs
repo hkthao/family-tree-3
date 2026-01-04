@@ -1,12 +1,13 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Voice.DTOs;
-using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Application.VoiceProfiles.Queries;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Net.Http; // Added
-using Microsoft.Extensions.Http; // Added
+using System.Net.Http;
+using Microsoft.Extensions.Http;
+using System.Text.Json;
+using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 
 namespace backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 
@@ -15,14 +16,14 @@ public class PreprocessAndCreateVoiceProfileCommandHandler : IRequestHandler<Pre
     private readonly IMediator _mediator;
     private readonly IVoiceAIService _voiceAIService;
     private readonly IFileStorageService _fileStorageService;
-    private readonly IHttpClientFactory _httpClientFactory; // Use IHttpClientFactory
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<PreprocessAndCreateVoiceProfileCommandHandler> _logger;
 
     public PreprocessAndCreateVoiceProfileCommandHandler(
         IMediator mediator,
         IVoiceAIService voiceAIService,
         IFileStorageService fileStorageService,
-        IHttpClientFactory httpClientFactory, // Inject IHttpClientFactory
+        IHttpClientFactory httpClientFactory,
         ILogger<PreprocessAndCreateVoiceProfileCommandHandler> logger)
     {
         _mediator = mediator;
@@ -52,12 +53,13 @@ public class PreprocessAndCreateVoiceProfileCommandHandler : IRequestHandler<Pre
 
         var preprocessedAudioUrl = preprocessResult.Value!.ProcessedAudioUrl;
         var durationSeconds = preprocessResult.Value!.Duration;
+        var qualityReport = preprocessResult.Value!.QualityReport;
 
-        _logger.LogInformation("Preprocessing successful. Preprocessed Audio URL: {Url}, Duration: {Duration}s", preprocessedAudioUrl, durationSeconds);
+        _logger.LogInformation("Preprocessing successful. Preprocessed Audio URL: {Url}, Duration: {Duration}s, Quality: {OverallQuality}", preprocessedAudioUrl, durationSeconds, qualityReport.OverallQuality);
 
         // 2. Download the preprocessed audio from the Python service's temporary URL
         Stream audioStream;
-        var httpClient = _httpClientFactory.CreateClient(); // Create HttpClient instance
+        var httpClient = _httpClientFactory.CreateClient();
         try
         {
             audioStream = await httpClient.GetStreamAsync(preprocessedAudioUrl, cancellationToken);
@@ -77,10 +79,10 @@ public class PreprocessAndCreateVoiceProfileCommandHandler : IRequestHandler<Pre
         // 3. Upload the downloaded audio to the C# backend's permanent storage
         // Assuming a folder structure like "family-voices/{memberId}/"
         var folder = $"family-voices/{command.MemberId}";
-        var fileName = $"{Guid.NewGuid()}.wav"; // Ensure a unique filename for storage
+        var fileName = $"{Guid.NewGuid()}.wav";
 
         Result<FileStorageResultDto> uploadResult;
-        await using (audioStream) // Ensures the stream is disposed after use
+        await using (audioStream)
         {
             uploadResult = await _fileStorageService.UploadFileAsync(audioStream, fileName, folder, cancellationToken);
         }
@@ -101,6 +103,9 @@ public class PreprocessAndCreateVoiceProfileCommandHandler : IRequestHandler<Pre
             Label = command.Label,
             AudioUrl = permanentAudioUrl,
             DurationSeconds = durationSeconds,
+            QualityScore = qualityReport.QualityScore,
+            OverallQuality = qualityReport.OverallQuality,
+            QualityMessages = JsonSerializer.Serialize(qualityReport.Messages),
             Language = command.Language,
             Consent = command.Consent
         };

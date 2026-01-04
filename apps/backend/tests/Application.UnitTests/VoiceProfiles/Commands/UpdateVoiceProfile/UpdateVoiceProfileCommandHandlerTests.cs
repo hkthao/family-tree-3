@@ -20,7 +20,7 @@ public class UpdateVoiceProfileCommandHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile = new VoiceProfile(memberId, "Old Label", "http://old.wav", 5.0, "en", false);
+        var voiceProfile = new VoiceProfile(memberId, "Old Label", "http://old.wav", 5.0, 0.0, "unknown", "{}", "en", false);
         context.VoiceProfiles.Add(voiceProfile);
         await context.SaveChangesAsync();
 

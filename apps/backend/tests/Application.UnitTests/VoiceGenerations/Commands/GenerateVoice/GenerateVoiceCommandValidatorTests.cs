@@ -62,7 +62,7 @@ public class GenerateVoiceCommandValidatorTests : TestBase
         var validator = new GenerateVoiceCommandValidator(context);
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, "en", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, 0.0, "unknown", "{}", "en", true));
         await context.SaveChangesAsync();
 
         var command = new GenerateVoiceCommand
@@ -84,7 +84,7 @@ public class GenerateVoiceCommandValidatorTests : TestBase
         var validator = new GenerateVoiceCommandValidator(context);
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, "en", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, 0.0, "unknown", "{}", "en", true));
         await context.SaveChangesAsync();
 
         var command = new GenerateVoiceCommand
@@ -106,7 +106,7 @@ public class GenerateVoiceCommandValidatorTests : TestBase
         var validator = new GenerateVoiceCommandValidator(context);
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, "en", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Label", "http://audio.wav", 10, 0.0, "unknown", "{}", "en", true));
         await context.SaveChangesAsync();
 
         var command = new GenerateVoiceCommand

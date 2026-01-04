@@ -261,8 +261,8 @@ public class CreateVoiceProfileCommandValidatorTests : TestBase
         var memberId = Guid.NewGuid();
         var familyId = Guid.NewGuid(); // Member needs a FamilyId
         var member = new Member("Last", "First", "CODE1", familyId) { Id = memberId }; // Explicitly set Id
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile1", "http://1.wav", 10, "vi", true));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile2", "http://2.wav", 10, "vi", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile1", "http://1.wav", 10, 0.0, "unknown", "{}", "vi", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile2", "http://2.wav", 10, 0.0, "unknown", "{}", "vi", true));
         await context.SaveChangesAsync();
 
         var command = new CreateVoiceProfileCommand
@@ -293,7 +293,7 @@ public class CreateVoiceProfileCommandValidatorTests : TestBase
 
         var validator = new CreateVoiceProfileCommandValidator(context);
 
-        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile1", "http://1.wav", 10, "vi", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId, "Profile1", "http://1.wav", 10, 0.0, "unknown", "{}", "vi", true));
         await context.SaveChangesAsync();
 
         var command = new CreateVoiceProfileCommand

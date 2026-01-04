@@ -30,6 +30,21 @@ public class VoiceProfile : BaseAuditableEntity
     public double DurationSeconds { get; private set; }
 
     /// <summary>
+    /// Điểm chất lượng của hồ sơ giọng nói. (0.0 - 100.0)
+    /// </summary>
+    public double QualityScore { get; private set; }
+
+    /// <summary>
+    /// Đánh giá chất lượng tổng thể của hồ sơ giọng nói ("pass", "warn", "reject").
+    /// </summary>
+    public string OverallQuality { get; private set; } = null!;
+
+    /// <summary>
+    /// Các thông điệp chi tiết về đánh giá chất lượng hồ sơ giọng nói (JSON string của List<string>).
+    /// </summary>
+    public string QualityMessages { get; private set; } = null!;
+
+    /// <summary>
     /// Ngôn ngữ của hồ sơ giọng nói.
     /// </summary>
     public string Language { get; private set; } = null!;
@@ -61,12 +76,15 @@ public class VoiceProfile : BaseAuditableEntity
     /// <summary>
     /// Khởi tạo một thể hiện mới của VoiceProfile.
     /// </summary>
-    public VoiceProfile(Guid memberId, string label, string audioUrl, double durationSeconds, string language, bool consent)
+    public VoiceProfile(Guid memberId, string label, string audioUrl, double durationSeconds, double qualityScore, string overallQuality, string qualityMessages, string language, bool consent)
     {
         MemberId = memberId;
         Label = label;
         AudioUrl = audioUrl;
         DurationSeconds = durationSeconds;
+        QualityScore = qualityScore;
+        OverallQuality = overallQuality;
+        QualityMessages = qualityMessages;
         Language = language;
         Consent = consent;
         Status = VoiceProfileStatus.Active;
@@ -75,11 +93,14 @@ public class VoiceProfile : BaseAuditableEntity
     /// <summary>
     /// Cập nhật thông tin hồ sơ giọng nói.
     /// </summary>
-    public void Update(string label, string audioUrl, double durationSeconds, string language, bool consent, VoiceProfileStatus status)
+    public void Update(string label, string audioUrl, double durationSeconds, double qualityScore, string overallQuality, string qualityMessages, string language, bool consent, VoiceProfileStatus status)
     {
         Label = label;
         AudioUrl = audioUrl;
         DurationSeconds = durationSeconds;
+        QualityScore = qualityScore;
+        OverallQuality = overallQuality;
+        QualityMessages = qualityMessages;
         Language = language;
         Consent = consent;
         Status = status;

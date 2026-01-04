@@ -24,7 +24,7 @@ public class GenerateVoiceCommandHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         _context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, "en", true); // Consent is true
+        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, 0.0, "unknown", "{}", "en", true); // Consent is true
         _context.VoiceProfiles.Add(voiceProfile);
         await _context.SaveChangesAsync();
 
@@ -75,7 +75,7 @@ public class GenerateVoiceCommandHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         _context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, "en", false); // Consent is false
+        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, 0.0, "unknown", "{}", "en", false); // Consent is false
         _context.VoiceProfiles.Add(voiceProfile);
         await _context.SaveChangesAsync();
 

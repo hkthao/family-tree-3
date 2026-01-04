@@ -29,6 +29,21 @@ public record CreateVoiceProfileCommand : IRequest<Result<VoiceProfileDto>>
     public double DurationSeconds { get; init; }
 
     /// <summary>
+    /// Điểm chất lượng của hồ sơ giọng nói.
+    /// </summary>
+    public double QualityScore { get; init; }
+
+    /// <summary>
+    /// Đánh giá chất lượng tổng thể của hồ sơ giọng nói.
+    /// </summary>
+    public string OverallQuality { get; init; } = null!;
+
+    /// <summary>
+    /// Các thông điệp chi tiết về đánh giá chất lượng hồ sơ giọng nói.
+    /// </summary>
+    public string QualityMessages { get; init; } = null!;
+
+    /// <summary>
     /// Ngôn ngữ của hồ sơ giọng nói.
     /// </summary>
     public string Language { get; init; } = null!;

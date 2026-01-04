@@ -31,6 +31,9 @@ public class CreateVoiceProfileCommandHandlerTests : TestBase
             Label = "Default Voice",
             AudioUrl = "http://example.com/audio.wav",
             DurationSeconds = 10.5,
+            QualityScore = 80.0,
+            OverallQuality = "pass",
+            QualityMessages = "{\"messages\":[]}",
             Language = "vi",
             Consent = true
         };

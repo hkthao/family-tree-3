@@ -18,8 +18,8 @@ public class GetVoiceGenerationHistoryQueryHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile1 = new VoiceProfile(memberId, "Profile1", "http://1.wav", 5.0, "en", true);
-        var voiceProfile2 = new VoiceProfile(memberId, "Profile2", "http://2.wav", 7.0, "en", true);
+        var voiceProfile1 = new VoiceProfile(memberId, "Profile1", "http://1.wav", 5.0, 0.0, "unknown", "{}", "en", true);
+        var voiceProfile2 = new VoiceProfile(memberId, "Profile2", "http://2.wav", 7.0, 0.0, "unknown", "{}", "en", true);
         context.VoiceProfiles.Add(voiceProfile1);
         context.VoiceProfiles.Add(voiceProfile2);
 
@@ -51,7 +51,7 @@ public class GetVoiceGenerationHistoryQueryHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile = new VoiceProfile(memberId, "Profile1", "http://1.wav", 5.0, "en", true);
+        var voiceProfile = new VoiceProfile(memberId, "Profile1", "http://1.wav", 5.0, 0.0, "unknown", "{}", "en", true);
         context.VoiceProfiles.Add(voiceProfile);
         await context.SaveChangesAsync();
 

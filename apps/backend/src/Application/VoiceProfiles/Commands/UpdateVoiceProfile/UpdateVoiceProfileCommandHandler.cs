@@ -31,6 +31,9 @@ public class UpdateVoiceProfileCommandHandler : IRequestHandler<UpdateVoiceProfi
             request.Label,
             request.AudioUrl,
             request.DurationSeconds,
+            request.QualityScore,
+            request.OverallQuality,
+            request.QualityMessages,
             request.Language,
             request.Consent,
             request.Status

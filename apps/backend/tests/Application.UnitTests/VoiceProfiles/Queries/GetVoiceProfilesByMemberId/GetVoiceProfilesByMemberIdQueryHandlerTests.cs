@@ -21,9 +21,9 @@ public class GetVoiceProfilesByMemberIdQueryHandlerTests : TestBase
         context.Members.Add(new Member("Last1", "First1", "CODE1", Guid.NewGuid()) { Id = memberId1 });
         context.Members.Add(new Member("Last2", "First2", "CODE2", Guid.NewGuid()) { Id = memberId2 });
 
-        context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile1", "http://1.wav", 5.0, "en", true));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile2", "http://2.wav", 7.0, "en", true));
-        context.VoiceProfiles.Add(new VoiceProfile(memberId2, "Profile3", "http://3.wav", 10.0, "fr", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile1", "http://1.wav", 5.0, 0.0, "unknown", "{}", "en", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId1, "Profile2", "http://2.wav", 7.0, 0.0, "unknown", "{}", "en", true));
+        context.VoiceProfiles.Add(new VoiceProfile(memberId2, "Profile3", "http://3.wav", 10.0, 0.0, "unknown", "{}", "fr", true));
         await context.SaveChangesAsync();
 
         // Verify that the member exists in the context

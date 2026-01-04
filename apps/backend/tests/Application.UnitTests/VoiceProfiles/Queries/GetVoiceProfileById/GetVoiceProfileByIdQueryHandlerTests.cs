@@ -19,7 +19,7 @@ public class GetVoiceProfileByIdQueryHandlerTests : TestBase
         // Arrange
         var memberId = Guid.NewGuid();
         context.Members.Add(new Member("Last", "First", "CODE1", memberId));
-        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, "en", true);
+        var voiceProfile = new VoiceProfile(memberId, "Test Label", "http://test.wav", 10.0, 0.0, "unknown", "{}", "en", true);
         context.VoiceProfiles.Add(voiceProfile);
         await context.SaveChangesAsync();
 
