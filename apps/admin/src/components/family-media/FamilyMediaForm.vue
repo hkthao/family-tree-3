@@ -2,13 +2,13 @@
   <v-form ref="formRef">
     <v-row>
       <v-col v-if="!readOnly" cols="12">
-        <VFileUpload v-model="file" :label="t('familyMedia.form.fileLabel')" prepend-icon="mdi-camera"
+        <VFileUpload v-model="file" :label="t('familyMedia.form.fileLabel')" prepend-inner-icon="mdi-file-upload"
           accept="image/*,video/*,audio/*,application/pdf" show-size :rules="readOnly ? [] : formRules.file"
           :disabled="readOnly"></VFileUpload>
       </v-col>
       <v-col cols="12">
         <v-textarea v-model="description" :label="t('familyMedia.form.description')" rows="3" clearable
-          :disabled="readOnly"></v-textarea>
+          :disabled="readOnly" prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
     </v-row>
     <v-row>

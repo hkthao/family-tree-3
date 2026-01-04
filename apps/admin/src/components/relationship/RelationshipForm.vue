@@ -4,12 +4,12 @@
       <v-col cols="12" md="6">
         <family-auto-complete v-model="formData.familyId" :label="t('relationship.form.family')"
           :rules="validationRules.familyId" :readonly="props.readOnly"
-          data-testid="relationship-family-autocomplete" />
+          data-testid="relationship-family-autocomplete" prepend-inner-icon="mdi-home-heart" />
       </v-col>
       <v-col cols="12" md="6">
         <v-select v-model="formData.type" :items="relationshipTypes" :label="t('relationship.form.type')"
           :rules="validationRules.type" :readonly="props.readOnly "
-          data-testid="relationship-type-select"></v-select>
+          data-testid="relationship-type-select" prepend-inner-icon="mdi-link"></v-select>
       </v-col>
 
     </v-row>
@@ -17,19 +17,22 @@
       <v-col cols="12" md="6">
         <member-auto-complete v-model="formData.sourceMemberId" :label="t('relationship.form.sourceMember')"
           :rules="validationRules.sourceMemberId" :readonly="props.readOnly || !formData.familyId"
-          :family-id="formData.familyId" data-testid="relationship-source-member-autocomplete" />
+          :family-id="formData.familyId" data-testid="relationship-source-member-autocomplete"
+          prepend-inner-icon="mdi-account" />
       </v-col>
       <v-col cols="12" md="6">
         <member-auto-complete v-model="formData.targetMemberId" :label="t('relationship.form.targetMember')"
           :rules="validationRules.targetMemberId" :readonly="props.readOnly || !formData.familyId"
-          :family-id="formData.familyId" data-testid="relationship-target-member-autocomplete" />
+          :family-id="formData.familyId" data-testid="relationship-target-member-autocomplete"
+          prepend-inner-icon="mdi-account" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
         <v-text-field v-model.number="formData.order" :label="t('relationship.form.order')" type="number"
-          :readonly="props.readOnly" data-testid="relationship-order-input"></v-text-field>
+          :readonly="props.readOnly" data-testid="relationship-order-input"
+          prepend-inner-icon="mdi-numeric"></v-text-field>
       </v-col>
     </v-row>
   </v-form>
