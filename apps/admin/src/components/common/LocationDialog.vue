@@ -1,6 +1,6 @@
 <template>
-  <v-dialog v-model="locationDrawerStore.drawer" @click:outside="locationDrawerStore.closeDrawer" max-width="800">
-    <v-card v-if="locationDrawerStore.drawer" :elevation="0">
+  <v-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" @click:outside="emit('update:modelValue', false)" max-width="800">
+    <v-card v-if="modelValue" :elevation="0">
       <v-card-title class="text-h5 text-uppercase text-center">
         {{ t('familyLocation.list.title') }}
       </v-card-title>
@@ -29,7 +29,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="grey" @click="locationDrawerStore.closeDrawer">{{ t('common.close') }}</v-btn>
+        <v-btn color="grey" @click="emit('update:modelValue', false)">{{ t('common.close') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -37,16 +37,21 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-// BaseCrudDrawer is no longer needed
-// import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; 
-import { useLocationDrawerStore } from '@/stores/locationDrawer.store';
 import { useFamilyLocationSearch } from '@/composables/family-location/useFamilyLocationSearch';
 import type { FamilyLocation } from '@/types';
-import { toRef } from 'vue'; // Import toRef
+import { computed } from 'vue'; // Import computed
+
+interface LocationDialogProps {
+  modelValue: boolean; // Controls dialog visibility
+  familyId?: string | null; // FamilyId for filtering locations
+}
+
+const props = defineProps<LocationDialogProps>();
+const emit = defineEmits(['update:modelValue', 'selectLocation']); // Emits for visibility and selection
 
 const { t } = useI18n();
-const locationDrawerStore = useLocationDrawerStore();
-const familyIdRef = toRef(locationDrawerStore, 'initialFamilyId'); // Make it a reactive ref
+
+const currentFamilyId = computed(() => props.familyId ?? null); // Ensure it's string | null
 
 const {
   familyLocations,
@@ -55,9 +60,10 @@ const {
   searchQuery,
   page,
   itemsPerPage,
-} = useFamilyLocationSearch(familyIdRef); // Pass the reactive ref
+} = useFamilyLocationSearch(currentFamilyId); // Pass the reactive ref
 
 const handleSelectLocation = (location: FamilyLocation) => {
-  locationDrawerStore.confirmSelection(location);
+  emit('selectLocation', location);
+  emit('update:modelValue', false); // Close dialog after selection
 };
 </script>

@@ -18,18 +18,19 @@
       <MemberAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMemberClosed" @saved="handleMemberSaved"
         :allow-save="allowAdd" />
     </BaseCrudDrawer>
-    <!-- Detail Member Drawer -->
-    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <MemberDetailTabsView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId"
-        @close="handleDetailClosed" @edit-member="openEditDrawer" @member-deleted="handleMemberSaved"
-        @show-event-detail="handleShowEventDetail"
-        :read-only="props.readOnly" />
-    </BaseCrudDrawer>
     <!-- Event Detail Drawer -->
     <BaseCrudDrawer v-model="eventDetailDrawer" @close="handleEventClosed">
       <EventDetailView v-if="selectedEventId && eventDetailDrawer" :event-id="selectedEventId"
         @close="handleEventClosed" />
     </BaseCrudDrawer>
+
+    <!-- Detail Member Drawer -->
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
+      <MemberDetailTabsView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId"
+        @close="handleDetailClosed" @edit-member="openEditDrawer" @member-deleted="handleMemberSaved"
+        @show-event-detail="handleShowEventDetail" :read-only="props.readOnly" />
+    </BaseCrudDrawer>
+
     <!-- Import Dialog -->
     <BaseImportDialog v-model="importDialog" :title="t('member.import.title')" :label="t('member.import.selectFile')"
       :loading="isImporting" :max-file-size="5 * 1024 * 1024" @update:model-value="importDialog = $event"
@@ -170,12 +171,10 @@ const handleDetailClosed = () => {
   detailDrawer.value = false;
 };
 const handleShowEventDetail = (eventId: string) => {
-  detailDrawer.value = false; // Close the member detail drawer
   selectedEventId.value = eventId;
   eventDetailDrawer.value = true;
 };
 const handleEventClosed = () => {
-  eventDetailDrawer.value = false;
   selectedEventId.value = null;
 };
 // Initial load is handled by useMembersQuery, no need for onMounted load

@@ -8,11 +8,13 @@
     :readonly="readOnly"
     data-testid="location-input-field"
   ></v-text-field>
+  <LocationDialog v-model="showDialog" :family-id="familyId" @selectLocation="handleLocationSelected" />
 </template>
 
 <script setup lang="ts">
-import { useLocationDrawerStore } from '@/stores/locationDrawer.store';
+import { ref } from 'vue'; // Import ref
 import type { FamilyLocation } from '@/types'; // Import FamilyLocation type
+import LocationDialog from './LocationDialog.vue'; // Import the new LocationDialog
 
 const props = defineProps<{
   modelValue?: string; // The address string
@@ -22,21 +24,20 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 
-const locationDrawerStore = useLocationDrawerStore();
+const showDialog = ref(false); // Controls the visibility of the LocationDialog
 
 const updateAddress = (value: string) => {
   emit('update:modelValue', value);
 };
 
-const openLocationPicker = async () => {
+const openLocationPicker = () => {
   if (props.readOnly) return;
-  try {
-    const selectedLocation: FamilyLocation = await locationDrawerStore.openDrawer(props.familyId);
-    if (selectedLocation && selectedLocation.address) {
-      updateAddress(selectedLocation.address);
-    }
-  } catch (error) {
-    console.error('Location selection cancelled or failed:', error);
+  showDialog.value = true; // Open the dialog
+};
+
+const handleLocationSelected = (location: FamilyLocation) => {
+  if (location && location.address) {
+    updateAddress(location.address);
   }
 };
 </script>
