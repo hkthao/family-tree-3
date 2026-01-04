@@ -29,6 +29,14 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
+        <v-tooltip v-if="allowGenerateVoice" :text="t('voiceProfile.list.generateVoice')" location="top">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn icon v-bind="tooltipProps" @click="() => { emit('generate-voice', item.id); }" variant="text"
+              data-testid="button-generate-voice" size="small">
+              <v-icon>mdi-microphone</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
         <v-tooltip v-if="allowEdit" :text="t('common.edit')" location="top">
           <template v-slot:activator="{ props: tooltipProps }">
             <v-btn icon v-bind="tooltipProps" @click="emit('edit', item.id)" variant="text" data-testid="button-edit"
@@ -70,7 +78,6 @@ interface VoiceProfileListProps {
   items: VoiceProfile[];
   totalItems: number;
   loading: boolean;
-
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
@@ -78,6 +85,7 @@ interface VoiceProfileListProps {
   isImporting?: boolean;
   canPerformActions?: boolean;
   searchQuery?: string;
+  allowGenerateVoice?: boolean;
 }
 
 withDefaults(defineProps<VoiceProfileListProps>(), {
@@ -87,6 +95,7 @@ withDefaults(defineProps<VoiceProfileListProps>(), {
   isExporting: false,
   isImporting: false,
   canPerformActions: true,
+  allowGenerateVoice: true,
 });
 
 const emit = defineEmits([
@@ -98,6 +107,7 @@ const emit = defineEmits([
   'on-export',
   'on-import-click',
   'update:search',
+  'generate-voice',
 ]);
 
 const { t } = useI18n();

@@ -11,6 +11,8 @@ using backend.Application.VoiceProfiles.Queries.ExportVoiceProfiles; // Add this
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using backend.Application.VoiceGenerations.Queries;
+using backend.Application.VoiceProfiles.Queries;
 
 namespace backend.Web.Controllers;
 
@@ -34,7 +36,7 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     [HttpGet("{id}")]
     public async Task<IActionResult> GetVoiceProfileById(Guid id)
     {
-        Result<backend.Application.VoiceProfiles.Queries.VoiceProfileDto> result = await _mediator.Send(new GetVoiceProfileByIdQuery { Id = id });
+        Result<VoiceProfileDto> result = await _mediator.Send(new GetVoiceProfileByIdQuery { Id = id });
         return result.ToActionResult(this, _logger);
     }
 
@@ -52,7 +54,7 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
             _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateVoiceProfileCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("ID trong URL và trong body không khớp.");
         }
-        Result<backend.Application.VoiceProfiles.Queries.VoiceProfileDto> result = await _mediator.Send(command);
+        Result<VoiceProfileDto> result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 200); // 200 OK for successful update returning entity
     }
 
@@ -82,7 +84,7 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
             _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandVoiceProfileId}) for GenerateVoiceCommand from {RemoteIpAddress}", id, command.VoiceProfileId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest("ID trong URL và trong body không khớp.");
         }
-        Result<Application.VoiceGenerations.Queries.VoiceGenerationDto> result = await _mediator.Send(command);
+        Result<VoiceGenerationDto> result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201);
     }
 
@@ -105,7 +107,7 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     /// <returns>Danh sách hồ sơ giọng nói đã được phân trang.</returns>
     [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<backend.Application.VoiceProfiles.Queries.VoiceProfileDto>>> SearchVoiceProfiles([FromQuery] SearchVoiceProfilesQuery query)
+    public async Task<ActionResult<PaginatedList<VoiceProfileDto>>> SearchVoiceProfiles([FromQuery] SearchVoiceProfilesQuery query)
     {
         var result = await _mediator.Send(query);
         return Ok(result);

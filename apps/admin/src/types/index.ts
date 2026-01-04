@@ -30,3 +30,4 @@ export * from './ai.d';
 export * from './ocr.d'; // NEW
 export * from './file.d'; // NEW
 export * from './voice-profile.d';
+export * from './voice-generation.d'; // NEW

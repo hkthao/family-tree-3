@@ -12,11 +12,13 @@
       :allow-add="true"
       :allow-edit="true"
       :allow-delete="true"
+      :allow-generate-voice="true"
       :is-exporting="isExporting"
       :is-importing="isImporting"
       :can-perform-actions="true"
       :on-export="exportVoiceProfiles"
       :on-import-click="() => importDialog = true"
+      @generate-voice="handleGenerateVoice"
       :search-query="filters.search"
       @update:search="setSearch"
     />
@@ -49,6 +51,13 @@
       @update:model-value="importDialog = $event"
       @import="triggerImport"
     />
+
+    <!-- Generate Voice Drawer -->
+    <BaseCrudDrawer v-model="generateVoiceDrawer" @close="handleGenerateVoiceClosed">
+      <GenerateVoiceView v-if="selectedVoiceProfileForGeneration && generateVoiceDrawer"
+        :voice-profile-id="selectedVoiceProfileForGeneration" @close="handleGenerateVoiceClosed"
+        @generated="handleGenerateVoiceGenerated" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -67,7 +76,9 @@ import VoiceProfileAddView from './VoiceProfileAddView.vue';
 import VoiceProfileEditView from './VoiceProfileEditView.vue';
 import VoiceProfileDetailView from './VoiceProfileDetailView.vue';
 import BaseImportDialog from '@/components/common/BaseImportDialog.vue';
+import GenerateVoiceView from './GenerateVoiceView.vue'; // NEW
 import { useVoiceProfileImportExport } from '@/composables/voice-profile/useVoiceProfileImportExport';
+
 
 interface VoiceProfileListViewProps {
   familyId: string; // New prop
@@ -80,6 +91,8 @@ const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
 const importDialog = ref(false);
+const generateVoiceDrawer = ref(false); // NEW
+const selectedVoiceProfileForGeneration = ref<string | null>(null); // NEW
 
 const { isExporting, isImporting, exportVoiceProfiles, importVoiceProfiles } = useVoiceProfileImportExport(computed(() => props.familyId));
 
@@ -191,6 +204,22 @@ const handleVoiceProfileSaved = () => {
 
 const handleVoiceProfileClosed = () => {
   closeAllDrawers();
+};
+
+// NEW: Generate Voice
+const handleGenerateVoice = (id: string) => {
+  selectedVoiceProfileForGeneration.value = id;
+  generateVoiceDrawer.value = true;
+};
+
+const handleGenerateVoiceClosed = () => {
+  generateVoiceDrawer.value = false;
+  selectedVoiceProfileForGeneration.value = null;
+};
+
+const handleGenerateVoiceGenerated = () => {
+  handleGenerateVoiceClosed();
+  queryClient.invalidateQueries({ queryKey: ['voice-profiles'] });
 };
 
 </script>
