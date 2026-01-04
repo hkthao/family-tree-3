@@ -19,8 +19,7 @@ import type { IPromptService } from './prompt/prompt.service.interface';
 import { ApiPromptService } from './prompt/api.prompt.service';
 import type { IFamilyLinkService } from './familyLink/familyLink.service.interface';
 import { ApiFamilyLinkService } from './familyLink/api.familyLink.service';
-import type { IFamilyLinkRequestService } from './familyLinkRequest/familyLinkRequest.service.interface';
-import { ApiFamilyLinkRequestService } from './familyLinkRequest/api.familyLinkRequest.service'; // ADD THIS IMPORT
+
 import type { IFamilyMediaService } from './family-media/family-media.service.interface';
 import { ApiFamilyMediaService } from './family-media/api.family-media.service';
 import type { IFamilyLocationService } from './family-location/family-location.service.interface';
@@ -44,7 +43,7 @@ export interface AppServices {
   memberFace: IMemberFaceService;
   prompt: IPromptService;
   familyLink: IFamilyLinkService;
-  familyLinkRequest: IFamilyLinkRequestService;
+
   familyMedia: IFamilyMediaService; // NEW: Add FamilyMediaService
   familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
   memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
@@ -100,10 +99,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyLinkService(apiClient)
         : testServices?.familyLink || new ApiFamilyLinkService(apiClient),
-    familyLinkRequest:
-      mode === 'real'
-        ? new ApiFamilyLinkRequestService(apiClient)
-        : testServices?.familyLinkRequest || new ApiFamilyLinkRequestService(apiClient),
+
     familyMedia: // NEW: Assign FamilyMediaService
       mode === 'real'
         ? new ApiFamilyMediaService(apiClient)
