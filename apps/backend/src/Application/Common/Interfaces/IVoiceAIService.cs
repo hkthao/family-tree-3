@@ -1,5 +1,5 @@
 using backend.Application.Common.Models;
-using backend.Application.Voice.DTOs;
+using backend.Application.VoiceProfiles.DTOs;
 
 namespace backend.Application.Common.Interfaces;
 

@@ -14,7 +14,7 @@ class ReplicateService:
         replicate.api_token = settings.REPLICATE_API_TOKEN
         # XTTS model version from Coqui
         # Ensure this is the correct and desired model version
-        self.xtts_model_version = "coqui-ai/xtts-v2:e876df565d4d629da440ce5820d1d2c8c2adb963f52e526efc064911f841f85e"
+        self.xtts_model_version = "lucataco/xtts-v2:684bc3855b37866c0c65add2ff39c78f3dea3f4ff103a436465326e0f438d55e"
         logger.info("ReplicateService initialized with XTTS model version: %s", self.xtts_model_version)
 
     async def generate_voice(self, speaker_wav_url: str, text: str, language: str) -> str:
@@ -24,6 +24,12 @@ class ReplicateService:
         """
         logger.info("Calling Replicate XTTS for voice generation. Speaker WAV: %s, Language: %s", speaker_wav_url, language)
         try:
+            # Supported languages for XTTS-v2 based on Replicate documentation
+            supported_languages = ["en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru", "nl", "cs", "ar", "zh", "hu", "ko", "hi", "ja"]
+
+            if language not in supported_languages:
+                raise ValueError(f"Language '{language}' is not supported by the XTTS model. Supported languages are: {', '.join(supported_languages)}")
+
             # Replicate model input parameters for XTTS-v2
             inputs = {
                 "speaker_wav": speaker_wav_url,

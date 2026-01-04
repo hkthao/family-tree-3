@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Voice.DTOs; // Added for VoiceGenerateRequest and VoiceGenerateResponse
+using backend.Application.VoiceProfiles.DTOs; // Added for VoiceGenerateRequest and VoiceGenerateResponse
 using backend.Application.VoiceProfiles.Queries;
 using backend.Domain.Entities;
 
@@ -14,15 +14,21 @@ public class GenerateVoiceCommandHandler : IRequestHandler<GenerateVoiceCommand,
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IVoiceAIService _voiceAIService; // Injected IVoiceAIService
+    private readonly IHttpClientFactory _httpClientFactory; // Injected IHttpClientFactory
+    private readonly IFileStorageService _fileStorageService; // Injected IFileStorageService
 
     public GenerateVoiceCommandHandler(
         IApplicationDbContext context,
         IMapper mapper,
-        IVoiceAIService voiceAIService) // Constructor updated
+        IVoiceAIService voiceAIService,
+        IHttpClientFactory httpClientFactory, // Constructor updated
+        IFileStorageService fileStorageService) // Constructor updated
     {
         _context = context;
         _mapper = mapper;
         _voiceAIService = voiceAIService; // Assign injected service
+        _httpClientFactory = httpClientFactory; // Assign injected service
+        _fileStorageService = fileStorageService; // Assign injected service
     }
 
     public async Task<Result<VoiceGenerationDto>> Handle(GenerateVoiceCommand request, CancellationToken cancellationToken)
@@ -62,10 +68,44 @@ public class GenerateVoiceCommandHandler : IRequestHandler<GenerateVoiceCommand,
         // This estimation might need refinement or could be retrieved from a different service if available.
         var generatedDuration = request.Text.Length * 0.1; // Placeholder: 0.1 seconds per character
 
+        // --- New Logic: Download and Upload Generated Audio ---
+        Stream audioStream;
+        var httpClient = _httpClientFactory.CreateClient();
+        try
+        {
+            audioStream = await httpClient.GetStreamAsync(generatedAudioUrl, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            return Result<VoiceGenerationDto>.Failure($"Failed to download generated audio: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result<VoiceGenerationDto>.Failure($"An unexpected error occurred during generated audio download: {ex.Message}");
+        }
+
+        // Upload the downloaded audio to permanent storage
+        var folder = $"voice-generations/{voiceProfile.MemberId}"; // Store by member ID
+        var fileName = $"{Guid.NewGuid()}.wav";
+
+        Result<FileStorageResultDto> uploadResult;
+        await using (audioStream)
+        {
+            uploadResult = await _fileStorageService.UploadFileAsync(audioStream, fileName, folder, cancellationToken);
+        }
+
+        if (!uploadResult.IsSuccess)
+        {
+            return Result<VoiceGenerationDto>.Failure(uploadResult.Error ?? "Failed to upload generated audio to permanent storage.");
+        }
+
+        var permanentAudioUrl = uploadResult.Value!.FileUrl;
+        // --- End New Logic ---
+
         var entity = new VoiceGeneration(
             request.VoiceProfileId,
             request.Text,
-            generatedAudioUrl,
+            permanentAudioUrl, // Use the permanent URL
             generatedDuration
         );
 

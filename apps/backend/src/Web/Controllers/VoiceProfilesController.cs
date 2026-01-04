@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using backend.Application.VoiceProfiles.Queries;
 using backend.Application.VoiceProfiles.Commands.GenerateVoice;
 using backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
+using backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistoryByMemberId; // New using statement
 
 namespace backend.Web.Controllers;
 
@@ -96,6 +97,18 @@ public class VoiceProfilesController(IMediator mediator, ILogger<VoiceProfilesCo
     public async Task<IActionResult> GetVoiceGenerationHistory(Guid id)
     {
         var result = await _mediator.Send(new GetVoiceGenerationHistoryQuery { VoiceProfileId = id });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Lấy lịch sử tạo giọng nói theo Member ID.
+    /// </summary>
+    /// <param name="memberId">ID của thành viên.</param>
+    /// <returns>Danh sách lịch sử tạo giọng nói.</returns>
+    [HttpGet("member/{memberId}/history")]
+    public async Task<IActionResult> GetVoiceGenerationHistoryByMemberId(Guid memberId)
+    {
+        var result = await _mediator.Send(new GetVoiceGenerationHistoryByMemberIdQuery { MemberId = memberId });
         return result.ToActionResult(this, _logger);
     }
 

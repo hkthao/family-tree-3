@@ -6,7 +6,7 @@
     </v-overlay>
     <v-card-text>
       <v-textarea v-model="textToGenerate" :label="t('voiceProfile.generateVoiceDialog.textFieldLabel')" :rows="2"
-        :max-rows="5" outlined clearable data-testid="text-to-generate-input"
+        auto-grow outlined clearable data-testid="text-to-generate-input"
         :rules="[v => !!v || t('common.fieldRequired')]"></v-textarea>
     </v-card-text>
     <v-card-actions>

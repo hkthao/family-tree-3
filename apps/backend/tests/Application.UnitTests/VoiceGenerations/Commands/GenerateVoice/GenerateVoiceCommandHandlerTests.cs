@@ -5,23 +5,64 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq; // Added for mocking
+using Moq;
+using Moq.Protected; // Added for mocking protected members
 using Xunit;
-using backend.Application.Common.Interfaces; // Added for IVoiceAIService
-using backend.Application.Voice.DTOs; // Added for VoiceGenerateResponse
-using backend.Application.Common.Models; // Added for Result
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.VoiceProfiles.DTOs;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace backend.Application.UnitTests.VoiceGenerations.Commands.GenerateVoice;
 
 public class GenerateVoiceCommandHandlerTests : TestBase
 {
     private readonly GenerateVoiceCommandHandler _handler;
-    private readonly Mock<IVoiceAIService> _mockVoiceAIService; // Declared mock
+    private readonly Mock<IVoiceAIService> _mockVoiceAIService;
+    private readonly Mock<IHttpClientFactory> _mockHttpClientFactory; // Declared mock
+    private readonly Mock<IFileStorageService> _mockFileStorageService; // Declared mock
+
 
     public GenerateVoiceCommandHandlerTests()
     {
-        _mockVoiceAIService = new Mock<IVoiceAIService>(); // Initialized mock
-        _handler = new GenerateVoiceCommandHandler(_context, _mapper, _mockVoiceAIService.Object); // Pass mock object
+        _mockVoiceAIService = new Mock<IVoiceAIService>();
+        _mockHttpClientFactory = new Mock<IHttpClientFactory>(); // Initialized mock
+        _mockFileStorageService = new Mock<IFileStorageService>(); // Initialized mock
+
+        // Setup a mock HttpMessageHandler that returns a stream
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        mockHttpMessageHandler.Protected() // Enable mocking of protected members
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Content = new StreamContent(new MemoryStream(System.Text.Encoding.UTF8.GetBytes("mock audio data")))
+            });
+
+        var mockHttpClient = new HttpClient(mockHttpMessageHandler.Object);
+        _mockHttpClientFactory.Setup(f => f.CreateClient(It.IsAny<string>()))
+            .Returns(mockHttpClient);
+
+        // Setup mock FileStorageService
+        _mockFileStorageService.Setup(s => s.UploadFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = "http://final-permanent-url.wav" })); // Return a dummy URL
+
+        _handler = new GenerateVoiceCommandHandler(
+            _context,
+            _mapper,
+            _mockVoiceAIService.Object,
+            _mockHttpClientFactory.Object, // Pass mock object
+            _mockFileStorageService.Object); // Pass mock object
     }
 
     [Fact]
@@ -55,13 +96,13 @@ public class GenerateVoiceCommandHandlerTests : TestBase
         result.Value!.Id.Should().NotBeEmpty();
         result.Value!.VoiceProfileId.Should().Be(voiceProfile.Id);
         result.Value!.Text.Should().Be(command.Text);
-        result.Value!.AudioUrl.Should().Be("http://generated.wav"); // Changed to match mock
+        result.Value!.AudioUrl.Should().Be("http://final-permanent-url.wav"); // Changed to match mock file storage
         result.Value!.Duration.Should().BeGreaterThan(0);
 
         generatedVoice.Should().NotBeNull();
         generatedVoice!.VoiceProfileId.Should().Be(voiceProfile.Id);
         generatedVoice.Text.Should().Be(command.Text);
-        generatedVoice.AudioUrl.Should().Be("http://generated.wav"); // Changed to match mock
+        generatedVoice.AudioUrl.Should().Be("http://final-permanent-url.wav"); // Changed to match mock file storage
     }
 
     [Fact]
