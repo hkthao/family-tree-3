@@ -15,6 +15,7 @@ const mockApiEventService: IEventService = {
   getByIds: vi.fn(),
   exportEvents: vi.fn(),
   importEvents: vi.fn(),
+  getEventsByMemberId: vi.fn(), // Add this new method
 };
 
 describe('ApiEventServiceAdapter', () => {
@@ -38,7 +39,7 @@ describe('ApiEventServiceAdapter', () => {
     repeatRule: RepeatRule.None,
     description: 'A test description',
     color: '#FF0000',
-    relatedMemberIds: ['member1'],
+    eventMemberIds: ['member1'], // Changed from relatedMemberIds
   };
 
   const mockError: ApiError = {
@@ -67,7 +68,7 @@ describe('ApiEventServiceAdapter', () => {
       repeatRule: RepeatRule.None,
       description: 'A test description',
       color: '#FF0000',
-      relatedMemberIds: ['member1'],
+      eventMemberIds: ['member1'],
     };
     const result = await adapter.add(eventDataWithoutId);
 
@@ -89,7 +90,7 @@ describe('ApiEventServiceAdapter', () => {
       repeatRule: RepeatRule.None,
       description: 'A test description',
       color: '#FF0000',
-      relatedMemberIds: ['member1'],
+      eventMemberIds: ['member1'],
     };
     const result = await adapter.add(eventDataWithoutId);
 

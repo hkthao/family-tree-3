@@ -280,15 +280,15 @@ describe('eventCalendar.logic', () => {
   describe('formatEventsForCalendarLogic', () => {
     const mockEvent1: EventDto = {
       id: '1', name: 'Solar EventDto', type: EventType.Other, solarDate: new Date(2023, 6, 10),
-      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', eventMemberIds: []
     };
     const mockEvent2: EventDto = {
       id: '2', name: 'Lunar EventDto', type: EventType.Other, lunarDate: { day: 28, month: 5, isLeapMonth: false },
-      familyId: '', calendarType: CalendarType.Lunar, solarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+      familyId: '', calendarType: CalendarType.Lunar, solarDate: null, repeatRule: 0, description: '', code: '', eventMemberIds: []
     };
     const mockEventOutsideMonth: EventDto = {
       id: '3', name: 'Outside EventDto', type: EventType.Other, solarDate: new Date(2023, 5, 1),
-      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+      familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', eventMemberIds: []
     };
 
     it('should format solar events for calendar', () => {
@@ -338,7 +338,7 @@ describe('eventCalendar.logic', () => {
     it('should handle events without valid dates', () => {
       const eventWithoutDate: EventDto = {
         id: '4', name: 'No Date EventDto', type: EventType.Other, solarDate: null,
-        familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', relatedMemberIds: []
+        familyId: '', calendarType: CalendarType.Solar, lunarDate: null, repeatRule: 0, description: '', code: '', eventMemberIds: []
       };
       const selectedDate = new Date(2023, 6, 15);
       const events = [eventWithoutDate];

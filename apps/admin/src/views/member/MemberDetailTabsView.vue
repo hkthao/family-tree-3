@@ -43,7 +43,7 @@
             <MemberFacesTab :member-id="props.memberId" />
           </v-window-item>
           <v-window-item value="events">
-            <MemberEventsTab :member-id="props.memberId" />
+            <MemberEventsTab :member-id="props.memberId" @show-event-detail="handleShowEventDetail" />
           </v-window-item>
           <v-window-item value="locations">
             <!-- Content for Locations tab -->
@@ -77,7 +77,7 @@ interface MemberDetailTabsViewProps {
 const props = withDefaults(defineProps<MemberDetailTabsViewProps>(), {
   readOnly: false, // Set a default value
 });
-const emit = defineEmits(['close', 'member-deleted', 'edit-member']);
+const emit = defineEmits(['close', 'member-deleted', 'edit-member', 'show-event-detail']);
 
 
 const { t } = useI18n();
@@ -96,6 +96,10 @@ const handleMemberDeleted = () => {
 
 const handleEditMember = (memberId: string) => {
   emit('edit-member', memberId);
+};
+
+const handleShowEventDetail = (eventId: string) => {
+  emit('show-event-detail', eventId);
 };
 
 </script>
