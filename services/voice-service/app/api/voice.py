@@ -45,7 +45,7 @@ async def preprocess_voice(
     # logger.debug(f"Audio URLs: {request.audio_urls}")  # Avoid logging sensitive/long data
 
     try:
-        processed_url, duration = await preprocess_service.process_audio_pipeline(request.audio_urls)
+        processed_url, duration, _ = await preprocess_service.process_audio_pipeline(request.audio_urls)
         logger.info(f"Successfully preprocessed audio. URL: {processed_url}, Duration: {duration:.2f}s")
         return PreprocessResponse(processed_audio_url=processed_url, duration=duration)
     except ValueError as e:

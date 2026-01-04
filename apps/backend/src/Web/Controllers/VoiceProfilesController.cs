@@ -1,7 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
-using backend.Application.VoiceGenerations.Commands.GenerateVoice;
-using backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
 using backend.Application.VoiceProfiles.Commands.PreprocessAndCreateVoiceProfile;
 using backend.Application.VoiceProfiles.Commands.ImportVoiceProfiles; // Add this using statement
 using backend.Application.VoiceProfiles.Commands.DeleteVoiceProfile;
@@ -11,8 +9,9 @@ using backend.Application.VoiceProfiles.Queries.ExportVoiceProfiles; // Add this
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using backend.Application.VoiceGenerations.Queries;
 using backend.Application.VoiceProfiles.Queries;
+using backend.Application.VoiceProfiles.Commands.GenerateVoice;
+using backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
 
 namespace backend.Web.Controllers;
 

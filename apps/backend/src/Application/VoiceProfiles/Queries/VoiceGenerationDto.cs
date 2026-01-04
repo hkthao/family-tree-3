@@ -1,4 +1,4 @@
-namespace backend.Application.VoiceGenerations.Queries;
+namespace backend.Application.VoiceProfiles.Queries;
 
 /// <summary>
 /// DTO đại diện cho thông tin tạo giọng nói.

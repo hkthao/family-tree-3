@@ -200,7 +200,7 @@ public class MappingProfile : Profile
         CreateMap<Domain.Entities.VoiceProfile, Application.VoiceProfiles.Queries.VoiceProfileDto>();
 
         // Voice Generation mappings
-        CreateMap<Domain.Entities.VoiceGeneration, Application.VoiceGenerations.Queries.VoiceGenerationDto>();
+        CreateMap<Domain.Entities.VoiceGeneration, Application.VoiceProfiles.Queries.VoiceGenerationDto>();
 
         // Event mappings for importing
         CreateMap<EventDto, Event>()

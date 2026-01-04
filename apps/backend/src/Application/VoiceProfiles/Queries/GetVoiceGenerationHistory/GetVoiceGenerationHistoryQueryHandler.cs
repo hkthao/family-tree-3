@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // Add this for Result<T>
 
-namespace backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
+namespace backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
 
 /// <summary>
 /// Handler để xử lý GetVoiceGenerationHistoryQuery.

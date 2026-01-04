@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
-using backend.Application.VoiceGenerations.Commands.GenerateVoice;
+using backend.Application.VoiceProfiles.Commands.GenerateVoice;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

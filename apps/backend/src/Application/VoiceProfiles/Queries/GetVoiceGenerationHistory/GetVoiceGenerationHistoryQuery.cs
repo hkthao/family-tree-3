@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 
 using backend.Application.Common.Models; // Added
 
-namespace backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
+namespace backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
 
 /// <summary>
 /// Query để lấy lịch sử tạo giọng nói của một hồ sơ giọng nói cụ thể.

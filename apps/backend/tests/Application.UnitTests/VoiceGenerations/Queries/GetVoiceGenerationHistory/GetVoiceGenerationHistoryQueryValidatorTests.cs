@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
-using backend.Application.VoiceGenerations.Queries.GetVoiceGenerationHistory;
+using backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

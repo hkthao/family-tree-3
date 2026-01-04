@@ -38,33 +38,12 @@ public class VoiceAIService : IVoiceAIService
                 return Result<VoicePreprocessResponse>.Failure($"Python Voice AI Service Preprocess failed with status {response.StatusCode}. Error: {errorContent}");
             }
 
-            // Deserialize the JSON array response from Python
-            // Python returns a tuple: (processed_audio_url, total_duration, quality_report)
-            using var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-            var root = doc.RootElement;
+            var preprocessResponse = await response.Content.ReadFromJsonAsync<VoicePreprocessResponse>();
 
-            if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() != 3)
+            if (preprocessResponse == null)
             {
-                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an unexpected JSON format. Expected an array of 3 elements.");
+                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an empty or invalid response.");
             }
-
-            var processedAudioUrl = root[0].GetString();
-            var duration = root[1].GetDouble();
-            var qualityReportJson = root[2]; // This is the JSON object for AudioQualityReport
-
-            var qualityReportDto = JsonSerializer.Deserialize<AudioQualityReportDto>(qualityReportJson.ToString());
-
-            if (processedAudioUrl == null || qualityReportDto == null)
-            {
-                return Result<VoicePreprocessResponse>.Failure("Python Voice AI Service Preprocess returned an invalid response content.");
-            }
-
-            var preprocessResponse = new VoicePreprocessResponse
-            {
-                ProcessedAudioUrl = processedAudioUrl,
-                Duration = duration,
-                QualityReport = qualityReportDto
-            };
             
             return Result<VoicePreprocessResponse>.Success(preprocessResponse);
         }
