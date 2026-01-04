@@ -65,17 +65,7 @@ const rawMenu: MenuSection[] = [
       },
     ],
   },
-  {
-    titleKey: 'menu.utilitiesAndAI',
-    items: [
-      {
-        titleKey: 'menu.imageRestoration',
-        icon: 'mdi-image-plus',
-        to: '/image-restoration',
-        roles: ['Admin'],
-      },
-    ],
-  },
+
   {
     titleKey: 'menu.admin',
     items: [
