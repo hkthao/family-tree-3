@@ -62,15 +62,7 @@ export * from './memory-item/queries/useMemoryItemsQuery';
 export * from './memory-item/queries/useMemoryItemQuery';
 export * from './memory-item/useMemoryItemForm';
 
-export * from './image-restoration-job/useCreateImageRestorationJobMutation'; // NEW
-export * from './image-restoration-job/useImageRestorationJobQuery'; // NEW
-export * from './image-restoration-job/useImageRestorationJobsQuery'; // NEW
-export * from './image-restoration-job/useUpdateImageRestorationJobMutation'; // NEW
-export * from './image-restoration-job/useDeleteImageRestorationJobMutation'; // NEW
-export * from './image-restoration-job/useImageRestorationJobDataManagement'; // NEW
-export * from './image-restoration-job/useImageRestorationJobAdd'; // NEW
 
-export * from './image-restoration-job/useImageRestorationJobDetail'; // NEW
 export * from './novu/useNovuInbox';
 export * from './novu/useNovuNotificationBell';
 export * from './prompt/mutations/useUpdatePromptMutation';

@@ -24,10 +24,7 @@ export { default as FamilyTabsView } from './family/FamilyTabsView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as FamilyListView } from './family/FamilyListView.vue';
 
-// Export pages from image-restoration-job
-export { default as ImageRestorationJobListView } from './image-restoration-job/ImageRestorationJobListView.vue';
-export { default as ImageRestorationJobAddView } from './image-restoration-job/ImageRestorationJobAddView.vue';
-export { default as ImageRestorationJobDetailView } from './image-restoration-job/ImageRestorationJobDetailView.vue';
+
 
 // Export pages from member
 export { default as MemberAddView } from './member/MemberAddView.vue';

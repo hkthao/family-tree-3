@@ -19,7 +19,7 @@ export * from './memberFace.d';
 export * from './familyMedia.d'; // NEW
 export * from './memoryItem.d'; // NEW
 export * from './enums'; // NEW - CalendarType and RepeatRule
-export * from './imageRestorationJob.d'; // NEW
+
 export * from './lunar-date.d'; // NEW - LunarDate interface
 export * from './prompt.d';
 export * from './familyLink.d';
