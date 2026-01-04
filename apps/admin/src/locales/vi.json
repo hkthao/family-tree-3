@@ -429,6 +429,7 @@
   "event.list.headers.location": "Địa điểm",
   "event.list.headers.name": "Tên Sự kiện",
   "event.list.headers.relatedMembers": "Thành viên liên quan",
+  "event.list.noEvents": "Không có sự kiện nào.",
   "event.list.title": "Danh sách Sự kiện",
   "event.location": "Địa điểm",
   "event.messages.addSuccess": "Thêm sự kiện thành công!",

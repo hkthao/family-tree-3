@@ -43,7 +43,7 @@
 
   <!-- New v-navigation-drawer for member details -->
   <v-navigation-drawer v-model="memberDetailDrawer" location="right" temporary width="650">
-    <MemberDetailView v-if="memberDetailDrawer && selectedMemberId" :member-id="selectedMemberId"
+    <MemberDetailTabsView v-if="memberDetailDrawer && selectedMemberId" :member-id="selectedMemberId"
       @close="memberDetailDrawer = false" @member-deleted="handleMemberDeleted"
       @add-member-with-relationship="handleAddMemberWithRelationship" @edit-member="handleEditMember"
       :read-only="props.readOnly" />
@@ -61,7 +61,7 @@ import { ref, onMounted, watch, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/family';
 import MemberAddView from '@/views/member/MemberAddView.vue';
-import MemberDetailView from '@/views/member/MemberDetailView.vue';
+import MemberDetailTabsView from '@/views/member/MemberDetailTabsView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useAuth } from '@/composables';

@@ -4,3 +4,4 @@ export { default as MemberListView } from './MemberListView.vue';
 export { default as MemberInformationTab } from './MemberInformationTab.vue';
 export { default as MemberDetailTabsView } from './MemberDetailTabsView.vue';
 export { default as MemberFacesTab } from './MemberFacesTab.vue';
+export { default as MemberEventsTab } from './MemberEventsTab.vue';

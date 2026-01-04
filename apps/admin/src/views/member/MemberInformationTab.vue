@@ -1,8 +1,5 @@
 <template>
   <v-card :elevation="0">
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('member.detail.title') }}</span>
-    </v-card-title>
     <v-progress-linear v-if="isLoadingMember || isDeletingMember" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <div v-if="isLoadingMember">

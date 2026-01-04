@@ -19,6 +19,16 @@ export class ApiEventService extends ApiCrudService<EventDto, AddEventDto, Updat
     return response;
   }
 
+  /**
+   * Fetches a list of all events for a specific member.
+   * @param memberId The ID of the member.
+   * @returns A promise that resolves to a Result object containing an array of Event objects or an ApiError.
+   */
+  async getEventsByMemberId(memberId: string): Promise<Result<EventDto[], ApiError>> {
+    const response = await this.http.get<EventDto[]>(`${this.baseUrl}/by-member/${memberId}`);
+    return response;
+  }
+
   async exportEvents(familyId?: string): Promise<Result<string, ApiError>> {
     const url = `${this.baseUrl}/export`;
     return this.http.get<string>(url, { params: { familyId } });

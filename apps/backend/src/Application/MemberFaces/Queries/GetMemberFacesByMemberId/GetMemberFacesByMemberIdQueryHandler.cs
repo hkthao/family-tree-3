@@ -1,10 +1,6 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.MemberFaces.Queries.GetMemberFacesByMemberId;
 

@@ -24,7 +24,7 @@
 
         <v-window v-model="tab">
           <v-window-item value="information">
-            <MemberDetailView
+            <MemberInformationTab
               :member-id="props.memberId"
               @member-deleted="handleMemberDeleted"
               @edit-member="handleEditMember"
@@ -38,8 +38,7 @@
             <MemberFacesTab :member-id="props.memberId" />
           </v-window-item>
           <v-window-item value="events">
-            <!-- Content for Events tab -->
-            Events Tab Content
+            <MemberEventsTab :member-id="props.memberId" />
           </v-window-item>
           <v-window-item value="locations">
             <!-- Content for Locations tab -->
@@ -62,8 +61,9 @@
 import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberQuery, useDeleteMemberMutation } from '@/composables';
-import MemberDetailView from './MemberDetailView.vue'; // Corrected import path
-import MemberFacesTab from './MemberFacesTab.vue'; // New import
+import MemberInformationTab from './MemberInformationTab.vue'; // Corrected import path
+import MemberFacesTab from './MemberFacesTab.vue';
+import MemberEventsTab from './MemberEventsTab.vue'; // New import
 
 interface MemberDetailTabsViewProps {
   memberId: string;
