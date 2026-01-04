@@ -1,4 +1,4 @@
-using backend.Application.Common.Constants; // Added to resolve ErrorSources
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
@@ -8,7 +8,8 @@ using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Queries.ExportMemberFaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.SearchMemberFaces;
-using Microsoft.AspNetCore.Authorization; // Added
+using backend.Application.MemberFaces.Queries.GetMemberFacesByMemberId;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -34,6 +35,13 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
     public async Task<IActionResult> GetMemberFaceById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberFaceByIdQuery { Id = id });
+        return result.ToActionResult(this, _logger);
+    }
+
+    [HttpGet("by-member/{memberId}")]
+    public async Task<IActionResult> GetMemberFacesByMemberId(Guid memberId)
+    {
+        var result = await _mediator.Send(new GetMemberFacesByMemberIdQuery { MemberId = memberId });
         return result.ToActionResult(this, _logger);
     }
 

@@ -35,8 +35,7 @@
             Family Tree Tab Content
           </v-window-item>
           <v-window-item value="faces">
-            <!-- Content for Faces tab -->
-            Faces Tab Content
+            <MemberFacesTab :member-id="props.memberId" />
           </v-window-item>
           <v-window-item value="events">
             <!-- Content for Events tab -->
@@ -64,6 +63,7 @@ import { ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberQuery, useDeleteMemberMutation } from '@/composables';
 import MemberDetailView from './MemberDetailView.vue'; // Corrected import path
+import MemberFacesTab from './MemberFacesTab.vue'; // New import
 
 interface MemberDetailTabsViewProps {
   memberId: string;
