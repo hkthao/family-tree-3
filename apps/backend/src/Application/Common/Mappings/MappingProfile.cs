@@ -146,9 +146,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.PublicFoundFaceProperties,
                        opt => opt.MapFrom(src => src.GetPublicFoundFacePropertiesList()));
 
-        CreateMap<FamilyLinkRequest, FamilyLinkRequestDto>()
-            .ForMember(dest => dest.RequestingFamilyName, opt => opt.MapFrom(src => src.RequestingFamily.Name))
-            .ForMember(dest => dest.TargetFamilyName, opt => opt.MapFrom(src => src.TargetFamily.Name));
+
 
         CreateMap<FamilyLink, FamilyLinkDto>()
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))

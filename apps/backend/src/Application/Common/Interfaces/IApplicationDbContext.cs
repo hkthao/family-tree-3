@@ -91,10 +91,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<VoiceGeneration> VoiceGenerations { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
-    /// </summary>
-    DbSet<FamilyLinkRequest> FamilyLinkRequests { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.

@@ -96,10 +96,7 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<VoiceGeneration> VoiceGenerations => Set<VoiceGeneration>();
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
-    /// </summary>
-    public DbSet<FamilyLinkRequest> FamilyLinkRequests => Set<FamilyLinkRequest>();
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
