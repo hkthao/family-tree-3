@@ -8,7 +8,7 @@ export function useUpdateVoiceProfileMutation() {
   const { voiceProfile: voiceProfileService } = useServices();
 
   return useMutation<VoiceProfile, ApiError, { id: string; data: UpdateVoiceProfileCommand }>({
-    mutationFn: async ({ id, data }) => {
+    mutationFn: async ({ data }) => {
       const response = await voiceProfileService.update(data);
       if (response.ok) {
         return response.value;

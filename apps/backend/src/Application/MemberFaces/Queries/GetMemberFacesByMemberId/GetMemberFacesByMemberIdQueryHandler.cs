@@ -19,8 +19,9 @@ public class GetMemberFacesByMemberIdQueryHandler : IRequestHandler<GetMemberFac
     {
         var memberFaces = await _context.MemberFaces
             .Include(e=>e.Member)
+            .Include(e=>e.Member.Family)
             .Where(mf => mf.MemberId == request.MemberId)
-            .OrderBy(mf => mf.Created)
+            .ProjectTo<MemberFaceDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         var memberFaceDtos = _mapper.Map<IEnumerable<MemberFaceDto>>(memberFaces);
