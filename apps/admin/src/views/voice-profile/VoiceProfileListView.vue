@@ -21,6 +21,7 @@
       @generate-voice="handleGenerateVoice"
       :search-query="filters.search"
       @update:search="setSearch"
+      @onViewHistory="handleViewHistory"
     />
 
     <!-- Add Voice Profile Drawer -->
@@ -58,6 +59,12 @@
         :voice-profile-id="selectedVoiceProfileForGeneration" @close="handleGenerateVoiceClosed"
         @generated="handleGenerateVoiceGenerated" />
     </BaseCrudDrawer>
+
+    <!-- Voice History Drawer -->
+    <BaseCrudDrawer v-model="viewHistoryDrawer" @close="handleViewHistoryClosed">
+      <VoiceHistoryView v-if="selectedVoiceProfileForHistory && viewHistoryDrawer"
+        :voice-profile-id="selectedVoiceProfileForHistory" @close="handleViewHistoryClosed" />
+    </BaseCrudDrawer>
   </div>
 </template>
 
@@ -77,6 +84,7 @@ import VoiceProfileEditView from './VoiceProfileEditView.vue';
 import VoiceProfileDetailView from './VoiceProfileDetailView.vue';
 import BaseImportDialog from '@/components/common/BaseImportDialog.vue';
 import GenerateVoiceView from './GenerateVoiceView.vue'; // NEW
+import VoiceHistoryView from './VoiceHistoryView.vue'; // NEW
 import { useVoiceProfileImportExport } from '@/composables/voice-profile/useVoiceProfileImportExport';
 
 
@@ -92,7 +100,9 @@ const { showSnackbar } = useGlobalSnackbar();
 
 const importDialog = ref(false);
 const generateVoiceDrawer = ref(false); // NEW
+const viewHistoryDrawer = ref(false); // NEW
 const selectedVoiceProfileForGeneration = ref<string | null>(null); // NEW
+const selectedVoiceProfileForHistory = ref<string | null>(null); // NEW
 
 const { isExporting, isImporting, exportVoiceProfiles, importVoiceProfiles } = useVoiceProfileImportExport(computed(() => props.familyId));
 
@@ -220,6 +230,17 @@ const handleGenerateVoiceClosed = () => {
 const handleGenerateVoiceGenerated = () => {
   handleGenerateVoiceClosed();
   queryClient.invalidateQueries({ queryKey: ['voice-profiles'] });
+};
+
+// NEW: View History
+const handleViewHistory = (id: string) => {
+  selectedVoiceProfileForHistory.value = id;
+  viewHistoryDrawer.value = true;
+};
+
+const handleViewHistoryClosed = () => {
+  viewHistoryDrawer.value = false;
+  selectedVoiceProfileForHistory.value = null;
 };
 
 </script>

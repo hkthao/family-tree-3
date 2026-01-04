@@ -40,4 +40,8 @@ export class ApiVoiceProfileService extends ApiCrudService<VoiceProfile, CreateV
     return this.api.post<VoiceGenerationDto>(`/voice-profiles/${voiceProfileId}/generate`, { voiceProfileId, text });
   }
 
+  async getVoiceGenerationHistory(voiceProfileId: string): Promise<Result<VoiceGenerationDto[]>> {
+    return this.api.get<VoiceGenerationDto[]>(`/voice-profiles/${voiceProfileId}/history`);
+  }
+
 }

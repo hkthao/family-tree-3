@@ -16,5 +16,6 @@ export interface IVoiceProfileService extends ICrudService<VoiceProfile, CreateV
 
   importVoiceProfiles(familyId: string, data: VoiceProfile[]): Promise<Result<void>>;
   generateVoice(voiceProfileId: string, text: string): Promise<Result<VoiceGenerationDto>>;
+  getVoiceGenerationHistory(voiceProfileId: string): Promise<Result<VoiceGenerationDto[]>>;
 
 }

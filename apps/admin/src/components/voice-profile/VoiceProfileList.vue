@@ -31,9 +31,17 @@
       <template v-slot:item.actions="{ item }">
         <v-tooltip v-if="allowGenerateVoice" :text="t('voiceProfile.list.generateVoice')" location="top">
           <template v-slot:activator="{ props: tooltipProps }">
-            <v-btn icon v-bind="tooltipProps" @click="() => { emit('generate-voice', item.id); }" variant="text"
+            <v-btn icon v-bind="tooltipProps" @click="emit('generate-voice', item.id)" variant="text"
               data-testid="button-generate-voice" size="small">
               <v-icon>mdi-microphone</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip v-if="allowViewHistory" :text="t('voiceProfile.history.viewHistory')" location="top">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn icon v-bind="tooltipProps" @click="emit('onViewHistory', item.id)" variant="text"
+              data-testid="button-view-history" size="small">
+              <v-icon>mdi-history</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -86,6 +94,7 @@ interface VoiceProfileListProps {
   canPerformActions?: boolean;
   searchQuery?: string;
   allowGenerateVoice?: boolean;
+  allowViewHistory?: boolean;
 }
 
 withDefaults(defineProps<VoiceProfileListProps>(), {
@@ -96,6 +105,7 @@ withDefaults(defineProps<VoiceProfileListProps>(), {
   isImporting: false,
   canPerformActions: true,
   allowGenerateVoice: true,
+  allowViewHistory: true,
 });
 
 const emit = defineEmits([
@@ -108,6 +118,7 @@ const emit = defineEmits([
   'on-import-click',
   'update:search',
   'generate-voice',
+  'onViewHistory',
 ]);
 
 const { t } = useI18n();
