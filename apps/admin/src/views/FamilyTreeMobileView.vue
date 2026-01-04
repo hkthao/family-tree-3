@@ -14,6 +14,7 @@
               :family-id="familyId"
               :members="members"
               :relationships="relationships"
+              :root-id="rootId"
             />
             <v-alert v-else type="info" prominent>{{ t('familyTree.noDataMessage') }}</v-alert>
           </v-window-item>
@@ -45,6 +46,7 @@ interface WindowFamilyTreeData {
   familyId?: string;
   members?: MemberDto[];
   relationships?: Relationship[];
+  rootId?: string; // Add rootId here
 }
 
 const { t } = useI18n();
@@ -53,6 +55,7 @@ const tab = ref('hierarchical');
 const familyId = ref<string | undefined>(undefined);
 const members = ref<MemberDto[]>([]);
 const relationships = ref<Relationship[]>([]);
+const rootId = ref<string | undefined>(undefined); // Declare rootId ref
 
 onMounted(() => {
   if (window.familyTreeData) {
@@ -60,6 +63,7 @@ onMounted(() => {
     familyId.value = data.familyId;
     members.value = data.members || [];
     relationships.value = data.relationships || [];
+    rootId.value = data.rootId; // Extract rootId
   }
 });
 </script>

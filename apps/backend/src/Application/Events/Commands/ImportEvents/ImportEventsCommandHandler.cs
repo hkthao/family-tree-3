@@ -85,9 +85,9 @@ public class ImportEventsCommandHandler : IRequestHandler<ImportEventsCommand, R
             eventEntity.Id = Guid.NewGuid(); // Assign a new ID
 
             // Handle EventMembers
-            if (eventDto.RelatedMembers != null && eventDto.RelatedMembers.Any())
+            if (eventDto.EventMembers != null && eventDto.EventMembers.Count != 0)
             {
-                var memberIds = eventDto.RelatedMembers.Select(rm => rm.Id).ToList();
+                var memberIds = eventDto.EventMembers.Select(rm => rm.MemberId).ToList();
                 var existingMembers = await _context.Members
                     .Where(m => memberIds.Contains(m.Id) && m.FamilyId == request.FamilyId)
                     .Select(m => m.Id)

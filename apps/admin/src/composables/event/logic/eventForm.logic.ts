@@ -41,7 +41,7 @@ export function getInitialEventFormData(props: GetInitialEventFormDataProps): Ad
       description: '',
       location: '', // ADD THIS
       color: '#1976D2',
-      relatedMemberIds: [],
+      eventMemberIds: [],
     };
     return addData;
   }

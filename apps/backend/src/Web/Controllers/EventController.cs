@@ -5,6 +5,7 @@ using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
+using backend.Application.Events.Queries.GetEventsByMemberId;
 using backend.Application.Events.Queries.SearchEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -129,6 +130,18 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     public async Task<IActionResult> GetAllEventsByFamilyId([FromRoute] Guid familyId)
     {
         var result = await _mediator.Send(new GetAllEventsByFamilyIdQuery { FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy danh sách các sự kiện của một thành viên.
+    /// </summary>
+    /// <param name="memberId">ID của thành viên cần lấy sự kiện.</param>
+    /// <returns>Danh sách tất cả các sự kiện của thành viên.</returns>
+    [HttpGet("by-member/{memberId}")]
+    public async Task<IActionResult> GetEventsByMemberId([FromRoute] Guid memberId)
+    {
+        var result = await _mediator.Send(new GetEventsByMemberIdQuery { MemberId = memberId });
         return result.ToActionResult(this, _logger);
     }
 

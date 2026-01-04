@@ -1,5 +1,3 @@
-using backend.Domain.Enums; // Assuming RestorationStatus enum is defined here or similar
-
 namespace backend.Application.Common.Models;
 
 /// <summary>

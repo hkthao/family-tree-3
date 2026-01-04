@@ -60,7 +60,7 @@ public class ImportEventsCommandHandlerTests : TestBase
                 RepeatRule = RepeatRule.Yearly,
                 Description = "Solar Event Description",
                 Color = "#FF0000",
-                RelatedMembers = new List<MemberListDto> { new MemberListDto { Id = member1.Id } }
+                EventMembers = new List<EventMemberDto> { new EventMemberDto { MemberId = member1.Id } }
             },
             new EventDto
             {
@@ -72,7 +72,7 @@ public class ImportEventsCommandHandlerTests : TestBase
                 RepeatRule = RepeatRule.None,
                 Description = "Lunar Event Description",
                 Color = "#00FF00",
-                RelatedMembers = new List<MemberListDto> { new MemberListDto { Id = member2.Id } }
+                EventMembers = new List<EventMemberDto> { new EventMemberDto { MemberId = member2.Id } }
             }
         };
 
@@ -251,7 +251,7 @@ public class ImportEventsCommandHandlerTests : TestBase
                 Type = EventType.Other,
                 CalendarType = CalendarType.Solar,
                 SolarDate = DateTime.Now,
-                RelatedMembers = new List<MemberListDto> { new MemberListDto { Id = nonExistentMemberId } }
+                EventMembers = new List<EventMemberDto> { new EventMemberDto { MemberId = nonExistentMemberId } }
             }
         });
 

@@ -21,7 +21,6 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 *   **Triển khai:** Docker, Nginx.
 *   **CI/CD:** GitHub Actions.
 *   **Trực quan hóa:** D3.js, ApexCharts, Family-chart (f3).
-*   **Xử lý văn bản rich-text:** Tiptap.
 
 ## 3. Bắt đầu nhanh (Getting Started)
 
@@ -66,7 +65,6 @@ Dự án được tổ chức theo cấu trúc monorepo, bao gồm các thư m�
 *   `apps/`: Chứa các ứng dụng chính có thể chạy độc lập.
     *   `apps/backend/`: Mã nguồn ASP.NET Core API, tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
     *   `apps/admin/`: Mã nguồn ứng dụng Vue.js frontend cho giao diện quản trị.
-    *   `apps/mobile/`: Ứng dụng di động (ví dụ: React Native).
 *   `services/`: Chứa các dịch vụ phụ trợ.
     *   `services/face-service/`: Dịch vụ xử lý khuôn mặt bằng Python.
     *   `services/puppeteer-service/`: Dịch vụ chuyển đổi HTML/CSS sang PDF bằng Node.js và Puppeteer.
@@ -79,31 +77,6 @@ Dự án được tổ chức theo cấu trúc monorepo, bao gồm các thư m�
     *   `project/`: Tài liệu quản lý dự án (backlog, sprint, test cases, release notes, roadmap, team).
 *   `tests/`: Chứa các bài kiểm thử tổng thể hoặc các bài kiểm thử không thuộc về một ứng dụng cụ thể.
 
-## 5. Tổng quan Tài liệu
-
-Thư mục `docs/` chứa các tài liệu quan trọng sau:
-
-*   [**Tổng quan Tài liệu**](./docs/README.md): Giới thiệu và liên kết đến tất cả các tài liệu con.
-*   [**Kiến trúc hệ thống**](./docs/engineering/architecture.md): Mô tả kiến trúc tổng quan, sơ đồ hệ thống và schema database.
-*   [**Hướng dẫn Phát triển**](./docs/engineering/development-guide.md): Hướng dẫn cài đặt môi trường, chạy dự án, test, linting, v.v.
-*   [**Tham chiếu API**](./docs/engineering/api-reference.md): Mô tả các endpoint API của backend.
-*   [**Product Backlog**](./docs/project/backlog.md): Danh sách chi tiết các User Story.
-*   [**Kế hoạch Sprint**](./docs/project/sprints.md): Kế hoạch chi tiết cho các sprint.
-*   [**Kịch bản Kiểm thử**](./docs/project/test-cases.md): Các kịch bản kiểm thử cho các chức năng chính.
-*   [**Ghi chú phát hành**](./docs/project/release-notes.md): Lịch sử các phiên bản và thay đổi.
-*   [**Lộ trình Phát triển**](./docs/project/roadmap.md): Lộ trình phát triển sản phẩm theo quý.
-*   [**Đội ngũ Phát triển**](./docs/project/team.md): Thông tin về các thành viên trong đội.
-
-## 6. Hướng dẫn Phát triển
-
-*   **Code Style & Linting:** Sử dụng `dotnet format` cho `apps/backend`, `eslint` cho `apps/admin`.
-*   **Testing:** Chạy unit tests (Vitest) với `npm run test:coverage` và kiểm tra code coverage cho cả backend và frontend. Chạy end-to-end tests (Playwright) cho frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
-*   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code. Chi tiết tại [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md).
-*   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
-*   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
-*   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
-*   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
-
 ## 8. Frontend Conventions
 
 ### 8.1. Cấu trúc Service
@@ -112,16 +85,8 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 *   Trong thư mục service, sẽ có các tệp sau:
     *   `[tên_service].service.interface.ts`: Định nghĩa interface cho service (ví dụ: `IFamilyService`).
     *   `api.[tên_service].service.ts`: Triển khai service sử dụng API thật (ví dụ: `ApiFamilyService`).
-    *   `mock.[tên_service].service.ts`: Triển khai service sử dụng dữ liệu giả (mock data) cho mục đích phát triển/kiểm thử (ví dụ: `MockFamilyService`).
 *   Tất cả các service API nên nhận `ApiClientMethods` làm dependency trong constructor.
 *   Các phương thức service nên trả về kiểu `Result<T, ApiError>` để xử lý lỗi nhất quán.
-
-### 8.2. Cấu trúc Store (Pinia)
-
-*   Các store nên được định nghĩa theo kiểu Options API của Pinia (sử dụng `state`, `getters`, `actions` làm thuộc tính của đối tượng truyền vào `defineStore`).
-*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `apps/admin/src/plugins/services.plugin.ts`.
-*   Thông báo lỗi nên được dịch hóa bằng `i18n.global.t()` (ví dụ: `i18n.global.t('family.errors.load')`).
-*   Các hành động (actions) trong store nên cập nhật trạng thái `loading` và `error` một cách nhất quán.
 
 ### 8.3. Import Paths
 

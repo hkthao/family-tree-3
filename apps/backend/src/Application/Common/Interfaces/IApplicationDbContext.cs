@@ -82,9 +82,16 @@ public interface IApplicationDbContext
     DbSet<Prompt> Prompts { get; }
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceProfile.
     /// </summary>
-    DbSet<FamilyLinkRequest> FamilyLinkRequests { get; }
+    DbSet<VoiceProfile> VoiceProfiles { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceGeneration.
+    /// </summary>
+    DbSet<VoiceGeneration> VoiceGenerations { get; }
+
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
@@ -96,10 +103,7 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<FamilyMedia> FamilyMedia { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể ImageRestorationJob.
-    /// </summary>
-    DbSet<ImageRestorationJob> ImageRestorationJobs { get; }
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể MediaLink.

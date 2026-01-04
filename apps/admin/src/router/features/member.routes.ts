@@ -1,4 +1,4 @@
-import { MainRouterView, MemberAddView, MemberDetailView, MemberEditView, MemberListView } from '@/views';
+import { MainRouterView, MemberAddView, MemberDetailTabsView, MemberEditView, MemberListView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const memberRoutes: RouteRecordRaw[] = [
@@ -23,7 +23,7 @@ export const memberRoutes: RouteRecordRaw[] = [
       {
         path: 'detail/:id',
         name: 'MemberDetail',
-        component: MemberDetailView,
+        component: MemberDetailTabsView,
         meta: { breadcrumb: 'member.detail.title' },
       },
       {

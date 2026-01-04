@@ -1,22 +1,6 @@
 using backend.Application.Common.Dtos;
-using backend.Domain.Enums;
 
 namespace backend.Application.FamilyLinks.Queries;
-
-public class FamilyLinkRequestDto : BaseAuditableDto
-{
-    public Guid Id { get; set; }
-    public Guid RequestingFamilyId { get; set; }
-    public string RequestingFamilyName { get; set; } = null!;
-    public Guid TargetFamilyId { get; set; }
-    public string TargetFamilyName { get; set; } = null!;
-    public LinkStatus Status { get; set; }
-    public DateTime RequestDate { get; set; }
-    public DateTime? ResponseDate { get; set; }
-    public string? RequestMessage { get; set; }
-    public string? ResponseMessage { get; set; }
-}
-
 public class FamilyLinkDto : BaseAuditableDto
 {
     public Guid Id { get; set; }

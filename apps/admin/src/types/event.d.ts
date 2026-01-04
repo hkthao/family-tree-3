@@ -10,8 +10,8 @@ export enum EventType {
   Other = 3, // Changed from 4 to 3, removed Migration
 }
 
-export interface RelatedMember {
-  id: string;
+export interface EventMemberDto {
+  memberId: string;
   fullName: string;
   avatarUrl?: string;
   gender: Gender;
@@ -27,8 +27,8 @@ export interface EventDto {
   familyId: string | null;
   familyName?: string;
   familyAvatarUrl?: string;
-  relatedMembers?: RelatedMember[];
-  relatedMemberIds?: string[];
+  eventMembers?: EventMemberDto[];
+  eventMemberIds?: string[];
   type: EventType;
   color?: string;
   calendarType: CalendarType;

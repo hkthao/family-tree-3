@@ -1,7 +1,7 @@
 <template>
   <div ref="chartContainer" :style="{
     width: '100%',
-    height: props.isMobile ? '100vh' : '80vh' // Dynamic height based on isMobile prop
+    height: props.isMobile ? '95vh' : '80vh' // Dynamic height based on isMobile prop
   }" data-testid="family-tree-canvas"></div>
 </template>
 
@@ -204,7 +204,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .force('charge', d3.forceManyBody().strength(-1200))
     .force('collide', d3.forceCollide(67.5))
     .force('x', d3.forceX(width / 2).strength(0.1))
-    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 240).strength(0.8));
+    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 200).strength(0.8));
 
   const link = chartGroup.append('g') // Append to chartGroup
     .attr('stroke-opacity', 0.5)
@@ -258,7 +258,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .data(legendData)
     .join('g')
     .attr('class', 'legend-item')
-    .attr('transform', (d, i) => `translate(0, ${i * 25})`);
+    .attr('transform', (d, i) => `translate(${i * 120}, 0)`); // Arrange horizontally with 120px spacing
 
   legendItem.each(function (d) {
     const g = d3.select(this);

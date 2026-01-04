@@ -27,7 +27,7 @@ public class RelationshipDetectionServiceTests : TestBase
     private readonly RelationshipDetectionService _service;
     private readonly Mock<IRelationshipGraph> _mockRelationshipGraph;
     private readonly Mock<IAiGenerateService> _mockAiGenerateService;
-    private readonly Mock<IRelationshipRuleEngine> _mockRelationshipRuleEngine;
+
     private readonly Mock<IMediator> _mockMediator; // New mock for IMediator
     private readonly Mock<ILogger<RelationshipDetectionService>> _mockLogger; // New mock for ILogger
 
@@ -35,7 +35,6 @@ public class RelationshipDetectionServiceTests : TestBase
     {
         _mockRelationshipGraph = new Mock<IRelationshipGraph>();
         _mockAiGenerateService = new Mock<IAiGenerateService>();
-        _mockRelationshipRuleEngine = new Mock<IRelationshipRuleEngine>();
         _mockMediator = new Mock<IMediator>(); // Initialize IMediator mock
         _mockMediator.Setup(m => m.Send(It.IsAny<GetPromptByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Default AI System Prompt for testing" }));
@@ -46,7 +45,6 @@ public class RelationshipDetectionServiceTests : TestBase
             _context,
             _mockRelationshipGraph.Object,
             _mockAiGenerateService.Object,
-            _mockRelationshipRuleEngine.Object,
             _mockMediator.Object, // Pass mediator mock
             _mockLogger.Object); // Pass logger mock
     }
@@ -83,10 +81,7 @@ public class RelationshipDetectionServiceTests : TestBase
         var pathToFather = new RelationshipPath(new List<Guid> { child.Id, father.Id }, new List<GraphEdge> { new GraphEdge(child.Id, father.Id, RelationshipType.Child) });
 
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
-        _mockRelationshipGraph.Setup(g => g.FindShortestPath(child.Id, father.Id)).Returns(pathToFather);
 
-        // Mock RuleEngine to return "unknown" so AI is triggered
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
 
         // Mock AI service behavior
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
@@ -109,7 +104,6 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.First().Should().Be(nameof(RelationshipType.Father));
 
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
-        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
     }
 
     /// <summary>
@@ -160,10 +154,7 @@ public class RelationshipDetectionServiceTests : TestBase
             });
 
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandfather.Id, grandchild.Id)).Returns(pathToGrandchild);
-        _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandchild.Id, grandfather.Id)).Returns(pathToGrandfather);
 
-        // Mock RuleEngine to return "unknown" so AI is triggered
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
 
         // Mock AI service behavior
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
@@ -186,7 +177,6 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.Last().Should().Be(nameof(RelationshipType.Father));
 
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
-        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
     }
 
     /// <summary>
@@ -217,8 +207,7 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberA.Id, memberB.Id)).Returns(new RelationshipPath());
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberB.Id, memberA.Id)).Returns(new RelationshipPath());
 
-        // Mock RuleEngine to return "unknown" as no path found
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
+
 
         // Mock AI service behavior (should NOT be called)
         _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
@@ -236,7 +225,6 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.Should().BeEmpty();
 
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
-        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.Never); // Verify rule engine was NOT called
     }
 
     /// <summary>
@@ -265,9 +253,7 @@ public class RelationshipDetectionServiceTests : TestBase
 
         var pathToB = new RelationshipPath(new List<Guid> { memberA.Id, memberB.Id }, new List<GraphEdge> { new GraphEdge(memberA.Id, memberB.Id, RelationshipType.Child) });
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberA.Id, memberB.Id)).Returns(pathToB);
-        _mockRelationshipGraph.Setup(g => g.FindShortestPath(memberB.Id, memberA.Id)).Returns(new RelationshipPath()); // No path back
 
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("unknown");
 
         _mockMediator.Setup(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success()); // Simulate successful quota increment
@@ -287,64 +273,5 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu: Kiểm tra phát hiện quan hệ cha-con trực tiếp thông qua quy tắc cục bộ (bỏ qua AI).
-    /// ⚙️ Arrange: Thiết lập dữ liệu thành viên, quan hệ và các mock cho graph/rule engine (suy luận cục bộ thành công).
-    /// ⚙️ Act: Gọi DetectRelationshipAsync.
-    /// ⚙️ Assert: Kết quả trả về phải là "cha" và "con" đúng như kỳ vọng từ quy tắc cục bộ. AI không được gọi.
-    /// </summary>
-    [Fact]
-    public async Task DetectRelationshipAsync_ShouldReturnLocalInferredRelationship_ForSimpleCases()
-    {
-        // Arrange
-        var familyId = Guid.NewGuid();
-        var father = new Member("Father", "Test", "F1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
-        father.UpdateGender(Gender.Male.ToString());
-        var child = new Member("Child", "Test", "C1", familyId, isDeceased: false) { Id = Guid.NewGuid() };
-        child.UpdateGender(Gender.Male.ToString());
 
-        _context.Members.Add(father);
-        _context.Members.Add(child);
-        _context.Relationships.Add(new Relationship(familyId, father.Id, child.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
-        await _context.SaveChangesAsync();
-
-        var members = _context.Members.ToList();
-        var relationships = _context.Relationships.ToList();
-
-        // Mock graph behavior
-        _mockRelationshipGraph.Setup(g => g.BuildGraph(It.IsAny<IEnumerable<Member>>(), It.IsAny<IEnumerable<Relationship>>()))
-            .Callback<IEnumerable<Member>, IEnumerable<Relationship>>((m, r) => { /* Simulate graph built */ });
-
-        var pathToChild = new RelationshipPath(new List<Guid> { father.Id, child.Id }, new List<GraphEdge> { new GraphEdge(father.Id, child.Id, RelationshipType.Father) });
-        var pathToFather = new RelationshipPath(new List<Guid> { child.Id, father.Id }, new List<GraphEdge> { new GraphEdge(child.Id, father.Id, RelationshipType.Child) });
-
-        _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
-        _mockRelationshipGraph.Setup(g => g.FindShortestPath(child.Id, father.Id)).Returns(pathToFather);
-
-        // Mock RuleEngine to return specific relationships
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToChild, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("cha");
-        _mockRelationshipRuleEngine.Setup(r => r.InferRelationship(pathToFather, It.IsAny<IReadOnlyDictionary<Guid, Member>>())).Returns("con");
-
-        // Mock AI service behavior (should NOT be called)
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
-            It.IsAny<GenerateRequest>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "Should not be called" }));
-
-        // Act
-        var result = await _service.DetectRelationshipAsync(familyId, father.Id, child.Id, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Description.Should().Be($"{father.FullName} là cha của {child.FullName} và {child.FullName} là con của {father.FullName}.");
-        result.Path.Should().HaveCount(2);
-        result.Edges.Should().HaveCount(1);
-        result.Path.First().Should().Be(father.Id);
-        result.Path.Last().Should().Be(child.Id);
-        result.Edges.First().Should().Be(nameof(RelationshipType.Father));
-
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
-        _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Never); // Verify that AI usage increment command was NOT sent
-        _mockRelationshipRuleEngine.Verify(r => r.InferRelationship(It.IsAny<RelationshipPath>(), It.IsAny<IReadOnlyDictionary<Guid, Member>>()), Times.AtLeastOnce); // Verify rule engine was tried
-    }
 }

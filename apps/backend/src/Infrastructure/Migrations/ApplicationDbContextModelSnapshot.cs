@@ -418,81 +418,6 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("family_links");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.FamilyLinkRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("deleted_by");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("deleted_date");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("last_modified");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<DateTime>("RequestDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("request_date");
-
-                    b.Property<string>("RequestMessage")
-                        .HasColumnType("longtext")
-                        .HasColumnName("request_message");
-
-                    b.Property<Guid>("RequestingFamilyId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("requesting_family_id");
-
-                    b.Property<DateTime?>("ResponseDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("response_date");
-
-                    b.Property<string>("ResponseMessage")
-                        .HasColumnType("longtext")
-                        .HasColumnName("response_message");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
-
-                    b.Property<Guid>("TargetFamilyId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("target_family_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_family_link_requests");
-
-                    b.HasIndex("RequestingFamilyId")
-                        .HasDatabaseName("ix_family_link_requests_requesting_family_id");
-
-                    b.HasIndex("TargetFamilyId")
-                        .HasDatabaseName("ix_family_link_requests_target_family_id");
-
-                    b.ToTable("family_link_requests");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.FamilyLocation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -698,81 +623,6 @@ namespace backend.Infrastructure.Migrations
                         .HasDatabaseName("ix_family_users_user_id");
 
                     b.ToTable("family_users");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.ImageRestorationJob", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("deleted_by");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("deleted_date");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("longtext")
-                        .HasColumnName("error_message");
-
-                    b.Property<Guid>("FamilyId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("family_id");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("JobId")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("job_id");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("last_modified");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<string>("OriginalImageUrl")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("original_image_url");
-
-                    b.Property<string>("RestoredImageUrl")
-                        .HasColumnType("longtext")
-                        .HasColumnName("restored_image_url");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_image_restoration_jobs");
-
-                    b.HasIndex("FamilyId")
-                        .HasDatabaseName("ix_image_restoration_jobs_family_id");
-
-                    b.ToTable("image_restoration_jobs");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MediaLink", b =>
@@ -1756,6 +1606,163 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("user_profiles");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AudioUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("audio_url");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<double>("Duration")
+                        .HasColumnType("double")
+                        .HasColumnName("duration");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)")
+                        .HasColumnName("text");
+
+                    b.Property<Guid>("VoiceProfileId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("voice_profile_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_voice_generations");
+
+                    b.HasIndex("VoiceProfileId")
+                        .HasDatabaseName("ix_voice_generations_voice_profile_id");
+
+                    b.ToTable("voice_generations");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AudioUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("audio_url");
+
+                    b.Property<bool>("Consent")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("consent");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<double>("DurationSeconds")
+                        .HasColumnType("double")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("label");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("language");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("member_id");
+
+                    b.Property<string>("OverallQuality")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("overall_quality");
+
+                    b.Property<string>("QualityMessages")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("quality_messages");
+
+                    b.Property<double>("QualityScore")
+                        .HasColumnType("double")
+                        .HasColumnName("quality_score");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_voice_profiles");
+
+                    b.HasIndex("MemberId")
+                        .HasDatabaseName("ix_voice_profiles_member_id");
+
+                    b.ToTable("voice_profiles");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Family", "Family")
@@ -1849,27 +1856,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Family2");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.FamilyLinkRequest", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Family", "RequestingFamily")
-                        .WithMany()
-                        .HasForeignKey("RequestingFamilyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_family_link_requests_families_requesting_family_id");
-
-                    b.HasOne("backend.Domain.Entities.Family", "TargetFamily")
-                        .WithMany()
-                        .HasForeignKey("TargetFamilyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_family_link_requests_families_target_family_id");
-
-                    b.Navigation("RequestingFamily");
-
-                    b.Navigation("TargetFamily");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.FamilyLocation", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Family", "Family")
@@ -1913,18 +1899,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Family");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.ImageRestorationJob", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Family", "Family")
-                        .WithMany()
-                        .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_image_restoration_jobs_families_family_id");
-
-                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MediaLink", b =>
@@ -2086,6 +2060,30 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.VoiceProfile", "VoiceProfile")
+                        .WithMany("VoiceGenerations")
+                        .HasForeignKey("VoiceProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voice_generations_voice_profiles_voice_profile_id");
+
+                    b.Navigation("VoiceProfile");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_voice_profiles_members_member_id");
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.Navigation("EventMembers");
@@ -2136,6 +2134,11 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Profile");
 
                     b.Navigation("UserActivities");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
+                {
+                    b.Navigation("VoiceGenerations");
                 });
 #pragma warning restore 612, 618
         }

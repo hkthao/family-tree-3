@@ -53,7 +53,8 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
     }),
     location: toRef(formData, 'location'), // ADD THIS
     repeatRule: toRef(formData, 'repeatRule'),
-    relatedMemberIds: toRef(formData, 'relatedMemberIds'),
+    eventMemberIds: toRef(formData, 'eventMemberIds'),
+
   });
 
   const eventOptionTypes = computed(() => getEventOptionTypes(t));

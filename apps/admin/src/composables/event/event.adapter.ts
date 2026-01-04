@@ -52,6 +52,14 @@ export interface EventServiceAdapter extends IEventService {
    * @returns A promise that resolves to a Result object containing an array of Event objects or an ApiError.
    */
   getEventsByFamilyId(familyId: string): Promise<Result<EventDto[]>>;
+
+  /**
+   * Fetches a list of all events for a specific member.
+   * @param memberId The ID of the member.
+   * @returns A promise that resolves to a Result object containing an array of Event objects or an ApiError.
+   */
+  getEventsByMemberId(memberId: string): Promise<Result<EventDto[], ApiError>>; // NEW METHOD
+
   getByIds(ids: string[]): Promise<Result<EventDto[]>>;
 }
 
@@ -89,6 +97,10 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
 
   async getEventsByFamilyId(familyId: string): Promise<Result<EventDto[]>> {
     return this.apiEventService.getEventsByFamilyId(familyId);
+  }
+
+  async getEventsByMemberId(memberId: string): Promise<Result<EventDto[], ApiError>> { // NEW IMPLEMENTATION
+    return this.apiEventService.getEventsByMemberId(memberId);
   }
 
   async getByIds(ids: string[]): Promise<Result<EventDto[]>> {

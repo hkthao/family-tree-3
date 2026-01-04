@@ -2,6 +2,8 @@ import type { MemberFace, Result, FaceDetectionResult, ApiError, AddMemberFaceDt
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IMemberFaceService extends ICrudService<MemberFace, AddMemberFaceDto, UpdateMemberFaceDto> {
+  getMemberFacesByMemberId(memberId: string): Promise<Result<MemberFace[], ApiError>>; // New method
+
   detect(
     imageFile: File,
     familyId: string,

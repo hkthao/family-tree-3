@@ -48,8 +48,7 @@ const transformHolidayToEventDto = (
     code: '', // Holidays don't have a specific code
     description: holiday.description,
     familyId: null, // Global holidays are not tied to a specific family
-    relatedMembers: [],
-    relatedMemberIds: [],
+    eventMembers: [],
     type: EventType.Other, // Map all custom holiday types to EventType.Other
     color: holiday.color,
     calendarType: holiday.calendarType === 'solar' ? CalendarType.Solar : CalendarType.Lunar,

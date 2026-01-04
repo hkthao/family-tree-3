@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using backend.Application.Common.Configurations;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
@@ -6,6 +7,7 @@ using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, A
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.Services.Background;
 using backend.Infrastructure.Services.RateLimiting;
 using FamilyTree.Infrastructure; // For ImgbbSettings
 using FamilyTree.Infrastructure.Services; // For ImgbbImageUploadService
@@ -78,8 +80,7 @@ public static class DependencyInjection
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
         services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
 
-        // Register ImageRestorationServiceSettings
-        services.Configure<ImageRestorationServiceSettings>(configuration.GetSection(ImageRestorationServiceSettings.SectionName));
+
 
         // Configure HttpClient for ImgurFileStorageService
         services.AddHttpClient<ImgurFileStorageService>(httpClient =>
@@ -93,20 +94,7 @@ public static class DependencyInjection
         // Register N8nService if it's used by N8nFileStorageService
         services.AddScoped<IN8nService, N8nService>();
 
-        // Register ImageRestorationService and configure its HttpClient
-        services.AddHttpClient<IImageRestorationService, ImageRestorationService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var settings = serviceProvider.GetRequiredService<IOptions<ImageRestorationServiceSettings>>().Value;
-                    if (!string.IsNullOrWhiteSpace(settings.BaseUrl))
-                    {
-                        httpClient.BaseAddress = new Uri(settings.BaseUrl);
-                    }
-                    else
-                    {
-                        serviceProvider.GetRequiredService<ILogger<ImageRestorationService>>().LogWarning("ImageRestorationService BaseUrl is not configured.");
-                    }
-                });
+
 
 
         // Dynamically register IFileStorageService based on configuration
@@ -178,7 +166,7 @@ public static class DependencyInjection
         // and uncomment the line below.
         // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
-        // Add Novu services
+        // Register Novu services
         services.AddNovuServices(configuration);
         // Add Rate Limiting services
         services.AddRateLimiter(rateLimiterOptions =>
@@ -187,6 +175,23 @@ public static class DependencyInjection
             rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
+        // Register VoiceAISettings
+        services.Configure<VoiceAISettings>(configuration.GetSection(VoiceAISettings.SectionName));
+
+        // Register VoiceAIService as a typed HttpClient
+        services.AddHttpClient<IVoiceAIService, VoiceAIService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var voiceAISettings = serviceProvider.GetRequiredService<IOptions<VoiceAISettings>>().Value;
+                    if (!string.IsNullOrEmpty(voiceAISettings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(voiceAISettings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<VoiceAIService>>().LogWarning("VoiceAISettings BaseUrl is not configured.");
+                    }
+                });
 
         return services;
     }

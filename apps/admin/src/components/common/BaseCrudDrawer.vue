@@ -15,7 +15,7 @@ interface BaseCrudDrawerProps {
 }
 
 const props = withDefaults(defineProps<BaseCrudDrawerProps>(), {
-  width: 650,
+  width: 750,
   scrim: true,
 });
 

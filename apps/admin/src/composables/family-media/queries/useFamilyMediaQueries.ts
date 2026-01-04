@@ -21,12 +21,15 @@ export function useFamilyMediaListQuery(
   service: IFamilyMediaService = useServices().familyMedia, // Inject service
 ) {
   const query = useQuery<Paginated<FamilyMedia>, Error>({
-    queryKey: computed(() => (unref(itemsPerPage) !== -1 ? queryKeys.familyMedia.list(
-      unref(filters),
-      unref(page),
-      unref(itemsPerPage),
-      unref(sortBy)
-    ) : [])),
+    queryKey: computed(() => {
+      if (unref(itemsPerPage) === -1) return [];
+      const listOptions: ListOptions = {
+        page: unref(page),
+        itemsPerPage: unref(itemsPerPage),
+        sortBy: unref(sortBy),
+      };
+      return queryKeys.familyMedia.list(listOptions, unref(filters));
+    }),
     queryFn: async () => {
       const currentFilters = unref(filters);
       const currentPage = unref(page);

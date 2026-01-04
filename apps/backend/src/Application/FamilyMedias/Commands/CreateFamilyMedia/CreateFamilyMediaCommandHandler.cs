@@ -84,11 +84,29 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
 
         string fileNameInStorage = $"{Guid.NewGuid()}{Path.GetExtension(request.FileName)}"; // Use original file extension from FileName property
 
+        string folderToUpload = request.Folder ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(folderToUpload))
+        {
+            var mediaType = request.MediaType ?? request.FileName.InferMediaType();
+            switch (mediaType)
+            {
+                case Domain.Enums.MediaType.Image:
+                    folderToUpload = string.Format(UploadConstants.ImagesFolder, request.FamilyId);
+                    break;
+                case Domain.Enums.MediaType.Video:
+                    folderToUpload = string.Format(UploadConstants.VideosFolder, request.FamilyId);
+                    break;
+                default:
+                    folderToUpload = string.Format(UploadConstants.ImagesFolder, request.FamilyId); // Fallback
+                    break;
+            }
+        }
+
         using var fileStream = new MemoryStream(request.File); // Create MemoryStream from byte array
         var uploadResult = await _fileStorageService.UploadFileAsync(
             fileStream,
             fileNameInStorage,
-            request.Folder,
+            folderToUpload,
             cancellationToken
         );
 

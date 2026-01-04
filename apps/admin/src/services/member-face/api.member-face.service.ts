@@ -4,8 +4,13 @@ import type { IMemberFaceService } from './member-face.service.interface';
 import { type ApiClientMethods } from '@/plugins/axios';
 import { ApiCrudService } from '../common/api.crud.service';
 
-export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFaceDto, UpdateMemberFaceDto>  implements IMemberFaceService {   constructor(protected http: ApiClientMethods) {
+export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFaceDto, UpdateMemberFaceDto>  implements IMemberFaceService {
+  constructor(protected http: ApiClientMethods) {
     super(http, '/member-faces');
+  }
+
+  async getMemberFacesByMemberId(memberId: string): Promise<Result<MemberFace[], ApiError>> {
+    return await this.http.get<MemberFace[]>(`${this.baseUrl}/by-member/${memberId}`);
   }
 
   async detect(
@@ -26,7 +31,7 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
       params.append('returnCrop', returnCrop.toString());
     }
 
-    return await this.http.post<FaceDetectionResult>(`/member-faces/detect?${params.toString()}`, formData, {
+    return await this.http.post<FaceDetectionResult>(`${this.baseUrl}/detect?${params.toString()}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -44,5 +49,6 @@ export class ApiMemberFaceService extends ApiCrudService<MemberFace, AddMemberFa
     const params: Record<string, string> = {};
     if (memberId) params.memberId = memberId;
     if (familyId) params.familyId = familyId;
-            return await this.http.post<null>(`${this.baseUrl}/import`, { familyId: familyId, faces: data }, { params });  }
+    return await this.http.post<null>(`${this.baseUrl}/import`, { familyId: familyId, faces: data }, { params });
+  }
 }

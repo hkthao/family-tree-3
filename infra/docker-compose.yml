@@ -7,6 +7,8 @@ services:
       - "3306:3306"
     env_file:
       - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -24,6 +26,8 @@ services:
       - "8080:8080"
     env_file:
       - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     depends_on:
       - mysql
     volumes:
@@ -43,6 +47,8 @@ services:
       - "8081:80"
     env_file:
       - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     depends_on:
       - backend
     logging:
@@ -58,8 +64,11 @@ services:
     container_name: family-tree-face-service
     ports:
       - "8000:8000" # Expose port 8000 for the FastAPI app
+    env_file:
+      - ./.env.dev
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+      - TZ=Asia/Ho_Chi_Minh
     mem_limit: 4g # Increase memory limit
     volumes:
       - ../infra/app/models:/face-service/app/models/dlib_models
@@ -76,8 +85,11 @@ services:
     container_name: family-tree-ocr-service
     ports:
       - "8001:8000" # Expose port 8000 for the FastAPI app
+    env_file:
+      - ./.env.dev
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+      - TZ=Asia/Ho_Chi_Minh
     mem_limit: 2g # Set memory limit for OCR service
     logging:
       driver: json-file
@@ -85,16 +97,20 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  image-restoration-service:
+
+  voice-service:
     build:
-      context: ../services/image_restoration_service
+      context: ../services/voice-service
       dockerfile: Dockerfile
-    container_name: family-tree-image-restoration-service
+    container_name: family-tree-voice-service
     ports:
-      - "8002:8000" # Expose port 8000 for the FastAPI app internally, map to 8002 externally
+      - "8003:8000" # Expose port 8000 for the FastAPI app internally, map to 8003 externally
     env_file:
-      - ./.env.dev # To load REPLICATE_API_TOKEN
-    restart: always # Always restart if it stops
+      - ./.env.dev
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+      - TZ=Asia/Ho_Chi_Minh
+    mem_limit: 2g # Set memory limit for voice service (similar to ocr-service)
     logging:
       driver: json-file
       options:
@@ -106,6 +122,8 @@ services:
     container_name: family-tree-promtail
     env_file:
       - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - ./promtail-config.yaml:/etc/promtail/config.yaml:ro # Mount the config file
       - /var/lib/docker/containers:/var/lib/docker/containers:ro # Mount Docker logs
@@ -116,6 +134,7 @@ services:
       - admin
       - face-service
       - ocr-service
+      - voice-service
 
 volumes:
   mysql-data:

@@ -87,9 +87,16 @@ public class ApplicationDbContext(
     public DbSet<Prompt> Prompts { get; set; } = null!;
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLinkRequest.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceProfile.
     /// </summary>
-    public DbSet<FamilyLinkRequest> FamilyLinkRequests => Set<FamilyLinkRequest>();
+    public DbSet<VoiceProfile> VoiceProfiles => Set<VoiceProfile>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceGeneration.
+    /// </summary>
+    public DbSet<VoiceGeneration> VoiceGenerations => Set<VoiceGeneration>();
+
+
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLink.
@@ -121,10 +128,7 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể ImageRestorationJob.
-    /// </summary>
-    public DbSet<ImageRestorationJob> ImageRestorationJobs { get; set; } = null!;
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         // Lấy tất cả các thực thể có sự kiện miền trước khi lưu thay đổi
