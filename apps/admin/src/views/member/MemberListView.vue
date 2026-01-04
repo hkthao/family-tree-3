@@ -25,8 +25,12 @@
     </BaseCrudDrawer>
         <!-- Detail Member Drawer -->
         <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-          <MemberDetailView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId" @close="handleDetailClosed"
-            @edit-member="openEditDrawer" />
+          <MemberDetailTabsView v-if="selectedItemId && detailDrawer"
+            :member-id="selectedItemId"
+            @close="handleDetailClosed"
+            @edit-member="openEditDrawer"
+            @member-deleted="handleMemberSaved"
+          />
         </BaseCrudDrawer>
     
         <!-- Import Dialog -->
@@ -46,7 +50,7 @@ import { MemberSearch, MemberList } from '@/components/member';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
-import MemberDetailView from '@/views/member/MemberDetailView.vue';
+import MemberDetailTabsView from '@/views/member/MemberDetailTabsView.vue';
 import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, watch, computed } from 'vue';
