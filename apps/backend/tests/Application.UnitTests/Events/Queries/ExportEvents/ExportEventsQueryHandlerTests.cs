@@ -77,8 +77,8 @@ public class ExportEventsQueryHandlerTests : TestBase
         exportedEvent1.Should().NotBeNull();
         exportedEvent1!.Name.Should().Be(event1.Name);
         exportedEvent1.FamilyId.Should().Be(event1.FamilyId);
-        exportedEvent1.RelatedMembers.Should().HaveCount(1);
-        exportedEvent1.RelatedMembers.First().Id.Should().Be(member1.Id);
+        exportedEvent1.EventMembers.Should().HaveCount(1);
+        exportedEvent1.EventMembers.First().MemberId.Should().Be(member1.Id);
         exportedEvent1.SolarDate.Should().Be(event1.SolarDate!.Value.ToUniversalTime());
         exportedEvent1.LunarDate.Should().BeNull();
 
@@ -86,8 +86,8 @@ public class ExportEventsQueryHandlerTests : TestBase
         exportedEvent2.Should().NotBeNull();
         exportedEvent2!.Name.Should().Be(event2.Name);
         exportedEvent2.FamilyId.Should().Be(event2.FamilyId);
-        exportedEvent2.RelatedMembers.Should().HaveCount(1);
-        exportedEvent2.RelatedMembers.First().Id.Should().Be(member2.Id);
+        exportedEvent2.EventMembers.Should().HaveCount(1);
+        exportedEvent2.EventMembers.First().MemberId.Should().Be(member2.Id);
         exportedEvent2.SolarDate.Should().BeNull();
         exportedEvent2.LunarDate.Should().NotBeNull();
         exportedEvent2.LunarDate!.Day.Should().Be(event2.LunarDate!.Day);
