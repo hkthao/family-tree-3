@@ -4,5 +4,6 @@ public enum RefType
 {
     Member,
     Event,
-    Family
+    Family,
+    MemoryItem
 }

@@ -13,6 +13,8 @@ public record CreateMemoryItemCommand : IRequest<Result<Guid>>
     public ICollection<CreateMemoryMediaCommandDto> MemoryMedia { get; init; } = [];
     public ICollection<Guid> PersonIds { get; init; } = [];
     public ICollection<Guid> DeletedMediaIds { get; init; } = [];
+    public Guid? LocationId { get; set; }
+    public string? Location { get; set; }
 }
 
 public record CreateMemoryMediaCommandDto

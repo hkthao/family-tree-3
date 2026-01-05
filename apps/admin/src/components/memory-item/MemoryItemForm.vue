@@ -1,23 +1,6 @@
 <template>
   <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
-      <v-col cols="12" v-if="memoryMedia && memoryMedia.length > 0">
-        <v-carousel :key="memoryMedia.length" cycle hide-delimiter-background :continuous="false" hide-delimiters>
-          <v-carousel-item v-for="(media, index) in memoryMedia" :key="media.id || index">
-            <div>
-              <v-img :src="media.url" cover class="carousel-image"></v-img>
-              <v-btn v-if="!props.readOnly" class="carousel-delete-btn" icon="mdi-delete" color="error" size="small"
-                @click="removeMedia(media)"></v-btn>
-            </div>
-          </v-carousel-item>
-        </v-carousel>
-      </v-col>
-      <v-col v-if="!props.readOnly" cols="12">
-        <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="newlyUploadedFiles" :accept="acceptedMimeTypes"
-          data-testid="memory-item-file-upload" multiple :rules="validationRules.uploadedFiles"
-          :disabled="props.readOnly" prepend-inner-icon="mdi-file-upload"></VFileUpload>
-      </v-col>
-
       <v-col cols="12">
         <v-text-field v-model="form.title" :label="t('memoryItem.form.title')" :rules="validationRules.title" required
           data-testid="memory-item-title" :readonly="props.readOnly"
@@ -29,17 +12,14 @@
           prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
       <v-col cols="12">
-        <LocationInputField
-          v-model="form.location"
-          :label="t('memoryItem.form.location')"
-          :family-id="props.familyId"
-          :read-only="props.readOnly"
-          prepend-inner-icon="mdi-map-marker"
-        ></LocationInputField>
+        <LocationInputField v-model:model-value="form.location" v-model:location-id="form.locationId"
+          :label="t('memoryItem.form.location')" :family-id="props.familyId" :read-only="props.readOnly"
+          prepend-inner-icon="mdi-map-marker"></LocationInputField>
       </v-col>
       <v-col cols="12" md="6">
         <VDateInput v-model="form.happenedAt" :label="t('memoryItem.form.happenedAt')"
-          data-testid="memory-item-happened-at" :readonly="props.readOnly" clearable append-inner-icon="mdi-calendar">
+          data-testid="memory-item-happened-at" :readonly="props.readOnly" clearable append-inner-icon="mdi-calendar"
+          :max="todayDate">
         </VDateInput>
       </v-col>
       <v-col cols="12" md="6">
@@ -53,20 +33,25 @@
           prepend-inner-icon="mdi-account-group">
         </MemberAutocomplete>
       </v-col>
+
+      <v-col v-if="!props.readOnly" cols="12">
+        <MediaInput v-model="memoryMedia" :family-id="props.familyId" :initialMediaType="MediaType.Image"
+          data-testid="memory-item-media-input" selectionMode="multiple" :disabled="props.readOnly" />
+      </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { type Ref } from 'vue';
+import { type Ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemoryItem } from '@/types';
+import { MediaType, type MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
-import { VFileUpload } from 'vuetify/labs/VFileUpload';
+import MediaInput from '@/components/common/MediaInput.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
 import { useMemoryItemForm } from '@/composables/memory-item/useMemoryItemForm';
-import type { LocalMemoryMedia } from '@/composables/memory-item/useMemoryItemForm'; // Type-only import
+import type { FamilyMedia } from '@/types/familyMedia'; // Import FamilyMedia
 
 interface MemoryItemFormProps {
   initialMemoryItemData?: MemoryItem;
@@ -78,18 +63,26 @@ const props = defineProps<MemoryItemFormProps>();
 
 const { t } = useI18n();
 
+const todayDate = computed(() => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+});
+
 const {
   state: {
     formRef, // Add formRef here
     form,
     emotionalTagOptions,
     memoryMedia,
-    newlyUploadedFiles, // Changed from uploadedFiles
     deletedMediaIds,
     acceptedMimeTypes,
     validationRules,
+
   },
-  actions: { validate, getFormData, removeMedia, addExistingMedia },
+  actions: { validate, getFormData, addExistingMedia },
 } = useMemoryItemForm({
   initialMemoryItemData: props.initialMemoryItemData,
   familyId: props.familyId,
@@ -99,21 +92,17 @@ const {
 export interface IMemoryItemFormInstance {
   validate: () => Promise<boolean>;
   getFormData: () => MemoryItem;
-  newlyUploadedFiles: Ref<File[]>; // Changed from uploadedFiles
-  memoryMedia: Ref<LocalMemoryMedia[]>; // Changed from Ref<LocalMemoryMedia[]>
+  memoryMedia: Ref<FamilyMedia[]>;
   deletedMediaIds: Ref<string[]>;
-  removeMedia: (mediaToDelete: LocalMemoryMedia) => void;
   acceptedMimeTypes: string;
-  addExistingMedia: (mediaItems: any[]) => void; // Changed from MediaItem[] to any[]
+  addExistingMedia: (mediaItems: any[]) => void;
 }
 
 defineExpose<IMemoryItemFormInstance>({
   validate,
   getFormData,
-  newlyUploadedFiles,
   memoryMedia,
   deletedMediaIds,
-  removeMedia,
   acceptedMimeTypes,
   addExistingMedia,
 });

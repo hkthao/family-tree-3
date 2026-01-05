@@ -2,6 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.MemoryItems.Commands.CreateMemoryItem;
 
@@ -44,7 +45,8 @@ public class CreateMemoryItemCommandHandler : IRequestHandler<CreateMemoryItemCo
             request.Title,
             request.Description,
             request.HappenedAt,
-            request.EmotionalTag
+            request.EmotionalTag,
+            request.Location
         );
 
         foreach (var mediaDto in request.MemoryMedia)
@@ -58,7 +60,7 @@ public class CreateMemoryItemCommandHandler : IRequestHandler<CreateMemoryItemCo
         var deleteItems = await _context.MemoryMedia
             .Where(mm => request.DeletedMediaIds.Contains(mm.Id) && mm.MemoryItem.FamilyId == request.FamilyId)
             .ToListAsync(cancellationToken);
-        if (deleteItems.Any()) // Use Any() for collection check
+        if (deleteItems.Count != 0) // Use Any() for collection check
             _context.MemoryMedia.RemoveRange(deleteItems);
 
         foreach (var personId in request.PersonIds)
@@ -67,6 +69,19 @@ public class CreateMemoryItemCommandHandler : IRequestHandler<CreateMemoryItemCo
         }
 
         _context.MemoryItems.Add(entity);
+
+        // Handle LocationLink
+        if (request.LocationId.HasValue)
+        {
+            var locationLink = LocationLink.Create(
+                entity.Id.ToString(), // RefId is MemoryItem Id
+                RefType.MemoryItem,   // RefType is MemoryItem
+                request.Description ?? string.Empty,  // Use request.Description for LocationLink Description
+                request.LocationId.Value,
+                LocationLinkType.General // Specify LinkType for memory item
+            );
+            _context.LocationLinks.Add(locationLink);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

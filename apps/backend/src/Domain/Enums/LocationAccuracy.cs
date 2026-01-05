@@ -4,5 +4,6 @@ public enum LocationAccuracy
 {
     Exact,
     Approximate,
-    Estimated
+    Estimated,
+    Unknown
 }

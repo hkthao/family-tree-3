@@ -1,9 +1,9 @@
-import { ref, type Ref } from 'vue';
+import { type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
 import { useAddMemoryItemMutation } from '@/composables';
-import { useAddFamilyMediaMutation } from '@/composables';
-import type { MemoryItem, FamilyMedia, MemoryMedia } from '@/types';
+// import { useAddFamilyMediaMutation } from '@/composables'; // No longer needed
+import type { MemoryItem } from '@/types'; // Removed FamilyMedia, MemoryMedia
 import type { IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue'; // Import the exposed interface
 import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
 
@@ -17,13 +17,13 @@ interface UseMemoryItemAddOptions {
 export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
   const { familyId, onSaveSuccess, onCancel, formRef } = options;
 
-  const isUploadingMedia = ref(false);
+  // const isUploadingMedia = ref(false); // No longer needed
 
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const queryClient = useQueryClient(); // Get queryClient instance
   const { mutate: addMemoryItem, isPending: isAddingMemoryItem } = useAddMemoryItemMutation();
-  const { mutateAsync: addFamilyMedia } = useAddFamilyMediaMutation();
+  // const { mutateAsync: addFamilyMedia } = useAddFamilyMediaMutation(); // No longer needed
 
   const handleAddItem = async () => {
     if (!formRef.value || typeof formRef.value.validate !== 'function') {
@@ -35,36 +35,37 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
     if (!isValid) return;
 
     const itemData = formRef.value.getFormData();
-    const newlyUploadedFiles = formRef.value.newlyUploadedFiles.value; // Access the array value
+    // const newlyUploadedFiles = formRef.value.newlyUploadedFiles.value; // No longer needed
 
-    const uploadedMedia: FamilyMedia[] = [];
+    // Media upload logic is now handled by MediaInput, memoryMedia is already processed by useMemoryItemForm
+    // const uploadedMedia: FamilyMedia[] = [];
 
-    if (newlyUploadedFiles && newlyUploadedFiles.length > 0) {
-      isUploadingMedia.value = true;
-      try {
-        for (const file of newlyUploadedFiles) { // Iterate over the array value
-          const media = await addFamilyMedia({ familyId: familyId, file: file });
-          uploadedMedia.push(media);
-        }
-        showSnackbar(t('familyMedia.messages.uploadSuccess'), 'success');
-      } catch (error: any) {
-        showSnackbar(error.message || t('familyMedia.messages.uploadError'), 'error');
-        isUploadingMedia.value = false;
-        return;
-      } finally {
-        isUploadingMedia.value = false;
-      }
-    }
+    // if (newlyUploadedFiles && newlyUploadedFiles.length > 0) {
+    //   isUploadingMedia.value = true;
+    //   try {
+    //     for (const file of newlyUploadedFiles) { // Iterate over the array value
+    //       const media = await addFamilyMedia({ familyId: familyId, file: file });
+    //       uploadedMedia.push(media);
+    //     }
+    //     showSnackbar(t('familyMedia.messages.uploadSuccess'), 'success');
+    //   } catch (error: any) {
+    //     showSnackbar(error.message || t('familyMedia.messages.uploadError'), 'error');
+    //     isUploadingMedia.value = false;
+    //     return;
+    //   } finally {
+    //     isUploadingMedia.value = false;
+    //   }
+    // }
 
-    // Append newly uploaded media to the existing media in itemData
-    const newMemoryMedia: MemoryMedia[] = uploadedMedia.map(media => ({
-      id: media.id,
-      memoryItemId: '', // Will be assigned on save
-      url: media.filePath,
-      type: media.mediaType, // Map media.mediaType to type
-    }));
+    // memoryMedia is already correctly populated by useMemoryItemForm
+    // const newMemoryMedia: MemoryMedia[] = uploadedMedia.map(media => ({
+    //   id: media.id,
+    //   memoryItemId: '', // Will be assigned on save
+    //   url: media.filePath,
+    //   type: media.mediaType, // Map media.mediaType to type
+    // }));
 
-    itemData.memoryMedia = [...(itemData.memoryMedia || []), ...newMemoryMedia];
+    // itemData.memoryMedia = [...(itemData.memoryMedia || []), ...newMemoryMedia];
 
     addMemoryItem(itemData as Omit<MemoryItem, 'id'>, {
       onSuccess: () => {
@@ -86,7 +87,6 @@ export function useMemoryItemAdd(options: UseMemoryItemAddOptions) {
 
   return {
     state: {
-      isUploadingMedia,
       isAddingMemoryItem,
     },
     actions: {

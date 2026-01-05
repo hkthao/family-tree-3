@@ -14,6 +14,8 @@ public record UpdateMemoryItemCommand : IRequest<Result>
     public ICollection<Guid> DeletedMediaIds { get; init; } = [];
     public ICollection<UpdateMemoryMediaCommandDto> MemoryMedia { get; init; } = [];
     public ICollection<Guid> PersonIds { get; init; } = [];
+    public string? Location { get; set; }
+    public Guid? LocationId { get; set; }
 }
 
 public record UpdateMemoryMediaCommandDto

@@ -1,8 +1,5 @@
 <template>
   <v-card :elevation="0">
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('member.detail.title') }}</span>
-    </v-card-title>
     <v-progress-linear v-if="isLoadingMember || isDeletingMember" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <div v-if="isLoadingMember">
@@ -20,7 +17,7 @@
           <v-tab value="faces">{{ t('member.detail.tabs.faces') }}</v-tab>
           <v-tab value="events">{{ t('member.detail.tabs.events') }}</v-tab>
           <v-tab value="locations">{{ t('member.detail.tabs.locations') }}</v-tab>
-          <v-tab value="voice">{{ t('member.detail.tabs.voice') }}</v-tab>
+
         </v-tabs>
 
         <v-window v-model="tab">
@@ -48,10 +45,7 @@
           <v-window-item value="locations">
             <MemberLocationsTab :member-id="props.memberId" @show-location-detail="handleShowLocationDetail" />
           </v-window-item>
-          <v-window-item value="voice">
-            <!-- Content for Voice tab -->
-            Voice Tab Content
-          </v-window-item>
+
         </v-window>
       </div>
     </v-card-text>

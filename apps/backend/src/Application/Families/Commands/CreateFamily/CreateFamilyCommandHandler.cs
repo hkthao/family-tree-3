@@ -54,7 +54,7 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                     File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
                     Folder = string.Format(UploadConstants.ImagesFolder, entity.Id),
-                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType
+                    MediaType = MediaType.Image // Explicitly set MediaType
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
