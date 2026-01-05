@@ -18,7 +18,8 @@
     <v-row>
       <v-col cols="12">
         <LocationInputField
-          v-model="formData.address"
+          v-model:model-value="formData.address"
+          v-model:location-id="formData.locationId"
           :family-id="(formData as FamilyDto).id || undefined"
           :read-only="props.readOnly"
           prepend-inner-icon="mdi-map-marker"

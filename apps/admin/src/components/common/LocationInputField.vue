@@ -18,28 +18,33 @@ import type { FamilyLocation } from '@/types'; // Import FamilyLocation type
 import LocationDrawer from './LocationDrawer.vue'; // Import the new LocationDrawer
 
 const props = defineProps<{
-  modelValue?: string; // The address string
+  modelValue?: string; // The address string (address)
+  locationId?: string | null; // The LocationId
   familyId?: string | null; // Optional familyId for filtering locations
   readOnly?: boolean; // To disable editing and the picker button
   label?: string; // Accept label prop
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'update:locationId']); // Added update:locationId
 
-const showDialog = ref(false); // Controls the visibility of the LocationDialog
+const showDialog = ref(false); // Controls the visibility of the LocationDrawer
 
 const updateAddress = (value: string) => {
   emit('update:modelValue', value);
 };
 
 const openLocationPicker = () => {
-  if (props.readOnly) return;
-  showDialog.value = true; // Open the dialog
+  showDialog.value = true; // Open the drawer
 };
 
 const handleLocationSelected = (location: FamilyLocation) => {
-  if (location && location.location.address) {
-    updateAddress(location.location.address);
+  if (location) {
+    if (location.location.address) {
+      updateAddress(location.location.address);
+    }
+    if (location.locationId) {
+      emit('update:locationId', location.locationId);
+    }
   }
 };
 </script>
