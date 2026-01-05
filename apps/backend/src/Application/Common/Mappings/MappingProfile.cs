@@ -19,6 +19,7 @@ using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries;
 using backend.Application.Identity.UserProfiles.Queries;
+using backend.Application.LocationLinks;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
 using backend.Application.MemberFaces.Common;
 using backend.Application.Members.DTOs;
@@ -114,6 +115,8 @@ public class MappingProfile : Profile
         CreateMap<FamilyLink, FamilyLinkDto>()
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
+        CreateMap<LocationLink, LocationLinkDto>()
+            .ForMember(dest => dest.FamilyLocationName, opt => opt.MapFrom(src => src.FamilyLocation.Name));
         CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))

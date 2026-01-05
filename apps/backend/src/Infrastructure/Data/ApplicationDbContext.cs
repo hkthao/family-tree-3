@@ -128,6 +128,11 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể LocationLink.
+    /// </summary>
+    public DbSet<LocationLink> LocationLinks => Set<LocationLink>();
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
