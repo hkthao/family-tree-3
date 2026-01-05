@@ -4,12 +4,13 @@
     v-bind="$attrs"
     :model-value="modelValue"
     @update:model-value="updateAddress"
-    :append-inner-icon="readOnly ? '' : 'mdi-selection-multiple-marker'"
+    append-inner-icon="mdi-selection-multiple-marker"
     @click:append-inner="openLocationPicker"
-    :readonly="readOnly"
+    :readonly="true"
     data-testid="location-input-field"
   ></v-text-field>
-  <LocationDrawer cssClass="location-drawer" v-model="showDialog" :family-id="familyId" @selectLocation="handleLocationSelected" />
+  <LocationDrawer cssClass="location-drawer" v-model="showDialog" :family-id="familyId"
+    @selectLocation="handleLocationSelected" />
 </template>
 
 <script setup lang="ts">
@@ -17,11 +18,11 @@ import { ref } from 'vue'; // Import ref
 import type { FamilyLocation } from '@/types'; // Import FamilyLocation type
 import LocationDrawer from './LocationDrawer.vue'; // Import the new LocationDrawer
 
-const props = defineProps<{
+defineProps<{
   modelValue?: string; // The address string (address)
   locationId?: string | null; // The LocationId
   familyId?: string | null; // Optional familyId for filtering locations
-  readOnly?: boolean; // To disable editing and the picker button
+  readOnly?: boolean; // To disable editing and the picker button, no longer affects opening the drawer
   label?: string; // Accept label prop
 }>();
 
@@ -34,7 +35,7 @@ const updateAddress = (value: string) => {
 };
 
 const openLocationPicker = () => {
-  showDialog.value = true; // Open the drawer
+  showDialog.value = true; // Open the drawer always
 };
 
 const handleLocationSelected = (location: FamilyLocation) => {
@@ -42,15 +43,15 @@ const handleLocationSelected = (location: FamilyLocation) => {
     if (location.location.address) {
       updateAddress(location.location.address);
     }
-    if (location.locationId) {
-      emit('update:locationId', location.locationId);
+    if (location.location.id) {
+      emit('update:locationId', location.location.id);
     }
   }
 };
 </script>
 
 <style>
-.location-drawer{
+.location-drawer {
   top: 0 !important;
   height: 100% !important;
 }

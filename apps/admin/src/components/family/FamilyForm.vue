@@ -23,6 +23,7 @@
           :family-id="(formData as FamilyDto).id || undefined"
           :read-only="props.readOnly"
           prepend-inner-icon="mdi-map-marker"
+          :label="$t('family.form.address')"
         ></LocationInputField>
       </v-col>
     </v-row>

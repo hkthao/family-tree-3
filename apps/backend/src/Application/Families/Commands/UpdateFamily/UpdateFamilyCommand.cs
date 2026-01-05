@@ -8,4 +8,5 @@ public record UpdateFamilyCommand : FamilyInput, IRequest<Result<Guid>>
     public Guid Id { get; init; }
     public IList<Guid> ManagerIds { get; set; } = [];
     public IList<Guid> ViewerIds { get; set; } = [];
+    public Guid? LocationId { get; set; }
 }
