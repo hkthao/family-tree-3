@@ -42,4 +42,11 @@ public class LocationLink : BaseAuditableEntity
         LocationId = locationId;
         LinkType = linkType; // NEW: Update LinkType
     }
+
+    // New method for updating just location details
+    public void UpdateLocationDetails(Guid locationId, string description)
+    {
+        LocationId = locationId;
+        Description = description;
+    }
 }

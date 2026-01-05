@@ -2,16 +2,18 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Events.Specifications;
+using backend.Domain.Entities; // Add this using statement
 using backend.Domain.Enums; // Add this
+using backend.Application.Events.Specifications; // Add this using statement
 using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateEventCommand, Result<bool>>
+public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can update events
@@ -54,7 +56,8 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
                 request.SolarDate.Value,
                 request.RepeatRule,
                 request.Type,
-                request.Color
+                request.Color,
+                request.Location // Pass Location here
             );
         }
         else if (request.CalendarType == CalendarType.Lunar)
@@ -75,7 +78,8 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
                 lunarDateVO,
                 request.RepeatRule,
                 request.Type,
-                request.Color
+                request.Color,
+                request.Location // Pass Location here
             );
         }
         else
@@ -96,6 +100,39 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
         // Domain event is added within the UpdateSolarEvent/UpdateLunarEvent methods now.
         // entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity));
+
+        // Handle LocationLink
+        var existingLocationLink = await _context.LocationLinks
+            .FirstOrDefaultAsync(ll => ll.RefId == entity.Id.ToString() && ll.RefType == RefType.Event, cancellationToken);
+
+        if (request.LocationId.HasValue)
+        {
+            if (existingLocationLink != null)
+            {
+                // Update existing LocationLink
+                existingLocationLink.UpdateLocationDetails(request.LocationId.Value, request.Location ?? string.Empty);
+            }
+            else
+            {
+                // Create new LocationLink
+                var newLocationLink = LocationLink.Create(
+                    entity.Id.ToString(),
+                    RefType.Event,
+                    request.Location ?? string.Empty,
+                    request.LocationId.Value,
+                    LocationLinkType.General
+                );
+                _context.LocationLinks.Add(newLocationLink);
+            }
+        }
+        else // request.LocationId has no value
+        {
+            if (existingLocationLink != null)
+            {
+                // Remove existing LocationLink
+                _context.LocationLinks.Remove(existingLocationLink);
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 
