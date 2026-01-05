@@ -13,6 +13,36 @@
       </div>
       <div v-else-if="memoryItem">
         <PrivacyAlert :is-private="memoryItem.isPrivate" />
+
+        <div v-if="memoryItem.memoryMedia && memoryItem.memoryMedia.length > 0">
+          <v-carousel cycle :show-arrows="memoryItem.memoryMedia.length > 1" hide-delimiter-background height="500px">
+            <v-carousel-item v-for="(media, index) in memoryItem.memoryMedia" :key="index">
+              <div class="d-flex fill-height justify-center align-center carousel-content">
+                <v-img
+                  v-if="media.type === 'Image'"
+                  :src="media.url"
+                  class="carousel-image"
+                  max-height="500px"
+                  contain
+                ></v-img>
+                <video
+                  v-else-if="media.type === 'Video'"
+                  :src="media.url"
+                  controls
+                  autoplay
+                  loop
+                  class="carousel-video"
+                  max-height="500px"
+                ></video>
+                <div v-else>
+                  <p>{{ t('memoryItem.detail.unsupportedMediaType') }}</p>
+                  <a :href="media.url" target="_blank">{{ media.url }}</a>
+                </div>
+              </div>
+            </v-carousel-item>
+          </v-carousel>
+        </div>
+
         <MemoryItemForm :initial-memory-item-data="memoryItem" :family-id="props.familyId" :read-only="true" />
       </div>
     </v-card-text>

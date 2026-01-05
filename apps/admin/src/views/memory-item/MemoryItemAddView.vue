@@ -11,23 +11,16 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm"
-        :disabled="isAddingMemoryItem || isUploadingMedia">{{
+        :disabled="isAddingMemoryItem">{{
           t('common.cancel')
         }}</v-btn>
-      <v-btn color="secondary" data-testid="button-select-media" @click="showMediaPicker = true"
-        :disabled="isAddingMemoryItem || isUploadingMedia">
-        {{ t('memoryItem.form.selectMedia') }}
-      </v-btn>
+
       <v-btn color="primary" data-testid="button-save" @click="handleAddItem"
-        :loading="isAddingMemoryItem || isUploadingMedia" :disabled="isAddingMemoryItem || isUploadingMedia">{{
+        :loading="isAddingMemoryItem" :disabled="isAddingMemoryItem">{{
           t('common.save') }}</v-btn>
     </v-card-actions>
 
-    <MemoryMediaPickerDialog
-      v-model="showMediaPicker"
-      :family-id="familyId"
-      @confirm="handleMediaConfirmed"
-    />
+
 
   </v-card>
 </template>
@@ -37,9 +30,7 @@ import { ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MemoryItemForm from '@/components/memory-item/MemoryItemForm.vue';
 import { useMemoryItemAdd } from '@/composables';
-import { type MediaItem } from '@/types';
 import { type IMemoryItemFormInstance } from '@/components/memory-item/MemoryItemForm.vue';
-import MemoryMediaPickerDialog from '@/components/memory-item/MemoryMediaPickerDialog.vue'; // New import
 
 const props = defineProps({
   familyId: {
@@ -53,17 +44,12 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 
-const showMediaPicker = ref(false);
 
-const handleMediaConfirmed = (selectedItems: MediaItem[]) => {
-  if (memoryItemFormRef.value) {
-    (memoryItemFormRef.value as IMemoryItemFormInstance).addExistingMedia(selectedItems);
-  }
-  showMediaPicker.value = false;
-};
+
+
 
 const {
-  state: { isAddingMemoryItem, isUploadingMedia },
+  state: { isAddingMemoryItem },
   actions: { handleAddItem, closeForm },
 } = useMemoryItemAdd({
   familyId: props.familyId,

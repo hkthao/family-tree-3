@@ -2,6 +2,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.MemoryItems.Commands.UpdateMemoryItem;
 
@@ -43,7 +44,8 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
             request.Title,
             request.Description,
             request.HappenedAt,
-            request.EmotionalTag
+            request.EmotionalTag,
+            request.Location // Pass the new location parameter
         );
         // Handle Media updates
         // Lấy tất cả media hiện có của MemoryItem
@@ -109,6 +111,43 @@ public class UpdateMemoryItemCommandHandler : IRequestHandler<UpdateMemoryItemCo
         {
             _context.MemoryPersons.Add(new MemoryPerson(entity.Id, personId));
         }
+
+        // Handle LocationLink updates
+        var existingLocationLink = await _context.LocationLinks
+            .FirstOrDefaultAsync(ll => ll.RefId == entity.Id.ToString() && ll.RefType == RefType.MemoryItem, cancellationToken);
+
+        if (request.LocationId.HasValue)
+        {
+            if (existingLocationLink != null)
+            {
+                // Update existing location link
+                existingLocationLink.UpdateLocationDetails(
+                    request.LocationId.Value,
+                    request.Description ?? string.Empty // Use request.Description for LocationLink Description
+                );
+            }
+            else
+            {
+                // Create new location link
+                var newLocationLink = LocationLink.Create(
+                    entity.Id.ToString(),
+                    RefType.MemoryItem,
+                    request.Description ?? string.Empty,
+                    request.LocationId.Value,
+                    LocationLinkType.General
+                );
+                _context.LocationLinks.Add(newLocationLink);
+            }
+        }
+        else // No location provided in the request
+        {
+            if (existingLocationLink != null)
+            {
+                // Remove existing location link
+                _context.LocationLinks.Remove(existingLocationLink);
+            }
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }

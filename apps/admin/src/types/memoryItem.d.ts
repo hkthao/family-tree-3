@@ -17,7 +17,8 @@ export interface MemoryItem {
   familyId: string;
   title: string;
   description?: string;
-  location?: string; // ADD THIS
+  location?: string;
+  locationId?: string; // ADD THIS
   happenedAt?: Date;
   emotionalTag: EmotionalTag;
   memoryMedia: MemoryMedia[];

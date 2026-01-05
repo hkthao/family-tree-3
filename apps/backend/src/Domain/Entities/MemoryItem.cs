@@ -11,6 +11,7 @@ public class MemoryItem : BaseAuditableEntity, ISoftDelete
     public string? Description { get; private set; }
     public DateTime? HappenedAt { get; private set; }
     public EmotionalTag EmotionalTag { get; private set; } = EmotionalTag.Neutral;
+    public string? Location { get; private set; } // New: Direct text location
 
     // Navigation properties
     private readonly List<MemoryMedia> _memoryMedia = new();
@@ -22,21 +23,23 @@ public class MemoryItem : BaseAuditableEntity, ISoftDelete
     // Private constructor for EF Core
     private MemoryItem() { }
 
-    public MemoryItem(Guid familyId, string title, string? description = null, DateTime? happenedAt = null, EmotionalTag emotionalTag = EmotionalTag.Neutral)
+    public MemoryItem(Guid familyId, string title, string? description = null, DateTime? happenedAt = null, EmotionalTag emotionalTag = EmotionalTag.Neutral, string? location = null)
     {
         FamilyId = familyId;
         Title = title;
         Description = description;
         HappenedAt = happenedAt;
         EmotionalTag = emotionalTag;
+        Location = location;
     }
 
-    public void Update(string title, string? description, DateTime? happenedAt, EmotionalTag emotionalTag)
+    public void Update(string title, string? description, DateTime? happenedAt, EmotionalTag emotionalTag, string? location)
     {
         Title = title;
         Description = description;
         HappenedAt = happenedAt;
         EmotionalTag = emotionalTag;
+        Location = location;
     }
 
     public void AddMedia(MemoryMedia media)

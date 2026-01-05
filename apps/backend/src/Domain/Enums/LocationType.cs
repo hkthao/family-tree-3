@@ -7,5 +7,6 @@ public enum LocationType
     AncestralHall = 2,
     Cemetery = 3,
     EventLocation = 4,
-    Other = 5
+    Other = 5,
+    Unknown = 6
 }
