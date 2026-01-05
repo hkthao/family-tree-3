@@ -16,5 +16,9 @@ public enum Gender
     /// <summary>
     /// Giới tính Khác.
     /// </summary>
-    Other
+    Other,
+    /// <summary>
+    /// Giới tính không xác định.
+    /// </summary>
+    Unknown
 }

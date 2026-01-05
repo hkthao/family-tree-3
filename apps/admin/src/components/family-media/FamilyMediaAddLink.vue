@@ -6,19 +6,20 @@
       <v-row>
         <v-col cols="12">
           <v-text-field v-model="urlFormData.url" :label="t('familyMedia.addLink.form.url')"
-            :rules="[rules.required, rules.url]" required></v-text-field>
+            :rules="[rules.required, rules.url]" required prepend-inner-icon="mdi-link"></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-text-field v-model="urlFormData.fileName" :label="t('familyMedia.addLink.form.fileName')"
-            :rules="[rules.required]" required></v-text-field>
+            :rules="[rules.required]" required prepend-inner-icon="mdi-file"></v-text-field>
         </v-col>
         <v-col cols="12">
           <v-select v-model="urlFormData.mediaType" :label="t('familyMedia.addLink.form.mediaType')"
-            :items="mediaTypeOptions" item-title="title" item-value="value" clearable></v-select>
+            :items="mediaTypeOptions" item-title="title" item-value="value" clearable
+            prepend-inner-icon="mdi-file-image"></v-select>
         </v-col>
         <v-col cols="12">
           <v-textarea v-model="urlFormData.description" :label="t('familyMedia.addLink.form.description')"
-            rows="3"></v-textarea>
+            rows="3" prepend-inner-icon="mdi-text-box-outline"></v-textarea>
         </v-col>
       </v-row>
       <v-row>

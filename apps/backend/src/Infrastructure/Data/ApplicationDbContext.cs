@@ -59,6 +59,12 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLocation.
     /// </summary>
     public DbSet<FamilyLocation> FamilyLocations => Set<FamilyLocation>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Location.
+    /// </summary>
+    public DbSet<Location> Locations => Set<Location>();
+
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
@@ -127,6 +133,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
     /// </summary>
     public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể LocationLink.
+    /// </summary>
+    public DbSet<LocationLink> LocationLinks => Set<LocationLink>();
 
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

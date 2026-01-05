@@ -11,9 +11,9 @@ public class FamilyLocationSearchQuerySpecification : Specification<FamilyLocati
         {
             var lowerSearchQuery = searchTerm.ToLower(); // Convert search term to lowercase
 
-            Query.Where(l => l.Name.ToLower().Contains(lowerSearchQuery) || // Convert Name to lowercase
-                             (l.Description != null && l.Description.ToLower().Contains(lowerSearchQuery)) || // Convert Description to lowercase
-                             (l.Address != null && l.Address.ToLower().Contains(lowerSearchQuery))); // Convert Address to lowercase
+            Query.Where(l => l.Location.Name.ToLower().Contains(lowerSearchQuery) || // Convert Name to lowercase
+                             (l.Location.Description != null && l.Location.Description.ToLower().Contains(lowerSearchQuery)) || // Convert Description to lowercase
+                             (l.Location.Address != null && l.Location.Address.ToLower().Contains(lowerSearchQuery))); // Convert Address to lowercase
         }
     }
 }

@@ -5,6 +5,8 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
+using backend.Domain.Entities; // NEW: Added for Location and LocationLink entities
+using backend.Domain.Enums; // NEW: Added for RefType enum
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
@@ -86,6 +88,55 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             entity.Code // Pass the existing code, as it's not updated via this command input
         );
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
+
+        // --- Handle LocationLink ---
+        var existingLocationLink = await _context.LocationLinks
+            .FirstOrDefaultAsync(ll => ll.RefId == entity.Id.ToString() && ll.RefType == RefType.Family && ll.LinkType == LocationLinkType.General, cancellationToken); // NEW: Add LinkType to query
+
+        if (request.LocationId.HasValue)
+        {
+            var location = await _context.Locations.FindAsync([request.LocationId.Value], cancellationToken);
+            if (location == null)
+            {
+                return Result<Guid>.Failure($"Location with ID {request.LocationId.Value} not found.", ErrorSources.NotFound);
+            }
+
+            if (existingLocationLink == null)
+            {
+                // Create new link
+                var newLocationLink = LocationLink.Create(
+                    entity.Id.ToString(),
+                    RefType.Family,
+                    "Family Location", // Default description for Family Location Link
+                    request.LocationId.Value,
+                    LocationLinkType.General // NEW: Specify LinkType for family
+                );
+                _context.LocationLinks.Add(newLocationLink);
+            }
+            else
+            {
+                // Update existing link if the location ID has changed
+                if (existingLocationLink.LocationId != request.LocationId.Value)
+                {
+                    existingLocationLink.Update(
+                        existingLocationLink.RefId,
+                        existingLocationLink.RefType,
+                        existingLocationLink.Description,
+                        request.LocationId.Value,
+                        LocationLinkType.General // NEW: Specify LinkType for family
+                    );
+                }
+            }
+        }
+        else // request.LocationId is null
+        {
+            if (existingLocationLink != null)
+            {
+                // Remove existing link if LocationId is now null
+                _context.LocationLinks.Remove(existingLocationLink);
+            }
+        }
+        // --- End Handle LocationLink ---
 
         // --- Update FamilyUsers ---
         // Clear all existing family users

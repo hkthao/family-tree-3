@@ -35,19 +35,15 @@ public class GetFamilyLocationByIdQueryHandlerTests : TestBase
 
     private FamilyLocation CreateTestFamilyLocation(Guid familyId, Guid locationId, string name)
     {
-        return new FamilyLocation
-        {
-            Id = locationId,
-            FamilyId = familyId,
-            Name = name,
-            Description = "Test Description",
-            Latitude = 1.0,
-            Longitude = 1.0,
-            Address = "Test Address",
-            LocationType = LocationType.Homeland,
-            Accuracy = LocationAccuracy.Exact,
-            Source = LocationSource.UserSelected
-        };
+        var location = new Location(name, "Test Description", 1.0, 1.0, "Test Address", LocationType.Homeland, LocationAccuracy.Exact, LocationSource.UserSelected);
+        SetPrivateProperty(location, "Id", locationId);
+        _context.Locations.Add(location); // Explicitly add Location to context
+        _context.SaveChanges(); // Save changes to ensure location has an Id from context if not set manually
+
+        var familyLocation = new FamilyLocation(familyId, location.Id);
+        SetPrivateProperty(familyLocation, "Location", location);
+        SetPrivateProperty(familyLocation, "Id", locationId); // Set FamilyLocation Id to match locationId for the query
+        return familyLocation;
     }
 
     [Fact]
@@ -72,7 +68,7 @@ public class GetFamilyLocationByIdQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().Be(locationId);
-        result.Value.Name.Should().Be(existingLocation.Name);
+        result.Value.Location.Name.Should().Be(existingLocation.Location.Name);
         result.Value.FamilyId.Should().Be(familyId);
     }
 

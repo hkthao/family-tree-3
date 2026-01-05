@@ -15,11 +15,11 @@
       <div v-show="expanded">
         <v-card-text class="pa-0">
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable
                 data-testid="member-gender-filter" />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.fatherId"
                 :label="t('member.search.father')"
@@ -27,7 +27,7 @@
                 data-testid="member-father-filter"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.motherId"
                 :label="t('member.search.mother')"
@@ -35,7 +35,7 @@
                 data-testid="member-mother-filter"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.husbandId"
                 :label="t('member.search.husband')"
@@ -43,7 +43,7 @@
                 data-testid="member-husband-filter"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.wifeId"
                 :label="t('member.search.wife')"

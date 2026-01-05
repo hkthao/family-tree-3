@@ -18,7 +18,8 @@
           t('userSettings.preferences.language')
         }}</VListSubheader>
         <v-select v-model="preferencesForm.language" :items="languageOptions"
-          :label="t('userSettings.preferences.language')" item-title="text" item-value="value"></v-select>
+          :label="t('userSettings.preferences.language')" item-title="text" item-value="value"
+          prepend-inner-icon="mdi-translate"></v-select>
       </v-col>
     </v-row>
 

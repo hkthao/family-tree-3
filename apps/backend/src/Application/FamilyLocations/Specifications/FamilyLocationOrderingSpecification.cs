@@ -13,37 +13,37 @@ public class FamilyLocationOrderingSpecification : Specification<FamilyLocation>
             {
                 case "name":
                     if (sortOrder?.ToLower() == "desc")
-                        Query.OrderByDescending(l => l.Name);
+                        Query.OrderByDescending(l => l.Location.Name);
                     else
-                        Query.OrderBy(l => l.Name);
+                        Query.OrderBy(l => l.Location.Name);
                     break;
                 case "locationtype":
                     if (sortOrder?.ToLower() == "desc")
-                        Query.OrderByDescending(l => l.LocationType);
+                        Query.OrderByDescending(l => l.Location.LocationType);
                     else
-                        Query.OrderBy(l => l.LocationType);
+                        Query.OrderBy(l => l.Location.LocationType);
                     break;
                 case "accuracy":
                     if (sortOrder?.ToLower() == "desc")
-                        Query.OrderByDescending(l => l.Accuracy);
+                        Query.OrderByDescending(l => l.Location.Accuracy);
                     else
-                        Query.OrderBy(l => l.Accuracy);
+                        Query.OrderBy(l => l.Location.Accuracy);
                     break;
 
                 case "source":
                     if (sortOrder?.ToLower() == "desc")
-                        Query.OrderByDescending(l => l.Source);
+                        Query.OrderByDescending(l => l.Location.Source);
                     else
-                        Query.OrderBy(l => l.Source);
+                        Query.OrderBy(l => l.Location.Source);
                     break;
                 default:
-                    Query.OrderBy(l => l.Name); // Default sort
+                    Query.OrderBy(l => l.Location.Name); // Default sort
                     break;
             }
         }
         else
         {
-            Query.OrderBy(l => l.Name); // Default sort
+            Query.OrderBy(l => l.Location.Name); // Default sort
         }
     }
 }

@@ -1,10 +1,12 @@
 <template>
-  <v-dialog v-model="locationDrawerStore.drawer" @click:outside="locationDrawerStore.closeDrawer" max-width="800">
-    <v-card v-if="locationDrawerStore.drawer" :elevation="0">
-      <v-card-title class="text-h5 text-uppercase text-center">
-        {{ t('familyLocation.list.title') }}
-      </v-card-title>
-      <v-card-text>
+  <BaseCrudDrawer :class="cssClass" :model-value="props.modelValue" @update:model-value="emit('update:modelValue', $event)"
+    @close="emit('update:modelValue', false)" :title="t('familyLocation.list.title')" data-testid="location-drawer">
+    <v-tabs class="ma-4" v-model="tab" align-tabs="start" color="primary">
+      <v-tab value="search">{{ t('common.searchAndSelect') }}</v-tab>
+      <v-tab value="create" :disabled="!canCreateLocation">{{ t('common.createNew') }}</v-tab>
+    </v-tabs>
+    <v-window v-model="tab">
+      <v-window-item class="pa-4" value="search">
         <v-text-field v-model="searchQuery" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
           hide-details class="mb-4"></v-text-field>
 
@@ -18,35 +20,58 @@
         <v-list v-else>
           <template v-for="(location, index) in familyLocations" :key="location.id">
             <v-list-item @click="handleSelectLocation(location)" link prepend-icon="mdi-map-marker">
-              <v-list-item-title>{{ location.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ location.address || location.description }}</v-list-item-subtitle>
+              <v-list-item-title>{{ location.location.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ location.location.address || location.location.description
+              }}</v-list-item-subtitle>
             </v-list-item>
             <v-divider v-if="index < familyLocations.length - 1"></v-divider>
           </template>
         </v-list>
         <v-pagination v-if="totalItems > itemsPerPage" v-model="page" :length="Math.ceil(totalItems / itemsPerPage)"
           rounded="circle" class="mt-4"></v-pagination>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="grey" @click="locationDrawerStore.closeDrawer">{{ t('common.close') }}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </v-window-item>
+      <v-window-item value="create" :disabled="!canCreateLocation">
+        <FamilyLocationAddView v-if="canCreateLocation" :family-id="familyId as string" @saved="handleLocationAdded"
+          @close="handleCloseFamilyLocationAddView" />
+        <v-alert v-else type="info" class="mt-4">{{ t('familyLocation.messages.noFamilyIdForCreation') }}</v-alert>
+      </v-window-item>
+    </v-window>
+  </BaseCrudDrawer>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'; // Import watch
 import { useI18n } from 'vue-i18n';
-// BaseCrudDrawer is no longer needed
-// import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue'; 
-import { useLocationDrawerStore } from '@/stores/locationDrawer.store';
 import { useFamilyLocationSearch } from '@/composables/family-location/useFamilyLocationSearch';
 import type { FamilyLocation } from '@/types';
-import { toRef } from 'vue'; // Import toRef
+import FamilyLocationAddView from '@/views/family-location/FamilyLocationAddView.vue';
+import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
+
+interface LocationDrawerProps {
+  modelValue: boolean; // Controls dialog visibility
+  familyId?: string | null; // Optional FamilyId for filtering locations
+  cssClass?: string | null; // Optional CSS class for the drawer
+}
+
+const props = defineProps<LocationDrawerProps>();
+const emit = defineEmits(['update:modelValue', 'selectLocation']); // Emits for visibility and selection
 
 const { t } = useI18n();
-const locationDrawerStore = useLocationDrawerStore();
-const familyIdRef = toRef(locationDrawerStore, 'initialFamilyId'); // Make it a reactive ref
+
+const tab = ref<string | null>(null); // Controls the active tab
+
+const canCreateLocation = computed(() => {
+  return typeof props.familyId === 'string' && props.familyId.length > 0;
+});
+
+// Watch for changes in canCreateLocation and switch tab if necessary
+watch(canCreateLocation, (newVal) => {
+  if (!newVal && tab.value === 'create') {
+    tab.value = 'search'; // Switch to search tab if create is no longer allowed
+  }
+});
+
+const currentFamilyId = computed(() => props.familyId ?? null); // Re-introduce computed property
 
 const {
   familyLocations,
@@ -55,9 +80,21 @@ const {
   searchQuery,
   page,
   itemsPerPage,
-} = useFamilyLocationSearch(familyIdRef); // Pass the reactive ref
+  refetch, // Inject refetch
+} = useFamilyLocationSearch(currentFamilyId); // Use currentFamilyId
+
+const handleLocationAdded = () => {
+  tab.value = 'search'; // Switch to search tab
+  refetch(); // Reload data
+  // emit('update:modelValue', false); // Do not close the drawer
+};
+
+const handleCloseFamilyLocationAddView = () => {
+  emit('update:modelValue', false); // Close the dialog when FamilyLocationAddView emits close
+};
 
 const handleSelectLocation = (location: FamilyLocation) => {
-  locationDrawerStore.confirmSelection(location);
+  emit('selectLocation', location);
+  emit('update:modelValue', false); // Close dialog after selection
 };
 </script>

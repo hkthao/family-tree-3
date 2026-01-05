@@ -27,7 +27,7 @@ public class GetEventsByMemberIdQueryHandler(
     {
         // Apply EventAccessSpecification to filter events based on user's access
         IQueryable<Event> eventsQuery = _context.Events
-            .Include(e => e.EventMembers)
+            .Include(e => e.EventMembers).ThenInclude(em => em.Member)
             .Where(e => e.EventMembers.Any(em => em.MemberId == request.MemberId));
 
         eventsQuery = eventsQuery.WithSpecification(new EventAccessSpecification(_authorizationService.IsAdmin(), _user.UserId));

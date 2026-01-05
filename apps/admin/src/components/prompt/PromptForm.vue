@@ -3,21 +3,25 @@
     <v-row>
       <v-col cols="12">
         <v-text-field v-model="formData.code" :label="t('prompt.form.code')" :rules="rules.code"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-code-input"></v-text-field>
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-code-input"
+          prepend-inner-icon="mdi-code-braces"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-text-field v-model="formData.title" :label="t('prompt.form.title')" :rules="rules.title"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-title-input"></v-text-field>
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-title-input"
+          prepend-inner-icon="mdi-format-title"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-textarea v-model="formData.content" :label="t('prompt.form.content')" :auto-grow="true" :rules="rules.content"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-content-input"></v-textarea>
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-content-input"
+          prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
       <v-col cols="12">
         <v-textarea 
         :rows="2"
         v-model="formData.description" :label="t('prompt.form.description')" :rules="rules.description"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-description-input"></v-textarea>
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" data-testid="prompt-description-input"
+          prepend-inner-icon="mdi-text-box-multiple-outline"></v-textarea>
       </v-col>
     </v-row>
   </v-form>

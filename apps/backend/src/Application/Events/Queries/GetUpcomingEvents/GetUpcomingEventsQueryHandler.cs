@@ -15,7 +15,7 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
 
     public async Task<Result<List<EventDto>>> Handle(GetUpcomingEventsQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<Domain.Entities.Event> eventsQuery = _context.Events;
+        IQueryable<Domain.Entities.Event> eventsQuery = _context.Events.Include(e => e.EventMembers).ThenInclude(em => em.Member);
 
         // Handle unauthenticated user first, return empty list
         if (!_user.IsAuthenticated || _user.UserId == Guid.Empty)

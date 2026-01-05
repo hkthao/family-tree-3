@@ -207,4 +207,37 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerId1 && fu.Role == FamilyRole.Viewer);
         createdFamily.FamilyUsers.Should().Contain(fu => fu.UserId == viewerId2 && fu.Role == FamilyRole.Viewer);
     }
+
+    [Fact]
+    public async Task Handle_ShouldCreateFamilyWithLocationLink_WhenLocationIdIsProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _currentUserMock.Setup(x => x.UserId).Returns(userId);
+
+        var locationId = Guid.NewGuid();
+        var command = new CreateFamilyCommand
+        {
+            Name = "Family with Location",
+            Description = "A family linked to a location",
+            LocationId = locationId,
+            Visibility = "Private"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == result.Value);
+        var locationLink = await _context.LocationLinks
+                                        .FirstOrDefaultAsync(ll => ll.RefId == createdFamily!.Id.ToString() && ll.RefType == RefType.Family);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        createdFamily.Should().NotBeNull();
+        locationLink.Should().NotBeNull();
+        locationLink!.LocationId.Should().Be(locationId);
+        locationLink.RefType.Should().Be(RefType.Family);
+        locationLink.RefId.Should().Be(createdFamily!.Id.ToString());
+    }
 }

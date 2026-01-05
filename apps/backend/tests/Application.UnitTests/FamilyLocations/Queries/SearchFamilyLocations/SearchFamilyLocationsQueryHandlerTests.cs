@@ -1,3 +1,4 @@
+using System.Reflection; // Added for reflection-based property setting
 using backend.Application.Common.Interfaces; // Add this using statement
 using backend.Application.FamilyLocations; // For FamilyLocationDto
 using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
@@ -34,32 +35,31 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         return family;
     }
 
-    private FamilyLocation CreateTestFamilyLocation(Guid familyId, Guid locationId, string name, LocationType type, LocationSource source, string? description = null, string? address = null)
+    private (FamilyLocation FamilyLocation, Location Location) CreateTestFamilyLocation(Guid familyId, Guid locationId, string name, LocationType type, LocationSource source, string? description = null, string? address = null)
     {
-        return new FamilyLocation
-        {
-            Id = locationId,
-            FamilyId = familyId,
-            Name = name,
-            Description = description,
-            Latitude = 1.0,
-            Longitude = 1.0,
-            Address = address,
-            LocationType = type,
-            Accuracy = LocationAccuracy.Exact,
-            Source = source
-        };
+        var location = new Location(name, description ?? "Default Description", 1.0, 1.0, address ?? "Default Address", type, LocationAccuracy.Exact, source);
+        SetPrivateProperty(location, "Id", locationId);
+
+        var familyLocation = new FamilyLocation(familyId, location.Id);
+        SetPrivateProperty(familyLocation, "Location", location);
+        SetPrivateProperty(familyLocation, "Id", Guid.NewGuid());
+        return (familyLocation, location);
     }
 
-    private async Task SeedData(params FamilyLocation[] locations)
+    private async Task SeedData(params (FamilyLocation FamilyLocation, Location Location)[] familyLocationsWithDetails)
     {
-        foreach (var loc in locations)
+        foreach (var (familyLocation, location) in familyLocationsWithDetails)
         {
-            if (await _context.Families.FindAsync(loc.FamilyId) == null)
+            if (await _context.Families.FindAsync(familyLocation.FamilyId) == null)
             {
-                await _context.Families.AddAsync(CreateTestFamily(loc.FamilyId, $"Family{loc.FamilyId.ToString().Substring(0, 4)}", $"F{loc.FamilyId.ToString().Substring(0, 4)}"));
+                await _context.Families.AddAsync(CreateTestFamily(familyLocation.FamilyId, $"Family{familyLocation.FamilyId.ToString().Substring(0, 4)}", $"F{familyLocation.FamilyId.ToString().Substring(0, 4)}"));
             }
-            await _context.FamilyLocations.AddAsync(loc);
+            // Add Location first if it's not already tracked
+            if (_context.Entry(location).State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+            {
+                await _context.Locations.AddAsync(location);
+            }
+            await _context.FamilyLocations.AddAsync(familyLocation);
         }
         await _context.SaveChangesAsync();
     }
@@ -84,8 +84,8 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Items.Should().HaveCount(2);
         result.Value.TotalItems.Should().Be(2);
-        result.Value.Items.Should().Contain(dto => dto.Id == loc1.Id);
-        result.Value.Items.Should().Contain(dto => dto.Id == loc2.Id);
+        result.Value.Items.Should().Contain(dto => dto.Id == loc1.FamilyLocation.Id);
+        result.Value.Items.Should().Contain(dto => dto.Id == loc2.FamilyLocation.Id);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.Id);
+        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.FamilyLocation.Id);
         result.Value.TotalItems.Should().Be(1);
     }
 
@@ -127,7 +127,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.Id);
+        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.FamilyLocation.Id);
         result.Value.TotalItems.Should().Be(1);
     }
 
@@ -148,7 +148,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.Id);
+        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.FamilyLocation.Id);
         result.Value.TotalItems.Should().Be(1);
     }
 
@@ -170,7 +170,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.Id);
+        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.FamilyLocation.Id);
         result.Value.TotalItems.Should().Be(1);
     }
 
@@ -191,7 +191,7 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.Id);
+        result.Value!.Items.Should().ContainSingle(dto => dto.Id == loc1.FamilyLocation.Id);
         result.Value.TotalItems.Should().Be(1);
     }
 
@@ -215,8 +215,8 @@ public class SearchFamilyLocationsQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Items.Should().HaveCount(2);
         result.Value.TotalItems.Should().Be(3);
-        result.Value.Items.First().Name.Should().Be("Alpha");
-        result.Value.Items.Last().Name.Should().Be("Beta");
+        result.Value.Items.First().Location.Name.Should().Be("Alpha");
+        result.Value.Items.Last().Location.Name.Should().Be("Beta");
     }
 
     [Fact]

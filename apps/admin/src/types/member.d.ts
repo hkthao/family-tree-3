@@ -22,6 +22,9 @@ export interface MemberDto {
   nickname?: string; // New
   placeOfBirth?: string; // New (replaces address)
   placeOfDeath?: string; // New (replaces address)
+  birthLocationId?: string | null; // Added
+  deathLocationId?: string | null; // Added
+  residenceLocationId?: string | null; // Added
   phone?: string; // New
   email?: string; // New
   address?: string; // New

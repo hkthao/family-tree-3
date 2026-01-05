@@ -48,6 +48,7 @@ const mockEventService: IEventService = {
   getByIds: vi.fn() as Mock,
   exportEvents: vi.fn() as Mock,
   importEvents: vi.fn() as Mock,
+  getEventsByMemberId: vi.fn() as Mock, // Add this new method
 };
 
 const mockDateAdapter = {
@@ -118,6 +119,7 @@ describe('useEventCalendar', () => {
     solarDate: new Date('2024-01-20T12:00:00.000Z'),
     repeatRule: RepeatRule.None,
     isPrivate: false,
+    eventMemberIds: [], // Added
   };
 
   beforeEach(() => {

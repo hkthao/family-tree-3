@@ -10,7 +10,7 @@ public class FamilyLocationByLocationTypeSpecification : Specification<FamilyLoc
     {
         if (locationType.HasValue)
         {
-            Query.Where(l => l.LocationType == locationType.Value);
+            Query.Where(l => l.Location.LocationType == locationType.Value);
         }
     }
 }

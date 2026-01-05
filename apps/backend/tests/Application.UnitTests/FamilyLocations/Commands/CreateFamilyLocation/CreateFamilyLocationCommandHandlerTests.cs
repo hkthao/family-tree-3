@@ -44,14 +44,14 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = familyId,
-            Name = "Home",
-            Description = "Our first home",
-            Latitude = 10.0,
-            Longitude = 20.0,
-            Address = "123 Main St",
+            LocationName = "Home",
+            LocationDescription = "Our first home",
+            LocationLatitude = 10.0,
+            LocationLongitude = 20.0,
+            LocationAddress = "123 Main St",
             LocationType = LocationType.Homeland,
-            Accuracy = LocationAccuracy.Exact,
-            Source = LocationSource.UserSelected
+            LocationAccuracy = LocationAccuracy.Exact,
+            LocationSource = LocationSource.UserSelected
         };
 
         // Act
@@ -64,8 +64,8 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var createdLocation = await _context.FamilyLocations.FindAsync(result.Value);
         createdLocation.Should().NotBeNull();
         createdLocation!.FamilyId.Should().Be(command.FamilyId);
-        createdLocation.Name.Should().Be(command.Name);
-        createdLocation.LocationType.Should().Be(command.LocationType);
+        createdLocation.Location.Name.Should().Be(command.LocationName);
+        createdLocation.Location.LocationType.Should().Be(command.LocationType);
 
         // Verify that the domain event was added
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(
@@ -80,14 +80,14 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = Guid.Empty, // Invalid FamilyId
-            Name = "", // Invalid Name
-            Description = "A description",
-            Latitude = 10.0,
-            Longitude = 20.0,
-            Address = "123 Main St",
+            LocationName = "", // Invalid Name
+            LocationDescription = "A description",
+            LocationLatitude = 10.0,
+            LocationLongitude = 20.0,
+            LocationAddress = "123 Main St",
             LocationType = LocationType.Homeland,
-            Accuracy = LocationAccuracy.Exact,
-            Source = LocationSource.UserSelected
+            LocationAccuracy = LocationAccuracy.Exact,
+            LocationSource = LocationSource.UserSelected
         };
 
         // Act
@@ -99,7 +99,7 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         // Assert
         validationResult.IsValid.Should().BeFalse();
         validationResult.Errors.Should().Contain(e => e.PropertyName == nameof(CreateFamilyLocationCommand.FamilyId));
-        validationResult.Errors.Should().Contain(e => e.PropertyName == nameof(CreateFamilyLocationCommand.Name));
+        validationResult.Errors.Should().Contain(e => e.PropertyName == nameof(CreateFamilyLocationCommand.LocationName));
     }
 
     [Fact]
@@ -119,14 +119,14 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = familyId,
-            Name = "Park",
-            Description = "Local park",
-            Latitude = 30.0,
-            Longitude = 40.0,
-            Address = "Park Ave",
+            LocationName = "Park",
+            LocationDescription = "Local park",
+            LocationLatitude = 30.0,
+            LocationLongitude = 40.0,
+            LocationAddress = "Park Ave",
             LocationType = LocationType.EventLocation, // Changed from PublicPlace
-            Accuracy = LocationAccuracy.Approximate,  // Changed from Street
-            Source = LocationSource.UserSelected   // Changed from UserGenerated
+            LocationAccuracy = LocationAccuracy.Approximate,  // Changed from Street
+            LocationSource = LocationSource.UserSelected   // Changed from UserGenerated
         };
 
         // Act
@@ -153,7 +153,7 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = familyId,
-            Name = "Unauthorized Location"
+            LocationName = "Unauthorized Location"
         };
 
         // Act
@@ -183,7 +183,7 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = familyId,
-            Name = "Forbidden Location"
+            LocationName = "Forbidden Location"
         };
 
         // Act
@@ -209,7 +209,7 @@ public class CreateFamilyLocationCommandHandlerTests : TestBase
         var command = new CreateFamilyLocationCommand
         {
             FamilyId = nonExistentFamilyId,
-            Name = "Location for Non-existent Family"
+            LocationName = "Location for Non-existent Family"
         };
 
         // Act

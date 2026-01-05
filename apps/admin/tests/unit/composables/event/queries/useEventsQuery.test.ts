@@ -23,6 +23,7 @@ const mockEventService: EventServiceAdapter = {
   getByIds: vi.fn() as Mock,
   exportEvents: vi.fn() as Mock,
   importEvents: vi.fn() as Mock,
+  getEventsByMemberId: vi.fn() as Mock, // Add this new method
 };
 
 describe('useEventsQuery', () => {
@@ -38,7 +39,7 @@ describe('useEventsQuery', () => {
     repeatRule: RepeatRule.None,
     description: 'A test description',
     color: '#FF0000',
-    relatedMemberIds: ['member1'],
+    eventMemberIds: ['member1'], // Changed from relatedMemberIds
   };
 
   const mockPaginatedEvents: Paginated<EventDto> = {

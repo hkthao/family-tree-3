@@ -20,6 +20,7 @@ public class GetAllEventsByFamilyIdQueryHandler : IRequestHandler<GetAllEventsBy
     public async Task<Result<List<EventDto>>> Handle(GetAllEventsByFamilyIdQuery request, CancellationToken cancellationToken)
     {
         var events = await _context.Events
+            .Include(e => e.EventMembers).ThenInclude(em => em.Member)
             .Where(e => e.FamilyId == request.FamilyId)
             .OrderBy(e => e.SolarDate)
             .ToListAsync(cancellationToken);

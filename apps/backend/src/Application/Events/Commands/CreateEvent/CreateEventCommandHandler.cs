@@ -7,10 +7,11 @@ using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can create events
@@ -76,6 +77,19 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         }
 
         _context.Events.Add(entity);
+
+        // Handle LocationLink
+        if (request.LocationId.HasValue)
+        {
+            var locationLink = LocationLink.Create(
+                entity.Id.ToString(), // RefId is EventId
+                RefType.Event,        // RefType is Event
+                request.Location ?? string.Empty,         // Description from Location
+                request.LocationId.Value,
+                LocationLinkType.General // Specify LinkType for event
+            );
+            _context.LocationLinks.Add(locationLink);
+        }
 
         entity.AddDomainEvent(new Domain.Events.Events.EventCreatedEvent(entity));
 

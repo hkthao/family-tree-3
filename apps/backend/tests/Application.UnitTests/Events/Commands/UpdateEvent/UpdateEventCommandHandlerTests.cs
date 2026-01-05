@@ -8,6 +8,7 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using MediatR; // Added
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -17,12 +18,14 @@ namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 public class UpdateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<IMediator> _mediatorMock; // Added
     private readonly UpdateEventCommandHandler _handler;
 
     public UpdateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object);
+        _mediatorMock = new Mock<IMediator>(); // Added
+        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Modified
     }
 
     [Fact]

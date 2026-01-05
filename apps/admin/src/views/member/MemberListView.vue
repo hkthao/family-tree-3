@@ -3,48 +3,39 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
     <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()" :read-only="props.readOnly"
-      :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete"
-      :is-exporting="isExporting"
-      :is-importing="isImporting"
-      :can-perform-actions="true"
-      :on-export="exportMembers"
+      @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
+      :read-only="props.readOnly" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete"
+      :is-exporting="isExporting" :is-importing="isImporting" :can-perform-actions="true" :on-export="exportMembers"
       :on-import-click="() => importDialog = true">
     </MemberList>
     <!-- Edit Member Drawer -->
     <BaseCrudDrawer v-model="editDrawer" @close="handleMemberClosed">
       <MemberEditView v-if="selectedItemId && editDrawer" :member-id="selectedItemId" @close="handleMemberClosed"
-        @saved="handleMemberSaved"
-        :allow-save="allowEdit" />
+        @saved="handleMemberSaved" :allow-save="allowEdit" />
     </BaseCrudDrawer>
     <!-- Add Member Drawer -->
     <BaseCrudDrawer v-model="addDrawer" @close="handleMemberClosed">
-      <MemberAddView v-if="addDrawer" :family-id="props.familyId"
-        @close="handleMemberClosed" @saved="handleMemberSaved"
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMemberClosed" @saved="handleMemberSaved"
         :allow-save="allowAdd" />
     </BaseCrudDrawer>
-        <!-- Detail Member Drawer -->
-        <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-          <MemberDetailTabsView v-if="selectedItemId && detailDrawer"
-            :member-id="selectedItemId"
-            @close="handleDetailClosed"
-            @edit-member="openEditDrawer"
-            @member-deleted="handleMemberSaved"
-            :read-only="props.readOnly"
-          />
-        </BaseCrudDrawer>
-    
-        <!-- Import Dialog -->
-        <BaseImportDialog
-          v-model="importDialog"
-          :title="t('member.import.title')"
-          :label="t('member.import.selectFile')"
-          :loading="isImporting"
-          :max-file-size="5 * 1024 * 1024"
-          @update:model-value="importDialog = $event"
-          @import="triggerImport"
-        />
-      </div>
+    <!-- Event Detail Drawer -->
+    <BaseCrudDrawer v-model="eventDetailDrawer" @close="handleEventClosed">
+      <EventDetailView v-if="selectedEventId && eventDetailDrawer" :event-id="selectedEventId"
+        @close="handleEventClosed" />
+    </BaseCrudDrawer>
+
+    <!-- Detail Member Drawer -->
+    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
+      <MemberDetailTabsView v-if="selectedItemId && detailDrawer" :member-id="selectedItemId"
+        @close="handleDetailClosed" @edit-member="openEditDrawer" @member-deleted="handleMemberSaved"
+        @show-event-detail="handleShowEventDetail" :read-only="props.readOnly" />
+    </BaseCrudDrawer>
+
+    <!-- Import Dialog -->
+    <BaseImportDialog v-model="importDialog" :title="t('member.import.title')" :label="t('member.import.selectFile')"
+      :loading="isImporting" :max-file-size="5 * 1024 * 1024" @update:model-value="importDialog = $event"
+      @import="triggerImport" />
+  </div>
 </template>
 <script setup lang="ts">
 import { MemberSearch, MemberList } from '@/components/member';
@@ -52,6 +43,7 @@ import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composable
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailTabsView from '@/views/member/MemberDetailTabsView.vue';
+import EventDetailView from '@/views/event/EventDetailView.vue'; // New import
 import type { MemberFilter } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { ref, watch, computed } from 'vue';
@@ -62,7 +54,6 @@ import { useQueryClient } from '@tanstack/vue-query'; // Import useQueryClient
 import { useAuth } from '@/composables'; // Import useAuth
 import BaseImportDialog from '@/components/common/BaseImportDialog.vue'; // New import
 import { useMemberImportExport } from '@/composables/member/useMemberImportExport'; // New import
-
 interface MemberListViewProps {
   familyId: string;
   readOnly?: boolean;
@@ -71,36 +62,29 @@ const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const queryClient = useQueryClient(); // Initialize useQueryClient
 const { state } = useAuth(); // Import useAuth
-
 const importDialog = ref(false); // New ref
-
+const eventDetailDrawer = ref(false); // New ref for event detail drawer
+const selectedEventId = ref<string | null>(null); // New ref for selected event ID
 const { isExporting, isImporting, exportMembers, importMembers } = useMemberImportExport(ref(props.familyId));
-
 const allowAdd = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 const allowEdit = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
 const allowDelete = computed(() => !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId)));
-
 const {
   state: { searchQuery, paginationOptions, filters },
   actions: { setSearchQuery, setFilters, setPage, setItemsPerPage, setSortBy },
 } = useMemberDataManagement(props.familyId);
-
 const { data: membersData, isLoading: isLoadingMembers, refetch } = useMembersQuery(paginationOptions, filters);
 const members = ref(membersData.value?.items || []);
 const totalItems = ref(membersData.value?.totalItems || 0);
-
 watch(membersData, (newData) => {
   members.value = newData?.items || [];
   totalItems.value = newData?.totalItems || 0;
 }, { deep: true });
-
 watch(() => props.familyId, (newFamilyId) => {
   setFilters({ familyId: newFamilyId });
   refetch();
 });
-
 const { mutate: deleteMember, isPending: isDeletingMember } = useDeleteMemberMutation();
-
 const {
   addDrawer,
   editDrawer,
@@ -109,18 +93,14 @@ const {
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
-  closeAllDrawers,
-} = useCrudDrawer<string>(); 
-
+} = useCrudDrawer<string>();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-
 const triggerImport = async (file: File) => {
   if (!file) {
     showSnackbar(t('member.messages.noFileSelected'), 'warning');
     return;
   }
-
   const reader = new FileReader();
   reader.onload = async (e) => {
     try {
@@ -134,16 +114,13 @@ const triggerImport = async (file: File) => {
   };
   reader.readAsText(file);
 };
-
 const handleFilterUpdate = (newFilters: MemberFilter) => {
   setFilters(newFilters);
 };
-
 const handleSearchUpdate = (search: string) => {
-  const processedSearch = removeDiacritics(search); 
+  const processedSearch = removeDiacritics(search);
   setSearchQuery(processedSearch); // setSearchQuery handles debounce and updates filters
 };
-
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
@@ -153,7 +130,6 @@ const handleListOptionsUpdate = (options: {
   setItemsPerPage(options.itemsPerPage);
   setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
-
 const confirmDelete = async (memberId: string) => {
   const memberToDelete = members.value.find(m => m.id === memberId);
   if (!memberToDelete) {
@@ -171,7 +147,6 @@ const confirmDelete = async (memberId: string) => {
     handleDeleteConfirm(memberToDelete.id);
   }
 };
-
 const handleDeleteConfirm = (memberId: string) => {
   deleteMember(memberId, {
     onSuccess: () => {
@@ -183,23 +158,24 @@ const handleDeleteConfirm = (memberId: string) => {
     },
   });
 };
-
 const handleMemberSaved = () => {
-  closeAllMemberDrawers(); 
+  addDrawer.value = false;
+  editDrawer.value = false;
   queryClient.invalidateQueries({ queryKey: ['members', 'list'] }); // Invalidate list to refetch
 };
-
 const handleMemberClosed = () => {
-  closeAllMemberDrawers(); 
+  addDrawer.value = false;
+  editDrawer.value = false;
 };
-
 const handleDetailClosed = () => {
-  closeAllMemberDrawers(); 
+  detailDrawer.value = false;
 };
-
-const closeAllMemberDrawers = () => {
-  closeAllDrawers();
+const handleShowEventDetail = (eventId: string) => {
+  selectedEventId.value = eventId;
+  eventDetailDrawer.value = true;
 };
-
+const handleEventClosed = () => {
+  selectedEventId.value = null;
+};
 // Initial load is handled by useMembersQuery, no need for onMounted load
 </script>

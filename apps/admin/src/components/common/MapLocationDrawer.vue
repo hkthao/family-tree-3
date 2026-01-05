@@ -18,9 +18,3 @@ const handleConfirmSelection = (payload: { coordinates: { latitude: number, long
   mapDrawerStore.confirmSelection(payload.coordinates, payload.location);
 };
 </script>
-
-<style>
-.map-drawer {
-  z-index: 1015 !important;
-}
-</style>

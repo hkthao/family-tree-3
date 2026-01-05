@@ -99,6 +99,7 @@ const mockMemberFaceService: IMemberFaceService = {
   getByIds: vi.fn() as Mock,
   exportMemberFaces: vi.fn() as Mock,
   importMemberFaces: vi.fn() as Mock,
+  getMemberFacesByMemberId: vi.fn() as Mock, // Add this
 };
 
 // Mock queryClient

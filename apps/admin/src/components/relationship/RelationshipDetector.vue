@@ -6,7 +6,7 @@
         <FamilyAutocomplete v-model="selectedFamilyId" :label="t('relationshipDetection.familyLabel')"
           :rules="validationRules.familyId" clearable
           :disabled="!!initialFamilyId"
-          required />
+          required prepend-inner-icon="mdi-home-heart" />
       </v-col>
     </v-row>
     <v-row>
@@ -15,14 +15,14 @@
           :family-id="selectedFamilyId"
           :disabled="!selectedFamilyId"
           :rules="validationRules.memberAId" clearable
-          required />
+          required prepend-inner-icon="mdi-account" />
       </v-col>
       <v-col cols="12" :md="memberColCols">
         <MemberAutocomplete v-model="selectedMemberBId" :label="t('relationshipDetection.memberBLabel')"
           :family-id="selectedFamilyId"
           :disabled="!selectedFamilyId"
           :rules="validationRules.memberBId" clearable
-          required />
+          required prepend-inner-icon="mdi-account" />
       </v-col>
     </v-row>
     <v-row justify="end">

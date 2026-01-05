@@ -21,7 +21,7 @@ public class GetEventsByIdsQueryHandler(IApplicationDbContext context, IMapper m
             return Result<List<EventDto>>.Success(new List<EventDto>());
         }
 
-        var eventsQuery = _context.Events.AsQueryable();
+        var eventsQuery = _context.Events.Include(e => e.EventMembers).ThenInclude(em => em.Member).AsQueryable();
 
         // Apply EventAccessSpecification to filter events based on user's access
         eventsQuery = eventsQuery.WithSpecification(new EventAccessSpecification(_authorizationService.IsAdmin(), _user.UserId));

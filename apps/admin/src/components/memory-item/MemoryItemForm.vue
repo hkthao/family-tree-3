@@ -15,16 +15,18 @@
       <v-col v-if="!props.readOnly" cols="12">
         <VFileUpload :label="t('memoryItem.form.memoryMediaFile')" v-model="newlyUploadedFiles" :accept="acceptedMimeTypes"
           data-testid="memory-item-file-upload" multiple :rules="validationRules.uploadedFiles"
-          :disabled="props.readOnly"></VFileUpload>
+          :disabled="props.readOnly" prepend-inner-icon="mdi-file-upload"></VFileUpload>
       </v-col>
 
       <v-col cols="12">
         <v-text-field v-model="form.title" :label="t('memoryItem.form.title')" :rules="validationRules.title" required
-          data-testid="memory-item-title" :readonly="props.readOnly"></v-text-field>
+          data-testid="memory-item-title" :readonly="props.readOnly"
+          prepend-inner-icon="mdi-format-title"></v-text-field>
       </v-col>
       <v-col cols="12">
         <v-textarea v-model="form.description" :label="t('memoryItem.form.description')" rows="3"
-          data-testid="memory-item-description" :readonly="props.readOnly"></v-textarea>
+          data-testid="memory-item-description" :readonly="props.readOnly"
+          prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
       <v-col cols="12">
         <LocationInputField
@@ -32,6 +34,7 @@
           :label="t('memoryItem.form.location')"
           :family-id="props.familyId"
           :read-only="props.readOnly"
+          prepend-inner-icon="mdi-map-marker"
         ></LocationInputField>
       </v-col>
       <v-col cols="12" md="6">
@@ -42,11 +45,12 @@
       <v-col cols="12" md="6">
         <v-select v-model="form.emotionalTag" :items="emotionalTagOptions" :label="t('memoryItem.form.emotionalTag')"
           :rules="validationRules.emotionalTag" required data-testid="memory-item-emotional-tag" item-title="title"
-          item-value="value" :readonly="props.readOnly"></v-select>
+          item-value="value" :readonly="props.readOnly" prepend-inner-icon="mdi-emoticon"></v-select>
       </v-col>
       <v-col cols="12">
         <MemberAutocomplete :disabled="props.readOnly" v-model="form.personIds" :family-id="props.familyId"
-          :label="t('memoryItem.form.persons')" multiple :read-only="props.readOnly" data-testid="memory-item-persons">
+          :label="t('memoryItem.form.persons')" multiple :read-only="props.readOnly" data-testid="memory-item-persons"
+          prepend-inner-icon="mdi-account-group">
         </MemberAutocomplete>
       </v-col>
     </v-row>

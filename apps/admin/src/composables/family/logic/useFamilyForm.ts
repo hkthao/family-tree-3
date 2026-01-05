@@ -25,6 +25,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         name: props.data.name,
         description: props.data.description || '',
         address: props.data.address || '',
+        locationId: props.data.locationId || null, // Initialize locationId
         avatarUrl: props.data.avatarUrl || '',
         avatarBase64: null,
         visibility: props.data.visibility || FamilyVisibility.Public,
@@ -37,6 +38,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
       name: '',
       description: '',
       address: '',
+      locationId: null, // Initialize locationId for add mode
       avatarUrl: '',
       avatarBase64: null,
       visibility: FamilyVisibility.Public,

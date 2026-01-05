@@ -4,6 +4,7 @@ import type { FamilyLocationFilter, ListOptions, LocationType, LocationSource } 
 export interface FamilyLocationSearchCriteria {
   locationType?: LocationType;
   locationSource?: LocationSource;
+  searchQuery?: string; // Add searchQuery
 }
 
 export const useFamilyLocationDataManagement = (familyId: Ref<string | undefined> | string) => {

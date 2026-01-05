@@ -13,6 +13,7 @@ export interface FamilyDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   familyUsers?: FamilyUser[];
   totalMembers?: number;
@@ -31,6 +32,7 @@ export interface FamilyAddDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   managerIds: string[];
   viewerIds: string[];
@@ -45,6 +47,7 @@ export interface FamilyUpdateDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   managerIds: string[];
   viewerIds: string[];

@@ -25,22 +25,22 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.firstName" :label="t('userSettings.profile.firstName')"
-            :rules="validationRules.firstName"></v-text-field>
+            :rules="validationRules.firstName" prepend-inner-icon="mdi-account"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.lastName" :label="t('userSettings.profile.lastName')"
-            :rules="validationRules.lastName"></v-text-field>
+            :rules="validationRules.lastName" prepend-inner-icon="mdi-account"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')" :disabled="true"
-            :rules="validationRules.email" />
+            :rules="validationRules.email" prepend-inner-icon="mdi-email" />
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field v-model="formData.phone" :label="t('userSettings.profile.phone')"></v-text-field>
+          <v-text-field v-model="formData.phone" :label="t('userSettings.profile.phone')" prepend-inner-icon="mdi-phone"></v-text-field>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field v-model="formData.externalId" :label="t('userSettings.profile.externalId')"
-            disabled></v-text-field>
+            disabled prepend-inner-icon="mdi-card-account-details"></v-text-field>
         </v-col>
       </v-row>
       <v-row>

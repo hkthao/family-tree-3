@@ -1,7 +1,7 @@
 
 export * from './family-dict.d';
 export * from './family.d';
-export * from './familyLocation.d'; // NEW
+export * from './familyLocation.d';
 export * from './base.d'; // NEW
 export * from './member.d';
 export * from './routes.d'; // NEW
@@ -23,6 +23,7 @@ export * from './enums'; // NEW - CalendarType and RepeatRule
 export * from './lunar-date.d'; // NEW - LunarDate interface
 export * from './prompt.d';
 export * from './familyLink.d';
+export * from './location-link.d'; // NEW
 export * from './relationshipDetection.d'; // NEWLY ADDED for relationship detection feature
 export * from './privacyConfiguration.d';
 export * from './apiError.d';

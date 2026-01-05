@@ -22,6 +22,7 @@ const mockEventService: EventServiceAdapter = {
   getByIds: vi.fn(),
   exportEvents: vi.fn(),
   importEvents: vi.fn(),
+  getEventsByMemberId: vi.fn(), // Add this
 };
 
 // Mock queryClient
@@ -41,7 +42,7 @@ describe('useAddEventMutation', () => {
     repeatRule: 0, // RepeatRule.None
     description: 'A test description',
     color: '#FF0000',
-    relatedMemberIds: ['member1'],
+    eventMemberIds: ['member1'], // Changed from relatedMemberIds
   };
   const mockEvent: EventDto = { id: 'event1', ...mockEventData };
 

@@ -6,7 +6,6 @@
     </div>
     <v-alert v-else-if="error" type="error" class="mb-4">{{ error?.message || t('event.errors.load') }}</v-alert>
     <v-list v-else-if="memberEvents && memberEvents.length > 0">
-      {{ console.log('MemberEventsTab - memberEvents:', memberEvents) }}
       <v-list-item v-for="event in memberEvents" :key="event.id" class="mb-2" :title="event.name"
         :subtitle="getEventSubtitle(event)">
         <template v-slot:prepend>
@@ -23,46 +22,28 @@
       </v-list-item>
     </v-list>
     <v-alert v-else type="info" variant="tonal" class="ma-2">{{ t('event.list.noEvents') }}</v-alert>
-
-    <BaseCrudDrawer v-model="detailDrawer" @close="handleDetailClosed">
-      <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed" />
-    </BaseCrudDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberEventsQuery } from '@/composables/event/useMemberEventsQuery';
 import type { EventDto } from '@/types';
 import { format } from 'date-fns';
 import { CalendarType, RepeatRule } from '@/types/enums';
 import { getEventTypeIcon } from '@/composables/utils/eventOptions';
-import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
-import EventDetailView from '@/views/event/EventDetailView.vue';
 
 interface MemberEventsTabProps {
   memberId: string;
 }
 
 const props = defineProps<MemberEventsTabProps>();
+const emit = defineEmits(['show-event-detail']); // Declare the emit
 const { t } = useI18n();
-
 const { data: memberEvents, isLoading, error } = useMemberEventsQuery(props.memberId);
-
-const detailDrawer = ref(false);
-const selectedEventId = ref<string | null>(null);
-
 const showEventDetails = (eventId: string) => {
-  selectedEventId.value = eventId;
-  detailDrawer.value = true;
+  emit('show-event-detail', eventId); // Emit the event
 };
-
-const handleDetailClosed = () => {
-  detailDrawer.value = false;
-  selectedEventId.value = null;
-};
-
 
 
 const getEventSubtitle = (event: EventDto): string => {

@@ -36,29 +36,50 @@ public class ImportFamilyLocationsCommandHandler : IRequestHandler<ImportFamilyL
             return Result<List<FamilyLocationDto>>.Success(new List<FamilyLocationDto>());
         }
 
-        var importedLocations = new List<FamilyLocation>();
+        var importedFamilyLocations = new List<FamilyLocation>();
 
         foreach (var importLocationItemDto in request.Locations)
         {
-            // Kiểm tra xem vị trí đã tồn tại theo tên và FamilyId chưa
-            var existingLocation = await _context.FamilyLocations
-                .FirstOrDefaultAsync(fl => fl.FamilyId == request.FamilyId && fl.Name == importLocationItemDto.Name, cancellationToken);
+            // Kiểm tra xem FamilyLocation đã tồn tại chưa (FamilyId và Location.Name)
+            var existingFamilyLocation = await _context.FamilyLocations
+                .Include(fl => fl.Location)
+                .FirstOrDefaultAsync(fl => fl.FamilyId == request.FamilyId && fl.Location.Name == importLocationItemDto.LocationName, cancellationToken);
 
-            if (existingLocation != null)
+            if (existingFamilyLocation != null)
             {
-                _logger.LogInformation("Vị trí gia đình với tên '{LocationName}' đã tồn tại cho FamilyId {FamilyId}. Bỏ qua nhập.", importLocationItemDto.Name, request.FamilyId);
+                _logger.LogInformation("Vị trí gia đình với tên '{LocationName}' đã tồn tại cho FamilyId {FamilyId}. Bỏ qua nhập.", importLocationItemDto.LocationName, request.FamilyId);
                 continue;
             }
 
-            var newLocation = _mapper.Map<FamilyLocation>(importLocationItemDto);
-            newLocation.FamilyId = request.FamilyId; // Gán FamilyId từ request
-            _context.FamilyLocations.Add(newLocation);
-            importedLocations.Add(newLocation);
+            // Create Location entity
+            var location = new Location(
+                importLocationItemDto.LocationName,
+                importLocationItemDto.LocationDescription,
+                importLocationItemDto.LocationLatitude,
+                importLocationItemDto.LocationLongitude,
+                importLocationItemDto.LocationAddress,
+                importLocationItemDto.LocationType,
+                importLocationItemDto.LocationAccuracy,
+                importLocationItemDto.LocationSource
+            );
+            _context.Locations.Add(location);
+            await _context.SaveChangesAsync(cancellationToken); // Save to get Location.Id
+
+            // Create FamilyLocation entity
+            var newFamilyLocation = new FamilyLocation(request.FamilyId, location.Id);
+            _context.FamilyLocations.Add(newFamilyLocation);
+            importedFamilyLocations.Add(newFamilyLocation);
         }
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        var importedLocationDtos = _mapper.Map<List<FamilyLocationDto>>(importedLocations);
+        // Load the Location for each FamilyLocation to map to DTO
+        foreach (var fl in importedFamilyLocations)
+        {
+            await ((DbContext)_context).Entry(fl).Reference(fl => fl.Location).LoadAsync(cancellationToken);
+        }
+
+        var importedLocationDtos = _mapper.Map<List<FamilyLocationDto>>(importedFamilyLocations);
 
         return Result<List<FamilyLocationDto>>.Success(importedLocationDtos);
     }

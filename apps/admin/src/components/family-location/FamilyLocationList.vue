@@ -30,7 +30,7 @@
     </template>
     <template #item.name="{ item }">
       <span class="text-primary cursor-pointer text-decoration-underline" @click="emit('view', item.id)">
-        {{ item.name }}
+        {{ item.location.name }}
       </span>
     </template>
     <template #item.actions="{ item }">
@@ -92,22 +92,22 @@ const locationSourceMap = computed(
 
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [
-    { title: t('familyLocation.form.name'), key: 'name' },
-    { title: t('familyLocation.form.address'), key: 'address' },
+    { title: t('familyLocation.form.name'), key: 'location.name' },
+    { title: t('familyLocation.form.address'), key: 'location.address' },
     {
       title: t('familyLocation.form.locationType'),
-      key: 'locationType',
-      value: (item: any) => locationTypeMap.value.get(item.locationType),
+      key: 'location.locationType',
+      value: (item: any) => locationTypeMap.value.get(item.location.locationType),
     },
     {
       title: t('familyLocation.form.accuracy'),
-      key: 'accuracy',
-      value: (item: any) => locationAccuracyMap.value.get(item.accuracy),
+      key: 'location.accuracy',
+      value: (item: any) => locationAccuracyMap.value.get(item.location.accuracy),
     },
     {
       title: t('familyLocation.form.source'),
-      key: 'source',
-      value: (item: any) => locationSourceMap.value.get(item.source),
+      key: 'location.source',
+      value: (item: any) => locationSourceMap.value.get(item.location.source),
     },
   ];
 
@@ -117,4 +117,5 @@ const headers = computed<DataTableHeader[]>(() => {
 
   return baseHeaders;
 });
+
 </script>

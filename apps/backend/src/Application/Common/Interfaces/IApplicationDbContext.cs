@@ -50,11 +50,16 @@ public interface IApplicationDbContext
     DbSet<FamilyLocation> FamilyLocations { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Location.
+    /// </summary>
+    DbSet<Location> Locations { get; }
+
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
     DbSet<EventMember> EventMembers { get; }
-
-
+    DbSet<LocationLink> LocationLinks { get; }
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể PrivacyConfiguration.

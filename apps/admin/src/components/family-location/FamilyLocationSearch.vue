@@ -17,6 +17,15 @@
         <v-card-text class="pa-0">
           <v-row>
             <v-col cols="12" md="4">
+              <v-text-field
+                v-model="filters.searchQuery"
+                :label="t('common.search')"
+                clearable
+                hide-details
+                single-line
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
               <v-select
                 v-model="filters.locationType"
                 :items="locationTypeOptions"
@@ -65,6 +74,7 @@ const { t } = useI18n();
 const expanded = ref(false);
 
 const filters = ref<FamilyLocationSearchCriteria>({
+  searchQuery: undefined,
   locationType: undefined,
   locationSource: undefined,
 });

@@ -1,6 +1,9 @@
 <template>
   <v-navigation-drawer v-model="internalModelValue" location="right" temporary :width="width" :scrim="scrim">
-    <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small" class="mx-2 mt-2 btn-close"></v-btn>
+    <v-toolbar  density="compact">
+      <v-btn icon="mdi-close" variant="text" @click="closeDrawer" size="small"></v-btn>
+      <v-toolbar-title  v-if="title" class="text-h6 text-uppercase text-center mr-8">{{ title }}</v-toolbar-title>
+    </v-toolbar>
     <slot></slot>
   </v-navigation-drawer>
 </template>
@@ -12,11 +15,13 @@ interface BaseCrudDrawerProps {
   modelValue: boolean;
   width?: string | number;
   scrim?: boolean;
+  title?: string; // Added title prop
 }
 
 const props = withDefaults(defineProps<BaseCrudDrawerProps>(), {
   width: 750,
   scrim: true,
+  title: '' // Default empty title
 });
 
 const emit = defineEmits(['update:modelValue', 'close']);
@@ -39,10 +44,3 @@ const closeDrawer = () => {
   emit('close');
 };
 </script>
-
-<style scoped>
-.btn-close{
-  position: absolute;
-  z-index: 100;
-}
-</style>

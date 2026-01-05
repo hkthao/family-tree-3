@@ -1,3 +1,4 @@
+using System.Reflection;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
@@ -73,4 +74,21 @@ public abstract class TestBase : IDisposable
     {
         _context.Dispose();
     }
+
+    /// <summary>
+    /// Sử dụng Reflection để set giá trị cho một private property.
+    /// </summary>
+    /// <typeparam name="TEntity">Kiểu của entity chứa property.</typeparam>
+    /// <typeparam name="TProperty">Kiểu của property.</typeparam>
+    /// <param name="entity">Instance của entity.</param>
+    /// <param name="propertyName">Tên của private property.</param>
+    /// <param name="value">Giá trị muốn set.</param>
+    protected static void SetPrivateProperty<TEntity, TProperty>(TEntity entity, string propertyName, TProperty value)
+        where TEntity : class
+    {
+        typeof(TEntity)
+            .GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!
+            .SetValue(entity, value);
+    }
 }
+

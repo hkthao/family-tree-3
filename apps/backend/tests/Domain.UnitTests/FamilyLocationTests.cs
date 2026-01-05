@@ -1,3 +1,4 @@
+using System.Reflection;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -12,38 +13,31 @@ public class FamilyLocationTests
     {
         // Arrange
         var familyId = Guid.NewGuid();
+        var locationId = Guid.NewGuid();
         var name = "Test Location";
         var description = "A description for the test location";
         var latitude = 10.0;
         var longitude = 20.0;
         var address = "123 Test St";
-        var locationType = LocationType.Homeland; var accuracy = LocationAccuracy.Exact;
+        var locationType = LocationType.Homeland;
+        var accuracy = LocationAccuracy.Exact;
         var source = LocationSource.UserSelected;
 
         // Act
-        var familyLocation = new FamilyLocation
-        {
-            FamilyId = familyId,
-            Name = name,
-            Description = description,
-            Latitude = latitude,
-            Longitude = longitude,
-            Address = address,
-            LocationType = locationType,
-            Accuracy = accuracy,
-            Source = source
-        };
+        var location = new Location(name, description, latitude, longitude, address, locationType, accuracy, source);
+        var familyLocation = new FamilyLocation(familyId, locationId);
+        SetPrivateLocationProperty(familyLocation, location);
 
         // Assert
         familyLocation.FamilyId.Should().Be(familyId);
-        familyLocation.Name.Should().Be(name);
-        familyLocation.Description.Should().Be(description);
-        familyLocation.Latitude.Should().Be(latitude);
-        familyLocation.Longitude.Should().Be(longitude);
-        familyLocation.Address.Should().Be(address);
-        familyLocation.LocationType.Should().Be(locationType);
-        familyLocation.Accuracy.Should().Be(accuracy);
-        familyLocation.Source.Should().Be(source);
+        familyLocation.Location.Name.Should().Be(name);
+        familyLocation.Location.Description.Should().Be(description);
+        familyLocation.Location.Latitude.Should().Be(latitude);
+        familyLocation.Location.Longitude.Should().Be(longitude);
+        familyLocation.Location.Address.Should().Be(address);
+        familyLocation.Location.LocationType.Should().Be(locationType);
+        familyLocation.Location.Accuracy.Should().Be(accuracy);
+        familyLocation.Location.Source.Should().Be(source);
     }
 
     [Fact]
@@ -51,20 +45,24 @@ public class FamilyLocationTests
     {
         // Arrange
         var familyId = Guid.NewGuid();
+        var locationId = Guid.NewGuid();
         var name = "Default Location";
         var locationType = LocationType.Grave;
+
         // Act
-        var familyLocation = new FamilyLocation
-        {
-            FamilyId = familyId,
-            Name = name,
-            LocationType = locationType
-        };
+        var location = new Location(name, null, null, null, null, locationType, LocationAccuracy.Estimated, LocationSource.UserSelected);
+        var familyLocation = new FamilyLocation(familyId, locationId);
+        SetPrivateLocationProperty(familyLocation, location);
 
         // Assert
-        familyLocation.Accuracy.Should().Be(LocationAccuracy.Estimated);
-        familyLocation.Source.Should().Be(LocationSource.UserSelected);
+        familyLocation.Location.Accuracy.Should().Be(LocationAccuracy.Estimated);
+        familyLocation.Location.Source.Should().Be(LocationSource.UserSelected);
     }
 
 
+    private void SetPrivateLocationProperty(FamilyLocation familyLocation, Location location)
+    {
+        var propertyInfo = typeof(FamilyLocation).GetProperty("Location");
+        propertyInfo?.SetValue(familyLocation, location);
+    }
 }

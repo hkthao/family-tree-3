@@ -10,7 +10,7 @@ public class FamilyLocationBySourceSpecification : Specification<FamilyLocation>
     {
         if (source.HasValue)
         {
-            Query.Where(l => l.Source == source.Value);
+            Query.Where(l => l.Location.Source == source.Value);
         }
     }
 }

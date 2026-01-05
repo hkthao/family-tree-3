@@ -35,8 +35,7 @@ export * from './prompt/api.prompt.service';
 export * from './familyLink/familyLink.service.interface';
 export * from './familyLink/api.familyLink.service';
 
-export * from './familyLinkRequest/familyLinkRequest.service.interface';
-export * from './familyLinkRequest/api.familyLinkRequest.service';
+
 
 export * from './family-media';
 

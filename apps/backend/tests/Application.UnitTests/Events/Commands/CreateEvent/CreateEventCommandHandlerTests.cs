@@ -1,13 +1,14 @@
-using backend.Application.Common.Constants;
+using backend.Application.Common.Constants; // Added
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.Inputs;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Common; // NEW
+using backend.Domain.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore; // NEW
+using MediatR; // Added
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -16,12 +17,14 @@ namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 public class CreateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<IMediator> _mediatorMock; // Added
     private readonly CreateEventCommandHandler _handler;
 
     public CreateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object);
+        _mediatorMock = new Mock<IMediator>(); // Added
+        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Modified
     }
 
     [Fact]
