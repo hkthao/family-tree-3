@@ -1,11 +1,6 @@
 <template>
   <v-form :disabled="props.readOnly" ref="formRef" @submit.prevent>
     <v-row>
-      <v-col v-if="!props.readOnly" cols="12">
-        <MediaInput v-model="memoryMedia" :family-id="props.familyId" :initialMediaType="MediaType.Image" data-testid="memory-item-media-input" selectionMode="multiple"
-          :disabled="props.readOnly" />
-      </v-col>
-
       <v-col cols="12">
         <v-text-field v-model="form.title" :label="t('memoryItem.form.title')" :rules="validationRules.title" required
           data-testid="memory-item-title" :readonly="props.readOnly"
@@ -17,12 +12,14 @@
           prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
       <v-col cols="12">
-        <LocationInputField v-model:model-value="form.location" v-model:location-id="form.locationId" :label="t('memoryItem.form.location')" :family-id="props.familyId"
-          :read-only="props.readOnly" prepend-inner-icon="mdi-map-marker"></LocationInputField>
+        <LocationInputField v-model:model-value="form.location" v-model:location-id="form.locationId"
+          :label="t('memoryItem.form.location')" :family-id="props.familyId" :read-only="props.readOnly"
+          prepend-inner-icon="mdi-map-marker"></LocationInputField>
       </v-col>
       <v-col cols="12" md="6">
         <VDateInput v-model="form.happenedAt" :label="t('memoryItem.form.happenedAt')"
-          data-testid="memory-item-happened-at" :readonly="props.readOnly" clearable append-inner-icon="mdi-calendar">
+          data-testid="memory-item-happened-at" :readonly="props.readOnly" clearable append-inner-icon="mdi-calendar"
+          :max="todayDate">
         </VDateInput>
       </v-col>
       <v-col cols="12" md="6">
@@ -36,12 +33,17 @@
           prepend-inner-icon="mdi-account-group">
         </MemberAutocomplete>
       </v-col>
+
+      <v-col v-if="!props.readOnly" cols="12">
+        <MediaInput v-model="memoryMedia" :family-id="props.familyId" :initialMediaType="MediaType.Image"
+          data-testid="memory-item-media-input" selectionMode="multiple" :disabled="props.readOnly" />
+      </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { type Ref } from 'vue';
+import { type Ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MediaType, type MemoryItem } from '@/types';
 import { VDateInput } from 'vuetify/labs/VDateInput';
@@ -60,6 +62,14 @@ interface MemoryItemFormProps {
 const props = defineProps<MemoryItemFormProps>();
 
 const { t } = useI18n();
+
+const todayDate = computed(() => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+});
 
 const {
   state: {

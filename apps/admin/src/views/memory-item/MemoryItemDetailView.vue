@@ -14,30 +14,16 @@
       <div v-else-if="memoryItem">
         <PrivacyAlert :is-private="memoryItem.isPrivate" />
 
-        <div v-if="memoryItem.memoryMedia && memoryItem.memoryMedia.length > 0">
+        <div class="mb-4" v-if="memoryItem.memoryMedia && memoryItem.memoryMedia.length > 0">
           <v-carousel cycle :show-arrows="memoryItem.memoryMedia.length > 1" hide-delimiter-background height="500px">
             <v-carousel-item v-for="(media, index) in memoryItem.memoryMedia" :key="index">
               <div class="d-flex fill-height justify-center align-center carousel-content">
                 <v-img
-                  v-if="media.type === 'Image'"
                   :src="media.url"
                   class="carousel-image"
                   max-height="500px"
                   contain
                 ></v-img>
-                <video
-                  v-else-if="media.type === 'Video'"
-                  :src="media.url"
-                  controls
-                  autoplay
-                  loop
-                  class="carousel-video"
-                  max-height="500px"
-                ></video>
-                <div v-else>
-                  <p>{{ t('memoryItem.detail.unsupportedMediaType') }}</p>
-                  <a :href="media.url" target="_blank">{{ media.url }}</a>
-                </div>
               </div>
             </v-carousel-item>
           </v-carousel>
@@ -86,4 +72,21 @@ const { state: { memoryItem, isLoading, error }, actions: { closeView } } = useM
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.carousel-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-image,
+.carousel-video {
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 5px;
+  height: 500px;
+}
+</style>
