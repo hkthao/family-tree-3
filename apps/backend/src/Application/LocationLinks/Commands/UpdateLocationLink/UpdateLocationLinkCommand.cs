@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Application.Common.Models;
+using backend.Domain.Enums;
 
 namespace backend.Application.LocationLinks.Commands.UpdateLocationLink;
 

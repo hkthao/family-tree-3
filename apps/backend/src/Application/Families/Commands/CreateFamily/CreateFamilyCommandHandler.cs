@@ -4,6 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
@@ -81,6 +82,18 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
             {
                 return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
             }
+        }
+
+        // Handle LocationLink
+        if (request.LocationId.HasValue)
+        {
+            var locationLink = LocationLink.Create(
+                entity.Id.ToString(), // RefId is FamilyId
+                RefType.Family,       // RefType is Family
+                string.Empty,         // Description
+                request.LocationId.Value
+            );
+            _context.LocationLinks.Add(locationLink);
         }
 
         await _context.SaveChangesAsync(cancellationToken); // Save avatar URL and family users

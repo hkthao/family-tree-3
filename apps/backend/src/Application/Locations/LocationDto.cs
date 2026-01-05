@@ -1,6 +1,6 @@
-using backend.Domain.Enums;
-using backend.Domain.Entities;
 using backend.Application.Common.Mappings;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.Locations;
 

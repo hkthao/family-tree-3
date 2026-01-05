@@ -7,5 +7,6 @@ public record CreateFamilyCommand : FamilyInput, IRequest<Result<Guid>>
 {
     public IList<Guid> ManagerIds { get; set; } = [];
     public IList<Guid> ViewerIds { get; set; } = [];
+    public Guid? LocationId { get; set; }
 }
 

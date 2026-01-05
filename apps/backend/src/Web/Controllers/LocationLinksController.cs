@@ -1,3 +1,5 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Security; // Specify ILogger to avoid ambiguity
 using backend.Application.LocationLinks.Commands.CreateLocationLink;
 using backend.Application.LocationLinks.Commands.DeleteLocationLink;
 using backend.Application.LocationLinks.Commands.UpdateLocationLink;
@@ -5,8 +7,6 @@ using backend.Application.LocationLinks.Queries.GetLocationLinkById;
 using backend.Application.LocationLinks.Queries.GetLocationLinks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using backend.Application.Common.Constants;
-using backend.Application.Common.Security; // Specify ILogger to avoid ambiguity
 
 namespace FamilyTree.Web.Controllers;
 

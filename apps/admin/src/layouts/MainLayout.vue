@@ -23,6 +23,7 @@ onMounted(async () => {
 
 <template>
   <v-app>
+    <MapLocationDrawer />
     <Sidebar v-model="drawer" :current-user="currentUser" />
     <TopBar @toggle-drawer="drawer = !drawer" :current-user="currentUser" />
     <v-main>
@@ -32,7 +33,6 @@ onMounted(async () => {
     </v-main>
     <GlobalSnackbar />
     <ConfirmDialog />
-    <MapLocationDrawer />
     <MediaPickerDrawer />
   </v-app>
 </template>
