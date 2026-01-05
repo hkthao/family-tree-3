@@ -46,8 +46,7 @@
             <MemberEventsTab :member-id="props.memberId" @show-event-detail="handleShowEventDetail" />
           </v-window-item>
           <v-window-item value="locations">
-            <!-- Content for Locations tab -->
-            Locations Tab Content
+            <MemberLocationsTab :member-id="props.memberId" @show-location-detail="handleShowLocationDetail" />
           </v-window-item>
           <v-window-item value="voice">
             <!-- Content for Voice tab -->
@@ -66,6 +65,7 @@ import { useI18n } from 'vue-i18n';
 import { useMemberQuery, useDeleteMemberMutation } from '@/composables';
 import MemberInformationTab from './MemberInformationTab.vue'; // Corrected import path
 import MemberFacesTab from './MemberFacesTab.vue';
+import MemberLocationsTab from './MemberLocationsTab.vue'; // New import
 import MemberEventsTab from './MemberEventsTab.vue'; // New import
 import TreeChart from '@/components/family/TreeChart.vue'; // Import TreeChart
 
@@ -77,8 +77,7 @@ interface MemberDetailTabsViewProps {
 const props = withDefaults(defineProps<MemberDetailTabsViewProps>(), {
   readOnly: false, // Set a default value
 });
-const emit = defineEmits(['close', 'member-deleted', 'edit-member', 'show-event-detail']);
-
+const emit = defineEmits(['close', 'member-deleted', 'edit-member', 'show-event-detail', 'show-location-detail']); // Added show-location-detail
 
 const { t } = useI18n();
 const tab = ref('information');
@@ -100,6 +99,11 @@ const handleEditMember = (memberId: string) => {
 
 const handleShowEventDetail = (eventId: string) => {
   emit('show-event-detail', eventId);
+};
+
+const handleShowLocationDetail = (locationId: string) => {
+  // TODO: Implement logic to show location detail, e.g., open a dialog or navigate
+  console.log('Show location detail for:', locationId);
 };
 
 </script>

@@ -16,7 +16,7 @@ using backend.Application.FamilyLocations;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries;
 using backend.Application.Identity.UserProfiles.Queries;
-using backend.Application.LocationLinks;
+using backend.Application.LocationLinks.Queries;
 using backend.Application.Locations;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
 using backend.Application.MemberFaces.Common;

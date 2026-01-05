@@ -23,6 +23,7 @@ export * from './enums'; // NEW - CalendarType and RepeatRule
 export * from './lunar-date.d'; // NEW - LunarDate interface
 export * from './prompt.d';
 export * from './familyLink.d';
+export * from './location-link.d'; // NEW
 export * from './relationshipDetection.d'; // NEWLY ADDED for relationship detection feature
 export * from './privacyConfiguration.d';
 export * from './apiError.d';

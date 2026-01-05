@@ -1,3 +1,4 @@
+using backend.Application.Locations;
 using backend.Domain.Enums; // Add this
 
 namespace backend.Application.LocationLinks.Queries;
@@ -13,17 +14,4 @@ public record LocationLinkDto
 
     // Navigation properties can be mapped if needed, e.g., Location details
     public LocationDto? Location { get; init; } // Assuming LocationDto exists or will be created
-}
-
-public record LocationDto
-{
-    public Guid Id { get; init; }
-    public string Name { get; init; } = null!;
-    public string? Description { get; init; }
-    public double? Latitude { get; init; }
-    public double? Longitude { get; init; }
-    public string? Address { get; init; }
-    public string LocationType { get; init; } = null!;
-    public string Accuracy { get; init; } = null!;
-    public string Source { get; init; } = null!;
 }

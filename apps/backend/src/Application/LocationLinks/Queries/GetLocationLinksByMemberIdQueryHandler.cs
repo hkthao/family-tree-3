@@ -38,11 +38,16 @@ public class GetLocationLinksByMemberIdQueryHandler : IRequestHandler<GetLocatio
             .ToListAsync(cancellationToken);
 
         // Get LocationLinks related to these events
-        var eventLocationLinks = await _context.LocationLinks
+        var rawEventLocationLinks = await _context.LocationLinks
             .Include(ll => ll.Location)
-            .Where(ll => eventIds.Contains(Guid.Parse(ll.RefId)) && ll.RefType == RefType.Event)
-            .ProjectTo<LocationLinkDto>(_mapper.ConfigurationProvider)
+            .Where(ll => ll.RefType == RefType.Event)
             .ToListAsync(cancellationToken);
+
+        var eventLocationLinks = rawEventLocationLinks
+            .Where(ll => Guid.TryParse(ll.RefId, out var parsedGuid) && eventIds.Contains(parsedGuid))
+            .AsQueryable() // Convert back to IQueryable for ProjectTo extension method
+            .ProjectTo<LocationLinkDto>(_mapper.ConfigurationProvider)
+            .ToList();
 
         // 3. Get FamilyId of the member
         var familyId = member.FamilyId.ToString();
