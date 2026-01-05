@@ -1,6 +1,6 @@
 import { watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
+import type { AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
 import { LocationAccuracy, LocationSource, LocationType } from '@/types';
 import { getLocationTypeOptions, getLocationAccuracyOptions, getLocationSourceOptions } from '@/composables/utils/familyLocationOptions';
 

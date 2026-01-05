@@ -56,8 +56,7 @@ import ListToolbar from '@/components/common/ListToolbar.vue';
 import type { DataTableHeader } from 'vuetify'; // Import DataTableHeader
 import {
   getLocationTypeOptions,
-  getLocationAccuracyOptions,
-  getLocationSourceOptions,
+
 } from '@/composables/utils/familyLocationOptions';
 
 interface FamilyLocationListProps {
@@ -83,12 +82,7 @@ const { t } = useI18n();
 const locationTypeMap = computed(
   () => new Map(getLocationTypeOptions(t).map((option) => [option.value, option.title])),
 );
-const locationAccuracyMap = computed(
-  () => new Map(getLocationAccuracyOptions(t).map((option) => [option.value, option.title])),
-);
-const locationSourceMap = computed(
-  () => new Map(getLocationSourceOptions(t).map((option) => [option.value, option.title])),
-);
+
 
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [
@@ -99,16 +93,7 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'location.locationType',
       value: (item: any) => locationTypeMap.value.get(item.location.locationType),
     },
-    {
-      title: t('familyLocation.form.accuracy'),
-      key: 'location.accuracy',
-      value: (item: any) => locationAccuracyMap.value.get(item.location.accuracy),
-    },
-    {
-      title: t('familyLocation.form.source'),
-      key: 'location.source',
-      value: (item: any) => locationSourceMap.value.get(item.location.source),
-    },
+
   ];
 
   if (props.allowEdit || props.allowDelete) {

@@ -20,13 +20,7 @@ const ACCEPTED_MIME_TYPES = [
   'application/pdf',
 ].join(',');
 
-const getMediaTypeFromMimeType = (mimeType: string): MediaType => {
-  if (mimeType.startsWith('image/')) return MediaType.Image;
-  if (mimeType.startsWith('video/')) return MediaType.Video;
-  if (mimeType.startsWith('audio/')) return MediaType.Audio;
-  if (mimeType === 'application/pdf') return MediaType.Document;
-  return MediaType.Other;
-};
+
 
 // --- Conversion Functions ---
 // Converts MemoryMedia to FamilyMedia (for internal use and MediaInput)

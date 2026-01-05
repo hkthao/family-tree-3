@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
-import type { FamilyLocation, AddFamilyLocationDto } from '@/types';
+import type { AddFamilyLocationDto } from '@/types';
 
 export const useAddFamilyLocationMutation = () => {
   const queryClient = useQueryClient();
