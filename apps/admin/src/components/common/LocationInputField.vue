@@ -38,8 +38,8 @@ const openLocationPicker = () => {
 };
 
 const handleLocationSelected = (location: FamilyLocation) => {
-  if (location && location.address) {
-    updateAddress(location.address);
+  if (location && location.location.address) {
+    updateAddress(location.location.address);
   }
 };
 </script>

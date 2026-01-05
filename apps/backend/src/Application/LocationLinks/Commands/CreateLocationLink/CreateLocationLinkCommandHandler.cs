@@ -19,7 +19,7 @@ public class CreateLocationLinkCommandHandler : IRequestHandler<CreateLocationLi
             request.RefId,
             request.RefType,
             request.Description,
-            request.FamilyLocationId
+            request.LocationId
         );
 
         _context.LocationLinks.Add(entity);

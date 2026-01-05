@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useServices } from '@/plugins/services.plugin';
-import type { FamilyLocation } from '@/types';
+import type { FamilyLocation, UpdateFamilyLocationDto } from '@/types';
 
 export const useUpdateFamilyLocationMutation = () => {
   const queryClient = useQueryClient();
   const { familyLocation: familyLocationService } = useServices();
   return useMutation({
-    mutationFn: async (updatedFamilyLocation: FamilyLocation) => {
+    mutationFn: async (updatedFamilyLocation: UpdateFamilyLocationDto) => {
       const response = await familyLocationService.update(updatedFamilyLocation);
       if (response.ok) {
         return response.value;

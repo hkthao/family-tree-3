@@ -1,40 +1,43 @@
 import { watch, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyLocation } from '@/types';
+import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
 import { LocationAccuracy, LocationSource, LocationType } from '@/types';
 import { getLocationTypeOptions, getLocationAccuracyOptions, getLocationSourceOptions } from '@/composables/utils/familyLocationOptions';
 
 interface UseFamilyLocationFormLogicProps {
-  initialFamilyLocationData?: FamilyLocation | null; // Allow null for initial data
+  initialFamilyLocationData?: (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) | null;
   familyId: string;
 }
 
 export function useFamilyLocationFormLogic(props: UseFamilyLocationFormLogicProps) {
   const { t } = useI18n();
 
-  const defaultForm: Omit<FamilyLocation, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'> = {
-    familyId: props.familyId,
-    name: '',
-    description: undefined,
-    latitude: undefined,
-    longitude: undefined,
-    address: undefined,
+  // The form state should directly reflect the structure of Add/Update DTOs
+  const defaultForm: Omit<AddFamilyLocationDto & Partial<UpdateFamilyLocationDto>, 'familyId'> & { id?: string } = {
+    locationName: '',
+    locationDescription: undefined,
+    locationLatitude: undefined,
+    locationLongitude: undefined,
+    locationAddress: undefined,
     locationType: LocationType.Other,
-    accuracy: LocationAccuracy.Estimated,
-    source: LocationSource.UserSelected,
+    locationAccuracy: LocationAccuracy.Estimated,
+    locationSource: LocationSource.UserSelected,
   };
 
-  const form = reactive<FamilyLocation>(
-    props.initialFamilyLocationData ? { ...props.initialFamilyLocationData } : { ...defaultForm, id: '' },
-  );
+  const initializeForm = (data?: (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) | null): (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) => {
+    if (data) {
+      return {
+        ...data,
+      };
+    }
+    return { ...defaultForm, familyId: props.familyId };
+  };
+
+  const form = reactive<AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }>(initializeForm(props.initialFamilyLocationData));
 
   // Watch for changes in initialFamilyLocationData and update the form
   watch(() => props.initialFamilyLocationData, (newData) => {
-    if (newData) {
-      Object.assign(form, newData);
-    } else {
-      Object.assign(form, { ...defaultForm, id: '' });
-    }
+    Object.assign(form, initializeForm(newData));
   });
 
   const locationTypeOptions = getLocationTypeOptions(t);

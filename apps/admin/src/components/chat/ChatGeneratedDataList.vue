@@ -49,9 +49,9 @@
           <template v-slot:prepend>
             <v-icon>mdi-map-marker</v-icon>
           </template>
-          <v-list-item-title>{{ location.name }}</v-list-item-title>
+          <v-list-item-title>{{ location.location.name }}</v-list-item-title>
           <v-list-item-subtitle>
-            {{ location.address || `Lat: ${location.latitude}, Lng: ${location.longitude}` }}
+            {{ location.location.address || `Lat: ${location.location.latitude}, Lng: ${location.location.longitude}` }}
           </v-list-item-subtitle>
           <template v-slot:append>
             <v-btn icon size="small" variant="text" @click="emit('add-generated-location', location)">

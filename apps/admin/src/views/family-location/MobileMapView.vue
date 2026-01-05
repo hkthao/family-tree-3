@@ -22,11 +22,13 @@ const mapMarkers = ref<MapMarker[]>([]);
 
 interface FamilyLocationData {
   id: string;
-  latitude: number;
-  longitude: number;
-  name: string;
-  description?: string;
-  locationType?: LocationType; // Add locationType
+  location: {
+    latitude: number;
+    longitude: number;
+    name: string;
+    description?: string;
+    locationType?: LocationType;
+  };
 }
 
 onMounted(() => {
@@ -35,11 +37,11 @@ onMounted(() => {
     const locations: FamilyLocationData[] = (window as any).familyLocationsData;
     mapMarkers.value = locations.map(loc => ({
       id: loc.id,
-      lng: loc.longitude,
-      lat: loc.latitude,
-      title: loc.name,
-      description: loc.description,
-      locationType: loc.locationType || LocationType.Other,
+      lng: loc.location.longitude,
+      lat: loc.location.latitude,
+      title: loc.location.name,
+      description: loc.location.description,
+      locationType: loc.location.locationType || LocationType.Other,
     }));
   } else {
     console.warn('No familyLocationsData found on window object.');

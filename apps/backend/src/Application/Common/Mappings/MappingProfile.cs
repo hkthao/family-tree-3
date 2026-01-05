@@ -13,9 +13,7 @@ using backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyLinks.Queries;
 using backend.Application.FamilyLocations;
-using backend.Application.FamilyLocations.Commands.CreateFamilyLocation;
-using backend.Application.FamilyLocations.Commands.ImportFamilyLocations;
-using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
+using backend.Application.Locations;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Identity.Queries;
 using backend.Application.Identity.UserProfiles.Queries;
@@ -115,8 +113,9 @@ public class MappingProfile : Profile
         CreateMap<FamilyLink, FamilyLinkDto>()
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
+        CreateMap<Location, LocationDto>();
         CreateMap<LocationLink, LocationLinkDto>()
-            .ForMember(dest => dest.FamilyLocationName, opt => opt.MapFrom(src => src.FamilyLocation.Name));
+            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Name));
         CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))
@@ -126,10 +125,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MediaLinks, opt => opt.MapFrom(src => src.MediaLinks));
         CreateMap<MediaLink, MediaLinkDto>()
             .ForMember(dest => dest.RefName, opt => opt.Ignore());
-        CreateMap<FamilyLocation, FamilyLocationDto>();
-        CreateMap<CreateFamilyLocationCommand, FamilyLocation>();
-        CreateMap<UpdateFamilyLocationCommand, FamilyLocation>();
-        CreateMap<ImportFamilyLocationItemDto, FamilyLocation>();
+        CreateMap<FamilyLocation, FamilyLocationDto>()
+            .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location));
         CreateMap<MemoryItem, MemoryItemDto>()
             .ForMember(dest => dest.MemoryMedia, opt => opt.MapFrom(src => src.MemoryMedia))
             .ForMember(dest => dest.MemoryPersons, opt => opt.MapFrom(src => src.MemoryPersons));

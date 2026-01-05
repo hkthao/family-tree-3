@@ -59,6 +59,12 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyLocation.
     /// </summary>
     public DbSet<FamilyLocation> FamilyLocations => Set<FamilyLocation>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Location.
+    /// </summary>
+    public DbSet<Location> Locations => Set<Location>();
+
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>

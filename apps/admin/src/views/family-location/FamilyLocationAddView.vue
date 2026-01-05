@@ -5,7 +5,11 @@
     </v-card-title>
     <v-progress-linear v-if="isAddingFamilyLocation" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
-      <FamilyLocationForm ref="familyLocationFormRef" :family-id="props.familyId" :initial-family-location-data="props.initialLocationData" />
+      <FamilyLocationForm
+        ref="familyLocationFormRef"
+        :family-id="props.familyId"
+        :initial-family-location-data="transformedInitialLocationData"
+      />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -23,10 +27,10 @@
 
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
-import type { FamilyLocation } from '@/types';
+import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types'; // Import FamilyLocation and DTOs
 import { useGlobalSnackbar } from '@/composables';
 import { useAddFamilyLocationMutation } from '@/composables';
 import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
@@ -45,16 +49,36 @@ const mapDrawerStore = useMapLocationDrawerStore();
 
 const { mutate: addFamilyLocation, isPending: isAddingFamilyLocation } = useAddFamilyLocationMutation();
 
+// Transform initialLocationData to the format expected by FamilyLocationForm
+const transformedInitialLocationData = computed<
+  (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) | null
+>(() => {
+  if (!props.initialLocationData) return null;
+  return {
+    id: props.initialLocationData.id,
+    familyId: props.initialLocationData.familyId,
+    locationId: props.initialLocationData.locationId,
+    locationName: props.initialLocationData.location.name,
+    locationDescription: props.initialLocationData.location.description,
+    locationLatitude: props.initialLocationData.location.latitude,
+    locationLongitude: props.initialLocationData.location.longitude,
+    locationAddress: props.initialLocationData.location.address,
+    locationType: props.initialLocationData.location.locationType,
+    locationAccuracy: props.initialLocationData.location.accuracy,
+    locationSource: props.initialLocationData.location.source,
+  };
+});
+
 const handleAddFamilyLocation = async () => {
   if (!familyLocationFormRef.value) return;
   const isValid = await familyLocationFormRef.value.validate();
   if (!isValid) {
     return;
   }
-  const familyLocationData = familyLocationFormRef.value.getFormData();
+  const familyLocationData = familyLocationFormRef.value.getFormData() as AddFamilyLocationDto; // Ensure correct type for mutation
   familyLocationData.familyId = props.familyId;
 
-  addFamilyLocation(familyLocationData as Omit<FamilyLocation, 'id'>, {
+  addFamilyLocation(familyLocationData, {
     onSuccess: () => {
       showSnackbar(t('familyLocation.messages.addSuccess'), 'success');
       emit('saved');

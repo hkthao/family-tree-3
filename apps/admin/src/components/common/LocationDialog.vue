@@ -18,8 +18,8 @@
         <v-list v-else>
           <template v-for="(location, index) in familyLocations" :key="location.id">
             <v-list-item @click="handleSelectLocation(location)" link prepend-icon="mdi-map-marker">
-              <v-list-item-title>{{ location.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ location.address || location.description }}</v-list-item-subtitle>
+              <v-list-item-title>{{ location.location.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ location.location.address || location.location.description }}</v-list-item-subtitle>
             </v-list-item>
             <v-divider v-if="index < familyLocations.length - 1"></v-divider>
           </template>

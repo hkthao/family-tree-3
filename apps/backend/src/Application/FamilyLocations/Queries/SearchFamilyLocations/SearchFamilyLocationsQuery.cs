@@ -35,6 +35,7 @@ public class SearchFamilyLocationsQueryHandler(IApplicationDbContext context, IM
         var isAdmin = _authorizationService.IsAdmin();
 
         var query = _context.FamilyLocations
+            .Include(e=>e.Location)
             .Include(l => l.Family) // Include Family for access control
             .ThenInclude(f => f!.FamilyUsers) // Include FamilyUsers for access control
             .AsNoTracking()

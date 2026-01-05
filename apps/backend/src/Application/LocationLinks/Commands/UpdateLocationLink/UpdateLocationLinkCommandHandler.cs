@@ -27,7 +27,7 @@ public class UpdateLocationLinkCommandHandler : IRequestHandler<UpdateLocationLi
             request.RefId,
             request.RefType,
             request.Description,
-            request.FamilyLocationId
+            request.LocationId
         );
 
         await _context.SaveChangesAsync(cancellationToken);

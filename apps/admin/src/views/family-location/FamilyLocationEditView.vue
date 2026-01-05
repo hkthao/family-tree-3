@@ -7,10 +7,10 @@
       color="primary"></v-progress-linear>
     <v-card-text>
       <FamilyLocationForm ref="familyLocationFormRef" v-if="familyLocation"
-        :initial-family-location-data="familyLocation" :family-id="familyLocation.familyId" />
+        :initial-family-location-data="transformedFamilyLocationData" :family-id="familyLocation.familyId" />
       <v-alert v-else-if="familyLocationError" type="error" class="mt-4">{{
         familyLocationError.message || t('familyLocation.messages.notFound')
-        }}</v-alert>
+      }}</v-alert>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -20,7 +20,7 @@
       </v-btn>
       <v-btn color="grey" @click="closeForm" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
         t('common.cancel')
-        }}</v-btn>
+      }}</v-btn>
       <v-btn color="primary" @click="handleUpdateFamilyLocation" data-testid="save-family-location-button"
         :loading="isUpdatingFamilyLocation" :disabled="isLoadingFamilyLocation || isUpdatingFamilyLocation">{{
           t('common.save') }}</v-btn>
@@ -31,10 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRef } from 'vue';
+import { ref, toRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyLocationForm } from '@/components/family-location';
-import type { FamilyLocation } from '@/types';
+import type { AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types'; // Import FamilyLocation and DTOs
 import { useGlobalSnackbar } from '@/composables';
 import { useFamilyLocationQuery, useUpdateFamilyLocationMutation } from '@/composables';
 import { useMapLocationDrawerStore } from '@/stores/mapLocationDrawer.store';
@@ -60,6 +60,26 @@ const {
 } = useFamilyLocationQuery(familyLocationIdRef);
 const { mutate: updateFamilyLocation, isPending: isUpdatingFamilyLocation } = useUpdateFamilyLocationMutation();
 
+// Transform FamilyLocation data to the format expected by FamilyLocationForm
+const transformedFamilyLocationData = computed<
+  (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) | null
+>(() => {
+  if (!familyLocation.value) return null;
+  return {
+    id: familyLocation.value.id,
+    familyId: familyLocation.value.familyId,
+    locationId: familyLocation.value.locationId,
+    locationName: familyLocation.value.location.name,
+    locationDescription: familyLocation.value.location.description,
+    locationLatitude: familyLocation.value.location.latitude,
+    locationLongitude: familyLocation.value.location.longitude,
+    locationAddress: familyLocation.value.location.address,
+    locationType: familyLocation.value.location.locationType,
+    locationAccuracy: familyLocation.value.location.accuracy,
+    locationSource: familyLocation.value.location.source,
+  };
+});
+
 const handleUpdateFamilyLocation = async () => {
   if (!familyLocationFormRef.value) return;
   const isValid = await familyLocationFormRef.value.validate();
@@ -68,7 +88,7 @@ const handleUpdateFamilyLocation = async () => {
     return;
   }
 
-  const familyLocationData = familyLocationFormRef.value.getFormData() as FamilyLocation;
+  const familyLocationData = familyLocationFormRef.value.getFormData() as UpdateFamilyLocationDto; // Ensure correct type for mutation
   if (!familyLocationData.id) {
     showSnackbar(t('familyLocation.messages.saveError'), 'error');
     return;
@@ -100,6 +120,5 @@ const handleOpenMapPicker = async () => {
     console.error('Map location selection cancelled or failed:', error);
   }
 };
-
 
 </script>

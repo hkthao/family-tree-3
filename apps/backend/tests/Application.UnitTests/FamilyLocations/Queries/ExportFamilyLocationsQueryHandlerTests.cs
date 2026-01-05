@@ -38,9 +38,24 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = _testFamilyId, Name = "Location 1" });
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = _testFamilyId, Name = "Location 2" });
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = Guid.NewGuid(), Name = "Other Family Location" }); // Other family
+        var location1 = new Location("Location 1", "Desc 1", 1.0, 1.0, "Addr 1", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocation1 = new FamilyLocation(_testFamilyId, location1.Id);
+        SetPrivateProperty(familyLocation1, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocation1, "Location", location1);
+
+        var location2 = new Location("Location 2", "Desc 2", 2.0, 2.0, "Addr 2", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocation2 = new FamilyLocation(_testFamilyId, location2.Id);
+        SetPrivateProperty(familyLocation2, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocation2, "Location", location2);
+
+        var locationOther = new Location("Other Family Location", "Desc Other", 3.0, 3.0, "Addr Other", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocationOther = new FamilyLocation(Guid.NewGuid(), locationOther.Id); // Other family
+        SetPrivateProperty(familyLocationOther, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocationOther, "Location", locationOther);
+
+        await _context.FamilyLocations.AddAsync(familyLocation1);
+        await _context.FamilyLocations.AddAsync(familyLocation2);
+        await _context.FamilyLocations.AddAsync(familyLocationOther);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportFamilyLocationsQuery(_testFamilyId);
@@ -52,8 +67,8 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(2);
-        result.Value.Should().Contain(fl => fl.Name == "Location 1");
-        result.Value.Should().Contain(fl => fl.Name == "Location 2");
+        result.Value.Should().Contain(fl => fl.Location.Name == "Location 1");
+        result.Value.Should().Contain(fl => fl.Location.Name == "Location 2");
     }
 
     [Fact]
@@ -63,8 +78,18 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(x => x.CanManageFamily(_testFamilyId)).Returns(true);
 
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = _testFamilyId, Name = "Location 1" });
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = _testFamilyId, Name = "Location 2" });
+        var location1 = new Location("Location 1", "Desc 1", 1.0, 1.0, "Addr 1", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocation1 = new FamilyLocation(_testFamilyId, location1.Id);
+        SetPrivateProperty(familyLocation1, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocation1, "Location", location1);
+
+        var location2 = new Location("Location 2", "Desc 2", 2.0, 2.0, "Addr 2", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocation2 = new FamilyLocation(_testFamilyId, location2.Id);
+        SetPrivateProperty(familyLocation2, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocation2, "Location", location2);
+
+        await _context.FamilyLocations.AddAsync(familyLocation1);
+        await _context.FamilyLocations.AddAsync(familyLocation2);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportFamilyLocationsQuery(_testFamilyId);
@@ -76,6 +101,8 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(2);
+        result.Value.Should().Contain(fl => fl.Location.Name == "Location 1");
+        result.Value.Should().Contain(fl => fl.Location.Name == "Location 2");
     }
 
     [Fact]
@@ -103,7 +130,12 @@ public class ExportFamilyLocationsQueryHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(x => x.CanManageFamily(_testFamilyId)).Returns(false);
 
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { Id = Guid.NewGuid(), FamilyId = _testFamilyId, Name = "Location 1" });
+        var location1 = new Location("Location 1", "Desc 1", 1.0, 1.0, "Addr 1", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var familyLocation1 = new FamilyLocation(_testFamilyId, location1.Id);
+        SetPrivateProperty(familyLocation1, "Id", Guid.NewGuid());
+        SetPrivateProperty(familyLocation1, "Location", location1);
+
+        await _context.FamilyLocations.AddAsync(familyLocation1);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportFamilyLocationsQuery(_testFamilyId);

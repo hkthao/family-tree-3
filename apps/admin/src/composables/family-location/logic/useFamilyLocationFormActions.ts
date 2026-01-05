@@ -1,24 +1,24 @@
-import { LocationSource, type FamilyLocation } from '@/types';
+import { LocationSource, type AddFamilyLocationDto, type UpdateFamilyLocationDto } from '@/types';
 
 interface UseFamilyLocationFormActionsProps {
-  form: FamilyLocation;
+  form: AddFamilyLocationDto | (UpdateFamilyLocationDto & { id?: string });
 }
 
 export function useFamilyLocationFormActions(props: UseFamilyLocationFormActionsProps) {
 
-  const getFormData = (): FamilyLocation => {
+  const getFormData = (): AddFamilyLocationDto | (UpdateFamilyLocationDto & { id?: string }) => {
     return { ...props.form };
   };
 
   const setCoordinates = (latitude: number, longitude: number) => {
-    props.form.latitude = latitude;
-    props.form.longitude = longitude;
-    props.form.source = LocationSource.UserSelected; // Set source to UserSelected when coordinates are chosen from map
+    props.form.locationLatitude = latitude;
+    props.form.locationLongitude = longitude;
+    props.form.locationSource = LocationSource.UserSelected; // Set source to UserSelected when coordinates are chosen from map
   };
 
   const setAddress = (address: string) => {
-    props.form.address = address;
-    props.form.source = LocationSource.UserSelected; // Also set source to UserSelected when address is chosen from map
+    props.form.locationAddress = address;
+    props.form.locationSource = LocationSource.UserSelected; // Also set source to UserSelected when address is chosen from map
   };
 
   return {

@@ -31,8 +31,8 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
 
         var importItems = new List<ImportFamilyLocationItemDto>
         {
-            new() { Name = "Location A", Description = "Desc A", LocationType = Domain.Enums.LocationType.Homeland, Accuracy = Domain.Enums.LocationAccuracy.Exact, Source = Domain.Enums.LocationSource.UserSelected },
-            new() { Name = "Location B", Description = "Desc B", LocationType = Domain.Enums.LocationType.EventLocation, Accuracy = Domain.Enums.LocationAccuracy.Estimated, Source = Domain.Enums.LocationSource.Geocoded }
+            new() { LocationName = "Location A", LocationDescription = "Desc A", LocationType = Domain.Enums.LocationType.Homeland, LocationAccuracy = Domain.Enums.LocationAccuracy.Exact, LocationSource = Domain.Enums.LocationSource.UserSelected },
+            new() { LocationName = "Location B", LocationDescription = "Desc B", LocationType = Domain.Enums.LocationType.EventLocation, LocationAccuracy = Domain.Enums.LocationAccuracy.Estimated, LocationSource = Domain.Enums.LocationSource.Geocoded }
         };
         var command = new ImportFamilyLocationsCommand(_testFamilyId, importItems);
 
@@ -45,9 +45,9 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty().And.HaveCount(2);
 
         _context.FamilyLocations.Should().HaveCount(2);
-        _context.FamilyLocations.First().Name.Should().Be("Location A");
+        _context.FamilyLocations.First().Location.Name.Should().Be("Location A");
         _context.FamilyLocations.First().FamilyId.Should().Be(_testFamilyId);
-        _context.FamilyLocations.Last().Name.Should().Be("Location B");
+        _context.FamilyLocations.Last().Location.Name.Should().Be("Location B");
         _context.FamilyLocations.Last().FamilyId.Should().Be(_testFamilyId);
     }
 
@@ -60,7 +60,7 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
 
         var importItems = new List<ImportFamilyLocationItemDto>
         {
-            new() { Name = "Location C", Description = "Desc C", LocationType = Domain.Enums.LocationType.Homeland, Accuracy = Domain.Enums.LocationAccuracy.Exact, Source = Domain.Enums.LocationSource.UserSelected },
+            new() { LocationName = "Location C", LocationDescription = "Desc C", LocationType = Domain.Enums.LocationType.Homeland, LocationAccuracy = Domain.Enums.LocationAccuracy.Exact, LocationSource = Domain.Enums.LocationSource.UserSelected },
         };
         var command = new ImportFamilyLocationsCommand(_testFamilyId, importItems);
 
@@ -72,7 +72,7 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(1);
         _context.FamilyLocations.Should().HaveCount(1);
-        _context.FamilyLocations.First().Name.Should().Be("Location C");
+        _context.FamilyLocations.First().Location.Name.Should().Be("Location C");
     }
 
     [Fact]
@@ -81,13 +81,17 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
-        await _context.FamilyLocations.AddAsync(new FamilyLocation { FamilyId = _testFamilyId, Name = "Existing Location", Description = "Existing Desc" });
+        var existingLocation = new Location("Existing Location", "Existing Desc", 1.0, 1.0, "Addr 1", Domain.Enums.LocationType.Homeland, Domain.Enums.LocationAccuracy.Exact, Domain.Enums.LocationSource.UserSelected);
+        var existingFamilyLocation = new FamilyLocation(_testFamilyId, existingLocation.Id);
+        SetPrivateProperty(existingFamilyLocation, "Id", Guid.NewGuid());
+        SetPrivateProperty(existingFamilyLocation, "Location", existingLocation);
+        await _context.FamilyLocations.AddAsync(existingFamilyLocation);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var importItems = new List<ImportFamilyLocationItemDto>
         {
-            new() { Name = "Existing Location", Description = "Updated Desc", LocationType = Domain.Enums.LocationType.Homeland, Accuracy = Domain.Enums.LocationAccuracy.Exact, Source = Domain.Enums.LocationSource.UserSelected }, // Should be skipped
-            new() { Name = "New Location", Description = "New Desc", LocationType = Domain.Enums.LocationType.EventLocation, Accuracy = Domain.Enums.LocationAccuracy.Estimated, Source = Domain.Enums.LocationSource.Geocoded }
+            new() { LocationName = "Existing Location", LocationDescription = "Updated Desc", LocationType = Domain.Enums.LocationType.Homeland, LocationAccuracy = Domain.Enums.LocationAccuracy.Exact, LocationSource = Domain.Enums.LocationSource.UserSelected }, // Should be skipped
+            new() { LocationName = "New Location", LocationDescription = "New Desc", LocationType = Domain.Enums.LocationType.EventLocation, LocationAccuracy = Domain.Enums.LocationAccuracy.Estimated, LocationSource = Domain.Enums.LocationSource.Geocoded }
         };
         var command = new ImportFamilyLocationsCommand(_testFamilyId, importItems);
 
@@ -100,9 +104,9 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty().And.HaveCount(1); // Only the new location should be imported
 
         _context.FamilyLocations.Should().HaveCount(2); // Existing + 1 new
-        _context.FamilyLocations.Any(fl => fl.Name == "Existing Location" && fl.FamilyId == _testFamilyId).Should().BeTrue();
-        _context.FamilyLocations.Any(fl => fl.Name == "New Location" && fl.FamilyId == _testFamilyId).Should().BeTrue();
-        _context.FamilyLocations.First(fl => fl.Name == "Existing Location").Description.Should().Be("Existing Desc"); // Should not be updated
+        _context.FamilyLocations.Any(fl => fl.Location.Name == "Existing Location" && fl.FamilyId == _testFamilyId).Should().BeTrue();
+        _context.FamilyLocations.Any(fl => fl.Location.Name == "New Location" && fl.FamilyId == _testFamilyId).Should().BeTrue();
+        _context.FamilyLocations.First(fl => fl.Location.Name == "Existing Location").Location.Description.Should().Be("Existing Desc"); // Should not be updated
     }
 
     [Fact]
@@ -114,7 +118,7 @@ public class ImportFamilyLocationsCommandHandlerTests : TestBase
 
         var importItems = new List<ImportFamilyLocationItemDto>
         {
-            new() { Name = "Location X", Description = "Desc X", LocationType = Domain.Enums.LocationType.Homeland, Accuracy = Domain.Enums.LocationAccuracy.Exact, Source = Domain.Enums.LocationSource.UserSelected },
+            new() { LocationName = "Location X", LocationDescription = "Desc X", LocationType = Domain.Enums.LocationType.Homeland, LocationAccuracy = Domain.Enums.LocationAccuracy.Exact, LocationSource = Domain.Enums.LocationSource.UserSelected },
         };
         var command = new ImportFamilyLocationsCommand(_testFamilyId, importItems);
 

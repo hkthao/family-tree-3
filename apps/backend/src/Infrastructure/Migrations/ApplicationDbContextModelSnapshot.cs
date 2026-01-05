@@ -129,7 +129,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("MemberId")
                         .HasDatabaseName("ix_event_members_member_id");
 
-                    b.ToTable("event_members");
+                    b.ToTable("event_members", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
@@ -215,12 +215,12 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_families_code");
 
-                    b.ToTable("families");
+                    b.ToTable("families", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyDict", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
                         .HasColumnType("char(50)")
@@ -286,7 +286,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_family_dicts");
 
-                    b.ToTable("family_dicts");
+                    b.ToTable("family_dicts", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyLimitConfiguration", b =>
@@ -355,7 +355,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_family_limit_configurations_family_id");
 
-                    b.ToTable("family_limit_configurations");
+                    b.ToTable("family_limit_configurations", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyLink", b =>
@@ -415,7 +415,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_family_links_family1_id_family2_id");
 
-                    b.ToTable("family_links");
+                    b.ToTable("family_links", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyLocation", b =>
@@ -505,7 +505,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("FamilyId")
                         .HasDatabaseName("ix_family_locations_family_id");
 
-                    b.ToTable("family_locations");
+                    b.ToTable("family_locations", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyMedia", b =>
@@ -583,7 +583,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("FamilyId")
                         .HasDatabaseName("ix_family_media_family_id");
 
-                    b.ToTable("family_media");
+                    b.ToTable("family_media", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
@@ -622,7 +622,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_family_users_user_id");
 
-                    b.ToTable("family_users");
+                    b.ToTable("family_users", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.LocationLink", b =>
@@ -686,7 +686,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("FamilyLocationId")
                         .HasDatabaseName("ix_location_links_family_location_id");
 
-                    b.ToTable("location_links");
+                    b.ToTable("location_links", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MediaLink", b =>
@@ -742,7 +742,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("FamilyMediaId")
                         .HasDatabaseName("ix_media_links_family_media_id");
 
-                    b.ToTable("media_links");
+                    b.ToTable("media_links", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
@@ -930,7 +930,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("FamilyId")
                         .HasDatabaseName("ix_members_family_id");
 
-                    b.ToTable("members");
+                    b.ToTable("members", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MemberFace", b =>
@@ -1021,7 +1021,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("MemberId")
                         .HasDatabaseName("ix_member_faces_member_id");
 
-                    b.ToTable("member_faces");
+                    b.ToTable("member_faces", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MemoryItem", b =>
@@ -1247,7 +1247,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_privacy_configurations_family_id");
 
-                    b.ToTable("privacy_configurations");
+                    b.ToTable("privacy_configurations", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Prompt", b =>
@@ -1314,7 +1314,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_prompts_code");
 
-                    b.ToTable("prompts");
+                    b.ToTable("prompts", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>
@@ -1384,7 +1384,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("TargetMemberId")
                         .HasDatabaseName("ix_relationships_target_member_id");
 
-                    b.ToTable("relationships");
+                    b.ToTable("relationships", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.User", b =>
@@ -1447,7 +1447,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_auth_provider_id");
 
-                    b.ToTable("users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserActivity", b =>
@@ -1524,7 +1524,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_activities_user_id");
 
-                    b.ToTable("user_activities");
+                    b.ToTable("user_activities", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserPreference", b =>
@@ -1576,7 +1576,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasKey("UserId")
                         .HasName("pk_user_preferences");
 
-                    b.ToTable("user_preferences");
+                    b.ToTable("user_preferences", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserProfile", b =>
@@ -1667,7 +1667,7 @@ namespace backend.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_user_profiles_user_id");
 
-                    b.ToTable("user_profiles");
+                    b.ToTable("user_profiles", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
@@ -1731,7 +1731,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("VoiceProfileId")
                         .HasDatabaseName("ix_voice_generations_voice_profile_id");
 
-                    b.ToTable("voice_generations");
+                    b.ToTable("voice_generations", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
@@ -1824,7 +1824,7 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("MemberId")
                         .HasDatabaseName("ix_voice_profiles_member_id");
 
-                    b.ToTable("voice_profiles");
+                    b.ToTable("voice_profiles", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
@@ -1835,7 +1835,7 @@ namespace backend.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_events_families_family_id");
 
-                    b.OwnsOne("backend.Domain.ValueObjects.LunarDate", "LunarDate", b1 =>
+                    b.OwnsOne("backend.Domain.Entities.Event.LunarDate#backend.Domain.ValueObjects.LunarDate", "LunarDate", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("char(36)")
@@ -1856,7 +1856,7 @@ namespace backend.Infrastructure.Migrations
                             b1.HasKey("Id")
                                 .HasName("pk_events");
 
-                            b1.ToTable("events");
+                            b1.ToTable("events", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("Id")

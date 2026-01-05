@@ -23,6 +23,7 @@ public class GetFamilyLocationByIdQueryHandler(IApplicationDbContext context, IM
         }
 
         var entity = await _context.FamilyLocations
+            .Include(fl => fl.Location) // Eagerly load the related Location entity
             .AsNoTracking()
             .FirstOrDefaultAsync(l => l.Id == request.Id, cancellationToken);
 

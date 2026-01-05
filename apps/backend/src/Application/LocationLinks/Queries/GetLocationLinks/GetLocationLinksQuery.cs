@@ -6,7 +6,7 @@ namespace backend.Application.LocationLinks.Queries.GetLocationLinks;
 
 public record GetLocationLinksQuery : IRequest<Result<List<LocationLinkDto>>>
 {
-    public Guid? FamilyLocationId { get; init; }
+    public Guid? LocationId { get; init; }
     public string? RefId { get; init; }
     public RefType? RefType { get; init; }
 }
@@ -24,11 +24,13 @@ public class GetLocationLinksQueryHandler : IRequestHandler<GetLocationLinksQuer
 
     public async Task<Result<List<LocationLinkDto>>> Handle(GetLocationLinksQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.LocationLinks.AsNoTracking();
+        var query = _context.LocationLinks
+            .Include(ll => ll.Location) // Include Location to access Location.Name
+            .AsNoTracking();
 
-        if (request.FamilyLocationId.HasValue)
+        if (request.LocationId.HasValue)
         {
-            query = query.Where(l => l.FamilyLocationId == request.FamilyLocationId.Value);
+            query = query.Where(l => l.LocationId == request.LocationId.Value);
         }
 
         if (!string.IsNullOrEmpty(request.RefId))

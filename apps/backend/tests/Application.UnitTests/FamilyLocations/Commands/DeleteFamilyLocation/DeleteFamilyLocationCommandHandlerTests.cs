@@ -28,21 +28,13 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
         return family;
     }
 
-    private FamilyLocation CreateTestFamilyLocation(Guid familyId, Guid locationId, string name)
+    private FamilyLocation CreateTestFamilyLocation(Guid familyId, Guid locationId, string name, Guid familyLocationId)
     {
-        return new FamilyLocation
-        {
-            Id = locationId,
-            FamilyId = familyId,
-            Name = name,
-            Description = "Test Description",
-            Latitude = 1.0,
-            Longitude = 1.0,
-            Address = "Test Address",
-            LocationType = LocationType.Homeland,
-            Accuracy = LocationAccuracy.Exact,
-            Source = LocationSource.UserSelected
-        };
+        var location = new Location(name, "Test Description", 1.0, 1.0, "Test Address", LocationType.Homeland, LocationAccuracy.Exact, LocationSource.UserSelected);
+        var familyLocation = new FamilyLocation(familyId, locationId);
+        SetPrivateProperty(familyLocation, "Location", location);
+        SetPrivateProperty(familyLocation, "Id", familyLocationId); // Set the FamilyLocation's Id
+        return familyLocation;
     }
 
     [Fact]
@@ -54,11 +46,12 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
         await _context.Families.AddAsync(family);
 
         var locationId = Guid.NewGuid();
-        var existingLocation = CreateTestFamilyLocation(familyId, locationId, "Location to Delete");
+        var familyLocationId = Guid.NewGuid(); // Define a specific Id for FamilyLocation
+        var existingLocation = CreateTestFamilyLocation(familyId, locationId, "Location to Delete", familyLocationId);
         await _context.FamilyLocations.AddAsync(existingLocation);
         await _context.SaveChangesAsync();
 
-        var command = new DeleteFamilyLocationCommand(locationId);
+        var command = new DeleteFamilyLocationCommand(familyLocationId);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -105,11 +98,12 @@ public class DeleteFamilyLocationCommandHandlerTests : TestBase
         await _context.Families.AddAsync(family);
 
         var locationId = Guid.NewGuid();
-        var existingLocation = CreateTestFamilyLocation(familyId, locationId, "Location to Delete");
+        var familyLocationId = Guid.NewGuid(); // Define a specific Id for FamilyLocation
+        var existingLocation = CreateTestFamilyLocation(familyId, locationId, "Location to Delete", familyLocationId);
         await _context.FamilyLocations.AddAsync(existingLocation);
         await _context.SaveChangesAsync();
 
-        var command = new DeleteFamilyLocationCommand(locationId);
+        var command = new DeleteFamilyLocationCommand(familyLocationId);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);

@@ -34,12 +34,28 @@ public class CreateFamilyLocationCommandHandler(IApplicationDbContext context, I
             return Result<Guid>.Forbidden(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        var entity = _mapper.Map<FamilyLocation>(request);
-        entity.AddDomainEvent(new FamilyLocationCreatedEvent(entity));
+        // Create Location entity
+        var location = new Location(
+            request.LocationName,
+            request.LocationDescription,
+            request.LocationLatitude,
+            request.LocationLongitude,
+            request.LocationAddress,
+            request.LocationType,
+            request.LocationAccuracy,
+            request.LocationSource
+        );
 
-        _context.FamilyLocations.Add(entity);
+        _context.Locations.Add(location);
+
+        // Create FamilyLocation entity
+        var familyLocation = new FamilyLocation(request.FamilyId, location.Id);
+
+        familyLocation.AddDomainEvent(new FamilyLocationCreatedEvent(familyLocation));
+
+        _context.FamilyLocations.Add(familyLocation);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(entity.Id);
+        return Result<Guid>.Success(familyLocation.Id);
     }
 }

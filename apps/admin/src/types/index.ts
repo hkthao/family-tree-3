@@ -1,7 +1,7 @@
 
 export * from './family-dict.d';
 export * from './family.d';
-export * from './familyLocation.d'; // NEW
+export * from './familyLocation.d';
 export * from './base.d'; // NEW
 export * from './member.d';
 export * from './routes.d'; // NEW

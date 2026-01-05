@@ -20,33 +20,44 @@ public class UpdateFamilyLocationCommandHandler(IApplicationDbContext context, I
             return Result.Failure(ErrorMessages.Unauthorized, ErrorSources.Authentication);
         }
 
-        var entity = await _context.FamilyLocations.FindAsync(new object[] { request.Id }, cancellationToken);
+        var familyLocation = await _context.FamilyLocations
+                                           .Include(fl => fl.Location) // Ensure Location is loaded
+                                           .FirstOrDefaultAsync(fl => fl.Id == request.Id, cancellationToken);
 
-        if (entity == null)
+        if (familyLocation == null)
         {
             return Result.NotFound($"FamilyLocation with id {request.Id} not found.");
         }
 
+        // Check if the LocationId matches the one associated with the FamilyLocation
+        if (familyLocation.LocationId != request.LocationId)
+        {
+            return Result.Failure($"LocationId {request.LocationId} does not match the location associated with FamilyLocation {request.Id}.", ErrorSources.BadRequest);
+        }
+
         // 2. Authorization: Check if user can access the family that the location belongs to
-        if (!_authorizationService.CanAccessFamily(entity.FamilyId))
+        if (!_authorizationService.CanAccessFamily(familyLocation.FamilyId))
         {
             return Result.Forbidden(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // 3. Optional: If FamilyId is being changed, ensure user has access to the *new* family as well.
-        // For simplicity, we assume FamilyId cannot be changed through this command or handled externally.
-        // If it can be changed, a more robust check here would be needed.
-        if (request.FamilyId != entity.FamilyId)
-        {
-            // If family ID is being updated, verify access to the new family as well
-            if (!_authorizationService.CanAccessFamily(request.FamilyId))
-            {
-                return Result.Forbidden(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-            }
-        }
+        // FamilyId cannot be changed through this command as it's a private set.
+        // If a FamilyLocation needs to be moved to another Family, a separate domain operation would be required.
 
-        _mapper.Map(request, entity);
-        entity.AddDomainEvent(new FamilyLocationUpdatedEvent(entity));
+        // Update Location properties
+        familyLocation.Location.Update(
+            request.LocationName,
+            request.LocationDescription,
+            request.LocationLatitude,
+            request.LocationLongitude,
+            request.LocationAddress,
+            request.LocationType,
+            request.LocationAccuracy,
+            request.LocationSource
+        );
+
+        _context.FamilyLocations.Update(familyLocation); // Explicitly mark as modified to ensure change tracking.
+        familyLocation.AddDomainEvent(new FamilyLocationUpdatedEvent(familyLocation));
 
         await _context.SaveChangesAsync(cancellationToken);
 

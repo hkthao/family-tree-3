@@ -50,14 +50,14 @@ const familyLocations = computed<FamilyLocation[]>(() => {
 
 const mapMarkers = computed(() => {
   const markers = familyLocations.value
-    .filter(loc => loc.latitude && loc.longitude)
+    .filter(loc => loc.location.latitude && loc.location.longitude)
     .map(loc => ({
       id: loc.id,
-      lng: loc.longitude!,
-      lat: loc.latitude!,
-      title: loc.name,
-      description: loc.description,
-      locationType: loc.locationType, // Added locationType
+      lng: loc.location.longitude!,
+      lat: loc.location.latitude!,
+      title: loc.location.name,
+      description: loc.location.description,
+      locationType: loc.location.locationType, // Added locationType
     }));
   return markers;
 });

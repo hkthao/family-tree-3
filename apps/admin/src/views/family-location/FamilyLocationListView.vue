@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FamilyLocation } from '@/types';
+import type { FamilyLocation, ImportFamilyLocationItemDto } from '@/types';
 import { ref, watch, toRef, computed } from 'vue';
 import { useConfirmDialog, useGlobalSnackbar, useCrudDrawer } from '@/composables';
 import FamilyLocationSearch from '@/components/family-location/FamilyLocationSearch.vue';
@@ -127,7 +127,7 @@ const triggerImport = async (file: File) => { // Modified to accept file directl
   const reader = new FileReader();
   reader.onload = async (e) => {
     try {
-      const jsonContent = JSON.parse(e.target?.result as string);
+      const jsonContent = JSON.parse(e.target?.result as string) as ImportFamilyLocationItemDto[]; // Cast to the correct type
       const success = await importFamilyLocations(jsonContent);
       if (success) {
         importDialog.value = false;
@@ -168,9 +168,7 @@ const handleClosed = () => {
 
 const handleFilterUpdate = (criteria: FamilyLocationSearchCriteria) => {
   setFilters({
-    ...filters,
-    locationType: criteria.locationType,
-    locationSource: criteria.locationSource,
+    ...criteria, // Directly use criteria as it now contains searchQuery, locationType, locationSource
   });
 };
 
@@ -192,7 +190,7 @@ const confirmDelete = async (familyLocationId: string) => {
   }
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
-    message: t('familyLocation.list.confirmDelete', { name: familyLocationToDelete.name }),
+    message: t('familyLocation.list.confirmDelete', { name: familyLocationToDelete.location.name }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     confirmColor: 'error',

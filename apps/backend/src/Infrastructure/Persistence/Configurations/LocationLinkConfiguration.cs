@@ -19,10 +19,10 @@ public class LocationLinkConfiguration : IEntityTypeConfiguration<LocationLink>
             .HasMaxLength(1000)
             .IsRequired();
 
-        // Configure relationship with FamilyLocation
-        builder.HasOne(ll => ll.FamilyLocation)
-            .WithMany() // No direct navigation property on FamilyLocation back to LocationLink (loose coupling)
-            .HasForeignKey(ll => ll.FamilyLocationId)
-            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if FamilyLocation has links
+        // Configure relationship with Location
+        builder.HasOne(ll => ll.Location)
+            .WithMany() // No direct navigation property on Location back to LocationLink (loose coupling)
+            .HasForeignKey(ll => ll.LocationId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if Location has links
     }
 }

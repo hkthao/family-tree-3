@@ -3,22 +3,28 @@ export const useFamilyLocationValidationRules = () => {
   const rulesVuetify = useRules();
 
   const rules = {
-    name: [
+    locationName: [
       rulesVuetify.required(),
       rulesVuetify.minLength(3),
-      rulesVuetify.maxLength(100),
+      rulesVuetify.maxLength(200),
+    ],
+    locationDescription: [
+      rulesVuetify.maxLength(1000),
+    ],
+    locationAddress: [
+      rulesVuetify.maxLength(500),
     ],
     locationType: [
       rulesVuetify.required(),
     ],
-    accuracy: [
+    locationAccuracy: [
       rulesVuetify.required(),
     ],
-    source: [
+    locationSource: [
       rulesVuetify.required(),
     ],
-    latitude: [], // Remove custom numeric validation
-    longitude: [], // Remove custom numeric validation
+    locationLatitude: [], // Remove custom numeric validation
+    locationLongitude: [], // Remove custom numeric validation
   };
 
   return rules;

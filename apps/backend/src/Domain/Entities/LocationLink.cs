@@ -10,13 +10,13 @@ public class LocationLink : BaseAuditableEntity
     public string RefId { get; private set; } = null!;
     public RefType RefType { get; private set; }
     public string Description { get; private set; } = null!;
-    public Guid FamilyLocationId { get; private set; }
+    public Guid LocationId { get; private set; }
 
     // Navigation Property
-    public FamilyLocation FamilyLocation { get; private set; } = null!;
+    public Location Location { get; private set; } = null!;
 
     // Factory method for creation
-    public static LocationLink Create(string refId, RefType refType, string description, Guid familyLocationId)
+    public static LocationLink Create(string refId, RefType refType, string description, Guid locationId)
     {
         // Add any domain validation/business rules here
         // For example: if (string.IsNullOrWhiteSpace(refId)) throw new ArgumentException("RefId cannot be empty.");
@@ -26,17 +26,17 @@ public class LocationLink : BaseAuditableEntity
             RefId = refId,
             RefType = refType,
             Description = description,
-            FamilyLocationId = familyLocationId
+            LocationId = locationId
         };
     }
 
     // Method for updating properties
-    public void Update(string refId, RefType refType, string description, Guid familyLocationId)
+    public void Update(string refId, RefType refType, string description, Guid locationId)
     {
         // Add any domain validation/business rules here before updating
         RefId = refId;
         RefType = refType;
         Description = description;
-        FamilyLocationId = familyLocationId;
+        LocationId = locationId;
     }
 }

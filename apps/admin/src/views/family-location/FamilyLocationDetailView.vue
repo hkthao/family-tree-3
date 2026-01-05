@@ -15,14 +15,14 @@
       </div>
       <div v-else-if="familyLocation">
         <PrivacyAlert :is-private="familyLocation.isPrivate" />
-        <FamilyLocationForm :initial-family-location-data="familyLocation" :family-id="familyLocation.familyId"
-          :read-only="true" />
+        <FamilyLocationForm :initial-family-location-data="transformedFamilyLocationData"
+          :family-id="familyLocation.familyId" :read-only="true" />
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose" :disabled="isLoadingFamilyLocation || isDeletingFamilyLocation">{{
         t('common.close')
-        }}</v-btn>
+      }}</v-btn>
       <v-btn color="primary" @click="handleEdit"
         :disabled="!familyLocation || isLoadingFamilyLocation || isDeletingFamilyLocation" v-if="canEditOrDelete">{{
           t('common.edit') }}</v-btn>
@@ -40,6 +40,7 @@ import { FamilyLocationForm } from '@/components/family-location';
 import { useConfirmDialog, useAuth, useGlobalSnackbar } from '@/composables';
 import { useFamilyLocationQuery, useDeleteFamilyLocationMutation } from '@/composables';
 import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
+import type { AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types'; // Import DTOs
 
 interface FamilyLocationDetailViewProps {
   familyLocationId: string;
@@ -62,7 +63,27 @@ const {
 const { mutate: deleteFamilyLocation, isPending: isDeletingFamilyLocation } = useDeleteFamilyLocationMutation();
 
 const canEditOrDelete = computed(() => {
-  return state.isAdmin.value || state.isFamilyManager.value;
+  return state.isAdmin.value || state.isFamilyManager.value(familyLocation.value?.familyId || '');
+});
+
+// Transform FamilyLocation data to the format expected by FamilyLocationForm
+const transformedFamilyLocationData = computed<
+  (AddFamilyLocationDto & Partial<UpdateFamilyLocationDto> & { id?: string }) | null
+>(() => {
+  if (!familyLocation.value) return null;
+  return {
+    id: familyLocation.value.id,
+    familyId: familyLocation.value.familyId,
+    locationId: familyLocation.value.locationId,
+    locationName: familyLocation.value.location.name,
+    locationDescription: familyLocation.value.location.description,
+    locationLatitude: familyLocation.value.location.latitude,
+    locationLongitude: familyLocation.value.location.longitude,
+    locationAddress: familyLocation.value.location.address,
+    locationType: familyLocation.value.location.locationType,
+    locationAccuracy: familyLocation.value.location.accuracy,
+    locationSource: familyLocation.value.location.source,
+  };
 });
 
 const handleClose = () => {
@@ -80,7 +101,7 @@ const handleDelete = async () => {
 
   const confirmed = await showConfirmDialog({
     title: t('confirmDelete.title'),
-    message: t('familyLocation.list.confirmDelete', { name: familyLocation.value.name }),
+    message: t('familyLocation.list.confirmDelete', { name: familyLocation.value.location.name }),
   });
 
   if (confirmed) {
