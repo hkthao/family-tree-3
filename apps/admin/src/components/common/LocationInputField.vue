@@ -9,13 +9,13 @@
     :readonly="readOnly"
     data-testid="location-input-field"
   ></v-text-field>
-  <LocationDialog v-model="showDialog" :family-id="familyId" @selectLocation="handleLocationSelected" />
+  <LocationDrawer cssClass="location-drawer" v-model="showDialog" :family-id="familyId" @selectLocation="handleLocationSelected" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'; // Import ref
 import type { FamilyLocation } from '@/types'; // Import FamilyLocation type
-import LocationDialog from './LocationDialog.vue'; // Import the new LocationDialog
+import LocationDrawer from './LocationDrawer.vue'; // Import the new LocationDrawer
 
 const props = defineProps<{
   modelValue?: string; // The address string
@@ -43,3 +43,10 @@ const handleLocationSelected = (location: FamilyLocation) => {
   }
 };
 </script>
+
+<style>
+.location-drawer{
+  top: 0 !important;
+  height: 100% !important;
+}
+</style>
