@@ -91,7 +91,8 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 entity.Id.ToString(), // RefId is FamilyId
                 RefType.Family,       // RefType is Family
                 string.Empty,         // Description
-                request.LocationId.Value
+                request.LocationId.Value,
+                LocationLinkType.General // NEW: Specify LinkType for family
             );
             _context.LocationLinks.Add(locationLink);
         }

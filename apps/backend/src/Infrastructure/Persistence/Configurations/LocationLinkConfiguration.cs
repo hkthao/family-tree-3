@@ -19,6 +19,12 @@ public class LocationLinkConfiguration : IEntityTypeConfiguration<LocationLink>
             .HasMaxLength(1000)
             .IsRequired();
 
+        // Configure LinkType enum
+        builder.Property(t => t.LinkType)
+            .HasConversion<string>() // Store enum as string
+            .IsRequired()
+            .HasMaxLength(50);
+
         // Configure relationship with Location
         builder.HasOne(ll => ll.Location)
             .WithMany() // No direct navigation property on Location back to LocationLink (loose coupling)

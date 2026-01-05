@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // NEW
 
 namespace backend.Application.LocationLinks.Commands.CreateLocationLink;
 
@@ -19,7 +20,8 @@ public class CreateLocationLinkCommandHandler : IRequestHandler<CreateLocationLi
             request.RefId,
             request.RefType,
             request.Description,
-            request.LocationId
+            request.LocationId,
+            request.LinkType // NEW: Pass LinkType from request
         );
 
         _context.LocationLinks.Add(entity);

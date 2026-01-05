@@ -3,6 +3,8 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
+using backend.Domain.Entities; // NEW
+using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Localization;
 
@@ -113,6 +115,13 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             cancellationToken
         );
 
+        // --- Handle Location Links for Member ---
+        await HandleLocationLink(member.Id, request.BirthLocationId, LocationLinkType.Birth, cancellationToken);
+        await HandleLocationLink(member.Id, request.DeathLocationId, LocationLinkType.Death, cancellationToken);
+        await HandleLocationLink(member.Id, request.ResidenceLocationId, LocationLinkType.Residence, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken); // Save all location links at once
+
         return Result<Guid>.Success(member.Id);
     }
 
@@ -121,5 +130,59 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         // For simplicity, generate a GUID and take a substring.
         // In a real application, you'd want to ensure uniqueness against existing codes in the database.
         return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
+    }
+
+    private async Task HandleLocationLink(Guid refId, Guid? locationId, LocationLinkType linkType, CancellationToken cancellationToken)
+    {
+        if (locationId.HasValue)
+        {
+            var location = await _context.Locations.FindAsync(new object[] { locationId.Value }, cancellationToken);
+            if (location == null)
+            {
+                // Log or handle error: location not found
+                // For now, we'll just return without creating a link if location is not found.
+                // A more robust solution might involve returning an error result or logging more verbosely.
+                return;
+            }
+
+            // Always create a new link if a locationId is provided and no existing link of this type is found for the member.
+            // Or if an existing link's locationId has changed.
+            var existingLink = await _context.LocationLinks
+                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
+
+            if (existingLink == null)
+            {
+                var newLocationLink = LocationLink.Create(
+                    refId.ToString(),
+                    RefType.Member,
+                    linkType.ToString(), // Description can be the LinkType itself
+                    locationId.Value,
+                    linkType
+                );
+                _context.LocationLinks.Add(newLocationLink);
+            }
+            else if (existingLink.LocationId != locationId.Value)
+            {
+                // Update existing link if location has changed
+                existingLink.Update(
+                    existingLink.RefId,
+                    existingLink.RefType,
+                    existingLink.Description,
+                    locationId.Value,
+                    linkType
+                );
+            }
+        }
+        else
+        {
+            // If locationId is null, remove any existing link of this type for the member
+            var existingLink = await _context.LocationLinks
+                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
+
+            if (existingLink != null)
+            {
+                _context.LocationLinks.Remove(existingLink);
+            }
+        }
     }
 }

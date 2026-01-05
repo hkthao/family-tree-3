@@ -5,6 +5,8 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
+using backend.Domain.Entities; // NEW
+using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.UpdateMember;
@@ -137,6 +139,63 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             cancellationToken
         );
 
+        // --- Handle Location Links for Member ---
+        await HandleLocationLink(member.Id, request.BirthLocationId, LocationLinkType.Birth, cancellationToken);
+        await HandleLocationLink(member.Id, request.DeathLocationId, LocationLinkType.Death, cancellationToken);
+        await HandleLocationLink(member.Id, request.ResidenceLocationId, LocationLinkType.Residence, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken); // Save all location links at once
+
         return Result<Guid>.Success(member.Id);
+    }
+
+    private async Task HandleLocationLink(Guid refId, Guid? locationId, LocationLinkType linkType, CancellationToken cancellationToken)
+    {
+        if (locationId.HasValue)
+        {
+            var location = await _context.Locations.FindAsync(new object[] { locationId.Value }, cancellationToken);
+            if (location == null)
+            {
+                // Log or handle error: location not found
+                return;
+            }
+
+            var existingLink = await _context.LocationLinks
+                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
+
+            if (existingLink == null)
+            {
+                var newLocationLink = LocationLink.Create(
+                    refId.ToString(),
+                    RefType.Member,
+                    linkType.ToString(), // Description can be the LinkType itself
+                    locationId.Value,
+                    linkType
+                );
+                _context.LocationLinks.Add(newLocationLink);
+            }
+            else if (existingLink.LocationId != locationId.Value)
+            {
+                // Update existing link if location has changed
+                existingLink.Update(
+                    existingLink.RefId,
+                    existingLink.RefType,
+                    existingLink.Description,
+                    locationId.Value,
+                    linkType
+                );
+            }
+        }
+        else
+        {
+            // If locationId is null, remove any existing link of this type for the member
+            var existingLink = await _context.LocationLinks
+                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
+
+            if (existingLink != null)
+            {
+                _context.LocationLinks.Remove(existingLink);
+            }
+        }
     }
 }

@@ -10,4 +10,5 @@ public record UpdateLocationLinkCommand : IRequest<Result<bool>>
     public RefType RefType { get; init; }
     public string Description { get; init; } = null!;
     public Guid LocationId { get; init; }
+    public LocationLinkType LinkType { get; init; }
 }

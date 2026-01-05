@@ -23,6 +23,9 @@ public record MemberInput
     public bool IsRoot { get; set; }
     public bool IsDeceased { get; set; }
     public int? Order { get; set; }
+    public Guid? BirthLocationId { get; set; }
+    public Guid? DeathLocationId { get; set; }
+    public Guid? ResidenceLocationId { get; set; }
     public Guid? FatherId { get; set; }
     public Guid? MotherId { get; set; }
     public Guid? HusbandId { get; set; }

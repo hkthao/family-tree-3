@@ -97,10 +97,12 @@ public class UpdateFamilyLocationCommandHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
+        var validLocationId = Guid.NewGuid(); // NEW: A valid but non-existent LocationId
         var command = new UpdateFamilyLocationCommand
         {
             Id = Guid.NewGuid(), // Non-existent ID
             FamilyId = familyId,
+            LocationId = validLocationId, // NEW: Provide a valid LocationId
             LocationName = "Any Name",
             LocationType = LocationType.Homeland,
             LocationAccuracy = LocationAccuracy.Exact,
@@ -137,6 +139,7 @@ public class UpdateFamilyLocationCommandHandlerTests : TestBase
         {
             Id = familyLocationId, // Use the FamilyLocation's actual Id
             FamilyId = familyId,
+            LocationId = locationId, // NEW: Add LocationId
             LocationName = "Updated Name",
             LocationType = LocationType.Homeland,
             LocationAccuracy = LocationAccuracy.Approximate,

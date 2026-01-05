@@ -69,7 +69,8 @@
     <v-row>
       <v-col cols="12">
         <LocationInputField
-          v-model="formData.address"
+          v-model:model-value="formData.address"
+          v-model:location-id="formData.residenceLocationId"
           :label="t('member.form.address')"
           :family-id="formData.familyId"
           :read-only="isFormReadOnly"
@@ -81,7 +82,8 @@
     <v-row>
       <v-col cols="12">
         <LocationInputField
-          v-model="formData.placeOfBirth"
+          v-model:model-value="formData.placeOfBirth"
+          v-model:location-id="formData.birthLocationId"
           :label="t('member.form.placeOfBirth')"
           :family-id="formData.familyId"
           :read-only="isFormReadOnly"
@@ -91,7 +93,8 @@
       </v-col>
       <v-col cols="12">
         <LocationInputField
-          v-model="formData.placeOfDeath"
+          v-model:model-value="formData.placeOfDeath"
+          v-model:location-id="formData.deathLocationId"
           :label="t('member.form.placeOfDeath')"
           :family-id="formData.familyId"
           :read-only="isFormReadOnly"

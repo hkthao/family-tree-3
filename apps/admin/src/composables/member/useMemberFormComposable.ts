@@ -37,6 +37,9 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
           nickname: options.initialMemberData.nickname,
           placeOfBirth: options.initialMemberData.placeOfBirth,
           placeOfDeath: options.initialMemberData.placeOfDeath,
+          birthLocationId: options.initialMemberData.birthLocationId, // Added
+          deathLocationId: options.initialMemberData.deathLocationId, // Added
+          residenceLocationId: options.initialMemberData.residenceLocationId, // Added
           phone: options.initialMemberData.phone,
           email: options.initialMemberData.email,
           address: options.initialMemberData.address,
@@ -71,6 +74,9 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
           nickname: undefined,
           placeOfBirth: undefined,
           placeOfDeath: undefined,
+          birthLocationId: undefined, // Added
+          deathLocationId: undefined, // Added
+          residenceLocationId: undefined, // Added
           biography: undefined,
         } as MemberAddDto)
   );

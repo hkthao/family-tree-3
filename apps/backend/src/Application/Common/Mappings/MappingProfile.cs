@@ -115,7 +115,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
         CreateMap<Location, LocationDto>();
         CreateMap<LocationLink, LocationLinkDto>()
-            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Name));
+            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Name))
+            .ForMember(dest => dest.LinkType, opt => opt.MapFrom(src => src.LinkType));
         CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))

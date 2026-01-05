@@ -91,11 +91,11 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
         // --- Handle LocationLink ---
         var existingLocationLink = await _context.LocationLinks
-            .FirstOrDefaultAsync(ll => ll.RefId == entity.Id.ToString() && ll.RefType == RefType.Family, cancellationToken);
+            .FirstOrDefaultAsync(ll => ll.RefId == entity.Id.ToString() && ll.RefType == RefType.Family && ll.LinkType == LocationLinkType.General, cancellationToken); // NEW: Add LinkType to query
 
         if (request.LocationId.HasValue)
         {
-            var location = await _context.Locations.FindAsync(new object[] { request.LocationId.Value }, cancellationToken);
+            var location = await _context.Locations.FindAsync([request.LocationId.Value], cancellationToken);
             if (location == null)
             {
                 return Result<Guid>.Failure($"Location with ID {request.LocationId.Value} not found.", ErrorSources.NotFound);
@@ -108,7 +108,8 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                     entity.Id.ToString(),
                     RefType.Family,
                     "Family Location", // Default description for Family Location Link
-                    request.LocationId.Value
+                    request.LocationId.Value,
+                    LocationLinkType.General // NEW: Specify LinkType for family
                 );
                 _context.LocationLinks.Add(newLocationLink);
             }
@@ -121,7 +122,8 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                         existingLocationLink.RefId,
                         existingLocationLink.RefType,
                         existingLocationLink.Description,
-                        request.LocationId.Value
+                        request.LocationId.Value,
+                        LocationLinkType.General // NEW: Specify LinkType for family
                     );
                 }
             }

@@ -1,5 +1,3 @@
-using backend.Domain.Enums;
-
 namespace backend.Domain.Entities;
 
 public class FamilyLocation : BaseAuditableEntity, IAggregateRoot
