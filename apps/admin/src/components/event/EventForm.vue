@@ -84,8 +84,14 @@
 
     <v-row>
       <v-col cols="12">
-        <LocationInputField v-model="formData.location" :family-id="formData.familyId || undefined"
-          :read-only="props.readOnly" prepend-inner-icon="mdi-map-marker"></LocationInputField>
+        <LocationInputField
+          v-model:model-value="formData.location"
+          v-model:location-id="formData.locationId"
+          :label="actions.t('event.form.location')"
+          :family-id="formData.familyId || undefined"
+          :read-only="props.readOnly"
+          prepend-inner-icon="mdi-map-marker"
+        ></LocationInputField>
       </v-col>
     </v-row>
 

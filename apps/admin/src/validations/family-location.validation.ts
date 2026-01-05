@@ -12,6 +12,7 @@ export const useFamilyLocationValidationRules = () => {
       rulesVuetify.maxLength(1000),
     ],
     locationAddress: [
+      rulesVuetify.required(), // Added required rule
       rulesVuetify.maxLength(500),
     ],
     locationType: [

@@ -98,6 +98,7 @@ const handleOpenMapPicker = async () => {
     const result = await mapDrawerStore.openDrawer(); // Open global map picker
     if (result.coordinates && familyLocationFormRef.value) {
       familyLocationFormRef.value.setCoordinates(result.coordinates.latitude, result.coordinates.longitude);
+      if(result.location)
       familyLocationFormRef.value.setAddress(result.location);
     }
   } catch (error) {

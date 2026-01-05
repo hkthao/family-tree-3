@@ -808,7 +808,7 @@
   "member.form.motherFullName": "Mother's Full Name",
   "member.form.nickname": "Nickname",
   "member.form.occupation": "Occupation (Optional)",
-  "member.form.order": "Order",
+  "member.form.order": "Order (child's birth order in family)",
   "member.form.parents": "Parents (Optional)",
   "member.form.phone": "Phone (Optional)",
   "member.form.placeOfBirth": "Place of Birth (Optional)",

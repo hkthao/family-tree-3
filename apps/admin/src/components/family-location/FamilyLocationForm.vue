@@ -17,7 +17,7 @@
       </v-col>
       <v-col cols="12">
         <v-text-field v-model="form.locationAddress" :label="t('familyLocation.form.address')"
-          data-testid="location-address" prepend-inner-icon="mdi-map-marker"></v-text-field>
+          data-testid="location-address" :rules="rules.locationAddress" prepend-inner-icon="mdi-map-marker"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field v-model.number="form.locationLatitude" :label="t('familyLocation.form.latitude')" type="number" step="any"
@@ -44,7 +44,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VForm } from 'vuetify/components';
-import type { FamilyLocation, AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
+import type { AddFamilyLocationDto, UpdateFamilyLocationDto } from '@/types';
 import {
   useFamilyLocationFormLogic,
   useFamilyLocationValidationRules,
