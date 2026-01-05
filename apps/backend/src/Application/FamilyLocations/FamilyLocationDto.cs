@@ -1,10 +1,8 @@
-using backend.Application.Common.Mappings;
 using backend.Application.Locations;
-using backend.Domain.Entities;
 
 namespace backend.Application.FamilyLocations;
 
-public class FamilyLocationDto : IMapFrom<FamilyLocation>
+public class FamilyLocationDto
 {
     public Guid Id { get; set; }
     public Guid FamilyId { get; set; }

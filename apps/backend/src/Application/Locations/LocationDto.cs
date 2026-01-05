@@ -1,10 +1,8 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.Locations;
 
-public class LocationDto : IMapFrom<Location>
+public class LocationDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.Enums; // NEW
 
 namespace backend.Application.LocationLinks.Commands.CreateLocationLink;
 

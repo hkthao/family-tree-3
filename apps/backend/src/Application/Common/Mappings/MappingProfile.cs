@@ -33,6 +33,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this using statement
 using backend.Domain.ValueObjects;
 namespace backend.Application.Common.Mappings;
 
@@ -55,7 +56,17 @@ public class MappingProfile : Profile
         CreateMap<Event, EventDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
             .ForMember(dest => dest.FamilyAvatarUrl, opt => opt.MapFrom(src => src.Family != null ? src.Family.AvatarUrl : null));
-        CreateMap<EventMember, EventMemberDto>();
+        CreateMap<EventMember, EventMemberDto>()
+            .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null))
+            .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Member.Gender))
+            .AfterMap((src, dest) =>
+            {
+                if (src.Member == null)
+                {
+                    dest.Gender = Gender.Unknown;
+                }
+            });
         CreateMap<LunarDate, LunarDateDto>();
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
@@ -114,9 +125,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Family1Name, opt => opt.MapFrom(src => src.Family1.Name))
             .ForMember(dest => dest.Family2Name, opt => opt.MapFrom(src => src.Family2.Name));
         CreateMap<Location, LocationDto>();
-        CreateMap<LocationLink, LocationLinkDto>()
-            .ForMember(dest => dest.LocationName, opt => opt.MapFrom(src => src.Location.Name))
-            .ForMember(dest => dest.LinkType, opt => opt.MapFrom(src => src.LinkType));
+        CreateMap<LocationLink, LocationLinkDto>();
         CreateMap<PaginatedList<Family>, PaginatedList<FamilyDto>>()
             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items))
             .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))

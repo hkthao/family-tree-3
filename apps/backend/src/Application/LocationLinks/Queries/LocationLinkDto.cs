@@ -1,10 +1,8 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
+using backend.Domain.Enums; // Add this
 
 namespace backend.Application.LocationLinks.Queries;
 
-public record LocationLinkDto : IMapFrom<LocationLink>
+public record LocationLinkDto
 {
     public Guid Id { get; init; }
     public string RefId { get; init; } = null!;
@@ -17,7 +15,7 @@ public record LocationLinkDto : IMapFrom<LocationLink>
     public LocationDto? Location { get; init; } // Assuming LocationDto exists or will be created
 }
 
-public record LocationDto : IMapFrom<Location>
+public record LocationDto
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = null!;
