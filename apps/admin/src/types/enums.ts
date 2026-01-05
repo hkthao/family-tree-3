@@ -27,11 +27,9 @@ export enum MediaType {
 }
 
 export enum RefType {
-  Family = 0,
-  Member = 1,
-  Event = 2,
-  FamilyMedia = 3,
-  Relationship = 4
+  Member = 0, // Align with backend
+  Event = 1,  // Align with backend
+  Family = 2  // Align with backend
 }
 
 export enum LifeStage {

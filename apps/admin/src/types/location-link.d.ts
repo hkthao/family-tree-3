@@ -1,10 +1,10 @@
 // Enums
 
 export enum LocationLinkType {
-  Birth = 'Birth',
-  Death = 'Death',
-  Residence = 'Residence',
-  General = 'General',
+  Birth = 0,
+  Death = 1,
+  Residence = 2,
+  General = 3,
 }
 
 // DTOs
