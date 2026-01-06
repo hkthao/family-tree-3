@@ -1,4 +1,4 @@
-import type { BaseAuditableEntity, PaginatedList, PaginationFilter } from '@/types';
+import type { BaseAuditableDto, PaginatedList, PaginationFilter } from '@/types';
 
 export enum LocationType {
   Grave = 0,
@@ -20,7 +20,7 @@ export enum LocationSource {
   Geocoded = 1,
 }
 
-export interface Location extends BaseAuditableEntity {
+export interface Location extends BaseAuditableDto {
   name: string;
   description?: string;
   latitude?: number;
@@ -31,7 +31,7 @@ export interface Location extends BaseAuditableEntity {
   source: LocationSource;
 }
 
-export interface FamilyLocation extends BaseAuditableEntity {
+export interface FamilyLocation extends BaseAuditableDto {
   familyId: string;
   locationId: string; // NEW: Added locationId
   location: Location; // NEW: Nested Location object

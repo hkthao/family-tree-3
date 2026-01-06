@@ -29,6 +29,8 @@ import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
 
 import type { IVoiceProfileService } from './voice-profile/voice-profile.service.interface';
 import { ApiVoiceProfileService } from './voice-profile/api.voice-profile.service';
+import type { IUserPushTokenService } from './user-push-token/user-push-token.service.interface';
+import { ApiUserPushTokenService } from './user-push-token/api.user-push-token.service';
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -49,6 +51,7 @@ export interface AppServices {
   memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
 
   voiceProfile: IVoiceProfileService;
+  userPushToken: IUserPushTokenService;
 }
 import apiClient from '@/plugins/axios';
 import type { IEventService } from './event/event.service.interface';
@@ -117,5 +120,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiVoiceProfileService(apiClient)
         : testServices?.voiceProfile || new ApiVoiceProfileService(apiClient),
+    userPushToken:
+      mode === 'real'
+        ? new ApiUserPushTokenService(apiClient)
+        : testServices?.userPushToken || new ApiUserPushTokenService(apiClient),
   };
 }

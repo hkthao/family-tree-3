@@ -75,6 +75,12 @@ const rawMenu: MenuSection[] = [
         to: '/prompts',
         roles: ['Admin'],
       },
+      {
+        titleKey: 'admin.userPushTokens',
+        icon: 'mdi-bell-badge-outline',
+        to: '/users/current/push-tokens', // Use a placeholder or actual user ID for now, will refine
+        roles: ['Admin'], // Ensure this role matches the backend role
+      },
     ],
   },
   {
