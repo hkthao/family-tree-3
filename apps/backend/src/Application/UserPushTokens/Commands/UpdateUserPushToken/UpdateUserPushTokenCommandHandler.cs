@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities; // Needed for UserPushToken entity
 
 namespace backend.Application.UserPushTokens.Commands.UpdateUserPushToken;
 

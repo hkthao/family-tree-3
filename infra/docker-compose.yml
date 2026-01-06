@@ -117,6 +117,23 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: family-tree-notification-service
+    ports:
+      - "3000:3000" # Expose port 3000 for the Node.js app
+    env_file:
+      - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   promtail:
     image: grafana/promtail:2.6.1 # Use a specific version of Promtail
     container_name: family-tree-promtail
@@ -135,6 +152,7 @@ services:
       - face-service
       - ocr-service
       - voice-service
+      - notification-service
 
 volumes:
   mysql-data:

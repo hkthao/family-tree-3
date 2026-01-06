@@ -5,12 +5,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
-using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.Background;
 using backend.Infrastructure.Services.RateLimiting;
-using FamilyTree.Infrastructure; // For ImgbbSettings
-using FamilyTree.Infrastructure.Services; // For ImgbbImageUploadService
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Novu;
 
 
 namespace backend.Infrastructure;
@@ -159,15 +155,28 @@ public static class DependencyInjection
         services.AddScoped<IN8nService, N8nService>();
         services.AddScoped<IAiChatService, AiChatService>();
         services.AddScoped<IAiGenerateService, AiGenerateService>();
-        // Register Notification Provider Factory
-        services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
+
 
         // If you want to use N8nFileStorageService instead, comment out the Imgur registration above
         // and uncomment the line below.
         // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
-        // Register Novu services
-        services.AddNovuServices(configuration);
+        // Register NotificationSettings
+
+        // Register NotificationService as a typed HttpClient
+        services.AddHttpClient<INotificationService, NotificationService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var settings = serviceProvider.GetRequiredService<IOptions<NotificationSettings>>().Value;
+                    if (!string.IsNullOrEmpty(settings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(settings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<NotificationService>>().LogWarning("NotificationService BaseUrl is not configured, falling back to default.");
+                    }
+                });
         // Add Rate Limiting services
         services.AddRateLimiter(rateLimiterOptions =>
         {
@@ -196,36 +205,7 @@ public static class DependencyInjection
         return services;
     }
 
-    /// <summary>
-    /// Adds Novu related services to the dependency injection container.
-    /// </summary>
-    public static IServiceCollection AddNovuServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        // 1. Configure and bind Novu settings from appsettings.json
-        var novuSettings = new NovuSettings();
-        configuration.GetSection(NovuSettings.SectionName).Bind(novuSettings);
-        services.AddSingleton(Options.Create(novuSettings));
 
-        // 2. Register NovuSDK
-        services.AddSingleton(provider =>
-        {
-            var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
-            var logger = provider.GetRequiredService<ILogger<NovuSDK>>();
-
-            if (string.IsNullOrEmpty(settings.ApiKey))
-            {
-                throw new ArgumentNullException(nameof(settings.ApiKey), "Novu API Key is not configured. Please check NovuSettings in appsettings.json or environment variables.");
-            }
-
-            // logger.LogInformation("NovuSDK secretKey: ", settings.ApiKey);
-            return new NovuSDK(secretKey: settings.ApiKey);
-        });
-
-        // 3. Register NovuNotificationProvider as INotificationProvider
-        services.AddScoped<INotificationProvider, NovuNotificationProvider>();
-
-        return services;
-    }
 
 
 }

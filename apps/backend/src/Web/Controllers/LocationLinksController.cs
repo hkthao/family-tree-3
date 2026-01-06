@@ -9,7 +9,7 @@ using backend.Application.LocationLinks.Queries.GetLocationLinks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace FamilyTree.Web.Controllers;
+namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/location-links")]

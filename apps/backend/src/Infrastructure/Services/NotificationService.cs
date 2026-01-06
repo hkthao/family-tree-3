@@ -1,0 +1,136 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
+using System.Text.Json;
+
+namespace backend.Infrastructure.Services;
+
+public class NotificationService : INotificationService
+{
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<NotificationService> _logger;
+    private readonly NotificationSettings _settings;
+
+    public NotificationService(
+        HttpClient httpClient,
+        ILogger<NotificationService> logger,
+        IOptions<NotificationSettings> settings)
+    {
+        _httpClient = httpClient;
+        _logger = logger;
+        _settings = settings.Value;
+
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogWarning("NotificationService BaseUrl is not configured.");
+            _httpClient.BaseAddress = new Uri("http://localhost:3000"); // Fallback for development
+        }
+        else
+        {
+            _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
+        }
+    }
+
+    public async Task<Result> SyncSubscriberAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var requestBody = new { userId = userId };
+            var response = await _httpClient.PostAsJsonAsync("/subscribers/sync", requestBody, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully synced subscriber {UserId}. Response: {Response}", userId, content);
+            return Result.Success();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request failed while syncing subscriber {UserId}.", userId);
+            return Result.Failure($"Failed to sync subscriber: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+        }
+    }
+
+    public async Task<Result> SaveExpoPushTokenAsync(string userId, string expoPushToken, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var requestBody = new { userId = userId, expoPushToken = expoPushToken };
+            var response = await _httpClient.PostAsJsonAsync("/subscribers/expo-token", requestBody, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully saved Expo Push Token for subscriber {UserId}. Response: {Response}", userId, content);
+            return Result.Success();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request failed while saving Expo Push Token for subscriber {UserId}.", userId);
+            return Result.Failure($"Failed to save Expo Push Token: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while saving Expo Push Token for subscriber {UserId}.", userId);
+            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+        }
+    }
+
+    public async Task<Result> DeleteExpoPushTokenAsync(string userId, string expoPushToken, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // For DELETE with body, HttpClient.SendAsync is needed with HttpMethod.Delete
+            var request = new HttpRequestMessage(HttpMethod.Delete, "/subscribers/expo-token")
+            {
+                Content = JsonContent.Create(new { userId = userId, expoPushToken = expoPushToken })
+            };
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully deleted Expo Push Token for subscriber {UserId}. Response: {Response}", userId, content);
+            return Result.Success();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request failed while deleting Expo Push Token for subscriber {UserId}.", userId);
+            return Result.Failure($"Failed to delete Expo Push Token: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting Expo Push Token for subscriber {UserId}.", userId);
+            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+        }
+    }
+
+    public async Task<Result> SendNotificationAsync(string workflowId, string userId, object payload, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var requestBody = new { workflowId = workflowId, userId = userId, payload = payload };
+            var response = await _httpClient.PostAsJsonAsync("/notifications/send", requestBody, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully sent notification for workflow {WorkflowId} to subscriber {UserId}. Response: {Response}", workflowId, userId, content);
+            return Result.Success();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP request failed while sending notification for workflow {WorkflowId} to subscriber {UserId}.", workflowId, userId);
+            return Result.Failure($"Failed to send notification: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while sending notification for workflow {WorkflowId} to subscriber {UserId}.", workflowId, userId);
+            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+        }
+    }
+}

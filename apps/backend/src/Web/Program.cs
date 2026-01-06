@@ -154,7 +154,6 @@ public class Startup
         app.UseRequestLocalization(localizationOptions);
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();
-        app.UseMiddleware<NovuSubscriberCreationMiddleware>();
         app.UseAuthorization();
         app.UseExceptionHandler(options => { });
         app.UseEndpoints(endpoints =>

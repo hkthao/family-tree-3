@@ -4,7 +4,7 @@ using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Http; // Added back
 using Microsoft.Extensions.Options;
 
-namespace FamilyTree.Infrastructure.Services;
+namespace backend.Infrastructure.Services;
 
 public class ImgbbImageUploadService : IImageUploadService
 {

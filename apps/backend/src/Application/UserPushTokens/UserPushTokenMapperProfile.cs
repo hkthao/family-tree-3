@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.UserPushTokens.Commands;
 using backend.Application.UserPushTokens.DTOs;
 using backend.Domain.Entities;
