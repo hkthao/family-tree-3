@@ -12,6 +12,10 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<User> Users { get; }
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể UserPushToken.
+    /// </summary>
+    DbSet<UserPushToken> UserPushTokens { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
     DbSet<Family> Families { get; }

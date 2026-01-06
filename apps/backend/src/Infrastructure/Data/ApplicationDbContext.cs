@@ -27,6 +27,10 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<User> Users => Set<User>();
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể UserPushToken.
+    /// </summary>
+    public DbSet<UserPushToken> UserPushTokens => Set<UserPushToken>();
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Member.
     /// </summary>
     public DbSet<Member> Members => Set<Member>();
