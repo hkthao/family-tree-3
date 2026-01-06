@@ -33,7 +33,7 @@
     @show-member-detail-drawer="handleShowMemberDetailDrawer" :read-only="props.readOnly" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
     @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember"
-    :read-only="props.readOnly" />
+    :read-only="props.readOnly" :root-id="selectedRootMemberId ?? undefined" />
 
   <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650" v-if="canAddMember">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"

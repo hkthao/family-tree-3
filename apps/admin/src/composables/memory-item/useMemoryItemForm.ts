@@ -22,6 +22,24 @@ const ACCEPTED_MIME_TYPES = [
 
 
 
+// Helper to convert string to MediaType enum
+const getMediaTypeFromString = (typeString: string): MediaType => {
+  const normalizedType = typeString.toLowerCase();
+  switch (normalizedType) {
+    case 'image':
+      return MediaType.Image;
+    case 'video':
+      return MediaType.Video;
+    case 'audio':
+      return MediaType.Audio;
+    case 'document':
+      return MediaType.Document;
+    case 'other':
+    default:
+      return MediaType.Other;
+  }
+};
+
 // --- Conversion Functions ---
 // Converts MemoryMedia to FamilyMedia (for internal use and MediaInput)
 const toLocalMemoryMedia = (memoryMediaItem: BaseMemoryMedia, familyId: string): FamilyMedia => {
@@ -45,7 +63,7 @@ const toMemoryMedia = (familyMediaItem: FamilyMedia): BaseMemoryMedia => {
     id: familyMediaItem.id,
     memoryItemId: familyMediaItem.familyId || '', // Map familyId back to memoryItemId, ensure it's not null
     url: familyMediaItem.filePath,
-    type: familyMediaItem.mediaType?.toString(), // Convert MediaType enum to string
+    type: familyMediaItem.mediaType,
     created: familyMediaItem.created,
     createdBy: familyMediaItem.createdBy,
     lastModified: familyMediaItem.lastModified,
@@ -200,7 +218,7 @@ export function useMemoryItemForm(options: UseMemoryItemFormOptions) {
         familyId: options.familyId,
         fileName: item.url.substring(item.url.lastIndexOf('/') + 1), // Derive fileName from URL
         filePath: item.url,
-        mediaType: item.type as MediaType || MediaType.Other, // Map MediaItem.type directly
+        mediaType: getMediaTypeFromString(item.type),
         fileSize: 0,
         // Add BaseAuditableEntity properties if MediaItem has them, otherwise initialize to null/undefined
         created: undefined,

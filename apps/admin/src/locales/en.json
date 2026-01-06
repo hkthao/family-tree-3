@@ -447,7 +447,6 @@
   "family.list.action.create": "Add New Family",
   "family.manageFamilies": "Manage Families",
   "menu.community": "Community",
-
   "family.manageMembers": "Manage Members",
   "family.management.filterLabel": "Filter by Visibility",
   "family.management.headers.actions": "Actions",
@@ -1000,7 +999,6 @@
   "menu.prompts": "Prompts",
   "menu.supportAndInfo": "Support & Info",
   "menu.system": "System",
-  "menu.utilitiesAndAI": "Utilities & AI",
   "n8nChat.welcomeMessage": "Welcome to Family Tree App! I'm your AI assistant, ready to help you explore your family history. What can I assist you with today? 🌳",
   "n8nChat.familySelectionLabel": "Select family to query",
   "n8nChat.en.title": "AI Family Tree Assistant",
@@ -1260,10 +1258,10 @@
   "version.info.environment": "Environment:",
   "version.info.frontendVersion": "Frontend Version:",
   "version.title": "App Version",
-      "familyLocation": {
-      "search": {
-        "reset": "Reset Filters"
-      }
-    },
-    "mediaPicker.noMedia": "No media to display."
-  }
+  "faceDataConsent.title": "🔒 Face Data Consent",
+  "faceDataConsent.content": "Dòng Họ Việt uses the facial images you provide solely for creating and managing personal profiles within the family tree. This data is not used for biometric identification, advertising, or shared with third parties. You may edit or delete your facial data at any time in your account settings.",
+  "faceDataConsent.agreeButton": "I Agree",
+  "faceDataConsent.cancelButton": "Cancel",
+  "faceDataConsent.privacyPolicyLink": "See more at Privacy Policy",
+  "faceDataConsent.deniedMessage": "You denied consent. Face data operation cannot proceed."
+}

@@ -26,6 +26,7 @@
               :members="members"
               :isMobile="true"
               :relationships="relationships"
+              :root-id="rootId"
             />
             <v-alert v-else type="info" prominent>{{ t('familyTree.noDataMessage') }}</v-alert>
           </v-window-item>

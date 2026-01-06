@@ -952,8 +952,8 @@
   "familyTree.fullName": "Họ và tên",
   "familyTree.noMembersMessage": "Chưa có thành viên nào trong gia đình này. Hãy thêm một thành viên để bắt đầu!",
   "familyTree.searchMember": "Tìm kiếm thành viên",
-  "familyTree.tab.forceDirected": "Biểu đồ Lực đẩy",
-  "familyTree.tab.hierarchical": "Biểu đồ Phân cấp",
+  "familyTree.tab.forceDirected": "Mạng lưới",
+  "familyTree.tab.hierarchical": "Phân cấp",
   "familyTree.noDataMessage": "Không có dữ liệu cây gia phả. Vui lòng đảm bảo dữ liệu gia đình được tải đúng cách.",
   "familyTree.title": "Cây Gia Phả",
   "faq.description": "Tại đây bạn có thể tìm thấy câu trả lời cho những câu hỏi phổ biến nhất về cách sử dụng Ứng dụng Cây Gia Phả của chúng tôi.",
@@ -1701,5 +1701,14 @@
   "version.info.environment": "Môi trường:",
   "version.info.frontendVersion": "Phiên bản Frontend:",
   "version.title": "Phiên bản ứng dụng",
-  "mediaPicker.noMedia": "Không có media nào để hiển thị."
+  "faceDataConsent.title": "🔒 Xác nhận sử dụng dữ liệu khuôn mặt",
+  "faceDataConsent.content": "Ứng dụng Dòng Họ Việt sử dụng hình ảnh khuôn mặt bạn cung cấp chỉ nhằm mục đích tạo và quản lý hồ sơ cá nhân trong cây gia phả. Dữ liệu này không được sử dụng cho nhận diện sinh trắc học, quảng cáo hoặc chia sẻ cho bên thứ ba. Bạn có thể chỉnh sửa hoặc xóa dữ liệu khuôn mặt bất kỳ lúc nào trong phần quản lý tài khoản.",
+  "faceDataConsent.agreeButton": "Tôi đồng ý",
+  "faceDataConsent.cancelButton": "Hủy",
+  "faceDataConsent.grantConsent": "Đồng ý",
+  "faceDataConsent.denyConsent": "Từ chối",
+  "faceDataConsent.grantSuccess": "Đã cấp quyền thành công!",
+  "faceDataConsent.denySuccess": "Đã từ chối cấp quyền!",
+  "faceDataConsent.privacyPolicyLink": "Xem thêm tại Chính sách quyền riêng tư",
+  "faceDataConsent.deniedMessage": "Bạn đã từ chối cung cấp sự đồng ý. Không thể tiếp tục thao tác dữ liệu khuôn mặt."
 }
