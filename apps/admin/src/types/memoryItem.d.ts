@@ -5,6 +5,10 @@ export interface MemoryMedia {
   memoryItemId: string;
   url: string;
   type: MediaType; // Changed from string to MediaType
+  created?: Date;
+  createdBy?: string;
+  lastModified?: Date;
+  lastModifiedBy?: string;
 }
 
 export interface MemoryPerson {

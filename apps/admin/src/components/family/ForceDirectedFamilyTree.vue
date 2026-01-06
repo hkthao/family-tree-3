@@ -2,7 +2,8 @@
   <div ref="chartContainer" :style="{
     width: '100%',
     height: props.isMobile ? '95vh' : '80vh' // Dynamic height based on isMobile prop
-  }" data-testid="family-tree-canvas"></div>
+  }" data-testid="family-tree-canvas">
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -20,6 +21,7 @@ const props = defineProps({
   members: { type: Array<MemberDto>, default: () => [] },
   relationships: { type: Array<Relationship>, default: () => [] },
   isMobile: { type: Boolean, default: false }, // New prop
+  rootId: { type: String, default: null }, // New prop for filtering
 });
 
 const emit = defineEmits([
@@ -46,7 +48,81 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 }
 
 const transformData = (members: MemberDto[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
-  const nodes: GraphNode[] = members.map(m => ({
+  let filteredMembers = [...members];
+  let filteredRelationships = [...relationships];
+
+  if (props.rootId) {
+    const rootMember = members.find(m => String(m.id) === props.rootId);
+    if (!rootMember) {
+      console.warn(`Root member with ID ${props.rootId} not found.`);
+      return { nodes: [], links: [] };
+    }
+
+    const childrenMap = new Map<string, string[]>(); // parentId -> childIds
+    const parentsMap = new Map<string, string[]>(); // childId -> parentIds
+    const spousesMap = new Map<string, string[]>(); // memberId -> spouseIds
+
+    relationships.forEach(rel => {
+      const sourceId = String(rel.sourceMemberId);
+      const targetId = String(rel.targetMemberId);
+
+      if (rel.type === RelationshipType.Husband || rel.type === RelationshipType.Wife) {
+        if (!spousesMap.has(sourceId)) spousesMap.set(sourceId, []);
+        spousesMap.get(sourceId)!.push(targetId);
+        if (!spousesMap.has(targetId)) spousesMap.set(targetId, []);
+        spousesMap.get(targetId)!.push(sourceId);
+      } else if (rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother) {
+        if (!childrenMap.has(sourceId)) childrenMap.set(sourceId, []);
+        childrenMap.get(sourceId)!.push(targetId);
+        if (!parentsMap.has(targetId)) parentsMap.set(targetId, []);
+        parentsMap.get(targetId)!.push(sourceId);
+      }
+    });
+
+    const relatedMemberIds = new Set<string>();
+
+    const addMemberAndSpouses = (memberId: string) => {
+      if (!relatedMemberIds.has(memberId)) {
+        relatedMemberIds.add(memberId);
+        (spousesMap.get(memberId) || []).forEach(spouseId => {
+          relatedMemberIds.add(spouseId);
+        });
+      }
+    };
+
+    const findAncestors = (memberId: string) => {
+      addMemberAndSpouses(memberId);
+      (parentsMap.get(memberId) || []).forEach(parentId => {
+        if (!relatedMemberIds.has(parentId)) { // Prevent reprocessing already added members
+          findAncestors(parentId);
+        }
+      });
+    };
+
+    const findDescendants = (memberId: string) => {
+      addMemberAndSpouses(memberId);
+      (childrenMap.get(memberId) || []).forEach(childId => {
+        if (!relatedMemberIds.has(childId)) { // Prevent reprocessing already added members
+          findDescendants(childId);
+        }
+      });
+    };
+
+    findAncestors(props.rootId);
+    findDescendants(props.rootId);
+
+    // Also explicitly add spouses of the root if not already added by ancestor/descendant traversal
+    (spousesMap.get(props.rootId) || []).forEach(spouseId => {
+      relatedMemberIds.add(spouseId);
+    });
+
+    filteredMembers = members.filter(m => relatedMemberIds.has(String(m.id)));
+    filteredRelationships = relationships.filter(rel =>
+      relatedMemberIds.has(String(rel.sourceMemberId)) && relatedMemberIds.has(String(rel.targetMemberId))
+    );
+  }
+
+  const nodes: GraphNode[] = filteredMembers.map(m => ({
     id: String(m.id),
     name: m.fullName || `${m.firstName} ${m.lastName}`,
     gender: m.gender,
@@ -60,14 +136,18 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   const links: GraphLink[] = [];
   const spouseLinks = new Set<string>();
 
-  relationships.forEach(rel => {
+  filteredRelationships.forEach(rel => {
     const sourceId = String(rel.sourceMemberId);
     const targetId = String(rel.targetMemberId);
+
+    // Ensure both source and target nodes exist in the filtered set
+    if (!nodeMap.has(sourceId) || !nodeMap.has(targetId)) {
+      return;
+    }
 
     switch (rel.type) {
       case RelationshipType.Husband:
       case RelationshipType.Wife: {
-        // Ensure spouse links are added only once for a couple
         const linkKey1 = `${sourceId}-${targetId}`;
         const linkKey2 = `${targetId}-${sourceId}`;
         if (!spouseLinks.has(linkKey1) && !spouseLinks.has(linkKey2)) {
@@ -85,7 +165,7 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   });
 
   // Calculate depth based on new relationships
-  const parentChildRelationships = relationships.filter(rel => rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother);
+  const parentChildRelationships = filteredRelationships.filter(rel => rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother);
   const childrenOf = new Map<string, string[]>(); // Map parentId to array of childIds
   const parentsOf = new Map<string, string[]>(); // Map childId to array of parentIds
 
@@ -100,20 +180,20 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   });
 
   const roots = nodes.filter(n => !parentsOf.has(n.id));
-  const queue: { node: GraphNode; depth: number }[] = roots.map(r => ({ node: r, depth: 0 }));
-  const visited = new Set<string>();
+  const queueDepth: { node: GraphNode; depth: number }[] = roots.map(r => ({ node: r, depth: 0 }));
+  const visitedDepth = new Set<string>();
 
-  while (queue.length > 0) {
-    const { node, depth } = queue.shift()!;
-    if (visited.has(node.id)) continue;
-    visited.add(node.id);
+  while (queueDepth.length > 0) {
+    const { node, depth } = queueDepth.shift()!;
+    if (visitedDepth.has(node.id)) continue;
+    visitedDepth.add(node.id);
     node.depth = depth;
 
     const childrenIds = childrenOf.get(node.id) || [];
     childrenIds.forEach(childId => {
       const childNode = nodeMap.get(childId);
       if (childNode) {
-        queue.push({ node: childNode, depth: depth + 1 });
+        queueDepth.push({ node: childNode, depth: depth + 1 });
       }
     });
   }
@@ -123,7 +203,7 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
     if (n.depth === -1) n.depth = 0; // Assign a default depth
   });
 
-  // Filter out links that refer to non-existent nodes
+  // Filter out links that refer to non-existent nodes (already handled implicitly by filtering relationships)
   const validLinks = links.filter(link => {
     const sourceNode = nodeMap.get(String(link.source));
     const targetNode = nodeMap.get(String(link.target));
@@ -361,7 +441,7 @@ onMounted(async () => {
   }
 });
 
-watch([() => props.members, () => props.relationships], ([newMembers, newRelationships]) => {
+watch([() => props.members, () => props.relationships, () => props.rootId], ([newMembers, newRelationships]) => {
   if (newMembers && newMembers.length > 0) {
     const { nodes, links } = transformData(newMembers, newRelationships);
     renderChart(nodes, links);
