@@ -1,52 +1,32 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-    lazy-validation
-    data-testid="user-push-token-form"
-  >
-    <v-text-field
-      v-model="formData.userId"
-      :label="t('userPushToken.form.userId')"
-      :rules="userIdRules"
-      required
-      :readonly="readOnly || isEditing"
-      data-testid="user-push-token-form-userId"
-    ></v-text-field>
-
-    <v-text-field
-      v-model="formData.expoPushToken"
-      :label="t('userPushToken.form.expoPushToken')"
-      :rules="expoPushTokenRules"
-      required
-      :readonly="readOnly"
-      data-testid="user-push-token-form-expoPushToken"
-    ></v-text-field>
-
-    <v-text-field
-      v-model="formData.platform"
-      :label="t('userPushToken.form.platform')"
-      :rules="platformRules"
-      required
-      :readonly="readOnly"
-      data-testid="user-push-token-form-platform"
-    ></v-text-field>
-
-    <v-text-field
-      v-model="formData.deviceId"
-      :label="t('userPushToken.form.deviceId')"
-      :rules="deviceIdRules"
-      required
-      :readonly="readOnly || isEditing"
-      data-testid="user-push-token-form-deviceId"
-    ></v-text-field>
-
-    <v-checkbox
-      v-model="formData.isActive"
-      :label="t('userPushToken.form.isActive')"
-      :readonly="readOnly"
-      data-testid="user-push-token-form-isActive"
-    ></v-checkbox>
+  <v-form ref="form" v-model="valid" lazy-validation data-testid="user-push-token-form">
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.userId" :label="t('userPushToken.form.userId')" :rules="userIdRules" required
+          :readonly="readOnly || isEditing" data-testid="user-push-token-form-userId"></v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.expoPushToken" :label="t('userPushToken.form.expoPushToken')"
+          :rules="expoPushTokenRules" required :readonly="readOnly"
+          data-testid="user-push-token-form-expoPushToken"></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.platform" :label="t('userPushToken.form.platform')" :rules="platformRules"
+          required :readonly="readOnly" data-testid="user-push-token-form-platform"></v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.deviceId" :label="t('userPushToken.form.deviceId')" :rules="deviceIdRules"
+          required :readonly="readOnly || isEditing" data-testid="user-push-token-form-deviceId"></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox v-model="formData.isActive" :label="t('userPushToken.form.isActive')" :readonly="readOnly"
+          data-testid="user-push-token-form-isActive"></v-checkbox>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -81,12 +61,12 @@ const formData = reactive<CreateUserPushTokenCommand | UpdateUserPushTokenComman
   props.initialData
     ? { ...props.initialData }
     : {
-        userId: '',
-        expoPushToken: '',
-        platform: '',
-        deviceId: '',
-        isActive: true,
-      },
+      userId: '',
+      expoPushToken: '',
+      platform: '',
+      deviceId: '',
+      isActive: true,
+    },
 );
 
 const userIdRules = [

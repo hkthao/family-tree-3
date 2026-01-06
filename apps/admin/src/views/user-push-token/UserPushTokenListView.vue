@@ -55,8 +55,6 @@ import UserPushTokenList from '@/components/user-push-token/UserPushTokenList.vu
 import UserPushTokenAddView from './UserPushTokenAddView.vue';
 import UserPushTokenEditView from './UserPushTokenEditView.vue';
 import UserPushTokenDetailView from './UserPushTokenDetailView.vue';
-import { useRouter } from 'vue-router';
-
 interface UserPushTokenListViewProps {
   userId: string;
 }
@@ -67,16 +65,8 @@ const { t } = useI18n();
 const queryClient = useQueryClient();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
-const router = useRouter();
 
 const userIdRef = ref(props.userId);
-
-const paginationOptions = ref({
-  page: 1,
-  itemsPerPage: 10,
-  sortBy: [],
-});
-const filters = ref({});
 
 const {
   state: { userPushTokens: fetchedUserPushTokens, isLoading: isLoadingUserPushTokens },
