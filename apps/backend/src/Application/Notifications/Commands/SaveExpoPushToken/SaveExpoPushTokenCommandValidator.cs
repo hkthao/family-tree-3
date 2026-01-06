@@ -6,8 +6,5 @@ public class SaveExpoPushTokenCommandValidator : AbstractValidator<SaveExpoPushT
     {
         RuleFor(v => v.UserId)
             .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(v => v.ExpoPushToken)
-            .NotEmpty().WithMessage("Expo Push Token is required.");
     }
 }

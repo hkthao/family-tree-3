@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
+using backend.Application.Notifications.DTOs; // New using directive
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
@@ -12,12 +13,12 @@ public class NotificationService : INotificationService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<NotificationService> _logger;
-    private readonly NotificationSettings _settings;
+    private readonly NotificationSettings _settings; // Changed to NotificationSettings
 
     public NotificationService(
         HttpClient httpClient,
         ILogger<NotificationService> logger,
-        IOptions<NotificationSettings> settings)
+        IOptions<NotificationSettings> settings) // Changed to NotificationSettings
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -25,7 +26,7 @@ public class NotificationService : INotificationService
 
         if (string.IsNullOrEmpty(_settings.BaseUrl))
         {
-            _logger.LogWarning("NotificationService BaseUrl is not configured.");
+            _logger.LogWarning("NotificationService BaseUrl is not configured, falling back to default."); // Updated message
             _httpClient.BaseAddress = new Uri("http://localhost:3000"); // Fallback for development
         }
         else
@@ -34,21 +35,31 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<Result> SyncSubscriberAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<Result> SyncSubscriberAsync(SyncSubscriberDto subscriberDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var requestBody = new { userId = userId };
+            var requestBody = new
+            {
+                userId = subscriberDto.UserId,
+                firstName = subscriberDto.FirstName,
+                lastName = subscriberDto.LastName,
+                email = subscriberDto.Email,
+                phone = subscriberDto.Phone,
+                avatar = subscriberDto.Avatar,
+                locale = subscriberDto.Locale,
+                timezone = subscriberDto.Timezone
+            };
             var response = await _httpClient.PostAsJsonAsync("/subscribers/sync", requestBody, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully synced subscriber {UserId}. Response: {Response}", userId, content);
+            _logger.LogInformation("Successfully synced subscriber {UserId}. Response: {Response}", subscriberDto.UserId, content);
             return Result.Success();
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "HTTP request failed while syncing subscriber {UserId}.", userId);
+            _logger.LogError(ex, "HTTP request failed while syncing subscriber {UserId}.", subscriberDto.UserId);
             return Result.Failure($"Failed to sync subscriber: {ex.Message}");
         }
         catch (Exception ex)
@@ -57,31 +68,31 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<Result> SaveExpoPushTokenAsync(string userId, string expoPushToken, CancellationToken cancellationToken = default)
+    public async Task<Result> SaveExpoPushTokenAsync(string userId, List<string?> expoPushTokens, CancellationToken cancellationToken = default)
     {
         try
         {
-            var requestBody = new { userId = userId, expoPushToken = expoPushToken };
+            var requestBody = new { userId = userId, expoPushTokens = expoPushTokens };
             var response = await _httpClient.PostAsJsonAsync("/subscribers/expo-token", requestBody, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully saved Expo Push Token for subscriber {UserId}. Response: {Response}", userId, content);
+            _logger.LogInformation("Successfully saved Expo Push Tokens for subscriber {UserId}. Response: {Response}", userId, content);
             return Result.Success();
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "HTTP request failed while saving Expo Push Token for subscriber {UserId}.", userId);
-            return Result.Failure($"Failed to save Expo Push Token: {ex.Message}");
+            _logger.LogError(ex, "HTTP request failed while saving Expo Push Tokens for subscriber {UserId}.", userId);
+            return Result.Failure($"Failed to save Expo Push Tokens: {ex.Message}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while saving Expo Push Token for subscriber {UserId}.", userId);
+            _logger.LogError(ex, "An unexpected error occurred while saving Expo Push Tokens for subscriber {UserId}.", userId);
             return Result.Failure($"An unexpected error occurred: {ex.Message}");
         }
     }
 
-    public async Task<Result> DeleteExpoPushTokenAsync(string userId, string expoPushToken, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteExpoPushTokenAsync(string userId, string? expoPushToken, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -110,7 +121,7 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<Result> SendNotificationAsync(string workflowId, string userId, object payload, CancellationToken cancellationToken = default)
+    public async Task<Result> SendNotificationAsync(string workflowId, string userId, object? payload, CancellationToken cancellationToken = default)
     {
         try
         {

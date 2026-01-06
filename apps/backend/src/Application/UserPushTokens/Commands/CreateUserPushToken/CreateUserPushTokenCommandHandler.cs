@@ -1,19 +1,24 @@
+using backend.Application.Notifications.Commands.SyncSubscriber; // New using directive
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using backend.Application.Notifications.Commands.SaveExpoPushToken; // New using directive
 
 namespace backend.Application.UserPushTokens.Commands.CreateUserPushToken;
 
-public class CreateUserPushTokenCommandHandler(IApplicationDbContext context, ICurrentUser currentUser) : IRequestHandler<CreateUserPushTokenCommand, Result<Guid>>
+public class CreateUserPushTokenCommandHandler(IApplicationDbContext context, ICurrentUser currentUserService, IMediator mediator, ILogger<CreateUserPushTokenCommandHandler> logger) : IRequestHandler<CreateUserPushTokenCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser _currentUser = currentUser;
+    private readonly ICurrentUser _currentUserService = currentUserService;
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<CreateUserPushTokenCommandHandler> _logger = logger; // Injected logger
 
     public async Task<Result<Guid>> Handle(CreateUserPushTokenCommand request, CancellationToken cancellationToken)
     {
         // Check if the current user is authorized to create a push token for the requested UserId
-        if (_currentUser.UserId != request.UserId)
+        if (_currentUserService.UserId != request.UserId)
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
@@ -29,9 +34,10 @@ public class CreateUserPushTokenCommandHandler(IApplicationDbContext context, IC
             existingToken.UpdateToken(request.ExpoPushToken, request.Platform, true); // Ensure it's active
             _context.UserPushTokens.Update(existingToken);
             await _context.SaveChangesAsync(cancellationToken);
+            await _mediator.Send(new SyncSubscriberCommand(request.UserId), cancellationToken);
+            await _mediator.Send(new SaveExpoPushTokenCommand(request.UserId.ToString()), cancellationToken);
             return Result<Guid>.Success(existingToken.Id);
         }
-
 
         var entity = UserPushToken.Create(
             request.UserId,
@@ -42,7 +48,10 @@ public class CreateUserPushTokenCommandHandler(IApplicationDbContext context, IC
 
         _context.UserPushTokens.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
-
+        await _mediator.Send(new SyncSubscriberCommand(request.UserId), cancellationToken);
+        await _mediator.Send(new SaveExpoPushTokenCommand(request.UserId.ToString()), cancellationToken);
         return Result<Guid>.Success(entity.Id);
     }
+
+
 }
