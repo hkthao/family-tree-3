@@ -4,7 +4,9 @@
       :items="userPushTokens"
       :total-items="totalItems"
       :loading="isLoadingUserPushTokens"
+      :search-query="searchQuery"
       @update:options="handleListOptionsUpdate"
+      @update:search="handleSearchUpdate"
       @create="openAddDrawer()"
       @view="openDetailDrawer"
       @edit="openEditDrawer"
@@ -56,23 +58,22 @@ import UserPushTokenList from '@/components/user-push-token/UserPushTokenList.vu
 import UserPushTokenAddView from './UserPushTokenAddView.vue';
 import UserPushTokenEditView from './UserPushTokenEditView.vue';
 import UserPushTokenDetailView from './UserPushTokenDetailView.vue';
-interface UserPushTokenListViewProps {
-  userId: string;
-}
-
-const props = defineProps<UserPushTokenListViewProps>();
+// const props = defineProps<UserPushTokenListViewProps>(); // Removed userId prop
 
 const { t } = useI18n();
 const queryClient = useQueryClient();
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar();
 
-const userIdRef = ref(props.userId);
+const searchQuery = ref('');
+
+// const userIdRef = ref(props.userId); // Removed userId prop usage
+const userIdRef = ref<string | null>(null); // Initialize userIdRef as null to represent no specific user filter by default
 
 // Integrate useUserPushTokenDataManagement
 const {
   state: { paginationOptions, filters },
-  actions: { setPage, setItemsPerPage, setSortBy },
+  actions: { setPage, setItemsPerPage, setSortBy, setFilters },
 } = useUserPushTokenDataManagement(userIdRef);
 
 const {
@@ -149,13 +150,18 @@ const handleUserPushTokenClosed = () => {
   closeAllDrawers();
 };
 
-watch(
-  () => props.userId,
-  (newUserId) => {
-    userIdRef.value = newUserId;
-    // refetch(); // Refetch is now handled by the useQuery's queryKey reactivity
-  },
-);
+const handleSearchUpdate = (newSearchQuery: string) => {
+  searchQuery.value = newSearchQuery;
+  setFilters({ search: newSearchQuery });
+};
+
+// watch(
+//   () => props.userId,
+//   (newUserId) => {
+//     userIdRef.value = newUserId;
+//     // refetch(); // Refetch is now handled by the useQuery's queryKey reactivity
+//   },
+// );
 
 </script>
 

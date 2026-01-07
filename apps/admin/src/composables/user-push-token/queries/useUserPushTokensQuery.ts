@@ -6,7 +6,7 @@ import type { ApiError } from '@/types/apiError';
 import type { Ref } from 'vue';
 
 export function useUserPushTokensQuery(
-  userId: Readonly<Ref<string>>,
+  userId: Readonly<Ref<string | undefined | null>>,
   paginationOptions: ListOptions,
   filters: FilterOptions,
 ) {
@@ -15,12 +15,12 @@ export function useUserPushTokensQuery(
   const queryResult = useQuery<Result<Paginated<UserPushTokenDto>, ApiError>, ApiError>({
     queryKey: ['user-push-tokens', userId, paginationOptions, filters],
     queryFn: () =>
-      userPushTokenService.getUserPushTokensByUserId(
+      userPushTokenService.searchUserPushTokens(
         userId.value,
         paginationOptions,
-        // filters, // Filters are not yet supported by the service method
+        filters,
       ),
-    enabled: computed(() => !!userId.value),
+    enabled: computed(() => userId.value !== undefined), // Only enable query if userId is explicitly set or null (to fetch all)
   });
 
   const userPushTokens = computed(() => {

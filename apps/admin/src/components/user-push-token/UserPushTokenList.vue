@@ -1,10 +1,10 @@
 <template>
   <ListToolbar :title="t('userPushToken.list.title')" :create-button-tooltip="t('common.add')"
     create-button-test-id="button-create-user-push-token" @create="emit('create')" :hide-create-button="!allowAdd"
-    :hide-search="false">
+    :hide-search="false" :search-query="searchQuery" @update:search="emit('update:search', $event)">
   </ListToolbar>
   <v-data-table-server data-testid="user-push-token-list" :headers="headers" :items="items" :items-length="totalItems"
-    :loading="loading" :search="search" item-value="id" @update:options="updateOptions">
+    :loading="loading" item-value="id" @update:options="updateOptions">
     <template v-slot:item.userId="{ item }">
       <router-link :to="{ name: 'UserProfile', params: { id: item.userId } }">
         {{ item.userId }}
@@ -49,7 +49,7 @@ interface UserPushTokenListProps {
   items: UserPushTokenDto[];
   totalItems: number;
   loading: boolean;
-  search?: string;
+  searchQuery?: string; // Add this prop
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
@@ -59,7 +59,7 @@ const {
   items,
   totalItems,
   loading,
-  search = '',
+  searchQuery = '', // Initialize with empty string
   allowAdd = true,
   allowEdit = true,
   allowDelete = true,
@@ -71,6 +71,7 @@ const emit = defineEmits([
   'view',
   'edit',
   'delete',
+  'update:search', // Add this emit
 ]);
 
 const { t } = useI18n();
