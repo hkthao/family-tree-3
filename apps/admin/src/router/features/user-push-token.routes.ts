@@ -1,20 +1,28 @@
 // apps/admin/src/router/features/user-push-token.routes.ts
 
+import { MainRouterView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 import UserPushTokenListView from '@/views/user-push-token/UserPushTokenListView.vue';
 
-const userRoutes: RouteRecordRaw[] = [
+export const userTokenRoutes: Array<RouteRecordRaw> = [
   {
-    path: '/users/:userId/push-tokens',
-    name: 'UserPushTokensList',
-    component: UserPushTokenListView,
-    props: true, // Pass route params as props to the component
+    path: '/user-push-tokens',
+    name: 'UserTokenRoute',
+    component: MainRouterView,
     meta: {
       requiresAuth: true,
-      hasPermission: ['ADMINISTRATOR'], // Restrict access to administrators
-      title: 'User Push Tokens',
+      roles: ['Admin'],
+      title: 'userToken.title',
     },
+    children: [{
+      path: '',
+      name: 'UserPushTokensList',
+      component: UserPushTokenListView,
+      meta: {
+        title: 'userToken.title',
+      },
+    }]
   },
 ];
 
-export default userRoutes;
+export default userTokenRoutes;
