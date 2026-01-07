@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Queries;
-using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById; // New using directive
+using backend.Application.Identity.UserProfiles.Queries.GetUserProfileByUserId;
 using backend.Application.Notifications.DTOs;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +18,7 @@ public class SyncSubscriberCommandHandler(INotificationService notificationServi
         UserProfileDto? userProfile = null;
 
         // Fetch user profile from the database
-        var userProfileQueryResult = await _mediator.Send(new GetUserProfileByIdQuery { Id = request.UserId }, cancellationToken);
+        var userProfileQueryResult = await _mediator.Send(new GetUserProfileByUserIdQuery { UserId = request.UserId }, cancellationToken);
         if (userProfileQueryResult.IsSuccess && userProfileQueryResult.Value != null)
         {
             userProfile = userProfileQueryResult.Value;
