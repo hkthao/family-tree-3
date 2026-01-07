@@ -5,17 +5,16 @@ using backend.Application.Notifications.Commands.SaveExpoPushToken;
 
 namespace backend.Application.UserPushTokens.Commands.DeleteUserPushToken;
 
-public class DeleteUserPushTokenCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IMediator mediator) : IRequestHandler<DeleteUserPushTokenCommand, Result>
+public class DeleteUserPushTokenCommandHandler(IApplicationDbContext context, IMediator mediator) : IRequestHandler<DeleteUserPushTokenCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser _currentUser = currentUser;
     private readonly IMediator _mediator = mediator; // Injected mediator
 
     public async Task<Result> Handle(DeleteUserPushTokenCommand request, CancellationToken cancellationToken)
     {
         // Check if the current user is authorized to delete this push token
         var entity = await _context.UserPushTokens
-            .Where(t => t.Id == request.Id && t.UserId == _currentUser.UserId)
+            .Where(t => t.Id == request.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (entity == null)
