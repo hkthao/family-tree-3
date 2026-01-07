@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/vue-query';
 import { useUserPushTokenApi } from '@/composables/user-push-token/useUserPushTokenApi';
 import type { ApiError } from '@/types/apiError';
-import type { Result } from '@/types';
 
 
 

@@ -572,6 +572,8 @@
   "family.management.add": "Thêm mới Gia đình",
   "family.management.filterLabel": "Lọc theo Chế độ",
   "family.updateLimits": "Cập nhật Giới hạn",
+  "family.follow": "Theo dõi",
+  "family.unfollow": "Hủy theo dõi",
   "family.management.headers.actions": "Hành động",
   "family.management.headers.avatar": "Ảnh đại diện",
   "family.management.headers.code": "Mã",

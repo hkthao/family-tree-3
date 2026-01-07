@@ -40,12 +40,13 @@ public class GetFollowStatusQueryHandlerTests : TestBase
         result.Value.NotifyEvent.Should().BeTrue(); // Expected True due to FamilyFollow.Create default
     }
 
-    // Test thất bại khi người dùng không theo dõi gia đình được chỉ định.
+    // Test thành công khi người dùng không theo dõi gia đình được chỉ định, nhưng vẫn trả về DTO với IsFollowing = false.
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotFollowingFamily()
+    public async Task Handle_ShouldReturnFamilyFollowDtoWithIsFollowingFalse_WhenUserIsNotFollowingFamily()
     {
         // Arrange
         var familyId = Guid.NewGuid(); // Not followed
+        var currentUserId = _mockUser.Object.UserId; // Get the current user ID
         var query = new GetFollowStatusQuery { FamilyId = familyId };
         var handler = new GetFollowStatusQueryHandler(_context, _mapper, _mockUser.Object);
 
@@ -54,7 +55,13 @@ public class GetFollowStatusQueryHandlerTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("is not following family");
+        result.IsSuccess.Should().BeTrue(); // Changed to BeTrue
+        result.Value.Should().NotBeNull(); // New assertion
+        result.Value!.FamilyId.Should().Be(familyId); // New assertion
+        result.Value.UserId.Should().Be(currentUserId); // New assertion
+        result.Value.IsFollowing.Should().BeFalse(); // New assertion
+        result.Value.NotifyBirthday.Should().BeFalse(); // New assertion based on default values
+        result.Value.NotifyDeathAnniversary.Should().BeFalse(); // New assertion based on default values
+        result.Value.NotifyEvent.Should().BeFalse(); // New assertion based on default values
     }
 }

@@ -33,6 +33,9 @@ import type { IUserPushTokenService } from './user-push-token/user-push-token.se
 import { ApiUserPushTokenService } from './user-push-token/api.user-push-token.service';
 import type { INotificationService } from './notification/notification.service.interface';
 import { ApiNotificationService } from './notification/api.notification.service';
+import type { IFamilyFollowService } from './familyFollow/familyFollow.service.interface';
+import { ApiFamilyFollowService } from './familyFollow/api.familyFollow.service';
+
 
 export type ServiceMode = 'real' | 'test';
 export interface AppServices {
@@ -55,6 +58,7 @@ export interface AppServices {
   voiceProfile: IVoiceProfileService;
   userPushToken: IUserPushTokenService;
   notification: INotificationService; // NEW: Add NotificationService
+  familyFollow: IFamilyFollowService; // NEW: Add FamilyFollowService
 }
 import apiClient from '@/plugins/axios';
 import type { IEventService } from './event/event.service.interface';
@@ -115,7 +119,7 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         ? new ApiFamilyLocationService(apiClient)
         : testServices?.familyLocation || new ApiFamilyLocationService(apiClient),
     memoryItem: // NEW: Assign MemoryItemService
-      mode === 'real'
+      mode === "real"
         ? new ApiMemoryItemService(apiClient)
         : testServices?.memoryItem || new ApiMemoryItemService(apiClient),
 
@@ -131,5 +135,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiNotificationService(apiClient)
         : testServices?.notification || new ApiNotificationService(apiClient),
+    familyFollow: // NEW: Assign FamilyFollowService
+      mode === 'real'
+        ? new ApiFamilyFollowService(apiClient)
+        : testServices?.familyFollow || new ApiFamilyFollowService(apiClient),
   };
 }

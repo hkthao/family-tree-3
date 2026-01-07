@@ -1,4 +1,4 @@
-import { ref, reactive, watch, type Ref } from 'vue';
+import { reactive, watch, type Ref } from 'vue';
 import type { ListOptions, FilterOptions } from '@/types/pagination.d'; // Use ListOptions and FilterOptions
 
 export const useUserPushTokenDataManagement = (_userId: Ref<string | undefined | null> | string | null) => { // Update userId type

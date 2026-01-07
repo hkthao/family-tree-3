@@ -88,10 +88,10 @@ const { t } = useI18n();
 const headers = computed(() => [
   { title: t('userPushToken.list.userId'), key: 'userId' },
   { title: t('userPushToken.list.expoPushToken'), key: 'expoPushToken' },
-  { title: t('userPushToken.list.platform'), key: 'platform', align: 'center', minWidth: 120 },
+  { title: t('userPushToken.list.platform'), key: 'platform', align: 'center' as const, minWidth: 120 },
   { title: t('userPushToken.list.deviceId'), key: 'deviceId' },
-  { title: t('userPushToken.list.isActive'), key: 'isActive', align: 'center', minWidth: 120  },
-  { title: t('common.actions'), key: 'actions', sortable: false, align: 'center' },
+  { title: t('userPushToken.list.isActive'), key: 'isActive', align: 'center' as const, minWidth: 120  },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'center' as const },
 ]);
 
 interface DataTableOptions {

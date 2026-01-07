@@ -1,8 +1,4 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.Common.Security;
 using backend.Application.Common.Models;
 
@@ -33,7 +29,15 @@ public class GetFollowStatusQueryHandler : IRequestHandler<GetFollowStatusQuery,
 
         if (familyFollow == null)
         {
-            return Result<FamilyFollowDto>.Failure($"User {currentUserId} is not following family {request.FamilyId}.");
+            return Result<FamilyFollowDto>.Success(new FamilyFollowDto
+            {
+                UserId = currentUserId,
+                FamilyId = request.FamilyId,
+                IsFollowing = false,
+                NotifyBirthday = false,
+                NotifyDeathAnniversary = false,
+                NotifyEvent = false
+            });
         }
 
         return Result<FamilyFollowDto>.Success(familyFollow);
