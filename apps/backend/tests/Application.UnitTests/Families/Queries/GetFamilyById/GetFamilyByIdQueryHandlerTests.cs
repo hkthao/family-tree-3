@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.Families.Dtos; // For FamilyUserDto
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.UnitTests.Common;

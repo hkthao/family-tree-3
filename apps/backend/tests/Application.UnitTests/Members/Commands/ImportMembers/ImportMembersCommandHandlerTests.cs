@@ -2,12 +2,9 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.ImportMembers;
 using backend.Application.Members.DTOs; // MemberImportDto is here
-using backend.Application.Members.Queries; // MemberListDto for RelatedMembers in EventDto, but not needed here.
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

@@ -1,7 +1,6 @@
 using System.Reflection;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;

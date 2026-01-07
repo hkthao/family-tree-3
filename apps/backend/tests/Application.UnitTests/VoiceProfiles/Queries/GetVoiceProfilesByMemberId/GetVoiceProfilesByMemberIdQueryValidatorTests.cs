@@ -1,11 +1,7 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfilesByMemberId;
 using backend.Domain.Entities;
-using FluentAssertions;
 using FluentValidation.TestHelper;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.VoiceProfiles.Queries.GetVoiceProfilesByMemberId;

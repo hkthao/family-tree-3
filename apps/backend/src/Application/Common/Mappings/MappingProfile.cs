@@ -33,8 +33,10 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
-using backend.Domain.Enums; // Add this using statement
 using backend.Domain.ValueObjects;
+using backend.Domain.Enums;
+using backend.Application.FamilyFollows;
+
 namespace backend.Application.Common.Mappings;
 
 public class MappingProfile : Profile
@@ -175,5 +177,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MotherId, opt => opt.Ignore())
             .ForMember(dest => dest.HusbandId, opt => opt.Ignore())
             .ForMember(dest => dest.WifeId, opt => opt.Ignore());
+
+        CreateMap<FamilyFollow, FamilyFollowDto>();
     }
 }

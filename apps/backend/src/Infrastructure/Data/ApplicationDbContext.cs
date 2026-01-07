@@ -50,6 +50,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyUser.
     /// </summary>
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyFollow.
+    /// </summary>
+    public DbSet<FamilyFollow> FamilyFollows => Set<FamilyFollow>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserActivity.
     /// </summary>

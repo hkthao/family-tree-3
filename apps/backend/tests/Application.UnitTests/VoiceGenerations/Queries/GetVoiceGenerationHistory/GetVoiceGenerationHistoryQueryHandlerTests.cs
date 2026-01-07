@@ -2,7 +2,6 @@ using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Queries.GetVoiceGenerationHistory;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace backend.Application.UnitTests.VoiceGenerations.Queries.GetVoiceGenerationHistory;

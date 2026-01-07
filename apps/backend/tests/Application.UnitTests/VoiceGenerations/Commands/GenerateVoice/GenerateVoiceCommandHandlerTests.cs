@@ -1,16 +1,10 @@
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Commands.GenerateVoice;
 using backend.Application.VoiceProfiles.DTOs;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.Protected; // Added for mocking protected members
 using Xunit;
