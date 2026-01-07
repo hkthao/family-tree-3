@@ -4,6 +4,8 @@ export interface MenuItem {
   titleKey: string;
   icon: string;
   to?: string;
+  href?: string;
+  target?: string;
   roles?: string[]; // Use string[] for roles
   exact?: boolean;
   badge?: {
@@ -87,14 +89,22 @@ const rawMenu: MenuSection[] = [
     titleKey: 'menu.supportAndInfo',
     items: [
       {
+        titleKey: 'menu.userGuide',
+        icon: 'mdi-book-open-outline',
+        href: 'https://blog.thaohk.com/category/huong-dan/',
+        target: '_blank',
+      },
+      {
         titleKey: 'menu.applicationInfo',
         icon: 'mdi-information-outline',
-        to: '/application-info',
+        href: 'https://donghoviet.thaohk.com/',
+        target: '_blank',
       },
       {
         titleKey: 'menu.supportAndLegal',
         icon: 'mdi-lifebuoy',
-        to: '/support-legal',
+        href: 'https://donghoviet.thaohk.com/terms-of-service',
+        target: '_blank',
       },
       {
         titleKey: 'menu.donate',
