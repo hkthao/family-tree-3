@@ -4,6 +4,7 @@ using backend.Application.UserPushTokens.Commands.DeleteUserPushToken;
 using backend.Application.UserPushTokens.Commands.UpdateUserPushToken;
 using backend.Application.UserPushTokens.Queries.GetUserPushTokenById;
 using backend.Application.UserPushTokens.Queries.GetUserPushTokensByUserId;
+using backend.Application.UserPushTokens.Queries.SearchUserPushTokens; // New using directive
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -56,6 +57,13 @@ public class UserPushTokensController(IMediator mediator, ILogger<UserPushTokens
     public async Task<IActionResult> GetUserPushTokensByUserId(Guid userId)
     {
         var result = await _mediator.Send(new GetUserPushTokensByUserIdQuery(userId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchUserPushTokens([FromQuery] SearchUserPushTokensQuery query)
+    {
+        var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);
     }
 }
