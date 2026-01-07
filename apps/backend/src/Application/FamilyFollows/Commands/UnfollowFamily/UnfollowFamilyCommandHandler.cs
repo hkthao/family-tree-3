@@ -1,10 +1,7 @@
 using backend.Application.Common.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Security;
 using backend.Application.Common.Models;
+using backend.Application.Common.Security;
 using backend.Domain.Events;
-using backend.Application.Common.Exceptions; // For NotFoundException, although returning Result.Failure is better
 
 namespace backend.Application.FamilyFollows.Commands.UnfollowFamily;
 

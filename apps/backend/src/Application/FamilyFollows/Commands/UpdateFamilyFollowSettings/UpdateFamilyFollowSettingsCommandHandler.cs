@@ -1,11 +1,7 @@
 using backend.Application.Common.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Security;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
+using backend.Application.Common.Security;
 using backend.Domain.Events;
-using System.Linq; // For LINQ operations
 
 namespace backend.Application.FamilyFollows.Commands.UpdateFamilyFollowSettings;
 

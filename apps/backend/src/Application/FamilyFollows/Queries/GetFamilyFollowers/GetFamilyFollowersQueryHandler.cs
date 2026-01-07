@@ -1,8 +1,4 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyFollows.Queries.GetFamilyFollowers;

@@ -1,6 +1,3 @@
-using AutoMapper;
-using backend.Domain.Entities;
-
 namespace backend.Application.FamilyFollows;
 
 public class FamilyFollowDto

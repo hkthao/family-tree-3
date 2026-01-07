@@ -1,10 +1,10 @@
-using backend.Application.Notifications.Commands.SyncSubscriber; // New using directive
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Notifications.Commands.SaveExpoPushToken; // New using directive
+using backend.Application.Notifications.Commands.SyncSubscriber; // New using directive
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using backend.Application.Notifications.Commands.SaveExpoPushToken; // New using directive
 
 namespace backend.Application.UserPushTokens.Commands.CreateUserPushToken;
 

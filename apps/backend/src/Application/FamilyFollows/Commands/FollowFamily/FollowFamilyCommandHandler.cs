@@ -1,11 +1,8 @@
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Security;
-using backend.Domain.Events;
 using backend.Application.Common.Models;
+using backend.Application.Common.Security;
+using backend.Domain.Entities;
+using backend.Domain.Events;
 
 namespace backend.Application.FamilyFollows.Commands.FollowFamily;
 
@@ -45,12 +42,12 @@ public class FollowFamilyCommandHandler : IRequestHandler<FollowFamilyCommand, R
 
         // Check if user is a member of the family (Scenario 2 from task.md)
         var isMember = await _context.FamilyUsers.AnyAsync(fu => fu.UserId == currentUserId && fu.FamilyId == request.FamilyId, cancellationToken);
-        
+
         var entity = FamilyFollow.Create(currentUserId, request.FamilyId);
         entity.NotifyDeathAnniversary = request.NotifyDeathAnniversary;
         entity.NotifyBirthday = request.NotifyBirthday;
         entity.NotifyEvent = request.NotifyEvent;
-        
+
         _context.FamilyFollows.Add(entity);
 
         // Add domain event for successful follow

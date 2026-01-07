@@ -1,8 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Notifications.Commands.SyncSubscriber;
-using backend.Application.UserPushTokens.Commands.SyncCurrentUserPushToken; // New using directive
 using backend.Application.UserPushTokens.Commands.RemoveCurrentUserPushToken; // Changed using directive
+using backend.Application.UserPushTokens.Commands.SyncCurrentUserPushToken; // New using directive
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -2,9 +2,9 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Events.Specifications; // Add this using statement
 using backend.Domain.Entities; // Add this using statement
 using backend.Domain.Enums; // Add this
-using backend.Application.Events.Specifications; // Add this using statement
 using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Application.Events.Commands.UpdateEvent;

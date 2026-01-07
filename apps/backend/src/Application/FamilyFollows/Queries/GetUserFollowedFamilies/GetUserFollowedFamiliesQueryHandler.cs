@@ -1,10 +1,6 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Security;
 using backend.Application.Common.Models;
+using backend.Application.Common.Security;
 
 namespace backend.Application.FamilyFollows.Queries.GetUserFollowedFamilies;
 

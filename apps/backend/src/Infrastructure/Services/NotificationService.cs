@@ -1,11 +1,11 @@
+using System.Net.Http.Json;
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Notifications.DTOs; // New using directive
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace backend.Infrastructure.Services;
 

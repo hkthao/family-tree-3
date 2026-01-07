@@ -1,11 +1,11 @@
 using backend.Application.Common.Models;
+using backend.Application.FamilyFollows; // Added for FamilyFollowDto
 using backend.Application.FamilyFollows.Commands.FollowFamily;
 using backend.Application.FamilyFollows.Commands.UnfollowFamily;
 using backend.Application.FamilyFollows.Commands.UpdateFamilyFollowSettings;
+using backend.Application.FamilyFollows.Queries.GetFamilyFollowers;
 using backend.Application.FamilyFollows.Queries.GetFollowStatus;
 using backend.Application.FamilyFollows.Queries.GetUserFollowedFamilies;
-using backend.Application.FamilyFollows.Queries.GetFamilyFollowers;
-using backend.Application.FamilyFollows; // Added for FamilyFollowDto
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

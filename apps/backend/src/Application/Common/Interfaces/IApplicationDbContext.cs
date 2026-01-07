@@ -1,5 +1,4 @@
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore; // Added
 
 namespace backend.Application.Common.Interfaces;
 
@@ -40,7 +39,7 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyUser.
     /// </summary>
     DbSet<FamilyUser> FamilyUsers { get; }
-    
+
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyFollow.
     /// </summary>

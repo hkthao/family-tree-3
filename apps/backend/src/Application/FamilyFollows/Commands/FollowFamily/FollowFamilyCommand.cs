@@ -1,5 +1,3 @@
-using backend.Application.Common.Interfaces;
-using MediatR;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyFollows.Commands.FollowFamily;

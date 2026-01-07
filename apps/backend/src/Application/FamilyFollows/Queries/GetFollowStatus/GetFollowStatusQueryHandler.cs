@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Security;
 using backend.Application.Common.Models;
+using backend.Application.Common.Security;
 
 namespace backend.Application.FamilyFollows.Queries.GetFollowStatus;
 
