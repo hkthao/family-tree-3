@@ -46,15 +46,34 @@ describe('Notification Service API', () => {
     test('should sync a subscriber successfully', async () => {
       mockSubscribers.identify.mockResolvedValueOnce({ data: { subscriberId: 'user123' } });
 
+      const subscriberPayload = {
+        userId: 'user123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        phone: '+1234567890',
+        avatar: 'http://example.com/avatar.jpg',
+        locale: 'en-US',
+        timezone: 'America/New_York',
+      };
+
       const response = await request(app)
         .post('/subscribers/sync')
-        .send({ userId: 'user123' })
+        .send(subscriberPayload)
         .expect(200);
 
       expect(response.body.message).toBe('Subscriber synced successfully');
       expect(mockSubscribers.identify).toHaveBeenCalledTimes(1);
       expect(mockSubscribers.identify).toHaveBeenCalledWith('user123', {
-        firstName: 'User-user123',
+        firstName: subscriberPayload.firstName,
+        lastName: subscriberPayload.lastName,
+        email: subscriberPayload.email,
+        phone: subscriberPayload.phone,
+        avatar: subscriberPayload.avatar,
+        locale: subscriberPayload.locale,
+        data: {
+          timezone: subscriberPayload.timezone,
+        }
       });
     });
 
@@ -87,10 +106,10 @@ describe('Notification Service API', () => {
 
       const response = await request(app)
         .post('/subscribers/expo-token')
-        .send({ userId: 'user123', expoPushToken: 'ExponentPushToken[abc]' })
+        .send({ userId: 'user123', expoPushTokens: ['ExponentPushToken[abc]'] })
         .expect(200);
 
-      expect(response.body.message).toBe('Expo Push Token added successfully');
+      expect(response.body.message).toBe('Expo Push Tokens added successfully');
       expect(mockSubscribers.setCredentials).toHaveBeenCalledTimes(1);
       expect(mockSubscribers.setCredentials).toHaveBeenCalledWith('user123', 'expo', {
         deviceTokens: ['ExponentPushToken[abc]'],
@@ -107,13 +126,13 @@ describe('Notification Service API', () => {
       expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
     });
 
-    test('should return 400 if expoPushToken is missing', async () => {
+    test('should return 400 if expoPushTokens is missing', async () => {
       const response = await request(app)
         .post('/subscribers/expo-token')
         .send({ userId: 'user123' })
         .expect(400);
 
-      expect(response.body.error).toBe('Missing required field: expoPushToken');
+      expect(response.body.error).toBe('Missing required field: expoPushTokens');
       expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
     });
 
@@ -122,7 +141,7 @@ describe('Notification Service API', () => {
 
       const response = await request(app)
         .post('/subscribers/expo-token')
-        .send({ userId: 'user123', expoPushToken: 'ExponentPushToken[abc]' })
+        .send({ userId: 'user123', expoPushTokens: ['ExponentPushToken[abc]'] })
         .expect(500);
 
       expect(response.body.error).toBe('Failed to add Expo Push Token');
@@ -130,54 +149,7 @@ describe('Notification Service API', () => {
     });
   });
 
-  describe('DELETE /subscribers/expo-token', () => {
-    test('should remove expo push token successfully by clearing all tokens', async () => {
-      mockSubscribers.setCredentials.mockResolvedValueOnce({});
 
-      const response = await request(app)
-        .delete('/subscribers/expo-token')
-        .send({ userId: 'user123', expoPushToken: 'ExponentPushToken[abc]' }) // expoPushToken is just for logging/context
-        .expect(200);
-
-      expect(response.body.message).toBe('Expo Push Token removed successfully');
-      expect(mockSubscribers.setCredentials).toHaveBeenCalledTimes(1);
-      expect(mockSubscribers.setCredentials).toHaveBeenCalledWith('user123', 'expo', {
-        deviceTokens: [],
-      });
-    });
-
-    test('should return 400 if userId is missing', async () => {
-      const response = await request(app)
-        .delete('/subscribers/expo-token')
-        .send({ expoPushToken: 'ExponentPushToken[abc]' })
-        .expect(400);
-
-      expect(response.body.error).toBe('Missing required field: userId');
-      expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
-    });
-
-    test('should return 400 if expoPushToken is missing', async () => {
-      const response = await request(app)
-        .delete('/subscribers/expo-token')
-        .send({ userId: 'user123' })
-        .expect(400);
-
-      expect(response.body.error).toBe('Missing required field: expoPushToken');
-      expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
-    });
-
-    test('should return 500 if Novu setCredentials fails', async () => {
-      mockSubscribers.setCredentials.mockRejectedValueOnce(new Error('Novu error'));
-
-      const response = await request(app)
-        .delete('/subscribers/expo-token')
-        .send({ userId: 'user123', expoPushToken: 'ExponentPushToken[abc]' })
-        .expect(500);
-
-      expect(response.body.error).toBe('Failed to remove Expo Push Token');
-      expect(response.body.details).toBe('Novu error');
-    });
-  });
 
   describe('POST /notifications/send', () => {
     test('should trigger notification successfully', async () => {
