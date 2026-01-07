@@ -6,3 +6,4 @@ export * from './mutations/useUpdateUserPushTokenMutation';
 export * from './mutations/useDeleteUserPushTokenMutation';
 export * from './queries/useUserPushTokenDetailQuery';
 export * from './queries/useUserPushTokensQuery';
+export * from './logic/useUserPushTokenDataManagement';

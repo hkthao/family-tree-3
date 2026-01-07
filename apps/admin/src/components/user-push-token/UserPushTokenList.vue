@@ -1,75 +1,41 @@
 <template>
-  <ListToolbar
-    :title="t('userPushToken.list.title')"
-    :create-button-tooltip="t('common.add')"
-    create-button-test-id="button-create-user-push-token"
-    @create="emit('create')"
-    :hide-create-button="!allowAdd"
-    :hide-search="false"
-  >
+  <ListToolbar :title="t('userPushToken.list.title')" :create-button-tooltip="t('common.add')"
+    create-button-test-id="button-create-user-push-token" @create="emit('create')" :hide-create-button="!allowAdd"
+    :hide-search="false">
   </ListToolbar>
-  <v-data-table-server
-    data-testid="user-push-token-list"
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :loading="loading"
-    :search="search"
-    item-value="id"
-    @update:options="updateOptions"
-  >
-              <template v-slot:item.userId="{ item }">
-                <router-link :to="{ name: 'UserProfile', params: { id: item.userId } }">
-                  {{ item.userId }}
-                </router-link>
-              </template>
+  <v-data-table-server data-testid="user-push-token-list" :headers="headers" :items="items" :items-length="totalItems"
+    :loading="loading" :search="search" item-value="id" @update:options="updateOptions">
+    <template v-slot:item.userId="{ item }">
+      <router-link :to="{ name: 'UserProfile', params: { id: item.userId } }">
+        {{ item.userId }}
+      </router-link>
+    </template>
 
-              <template v-slot:item.isActive="{ item }">
-                <v-icon :color="item.isActive ? 'success' : 'error'">
-                  {{ item.isActive ? 'mdi-check-circle' : 'mdi-cancel' }}
-                </v-icon>
-              </template>
+    <template v-slot:item.isActive="{ item }">
+      <v-icon :color="item.isActive ? 'success' : 'error'">
+        {{ item.isActive ? 'mdi-check-circle' : 'mdi-cancel' }}
+      </v-icon>
+    </template>
 
-              <template v-slot:item.actions="{ item }">
-                <div class="d-flex ga-2">
-                  <v-btn
-                    icon
-                    variant="text"
-                    color="info"
-                    size="small"
-                    data-testid="button-view"
-                    @click="emit('view', item.id)"
-                  >
-                    <v-icon>mdi-eye</v-icon>
-                    <v-tooltip activator="parent" location="top">{{ t('common.view') }}</v-tooltip>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    color="warning"
-                    size="small"
-                    data-testid="button-edit"
-                    @click="emit('edit', item.id)"
-                    v-if="allowEdit"
-                  >
-                    <v-icon>mdi-pencil</v-icon>
-                    <v-tooltip activator="parent" location="top">{{ t('common.edit') }}</v-tooltip>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    variant="text"
-                    color="error"
-                    size="small"
-                    data-testid="button-delete"
-                    @click="emit('delete', item.id)"
-                    v-if="allowDelete"
-                  >
-                    <v-icon>mdi-delete</v-icon>
-                    <v-tooltip activator="parent" location="top">{{ t('common.delete') }}</v-tooltip>
-                  </v-btn>
-                </div>
-              </template>
-            </v-data-table-server>
+    <template v-slot:item.actions="{ item }">
+      <div class="d-flex ga-2">
+        <v-btn icon variant="text" color="info" size="small" data-testid="button-view" @click="emit('view', item.id)">
+          <v-icon>mdi-eye</v-icon>
+          <v-tooltip activator="parent" location="top">{{ t('common.view') }}</v-tooltip>
+        </v-btn>
+        <v-btn icon variant="text" color="warning" size="small" data-testid="button-edit" @click="emit('edit', item.id)"
+          v-if="allowEdit">
+          <v-icon>mdi-pencil</v-icon>
+          <v-tooltip activator="parent" location="top">{{ t('common.edit') }}</v-tooltip>
+        </v-btn>
+        <v-btn icon variant="text" color="error" size="small" data-testid="button-delete"
+          @click="emit('delete', item.id)" v-if="allowDelete">
+          <v-icon>mdi-delete</v-icon>
+          <v-tooltip activator="parent" location="top">{{ t('common.delete') }}</v-tooltip>
+        </v-btn>
+      </div>
+    </template>
+  </v-data-table-server>
 </template>
 
 <script setup lang="ts">
@@ -89,12 +55,15 @@ interface UserPushTokenListProps {
   allowDelete?: boolean;
 }
 
-const { search, allowAdd, allowEdit, allowDelete, items, totalItems, loading } = withDefaults(defineProps<UserPushTokenListProps>(), {
-  search: '',
-  allowAdd: true,
-  allowEdit: true,
-  allowDelete: true,
-});
+const {
+  items,
+  totalItems,
+  loading,
+  search = '',
+  allowAdd = true,
+  allowEdit = true,
+  allowDelete = true,
+} = defineProps<UserPushTokenListProps>();
 
 const emit = defineEmits([
   'update:options',

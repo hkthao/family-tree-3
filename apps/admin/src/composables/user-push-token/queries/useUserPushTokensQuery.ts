@@ -1,22 +1,35 @@
-import { computed } from 'vue';
+import { computed } from 'vue'; // Removed toRef
 import { useQuery } from '@tanstack/vue-query';
 import { useUserPushTokenApi } from '@/composables/user-push-token/useUserPushTokenApi';
-import type { Result, UserPushTokenDto } from '@/types';
+import type { Result, UserPushTokenDto, Paginated, ListOptions, FilterOptions } from '@/types';
 import type { ApiError } from '@/types/apiError';
 import type { Ref } from 'vue';
 
-export function useUserPushTokensQuery(userId: Readonly<Ref<string>>) {
+export function useUserPushTokensQuery(
+  userId: Readonly<Ref<string>>,
+  paginationOptions: ListOptions,
+  filters: FilterOptions,
+) {
   const { userPushTokenService } = useUserPushTokenApi();
 
-  const queryResult = useQuery<Result<UserPushTokenDto[], ApiError>, ApiError>({
-    queryKey: ['user-push-tokens', userId],
-    queryFn: () => userPushTokenService.getUserPushTokensByUserId(userId.value),
-    enabled: computed(() => !!userId.value), // Only run query if userId is available
+  const queryResult = useQuery<Result<Paginated<UserPushTokenDto>, ApiError>, ApiError>({
+    queryKey: ['user-push-tokens', userId, paginationOptions, filters],
+    queryFn: () =>
+      userPushTokenService.getUserPushTokensByUserId(
+        userId.value,
+        paginationOptions,
+        // filters, // Filters are not yet supported by the service method
+      ),
+    enabled: computed(() => !!userId.value),
   });
 
   const userPushTokens = computed(() => {
     const data = queryResult.data.value;
-    return data?.ok ? data.value : [];
+    return data?.ok ? data.value?.items || [] : [];
+  });
+  const totalItems = computed(() => {
+    const data = queryResult.data.value;
+    return data?.ok ? data.value?.totalItems || 0 : 0;
   });
   const isLoading = computed(() => queryResult.isLoading.value);
   const error = computed(() => queryResult.error.value);
@@ -24,6 +37,7 @@ export function useUserPushTokensQuery(userId: Readonly<Ref<string>>) {
   return {
     state: {
       userPushTokens,
+      totalItems,
       isLoading,
       error,
     },

@@ -48,6 +48,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import {
   useUserPushTokensQuery,
   useDeleteUserPushTokenMutation,
+  useUserPushTokenDataManagement, // Import the new composable
 } from '@/composables/user-push-token';
 import type { UserPushTokenDto } from '@/types';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
@@ -68,16 +69,21 @@ const { showSnackbar } = useGlobalSnackbar();
 
 const userIdRef = ref(props.userId);
 
+// Integrate useUserPushTokenDataManagement
 const {
-  state: { userPushTokens: fetchedUserPushTokens, isLoading: isLoadingUserPushTokens },
-  actions: { refetch },
-} = useUserPushTokensQuery(userIdRef);
+  state: { paginationOptions, filters },
+  actions: { setPage, setItemsPerPage, setSortBy },
+} = useUserPushTokenDataManagement(userIdRef);
+
+const {
+  state: { userPushTokens: fetchedUserPushTokens, isLoading: isLoadingUserPushTokens, totalItems: queryTotalItems },
+} = useUserPushTokensQuery(userIdRef, paginationOptions, filters); // Pass paginationOptions and filters
 
 const userPushTokens = computed<UserPushTokenDto[]>(() => {
   return fetchedUserPushTokens.value || [];
 });
 
-const totalItems = computed(() => userPushTokens.value.length); // Assuming no server-side pagination for now
+const totalItems = computed(() => queryTotalItems.value); // Use totalItems from query
 
 const { mutate: deleteUserPushToken } = useDeleteUserPushTokenMutation();
 
@@ -97,9 +103,9 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  // In a real scenario with server-side pagination, you would update paginationOptions here
-  // and trigger a refetch of useUserPushTokensQuery
-  console.log('List options updated:', options);
+  setPage(options.page);
+  setItemsPerPage(options.itemsPerPage);
+  setSortBy(options.sortBy as { key: string; order: 'asc' | 'desc' }[]);
 };
 
 const confirmDelete = async (id: string) => {
@@ -126,7 +132,7 @@ const handleDeleteConfirm = (id: string) => {
   deleteUserPushToken(id, {
     onSuccess: () => {
       showSnackbar(t('userPushToken.messages.deleteSuccess'), 'success');
-      queryClient.invalidateQueries({ queryKey: ['user-push-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['user-push-tokens', userIdRef.value, paginationOptions, filters] });
     },
     onError: (error) => {
       showSnackbar((error as Error).message || t('userPushToken.messages.deleteError'), 'error');
@@ -136,7 +142,7 @@ const handleDeleteConfirm = (id: string) => {
 
 const handleUserPushTokenSaved = () => {
   closeAllDrawers();
-  queryClient.invalidateQueries({ queryKey: ['user-push-tokens'] });
+  queryClient.invalidateQueries({ queryKey: ['user-push-tokens', userIdRef.value, paginationOptions, filters] });
 };
 
 const handleUserPushTokenClosed = () => {
@@ -147,9 +153,10 @@ watch(
   () => props.userId,
   (newUserId) => {
     userIdRef.value = newUserId;
-    refetch();
+    // refetch(); // Refetch is now handled by the useQuery's queryKey reactivity
   },
 );
+
 </script>
 
 <style scoped></style>
