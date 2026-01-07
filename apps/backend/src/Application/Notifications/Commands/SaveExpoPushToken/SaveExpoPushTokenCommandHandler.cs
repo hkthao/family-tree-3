@@ -1,18 +1,11 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Notifications.Commands.SaveExpoPushToken;
 
-public class SaveExpoPushTokenCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, INotificationService notificationService) : IRequestHandler<SaveExpoPushTokenCommand, Result>
+public class SaveExpoPushTokenCommandHandler(IApplicationDbContext context, INotificationService notificationService) : IRequestHandler<SaveExpoPushTokenCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser _currentUser = currentUser;
     private readonly INotificationService _notificationService = notificationService;
 
     public async Task<Result> Handle(SaveExpoPushTokenCommand request, CancellationToken cancellationToken)
@@ -28,22 +21,18 @@ public class SaveExpoPushTokenCommandHandler(IApplicationDbContext context, ICur
             .Select(t => t.ExpoPushToken)
             .ToListAsync(cancellationToken);
 
-        if (!expoPushTokens.Any())
+        if (expoPushTokens.Count == 0)
         {
             // If no active tokens found, still call the service with an empty list
             // or consider it a success if nothing needs to be saved.
             // For now, let's call the service with an empty list to ensure sync.
+            await _notificationService.SaveExpoPushTokenAsync(request.UserId, [], cancellationToken);
             return Result.Success();
         }
 
         // Save the list of Expo Push Tokens with the Notification Service
-        var saveResult = await _notificationService.SaveExpoPushTokenAsync(request.UserId, expoPushTokens.Cast<string?>().ToList(), cancellationToken);
+        var saveResult = await _notificationService.SaveExpoPushTokenAsync(request.UserId, [.. expoPushTokens], cancellationToken);
 
-        if (!saveResult.IsSuccess)
-        {
-            return saveResult;
-        }
-
-        return Result.Success();
+        return !saveResult.IsSuccess ? saveResult : Result.Success();
     }
 }
