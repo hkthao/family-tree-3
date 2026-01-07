@@ -13,6 +13,7 @@ export const userTokenRoutes: Array<RouteRecordRaw> = [
       requiresAuth: true,
       roles: ['Admin'],
       title: 'userToken.title',
+      breadcrumb: 'userToken.title',
     },
     children: [{
       path: '',
@@ -20,6 +21,7 @@ export const userTokenRoutes: Array<RouteRecordRaw> = [
       component: UserPushTokenListView,
       meta: {
         title: 'userToken.title',
+        breadcrumb: 'userPushToken.list.title',
       },
     }]
   },

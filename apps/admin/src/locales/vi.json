@@ -1682,6 +1682,7 @@
   "voiceProfile.history.headers.created": "Ngày tạo",
   "voiceProfile.history.viewHistory": "Xem lịch sử",
   "voiceProfile.history.noHistory": "Không có lịch sử tạo giọng nói nào.",
+  "userToken.title": "Token Người dùng",
   "userPushToken.list.title": "Danh sách Token của người dùng",
   "userPushToken.list.id": "ID",
   "userPushToken.list.userId": "ID Người dùng",
