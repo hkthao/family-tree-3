@@ -310,6 +310,7 @@
   "common.fieldRequired": "Trường này là bắt buộc.",
   "common.formValidationErrors": "Vui lòng kiểm tra lại các lỗi trong biểu mẫu.",
   "common.errors.noPermission": "Bạn không có quyền thực hiện hành động này.",
+  "common.view": "Xem",
   "common.viewDetails": "Xem chi tiết",
   "common.itemsPerPage": "Số mục mỗi trang",
   "common.export": "Xuất",

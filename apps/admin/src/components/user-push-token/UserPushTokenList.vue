@@ -6,9 +6,14 @@
   <v-data-table-server data-testid="user-push-token-list" :headers="headers" :items="items" :items-length="totalItems"
     :loading="loading" item-value="id" @update:options="updateOptions">
     <template v-slot:item.userId="{ item }">
-      <router-link :to="{ name: 'UserProfile', params: { id: item.userId } }">
-        {{ item.userId }}
-      </router-link>
+      {{ item.userId }}
+    </template>
+
+    <template v-slot:item.expoPushToken="{ item }">
+      <a href="#" @click="emit('view', item.id)">
+        {{ item.expoPushToken }}
+        <v-tooltip activator="parent" location="top">{{ t('common.view') }}</v-tooltip>
+      </a>
     </template>
 
     <template v-slot:item.isActive="{ item }">
@@ -19,16 +24,12 @@
 
     <template v-slot:item.actions="{ item }">
       <div class="d-flex ga-2">
-        <v-btn icon variant="text" color="info" size="small" data-testid="button-view" @click="emit('view', item.id)">
-          <v-icon>mdi-eye</v-icon>
-          <v-tooltip activator="parent" location="top">{{ t('common.view') }}</v-tooltip>
-        </v-btn>
-        <v-btn icon variant="text" color="warning" size="small" data-testid="button-edit" @click="emit('edit', item.id)"
+        <v-btn icon variant="text" size="small" data-testid="button-edit" @click="emit('edit', item.id)"
           v-if="allowEdit">
           <v-icon>mdi-pencil</v-icon>
           <v-tooltip activator="parent" location="top">{{ t('common.edit') }}</v-tooltip>
         </v-btn>
-        <v-btn icon variant="text" color="error" size="small" data-testid="button-delete"
+        <v-btn icon variant="text" size="small" data-testid="button-delete"
           @click="emit('delete', item.id)" v-if="allowDelete">
           <v-icon>mdi-delete</v-icon>
           <v-tooltip activator="parent" location="top">{{ t('common.delete') }}</v-tooltip>

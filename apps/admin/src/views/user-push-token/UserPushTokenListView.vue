@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCrudDrawer, useConfirmDialog, useGlobalSnackbar } from '@/composables';
 import { useQueryClient } from '@tanstack/vue-query';
