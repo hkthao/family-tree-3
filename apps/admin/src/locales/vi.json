@@ -38,7 +38,7 @@
   "admin.roles": "Quản lý vai trò & quyền",
   "admin.title": "Quản trị",
   "admin.users": "Quản lý người dùng",
-  "admin.userPushTokens": "Quản lý Token của người dùng",
+  "admin.userPushTokens": "Push token",
   "ai.bioSuggest": "AI gợi ý tiểu sử",
   "ai.bioSuggestShort": "Tiểu sử AI",
   "ai.chatbot": "Chatbot AI",
