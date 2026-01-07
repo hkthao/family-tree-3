@@ -1620,6 +1620,7 @@
   "userSettings.profile.phone": "Số điện thoại",
   "userSettings.profile.saveError": "Lỗi khi cập nhật hồ sơ.",
   "userSettings.profile.saveSuccess": "Cập nhật hồ sơ thành công!",
+  "userSettings.profile.loadingProfile": "Đang tải hồ sơ...",
   "userSettings.profile.validationError": "Vui lòng điền đầy đủ thông tin bắt buộc.",
   "userSettings.tab.preferences": "Tùy chọn",
   "userSettings.tab.profile": "Hồ sơ",
