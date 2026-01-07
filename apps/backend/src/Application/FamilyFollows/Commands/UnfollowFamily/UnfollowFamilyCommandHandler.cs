@@ -32,12 +32,7 @@ public class UnfollowFamilyCommandHandler : IRequestHandler<UnfollowFamilyComman
             return Result.Failure($"User {currentUserId} is not following family {request.FamilyId}.");
         }
 
-        // Scenario 2: User is a member of family A -> auto-follow -> cannot unfollow (only mute)
-        var isMember = await _context.FamilyUsers.AnyAsync(fu => fu.UserId == currentUserId && fu.FamilyId == request.FamilyId, cancellationToken);
-        if (isMember)
-        {
-            return Result.Failure($"User is a member of family {request.FamilyId} and cannot unfollow. Consider updating notification settings instead.");
-        }
+
 
         _context.FamilyFollows.Remove(familyFollow);
 
