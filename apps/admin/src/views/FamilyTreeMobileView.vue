@@ -39,8 +39,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import HierarchicalFamilyTree from '@/components/family/Hierarchicalbackend.vue';
-import ForceDirectedFamilyTree from '@/components/family/ForceDirectedbackend.vue';
+import HierarchicalFamilyTree from '@/components/family/HierarchicalFamilyTree.vue';
+import ForceDirectedFamilyTree from '@/components/family/ForceDirectedFamilyTree.vue';
 import type { MemberDto, Relationship } from '@/types';
 
 interface WindowFamilyTreeData {

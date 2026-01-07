@@ -45,5 +45,9 @@ export * from './family-location/api.family-location.service';
 export * from './memory-item/memory-item.service.interface';
 export * from './memory-item/api.memory-item.service';
 
+export * from './notification/notification.service.interface';
+export * from './notification/api.notification.service';
+
+
 // Re-export service factory for dependency injection setup
 export * from './service.factory';
