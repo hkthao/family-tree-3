@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.UserPushTokens.Commands.SyncCurrentUserPushToken;
 
 public class SyncCurrentUserPushTokenCommandValidator : AbstractValidator<SyncCurrentUserPushTokenCommand>

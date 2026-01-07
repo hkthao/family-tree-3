@@ -4,7 +4,6 @@ using backend.Application.Common.Models;
 using backend.Application.Notifications.Commands.SaveExpoPushToken;
 using backend.Application.Notifications.Commands.SyncSubscriber; // New using directive
 using backend.Domain.Entities;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.UserPushTokens.Commands.SyncCurrentUserPushToken;
