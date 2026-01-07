@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Notifications.Commands.SyncSubscriber;
 using backend.Application.UserPushTokens.Commands.SyncCurrentUserPushToken; // New using directive
-using backend.Application.UserPushTokens.Commands.RemoveUserPushToken;
+using backend.Application.UserPushTokens.Commands.RemoveCurrentUserPushToken; // Changed using directive
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,10 +34,23 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpDelete("push-token")]
-    public async Task<ActionResult<Result>> RemovePushToken([FromBody] RemoveUserPushTokenCommand command)
+    public async Task<ActionResult<Result>> RemovePushToken([FromForm] string deviceId, [FromForm] string expoPushToken)
     {
+        if (!_currentUser.IsAuthenticated)
+        {
+            return Unauthorized(Result.Failure("User is not authenticated.", "Authentication"));
+        }
+
+        // Command validator will handle validation for deviceId and expoPushToken
+        var command = new RemoveCurrentUserPushTokenCommand(deviceId, expoPushToken);
         var result = await _mediator.Send(command);
-        return !result.IsSuccess ? (ActionResult<Result>)BadRequest(result.Error) : (ActionResult<Result>)Ok(Result.Success());
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+
+        return Ok(Result.Success());
     }
 
     [HttpPost("subscriber")]
