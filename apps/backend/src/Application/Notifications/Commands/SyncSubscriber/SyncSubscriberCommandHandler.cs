@@ -32,8 +32,8 @@ public class SyncSubscriberCommandHandler(INotificationService notificationServi
             Email = userProfile?.Email,
             Phone = userProfile?.Phone,
             Avatar = userProfile?.Avatar,
-            Locale = "Asia/Ho_Chi_Minh", // Assuming locale is in preferences
-            Timezone = "UTC+7", // Assuming timezone is in preferences
+            Locale = "vi-VN", // Assuming locale is in preferences
+            Timezone = "Asia/Ho_Chi_Minh", // Assuming timezone is in preferences
         };
 
         var syncResult = await _notificationService.SyncSubscriberAsync(subscriberDto, cancellationToken);

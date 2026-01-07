@@ -35,22 +35,44 @@ const validateBody = (fields) => (req, res, next) => {
 app.post('/subscribers/sync', validateBody(['userId']), async (req, res) => {
   const { userId, firstName, lastName, email, phone, avatar, locale, timezone } = req.body;
   try {
-    const subscriber = await novu.subscribers.identify(userId, {
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone,
-      avatar: avatar,
-      locale: locale,
+    const subscriberPayload = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      avatar,
+      locale,
       data: {
-        timezone: timezone,
+        timezone,
+      },
+    };
+
+    // Remove null or undefined properties from the main payload
+    Object.keys(subscriberPayload).forEach(key => {
+      if (subscriberPayload[key] === null || subscriberPayload[key] === undefined) {
+        delete subscriberPayload[key];
       }
     });
+
+    // Remove null or undefined properties from the nested 'data' object
+    if (subscriberPayload.data) {
+      Object.keys(subscriberPayload.data).forEach(key => {
+        if (subscriberPayload.data[key] === null || subscriberPayload.data[key] === undefined) {
+          delete subscriberPayload.data[key];
+        }
+      });
+      // If the 'data' object becomes empty after cleaning, remove it too
+      if (Object.keys(subscriberPayload.data).length === 0) {
+        delete subscriberPayload.data;
+      }
+    }
+
+    const subscriber = await novu.subscribers.identify(userId, subscriberPayload);
     console.log(`Subscriber synced: ${userId}`);
     res.status(200).json({ message: 'Subscriber synced successfully', subscriber: subscriber.data });
   } catch (error) {
     console.error(`Error syncing subscriber ${userId}:`, error);
-    res.status(500).json({ error: 'Failed to sync subscriber', details: error.message });
+    res.status(500).json({ error: 'Failed to sync subscriber', details: error.message, fullError: error.response ? error.response.data : error });
   }
 });
 
