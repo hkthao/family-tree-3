@@ -29,8 +29,7 @@ public class RemoveCurrentUserPushTokenCommandHandler : IRequestHandler<RemoveCu
 
         var userPushToken = await _context.UserPushTokens
             .FirstOrDefaultAsync(
-                t => t.DeviceId == request.DeviceId &&
-                     t.ExpoPushToken == request.ExpoPushToken &&
+                t => t.ExpoPushToken == request.ExpoPushToken &&
                      t.UserId == _currentUser.UserId, // Use _currentUser.UserId
                 cancellationToken);
 

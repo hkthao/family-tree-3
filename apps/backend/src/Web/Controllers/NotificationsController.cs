@@ -34,7 +34,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpDelete("push-token")]
-    public async Task<ActionResult<Result>> RemovePushToken([FromForm] string deviceId, [FromForm] string expoPushToken)
+    public async Task<ActionResult<Result>> RemovePushToken([FromQuery] string deviceId, [FromQuery] string expoPushToken)
     {
         if (!_currentUser.IsAuthenticated)
         {
