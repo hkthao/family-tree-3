@@ -4,6 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.SearchPublicFamilies;
 
@@ -36,9 +37,10 @@ public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMa
             }
             else // User is authenticated, proceed with filtering
             {
-                var followedFamilyIds = _context.FamilyFollows
-                    .Where(ff => ff.UserId == userId)
+                var followedFamilyIds = (await _context.FamilyFollows
+                    .Where(ff => ff.UserId == userId && ff.IsFollowing)
                     .Select(ff => ff.FamilyId)
+                    .ToListAsync(cancellationToken))
                     .ToHashSet();
 
                 if (request.IsFollowing.Value)
@@ -66,6 +68,21 @@ public class SearchPublicFamiliesQueryHandler(IApplicationDbContext context, IMa
         var paginatedFamilyEntities = await PaginatedList<Family>.CreateAsync(query, request.Page, request.ItemsPerPage);
 
         var familyDtos = _mapper.Map<List<FamilyDto>>(paginatedFamilyEntities.Items);
+
+        if (_currentUser.IsAuthenticated)
+        {
+            var userId = _currentUser.UserId;
+            var followedFamilyIds = (await _context.FamilyFollows
+                .Where(ff => ff.UserId == userId && ff.IsFollowing)
+                .Select(ff => ff.FamilyId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            foreach (var familyDto in familyDtos)
+            {
+                familyDto.IsFollowing = followedFamilyIds.Contains(familyDto.Id);
+            }
+        }
 
         var filteredFamilyDtos = new List<FamilyDto>();
         foreach (var familyDto in familyDtos)

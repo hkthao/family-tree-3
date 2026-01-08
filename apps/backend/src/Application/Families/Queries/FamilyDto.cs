@@ -30,4 +30,5 @@ public class FamilyDto : BaseAuditableDto
             return [.. FamilyUsers.Where(e => e.Role == Domain.Enums.FamilyRole.Viewer).Select(e => e.UserId)];
         }
     }
+    public bool IsFollowing { get; set; } = false; // NEW
 }

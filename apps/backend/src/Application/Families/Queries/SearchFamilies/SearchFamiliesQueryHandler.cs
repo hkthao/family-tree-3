@@ -3,6 +3,7 @@ using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 
@@ -24,35 +25,29 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
             var userId = _currentUser.UserId;
             if (!_currentUser.IsAuthenticated)
             {
-                // If IsFollowing is requested but user is not authenticated, no families are followed/unfollowed by this user
-                // If filtering for followed families (true), return empty list.
-                // If filtering for unfollowed families (false), all families fit the criteria (as no families are followed).
                 if (request.IsFollowing.Value)
                 {
                     return Result<PaginatedList<FamilyDto>>.Success(PaginatedList<FamilyDto>.Empty());
                 }
-                // Continue if IsFollowing is false, as all families are considered "not followed" for an unauthenticated user.
-            }
-            else // User is authenticated, proceed with filtering
-            {
-                var followedFamilyIds = _context.FamilyFollows
-                    .Where(ff => ff.UserId == userId)
-                    .Select(ff => ff.FamilyId)
-                    .ToHashSet(); // Using HashSet for efficient lookups
-
-            if (request.IsFollowing.Value)
-            {
-                // Filter to include only families that the current user is following
-                query = query.Where(f => followedFamilyIds.Contains(f.Id));
             }
             else
             {
-                // Filter to include only families that the current user is NOT following
-                query = query.Where(f => !followedFamilyIds.Contains(f.Id));
+                var followedFamilyIds = _context.FamilyFollows
+                    .Where(ff => ff.UserId == userId && ff.IsFollowing) // Ensure IsFollowing is true for followed families
+                    .Select(ff => ff.FamilyId)
+                    .ToHashSet();
+
+                if (request.IsFollowing.Value)
+                {
+                    query = query.Where(f => followedFamilyIds.Contains(f.Id));
+                }
+                else
+                {
+                    query = query.Where(f => !followedFamilyIds.Contains(f.Id));
+                }
             }
-                    }
-                } // Missing closing brace for 'if (request.IsFollowing.HasValue)'
-                query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
+        }
+        query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
         query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
         query = query.WithSpecification(new FamilyVisibilitySpecification(request.Visibility));
@@ -61,6 +56,21 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
         var familyDtos = _mapper.Map<List<FamilyDto>>(paginatedFamilyEntities.Items);
+
+        if (_currentUser.IsAuthenticated)
+        {
+            var userId = _currentUser.UserId;
+            var followedFamilyIds = (await _context.FamilyFollows
+                .Where(ff => ff.UserId == userId && ff.IsFollowing)
+                .Select(ff => ff.FamilyId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            foreach (var familyDto in familyDtos)
+            {
+                familyDto.IsFollowing = followedFamilyIds.Contains(familyDto.Id);
+            }
+        }
 
         var filteredFamilyDtos = new List<FamilyDto>();
         foreach (var familyDto in familyDtos)
