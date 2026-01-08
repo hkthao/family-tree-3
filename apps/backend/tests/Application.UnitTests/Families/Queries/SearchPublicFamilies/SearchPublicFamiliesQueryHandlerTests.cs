@@ -121,7 +121,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         var privateFamily = new Family { Id = Guid.NewGuid(), Name = "Private Family", Code = "PRIV1", Visibility = FamilyVisibility.Private.ToString() };
 
         _context.Families.AddRange(publicFamily1, publicFamily2, privateFamily);
-        _context.FamilyFollows.Add(new FamilyFollow { FamilyId = publicFamily1.Id, UserId = TestUserId });
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id));
         await _context.SaveChangesAsync();
 
         var query = new SearchPublicFamiliesQuery { IsFollowing = true };
@@ -146,7 +146,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         var privateFamily = new Family { Id = Guid.NewGuid(), Name = "Private Family", Code = "PRIV1", Visibility = FamilyVisibility.Private.ToString() };
 
         _context.Families.AddRange(publicFamily1, publicFamily2, privateFamily);
-        _context.FamilyFollows.Add(new FamilyFollow { FamilyId = publicFamily1.Id, UserId = TestUserId });
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id));
         await _context.SaveChangesAsync();
 
         var query = new SearchPublicFamiliesQuery { IsFollowing = false };
@@ -168,7 +168,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(false);
         var publicFamily1 = new Family { Id = Guid.NewGuid(), Name = "Public Family 1", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
         _context.Families.Add(publicFamily1);
-        _context.FamilyFollows.Add(new FamilyFollow { FamilyId = publicFamily1.Id, UserId = TestUserId }); // Followed by some user, but current is unauthenticated
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id)); // Followed by some user, but current is unauthenticated
         await _context.SaveChangesAsync();
 
         var query = new SearchPublicFamiliesQuery { IsFollowing = true };
@@ -203,4 +203,3 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         result.Value!.Items.Should().HaveCount(2); // All public families are considered "not followed"
     }
 }
-
