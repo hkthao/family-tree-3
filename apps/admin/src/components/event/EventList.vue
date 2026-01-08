@@ -50,10 +50,10 @@
             v-if="props.isAdmin"
             color="primary"
             icon
-            @click="actions.generateEventOccurrences(new Date().getFullYear())"
+            @click="emit('generateOccurrences', new Date().getFullYear(), props.familyId)"
             data-testid="generate-event-occurrences-button"
             :aria-label="t('event.list.action.generateOccurrences')"
-            :loading="state.isGeneratingOccurrences.value"
+            :loading="props.isGeneratingOccurrences"
           >
             <v-tooltip :text="t('event.list.action.generateOccurrences')">
               <template v-slot:activator="{ props: tooltipProps }">
@@ -153,6 +153,8 @@ const props = defineProps<{
   onExport?: () => void;
   onImportClick?: () => void;
   isAdmin?: boolean;
+  familyId?: string; // NEW
+  isGeneratingOccurrences?: boolean; // NEW
 }>();
 
 const emit = defineEmits([
@@ -162,6 +164,7 @@ const emit = defineEmits([
   'delete',
   'create',
   'update:search',
+  'generateOccurrences', // NEW
 ]);
 
 const {
@@ -180,7 +183,6 @@ const {
   loadEvents,
   editEvent,
   confirmDelete,
-  // REMOVED: formatDate, // Now imported directly
 } = actions;
 </script>
 

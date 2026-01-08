@@ -167,7 +167,6 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// <param name="familyId">Optional: The ID of the family to generate occurrences for.</param>
     /// <returns>A confirmation message.</returns>
     [HttpPost("generate-occurrences")]
-    [Authorize(Roles = "Administrator")] // Example authorization
     public async Task<IActionResult> GenerateEventOccurrences([FromQuery] int year, [FromQuery] Guid? familyId)
     {
         var result = await _mediator.Send(new GenerateEventOccurrencesCommand { Year = year, FamilyId = familyId });
@@ -180,7 +179,6 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// </summary>
     /// <returns>A confirmation message.</returns>
     [HttpPost("reschedule-recurring-occurrences")]
-    [Authorize(Roles = "Administrator")] // Example authorization
     public async Task<IActionResult> RescheduleRecurringEventOccurrences()
     {
         var result = await _mediator.Send(new RescheduleRecurringEventOccurrencesCommand());

@@ -9,7 +9,11 @@
     :can-perform-actions="true"
     :on-export="exportEvents"
     :on-import-click="() => importDialog = true"
-    :is-admin="isAdmin" /> <!-- NEW -->
+    :is-admin="isAdmin"
+    :family-id="props.familyId"
+    :is-generating-occurrences="isGeneratingOccurrences"
+    @generateOccurrences="handleGenerateOccurrences" /> <!-- NEW -->
+
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
     <EventAddView v-if="addDrawer" :family-id="filters.familyId || undefined" @close="closeAddDrawer"
@@ -51,8 +55,9 @@ import { useEventList } from '@/composables';
 import { useEventImportExport } from '@/composables/event/useEventImportExport';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
-import { ref, computed } from 'vue'; // NEW: Added computed
-import { useAuthStore } from '@/stores/auth.store'; // NEW
+import { ref, computed } from 'vue';
+import { useAuthStore } from '@/stores/auth.store';
+import { useEventService } from '@/services/event.service'; // NEW
 
 const props = defineProps<{
   familyId: string;
@@ -63,18 +68,19 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
-const authStore = useAuthStore(); // NEW
+const authStore = useAuthStore();
 
 const importDialog = ref(false);
 
 const { isExporting, isImporting, exportEvents, importEvents } = useEventImportExport(ref(props.familyId));
+const eventService = useEventService(); // NEW
 
 const {
   state,
   actions,
 } = useEventList(props, emit);
 
-const { refetchEvents } = actions; // Extract refetchEvents
+const { refetchEvents } = actions;
 
 const {
   eventListSearchQuery,
@@ -93,7 +99,7 @@ const {
   handleSearchUpdate,
   handleListOptionsUpdate,
   confirmDelete,
-  handleEventSaved: originalHandleEventSaved, // Rename to avoid conflict
+  handleEventSaved: originalHandleEventSaved,
   openAddDrawer,
   openEditDrawer,
   openDetailDrawer,
@@ -114,7 +120,7 @@ const triggerImport = async (file: File) => {
       const jsonContent = JSON.parse(e.target?.result as string);
       await importEvents(jsonContent);
       importDialog.value = false;
-      refetchEvents(); // Refetch the list after successful import
+      refetchEvents();
     } catch (error: any) {
       console.error("Import operation failed:", error);
     }
@@ -123,9 +129,23 @@ const triggerImport = async (file: File) => {
 };
 
 const handleEventSaved = () => {
-  originalHandleEventSaved(); // Call original handler
-  refetchEvents(); // Refetch the list after successful save
+  originalHandleEventSaved();
+  refetchEvents();
 };
 
-const isAdmin = computed(() => authStore.isAdmin); // NEW
+const isAdmin = computed(() => authStore.isAdmin);
+
+const isGeneratingOccurrences = ref(false); // NEW
+
+const handleGenerateOccurrences = async (year: number, familyId: string) => { // NEW
+  isGeneratingOccurrences.value = true;
+  const result = await eventService.generateEventOccurrences(year, familyId);
+  if (result.ok) {
+    showSnackbar(t('event.list.action.generateOccurrencesSuccess'), 'success');
+    refetchEvents(); // Reload events
+  } else {
+    showSnackbar(result.error?.message || t('event.list.action.generateOccurrencesError'), 'error');
+  }
+  isGeneratingOccurrences.value = false;
+};
 </script>

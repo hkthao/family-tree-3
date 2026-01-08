@@ -7,18 +7,19 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { formatDate } from '@/utils/dateUtils';
 // REMOVED: import { useAuthStore } from '@/stores/auth.store'; // No longer needed
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
-import { useEventService } from '@/services/event.service';
+// REMOVED: import { useEventService } from '@/services/event.service'; // No longer needed
 
 export function useEventListComposable(props: {
   events: EventDto[];
   totalEvents: number;
   loading: boolean;
   search: string;
+  familyId?: string; // familyId prop added
 }, emit: (event: 'update:options' | 'view' | 'edit' | 'delete' | 'create' | 'update:search', ...args: any[]) => void) {
   const { t } = useI18n();
   // REMOVED: const authStore = useAuthStore(); // No longer needed
   const { showSnackbar } = useGlobalSnackbar();
-  const eventService = useEventService();
+  // REMOVED: const eventService = useEventService(); // No longer needed
 
   const searchQuery = ref(props.search);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -56,11 +57,11 @@ export function useEventListComposable(props: {
       align: 'center',
     },
     {
-      title: t('event.list.headers.currentYearOccurrenceDate'), // NEW
-      key: 'currentYearOccurrenceDate', // NEW
-      width: '150px', // NEW
-      align: 'center', // NEW
-      sortable: false, // NEW
+      title: t('event.list.headers.currentYearOccurrenceDate'),
+      key: 'currentYearOccurrenceDate',
+      width: '150px',
+      align: 'center',
+      sortable: false,
     },
     {
       title: t('event.list.headers.name'),
@@ -92,19 +93,13 @@ export function useEventListComposable(props: {
     },
   ]);
 
-  // REMOVED: const currentYearOccurrenceDates = ref<Record<string, string>>({});
-
-  // REMOVED: const fetchCurrentYearOccurrences = async (eventIds: string[]) => { /* ... */ };
-
-  const loadEvents = (options: { // MODIFIED to not be async
+  const loadEvents = (options: {
     page: number;
     itemsPerPage: number;
     sortBy: { key: string; order: string }[];
   }) => {
     emit('update:options', options);
   };
-
-  // REMOVED: watch for props.events
 
   const editEvent = (eventId: string) => {
     emit('edit', eventId);
@@ -114,27 +109,16 @@ export function useEventListComposable(props: {
     emit('delete', eventId);
   };
 
-  const isGeneratingOccurrences = ref(false);
-
-  const generateEventOccurrences = async (year: number) => {
-    isGeneratingOccurrences.value = true;
-    const result = await eventService.generateEventOccurrences(year);
-    if (result.ok) {
-      showSnackbar(t('event.list.action.generateOccurrencesSuccess'), 'success');
-      loadEvents({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload events
-    } else {
-      showSnackbar(result.error?.message || t('event.list.action.generateOccurrencesError'), 'error');
-    }
-    isGeneratingOccurrences.value = false;
-  };
+  // REMOVED: isGeneratingOccurrences and generateEventOccurrences
+  // const isGeneratingOccurrences = ref(false);
+  // const generateEventOccurrences = async (year: number) => { /* ... */ };
 
   return {
     state: {
       debouncedSearch,
       itemsPerPage,
       headers,
-      isGeneratingOccurrences,
-      // REMOVED: currentYearOccurrenceDates,
+      // REMOVED: isGeneratingOccurrences,
     },
     actions: {
       t,
@@ -142,7 +126,7 @@ export function useEventListComposable(props: {
       editEvent,
       confirmDelete,
       formatDate,
-      generateEventOccurrences,
+      // REMOVED: generateEventOccurrences,
     },
   };
 }
