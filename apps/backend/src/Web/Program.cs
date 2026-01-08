@@ -1,9 +1,12 @@
 using backend.CompositionRoot;
-
+using Hangfire;
+using Hangfire.Redis.StackExchange;
+using backend.Infrastructure.Constants;
 using backend.Infrastructure.Data;
 using backend.Web.Formatters; // Added for custom HTML input formatter
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.
@@ -38,6 +41,15 @@ public partial class Program
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while migrating or seeding the database.");
             }
+        }
+
+        // Enqueue a sample Hangfire job
+        using (var scope = host.Services.CreateScope())
+        {
+            var jobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
+            jobClient.Enqueue<backend.Application.Common.Services.SampleHangfireJob>(
+                x => x.LogMessage("Hello from Hangfire! This is a one-time job from Main.")
+            );
         }
 
         await host.RunAsync();
@@ -83,6 +95,15 @@ public class Startup
     {
         services.AddCompositionRootServices(Configuration);
         services.AddWebServices(Configuration);
+
+        services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseRedisStorage(Configuration["Hangfire:RedisConnectionString"])); // Use Redis for Hangfire storage
+
+        services.AddHangfireServer(); // Add Hangfire server
+
 
         services.AddControllers(options =>
         {
@@ -145,6 +166,11 @@ public class Startup
 
         app.UseRateLimiter();
         app.UseRouting();
+
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+        });
 
         var supportedCultures = new[] { "en-US", "vi-VN" };
         var localizationOptions = new RequestLocalizationOptions()

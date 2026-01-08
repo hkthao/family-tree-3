@@ -21,6 +21,7 @@ public static class DependencyInjection
 
 
         services.AddScoped<Common.Interfaces.IRelationshipDetectionService, Services.RelationshipDetectionService>();
+        services.AddTransient<Common.Services.SampleHangfireJob>();
 
         return services;
     }
