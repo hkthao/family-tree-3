@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.EventOccurrences.Jobs;
 
-public class GenerateEventOccurrencesJob
+public class GenerateEventOccurrencesJob : IGenerateEventOccurrencesJob
 {
     private readonly ILogger<GenerateEventOccurrencesJob> _logger;
     private readonly IApplicationDbContext _context;
@@ -24,9 +24,9 @@ public class GenerateEventOccurrencesJob
         _dateTime = dateTime;
     }
 
-    public async Task GenerateOccurrences(int year, CancellationToken cancellationToken)
+    public async Task GenerateOccurrences(int year, Guid? familyId, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"Hangfire Job: Starting to generate event occurrences for year {year}.");
+        _logger.LogInformation($"Hangfire Job: Starting to generate event occurrences for year {year} (FamilyId: {familyId}).");
 
         const int BatchSize = 200;
         int skipCount = 0;
@@ -35,8 +35,15 @@ public class GenerateEventOccurrencesJob
 
         while (moreEvents)
         {
-            var eventsToProcessBatch = await _context.Events
-                .Where(e => !e.IsDeleted && e.SolarDate == null && e.LunarDate != null)
+            var eventsQuery = _context.Events
+                .Where(e => !e.IsDeleted && e.SolarDate == null && e.LunarDate != null);
+
+            if (familyId.HasValue)
+            {
+                eventsQuery = eventsQuery.Where(e => e.FamilyId == familyId.Value);
+            }
+
+            var eventsToProcessBatch = await eventsQuery
                 .OrderBy(e => e.Id) // Ensure consistent ordering for pagination
                 .Skip(skipCount)
                 .Take(BatchSize)

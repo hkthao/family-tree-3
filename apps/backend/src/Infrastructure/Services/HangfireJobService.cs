@@ -1,0 +1,52 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.Events.EventOccurrences.Jobs;
+using Hangfire;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace backend.Infrastructure.Services;
+
+public class HangfireJobService : IBackgroundJobService
+{
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IRecurringJobManager _recurringJobManager;
+    private readonly ILogger<HangfireJobService> _logger;
+    private readonly IDateTime _dateTime;
+
+    public HangfireJobService(
+        IBackgroundJobClient backgroundJobClient,
+        IRecurringJobManager recurringJobManager,
+        ILogger<HangfireJobService> logger,
+        IDateTime dateTime)
+    {
+        _backgroundJobClient = backgroundJobClient;
+        _recurringJobManager = recurringJobManager;
+        _logger = logger;
+        _dateTime = dateTime;
+    }
+
+    public string EnqueueGenerateEventOccurrences(int year, Guid? familyId, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation($"Enqueuing GenerateEventOccurrences job for year {year} and FamilyId {familyId}.");
+        return _backgroundJobClient.Enqueue<GenerateEventOccurrencesJob>(
+            job => job.GenerateOccurrences(year, familyId, CancellationToken.None)); // Hangfire injects its own CT
+    }
+
+    public void ScheduleGenerateEventOccurrencesAnnually()
+    {
+        _logger.LogInformation("Scheduling recurring GenerateEventOccurrences jobs annually for the next few years.");
+
+        var currentYear = _dateTime.Now.Year;
+
+        for (int year = currentYear; year <= currentYear + 5; year++)
+        {
+            _recurringJobManager.AddOrUpdate<GenerateEventOccurrencesJob>(
+                $"generate-event-occurrences-{year}",
+                job => job.GenerateOccurrences(year, null, CancellationToken.None), // Pass null for familyId, Hangfire injects its own CT
+                Cron.Yearly(1, 1, 3, 0) // Month, Day, Hour, Minute
+            );
+        }
+    }
+}

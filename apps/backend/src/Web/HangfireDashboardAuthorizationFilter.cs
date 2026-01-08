@@ -1,7 +1,5 @@
 using Hangfire.Dashboard;
 using backend.Application.Common.Interfaces; // Assuming ICurrentUser is here
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http; // NEW
 
 namespace backend.Web;
 

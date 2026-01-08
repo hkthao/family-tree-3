@@ -49,7 +49,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
             .Returns(new DateTime(year, 2, 10));
 
         // Act
-        await _job.GenerateOccurrences(year, CancellationToken.None);
+        await _job.GenerateOccurrences(year, null, CancellationToken.None);
 
         // Assert
         var generatedOccurrence = await _context.EventOccurrences.FirstOrDefaultAsync(eo => eo.EventId == lunarEvent.Id && eo.Year == year);
@@ -83,7 +83,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
             .Returns(new DateTime(year, 2, 10));
 
         // Act
-        await _job.GenerateOccurrences(year, CancellationToken.None);
+        await _job.GenerateOccurrences(year, null, CancellationToken.None);
 
         // Assert
         // Should still only have one occurrence in the database (the existing one)
@@ -112,7 +112,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
             .Returns(new DateTime(year, 2, 10));
 
         // Act
-        await _job.GenerateOccurrences(year, CancellationToken.None);
+        await _job.GenerateOccurrences(year, null, CancellationToken.None);
 
         // Assert
         _context.EventOccurrences.Count().Should().Be(250);
@@ -151,7 +151,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         // For simplicity in a unit test, we can assume the job method handles the token.
 
         // Act
-        Func<Task> act = async () => await _job.GenerateOccurrences(year, cts.Token);
+        Func<Task> act = async () => await _job.GenerateOccurrences(year, null, cts.Token);
         cts.Cancel(); // Immediately cancel
 
         // Assert

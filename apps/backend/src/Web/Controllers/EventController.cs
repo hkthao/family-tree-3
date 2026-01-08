@@ -3,6 +3,8 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
+using backend.Application.Events.Commands.GenerateEventOccurrences; // NEW
+using backend.Application.Events.Commands.RescheduleRecurringEventOccurrences; // NEW
 using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEventsByMemberId;
@@ -85,7 +87,7 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     /// Xử lý DELETE request để xóa một sự kiện.
     /// </summary>
     /// <param name="id">ID của sự kiện cần xóa.</param>
-    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
+    /// <returns>IActionResult cho biết kết quả của thao tác.</param>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
@@ -154,6 +156,34 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     public async Task<IActionResult> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Manually triggers the generation of event occurrences for a specific year and optional family.
+    /// Accessible only by administrators.
+    /// </summary>
+    /// <param name="year">The year for which to generate occurrences.</param>
+    /// <param name="familyId">Optional: The ID of the family to generate occurrences for.</param>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("generate-occurrences")]
+    [Authorize(Roles = "Administrator")] // Example authorization
+    public async Task<IActionResult> GenerateEventOccurrences([FromQuery] int year, [FromQuery] Guid? familyId)
+    {
+        var result = await _mediator.Send(new GenerateEventOccurrencesCommand { Year = year, FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Manually triggers the rescheduling of recurring event occurrences for the next few years.
+    /// Accessible only by administrators.
+    /// </summary>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("reschedule-recurring-occurrences")]
+    [Authorize(Roles = "Administrator")] // Example authorization
+    public async Task<IActionResult> RescheduleRecurringEventOccurrences()
+    {
+        var result = await _mediator.Send(new RescheduleRecurringEventOccurrencesCommand());
         return result.ToActionResult(this, _logger);
     }
 

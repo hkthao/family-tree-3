@@ -133,6 +133,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>(); // NEW: Register IJwtService
         services.AddScoped<Domain.Interfaces.IRelationshipGraph, RelationshipGraph>();
         services.AddScoped<Domain.Interfaces.IRelationshipRuleEngine, RelationshipRuleEngine>();
+        services.AddScoped<IBackgroundJobService, HangfireJobService>(); // NEW: Register HangfireJobService
 
 
         // Register Face API Service and configure its HttpClient
