@@ -161,8 +161,8 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         result.Value.Should().Contain("Notification sent");
         _mockNotificationService.Verify(
             ns => ns.SendNotificationAsync(
-                "manual-event-notification",
-                It.Is<List<string>>(recipients => recipients.Contains(user1Id.ToString()) && recipients.Contains(user2Id.ToString())),
+                "event-upcoming",
+                It.Is<List<string>>(recipients => recipients.ToHashSet().SetEquals(new List<string> { user1Id.ToString(), user2Id.ToString() })),
                 It.Is<object>(payload =>
                     payload.GetType().GetProperty("titles")!.GetValue(payload)!.ToString()!.Equals("Ông John") &&
                     payload.GetType().GetProperty("member_name")!.GetValue(payload)!.ToString()!.Equals("John") &&
@@ -248,7 +248,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         result.Error.Should().Contain("Notification sending failed");
         _mockNotificationService.Verify(
             ns => ns.SendNotificationAsync(
-                "manual-event-notification",
+                "event-upcoming",
                 It.IsAny<List<string>>(),
                 It.IsAny<object>(),
                 It.IsAny<CancellationToken>()
