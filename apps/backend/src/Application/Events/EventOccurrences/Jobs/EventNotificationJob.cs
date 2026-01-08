@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using backend.Domain.Enums; // NEW: For Gender enum
 
 namespace backend.Application.Events.EventOccurrences.Jobs;
 
@@ -35,10 +35,11 @@ public class EventNotificationJob : IEventNotificationJob
 
         var eventIds = upcomingOccurrences.Select(eo => eo.EventId).Distinct().ToList();
 
-        // Lấy thông tin Event cho các EventId này
+        // Lấy thông tin Event cho các EventId này, eager loading EventMembers và Member cho thông tin giới tính
         var events = await _context.Events
             .Where(e => eventIds.Contains(e.Id))
-            .Include(e => e.Family) // Nếu cần thông tin family cho thông báo
+            .Include(e => e.Family)
+            .Include(e => e.EventMembers).ThenInclude(em => em.Member) // NEW: Eager load EventMembers and Member
             .ToListAsync(cancellationToken);
 
         foreach (var occurrence in upcomingOccurrences)
@@ -54,10 +55,9 @@ public class EventNotificationJob : IEventNotificationJob
             var existingDelivery = await _context.NotificationDeliveries
                 .FirstOrDefaultAsync(nd => nd.EventId == occurrence.EventId &&
                                            nd.DeliveryDate.Date == occurrence.OccurrenceDate.Date &&
-                                           nd.DeliveryMethod == "Push Notification", // Giả định là Push Notification
+                                           nd.DeliveryMethod == "Push Notification",
                                            cancellationToken);
 
-            // Xác định bản ghi delivery để làm việc
             // Nếu đã gửi thành công trước đó, bỏ qua
             if (existingDelivery != null && existingDelivery.IsSent)
             {
@@ -69,28 +69,75 @@ public class EventNotificationJob : IEventNotificationJob
             if (existingDelivery == null)
             {
                 existingDelivery = NotificationDelivery.Create(occurrence.EventId, null, occurrence.OccurrenceDate.Date, "Push Notification");
-                _context.NotificationDeliveries.Add(existingDelivery); // Thêm bản ghi mới nếu không tồn tại
+                _context.NotificationDeliveries.Add(existingDelivery);
             }
 
-            // Tạo payload thông báo
+            // NEW: Determine titles based on gender
+            string memberHonorific = "Sự kiện sắp tới"; // Default title
+            string memberName = "";
+
+            var primaryEventMember = @event.EventMembers?.FirstOrDefault(); // Get the first related member
+            if (primaryEventMember?.Member != null)
+            {
+                memberName = primaryEventMember.Member.FirstName ?? primaryEventMember.Member.FullName ?? "";
+                if (Enum.TryParse<Gender>(primaryEventMember.Member.Gender, true, out var memberGender) && memberGender == Gender.Male)
+                {
+                    memberHonorific = $"Ông {memberName}";
+                }
+                else if (Enum.TryParse<Gender>(primaryEventMember.Member.Gender, true, out memberGender) && memberGender == Gender.Female)
+                {
+                    memberHonorific = $"Bà {memberName}";
+                }
+            } else {
+                 memberHonorific = $"Sự kiện sắp tới: {@event.Name}"; // Fallback if no specific member for honorific
+            }
+
+            // NEW: Retrieve recipient user IDs
+            var familyUserIds = await _context.FamilyUsers
+                .Where(fu => fu.FamilyId == @event.FamilyId)
+                .Select(fu => fu.UserId.ToString())
+                .ToListAsync(cancellationToken);
+
+            var familyFollowerIds = await _context.FamilyFollows
+                .Where(ff => ff.FamilyId == @event.FamilyId)
+                .Select(ff => ff.UserId.ToString())
+                .ToListAsync(cancellationToken);
+
+            var recipientUserIds = familyUserIds.Union(familyFollowerIds).ToList();
+
+            if (!recipientUserIds.Any())
+            {
+                _logger.LogInformation("No recipients found for Event {EventName} ({EventId}) on {OccurrenceDate}. Skipping notification.", @event.Name, @event.Id, occurrence.OccurrenceDate.Date);
+                continue;
+            }
+
+            // Tạo payload thông báo theo scheme từ @task.md
             var notificationPayload = new
             {
-                Title = $"Sự kiện sắp diễn ra: {@event.Name}",
-                Body = $"Sự kiện '{@event.Name}' của gia đình {@event.Family?.Name ?? "không rõ"} sẽ diễn ra vào ngày {occurrence.OccurrenceDate.ToShortDateString()}.",
-                EventId = @event.Id,
-                EventType = @event.Type.ToString(),
-                FamilyId = @event.FamilyId
+                event_id = @event.Id.ToString(),
+                event_name = @event.Name,
+                event_type = @event.Type.ToString(),
+                familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
+                member_name = memberName, // Use determined member name
+                lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : null,
+                event_date = occurrence.OccurrenceDate.ToString("dd/MM"), // Format as dd/MM
+                titles = memberHonorific // Use determined honorific
             };
 
             // Gửi thông báo
             try
             {
-                var sendResult = await _notificationService.SendNotificationAsync("event-upcoming", "all", notificationPayload, cancellationToken);
+                var sendResult = await _notificationService.SendNotificationAsync(
+                    "event-upcoming",
+                    recipientUserIds, // NEW: Pass list of recipient user IDs
+                    notificationPayload,
+                    cancellationToken
+                );
 
                 if (sendResult.IsSuccess)
                 {
-                    existingDelivery.MarkAsSent(); // This is supposed to set IsSent = true
-                    _logger.LogInformation("Notification sent successfully...");
+                    existingDelivery.MarkAsSent();
+                    _logger.LogInformation("Notification sent successfully to {RecipientCount} recipients for Event {EventName} ({EventId}) on {OccurrenceDate}", recipientUserIds.Count, @event.Name, @event.Id, occurrence.OccurrenceDate.Date);
                 }
                 else
                 {

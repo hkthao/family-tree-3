@@ -144,4 +144,26 @@ public class NotificationService : INotificationService
             return Result.Failure($"An unexpected error occurred: {ex.Message}");
         }
     }
+
+    public async Task<Result> SendNotificationAsync(string workflowId, List<string> recipientUserIds, object? payload, CancellationToken cancellationToken = default) // NEW Overload
+    {
+        var allResults = new List<Result>();
+        foreach (var userId in recipientUserIds)
+        {
+            var result = await SendNotificationAsync(workflowId, userId, payload, cancellationToken);
+            allResults.Add(result);
+        }
+
+        // Return success only if all individual notifications were successful
+        if (allResults.All(r => r.IsSuccess))
+        {
+            return Result.Success();
+        }
+        else
+        {
+            // Aggregate errors from failed notifications
+            var errorMessages = allResults.Where(r => !r.IsSuccess).Select(r => r.Error).ToList();
+            return Result.Failure($"Failed to send to some recipients: {string.Join("; ", errorMessages)}");
+        }
+    }
 }

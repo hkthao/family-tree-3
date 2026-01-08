@@ -9,4 +9,5 @@ public interface INotificationService
     Task<Result> SaveExpoPushTokenAsync(string userId, List<string?> expoPushTokens, CancellationToken cancellationToken = default);
     Task<Result> DeleteExpoPushTokenAsync(string userId, string? expoPushToken, CancellationToken cancellationToken = default);
     Task<Result> SendNotificationAsync(string workflowId, string userId, object? payload, CancellationToken cancellationToken = default);
+    Task<Result> SendNotificationAsync(string workflowId, List<string> recipientUserIds, object? payload, CancellationToken cancellationToken = default); // NEW Overload
 }
