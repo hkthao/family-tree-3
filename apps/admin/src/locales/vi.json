@@ -387,6 +387,7 @@
   "event.errors.notFound": "Không tìm thấy sự kiện để cập nhật trong kho.",
   "event.errors.update": "Không thể cập nhật sự kiện.",
   "event.familyName": "Tên gia đình",
+  "event.filter.familyEventsOnly": "Chỉ sự kiện gia đình",
   "event.form.addTitle": "Thêm Sự kiện Mới",
   "event.form.color": "Màu sắc",
   "event.form.date": "Ngày",
