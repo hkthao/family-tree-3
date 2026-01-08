@@ -21,7 +21,7 @@ namespace backend.Infrastructure.Services;
 public class PrivacyService : IPrivacyService
 {
     private readonly IApplicationDbContext _context;
-    private readonly ICurrentUser _currentUserService;
+    private readonly ICurrentUser _currentUser;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMapper _mapper;
 
@@ -31,7 +31,7 @@ public class PrivacyService : IPrivacyService
     public PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService, IMapper mapper)
     {
         _context = context;
-        _currentUserService = currentUserService;
+        _currentUser = currentUserService;
         _authorizationService = authorizationService;
         _mapper = mapper;
     }
@@ -111,7 +111,7 @@ public class PrivacyService : IPrivacyService
     public async Task<MemberDto> ApplyPrivacyFilter(MemberDto memberDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberDto;
         }
@@ -155,7 +155,7 @@ public class PrivacyService : IPrivacyService
     public async Task<MemberDetailDto> ApplyPrivacyFilter(MemberDetailDto memberDetailDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberDetailDto;
         }
@@ -190,7 +190,7 @@ public class PrivacyService : IPrivacyService
     public async Task<MemberListDto> ApplyPrivacyFilter(MemberListDto memberListDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberListDto;
         }
@@ -239,7 +239,7 @@ public class PrivacyService : IPrivacyService
     public async Task<EventDto> ApplyPrivacyFilter(EventDto eventDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return eventDto;
         }
@@ -282,7 +282,7 @@ public class PrivacyService : IPrivacyService
     public async Task<EventDetailDto> ApplyPrivacyFilter(EventDetailDto eventDetailDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return eventDetailDto;
         }
@@ -319,7 +319,7 @@ public class PrivacyService : IPrivacyService
     public async Task<FamilyDto> ApplyPrivacyFilter(FamilyDto familyDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return familyDto;
         }
@@ -365,7 +365,7 @@ public class PrivacyService : IPrivacyService
     public async Task<FamilyDetailDto> ApplyPrivacyFilter(FamilyDetailDto familyDetailDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return familyDetailDto;
         }
@@ -401,7 +401,7 @@ public class PrivacyService : IPrivacyService
     public async Task<FamilyLocationDto> ApplyPrivacyFilter(FamilyLocationDto familyLocationDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return familyLocationDto;
         }
@@ -440,7 +440,7 @@ public class PrivacyService : IPrivacyService
     public async Task<MemoryItemDto> ApplyPrivacyFilter(MemoryItemDto memoryItemDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memoryItemDto;
         }
@@ -479,7 +479,7 @@ public class PrivacyService : IPrivacyService
     public async Task<MemberFaceDto> ApplyPrivacyFilter(MemberFaceDto memberFaceDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberFaceDto;
         }
@@ -520,7 +520,7 @@ public class PrivacyService : IPrivacyService
     public async Task<FoundFaceDto> ApplyPrivacyFilter(FoundFaceDto foundFaceDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUserService.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return foundFaceDto;
         }

@@ -7,6 +7,8 @@ using backend.Web.Formatters; // Added for custom HTML input formatter
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
+using backend.Application.Common.Interfaces; // NEW: Added for IDateTime
+
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.
@@ -47,9 +49,30 @@ public partial class Program
         using (var scope = host.Services.CreateScope())
         {
             var jobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>(); // Get logger for Main method
+
             jobClient.Enqueue<backend.Application.Common.Services.SampleHangfireJob>(
                 x => x.LogMessage("Hello from Hangfire! This is a one-time job from Main.")
             );
+
+            // Schedule recurring Hangfire job to generate EventOccurrences
+            var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+            var dateTime = scope.ServiceProvider.GetRequiredService<IDateTime>(); // Assuming IDateTime is registered in DI
+
+            var currentYear = dateTime.Now.Year;
+
+            // Schedule for current year and next 5 years
+            for (int year = currentYear; year <= currentYear + 5; year++)
+            {
+                // Run annually on January 1st at 03:00 AM (or whenever suitable)
+                // Unique job ID for each year
+                recurringJobManager.AddOrUpdate<backend.Application.Events.EventOccurrences.Jobs.GenerateEventOccurrencesJob>(
+                    $"generate-event-occurrences-{year}",
+                    x => x.GenerateOccurrences(year, CancellationToken.None), // Explicitly pass CancellationToken.None to satisfy compiler
+                    Cron.Yearly(1, 1, 3, 0) // Month, Day, Hour, Minute
+                );
+            }
+            logger.LogInformation("Hangfire Recurring Job: EventOccurrence generation scheduled.");
         }
 
         await host.RunAsync();

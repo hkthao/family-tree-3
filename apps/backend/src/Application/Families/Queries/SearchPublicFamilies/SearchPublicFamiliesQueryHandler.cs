@@ -4,7 +4,6 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.SearchPublicFamilies;
 

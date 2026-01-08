@@ -3,7 +3,6 @@ using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 

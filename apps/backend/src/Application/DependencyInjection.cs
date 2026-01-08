@@ -22,6 +22,8 @@ public static class DependencyInjection
 
         services.AddScoped<Common.Interfaces.IRelationshipDetectionService, Services.RelationshipDetectionService>();
         services.AddTransient<Common.Services.SampleHangfireJob>();
+        services.AddTransient<Common.Services.ILunarCalendarService, Common.Services.LunarCalendarService>();
+        services.AddTransient<Events.EventOccurrences.Jobs.GenerateEventOccurrencesJob>();
 
         return services;
     }

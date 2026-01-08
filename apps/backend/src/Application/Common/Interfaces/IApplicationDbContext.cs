@@ -28,6 +28,10 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<Event> Events { get; }
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể EventOccurrence.
+    /// </summary>
+    DbSet<EventOccurrence> EventOccurrences { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Relationship.
     /// </summary>
     DbSet<Relationship> Relationships { get; }

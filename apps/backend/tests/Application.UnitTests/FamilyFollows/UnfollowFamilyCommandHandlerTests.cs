@@ -2,7 +2,6 @@ using backend.Application.FamilyFollows.Commands.UnfollowFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // Added for BaseEvent
 using backend.Domain.Entities;
-using backend.Domain.Enums; // Added for FamilyRole
 using backend.Domain.Events;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
