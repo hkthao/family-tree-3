@@ -12,12 +12,22 @@
       </v-btn>
       <v-btn
         :color="familyFollowState.isFollowing.value ? 'warning' : 'success'"
-        @click="toggleFollow()"
+        @click="emitToggleFollowSettings()"
         :loading="familyFollowState.isLoading.value"
         data-testid="button-toggle-follow"
       >
         <span v-if="familyFollowState.isFollowing.value">{{ t('family.unfollow') }}</span>
         <span v-else>{{ t('family.follow') }}</span>
+      </v-btn>
+      <v-btn
+        v-if="familyFollowState.isFollowing.value"
+        color="info"
+        @click="emitToggleFollowSettings()"
+        :loading="familyFollowState.isLoading.value"
+        data-testid="button-notification-settings"
+        class="ml-2"
+      >
+        {{ t('family.followSettings.title') }}
       </v-btn>
       <v-btn color="primary" @click="actions.openEditDrawer()" data-testid="button-edit" v-if="canManageFamily">
         {{ t('common.edit') }}
@@ -39,33 +49,25 @@ import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
 import { useFamilyFollow } from '@/composables/family/logic/useFamilyFollow'; // Import useFamilyFollow
 import { useAuthStore } from '@/stores/auth.store'; // Import auth store
 import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
-import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar'; // NEW import
 
 const { t } = useI18n();
 const authStore = useAuthStore();
 const isAdmin = authStore.isAdmin; // Get admin status
-const { showSnackbar } = useGlobalSnackbar(); // NEW: initialize global snackbar
 
 const props = defineProps<{
   familyId: string;
   readOnly: boolean;
 }>();
 
-const emit = defineEmits(['openEditDrawer', 'openUpdateFamilyLimitDrawer']);
+const emit = defineEmits(['openEditDrawer', 'openUpdateFamilyLimitDrawer', 'toggle-follow-settings']);
 
 const { state: { familyData, isLoading, canManageFamily }, actions } = useFamilyDetail(props, emit);
-const { state: familyFollowState, actions: familyFollowActions } = useFamilyFollow(toRef(props, 'familyId'));
+const { state: familyFollowState } = useFamilyFollow(toRef(props, 'familyId')); // Remove actions: familyFollowActions as toggleFollow is removed
 
-const toggleFollow = async () => {
-  if (familyFollowState.isFollowing.value) {
-    await familyFollowActions.unfollowFamily();
-  } else {
-    await familyFollowActions.followFamily();
-  }
-
-  // NEW: Check for error after action and use global snackbar
-  if (familyFollowState.error.value) {
-    showSnackbar(familyFollowState.error.value.message || t('family.detail.errorLoading'), 'error');
-  }
+const emitToggleFollowSettings = () => {
+  emit('toggle-follow-settings', {
+    familyId: props.familyId,
+    isFollowing: familyFollowState.isFollowing.value,
+  });
 };
 </script>

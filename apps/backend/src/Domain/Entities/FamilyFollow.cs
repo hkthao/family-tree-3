@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using backend.Domain.Enums; // Assuming NotificationType is in Enums
-using backend.Domain.ValueObjects;
-
 namespace backend.Domain.Entities;
 
 public class FamilyFollow : BaseAuditableEntity

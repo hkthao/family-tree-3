@@ -20,7 +20,8 @@
       <v-window v-model="selectedTab">
         <v-window-item value="general">
           <FamilyDetailView :family-id="familyId" :read-only="true" @open-edit-drawer="handleOpenEditDrawer"
-            @open-update-family-limit-drawer="handleOpenUpdateFamilyLimitDrawer" />
+            @open-update-family-limit-drawer="handleOpenUpdateFamilyLimitDrawer"
+            @toggle-follow-settings="handleToggleFamilyFollowSettings" />
         </v-window-item>
         <v-window-item value="timeline">
           <EventTimeline :family-id="familyId" />
@@ -88,6 +89,20 @@
       @saved="handleUpdateFamilyLimitSaved" />
   </BaseCrudDrawer>
 
+  <!-- Family Follow Settings Drawer -->
+  <BaseCrudDrawer :model-value="showFamilyFollowSettingsDrawer" @update:model-value="showFamilyFollowSettingsDrawer = $event"
+    @close="handleCloseFamilyFollowSettingsDrawer" :title="familyFollowSettingsDrawerTitle">
+    <FamilyFollowSettingsView
+      v-if="familyIdToFollow && showFamilyFollowSettingsDrawer"
+      :family-id="familyIdToFollow"
+      :is-following-initial="isFollowingInitialForSettings"
+      @close="handleCloseFamilyFollowSettingsDrawer"
+      @saved="handleFamilyFollowSettingsSaved"
+      @update:title="familyFollowSettingsDrawerTitle = $event"
+    />
+  </BaseCrudDrawer>
+
+
 </template>
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
@@ -112,6 +127,7 @@ import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 import UpdateFamilyLimitView from '@/views/family/UpdateFamilyLimitView.vue'; // NEW
 import VoiceProfileListView from '@/views/voice-profile/VoiceProfileListView.vue'; // NEW
+import FamilyFollowSettingsView from '@/views/family/FamilyFollowSettingsView.vue'; // NEW
 
 const { t } = useI18n();
 const route = useRoute();
@@ -152,6 +168,37 @@ const handleUpdateFamilyLimitSaved = () => { // NEW
   handleCloseUpdateFamilyLimitDrawer();
   queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyId.value] });
 };
+
+// NEW: Family Follow Settings
+const showFamilyFollowSettingsDrawer = ref(false);
+const familyIdToFollow = ref('');
+const isFollowingInitialForSettings = ref(false);
+const familyFollowSettingsDrawerTitle = ref(''); // NEW
+
+interface ToggleFollowSettingsEvent {
+  familyId: string;
+  isFollowing: boolean;
+}
+
+const handleToggleFamilyFollowSettings = (payload: ToggleFollowSettingsEvent) => {
+  familyIdToFollow.value = payload.familyId;
+  isFollowingInitialForSettings.value = payload.isFollowing;
+  showFamilyFollowSettingsDrawer.value = true;
+};
+
+const handleCloseFamilyFollowSettingsDrawer = () => {
+  showFamilyFollowSettingsDrawer.value = false;
+  familyIdToFollow.value = '';
+};
+
+const handleFamilyFollowSettingsSaved = () => {
+  handleCloseFamilyFollowSettingsDrawer();
+  queryClient.invalidateQueries({ queryKey: ['familyFollow', 'status', familyId.value] });
+  queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyId.value] });
+  queryClient.invalidateQueries({ queryKey: ['families', 'detail', familyIdToFollow.value] }); // Also invalidate the specific family to update its follow button state.
+  queryClient.invalidateQueries({ queryKey: ['familyFollow', 'list'] }); // Invalidate general family follow list if there is one
+};
+
 
 const canViewFaceDataTab = computed(() => {
   return state.isAdmin.value || state.isFamilyManager.value(familyId.value);

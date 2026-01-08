@@ -8,6 +8,7 @@ import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as labsComponents from 'vuetify/labs/components';
 import { Ripple } from 'vuetify/directives';
+import { aliases, mdi } from 'vuetify/iconsets/mdi'; // NEW: Import mdi iconset and aliases
 
 // i18n
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';
@@ -22,6 +23,13 @@ export default createVuetify({
   },
   directives: {
     Ripple,
+  },
+  icons: { // NEW: Add icons configuration
+    defaultSet: 'mdi',
+    aliases,
+    sets: {
+      mdi,
+    },
   },
   locale: {
     adapter: createVueI18nAdapter({ i18n, useI18n }),
