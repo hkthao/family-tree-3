@@ -1,6 +1,5 @@
 import apiClient from '@/plugins/axios';
 import type { Result } from '@/types';
-import type { ApiError } from '@/types/apiError';
 import { useAuthStore } from '@/stores/auth.store';
 
 export const useEventService = () => {

@@ -5,7 +5,11 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useEventService } from '@/services/event.service';
 import { useEventImportExport } from './useEventImportExport'; // Assuming useEventImportExport is in the same directory
 
-export const useEventActions = (props: any, emit: Function, refetchEvents: Function) => {
+export const useEventActions = (
+  props: any,
+  emit: (event: string, ...args: any[]) => void,
+  refetchEvents: () => void | Promise<void>
+) => {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
   const authStore = useAuthStore();
