@@ -1,9 +1,8 @@
 import { reactive, toRef, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventDto, AddEventDto, UpdateEventDto } from '@/types';
-import type { LunarDate } from '@/types/lunar-date';
 import { useEventRules, type UseEventRulesReturn } from '@/validations/event.validation';
-import { cloneDeep } from 'lodash'; // Keep for now for initial formData cloning
+import { cloneDeep } from 'lodash';
 
 import {
   getInitialEventFormData,
@@ -35,27 +34,23 @@ const defaultDeps: UseEventFormDeps = {
 
 export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = defaultDeps) {
   const { t } = deps.useI18n();
-  const formRef = ref<any>(null); // Ref for the v-form component
+  const formRef = ref<any>(null);
 
-  const formData = reactive<AddEventDto | UpdateEventDto>(getInitialEventFormData(props));
+  const formData = ref<AddEventDto | UpdateEventDto>(getInitialEventFormData(props)); // Changed to ref
 
+  // Now, the 'state' properties will be refs to the properties of formData.value
   const state = reactive({
-    name: toRef(formData, 'name'),
-    code: toRef(formData, 'code'),
-    type: toRef(formData, 'type'),
-    familyId: toRef(formData, 'familyId'),
-    solarDate: toRef(formData, 'solarDate'),
-    calendarType: toRef(formData, 'calendarType'),
-    lunarDate: reactive({
-      day: toRef(formData.lunarDate as LunarDate, 'day'),
-      month: toRef(formData.lunarDate as LunarDate, 'month'),
-      isLeapMonth: toRef(formData.lunarDate as LunarDate, 'isLeapMonth'),
-    }),
-    location: toRef(formData, 'location'),
-    locationId: toRef(formData, 'locationId'), // Added
-    repeatRule: toRef(formData, 'repeatRule'),
-    eventMemberIds: toRef(formData, 'eventMemberIds'),
-
+    name: toRef(formData.value, 'name'),
+    code: toRef(formData.value, 'code'),
+    type: toRef(formData.value, 'type'),
+    familyId: toRef(formData.value, 'familyId'),
+    solarDate: toRef(formData.value, 'solarDate'),
+    calendarType: toRef(formData.value, 'calendarType'),
+    lunarDate: toRef(formData.value, 'lunarDate'), // lunarDate itself is a ref to the object
+    location: toRef(formData.value, 'location'),
+    locationId: toRef(formData.value, 'locationId'),
+    repeatRule: toRef(formData.value, 'repeatRule'),
+    eventMemberIds: toRef(formData.value, 'eventMemberIds'),
   });
 
   const eventOptionTypes = computed(() => getEventOptionTypes(t));
@@ -65,7 +60,7 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
   const lunarDays = computed(() => getLunarDays());
   const lunarMonths = computed(() => getLunarMonths());
 
-  const rules = deps.useEventRules(state);
+  const rules = deps.useEventRules(state); // Pass the reactive state object
 
   const validate = async () => {
     const { valid } = await formRef.value.validate();
@@ -73,13 +68,13 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
   };
 
   const getFormData = () => {
-    return processEventFormDataForSave(formData as EventDto);
+    return processEventFormDataForSave(formData.value as EventDto); // Access formData.value
   };
 
   return {
     formRef,
     state: {
-      formData,
+      formData: formData.value, // Return the unwrapped value
       rules,
       eventOptionTypes,
       calendarTypes,
@@ -90,7 +85,7 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
     actions: {
       validate,
       getFormData,
-      t, // Expose t for template usage
+      t,
     },
   };
 }

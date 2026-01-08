@@ -1,7 +1,6 @@
 using System.Reflection;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -24,6 +23,7 @@ public abstract class TestBase : IDisposable
     protected readonly Mock<HttpClient> _mockHttpClient; // Added for HttpClient
     protected readonly IMapper _mapper;
     protected readonly string _databaseName;
+    protected readonly Guid TestUserId; // NEW
 
     protected TestBase()
     {
@@ -35,7 +35,8 @@ public abstract class TestBase : IDisposable
 
         // Mock ICurrentUser and IDateTime and IDomainEventDispatcher
         _mockUser = new Mock<ICurrentUser>();
-        _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid()); // Provide a default mocked UserId
+        TestUserId = Guid.NewGuid(); // Initialize TestUserId
+        _mockUser.Setup(x => x.UserId).Returns(TestUserId); // Use the consistent TestUserId
         _mockUser.Setup(x => x.IsAuthenticated).Returns(true); // Default to authenticated
         _mockDateTime = new Mock<IDateTime>();
         _mockDomainEventDispatcher = new Mock<IDomainEventDispatcher>();

@@ -193,6 +193,7 @@ public static class PrivacyConstants
         public const string Name = "Name";
         public const string Code = "Code";
         public const string Visibility = "Visibility";
+        public const string IsFollowing = "IsFollowing"; // NEW
 
         // Auditable properties
         public const string Created = "Created";

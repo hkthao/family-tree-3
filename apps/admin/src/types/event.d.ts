@@ -36,6 +36,7 @@ export interface EventDto {
   solarDate?: Date | null;
   lunarDate?: LunarDate | null;
   repeatRule: RepeatRule;
+  currentYearOccurrenceDate?: string; // NEW
   validationErrors?: string[]; // Includes validation errors for display
   isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }

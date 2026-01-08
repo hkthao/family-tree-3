@@ -45,6 +45,19 @@ services:
       retries: 10
       start_period: 60s
 
+  redis:
+    image: redis:7-alpine
+    container_name: family-tree-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
   backend:
     image: hkthao/family-tree-backend:latest
     platform: linux/amd64
@@ -101,21 +114,39 @@ services:
       - app-network
     restart: unless-stopped
 
-  promtail:
-    image: grafana/promtail:2.6.1 # Use a specific version of Promtail
-    container_name: family-tree-promtail
+  notification-service:
+    image: hkthao/family-tree-notification-service:latest
+    container_name: family-tree-notification-service
+    ports:
+      - "3000:3000" # Expose port 3000 for the Node.js app
     env_file:
-      - ./.env
-    volumes:
-      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro # Mount the config file
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro # Mount Docker logs
-      - /var/run/docker.sock:/var/run/docker.sock:ro # Mount Docker socket
-    command: -config.file=/etc/promtail/config.yaml
-    depends_on:
-      - backend
-      - admin
-      - face-service
-      - ocr-service
+      - ./.env.prod # Using .env.prod for production environment
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app-network # Add to app-network for inter-service communication
+    restart: unless-stopped
+
+  # promtail:
+  #   image: grafana/promtail:2.6.1 # Use a specific version of Promtail
+  #   container_name: family-tree-promtail
+  #   env_file:
+  #     - ./.env
+  #   volumes:
+  #     - ./promtail-config.yaml:/etc/promtail/config.yaml:ro # Mount the config file
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro # Mount Docker logs
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro # Mount Docker socket
+  #   command: -config.file=/etc/promtail/config.yaml
+  #   depends_on:
+  #     - backend
+  #     - admin
+  #     - face-service
+  #     - ocr-service
 
 networks:
   app-network:
@@ -124,3 +155,4 @@ networks:
 volumes:
   mysql-data:
   backend-dataprotection-keys:
+  redis-data:

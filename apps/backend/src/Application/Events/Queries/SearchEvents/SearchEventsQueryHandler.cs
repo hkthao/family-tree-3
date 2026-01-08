@@ -16,7 +16,9 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events.Include(e => e.EventMembers).ThenInclude(em => em.Member).AsQueryable();
+        var query = _context.Events
+            .Include(e => e.EventMembers).ThenInclude(em => em.Member) // Bỏ include EventOccurrences ở đây
+            .AsQueryable();
 
         // Apply access control specification first
         var isAdmin = _authorizationService.IsAdmin();
@@ -49,8 +51,31 @@ public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper map
         var eventDtos = _mapper.Map<List<EventDto>>(paginatedEventEntities.Items);
 
         var filteredEventDtos = new List<EventDto>();
+        var currentYear = DateTime.UtcNow.Year; // Lấy năm hiện tại
+
+        // Lấy danh sách EventIds từ các sự kiện đã truy vấn
+        var eventIds = paginatedEventEntities.Items.Select(e => e.Id).ToList();
+
+        // Truy vấn EventOccurrences riêng biệt cho các EventId và năm hiện tại
+        var eventOccurrences = await _context.EventOccurrences
+            .Where(eo => eventIds.Contains(eo.EventId) && eo.OccurrenceDate.Year == currentYear)
+            .GroupBy(eo => eo.EventId)
+            .Select(g => new
+            {
+                EventId = g.Key,
+                OccurrenceDate = g.OrderBy(eo => eo.OccurrenceDate).Select(eo => eo.OccurrenceDate).FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken);
+
         foreach (var eventDto in eventDtos)
         {
+            // Gán ngày xảy ra sự kiện trong năm hiện tại từ danh sách đã truy vấn
+            var occurrence = eventOccurrences.FirstOrDefault(eo => eo.EventId == eventDto.Id);
+            if (occurrence != null)
+            {
+                eventDto.CurrentYearOccurrenceDate = occurrence.OccurrenceDate;
+            }
+
             filteredEventDtos.Add(await _privacyService.ApplyPrivacyFilter(eventDto, eventDto.FamilyId ?? Guid.Empty, cancellationToken));
         }
 

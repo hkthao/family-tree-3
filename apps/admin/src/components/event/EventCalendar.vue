@@ -15,7 +15,13 @@
         <v-icon>mdi-chevron-right</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-
+      <v-switch
+        v-model="showFamilyEventsOnly"
+        :label="t('event.filter.familyEventsOnly')"
+        color="primary"
+        hide-details
+        inset
+      ></v-switch>
       <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
         <v-tooltip :text="t('event.list.action.create')">
           <template v-slot:activator="{ props }">
@@ -43,6 +49,11 @@
         <template #event="{ event }">
           <div class="px-2">
             <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
+              <v-icon
+                v-if="event.eventObject.repeatRule === RepeatRule.Yearly"
+                size="small"
+                icon="mdi-repeat"
+              ></v-icon>
               {{ event.title }}
             </div>
             <div class="v-event-description">
@@ -74,6 +85,7 @@ import EventAddView from '@/views/event/EventAddView.vue';
 import EventDetailView from '@/views/event/EventDetailView.vue';
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useEventCalendar } from '@/composables';
+import { RepeatRule } from '@/types/enums';
 
 const props = defineProps<{
   familyId?: string;
@@ -105,6 +117,7 @@ const {
   calendarTitle,
   formattedEvents,
   loading,
+  showFamilyEventsOnly,
 } = state;
 
 const {

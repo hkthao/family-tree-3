@@ -31,11 +31,13 @@
           </v-list-group>
           <v-list-item
             v-else
-            :to="item.to"
+            :to="item.to && !item.href ? item.to : undefined"
+            :href="item.href"
+            :target="item.target"
             :prepend-icon="item.icon"
             :title="$t(item.titleKey)"
             active-class="active-item"
-            :exact="item.exact"
+            :exact="item.exact && !item.href"
             :id="item.to === '/dashboard' ? 'dashboard-link' : undefined"
           ></v-list-item>
         </template>

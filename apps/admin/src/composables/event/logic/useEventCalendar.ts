@@ -155,6 +155,7 @@ export function useEventCalendar(
   const selectedEventId = ref<string | null>(null);
   const selectedEventDtoForDetail = ref<EventDto | null>(null); // New ref for passing full EventDto
   const isDatePickerOpen = ref(false);
+  const showFamilyEventsOnly = ref(false);
 
   const todayDate = computed(() => dateAdapter.newDate()); // Current date
 
@@ -192,6 +193,10 @@ export function useEventCalendar(
     const transformedHolidays = vietnameseHolidays.map(holiday =>
       transformHolidayToEventDto(holiday as HolidayEvent, currentYear, dateAdapter)
     );
+
+    if (showFamilyEventsOnly.value) {
+      return events.value;
+    }
     return [...events.value, ...transformedHolidays];
   });
 
@@ -270,6 +275,7 @@ export function useEventCalendar(
       selectedEventId,
       selectedEventDtoForDetail, // Expose new ref
       isDatePickerOpen,
+      showFamilyEventsOnly,
       calendarRef,
       calendarType,
       calendarTitle,

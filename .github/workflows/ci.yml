@@ -49,6 +49,13 @@ jobs:
     - name: Test Admin
       run: npm run test:coverage --prefix apps/admin
 
+    # Notification Service CI
+    - name: Install Notification Service Dependencies
+      run: npm install --prefix services/notification-service
+
+    - name: Test Notification Service
+      run: npm run test --prefix services/notification-service
+
     # OCR Service CI (Temporarily disabled due to long running time)
     - name: Set up Python for OCR Service
       uses: actions/setup-python@v5

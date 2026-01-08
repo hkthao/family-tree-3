@@ -3,7 +3,6 @@ using backend.Application.Common.Dtos; // Added
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.ImportEvents;
 using backend.Application.Events.Queries;
-using backend.Application.Members.Queries.GetMembers; // Changed
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;

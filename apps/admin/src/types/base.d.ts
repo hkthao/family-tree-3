@@ -1,4 +1,4 @@
-export interface BaseAuditableEntity {
+export interface BaseAuditableDto {
   id: string;
   created?: Date;
   createdBy?: string;

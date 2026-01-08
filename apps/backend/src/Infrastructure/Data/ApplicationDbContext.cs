@@ -27,6 +27,10 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<User> Users => Set<User>();
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể UserPushToken.
+    /// </summary>
+    public DbSet<UserPushToken> UserPushTokens => Set<UserPushToken>();
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Member.
     /// </summary>
     public DbSet<Member> Members => Set<Member>();
@@ -34,6 +38,10 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể Event.
     /// </summary>
     public DbSet<Event> Events => Set<Event>();
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể EventOccurrence.
+    /// </summary>
+    public DbSet<EventOccurrence> EventOccurrences => Set<EventOccurrence>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Relationship.
     /// </summary>
@@ -46,6 +54,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyUser.
     /// </summary>
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyFollow.
+    /// </summary>
+    public DbSet<FamilyFollow> FamilyFollows => Set<FamilyFollow>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserActivity.
     /// </summary>
@@ -133,6 +146,11 @@ public class ApplicationDbContext(
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
     /// </summary>
     public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationDelivery.
+    /// </summary>
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể LocationLink.

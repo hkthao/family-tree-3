@@ -6,4 +6,5 @@ public record SearchFamiliesQuery : PaginatedQuery, IRequest<Result<PaginatedLis
 {
     public string? SearchQuery { get; init; }
     public string? Visibility { get; init; }
+    public bool? IsFollowing { get; init; }
 }

@@ -1,5 +1,4 @@
 using backend.Application.VoiceProfiles.Commands.UpdateVoiceProfile;
-using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
 

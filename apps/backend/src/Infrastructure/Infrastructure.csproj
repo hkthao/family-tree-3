@@ -16,6 +16,8 @@
 
     <PackageReference Include="CloudinaryDotNet" />
 
+    <PackageReference Include="Hangfire.Redis.StackExchange" />
+
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
 
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />

@@ -9,9 +9,5 @@ public class NotificationSettings
     /// Tên của phần cấu hình trong tệp cài đặt.
     /// </summary>
     public const string SectionName = "NotificationSettings";
-
-    /// <summary>
-    /// Nhà cung cấp thông báo đang hoạt động (ví dụ: "Novu", "Firebase").
-    /// </summary>
-    public string Provider { get; set; } = null!;
+    public string? BaseUrl { get; set; }
 }

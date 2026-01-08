@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces;
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.UnitTests.Common;
@@ -12,7 +12,9 @@ namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 
 public class SearchFamiliesQueryHandlerTests : TestBase
 {
+    private readonly SearchFamiliesQueryHandler _handler; // NEW
     private readonly Mock<IPrivacyService> _mockPrivacyService;
+    private readonly Mock<ICurrentUser> _mockCurrentUser; // NEW
 
     public SearchFamiliesQueryHandlerTests()
     {
@@ -23,11 +25,16 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
 
-        // Set up authenticated user by default for most tests
-        _mockUser.Setup(c => c.UserId).Returns(Guid.NewGuid());
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        // Default to non-admin for most tests, override in specific admin tests
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockCurrentUser = new Mock<ICurrentUser>(); // NEW
+        _mockCurrentUser.Setup(x => x.UserId).Returns(TestUserId); // Use a consistent TestUserId from TestBase
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true); // Default to authenticated for most tests
+
+        // Setup mock user and authorization service for the handler
+        _mockUser.Setup(c => c.UserId).Returns(TestUserId); // Ensure this is setup in TestBase
+        _mockUser.Setup(c => c.IsAuthenticated).Returns(true); // Ensure this is setup in TestBase
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Default to non-admin
+
+        _handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
     }
 
     [Fact]
@@ -39,10 +46,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId); // Ensure mock is updated for this test
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByOther = new Family { Id = Guid.NewGuid(), Name = "Family By Other", Code = "FBO", CreatedBy = otherUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
@@ -76,10 +83,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = authenticatedUserId.ToString() };
@@ -110,10 +117,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Alpha", Description = "Description for Alpha", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Beta", Description = "Description for Beta", Code = "FB", CreatedBy = authenticatedUserId.ToString() };
@@ -141,10 +148,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family Public", Visibility = "Public", Code = "FP", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family Private", Visibility = "Private", Code = "FPR", CreatedBy = authenticatedUserId.ToString() };
@@ -172,10 +179,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family C", Code = "FC", CreatedBy = authenticatedUserId.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA", CreatedBy = authenticatedUserId.ToString() };
@@ -204,10 +211,10 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var authenticatedUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(authenticatedUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var authenticatedUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(authenticatedUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var otherUserId = Guid.NewGuid();
         var familyCreatedByAuthenticatedUser = new Family { Id = Guid.NewGuid(), Name = "My Created Family", Code = "MYF", CreatedBy = authenticatedUserId.ToString() };
@@ -242,12 +249,12 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync();
 
-        var adminUserId = Guid.NewGuid();
-        _mockUser.Setup(c => c.UserId).Returns(adminUserId);
-        _mockUser.Setup(c => c.IsAuthenticated).Returns(true);
+        var adminUserId = TestUserId; // Use TestUserId
+        _mockCurrentUser.Setup(c => c.UserId).Returns(adminUserId);
+        _mockCurrentUser.Setup(c => c.IsAuthenticated).Returns(true);
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // Simulate admin user
 
-        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
+        var handler = new SearchFamiliesQueryHandler(_context, _mapper, _mockCurrentUser.Object, _mockAuthorizationService.Object, _mockPrivacyService.Object);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 1", Code = "ADM1", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Private.ToString() };
         var family2 = new Family { Id = Guid.NewGuid(), Name = "Admin Family 2", Code = "ADM2", CreatedBy = Guid.NewGuid().ToString(), Visibility = FamilyVisibility.Public.ToString() };
@@ -267,4 +274,100 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         result.Value.Items.Should().Contain(f => f.Name == "Admin Family 2");
     }
 
+    // NEW TESTS FOR ISFOLLOWING FILTER
+
+    [Fact]
+    public async Task Handle_IsFollowingTrue_ShouldReturnFollowedFamiliesForAuthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true);
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
+        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family 3", Code = "F3", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+
+        _context.Families.AddRange(family1, family2, family3);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, family1.Id));
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, family2.Id));
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { IsFollowing = true };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2);
+        result.Value.Items.Should().Contain(f => f.Id == family1.Id);
+        result.Value.Items.Should().Contain(f => f.Id == family2.Id);
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingFalse_ShouldReturnUnfollowedFamiliesForAuthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true);
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
+        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family 3", Code = "F3", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+
+        _context.Families.AddRange(family1, family2, family3);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, family1.Id));
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { IsFollowing = false };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2);
+        result.Value.Items.Should().Contain(f => f.Id == family2.Id);
+        result.Value.Items.Should().Contain(f => f.Id == family3.Id);
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingTrue_ShouldReturnEmptyListForUnauthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(false);
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+        _context.Families.Add(family1);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, family1.Id)); // Followed by some user, but current is unauthenticated
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { IsFollowing = true };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingFalse_ShouldReturnAllFamiliesForUnauthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(false);
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Public.ToString() };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2", CreatedBy = TestUserId.ToString(), Visibility = FamilyVisibility.Private.ToString() };
+        _context.Families.AddRange(family1, family2);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchFamiliesQuery { IsFollowing = false };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2); // All accessible families are considered "not followed"
+    }
 }

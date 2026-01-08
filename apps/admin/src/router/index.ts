@@ -24,6 +24,7 @@ import { chatRoutes } from './features/chat.routes'; // New
 import { promptRoutes } from './features/prompt.routes'; // New
 import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
 import { voiceProfileRoutes } from './features/voice-profile.routes'; // NEW
+import userPushTokenRoutes from './features/user-push-token.routes'; // NEW
 
 const router = createRouter({
   history: createWebHistory(getEnvVariable('BASE_URL')),
@@ -38,6 +39,7 @@ const router = createRouter({
         ...memberRoutes,
         ...familyDictRoutes,
         ...familyRoutes,
+        ...userPushTokenRoutes, // NEW
         ...faceRoutes,
         ...settingRoutes,
         ...donateRoutes,

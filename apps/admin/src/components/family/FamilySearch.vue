@@ -20,6 +20,15 @@
                 data-testid="family-visibility-filter"
               />
             </v-col>
+            <v-col cols="4">
+              <v-select
+                v-model="isFollowing"
+                :items="isFollowingItems"
+                :label="$t('family.search.isFollowing')"
+                clearable
+                data-testid="family-is-following-filter"
+              />
+            </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
@@ -44,6 +53,7 @@ const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 
 const visibility = ref<'All' | 'Private' | 'Public'>('All');
+const isFollowing = ref<'All' | 'True' | 'False'>('All');
 
 const visibilityItems = computed(() => [
   { title: t('family.management.visibility.all'), value: 'All' },
@@ -51,19 +61,27 @@ const visibilityItems = computed(() => [
   { title: t('family.management.visibility.public'), value: 'Public' },
 ]);
 
+const isFollowingItems = computed(() => [
+  { title: t('common.all'), value: 'All' },
+  { title: t('family.search.isFollowingTrue'), value: 'True' },
+  { title: t('family.search.isFollowingFalse'), value: 'False' },
+]);
+
 const applyFilters = () => {
   emit('update:filters', {
     visibility: visibility.value === 'All' ? undefined : visibility.value,
+    isFollowing: isFollowing.value === 'All' ? undefined : (isFollowing.value === 'True' ? true : false),
   } as FamilyFilter);
 };
 
 const resetFilters = () => {
   visibility.value = 'All';
+  isFollowing.value = 'All';
   // applyFilters(); // Watch will handle it
 };
 
 // Watch for changes in filters and apply them automatically
-watch([visibility], () => {
+watch([visibility, isFollowing], () => {
   applyFilters();
 }, { immediate: true }); // immediate: true to apply filters on initial load
 

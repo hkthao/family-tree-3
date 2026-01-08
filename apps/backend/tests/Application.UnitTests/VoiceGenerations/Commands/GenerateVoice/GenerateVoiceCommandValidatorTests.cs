@@ -1,12 +1,7 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Commands.GenerateVoice;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
-using FluentAssertions;
 using FluentValidation.TestHelper;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.VoiceGenerations.Commands.GenerateVoice;

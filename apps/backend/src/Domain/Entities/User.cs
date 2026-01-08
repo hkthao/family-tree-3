@@ -41,6 +41,12 @@ public class User : BaseAuditableEntity, IAggregateRoot
     private readonly HashSet<UserActivity> _userActivities = new();
     public IReadOnlyCollection<UserActivity> UserActivities => _userActivities;
 
+    /// <summary>
+    /// Danh sách các token đẩy (push token) của người dùng (UserPushToken) thuộc về người dùng này.
+    /// </summary>
+    private readonly HashSet<UserPushToken> _userPushTokens = new();
+    public IReadOnlyCollection<UserPushToken> UserPushTokens => _userPushTokens;
+
     // Private constructor for EF Core
     private User() { }
 

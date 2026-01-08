@@ -63,6 +63,7 @@ export interface IFamilyAccess {
 
 export interface FamilyFilter extends FilterOptions {
   visibility?: 'all' | FamilyVisibility;
+  isFollowing?: boolean; // NEW
   searchQuery?: string;
   familyId?: string;
   page?: number;

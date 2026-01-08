@@ -3,6 +3,9 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
+using backend.Application.Events.Commands.GenerateEventOccurrences;
+using backend.Application.Events.Commands.RescheduleRecurringEventOccurrences;
+using backend.Application.Events.Commands.SendEventNotification; // NEW
 using backend.Application.Events.Queries.GetAllEventsByFamilyId;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEventsByMemberId;
@@ -154,6 +157,42 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     public async Task<IActionResult> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Manually triggers the generation of event occurrences for a specific year and optional family.
+    /// </summary>
+    /// <param name="year">The year for which to generate occurrences.</param>
+    /// <param name="familyId">Optional: The ID of the family to generate occurrences for.</param>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("generate-occurrences")]
+    public async Task<IActionResult> GenerateEventOccurrences([FromQuery] int year, [FromQuery] Guid? familyId)
+    {
+        var result = await _mediator.Send(new GenerateEventOccurrencesCommand { Year = year, FamilyId = familyId });
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Manually triggers the rescheduling of recurring event occurrences for the next few years.
+    /// </summary>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("reschedule-recurring-occurrences")]
+    public async Task<IActionResult> RescheduleRecurringEventOccurrences()
+    {
+        var result = await _mediator.Send(new RescheduleRecurringEventOccurrencesCommand());
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Manually triggers sending a notification for a specific event.
+    /// </summary>
+    /// <param name="id">ID of the event to send notification for.</param>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("{id}/send-notification")]
+    public async Task<IActionResult> SendEventNotification([FromRoute] Guid id)
+    {
+        var result = await _mediator.Send(new SendEventNotificationCommand { EventId = id });
         return result.ToActionResult(this, _logger);
     }
 

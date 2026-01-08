@@ -30,4 +30,6 @@ public class EventDto
             return [.. EventMembers.Select(e => e.MemberId)];
         }
     }
+
+    public DateTime? CurrentYearOccurrenceDate { get; set; }
 }

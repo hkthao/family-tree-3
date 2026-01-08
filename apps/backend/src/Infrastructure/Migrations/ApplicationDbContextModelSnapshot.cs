@@ -132,6 +132,62 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("event_members");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.EventOccurrence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("event_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<DateTime>("OccurrenceDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("occurrence_date");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int")
+                        .HasColumnName("year");
+
+                    b.HasKey("Id")
+                        .HasName("pk_event_occurrences");
+
+                    b.HasIndex("EventId")
+                        .HasDatabaseName("ix_event_occurrences_event_id");
+
+                    b.ToTable("event_occurrences");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
                 {
                     b.Property<Guid>("Id")
@@ -287,6 +343,77 @@ namespace backend.Infrastructure.Migrations
                         .HasName("pk_family_dicts");
 
                     b.ToTable("family_dicts");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.FamilyFollow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsFollowing")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_following");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<bool>("NotifyBirthday")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("notify_birthday");
+
+                    b.Property<bool>("NotifyDeathAnniversary")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("notify_death_anniversary");
+
+                    b.Property<bool>("NotifyEvent")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("notify_event");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_family_follows");
+
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_family_follows_family_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_family_follows_user_id");
+
+                    b.ToTable("family_follows");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyLimitConfiguration", b =>
@@ -1728,6 +1855,76 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("user_profiles");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.UserPushToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("ExpoPushToken")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("expo_push_token");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("platform");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_push_tokens");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_push_tokens_user_id");
+
+                    b.ToTable("user_push_tokens");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1943,6 +2140,39 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.EventOccurrence", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_event_occurrences_events_event_id");
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.FamilyFollow", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_family_follows_families_family_id");
+
+                    b.HasOne("backend.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_family_follows_users_user_id");
+
+                    b.Navigation("Family");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyLimitConfiguration", b =>
@@ -2203,6 +2433,18 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.UserPushToken", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.User", "User")
+                        .WithMany("UserPushTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_push_tokens_users_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
                 {
                     b.HasOne("backend.Domain.Entities.VoiceProfile", "VoiceProfile")
@@ -2277,6 +2519,8 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Profile");
 
                     b.Navigation("UserActivities");
+
+                    b.Navigation("UserPushTokens");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>

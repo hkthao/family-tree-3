@@ -1,7 +1,7 @@
-import type { BaseAuditableEntity } from './base.d';
+import type { BaseAuditableDto } from './base.d';
 import type { RefType, MediaType } from './enums'; // Import from enums.ts
 
-export interface FamilyMedia extends BaseAuditableEntity {
+export interface FamilyMedia extends BaseAuditableDto {
   familyId: string | null;
   fileName: string;
   filePath: string; // URL to the stored media file
@@ -13,7 +13,7 @@ export interface FamilyMedia extends BaseAuditableEntity {
   isPrivate?: boolean; // Flag to indicate if some properties were hidden due to privacy
 }
 
-export interface MediaLink extends BaseAuditableEntity {
+export interface MediaLink extends BaseAuditableDto {
   familyMediaId: string;
   familyMedia?: FamilyMedia; // Navigation property (optional for DTOs)
   refType: RefType;

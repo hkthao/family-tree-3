@@ -136,7 +136,7 @@
 /* Legend Styles */
 .legend {
   position: absolute;
-  top: 0px; /* Prioritize HierarchicalFamilyTree.vue top for legend */
+  top: 0px; /* Prioritize Hierarchicalbackend.vue top for legend */
   left: 0px;
   background: rgba(var(--v-theme-surface-variant-rgb), 0.8);
   padding: 10px;

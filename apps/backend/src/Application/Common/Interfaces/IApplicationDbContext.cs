@@ -12,6 +12,10 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<User> Users { get; }
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể UserPushToken.
+    /// </summary>
+    DbSet<UserPushToken> UserPushTokens { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
     DbSet<Family> Families { get; }
@@ -24,6 +28,10 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<Event> Events { get; }
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể EventOccurrence.
+    /// </summary>
+    DbSet<EventOccurrence> EventOccurrences { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Relationship.
     /// </summary>
     DbSet<Relationship> Relationships { get; }
@@ -35,6 +43,11 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyUser.
     /// </summary>
     DbSet<FamilyUser> FamilyUsers { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyFollow.
+    /// </summary>
+    DbSet<FamilyFollow> FamilyFollows { get; }
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserActivity.
     /// </summary>
@@ -129,6 +142,11 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể MemoryPerson.
     /// </summary>
     DbSet<MemoryPerson> MemoryPersons { get; }
+
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationDelivery.
+    /// </summary>
+    DbSet<NotificationDelivery> NotificationDeliveries { get; }
 
     /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.

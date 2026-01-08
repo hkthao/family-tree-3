@@ -46,6 +46,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = await authService.getAccessToken();
         if (this.user) {
           await this.fetchUserFamilyAccess(); // Gọi action mới sau khi người dùng được tải
+          await this.services.notification.syncSubscriber(); // Đồng bộ hóa subscriber Novu
         }
         return { ok: true, value: this.user };
       } catch (err: any) {

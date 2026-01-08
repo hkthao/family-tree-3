@@ -1,13 +1,8 @@
-using backend.Application.Common.Constants;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Commands.CreateVoiceProfile;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Moq; // Added to enable mocking
 using Xunit;
 
 namespace backend.Application.UnitTests.VoiceProfiles.Commands.CreateVoiceProfile;

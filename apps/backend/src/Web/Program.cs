@@ -1,9 +1,12 @@
 using backend.CompositionRoot;
-
+using Hangfire; // RE-ADDED
+using Hangfire.Redis.StackExchange; // RE-ADDED
 using backend.Infrastructure.Data;
 using backend.Web.Formatters; // Added for custom HTML input formatter
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
+using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.
@@ -38,6 +41,16 @@ public partial class Program
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "An error occurred while migrating or seeding the database.");
             }
+        }
+
+        using (var scope = host.Services.CreateScope())
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>(); // Get logger for Main method
+            var backgroundJobService = scope.ServiceProvider.GetRequiredService<IBackgroundJobService>(); // NEW
+
+            // Schedule recurring Hangfire job to generate EventOccurrences using IBackgroundJobService
+            backgroundJobService.ScheduleGenerateEventOccurrencesAnnually(); // UPDATED
+            logger.LogInformation("Hangfire Recurring Job: EventOccurrence generation scheduled.");
         }
 
         await host.RunAsync();
@@ -83,6 +96,15 @@ public class Startup
     {
         services.AddCompositionRootServices(Configuration);
         services.AddWebServices(Configuration);
+
+        services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseRedisStorage(Configuration["Hangfire:RedisConnectionString"])); // Use Redis for Hangfire storage
+
+        services.AddHangfireServer(); // Add Hangfire server
+
 
         services.AddControllers(options =>
         {
@@ -146,6 +168,11 @@ public class Startup
         app.UseRateLimiter();
         app.UseRouting();
 
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+        });
+
         var supportedCultures = new[] { "en-US", "vi-VN" };
         var localizationOptions = new RequestLocalizationOptions()
             .SetDefaultCulture(supportedCultures[0])
@@ -154,7 +181,6 @@ public class Startup
         app.UseRequestLocalization(localizationOptions);
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();
-        app.UseMiddleware<NovuSubscriberCreationMiddleware>();
         app.UseAuthorization();
         app.UseExceptionHandler(options => { });
         app.UseEndpoints(endpoints =>

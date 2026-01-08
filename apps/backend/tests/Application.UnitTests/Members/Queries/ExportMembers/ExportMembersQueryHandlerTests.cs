@@ -1,11 +1,8 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces; // Add this using statement
-using backend.Application.Common.Models;
 using backend.Application.Members.Queries; // MemberDto is here
 using backend.Application.Members.Queries.ExportMembers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

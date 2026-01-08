@@ -2,7 +2,7 @@ using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FamilyTree.Infrastructure.Persistence.Configurations;
+namespace backend.Infrastructure.Persistence.Configurations;
 
 public class LocationLinkConfiguration : IEntityTypeConfiguration<LocationLink>
 {

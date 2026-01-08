@@ -1,4 +1,4 @@
-namespace FamilyTree.Infrastructure;
+namespace backend.Infrastructure;
 
 public class ImgbbSettings
 {

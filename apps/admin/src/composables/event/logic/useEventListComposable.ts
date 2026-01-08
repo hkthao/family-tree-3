@@ -2,7 +2,6 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { formatDate } from '@/utils/dateUtils';
 
@@ -11,6 +10,7 @@ export function useEventListComposable(props: {
   totalEvents: number;
   loading: boolean;
   search: string;
+  familyId?: string; // familyId prop added
 }, emit: (event: 'update:options' | 'view' | 'edit' | 'delete' | 'create' | 'update:search', ...args: any[]) => void) {
   const { t } = useI18n();
 
@@ -50,6 +50,13 @@ export function useEventListComposable(props: {
       align: 'center',
     },
     {
+      title: t('event.list.headers.currentYearOccurrenceDate'),
+      key: 'currentYearOccurrenceDate',
+      width: '150px',
+      align: 'center',
+      sortable: false,
+    },
+    {
       title: t('event.list.headers.name'),
       key: 'name',
       minWidth: '150px',
@@ -74,7 +81,7 @@ export function useEventListComposable(props: {
       title: t('event.list.headers.actions'),
       key: 'actions',
       sortable: false,
-      width: '120px',
+      minWidth: '150px',
       align: 'center',
     },
   ]);
@@ -95,11 +102,16 @@ export function useEventListComposable(props: {
     emit('delete', eventId);
   };
 
+  // REMOVED: isGeneratingOccurrences and generateEventOccurrences
+  // const isGeneratingOccurrences = ref(false);
+  // const generateEventOccurrences = async (year: number) => { /* ... */ };
+
   return {
     state: {
       debouncedSearch,
       itemsPerPage,
       headers,
+      // REMOVED: isGeneratingOccurrences,
     },
     actions: {
       t,
@@ -107,6 +119,7 @@ export function useEventListComposable(props: {
       editEvent,
       confirmDelete,
       formatDate,
+      // REMOVED: generateEventOccurrences,
     },
   };
 }

@@ -18,6 +18,34 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
     {
         var query = _context.Families.AsQueryable();
 
+        // Apply family following filter
+        if (request.IsFollowing.HasValue)
+        {
+            var userId = _currentUser.UserId;
+            if (!_currentUser.IsAuthenticated)
+            {
+                if (request.IsFollowing.Value)
+                {
+                    return Result<PaginatedList<FamilyDto>>.Success(PaginatedList<FamilyDto>.Empty());
+                }
+            }
+            else
+            {
+                var followedFamilyIds = _context.FamilyFollows
+                    .Where(ff => ff.UserId == userId && ff.IsFollowing) // Ensure IsFollowing is true for followed families
+                    .Select(ff => ff.FamilyId)
+                    .ToHashSet();
+
+                if (request.IsFollowing.Value)
+                {
+                    query = query.Where(f => followedFamilyIds.Contains(f.Id));
+                }
+                else
+                {
+                    query = query.Where(f => !followedFamilyIds.Contains(f.Id));
+                }
+            }
+        }
         query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
         query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
@@ -27,6 +55,21 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
 
         var familyDtos = _mapper.Map<List<FamilyDto>>(paginatedFamilyEntities.Items);
+
+        if (_currentUser.IsAuthenticated)
+        {
+            var userId = _currentUser.UserId;
+            var followedFamilyIds = (await _context.FamilyFollows
+                .Where(ff => ff.UserId == userId && ff.IsFollowing)
+                .Select(ff => ff.FamilyId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            foreach (var familyDto in familyDtos)
+            {
+                familyDto.IsFollowing = followedFamilyIds.Contains(familyDto.Id);
+            }
+        }
 
         var filteredFamilyDtos = new List<FamilyDto>();
         foreach (var familyDto in familyDtos)

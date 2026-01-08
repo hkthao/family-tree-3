@@ -3,7 +3,6 @@ using backend.Application.UnitTests.Common;
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfileById;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace backend.Application.UnitTests.VoiceProfiles.Queries.GetVoiceProfileById;

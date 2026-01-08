@@ -1,5 +1,4 @@
 using backend.Application.VoiceProfiles.Queries.GetVoiceProfileById;
-using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
 

@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces;
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.UnitTests.Common;
@@ -14,6 +14,7 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
 {
     private readonly SearchPublicFamiliesQueryHandler _handler;
     private readonly Mock<IPrivacyService> _mockPrivacyService;
+    private readonly Mock<ICurrentUser> _mockCurrentUser; // NEW
 
     public SearchPublicFamiliesQueryHandlerTests()
     {
@@ -24,7 +25,11 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         _mockPrivacyService.Setup(x => x.ApplyPrivacyFilter(It.IsAny<List<FamilyDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((List<FamilyDto> dtos, Guid familyId, CancellationToken token) => dtos);
 
-        _handler = new SearchPublicFamiliesQueryHandler(_context, _mapper, _mockPrivacyService.Object);
+        _mockCurrentUser = new Mock<ICurrentUser>(); // NEW
+        _mockCurrentUser.Setup(x => x.UserId).Returns(TestUserId); // Use a consistent TestUserId from TestBase
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true); // Default to authenticated for most tests
+
+        _handler = new SearchPublicFamiliesQueryHandler(_context, _mapper, _mockPrivacyService.Object, _mockCurrentUser.Object);
     }
 
     [Fact]
@@ -102,5 +107,99 @@ public class SearchPublicFamiliesQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Items.Should().BeEmpty();
+    }
+
+    // NEW TESTS FOR ISFOLLOWING FILTER
+
+    [Fact]
+    public async Task Handle_IsFollowingTrue_ShouldReturnFollowedPublicFamiliesForAuthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true);
+        var publicFamily1 = new Family { Id = Guid.NewGuid(), Name = "Public Family 1", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
+        var publicFamily2 = new Family { Id = Guid.NewGuid(), Name = "Public Family 2", Code = "PUB2", Visibility = FamilyVisibility.Public.ToString() };
+        var privateFamily = new Family { Id = Guid.NewGuid(), Name = "Private Family", Code = "PRIV1", Visibility = FamilyVisibility.Private.ToString() };
+
+        _context.Families.AddRange(publicFamily1, publicFamily2, privateFamily);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id));
+        await _context.SaveChangesAsync();
+
+        var query = new SearchPublicFamiliesQuery { IsFollowing = true };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items.First().Id.Should().Be(publicFamily1.Id);
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingFalse_ShouldReturnUnfollowedPublicFamiliesForAuthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(true);
+        var publicFamily1 = new Family { Id = Guid.NewGuid(), Name = "Public Family 1", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
+        var publicFamily2 = new Family { Id = Guid.NewGuid(), Name = "Public Family 2", Code = "PUB2", Visibility = FamilyVisibility.Public.ToString() };
+        var privateFamily = new Family { Id = Guid.NewGuid(), Name = "Private Family", Code = "PRIV1", Visibility = FamilyVisibility.Private.ToString() };
+
+        _context.Families.AddRange(publicFamily1, publicFamily2, privateFamily);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id));
+        await _context.SaveChangesAsync();
+
+        var query = new SearchPublicFamiliesQuery { IsFollowing = false };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(1);
+        result.Value.Items.First().Id.Should().Be(publicFamily2.Id);
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingTrue_ShouldReturnEmptyListForUnauthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(false);
+        var publicFamily1 = new Family { Id = Guid.NewGuid(), Name = "Public Family 1", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
+        _context.Families.Add(publicFamily1);
+        _context.FamilyFollows.Add(FamilyFollow.Create(TestUserId, publicFamily1.Id)); // Followed by some user, but current is unauthenticated
+        await _context.SaveChangesAsync();
+
+        var query = new SearchPublicFamiliesQuery { IsFollowing = true };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_IsFollowingFalse_ShouldReturnAllPublicFamiliesForUnauthenticatedUser()
+    {
+        // Arrange
+        _mockCurrentUser.Setup(x => x.IsAuthenticated).Returns(false);
+        var publicFamily1 = new Family { Id = Guid.NewGuid(), Name = "Public Family 1", Code = "PUB1", Visibility = FamilyVisibility.Public.ToString() };
+        var publicFamily2 = new Family { Id = Guid.NewGuid(), Name = "Public Family 2", Code = "PUB2", Visibility = FamilyVisibility.Public.ToString() };
+        _context.Families.AddRange(publicFamily1, publicFamily2);
+        await _context.SaveChangesAsync();
+
+        var query = new SearchPublicFamiliesQuery { IsFollowing = false };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2); // All public families are considered "not followed"
     }
 }
