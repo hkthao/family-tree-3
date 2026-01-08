@@ -346,6 +346,7 @@ public class PrivacyService : IPrivacyService
             PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy,
+            PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing, // NEW
         };
 
         return FilterDto(familyDto, publicProperties, alwaysIncludeProps);
@@ -391,6 +392,7 @@ public class PrivacyService : IPrivacyService
             PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
             PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy
+            , PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing // NEW
         };
 
         return FilterDto(familyDetailDto, publicProperties, alwaysIncludeProps);
