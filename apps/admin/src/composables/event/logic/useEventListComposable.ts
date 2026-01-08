@@ -2,12 +2,8 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { formatDate } from '@/utils/dateUtils';
-// REMOVED: import { useAuthStore } from '@/stores/auth.store'; // No longer needed
-import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
-// REMOVED: import { useEventService } from '@/services/event.service'; // No longer needed
 
 export function useEventListComposable(props: {
   events: EventDto[];
@@ -17,9 +13,6 @@ export function useEventListComposable(props: {
   familyId?: string; // familyId prop added
 }, emit: (event: 'update:options' | 'view' | 'edit' | 'delete' | 'create' | 'update:search', ...args: any[]) => void) {
   const { t } = useI18n();
-  // REMOVED: const authStore = useAuthStore(); // No longer needed
-  const { showSnackbar } = useGlobalSnackbar();
-  // REMOVED: const eventService = useEventService(); // No longer needed
 
   const searchQuery = ref(props.search);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -88,7 +81,7 @@ export function useEventListComposable(props: {
       title: t('event.list.headers.actions'),
       key: 'actions',
       sortable: false,
-      width: '120px',
+      minWidth: '150px',
       align: 'center',
     },
   ]);

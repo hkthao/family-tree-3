@@ -117,6 +117,21 @@
           </v-btn>
         </template>
       </v-tooltip>
+      <v-tooltip :text="t('event.list.action.sendNotification')">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-if="isAdmin"
+            icon
+            size="small"
+            variant="text"
+            v-bind="props"
+            @click="emit('sendNotification', item.id)"
+            data-testid="send-notification-button"
+          >
+            <v-icon>mdi-send</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
@@ -155,6 +170,7 @@ const props = defineProps<{
   isAdmin?: boolean;
   familyId?: string; // NEW
   isGeneratingOccurrences?: boolean; // NEW
+  isSendingNotification?: boolean; // NEW
 }>();
 
 const emit = defineEmits([
@@ -165,6 +181,7 @@ const emit = defineEmits([
   'create',
   'update:search',
   'generateOccurrences', // NEW
+  'sendNotification',
 ]);
 
 const {

@@ -352,6 +352,8 @@
   "event.messages.exportError": "Failed to export events.",
   "event.messages.importSuccess": "Events imported successfully!",
   "event.messages.importError": "Failed to import events.",
+  "event.messages.sendNotificationSuccess": "Event notification sent successfully!",
+  "event.messages.sendNotificationError": "Failed to send event notification.",
   "event.messages.noFileSelected": "No file selected.",
   "event.messages.noFamilyId": "No Family ID.",
   "event.search.apply": "Apply Filters",

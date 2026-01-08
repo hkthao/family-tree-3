@@ -62,7 +62,7 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
         // For manual notification, we take today's occurrence date, or the event's solar date if no occurrence
         DateTime notificationDate;
         var currentOccurrence = await _context.EventOccurrences
-            .Where(eo => eo.EventId == request.EventId && eo.OccurrenceDate.Date == _dateTime.Now.Date)
+            .Where(eo => eo.EventId == request.EventId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (currentOccurrence != null)
@@ -135,7 +135,7 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
 
         // Send notification
         var sendResult = await _notificationService.SendNotificationAsync(
-            "manual-event-notification", // Use a specific workflow ID for manual sends
+            "event-upcoming", // Use a specific workflow ID for manual sends
             recipientUserIds,
             notificationPayload,
             cancellationToken

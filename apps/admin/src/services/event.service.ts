@@ -19,7 +19,20 @@ export const useEventService = () => {
     }
   };
 
+  const sendEventNotification = async (eventId: string): Promise<Result<string>> => {
+    try {
+      if (!authStore.isAdmin) {
+        return { ok: false, error: { name: 'ApiError', message: 'Unauthorized: Only administrators can perform this action.' } };
+      }
+      const response = await apiClient.post<string>(`/event/${eventId}/send-notification`);
+      return response;
+    } catch (error: any) {
+      return { ok: false, error: { name: 'ApiError', message: error.message || 'Failed to send event notification.' } };
+    }
+  };
+
   return {
     generateEventOccurrences,
+    sendEventNotification,
   };
 };
