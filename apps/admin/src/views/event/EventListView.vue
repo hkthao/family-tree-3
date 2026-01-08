@@ -8,8 +8,8 @@
     :is-importing="isImporting"
     :can-perform-actions="true"
     :on-export="exportEvents"
-    :on-import-click="() => importDialog = true" />
-
+    :on-import-click="() => importDialog = true"
+    :is-admin="isAdmin" /> <!-- NEW -->
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
     <EventAddView v-if="addDrawer" :family-id="filters.familyId || undefined" @close="closeAddDrawer"
@@ -51,7 +51,8 @@ import { useEventList } from '@/composables';
 import { useEventImportExport } from '@/composables/event/useEventImportExport';
 import { useI18n } from 'vue-i18n';
 import { useGlobalSnackbar } from '@/composables';
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // NEW: Added computed
+import { useAuthStore } from '@/stores/auth.store'; // NEW
 
 const props = defineProps<{
   familyId: string;
@@ -62,6 +63,7 @@ const emit = defineEmits(['close', 'saved']);
 
 const { t } = useI18n();
 const { showSnackbar } = useGlobalSnackbar();
+const authStore = useAuthStore(); // NEW
 
 const importDialog = ref(false);
 
@@ -124,4 +126,6 @@ const handleEventSaved = () => {
   originalHandleEventSaved(); // Call original handler
   refetchEvents(); // Refetch the list after successful save
 };
+
+const isAdmin = computed(() => authStore.isAdmin); // NEW
 </script>

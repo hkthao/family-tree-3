@@ -1,5 +1,4 @@
 ﻿using backend.Application.Common.Behaviours;
-using backend.Application.Events.EventOccurrences.Jobs; // NEW
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

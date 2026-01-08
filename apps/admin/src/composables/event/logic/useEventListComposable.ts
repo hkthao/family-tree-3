@@ -5,6 +5,9 @@ import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { formatDate } from '@/utils/dateUtils';
+import { useAuthStore } from '@/stores/auth.store'; // NEW
+import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar'; // NEW
+import { useEventService } from '@/services/event.service'; // NEW
 
 export function useEventListComposable(props: {
   events: EventDto[];
@@ -13,6 +16,9 @@ export function useEventListComposable(props: {
   search: string;
 }, emit: (event: 'update:options' | 'view' | 'edit' | 'delete' | 'create' | 'update:search', ...args: any[]) => void) {
   const { t } = useI18n();
+  const authStore = useAuthStore(); // NEW
+  const { showSnackbar } = useGlobalSnackbar(); // NEW
+  const eventService = useEventService(); // NEW
 
   const searchQuery = ref(props.search);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -95,11 +101,27 @@ export function useEventListComposable(props: {
     emit('delete', eventId);
   };
 
+  // REMOVED: const isAdmin = computed(() => authStore.isAdmin); // NEW
+  const isGeneratingOccurrences = ref(false); // NEW
+
+  const generateEventOccurrences = async (year: number) => { // NEW
+    isGeneratingOccurrences.value = true;
+    const result = await eventService.generateEventOccurrences(year);
+    if (result.ok) {
+      showSnackbar(t('event.list.action.generateOccurrencesSuccess'), 'success');
+      loadEvents({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] }); // Reload events
+    } else {
+      showSnackbar(result.error?.message || t('event.list.action.generateOccurrencesError'), 'error');
+    }
+    isGeneratingOccurrences.value = false;
+  };
+
   return {
     state: {
       debouncedSearch,
       itemsPerPage,
       headers,
+      isGeneratingOccurrences, // NEW
     },
     actions: {
       t,
@@ -107,6 +129,7 @@ export function useEventListComposable(props: {
       editEvent,
       confirmDelete,
       formatDate,
+      generateEventOccurrences, // NEW
     },
   };
 }

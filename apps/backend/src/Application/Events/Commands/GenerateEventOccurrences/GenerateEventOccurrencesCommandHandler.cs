@@ -1,11 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs; // Needed for IGenerateEventOccurrencesJob
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Constants; // NEW
 
 namespace backend.Application.Events.Commands.GenerateEventOccurrences;

@@ -2,51 +2,67 @@
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="events"
     :items-length="totalEvents" :loading="loading" item-value="id" @update:options="loadEvents" elevation="0">
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title data-testid="event-list-title">{{ t('event.list.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-
-        <v-btn
-          v-if="props.canPerformActions"
-          color="primary"
-          icon
-          @click="props.onExport?.()"
-          data-testid="export-event-button"
-          :aria-label="t('common.export')"
-          :loading="props.isExporting"
-        >
-          <v-tooltip :text="t('common.export')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-export</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-btn
-          v-if="props.canPerformActions"
-          color="primary"
-          icon
-          @click="props.onImportClick?.()"
-          data-testid="import-event-button"
-          :aria-label="t('common.import')"
-          :loading="props.isImporting"
-        >
-          <v-tooltip :text="t('common.import')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-import</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-event-button">
-          <v-tooltip :text="t('event.list.action.create')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-plus</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
-          hide-details clearable class="mr-2" data-test-id="event-list-search-input"></v-text-field>
-      </v-toolbar>
+      <!-- REFACTOR: Use ListToolbar component -->
+      <ListToolbar
+        :title="t('event.list.title')"
+        :search-query="debouncedSearch"
+        :search-label="t('common.search')"
+        :create-button-tooltip="t('event.list.action.create')"
+        create-button-test-id="add-new-event-button"
+        @update:search="emit('update:search', $event)"
+        @create="emit('create')"
+      >
+        <template #custom-buttons>
+          <!-- Export Button -->
+          <v-btn
+            v-if="props.canPerformActions"
+            color="primary"
+            icon
+            @click="props.onExport?.()"
+            data-testid="export-event-button"
+            :aria-label="t('common.export')"
+            :loading="props.isExporting"
+          >
+            <v-tooltip :text="t('common.export')">
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-icon v-bind="tooltipProps">mdi-export</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <!-- Import Button -->
+          <v-btn
+            v-if="props.canPerformActions"
+            color="primary"
+            icon
+            @click="props.onImportClick?.()"
+            data-testid="import-event-button"
+            :aria-label="t('common.import')"
+            :loading="props.isImporting"
+          >
+            <v-tooltip :text="t('common.import')">
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-icon v-bind="tooltipProps">mdi-import</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <!-- Generate Event Occurrences Button (Admin Only) -->
+          <v-btn
+            v-if="props.isAdmin"
+            color="primary"
+            icon
+            @click="actions.generateEventOccurrences(new Date().getFullYear())"
+            data-testid="generate-event-occurrences-button"
+            :aria-label="t('event.list.action.generateOccurrences')"
+            :loading="state.isGeneratingOccurrences.value"
+          >
+            <v-tooltip :text="t('event.list.action.generateOccurrences')">
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-icon v-bind="tooltipProps">mdi-calendar-plus</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </ListToolbar>
     </template>
 
     <!-- Date column -->
@@ -115,20 +131,22 @@
 <script setup lang="ts">
 import type { EventDto } from '@/types';
 import FamilyName from '@/components/common/FamilyName.vue';
-import MemberName from '@/components/member/MemberName.vue'; // Import MemberName
+import MemberName from '@/components/member/MemberName.vue';
 import { useEventListComposable } from '@/composables';
-import { CalendarType } from '@/types/enums'; // Import CalendarType enum
+import { CalendarType } from '@/types/enums';
+import ListToolbar from '@/components/common/ListToolbar.vue'; // NEW
 
 const props = defineProps<{
   events: EventDto[];
   totalEvents: number;
   loading: boolean;
   search: string;
-  isExporting?: boolean; // New prop
-  isImporting?: boolean; // New prop
-  canPerformActions?: boolean; // New prop
-  onExport?: () => void; // New prop
-  onImportClick?: () => void; // New prop
+  isExporting?: boolean;
+  isImporting?: boolean;
+  canPerformActions?: boolean;
+  onExport?: () => void;
+  onImportClick?: () => void;
+  isAdmin?: boolean; // NEW
 }>();
 
 const emit = defineEmits([
@@ -159,3 +177,5 @@ const {
   formatDate,
 } = actions;
 </script>
+
+<style scoped></style>
