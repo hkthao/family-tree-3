@@ -126,9 +126,9 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
             event_id = @event.Id.ToString(),
             event_name = @event.Name,
             event_type = @event.Type.ToString(),
-            familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
+            family_id = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
             member_name = memberName,
-            lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : null,
+            lunar_date = @event.LunarDate != null ? $"{@event.LunarDate.Day:D2}/{@event.LunarDate.Month:D2}" : null,
             event_date = notificationDate.ToString("dd/MM"), // Format as dd/MM
             titles = memberHonorific
         };
