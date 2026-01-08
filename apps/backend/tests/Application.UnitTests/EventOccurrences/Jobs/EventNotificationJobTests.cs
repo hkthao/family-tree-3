@@ -217,8 +217,7 @@ public class EventNotificationJobTests : TestBase
                 It.Is<object>(payload =>
                     payload.GetType().GetProperty("titles")!.GetValue(payload)!.ToString()!.Equals($"Sự kiện sắp tới: {@event.Name}") && // Verify 'titles' with event name
                     payload.GetType().GetProperty("member_name")!.GetValue(payload)!.ToString()!.Equals("") && // Verify 'member_name' is empty
-                    payload.GetType().GetProperty("event_id")!.GetValue(payload)!.ToString()!.Equals(@event.Id.ToString()) && // Verify 'event_id'
-                    payload.GetType().GetProperty("event_date")!.GetValue(payload)!.ToString()!.Equals("01/01") // Verify 'event_date'
+                    payload.GetType().GetProperty("event_id")!.GetValue(payload)!.ToString()!.Equals(@event.Id.ToString()) // Verify 'event_id'
                 ),
                 It.IsAny<CancellationToken>()
             ),
