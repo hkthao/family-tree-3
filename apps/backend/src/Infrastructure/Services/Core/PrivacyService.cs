@@ -238,35 +238,37 @@ public class PrivacyService : IPrivacyService
 
     public async Task<EventDto> ApplyPrivacyFilter(EventDto eventDto, Guid familyId, CancellationToken cancellationToken)
     {
+        return await Task.FromResult(eventDto);
+
         // Admin always sees full data
-        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
-        {
-            return eventDto;
-        }
+        // if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        // {
+        //     return eventDto;
+        // }
 
-        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+        // PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+        //     .AsNoTracking()
+        //     .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
-        if (privacyConfig == null)
-        {
-            // If no config, create a default privacy config with predefined public properties
-            privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicEventProperties(PrivacyConstants.DefaultPublicEventProperties.EventDto);
-        }
+        // if (privacyConfig == null)
+        // {
+        //     // If no config, create a default privacy config with predefined public properties
+        //     privacyConfig = new PrivacyConfiguration(familyId);
+        //     privacyConfig.UpdatePublicEventProperties(PrivacyConstants.DefaultPublicEventProperties.EventDto);
+        // }
 
-        var publicProperties = privacyConfig.GetPublicEventPropertiesList();
-        var alwaysIncludeProps = new List<string>
-        {
-            PrivacyConstants.AlwaysIncludeEventProps.Id,
-            PrivacyConstants.AlwaysIncludeEventProps.FamilyId,
-            PrivacyConstants.AlwaysIncludeEventProps.FamilyName,
-            PrivacyConstants.AlwaysIncludeEventProps.FamilyAvatarUrl,
-            PrivacyConstants.AlwaysIncludeEventProps.RelatedMembers,
-            PrivacyConstants.AlwaysIncludeEventProps.RelatedMemberIds
-        };
+        // var publicProperties = privacyConfig.GetPublicEventPropertiesList();
+        // var alwaysIncludeProps = new List<string>
+        // {
+        //     PrivacyConstants.AlwaysIncludeEventProps.Id,
+        //     PrivacyConstants.AlwaysIncludeEventProps.FamilyId,
+        //     PrivacyConstants.AlwaysIncludeEventProps.FamilyName,
+        //     PrivacyConstants.AlwaysIncludeEventProps.FamilyAvatarUrl,
+        //     PrivacyConstants.AlwaysIncludeEventProps.RelatedMembers,
+        //     PrivacyConstants.AlwaysIncludeEventProps.RelatedMemberIds
+        // };
 
-        return FilterDto(eventDto, publicProperties, alwaysIncludeProps);
+        // return FilterDto(eventDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<List<EventDto>> ApplyPrivacyFilter(List<EventDto> eventDtos, Guid familyId, CancellationToken cancellationToken)
