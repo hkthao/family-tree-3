@@ -3,11 +3,13 @@ using backend.Application.Events.EventOccurrences.Jobs;
 using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this line
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic; // NEW
 
 namespace backend.Application.UnitTests.EventOccurrences.Jobs;
 
@@ -42,7 +44,7 @@ public class EventNotificationJobTests : TestBase
 
         // Assert
         _mockNotificationService.Verify(
-            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()),
+            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), // UPDATED
             Times.Never
         );
         _context.NotificationDeliveries.Should().BeEmpty();
@@ -55,8 +57,22 @@ public class EventNotificationJobTests : TestBase
         var today = new DateTime(2023, 1, 1);
         _mockDateTime.Setup(dt => dt.Now).Returns(today);
 
-        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF1" };
+        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF1" }; // UPDATED: Added Code
         _context.Families.Add(family);
+
+        // Add a member with gender for honorific test
+        var member = new Member("Doe", "John", "JD1", family.Id);
+        member.UpdateGender(Gender.Male.ToString());
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+
+        // Add a family user and a family follower to simulate recipients
+        var user1Id = Guid.NewGuid();
+        var user2Id = Guid.NewGuid();
+        _context.FamilyUsers.Add(new FamilyUser(family.Id, user1Id, Domain.Enums.FamilyRole.Manager));
+        _context.FamilyFollows.Add(FamilyFollow.Create(user2Id, family.Id));
+        await _context.SaveChangesAsync();
 
         var @event = Event.CreateSolarEvent("Test Event", "TE1", Domain.Enums.EventType.Anniversary, today.AddDays(1), Domain.Enums.RepeatRule.Yearly, family.Id);
         _context.Events.Add(@event);
@@ -66,7 +82,10 @@ public class EventNotificationJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockNotificationService.Setup(ns => ns.SendNotificationAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()
+                It.IsAny<string>(), // workflowId
+                It.IsAny<List<string>>(), // recipientUserIds - UPDATED
+                It.IsAny<object>(), // payload
+                It.IsAny<CancellationToken>()
             )).ReturnsAsync(Result.Success());
 
         // Act
@@ -75,11 +94,13 @@ public class EventNotificationJobTests : TestBase
         // Assert
         _mockNotificationService.Verify(
             ns => ns.SendNotificationAsync(
-                "event-upcoming", // Changed to kebab-case
-                "all",
+                "event-upcoming",
+                It.Is<List<string>>(recipients => recipients.Contains(user1Id.ToString()) && recipients.Contains(user2Id.ToString())), // Verify recipients
                 It.Is<object>(payload =>
-                    payload.GetType().GetProperty("Title")!.GetValue(payload)!.ToString()!.Contains(@event.Name) &&
-                    payload.GetType().GetProperty("EventId")!.GetValue(payload)!.Equals(@event.Id)
+                    payload.GetType().GetProperty("titles")!.GetValue(payload)!.ToString()!.Equals($"Sự kiện sắp tới: {@event.Name}") && // Verify 'titles'
+                    payload.GetType().GetProperty("member_name")!.GetValue(payload)!.ToString()!.Equals("") && // Verify 'member_name' is empty
+                    payload.GetType().GetProperty("event_id")!.GetValue(payload)!.ToString()!.Equals(@event.Id.ToString()) && // Verify 'event_id'
+                    payload.GetType().GetProperty("event_date")!.GetValue(payload)!.ToString()!.Equals(occurrence.OccurrenceDate.ToString("dd/MM")) // Verify 'event_date'
                 ),
                 It.IsAny<CancellationToken>()
             ),
@@ -101,8 +122,15 @@ public class EventNotificationJobTests : TestBase
         var today = new DateTime(2023, 1, 1);
         _mockDateTime.Setup(dt => dt.Now).Returns(today);
 
-        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF2" };
+        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF2" }; // UPDATED: Added Code
         _context.Families.Add(family);
+
+        // Add a family user and a family follower to simulate recipients
+        var user1Id = Guid.NewGuid();
+        var user2Id = Guid.NewGuid();
+        _context.FamilyUsers.Add(new FamilyUser(family.Id, user1Id, Domain.Enums.FamilyRole.Manager));
+        _context.FamilyFollows.Add(FamilyFollow.Create(user2Id, family.Id));
+        await _context.SaveChangesAsync();
 
         var @event = Event.CreateSolarEvent("Another Event", "AE1", Domain.Enums.EventType.Birth, today.AddDays(2), Domain.Enums.RepeatRule.Yearly, family.Id);
         @event.Id = Guid.NewGuid(); // Ensure unique EventId
@@ -126,7 +154,7 @@ public class EventNotificationJobTests : TestBase
 
         // Assert
         _mockNotificationService.Verify(
-            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()),
+            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), // UPDATED
             Times.Never
         );
 
@@ -142,8 +170,15 @@ public class EventNotificationJobTests : TestBase
         var today = new DateTime(2023, 1, 1);
         _mockDateTime.Setup(dt => dt.Now).Returns(today);
 
-        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF3" };
+        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF3" }; // UPDATED: Added Code
         _context.Families.Add(family);
+
+        // Add a family user and a family follower to simulate recipients
+        var user1Id = Guid.NewGuid();
+        var user2Id = Guid.NewGuid();
+        _context.FamilyUsers.Add(new FamilyUser(family.Id, user1Id, Domain.Enums.FamilyRole.Manager));
+        _context.FamilyFollows.Add(FamilyFollow.Create(user2Id, family.Id));
+        await _context.SaveChangesAsync();
 
         var @event = Event.CreateSolarEvent("Failed Event", "FE1", Domain.Enums.EventType.Other, today.AddDays(1), Domain.Enums.RepeatRule.None, family.Id);
         @event.Id = Guid.NewGuid(); // Ensure unique EventId
@@ -163,7 +198,10 @@ public class EventNotificationJobTests : TestBase
 
         // Act
         _mockNotificationService.Setup(ns => ns.SendNotificationAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()
+                It.IsAny<string>(),
+                It.IsAny<List<string>>(), // UPDATED
+                It.IsAny<object>(),
+                It.IsAny<CancellationToken>()
             )).ReturnsAsync(Result.Success());
         await _sut.Run(CancellationToken.None);
 
@@ -174,11 +212,13 @@ public class EventNotificationJobTests : TestBase
         // Assert
         _mockNotificationService.Verify(
             ns => ns.SendNotificationAsync(
-                "event-upcoming", // Changed to kebab-case
-                "all",
+                "event-upcoming",
+                It.Is<List<string>>(recipients => recipients.Contains(user1Id.ToString()) && recipients.Contains(user2Id.ToString())), // Verify recipients
                 It.Is<object>(payload =>
-                    payload.GetType().GetProperty("Title")!.GetValue(payload)!.ToString()!.Contains(@event.Name) &&
-                    payload.GetType().GetProperty("EventId")!.GetValue(payload)!.Equals(@event.Id)
+                    payload.GetType().GetProperty("titles")!.GetValue(payload)!.ToString()!.Equals($"Sự kiện sắp tới: {@event.Name}") && // Verify 'titles' with event name
+                    payload.GetType().GetProperty("member_name")!.GetValue(payload)!.ToString()!.Equals("") && // Verify 'member_name' is empty
+                    payload.GetType().GetProperty("event_id")!.GetValue(payload)!.ToString()!.Equals(@event.Id.ToString()) && // Verify 'event_id'
+                    payload.GetType().GetProperty("event_date")!.GetValue(payload)!.ToString()!.Equals("01/01") // Verify 'event_date'
                 ),
                 It.IsAny<CancellationToken>()
             ),
@@ -205,7 +245,7 @@ public class EventNotificationJobTests : TestBase
 
         // Assert
         _mockNotificationService.Verify(
-            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()),
+            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), // UPDATED
             Times.Never
         );
         _context.NotificationDeliveries.Should().BeEmpty();
@@ -218,8 +258,15 @@ public class EventNotificationJobTests : TestBase
         var today = new DateTime(2023, 1, 1);
         _mockDateTime.Setup(dt => dt.Now).Returns(today);
 
-        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF4" };
+        var family = new Family { Id = Guid.NewGuid(), Name = "TestFamily", Code = "TF4" }; // UPDATED: Added Code
         _context.Families.Add(family);
+
+        // Add a family user and a family follower to simulate recipients
+        var user1Id = Guid.NewGuid();
+        var user2Id = Guid.NewGuid();
+        _context.FamilyUsers.Add(new FamilyUser(family.Id, user1Id, Domain.Enums.FamilyRole.Manager));
+        _context.FamilyFollows.Add(FamilyFollow.Create(user2Id, family.Id));
+        await _context.SaveChangesAsync();
 
         var @event = Event.CreateSolarEvent("Failing Event", "FEL", Domain.Enums.EventType.Other, today.AddDays(1), Domain.Enums.RepeatRule.None, family.Id);
         _context.Events.Add(@event);
@@ -229,7 +276,10 @@ public class EventNotificationJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockNotificationService.Setup(ns => ns.SendNotificationAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()
+                It.IsAny<string>(),
+                It.IsAny<List<string>>(), // UPDATED
+                It.IsAny<object>(),
+                It.IsAny<CancellationToken>()
             )).ReturnsAsync(Result.Failure("Notification service failed"));
 
         // Act
@@ -237,7 +287,16 @@ public class EventNotificationJobTests : TestBase
 
         // Assert
         _mockNotificationService.Verify(
-            ns => ns.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()),
+            ns => ns.SendNotificationAsync(
+                "event-upcoming",
+                It.Is<List<string>>(recipients => recipients.Contains(user1Id.ToString()) && recipients.Contains(user2Id.ToString())), // Verify recipients
+                It.Is<object>(payload =>
+                    payload.GetType().GetProperty("titles")!.GetValue(payload)!.ToString()!.Equals($"Sự kiện sắp tới: {@event.Name}") && // Verify 'titles' with event name
+                    payload.GetType().GetProperty("event_id")!.GetValue(payload)!.ToString()!.Equals(@event.Id.ToString()) &&
+                    payload.GetType().GetProperty("event_date")!.GetValue(payload)!.ToString()!.Equals(occurrence.OccurrenceDate.ToString("dd/MM"))
+                ),
+                It.IsAny<CancellationToken>()
+            ),
             Times.Once
         );
 
