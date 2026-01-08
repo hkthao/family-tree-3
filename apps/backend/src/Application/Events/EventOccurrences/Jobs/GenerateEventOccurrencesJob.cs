@@ -36,7 +36,7 @@ public class GenerateEventOccurrencesJob : IGenerateEventOccurrencesJob
         while (moreEvents)
         {
             var eventsQuery = _context.Events
-                .Where(e => !e.IsDeleted && e.SolarDate == null && e.LunarDate != null);
+                .Where(e => !e.IsDeleted && e.CalendarType == Domain.Enums.CalendarType.Lunar && e.RepeatRule == Domain.Enums.RepeatRule.Yearly);
 
             if (familyId.HasValue)
             {
@@ -56,7 +56,7 @@ public class GenerateEventOccurrencesJob : IGenerateEventOccurrencesJob
             }
 
             var eventIdsInBatch = eventsToProcessBatch.Select(e => e.Id).ToHashSet();
-            
+
             // Efficiently query existing occurrences for the current batch
             var existingOccurrences = (await _context.EventOccurrences
                 .Where(eo => eo.Year == year && eventIdsInBatch.Contains(eo.EventId))
