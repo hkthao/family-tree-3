@@ -108,7 +108,6 @@ services:
       - ./.env
     environment:
       - PYTHONUNBUFFERED=1
-      - PORT=${OCR_SERVICE_PORT}
     mem_limit: 2g # Consistent with dev, adjust if needed
     networks:
       - app-network
