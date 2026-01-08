@@ -22,10 +22,13 @@ export function getInitialEventFormData(props: GetInitialEventFormDataProps): Ad
   if (props.initialEventData) {
     // This is an edit operation, return UpdateEventDto
     const updateData: UpdateEventDto = {
-      ...cloneDeep(props.initialEventData),
-      lunarDate: props.initialEventData.lunarDate ?? ({ day: 1, month: 1, isLeapMonth: false } as LunarDate),
+      ...cloneDeep(props.initialEventData), // Deep clone the whole object
+      // Ensure lunarDate is always a fresh mutable object
+      lunarDate: props.initialEventData.lunarDate
+        ? { ...props.initialEventData.lunarDate } // Create a new object from existing
+        : { day: 1, month: 1, isLeapMonth: false } as LunarDate,
       location: props.initialEventData.location,
-      locationId: props.initialEventData.locationId, // Added
+      locationId: props.initialEventData.locationId,
     };
     return updateData;
   } else {
@@ -41,7 +44,7 @@ export function getInitialEventFormData(props: GetInitialEventFormDataProps): Ad
       repeatRule: RepeatRule.None,
       description: '',
       location: '',
-      locationId: null, // Added
+      locationId: null,
       color: '#1976D2',
       eventMemberIds: [],
     };
