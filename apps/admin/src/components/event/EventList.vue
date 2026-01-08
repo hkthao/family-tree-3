@@ -94,6 +94,11 @@
       <FamilyName :name="item.familyName" :avatar-url="item.familyAvatarUrl" />
     </template>
 
+    <!-- Current Year Occurrence Date column -->
+    <template #item.currentYearOccurrenceDate="{ item }">
+      {{ item.currentYearOccurrenceDate ? formatDate(item.currentYearOccurrenceDate) : '-' }}
+    </template>
+
     <!-- Event Members column -->
     <template #item.eventMembers="{ item }">
       <div class="d-flex flex-wrap">
@@ -135,6 +140,7 @@ import MemberName from '@/components/member/MemberName.vue';
 import { useEventListComposable } from '@/composables';
 import { CalendarType } from '@/types/enums';
 import ListToolbar from '@/components/common/ListToolbar.vue'; // NEW
+import { formatDate } from '@/utils/dateUtils'; // NEW
 
 const props = defineProps<{
   events: EventDto[];
@@ -146,7 +152,7 @@ const props = defineProps<{
   canPerformActions?: boolean;
   onExport?: () => void;
   onImportClick?: () => void;
-  isAdmin?: boolean; // NEW
+  isAdmin?: boolean;
 }>();
 
 const emit = defineEmits([
@@ -174,7 +180,7 @@ const {
   loadEvents,
   editEvent,
   confirmDelete,
-  formatDate,
+  // REMOVED: formatDate, // Now imported directly
 } = actions;
 </script>
 

@@ -435,6 +435,7 @@
   "event.list.action.generateOccurrencesError": "Lỗi khi tạo sự kiện định kỳ.",
   "event.list.confirmDelete": "Bạn có chắc muốn xoá sự kiện {name} không?",
   "event.list.headers.actions": "Hành động",
+  "event.list.headers.currentYearOccurrenceDate": "Ngày lặp năm nay",
   "event.list.headers.date": "Ngày",
   "event.list.headers.family": "Gia đình/Dòng họ",
   "event.list.headers.location": "Địa điểm",

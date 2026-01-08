@@ -148,6 +148,11 @@ public class ApplicationDbContext(
     public DbSet<MemoryPerson> MemoryPersons => Set<MemoryPerson>();
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationDelivery.
+    /// </summary>
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
+
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể LocationLink.
     /// </summary>
     public DbSet<LocationLink> LocationLinks => Set<LocationLink>();

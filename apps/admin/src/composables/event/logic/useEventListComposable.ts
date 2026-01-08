@@ -5,9 +5,9 @@ import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { formatDate } from '@/utils/dateUtils';
-import { useAuthStore } from '@/stores/auth.store'; // NEW
-import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar'; // NEW
-import { useEventService } from '@/services/event.service'; // NEW
+// REMOVED: import { useAuthStore } from '@/stores/auth.store'; // No longer needed
+import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar';
+import { useEventService } from '@/services/event.service';
 
 export function useEventListComposable(props: {
   events: EventDto[];
@@ -16,9 +16,9 @@ export function useEventListComposable(props: {
   search: string;
 }, emit: (event: 'update:options' | 'view' | 'edit' | 'delete' | 'create' | 'update:search', ...args: any[]) => void) {
   const { t } = useI18n();
-  const authStore = useAuthStore(); // NEW
-  const { showSnackbar } = useGlobalSnackbar(); // NEW
-  const eventService = useEventService(); // NEW
+  // REMOVED: const authStore = useAuthStore(); // No longer needed
+  const { showSnackbar } = useGlobalSnackbar();
+  const eventService = useEventService();
 
   const searchQuery = ref(props.search);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -56,6 +56,13 @@ export function useEventListComposable(props: {
       align: 'center',
     },
     {
+      title: t('event.list.headers.currentYearOccurrenceDate'), // NEW
+      key: 'currentYearOccurrenceDate', // NEW
+      width: '150px', // NEW
+      align: 'center', // NEW
+      sortable: false, // NEW
+    },
+    {
       title: t('event.list.headers.name'),
       key: 'name',
       minWidth: '150px',
@@ -85,13 +92,19 @@ export function useEventListComposable(props: {
     },
   ]);
 
-  const loadEvents = (options: {
+  // REMOVED: const currentYearOccurrenceDates = ref<Record<string, string>>({});
+
+  // REMOVED: const fetchCurrentYearOccurrences = async (eventIds: string[]) => { /* ... */ };
+
+  const loadEvents = (options: { // MODIFIED to not be async
     page: number;
     itemsPerPage: number;
     sortBy: { key: string; order: string }[];
   }) => {
     emit('update:options', options);
   };
+
+  // REMOVED: watch for props.events
 
   const editEvent = (eventId: string) => {
     emit('edit', eventId);
@@ -101,10 +114,9 @@ export function useEventListComposable(props: {
     emit('delete', eventId);
   };
 
-  // REMOVED: const isAdmin = computed(() => authStore.isAdmin); // NEW
-  const isGeneratingOccurrences = ref(false); // NEW
+  const isGeneratingOccurrences = ref(false);
 
-  const generateEventOccurrences = async (year: number) => { // NEW
+  const generateEventOccurrences = async (year: number) => {
     isGeneratingOccurrences.value = true;
     const result = await eventService.generateEventOccurrences(year);
     if (result.ok) {
@@ -121,7 +133,8 @@ export function useEventListComposable(props: {
       debouncedSearch,
       itemsPerPage,
       headers,
-      isGeneratingOccurrences, // NEW
+      isGeneratingOccurrences,
+      // REMOVED: currentYearOccurrenceDates,
     },
     actions: {
       t,
@@ -129,7 +142,7 @@ export function useEventListComposable(props: {
       editEvent,
       confirmDelete,
       formatDate,
-      generateEventOccurrences, // NEW
+      generateEventOccurrences,
     },
   };
 }
