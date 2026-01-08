@@ -39,6 +39,10 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<Event> Events => Set<Event>();
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể EventOccurrence.
+    /// </summary>
+    public DbSet<EventOccurrence> EventOccurrences => Set<EventOccurrence>();
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Relationship.
     /// </summary>
     public DbSet<Relationship> Relationships => Set<Relationship>();
