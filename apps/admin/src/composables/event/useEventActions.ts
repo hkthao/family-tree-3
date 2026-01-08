@@ -5,10 +5,15 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useEventService } from '@/services/event.service';
 import { useEventImportExport } from './useEventImportExport'; // Assuming useEventImportExport is in the same directory
 
+import type { QueryObserverResult } from '@tanstack/vue-query';
+import type { Paginated, EventDto } from '@/types';
+
+// ... (other imports)
+
 export const useEventActions = (
   props: any,
-  emit: (event: string, ...args: any[]) => void,
-  refetchEvents: () => void | Promise<void>
+  emit: (event: 'close' | 'saved', ...args: any[]) => void,
+  refetchEvents: (options?: any) => Promise<QueryObserverResult<Paginated<EventDto>, Error>>
 ) => {
   const { t } = useI18n();
   const { showSnackbar } = useGlobalSnackbar();
