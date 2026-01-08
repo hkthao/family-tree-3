@@ -6,22 +6,32 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using backend.Application.Common.Constants; // NEW
 
 namespace backend.Application.Events.Commands.GenerateEventOccurrences;
 
 public class GenerateEventOccurrencesCommandHandler : IRequestHandler<GenerateEventOccurrencesCommand, Result<string>>
 {
-    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob; // Inject the interface
+    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob;
     private readonly ILogger<GenerateEventOccurrencesCommandHandler> _logger;
+    private readonly IAuthorizationService _authorizationService; // NEW
 
-    public GenerateEventOccurrencesCommandHandler(IGenerateEventOccurrencesJob generateEventOccurrencesJob, ILogger<GenerateEventOccurrencesCommandHandler> logger)
+    public GenerateEventOccurrencesCommandHandler(IGenerateEventOccurrencesJob generateEventOccurrencesJob, ILogger<GenerateEventOccurrencesCommandHandler> logger, IAuthorizationService authorizationService) // UPDATED
     {
         _generateEventOccurrencesJob = generateEventOccurrencesJob;
         _logger = logger;
+        _authorizationService = authorizationService; // NEW
     }
 
     public async Task<Result<string>> Handle(GenerateEventOccurrencesCommand request, CancellationToken cancellationToken)
     {
+        // Authorization check
+        if (!_authorizationService.IsAdmin())
+        {
+            _logger.LogWarning("Unauthorized attempt to generate event occurrences directly by non-admin user.");
+            return Result<string>.Failure("Access Denied: Only administrators can generate event occurrences directly.", ErrorSources.Forbidden);
+        }
+
         _logger.LogInformation($"Handling GenerateEventOccurrencesCommand for year {request.Year} and FamilyId {request.FamilyId}. Directly generating occurrences.");
 
         if (!request.FamilyId.HasValue)

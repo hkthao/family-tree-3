@@ -27,7 +27,8 @@ public class GenerateEventOccurrencesCommandHandlerTests : TestBase
 
         _handler = new GenerateEventOccurrencesCommandHandler(
             _mockGenerateEventOccurrencesJob.Object,
-            _mockLogger.Object
+            _mockLogger.Object,
+            _mockAuthorizationService.Object // Use _mockAuthorizationService from TestBase
         );
     }
 
@@ -38,6 +39,8 @@ public class GenerateEventOccurrencesCommandHandlerTests : TestBase
         var year = 2024;
         var familyId = Guid.NewGuid();
         var command = new GenerateEventOccurrencesCommand { Year = year, FamilyId = familyId };
+
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // User is admin
 
         _mockGenerateEventOccurrencesJob
             .Setup(j => j.GenerateOccurrences(year, familyId, It.IsAny<CancellationToken>()))
@@ -61,6 +64,8 @@ public class GenerateEventOccurrencesCommandHandlerTests : TestBase
         var year = 2024;
         var command = new GenerateEventOccurrencesCommand { Year = year, FamilyId = null };
 
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // User is admin
+
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -70,5 +75,26 @@ public class GenerateEventOccurrencesCommandHandlerTests : TestBase
         _mockGenerateEventOccurrencesJob.Verify(
             j => j.GenerateOccurrences(It.IsAny<int>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAdmin()
+    {
+        // Arrange
+        var year = 2024;
+        var familyId = Guid.NewGuid();
+        var command = new GenerateEventOccurrencesCommand { Year = year, FamilyId = familyId };
+
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // User is NOT admin
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be("Access Denied: Only administrators can generate event occurrences directly.");
+        _mockGenerateEventOccurrencesJob.Verify(
+            j => j.GenerateOccurrences(It.IsAny<int>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()),
+            Times.Never); // Job should not be called
     }
 }
