@@ -143,6 +143,7 @@ family-tree-3/
 
 Để có thông tin chi tiết hơn về từng phần của dự án, vui lòng tham khảo các tài liệu sau:
 
+*   [**Hướng dẫn Phát triển Tổng thể**](./docs/engineering/development-guide.md)
 *   [**Kiến trúc tổng quan**](./docs/engineering/architecture.md)
 *   [**Hướng dẫn Backend**](./docs/engineering/backend-guide.md)
 *   [**Hướng dẫn Frontend (Admin)**](./docs/engineering/frontend-guide.md)

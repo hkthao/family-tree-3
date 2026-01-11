@@ -4,7 +4,7 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 
 ## 1. Tổng quan Dự án
 
-**Tên Dự án:** Dự án Cây Gia Phả (Family Tree Project)
+**Tên Dự án:** Dự án Dòng Họ Việt (Family Tree Project)
 **Mục đích:** Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình, cho phép xây dựng, quản lý và trực quan hóa cây gia phả một cách dễ dàng.
 
 **Các tính năng chính:**
