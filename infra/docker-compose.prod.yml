@@ -52,6 +52,8 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1s
