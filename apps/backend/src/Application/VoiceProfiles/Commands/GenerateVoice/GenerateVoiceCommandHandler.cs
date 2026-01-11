@@ -91,7 +91,7 @@ public class GenerateVoiceCommandHandler : IRequestHandler<GenerateVoiceCommand,
         Result<FileStorageResultDto> uploadResult;
         await using (audioStream)
         {
-            uploadResult = await _fileStorageService.UploadFileAsync(audioStream, fileName, folder, cancellationToken);
+            uploadResult = await _fileStorageService.UploadFileAsync(audioStream, fileName, "audio/wav", folder, cancellationToken);
         }
 
         if (!uploadResult.IsSuccess)

@@ -12,7 +12,7 @@ public interface IFileStorageService
     /// <param name="folder">Thư mục lưu trữ (tùy chọn).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Đường dẫn đến file đã tải lên.</returns>
-    Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default);
+    Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lấy file từ bộ nhớ.

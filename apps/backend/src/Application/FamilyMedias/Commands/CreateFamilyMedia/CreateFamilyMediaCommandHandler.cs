@@ -102,10 +102,15 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             }
         }
 
+        // Determine content type based on inferred or provided MediaType
+        var actualMediaType = request.MediaType ?? request.FileName.InferMediaType();
+        var contentType = GetContentTypeFromMediaType(actualMediaType);
+
         using var fileStream = new MemoryStream(request.File); // Create MemoryStream from byte array
         var uploadResult = await _fileStorageService.UploadFileAsync(
             fileStream,
             fileNameInStorage,
+            contentType, // New argument
             folderToUpload,
             cancellationToken
         );
@@ -138,5 +143,17 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
 
         var familyMediaDto = _mapper.Map<FamilyMediaDto>(familyMedia);
         return Result<FamilyMediaDto>.Success(familyMediaDto);
+    }
+
+    private static string GetContentTypeFromMediaType(backend.Domain.Enums.MediaType mediaType)
+    {
+        return mediaType switch
+        {
+            backend.Domain.Enums.MediaType.Image => "image/jpeg", // Mặc định là jpeg, lý tưởng nên cụ thể hơn
+            backend.Domain.Enums.MediaType.Video => "video/mp4",  // Mặc định là mp4
+            backend.Domain.Enums.MediaType.Audio => "audio/mpeg", // Mặc định là mpeg
+            backend.Domain.Enums.MediaType.Document => "application/pdf", // Chỉ loại tài liệu được xử lý rõ ràng
+            _ => "application/octet-stream" // Dữ liệu nhị phân chung
+        };
     }
 }

@@ -14,22 +14,19 @@ public class N8nFileStorageService : IFileStorageService
         _n8nService = n8nService;
     }
 
-    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
+    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default)
     {
         // Convert Stream to byte array
         using var memoryStream = new MemoryStream();
         await fileStream.CopyToAsync(memoryStream, cancellationToken);
         var imageData = memoryStream.ToArray();
 
-        // Infer ContentType from fileName extension, or default
-        var contentType = GetContentType(fileName);
-
         var imageUploadDto = new ImageUploadWebhookDto
         {
             ImageData = imageData,
             FileName = fileName,
             Folder = folder ?? "general", // Default folder if not specified
-            ContentType = contentType
+            ContentType = contentType // Use the provided contentType
         };
 
         var n8nUploadResult = await _n8nService.CallImageUploadWebhookAsync(imageUploadDto, cancellationToken);
