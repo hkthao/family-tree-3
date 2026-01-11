@@ -17,6 +17,7 @@ public class UploadFileCommandHandler(
         var uploadResult = await _fileStorageService.UploadFileAsync(
             fileStream,
             request.FileName,
+            request.ContentType, // Thêm ContentType
             request.Folder,
             cancellationToken
         );

@@ -47,7 +47,7 @@ public class CloudflareR2FileStorageService : IFileStorageService
         );
     }
 
-    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
+    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default)
     {
         var objectKey = GetObjectKey(fileName, folder);
 
@@ -65,7 +65,7 @@ public class CloudflareR2FileStorageService : IFileStorageService
                 BucketName = _bucketName,
                 Key = objectKey,
                 InputStream = memoryStream,
-                ContentType = GetContentType(fileName),
+                ContentType = contentType, // Use the provided contentType
                 DisablePayloadSigning = true,
                 DisableDefaultChecksumValidation = true
                 // CannedACL = S3CannedACL.PublicRead, // Make object publicly accessible

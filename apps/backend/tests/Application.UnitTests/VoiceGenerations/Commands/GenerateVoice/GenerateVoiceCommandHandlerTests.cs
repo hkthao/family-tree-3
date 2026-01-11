@@ -47,7 +47,8 @@ public class GenerateVoiceCommandHandlerTests : TestBase
         _mockFileStorageService.Setup(s => s.UploadFileAsync(
             It.IsAny<Stream>(),
             It.IsAny<string>(),
-            It.IsAny<string>(),
+            It.IsAny<string>(), // contentType
+            It.IsAny<string>(), // folder
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = "http://final-permanent-url.wav" })); // Return a dummy URL
 

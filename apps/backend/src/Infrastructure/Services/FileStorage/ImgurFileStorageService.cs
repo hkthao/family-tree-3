@@ -23,14 +23,14 @@ public class ImgurFileStorageService : IFileStorageService
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", _clientId);
     }
 
-    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
+    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default)
     {
         using var memoryStream = new MemoryStream();
         await fileStream.CopyToAsync(memoryStream, cancellationToken);
         var imageData = memoryStream.ToArray();
 
         using var content = new ByteArrayContent(imageData);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Headers.ContentType = new MediaTypeHeaderValue(contentType); // Use the provided contentType
 
         var request = new HttpRequestMessage(HttpMethod.Post, "image")
         {

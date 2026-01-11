@@ -37,14 +37,14 @@ public class CloudinaryFileStorageService : IFileStorageService
         _rootFolder = _cloudinarySettings.RootFolder.Trim('/');
     }
 
-    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string? folder = null, CancellationToken cancellationToken = default)
+    public async Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default)
     {
         var publicId = GetPublicId(fileName);
         var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-        var resourceType = GetCloudinaryResourceType(fileExtension);
+        var resourceType = GetCloudinaryResourceType(contentType, fileExtension);
 
         RawUploadParams uploadParams;
-        object uploadResult; // Declare as object to hold various upload result types
+        UploadResult baseUploadResult = null!; // Khai báo và khởi tạo biến chung
 
         switch (resourceType)
         {
@@ -54,8 +54,11 @@ public class CloudinaryFileStorageService : IFileStorageService
             case ResourceType.Video: // Handles both video and audio
                 uploadParams = new VideoUploadParams();
                 break;
+            case ResourceType.Raw: // If Raw, fallback to ImageUploadParams, Cloudinary will reject if not actual image
+                uploadParams = new ImageUploadParams();
+                break;
             default:
-                uploadParams = new RawUploadParams(); // Default to raw for unknown types
+                uploadParams = new ImageUploadParams(); // Default to image for unknown types
                 break;
         }
 
@@ -68,22 +71,20 @@ public class CloudinaryFileStorageService : IFileStorageService
 
         try
         {
-            // Dynamically call the appropriate UploadAsync overload
+            // Gọi động overload UploadAsync thích hợp
             if (uploadParams is ImageUploadParams imageUploadParams)
             {
-                uploadResult = await _cloudinary.UploadAsync(imageUploadParams, cancellationToken);
+                baseUploadResult = await _cloudinary.UploadAsync(imageUploadParams, cancellationToken);
             }
             else if (uploadParams is VideoUploadParams videoUploadParams)
             {
-                uploadResult = await _cloudinary.UploadAsync(videoUploadParams, cancellationToken);
+                baseUploadResult = await _cloudinary.UploadAsync(videoUploadParams, cancellationToken);
             }
             else
             {
-                // Fallback or error if an unsupported uploadParams type is somehow used
+                // Xử lý lỗi nếu một loại uploadParams không được hỗ trợ được sử dụng
                 throw new InvalidOperationException("Unsupported upload parameters type.");
             }
-
-            var baseUploadResult = uploadResult as UploadResult; // Cast to common base type
 
             if (baseUploadResult != null && baseUploadResult.StatusCode == HttpStatusCode.OK)
             {
@@ -146,7 +147,7 @@ public class CloudinaryFileStorageService : IFileStorageService
             return Result.Failure("Invalid file path or public ID for deletion.", "CloudinaryDeleteError");
         }
         var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-        var resourceType = GetCloudinaryResourceType(fileExtension);
+        var resourceType = GetCloudinaryResourceType(null, fileExtension);
         var deletionParams = new DeletionParams(publicId)
         {
             ResourceType = resourceType // Use dynamic resource type
@@ -194,15 +195,33 @@ public class CloudinaryFileStorageService : IFileStorageService
         return $"{_rootFolder}_{nameWithoutExtension}";
     }
 
-    private CloudinaryDotNet.Actions.ResourceType GetCloudinaryResourceType(string fileExtension)
+    private CloudinaryDotNet.Actions.ResourceType GetCloudinaryResourceType(string? contentType, string fileExtension)
     {
+        // Ưu tiên kiểm tra theo ContentType nếu có
+        if (!string.IsNullOrEmpty(contentType))
+        {
+            if (contentType.StartsWith("image/"))
+            {
+                return ResourceType.Image;
+            }
+            if (contentType.StartsWith("video/") || contentType.StartsWith("audio/"))
+            {
+                return ResourceType.Video;
+            }
+            if (contentType == "application/pdf")
+            {
+                return ResourceType.Raw;
+            }
+        }
+
+        // Nếu ContentType không có hoặc không cung cấp đủ thông tin, kiểm tra theo phần mở rộng file
         return fileExtension switch
         {
             ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".svg" => ResourceType.Image,
             ".mp4" or ".avi" or ".mov" or ".webm" => ResourceType.Video,
-            ".mp3" or ".wav" or ".ogg" or ".flac" => ResourceType.Video, // Cloudinary often treats audio as video resource type
-            ".pdf" => ResourceType.Raw, // PDFs are treated as raw files in Cloudinary
-            _ => ResourceType.Raw // Default to raw for unknown types
+            ".mp3" or ".wav" or ".ogg" or ".flac" => ResourceType.Video, // Cloudinary thường coi audio là loại tài nguyên video
+            ".pdf" => ResourceType.Raw, // PDF được xử lý như các file raw trong Cloudinary
+            _ => ResourceType.Raw // Mặc định là raw cho các loại không xác định
         };
     }
 
