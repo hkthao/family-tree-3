@@ -2,18 +2,22 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Events.Specifications; // Add this using statement
-using backend.Domain.Entities; // Add this using statement
-using backend.Domain.Enums; // Add this
-using backend.Domain.ValueObjects; // Add this
+using backend.Application.Common.Services; // Add this for ILunarCalendarService
+using backend.Application.Events.Specifications;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore; // Add this for AnyAsync()
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<UpdateEventCommand, Result<bool>>
+public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, ILunarCalendarService lunarCalendarService) : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IMediator _mediator = mediator;
+    private readonly ILunarCalendarService _lunarCalendarService = lunarCalendarService; // Injected service
+
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can update events
@@ -131,6 +135,33 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             {
                 // Remove existing LocationLink
                 _context.LocationLinks.Remove(existingLocationLink);
+            }
+        }
+
+        // Generate EventOccurrences for the current year if it's a yearly repeating lunar event
+        // This should be done only if the event's CalendarType and RepeatRule make it a candidate
+        // and its LunarDate is not null.
+        if (entity.CalendarType == CalendarType.Lunar && entity.RepeatRule == RepeatRule.Yearly && entity.LunarDate != null)
+        {
+            int currentYear = DateTime.Now.Year;
+
+            // Check if an occurrence for this event and current year already exists
+            bool occurrenceExists = await _context.EventOccurrences
+                .AnyAsync(eo => eo.EventId == entity.Id && eo.Year == currentYear, cancellationToken);
+
+            if (!occurrenceExists)
+            {
+                DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(
+                    entity.LunarDate.Day,
+                    entity.LunarDate.Month,
+                    currentYear,
+                    entity.LunarDate.IsLeapMonth);
+
+                if (solarOccurrenceDate.HasValue)
+                {
+                    var newOccurrence = EventOccurrence.Create(entity.Id, currentYear, solarOccurrenceDate.Value);
+                    _context.EventOccurrences.Add(newOccurrence);
+                }
             }
         }
 

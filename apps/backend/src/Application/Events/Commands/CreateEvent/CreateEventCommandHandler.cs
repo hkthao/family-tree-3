@@ -1,17 +1,21 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Services; // Add this for ILunarCalendarService
 using backend.Domain.Entities;
-using backend.Domain.Enums; // Add this
-using backend.Domain.ValueObjects; // Add this
+using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore; // Add this for AnyAsync()
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, ILunarCalendarService lunarCalendarService) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IMediator _mediator = mediator;
+    private readonly ILunarCalendarService _lunarCalendarService = lunarCalendarService; // Injected service
+
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can create events
@@ -50,10 +54,6 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             {
                 return Result<Guid>.Failure("Lunar event must have a LunarDate.", ErrorSources.BadRequest);
             }
-            if (request.SolarDate.HasValue)
-            {
-                return Result<Guid>.Failure("Lunar event cannot have a SolarDate.", ErrorSources.BadRequest);
-            }
             var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
             entity = Event.CreateLunarEvent(
                 request.Name,
@@ -89,6 +89,31 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
                 LocationLinkType.General // Specify LinkType for event
             );
             _context.LocationLinks.Add(locationLink);
+        }
+
+        // Generate EventOccurrences for the current year if it's a yearly repeating lunar event
+        if (entity.CalendarType == CalendarType.Lunar && entity.RepeatRule == RepeatRule.Yearly && entity.LunarDate != null)
+        {
+            int currentYear = DateTime.Now.Year;
+
+            // Check if an occurrence for this event and current year already exists
+            bool occurrenceExists = await _context.EventOccurrences
+                .AnyAsync(eo => eo.EventId == entity.Id && eo.Year == currentYear, cancellationToken);
+
+            if (!occurrenceExists)
+            {
+                DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(
+                    entity.LunarDate.Day,
+                    entity.LunarDate.Month,
+                    currentYear,
+                    entity.LunarDate.IsLeapMonth);
+
+                if (solarOccurrenceDate.HasValue)
+                {
+                    var newOccurrence = EventOccurrence.Create(entity.Id, currentYear, solarOccurrenceDate.Value);
+                    _context.EventOccurrences.Add(newOccurrence);
+                }
+            }
         }
 
         entity.AddDomainEvent(new Domain.Events.Events.EventCreatedEvent(entity));
