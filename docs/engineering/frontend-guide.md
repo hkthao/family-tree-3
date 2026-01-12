@@ -1,10 +1,10 @@
 # Hướng dẫn Phát triển Frontend
 
-Tài liệu này cung cấp hướng dẫn chi tiết về cách thiết lập, phát triển và duy trì phần frontend của ứng dụng Family Tree.
+Tài liệu này cung cấp hướng dẫn chi tiết về cách thiết lập, phát triển và duy trì phần frontend của ứng dụng Dòng Họ Việt.
 
 ## 1. Tổng quan
 
-Frontend của ứng dụng Family Tree là giao diện người dùng tương tác, cho phép người dùng xem, quản lý và trực quan hóa cây gia phả. Mục tiêu chính là cung cấp trải nghiệm người dùng mượt mà, trực quan và phản hồi nhanh.
+Frontend của ứng dụng Dòng Họ Việt là giao diện người dùng tương tác, cho phép người dùng xem, quản lý và trực quan hóa cây gia phả. Mục tiêu chính là cung cấp trải nghiệm người dùng mượt mà, trực quan và phản hồi nhanh.
 
 **Công nghệ chính:**
 *   **Framework:** Vue.js 3 (TypeScript)

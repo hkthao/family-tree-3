@@ -13,4 +13,5 @@ public class CombinedAiContentDto
     public List<MemberDto>? Members { get; set; }
     public List<EventDto>? Events { get; set; }
     public List<FamilyLocationDto>? Locations { get; set; } // NEW
+    public string? RawOutput { get; set; }
 }

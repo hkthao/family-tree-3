@@ -1,5 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Services; // Added for ILunarCalendarService
 using backend.Application.Events.Commands.Inputs;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.UnitTests.Common;
@@ -19,13 +20,15 @@ public class UpdateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IMediator> _mediatorMock; // Added
+    private readonly Mock<ILunarCalendarService> _lunarCalendarServiceMock; // Added
     private readonly UpdateEventCommandHandler _handler;
 
     public UpdateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _mediatorMock = new Mock<IMediator>(); // Added
-        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Modified
+        _lunarCalendarServiceMock = new Mock<ILunarCalendarService>(); // Added
+        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object, _lunarCalendarServiceMock.Object); // Modified
     }
 
     [Fact]
@@ -490,4 +493,68 @@ public class UpdateEventCommandHandlerTests : TestBase
         result.Error.Should().Contain("Lunar event must have a LunarDate.");
         result.ErrorSource.Should().Be(ErrorSources.BadRequest);
     }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng EventOccurrences được tạo khi sự kiện được cập nhật thành Lunar lặp lại hàng năm.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Chuẩn bị một sự kiện Solar hiện có, ủy quyền và mock ILunarCalendarService.
+    ///    - Act: Gửi UpdateEventCommand để chuyển sự kiện thành Lunar lặp lại hàng năm.
+    ///    - Assert: Kiểm tra kết quả thành công và một EventOccurrence được tạo trong cơ sở dữ liệu cho năm hiện tại.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi sự kiện được cập nhật thành Lunar lặp lại hàng năm, EventOccurrence phải được tạo.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldGenerateEventOccurrence_WhenEventUpdatedToYearlyRepeatingLunar()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var eventId = Guid.NewGuid();
+        var existingEvent = Event.CreateSolarEvent(
+            "Old Solar Event",
+            "EVT-SOLAR-OLD",
+            EventType.Other,
+            new DateTime(2024, 1, 1),
+            RepeatRule.None,
+            familyId
+        );
+        existingEvent.Id = eventId;
+        _context.Events.Add(existingEvent);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var lunarDateInput = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false };
+        var currentYear = DateTime.Now.Year;
+        var expectedSolarDate = new DateTime(currentYear, 9, 29); // Example date
+
+        _lunarCalendarServiceMock
+            .Setup(x => x.ConvertLunarToSolar(lunarDateInput.Day, lunarDateInput.Month, currentYear, lunarDateInput.IsLeapMonth))
+            .Returns(expectedSolarDate);
+
+        var command = new UpdateEventCommand
+        {
+            Id = eventId,
+            Name = "Updated Lunar Event",
+            Description = "Updated Lunar Description",
+            FamilyId = familyId,
+            Type = EventType.Other,
+            CalendarType = CalendarType.Lunar, // Change to Lunar
+            LunarDate = lunarDateInput,
+            RepeatRule = RepeatRule.Yearly // Change to Yearly
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedEvent = await _context.Events.FindAsync(eventId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedEvent.Should().NotBeNull();
+
+        var eventOccurrence = await _context.EventOccurrences
+            .FirstOrDefaultAsync(eo => eo.EventId == updatedEvent!.Id && eo.Year == currentYear);
+
+        eventOccurrence.Should().NotBeNull();
+        eventOccurrence!.OccurrenceDate.Should().Be(expectedSolarDate);
+    }
 }
+

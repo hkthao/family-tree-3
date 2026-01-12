@@ -1,5 +1,6 @@
 using backend.Application.Common.Constants; // Added
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Services; // Added for ILunarCalendarService
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.Inputs;
 using backend.Application.UnitTests.Common;
@@ -18,13 +19,15 @@ public class CreateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IMediator> _mediatorMock; // Added
+    private readonly Mock<ILunarCalendarService> _lunarCalendarServiceMock; // Added
     private readonly CreateEventCommandHandler _handler;
 
     public CreateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _mediatorMock = new Mock<IMediator>(); // Added
-        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object); // Modified
+        _lunarCalendarServiceMock = new Mock<ILunarCalendarService>(); // Added
+        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object, _lunarCalendarServiceMock.Object); // Modified
     }
 
     [Fact]
@@ -303,16 +306,15 @@ public class CreateEventCommandHandlerTests : TestBase
         result.ErrorSource.Should().Be(ErrorSources.BadRequest);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh lỗi khi sự kiện Lunar có SolarDate.
+    /// 🎯 Mục tiêu của test: Xác minh rằng sự kiện Lunar có thể có SolarDate sau khi logic kiểm tra bị xóa.
     /// ⚙️ Các bước (Arrange, Act, Assert):
     ///    - Arrange: Chuẩn bị CreateEventCommand với CalendarType là Lunar và có SolarDate.
     ///    - Act: Gửi lệnh đến handler.
-    ///    - Assert: Kiểm tra kết quả thất bại và thông báo lỗi tương ứng.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar không được có SolarDate.
+    ///    - Assert: Kiểm tra kết quả thành công.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Logic ngăn chặn Lunar event có SolarDate đã bị xóa.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenLunarEventHasSolarDate()
+    public async Task Handle_ShouldSucceed_WhenLunarEventHasSolarDate_AfterLogicRemoval()
     {
         // Arrange
         var familyId = Guid.NewGuid();
@@ -322,7 +324,7 @@ public class CreateEventCommandHandlerTests : TestBase
 
         var command = new CreateEventCommand
         {
-            Name = "Invalid Lunar Event",
+            Name = "Valid Lunar Event with SolarDate",
             FamilyId = familyId,
             Type = EventType.Other,
             CalendarType = CalendarType.Lunar,
@@ -334,9 +336,7 @@ public class CreateEventCommandHandlerTests : TestBase
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Lunar event cannot have a SolarDate.");
-        result.ErrorSource.Should().Be(ErrorSources.BadRequest);
+        result.IsSuccess.Should().BeTrue();
     }
 
     /// <summary>
@@ -373,4 +373,56 @@ public class CreateEventCommandHandlerTests : TestBase
         result.Error.Should().Contain("Invalid CalendarType.");
         result.ErrorSource.Should().Be(ErrorSources.BadRequest);
     }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng EventOccurrences được tạo cho sự kiện Lunar lặp lại hàng năm.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Chuẩn bị Family, ủy quyền, và một sự kiện Lunar lặp lại hàng năm. Mock ILunarCalendarService để trả về ngày dương lịch cụ thể.
+    ///    - Act: Gửi CreateEventCommand.
+    ///    - Assert: Kiểm tra kết quả thành công và một EventOccurrence được tạo trong cơ sở dữ liệu cho năm hiện tại.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Sự kiện Lunar lặp lại hàng năm phải tự động tạo EventOccurrence cho năm hiện tại.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldGenerateEventOccurrence_WhenYearlyRepeatingLunarEventCreated()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF8" });
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var lunarDateInput = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false };
+        var currentYear = DateTime.Now.Year;
+        var expectedSolarDate = new DateTime(currentYear, 9, 29); // Example date
+
+        _lunarCalendarServiceMock
+            .Setup(x => x.ConvertLunarToSolar(lunarDateInput.Day, lunarDateInput.Month, currentYear, lunarDateInput.IsLeapMonth))
+            .Returns(expectedSolarDate);
+
+        var command = new CreateEventCommand
+        {
+            Name = "Yearly Lunar Event",
+            FamilyId = familyId,
+            Type = EventType.Other,
+            CalendarType = CalendarType.Lunar,
+            LunarDate = lunarDateInput,
+            RepeatRule = RepeatRule.Yearly
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdEvent = await _context.Events.FindAsync(result.Value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        createdEvent.Should().NotBeNull();
+
+        var eventOccurrence = await _context.EventOccurrences
+            .FirstOrDefaultAsync(eo => eo.EventId == createdEvent!.Id && eo.Year == currentYear);
+
+        eventOccurrence.Should().NotBeNull();
+        eventOccurrence!.OccurrenceDate.Should().Be(expectedSolarDate);
+    }
 }
+
