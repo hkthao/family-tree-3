@@ -123,6 +123,15 @@ public class AiGenerateService : IAiGenerateService
                         };
                         deserializedOutput = (T)(object)resultDto; // Cast to T
                     }
+                    else if (typeof(T) == typeof(CombinedAiContentDto)) // Handle raw output for CombinedAiContentDto
+                    {
+                        _logger.LogWarning("Failed to deserialize ChatResponse.Output as JSON for CombinedAiContentDto. Storing raw output. Raw output: {RawOutput}", chatResponse.Output);
+                        var combinedAiContentDto = new CombinedAiContentDto
+                        {
+                            RawOutput = chatResponse.Output
+                        };
+                        deserializedOutput = (T)(object)combinedAiContentDto; // Cast to T
+                    }
                     else
                     {
                         // If it's not RelationshipInferenceResultDto or another unexpected error, rethrow
