@@ -1,5 +1,5 @@
 using backend.Application.Common.Dtos;
-using backend.Application.Families.Dtos;
+using backend.Application.Families.Queries;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 

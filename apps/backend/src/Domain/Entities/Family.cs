@@ -25,6 +25,16 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public int TotalGenerations { get; set; }
 
     /// <summary>
+    /// Nguồn gốc của dữ liệu gia đình (ví dụ: "System" nếu tạo thủ công, "Public_API" nếu thu thập tự động).
+    /// </summary>
+    public string Source { get; set; } = "System"; // Default to "System"
+
+    /// <summary>
+    /// Trạng thái xác minh của gia đình (true nếu đã được xác minh).
+    /// </summary>
+    public bool IsVerified { get; set; } = false; // Default to false
+
+    /// <summary>
     /// Navigation property for users associated with this family.
     /// </summary>
     private readonly HashSet<FamilyUser> _familyUsers = new();
@@ -276,7 +286,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// <summary>
     /// Factory method to create a new Family aggregate.
     /// </summary>
-    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId)
+    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId, string source = "System", bool isVerified = false)
     {
         var family = new Family
         {
@@ -286,7 +296,9 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             Address = address,
             Visibility = visibility,
             TotalMembers = 0, // Initial value
-            TotalGenerations = 0 // Initial value
+            TotalGenerations = 0, // Initial value
+            Source = source,
+            IsVerified = isVerified
         };
 
         family.PrivacyConfiguration = new PrivacyConfiguration(family.Id); // Initialize with default PrivacyConfiguration using family.Id

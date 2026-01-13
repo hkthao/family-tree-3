@@ -3,7 +3,6 @@ using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.ExportImport.Commands;
-using backend.Application.Families.Dtos;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
@@ -43,7 +42,9 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Family, FamilyDto>();
+        CreateMap<Family, FamilyDto>()
+            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => src.Source))
+            .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => src.IsVerified));
         CreateMap<Family, FamilyDetailDto>()
             .ForMember(dest => dest.FamilyUsers, opt => opt.MapFrom(src => src.FamilyUsers));
         CreateMap<Member, MemberDto>();
