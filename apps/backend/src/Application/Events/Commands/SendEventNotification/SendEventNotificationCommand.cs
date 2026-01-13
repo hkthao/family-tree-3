@@ -1,5 +1,3 @@
-using MediatR;
-using System;
 using backend.Application.Common.Models;
 
 namespace backend.Application.Events.Commands.SendEventNotification;

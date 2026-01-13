@@ -5,7 +5,6 @@ using backend.Application.Common.Services; // Add this for ILunarCalendarService
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore; // Add this for AnyAsync()
 
 namespace backend.Application.Events.Commands.CreateEvent;
 

@@ -11,10 +11,9 @@ public class FamilyTests
     {
         // Arrange
         var familyName = "Test Family";
-        var familyCode = "TF001";
         var creatorUserId = Guid.NewGuid();
+        var familyCode = "TF001";
 
-        // Act
         var family = Family.Create(familyName, familyCode, null, null, "Private", creatorUserId);
 
         // Assert
@@ -34,7 +33,6 @@ public class FamilyTests
         var familyCode = "TF001";
         var creatorUserId = Guid.NewGuid();
         var family = Family.Create(familyName, familyCode, null, null, "Private", creatorUserId);
-
         var newMaxMembers = 100;
         var newMaxStorageMb = 2048;
 

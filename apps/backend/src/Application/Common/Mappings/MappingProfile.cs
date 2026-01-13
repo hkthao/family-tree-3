@@ -2,7 +2,7 @@ using backend.Application.Common.Dtos;
 using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
-using backend.Application.ExportImport.Commands;
+
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
@@ -90,14 +90,26 @@ public class MappingProfile : Profile
         CreateMap<NamesByRegionUpdateCommandDto, NamesByRegion>();
         CreateMap<NamesByRegionImportDto, NamesByRegion>();
         CreateMap<FamilyDictImportDto, FamilyDict>();
-        CreateMap<Family, FamilyExportDto>()
-            .ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.Members))
-            .ForMember(dest => dest.Relationships, opt => opt.MapFrom(src => src.Relationships))
-            .ForMember(dest => dest.Events, opt => opt.MapFrom(src => src.Events));
-        CreateMap<Member, MemberExportDto>();
-        CreateMap<Relationship, RelationshipExportDto>();
-        CreateMap<Event, EventExportDto>()
-            .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
+        CreateMap<backend.Application.Families.Commands.Import.FamilyImportDto, Family>()
+            .ForMember(dest => dest.Members, opt => opt.Ignore())
+            .ForMember(dest => dest.Relationships, opt => opt.Ignore())
+            .ForMember(dest => dest.Events, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore());
+
+        CreateMap<MemberImportDto, Member>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
+            .ForMember(dest => dest.Family, opt => opt.Ignore())
+            .ForMember(dest => dest.FullName, opt => opt.Ignore())
+            .ForMember(dest => dest.FatherId, opt => opt.Ignore())
+            .ForMember(dest => dest.MotherId, opt => opt.Ignore())
+            .ForMember(dest => dest.HusbandId, opt => opt.Ignore())
+            .ForMember(dest => dest.WifeId, opt => opt.Ignore());
+
+
+
+
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? (src.Member.LastName + " " + src.Member.FirstName).Trim() : null))
             .ForMember(dest => dest.MemberGender, opt => opt.MapFrom(src => src.Member != null ? src.Member.Gender : null))
@@ -169,7 +181,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.SolarDate, opt => opt.Ignore())
             .ForMember(dest => dest.LunarDate, opt => opt.Ignore());
         CreateMap<LunarDateDto, LunarDate>();
-        CreateMap<MemberImportDto, Member>()
+        CreateMap<backend.Application.Members.DTOs.MemberImportDto, Member>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
             .ForMember(dest => dest.Family, opt => opt.Ignore())

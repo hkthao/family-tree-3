@@ -92,59 +92,6 @@ export interface UpdateFamilyLimitConfigurationDto {
   aiChatMonthlyLimit: number;
 }
 
-export interface MemberExportDto {
-  id: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  nickname?: string;
-  gender: number;
-  dateOfBirth?: Date;
-  dateOfDeath?: Date;
-  placeOfBirth?: string;
-  placeOfDeath?: string;
-  occupation?: string;
-  biography?: string;
-  avatarUrl?: string;
-  isRoot: boolean;
-  order: number;
-}
-
-export interface RelationshipExportDto {
-  id: string;
-  sourceMemberId: string;
-  targetMemberId: string;
-  relationshipType: number;
-  startDate?: Date;
-  endDate?: Date;
-  description?: string;
-}
-
-export interface EventExportDto {
-  id: string;
-  name: string;
-  type: number;
-  startDate: Date;
-  endDate?: Date;
-  location?: string;
-  description?: string;
-  color?: string;
-  relatedMemberIds: string[];
-}
-
-export interface FamilyExportDto {
-  id: string;
-  name: string;
-  code?: string;
-  description?: string;
-  avatarUrl?: string;
-  address?: string;
-  visibility: number;
-  familyUsers?: any[]; // Added for consistency with test expectations
-  settings?: any; // Added for consistency with test expectations
-  privacyConfiguration?: any; // Added for consistency with test expectations
-  familyLimitConfiguration?: FamilyLimitConfiguration;
-  members: MemberExportDto[];
-  relationships: RelationshipExportDto[];
-  events: EventExportDto[];
+export interface FamilyImportDto {
+  families: FamilyAddDto[];
 }

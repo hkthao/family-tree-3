@@ -14,6 +14,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     public string Code { get; set; } = null!;
     public string? Description { get; set; }
 
+
     /// <summary>
     /// Dia chi
     /// </summary>

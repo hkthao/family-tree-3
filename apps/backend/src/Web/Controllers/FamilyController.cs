@@ -15,6 +15,8 @@ using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
+using backend.Application.Families.Commands.Import;
+
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -112,6 +114,31 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger);
     }
+
+    /// <summary>
+    /// Xử lý POST request để nhập dữ liệu gia đình từ file JSON.
+    /// Endpoint này chỉ tạo mới thông tin gia đình, không hỗ trợ cập nhật.
+    /// </summary>
+    /// <param name="familyData">Dữ liệu gia đình cần nhập.</param>
+    /// <param name="clearExistingData">Tùy chọn có xóa dữ liệu hiện có (chỉ áp dụng khi cập nhật, nhưng ở đây luôn tạo mới).</param>
+    /// <returns>ID của gia đình vừa được tạo.</returns>
+    [HttpPost("import")]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ImportFamily([FromBody] FamilyImportDto familyData, [FromQuery] bool clearExistingData = true)
+    {
+        var command = new ImportFamilyCommand
+        {
+            FamilyId = null, // Luôn tạo mới gia đình
+            FamilyData = familyData,
+            ClearExistingData = clearExistingData // Tùy chọn này sẽ bị bỏ qua khi tạo mới
+        };
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
+    }
+
+
 
     /// <summary>
     /// Xử lý PUT request để cập nhật thông tin của một gia đình.

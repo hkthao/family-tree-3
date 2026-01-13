@@ -3,10 +3,10 @@ import type { ApiClientMethods } from '@/plugins/axios';
 import {
   type FamilyDto, // Renamed from Family
   type IFamilyAccess,
-  type FamilyExportDto,
   type FamilyAddDto,
   type FamilyUpdateDto,
   type FamilyLimitConfiguration, // NEW
+  type FamilyImportDto, // NEW
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
@@ -31,14 +31,9 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
     return this.http.get<IFamilyAccess[]>(`/family/my-access`);
   }
 
-  async exportFamilyData(familyId: string): Promise<Result<FamilyExportDto>> {
-    return this.http.get<FamilyExportDto>(`/family-data/${familyId}/export`);
-  }
 
-  async importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string>> {
-    const queryParams = clearExistingData === false ? '?clearExistingData=false' : '';
-    return this.http.post<string>(`/family-data/import/${familyId}${queryParams}`, familyData);
-  }
+
+
 
   async exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob>> {
     return this.http.post<Blob>(`/family-data/${familyId}/export-pdf`, htmlContent, { headers: { 'Content-Type': 'text/html' }, responseType: 'blob' });
@@ -92,6 +87,10 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
 
   async updateFamilyLimitConfiguration(familyId: string, payload: { maxMembers: number; maxStorageMb: number; aiChatMonthlyLimit: number }): Promise<Result<void>> {
     return this.http.put<void>(`/family/${familyId}/limit-configuration`, payload);
+  }
+
+  async importFamilyData(familyData: FamilyImportDto, clearExistingData: boolean): Promise<Result<string>> {
+    return this.http.post<string>(`/family/import?clearExistingData=${clearExistingData}`, familyData);
   }
 }
 

@@ -1,13 +1,13 @@
-import type { FamilyExportDto } from '@/types';
+import type { FamilyImportDto } from '@/types';
 
-export async function parseJsonFile(file: File): Promise<FamilyExportDto> {
+export async function parseJsonFile(file: File): Promise<FamilyImportDto> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       try {
         const fileContent = e.target?.result as string;
-        const familyData: FamilyExportDto = JSON.parse(fileContent);
+        const familyData: FamilyImportDto = JSON.parse(fileContent);
         resolve(familyData);
       } catch (parseError: any) {
         reject(new Error(`Failed to parse JSON file: ${parseError.message}`));
