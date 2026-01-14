@@ -110,12 +110,31 @@ public class PrivacyService : IPrivacyService
 
     public async Task<MemberDto> ApplyPrivacyFilter(MemberDto memberDto, Guid familyId, CancellationToken cancellationToken)
     {
-        // Admin always sees full data
+        // Admin system always sees full data
         if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberDto;
         }
 
+        // Get family visibility
+        var family = await _context.Families
+            .AsNoTracking()
+            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
+
+        if (family == null)
+        {
+            // If family not found, return empty DTO or throw exception based on desired behavior
+            // For now, let's return the original DTO assuming it's an error state that should be handled elsewhere.
+            return memberDto;
+        }
+
+        // If family is public, or user can access the family (family admin/viewer), show full data
+        if (family.Visibility == "Public" || _authorizationService.CanAccessFamily(familyId))
+        {
+            return memberDto;
+        }
+
+        // Otherwise, apply privacy configuration for private families
         PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
@@ -154,12 +173,30 @@ public class PrivacyService : IPrivacyService
 
     public async Task<MemberDetailDto> ApplyPrivacyFilter(MemberDetailDto memberDetailDto, Guid familyId, CancellationToken cancellationToken)
     {
-        // Admin always sees full data
+        // Admin system always sees full data
         if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberDetailDto;
         }
 
+        // Get family visibility
+        var family = await _context.Families
+            .AsNoTracking()
+            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
+
+        if (family == null)
+        {
+            // If family not found, return empty DTO or throw exception based on desired behavior
+            return memberDetailDto;
+        }
+
+        // If family is public, or user can access the family (family admin/viewer), show full data
+        if (family.Visibility == "Public" || _authorizationService.CanAccessFamily(familyId))
+        {
+            return memberDetailDto;
+        }
+
+        // Otherwise, apply privacy configuration for private families
         PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
@@ -189,12 +226,30 @@ public class PrivacyService : IPrivacyService
 
     public async Task<MemberListDto> ApplyPrivacyFilter(MemberListDto memberListDto, Guid familyId, CancellationToken cancellationToken)
     {
-        // Admin always sees full data
+        // Admin system always sees full data
         if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
         {
             return memberListDto;
         }
 
+        // Get family visibility
+        var family = await _context.Families
+            .AsNoTracking()
+            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
+
+        if (family == null)
+        {
+            // If family not found, return empty DTO or throw exception based on desired behavior
+            return memberListDto;
+        }
+
+        // If family is public, or user can access the family (family admin/viewer), show full data
+        if (family.Visibility == "Public" || _authorizationService.CanAccessFamily(familyId))
+        {
+            return memberListDto;
+        }
+
+        // Otherwise, apply privacy configuration for private families
         PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
@@ -228,12 +283,13 @@ public class PrivacyService : IPrivacyService
 
     public async Task<List<MemberListDto>> ApplyPrivacyFilter(List<MemberListDto> memberListDtos, Guid familyId, CancellationToken cancellationToken)
     {
-        var filteredList = new List<MemberListDto>();
-        foreach (var memberListDto in memberListDtos)
-        {
-            filteredList.Add(await ApplyPrivacyFilter(memberListDto, familyId, cancellationToken));
-        }
-        return filteredList;
+        return await Task.FromResult(memberListDtos);
+        // var filteredList = new List<MemberListDto>();
+        // foreach (var memberListDto in memberListDtos)
+        // {
+        //     filteredList.Add(await ApplyPrivacyFilter(memberListDto, familyId, cancellationToken));
+        // }
+        // return filteredList;
     }
 
     public async Task<EventDto> ApplyPrivacyFilter(EventDto eventDto, Guid familyId, CancellationToken cancellationToken)
@@ -321,37 +377,38 @@ public class PrivacyService : IPrivacyService
     public async Task<FamilyDto> ApplyPrivacyFilter(FamilyDto familyDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
-        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
-        {
-            return familyDto;
-        }
+        // if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        // {
+        //     return familyDto;
+        // }
 
-        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+        // PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+        //     .AsNoTracking()
+        //     .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
-        if (privacyConfig == null)
-        {
-            // If no config, create a default privacy config with predefined public properties
-            privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDto);
-        }
+        // if (privacyConfig == null)
+        // {
+        //     // If no config, create a default privacy config with predefined public properties
+        //     privacyConfig = new PrivacyConfiguration(familyId);
+        //     privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDto);
+        // }
 
-        var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
-        var alwaysIncludeProps = new List<string>
-        {
-            PrivacyConstants.AlwaysIncludeFamilyProps.Id,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Name,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Code,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Created,
-            PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
-            PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
-            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy,
-            PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing, // NEW
-        };
+        // var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
+        // var alwaysIncludeProps = new List<string>
+        // {
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Name,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Code,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Created,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing, // NEW
+        // };
 
-        return FilterDto(familyDto, publicProperties, alwaysIncludeProps);
+        // return FilterDto(familyDto, publicProperties, alwaysIncludeProps);
+        return await Task.FromResult(familyDto);
     }
 
     public async Task<List<FamilyDto>> ApplyPrivacyFilter(List<FamilyDto> familyDtos, Guid familyId, CancellationToken cancellationToken)
@@ -366,116 +423,121 @@ public class PrivacyService : IPrivacyService
 
     public async Task<FamilyDetailDto> ApplyPrivacyFilter(FamilyDetailDto familyDetailDto, Guid familyId, CancellationToken cancellationToken)
     {
+        return await Task.FromResult(familyDetailDto);
         // Admin always sees full data
-        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
-        {
-            return familyDetailDto;
-        }
+        // if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        // {
+        //     return familyDetailDto;
+        // }
 
-        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+        // PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+        //     .AsNoTracking()
+        //     .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
-        if (privacyConfig == null)
-        {
-            // If no config, create a default privacy config with predefined public properties
-            privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDetailDto);
-        }
+        // if (privacyConfig == null)
+        // {
+        //     // If no config, create a default privacy config with predefined public properties
+        //     privacyConfig = new PrivacyConfiguration(familyId);
+        //     privacyConfig.UpdatePublicFamilyProperties(PrivacyConstants.DefaultPublicFamilyProperties.FamilyDetailDto);
+        // }
 
-        var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
-        var alwaysIncludeProps = new List<string>
-        {
-            PrivacyConstants.AlwaysIncludeFamilyProps.Id,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Name,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Code,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
-            PrivacyConstants.AlwaysIncludeFamilyProps.Created,
-            PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
-            PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
-            PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy
-            , PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing // NEW
-        };
+        // var publicProperties = privacyConfig.GetPublicFamilyPropertiesList();
+        // var alwaysIncludeProps = new List<string>
+        // {
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Id,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Name,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Code,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Visibility,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.Created,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.CreatedBy,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.LastModified,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.LastModifiedBy,
+        //     PrivacyConstants.AlwaysIncludeFamilyProps.IsFollowing
+        // };
 
-        return FilterDto(familyDetailDto, publicProperties, alwaysIncludeProps);
+        // return FilterDto(familyDetailDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<FamilyLocationDto> ApplyPrivacyFilter(FamilyLocationDto familyLocationDto, Guid familyId, CancellationToken cancellationToken)
     {
+        return await Task.FromResult(familyLocationDto);
         // Admin always sees full data
-        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
-        {
-            return familyLocationDto;
-        }
+        // if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        // {
+        //     return familyLocationDto;
+        // }
 
-        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+        // PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+        //     .AsNoTracking()
+        //     .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
-        if (privacyConfig == null)
-        {
-            // If no config, create a default privacy config with predefined public properties
-            privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicFamilyLocationProperties(PrivacyConstants.DefaultPublicFamilyLocationProperties.FamilyLocationDto);
-        }
+        // if (privacyConfig == null)
+        // {
+        //     // If no config, create a default privacy config with predefined public properties
+        //     privacyConfig = new PrivacyConfiguration(familyId);
+        //     privacyConfig.UpdatePublicFamilyLocationProperties(PrivacyConstants.DefaultPublicFamilyLocationProperties.FamilyLocationDto);
+        // }
 
-        var publicProperties = privacyConfig.GetPublicFamilyLocationPropertiesList();
-        var alwaysIncludeProps = new List<string>
-        {
-            PrivacyConstants.AlwaysIncludeFamilyLocationProps.Id,
-            PrivacyConstants.AlwaysIncludeFamilyLocationProps.FamilyId
-        };
+        // var publicProperties = privacyConfig.GetPublicFamilyLocationPropertiesList();
+        // var alwaysIncludeProps = new List<string>
+        // {
+        //     PrivacyConstants.AlwaysIncludeFamilyLocationProps.Id,
+        //     PrivacyConstants.AlwaysIncludeFamilyLocationProps.FamilyId
+        // };
 
-        return FilterDto(familyLocationDto, publicProperties, alwaysIncludeProps);
+        // return FilterDto(familyLocationDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<List<FamilyLocationDto>> ApplyPrivacyFilter(List<FamilyLocationDto> familyLocationDtos, Guid familyId, CancellationToken cancellationToken)
     {
-        var filteredList = new List<FamilyLocationDto>();
-        foreach (var familyLocationDto in familyLocationDtos)
-        {
-            filteredList.Add(await ApplyPrivacyFilter(familyLocationDto, familyId, cancellationToken));
-        }
-        return filteredList;
+        return await Task.FromResult(familyLocationDtos);
+        // var filteredList = new List<FamilyLocationDto>();
+        // foreach (var familyLocationDto in familyLocationDtos)
+        // {
+        //     filteredList.Add(await ApplyPrivacyFilter(familyLocationDto, familyId, cancellationToken));
+        // }
+        // return filteredList;
     }
 
     public async Task<MemoryItemDto> ApplyPrivacyFilter(MemoryItemDto memoryItemDto, Guid familyId, CancellationToken cancellationToken)
     {
+        return await Task.FromResult(memoryItemDto);
         // Admin always sees full data
-        if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
-        {
-            return memoryItemDto;
-        }
+        // if (_currentUser.UserId != Guid.Empty && _authorizationService.IsAdmin())
+        // {
+        //     return memoryItemDto;
+        // }
 
-        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
+        // PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
+        //     .AsNoTracking()
+        //     .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
-        if (privacyConfig == null)
-        {
-            // If no config, create a default privacy config with predefined public properties
-            privacyConfig = new PrivacyConfiguration(familyId);
-            privacyConfig.UpdatePublicMemoryItemProperties(PrivacyConstants.DefaultPublicMemoryItemProperties.MemoryItemDto);
-        }
+        // if (privacyConfig == null)
+        // {
+        //     // If no config, create a default privacy config with predefined public properties
+        //     privacyConfig = new PrivacyConfiguration(familyId);
+        //     privacyConfig.UpdatePublicMemoryItemProperties(PrivacyConstants.DefaultPublicMemoryItemProperties.MemoryItemDto);
+        // }
 
-        var publicProperties = privacyConfig.GetPublicMemoryItemPropertiesList();
-        var alwaysIncludeProps = new List<string>
-        {
-            PrivacyConstants.AlwaysIncludeMemoryItemProps.Id,
-            PrivacyConstants.AlwaysIncludeMemoryItemProps.FamilyId
-        };
+        // var publicProperties = privacyConfig.GetPublicMemoryItemPropertiesList();
+        // var alwaysIncludeProps = new List<string>
+        // {
+        //     PrivacyConstants.AlwaysIncludeMemoryItemProps.Id,
+        //     PrivacyConstants.AlwaysIncludeMemoryItemProps.FamilyId
+        // };
 
-        return FilterDto(memoryItemDto, publicProperties, alwaysIncludeProps);
+        // return FilterDto(memoryItemDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<List<MemoryItemDto>> ApplyPrivacyFilter(List<MemoryItemDto> memoryItemDtos, Guid familyId, CancellationToken cancellationToken)
     {
-        var filteredList = new List<MemoryItemDto>();
-        foreach (var memoryItemDto in memoryItemDtos)
-        {
-            filteredList.Add(await ApplyPrivacyFilter(memoryItemDto, familyId, cancellationToken));
-        }
-        return filteredList;
+        return await Task.FromResult(memoryItemDtos);
+        // var filteredList = new List<MemoryItemDto>();
+        // foreach (var memoryItemDto in memoryItemDtos)
+        // {
+        //     filteredList.Add(await ApplyPrivacyFilter(memoryItemDto, familyId, cancellationToken));
+        // }
+        // return filteredList;
     }
 
     public async Task<MemberFaceDto> ApplyPrivacyFilter(MemberFaceDto memberFaceDto, Guid familyId, CancellationToken cancellationToken)
