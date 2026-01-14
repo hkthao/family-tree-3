@@ -20,6 +20,26 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// </summary>
     public string? Address { get; set; }
 
+    /// <summary>
+    /// Bản ghi phả hệ hoặc nguồn gốc của dòng họ (mô tả hoặc đường dẫn đến tài liệu).
+    /// </summary>
+    public string? GenealogyRecord { get; set; }
+
+    /// <summary>
+    /// Tên Thủy tổ của gia đình.
+    /// </summary>
+    public string? ProgenitorName { get; set; }
+
+    /// <summary>
+    /// Tộc Ước của gia đình (mô tả hoặc đường dẫn đến tài liệu).
+    /// </summary>
+    public string? FamilyCovenant { get; set; }
+
+    /// <summary>
+    /// Thông tin người liên hệ cho gia đình.
+    /// </summary>
+    public string? ContactInfo { get; set; }
+
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = "Private"; // e.g., Private, Public
     public int TotalMembers { get; set; }
@@ -100,13 +120,17 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         _familyUsers.Clear();
     }
 
-    public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code)
+    public void UpdateFamilyDetails(string name, string? description, string? address, string visibility, string code, string? genealogyRecord, string? progenitorName, string? familyCovenant, string? contactInfo)
     {
         Name = name;
         Description = description;
         Address = address;
         Visibility = visibility;
         Code = code;
+        GenealogyRecord = genealogyRecord;
+        ProgenitorName = progenitorName;
+        FamilyCovenant = familyCovenant;
+        ContactInfo = contactInfo;
     }
 
     /// <summary>
@@ -287,7 +311,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     /// <summary>
     /// Factory method to create a new Family aggregate.
     /// </summary>
-    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId, string source = "System", bool isVerified = false)
+    public static Family Create(string name, string code, string? description, string? address, string visibility, Guid creatorUserId, string source = "System", bool isVerified = false, string? genealogyRecord = null, string? progenitorName = null, string? familyCovenant = null, string? contactInfo = null)
     {
         var family = new Family
         {
@@ -299,7 +323,11 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             TotalMembers = 0, // Initial value
             TotalGenerations = 0, // Initial value
             Source = source,
-            IsVerified = isVerified
+            IsVerified = isVerified,
+            GenealogyRecord = genealogyRecord,
+            ProgenitorName = progenitorName,
+            FamilyCovenant = familyCovenant,
+            ContactInfo = contactInfo
         };
 
         family.PrivacyConfiguration = new PrivacyConfiguration(family.Id); // Initialize with default PrivacyConfiguration using family.Id

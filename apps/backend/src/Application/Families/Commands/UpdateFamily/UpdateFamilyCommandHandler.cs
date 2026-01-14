@@ -85,7 +85,11 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Description,
             request.Address,
             request.Visibility,
-            entity.Code // Pass the existing code, as it's not updated via this command input
+            entity.Code, // Pass the existing code, as it's not updated via this command input
+            request.GenealogyRecord,
+            request.ProgenitorName,
+            request.FamilyCovenant,
+            request.ContactInfo
         );
         entity.UpdateAvatar(finalAvatarUrl); // Update avatar using its specific method
 

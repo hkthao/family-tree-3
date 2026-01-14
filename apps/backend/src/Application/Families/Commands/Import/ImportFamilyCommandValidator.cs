@@ -24,7 +24,6 @@ public class ImportFamilyCommandValidator : AbstractValidator<ImportFamilyComman
             .NotEmpty().WithMessage("Family Visibility is required.");
             // No IsEnumName validation, as Visibility is a string in domain entity
 
-        RuleFor(v => v.FamilyData.FamilyHistory)
-            .MaximumLength(2000).WithMessage("Family History must not exceed 2000 characters.");
+
     }
 }

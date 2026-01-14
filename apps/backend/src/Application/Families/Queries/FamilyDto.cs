@@ -10,6 +10,10 @@ public class FamilyDto : BaseAuditableDto
     public string? Description { get; set; }
 
     public string? Address { get; set; }
+    public string? GenealogyRecord { get; set; }
+    public string? ProgenitorName { get; set; }
+    public string? FamilyCovenant { get; set; }
+    public string? ContactInfo { get; set; }
     public int TotalMembers { get; set; } = 0;
     public int? TotalGenerations { get; set; } = null;
     public string? Visibility { get; set; }

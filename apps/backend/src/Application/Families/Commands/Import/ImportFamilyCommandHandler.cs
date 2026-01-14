@@ -30,7 +30,11 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
                 request.FamilyData.Description,
                 request.FamilyData.Address,
                 request.FamilyData.Visibility, // Use visibility from DTO
-                request.FamilyData.Code
+                request.FamilyData.Code,
+                request.FamilyData.GenealogyRecord,
+                request.FamilyData.ProgenitorName,
+                request.FamilyData.FamilyCovenant,
+                request.FamilyData.ContactInfo
             );
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -46,7 +50,11 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
                 request.FamilyData.Visibility, // Use visibility from DTO
                 _currentUser.UserId,
                 "System", // Default source
-                false // Not verified by default
+                false, // Not verified by default
+                request.FamilyData.GenealogyRecord,
+                request.FamilyData.ProgenitorName,
+                request.FamilyData.FamilyCovenant,
+                request.FamilyData.ContactInfo
             );
 
             _context.Families.Add(newFamily);
