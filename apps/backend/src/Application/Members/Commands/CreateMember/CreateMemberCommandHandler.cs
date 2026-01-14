@@ -3,6 +3,8 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
+using System.Linq; // Thêm namespace này
+using Microsoft.EntityFrameworkCore; // Thêm namespace này
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
@@ -28,6 +30,19 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (family == null)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
+        }
+
+        // Kiểm tra xem mã thành viên đã tồn tại trong gia đình này chưa
+        if (!string.IsNullOrEmpty(request.Code))
+        {
+            var existingMember = await _context.Members
+                .Where(m => m.FamilyId == request.FamilyId && m.Code == request.Code)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existingMember != null)
+            {
+                return Result<Guid>.Failure(_localizer["Mã thành viên đã tồn tại trong gia đình này."], ErrorSources.Conflict);
+            }
         }
 
         var newMember = new Domain.Entities.Member(
