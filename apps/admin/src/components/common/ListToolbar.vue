@@ -52,7 +52,9 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 
 const { title, createButtonTooltip, createButtonTestId, hideCreateButton, searchQuery, searchLabel, hideSearch, addLinkButtonTooltip } = defineProps<{
   title: string;
@@ -65,7 +67,7 @@ const { title, createButtonTooltip, createButtonTestId, hideCreateButton, search
   addLinkButtonTooltip?: string; // New prop
 }>();
 
-const emit = defineEmits(['create', 'update:search', 'addLink']); // New emit
+const emit = defineEmits(['create', 'update:search', 'addLink']);
 </script>
 
 <style scoped></style>

@@ -25,6 +25,10 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         name: props.data.name,
         description: props.data.description || '',
         address: props.data.address || '',
+        genealogyRecord: props.data.genealogyRecord || '',
+        progenitorName: props.data.progenitorName || '',
+        familyCovenant: props.data.familyCovenant || '',
+        contactInfo: props.data.contactInfo || '',
         locationId: props.data.locationId || null, // Initialize locationId
         avatarUrl: props.data.avatarUrl || '',
         avatarBase64: null,
@@ -38,6 +42,10 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
       name: '',
       description: '',
       address: '',
+      genealogyRecord: '',
+      progenitorName: '',
+      familyCovenant: '',
+      contactInfo: '',
       locationId: null, // Initialize locationId for add mode
       avatarUrl: '',
       avatarBase64: null,
@@ -67,7 +75,19 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     (newVal) => {
       if (newVal) {
         isEditMode.value = true;
-        Object.assign(formData, { ...initialFormData(), familyLimitConfiguration: newVal.familyLimitConfiguration }); // Reset form data and include familyLimitConfiguration
+        formData.id = newVal.id;
+        formData.name = newVal.name;
+        formData.description = newVal.description || '';
+        formData.address = newVal.address || '';
+        formData.genealogyRecord = newVal.genealogyRecord || '';
+        formData.progenitorName = newVal.progenitorName || '';
+        formData.familyCovenant = newVal.familyCovenant || '';
+        formData.contactInfo = newVal.contactInfo || '';
+        formData.locationId = newVal.locationId || null;
+        formData.avatarUrl = newVal.avatarUrl || '';
+        formData.visibility = newVal.visibility || FamilyVisibility.Public;
+        formData.familyLimitConfiguration = newVal.familyLimitConfiguration;
+
         initialAvatarDisplay.value = formData.avatarBase64 || formData.avatarUrl;
         managers.value = newVal.managerIds || [];
         viewers.value = newVal.viewerIds || [];

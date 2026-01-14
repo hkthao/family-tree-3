@@ -14,7 +14,7 @@
     "test:coverage": "vitest run --coverage --coverage.threshold.statements=80 --coverage.threshold.branches=80 --coverage.threshold.functions=80 --coverage.threshold.lines=80",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path ../../.gitignore",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts",
     "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path ../../.gitignore",
     "test:e2e": "playwright test"
   },

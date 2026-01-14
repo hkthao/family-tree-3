@@ -7,7 +7,6 @@ using backend.Application.Events.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore; // Add this for AnyAsync()
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 

@@ -72,7 +72,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
     addDrawer,
     openAddDrawer,
     closeAllDrawers,
-  } = useCrudDrawer<string>();
+  } = useCrudDrawer();
 
   const handleFilterUpdate = (newFilters: FamilyFilter) => {
     setFilters(newFilters);
@@ -114,9 +114,9 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
           );
           refetch(); // Refetch the list after successful deletion
         },
-        onError: () => {
+        onError: (error) => {
           showSnackbar(
-            t('family.management.messages.deleteError'),
+            error.message || t('family.management.messages.deleteError'),
             'error',
           );
         },
@@ -128,6 +128,8 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
     closeAllDrawers(); // Close the drawer on cancel
     refetch(); // Refetch the list in case a family was added
   };
+
+
 
   return {
     state: {
@@ -154,6 +156,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
       setSearchQuery,
       setFilters,
       t,
+      refetch,
     },
   };
 }

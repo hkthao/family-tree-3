@@ -12,7 +12,23 @@
         :searchPlaceholder="t('common.search')"
         createButtonTestId="add-new-family-button"
         searchInputTestId="family-list-search-input"
-      />
+      >
+        <template #custom-buttons>
+          <v-btn
+            color="primary"
+            icon
+            @click="emit('onImportClick')"
+            data-testid="import-family-button"
+            :aria-label="t('family.list.action.import')"
+          >
+            <v-tooltip :text="t('family.list.action.import')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-import</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+        </template>
+      </ListToolbar>
     </template>
     <!-- Avatar column -->
     <template #item.avatarUrl="{ item }">
@@ -97,6 +113,7 @@ const props = defineProps<{
   itemsPerPage: number;
   search: string;
   sortBy: { key: string; order: 'asc' | 'desc' }[];
+  onImportClick?: () => void;
 }>();
 
 const emit = defineEmits([
@@ -107,6 +124,7 @@ const emit = defineEmits([
   'create',
   'update:search',
   'update:sortBy',
+  'onImportClick',
 ]);
 
 const { t } = useI18n();

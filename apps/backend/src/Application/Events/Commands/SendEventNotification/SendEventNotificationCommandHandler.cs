@@ -1,16 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace backend.Application.Events.Commands.SendEventNotification;
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113042450_AddSourceAndIsVerifiedToFamily")]
+    partial class AddSourceAndIsVerifiedToFamily
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,10 +214,6 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("code");
 
-                    b.Property<string>("ContactInfo")
-                        .HasColumnType("longtext")
-                        .HasColumnName("contact_info");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created");
@@ -235,14 +234,6 @@ namespace backend.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)")
                         .HasColumnName("description");
-
-                    b.Property<string>("FamilyCovenant")
-                        .HasColumnType("longtext")
-                        .HasColumnName("family_covenant");
-
-                    b.Property<string>("GenealogyRecord")
-                        .HasColumnType("longtext")
-                        .HasColumnName("genealogy_record");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)")
@@ -265,10 +256,6 @@ namespace backend.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
                         .HasColumnName("name");
-
-                    b.Property<string>("ProgenitorName")
-                        .HasColumnType("longtext")
-                        .HasColumnName("progenitor_name");
 
                     b.Property<string>("Source")
                         .IsRequired()

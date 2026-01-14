@@ -1,6 +1,6 @@
 using backend.Domain.Enums;
 
-namespace backend.Application.Families.Dtos;
+namespace backend.Application.Families.Queries;
 
 public class FamilyUserDto
 {
