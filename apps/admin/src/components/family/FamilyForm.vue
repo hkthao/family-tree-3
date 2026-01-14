@@ -34,6 +34,34 @@
           prepend-inner-icon="mdi-text-box-outline"></v-textarea>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-textarea v-model="formData.genealogyRecord" :rows="2" :auto-grow="true"
+          :label="$t('family.form.genealogyRecord')" data-testid="family-genealogy-record-input"
+          prepend-inner-icon="mdi-book-open-outline"></v-textarea>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-textarea v-model="formData.progenitorName" :rows="1" :auto-grow="true"
+          :label="$t('family.form.progenitorName')" data-testid="family-progenitor-name-input"
+          prepend-inner-icon="mdi-account-heart-outline"></v-textarea>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-textarea v-model="formData.familyCovenant" :rows="2" :auto-grow="true"
+          :label="$t('family.form.familyCovenant')" data-testid="family-family-covenant-input"
+          prepend-inner-icon="mdi-file-document-outline"></v-textarea>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-textarea v-model="formData.contactInfo" :rows="2" :auto-grow="true"
+          :label="$t('family.form.contactInfo')" data-testid="family-contact-info-input"
+          prepend-inner-icon="mdi-card-account-details-outline"></v-textarea>
+      </v-col>
+    </v-row>
     <v-row v-if="props.displayLimitConfig">
       <v-col cols="6">
         <v-text-field

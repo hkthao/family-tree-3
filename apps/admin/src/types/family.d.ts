@@ -13,6 +13,10 @@ export interface FamilyDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  genealogyRecord?: string;
+  progenitorName?: string;
+  familyCovenant?: string;
+  contactInfo?: string;
   locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   familyUsers?: FamilyUser[];
@@ -32,6 +36,10 @@ export interface FamilyAddDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  genealogyRecord?: string;
+  progenitorName?: string;
+  familyCovenant?: string;
+  contactInfo?: string;
   locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   managerIds: string[];
@@ -47,6 +55,10 @@ export interface FamilyUpdateDto {
   avatarUrl?: string;
   avatarBase64?: string | null;
   address?: string;
+  genealogyRecord?: string;
+  progenitorName?: string;
+  familyCovenant?: string;
+  contactInfo?: string;
   locationId?: string | null; // Added locationId
   visibility?: FamilyVisibility;
   managerIds: string[];
