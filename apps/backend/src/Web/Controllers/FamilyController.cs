@@ -31,7 +31,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
-[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
+// [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
 {
     /// <summary>
@@ -64,6 +64,18 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     public async Task<IActionResult> GetFamilyById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyByIdQuery(id));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy thông tin chi tiết của một gia đình theo mã Code.
+    /// </summary>
+    /// <param name="code">Mã Code của gia đình cần lấy.</param>
+    /// <returns>Thông tin chi tiết của gia đình.</returns>
+    [HttpGet("by-code/{code}")]
+    public async Task<IActionResult> GetFamilyByCode(string code)
+    {
+        var result = await _mediator.Send(new GetFamilyByCodeQuery(code));
         return result.ToActionResult(this, _logger);
     }
 

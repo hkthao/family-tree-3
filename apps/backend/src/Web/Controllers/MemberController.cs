@@ -9,6 +9,7 @@ using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByFamilyId;
 using backend.Application.Members.Queries.GetMembersByIds;
+using backend.Application.Members.Queries.GetMemberByFamilyIdAndCode;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -87,6 +88,19 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     public async Task<IActionResult> GetMembersByFamilyId(Guid familyId)
     {
         var result = await _mediator.Send(new GetMembersByFamilyIdQuery(familyId));
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Xử lý GET request để lấy thông tin chi tiết của một thành viên theo ID gia đình và mã thành viên.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
+    /// <param name="memberCode">Mã của thành viên cần lấy.</param>
+    /// <returns>Thông tin chi tiết của thành viên.</returns>
+    [HttpGet("by-family/{familyId}/by-code/{memberCode}")]
+    public async Task<IActionResult> GetMemberByFamilyIdAndCode(Guid familyId, string memberCode)
+    {
+        var result = await _mediator.Send(new Application.Members.Queries.GetMemberByFamilyIdAndCode.GetMemberByFamilyIdAndCodeQuery(familyId, memberCode));
         return result.ToActionResult(this, _logger);
     }
 

@@ -54,6 +54,20 @@ public static class DependencyInjection
                     ValidateIssuerSigningKey = true
                 };
 
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        logger.LogError(context.Exception, "Authentication failed: {Message}", context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        logger.LogWarning("Authentication challenge. Scheme: {Scheme}, Error: {Error}, Description: {Description}",
+                            context.Scheme, context.Error, context.ErrorDescription);
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         services.AddAuthorization(options =>
