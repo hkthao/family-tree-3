@@ -82,7 +82,9 @@ export const F3Adapter: IF3Adapter = {
       .createChart(container, data)
       .setTransitionTime(1000)
       .setCardXSpacing(150)
-      .setCardYSpacing(150);
+      .setCardYSpacing(150)
+      .setSingleParentEmptyCard(false, {label: 'Unknown'})
+      ;
 
     return chart;
   },
@@ -110,7 +112,9 @@ export function createDefaultF3Adapter(emit: (event: 'show-member-detail-drawer'
       .createChart(container, data)
       .setTransitionTime(1000)
       .setCardXSpacing(150)
-      .setCardYSpacing(150);
+      .setCardYSpacing(150)
+      .setSingleParentEmptyCard(false, {label: 'Unknown'})
+      ;
 
     chart.setCardHtml()
          .setCardDim({ w: 150, h: 200 })
