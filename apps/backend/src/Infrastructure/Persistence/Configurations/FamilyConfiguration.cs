@@ -30,9 +30,7 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(f => f.Code)
-            .IsUnique()
-            .HasFilter("IsDeleted = 0");
+
 
         // Configure the private collections for FamilyUsers, Members, and Relationships
         builder.HasMany(f => f.FamilyUsers)
