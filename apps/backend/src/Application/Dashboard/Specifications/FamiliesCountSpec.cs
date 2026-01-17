@@ -5,7 +5,7 @@ namespace backend.Application.Dashboard.Specifications;
 
 public class FamiliesCountSpec : Specification<Family>
 {
-    public FamiliesCountSpec(IEnumerable<Guid>? accessibleFamilyIds, Guid? familyId)
+    public FamiliesCountSpec(IEnumerable<Guid>? accessibleFamilyIds, Guid familyId)
     {
         if (accessibleFamilyIds != null)
         {
@@ -20,9 +20,6 @@ public class FamiliesCountSpec : Specification<Family>
             }
         }
 
-        if (familyId.HasValue)
-        {
-            Query.Where(f => f.Id == familyId.Value);
-        }
+        Query.Where(f => f.Id == familyId);
     }
 }

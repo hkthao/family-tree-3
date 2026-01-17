@@ -76,7 +76,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         _context.Families.Count().Should().Be(3);
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family1.Id };
 
         // Act: Gọi handler để xử lý query.
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -85,8 +85,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.TotalFamilies.Should().Be(3);
-        result.Value!.TotalMembers.Should().Be(6); // 4 initial + 2 for relationship
+        result.Value!.TotalFamilies.Should().Be(1); // Should be 1 because we are querying for a specific family.
+        result.Value!.TotalMembers.Should().Be(4); // 2 initial + 2 for relationship, all from family1
         result.Value!.TotalRelationships.Should().Be(1);
 
 
@@ -138,7 +138,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = accessibleFamily1.Id };
 
         // Act: Gọi handler để xử lý query.
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -147,8 +147,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.TotalFamilies.Should().Be(2);
-        result.Value!.TotalMembers.Should().Be(5); // 3 initial accessible + 2 for relationship
+        result.Value!.TotalFamilies.Should().Be(1);
+        result.Value!.TotalMembers.Should().Be(4);
         result.Value!.TotalRelationships.Should().Be(1);
 
 
@@ -274,7 +274,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.AddRange(member1, member2, member3, member4);
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
 
         // Act:
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -341,7 +341,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
 
         // Act:
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -375,7 +375,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
 
         // Act:
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -405,7 +405,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.AddRange(maleMember1, maleMember2, femaleMember1, unknownGenderMember);
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
 
         // Act:
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -435,7 +435,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.AddRange(livingMember1, livingMember2, deceasedMember1, deletedMember);
         await _context.SaveChangesAsync();
 
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
 
         // Act:
         var result = await _handler.Handle(query, CancellationToken.None);
