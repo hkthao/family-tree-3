@@ -12,6 +12,7 @@ interface UseHierarchicalTreeChartProps {
 
 interface UseHierarchicalTreeChartEmits {
   (event: 'show-member-detail-drawer', memberId: string): void;
+  (event: 'update:rootId', memberId: string): void;
 }
 
 interface UseHierarchicalTreeChartDeps {
@@ -22,14 +23,15 @@ interface UseHierarchicalTreeChartDeps {
 export function useHierarchicalTreeChart(
   props: UseHierarchicalTreeChartProps,
   emit: UseHierarchicalTreeChartEmits,
-  deps?: Partial<UseHierarchicalTreeChartDeps>
+  deps: Partial<UseHierarchicalTreeChartDeps>,
+  onNodeClick: (memberId: string, memberName: string) => void
 ) {
   const chartContainer = ref<HTMLDivElement | null>(null);
   let chartInstance: any = null; // To hold the chart instance
 
   // Default dependencies
   const defaultDeps: UseHierarchicalTreeChartDeps = {
-    f3Adapter: createDefaultF3Adapter(emit),
+    f3Adapter: createDefaultF3Adapter(emit, onNodeClick),
     t: (key: string) => key, // Placeholder, should be injected via useI18n().t in actual usage
   };
   const { f3Adapter, t } = { ...defaultDeps, ...deps };

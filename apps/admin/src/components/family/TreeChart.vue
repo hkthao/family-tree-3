@@ -30,10 +30,12 @@
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
     :relationships="relationships" :root-id="selectedRootMemberId ?? undefined"
-    @show-member-detail-drawer="handleShowMemberDetailDrawer" :read-only="props.readOnly" />
+    @show-member-detail-drawer="handleShowMemberDetailDrawer" :read-only="props.readOnly"
+    @update:rootId="(newRootId: string) => selectedRootMemberId = newRootId" :onNodeClick="handleNodeClick" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
     @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember"
-    :read-only="props.readOnly" :root-id="selectedRootMemberId ?? undefined" />
+    :read-only="props.readOnly" :root-id="selectedRootMemberId ?? undefined"
+    @update:rootId="(newRootId: string) => selectedRootMemberId = newRootId" :onNodeClick="handleNodeClick" />
 
   <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650" v-if="canAddMember">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"
@@ -54,6 +56,14 @@
     <MemberEditView v-if="editMemberDrawer && selectedMemberId" :member-id="selectedMemberId"
       @close="editMemberDrawer = false" @saved="handleMemberEdited" />
   </v-navigation-drawer>
+
+  <MemberActionDialog
+    v-model="isActionDialogOpen"
+    :member-id="selectedMemberIdForAction"
+    :member-name="selectedMemberNameForAction"
+    @view-details="handleViewDetails"
+    @view-relationships="handleViewRelationships"
+  />
 </template>
 
 <script setup lang="ts">
@@ -66,6 +76,7 @@ import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useAuth } from '@/composables';
 import { useTreeVisualization } from '@/composables/family/useTreeVisualization'; // Import the new composable
+import MemberActionDialog from '@/components/member/MemberActionDialog.vue'; // Import MemberActionDialog
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -95,6 +106,27 @@ const selectedMemberId = ref<string | null>(null);
 const memberDetailDrawer = ref(false);
 const editMemberDrawer = ref(false);
 const initialRelationshipData = ref<any | null>(null);
+
+// State for MemberActionDialog
+const isActionDialogOpen = ref(false);
+const selectedMemberIdForAction = ref('');
+const selectedMemberNameForAction = ref('');
+
+const handleNodeClick = (memberId: string, memberName: string) => {
+  selectedMemberIdForAction.value = memberId;
+  selectedMemberNameForAction.value = memberName;
+  isActionDialogOpen.value = true;
+};
+
+const handleViewDetails = (memberId: string) => {
+  handleShowMemberDetailDrawer(memberId);
+  isActionDialogOpen.value = false;
+};
+
+const handleViewRelationships = (memberId: string) => {
+  selectedRootMemberId.value = memberId;
+  isActionDialogOpen.value = false;
+};
 
 const handleAddMember = () => {
   initialRelationshipData.value = null;
