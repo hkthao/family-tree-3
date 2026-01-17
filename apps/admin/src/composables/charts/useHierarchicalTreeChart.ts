@@ -36,25 +36,19 @@ export function useHierarchicalTreeChart(
 
 
   const renderChart = async (currentMembers: MemberDto[]) => {
-    console.log('[renderChart] Start, currentMembers count:', currentMembers.length, 'rootId:', props.rootId);
     if (!chartContainer.value) {
-      console.log('[renderChart] chartContainer is null, returning.');
       return;
     }
 
     f3Adapter.clearChart(chartContainer.value); // Clear existing chart
 
-    console.log('[renderChart] Calling transformFamilyData...');
     const { filteredMembers, transformedData } = transformFamilyData(
       currentMembers,
       props.relationships,
       props.rootId
     );
-    console.log('[renderChart] transformFamilyData returned. filteredMembers count:', filteredMembers.length, 'transformedData count:', transformedData.length);
-
 
     if (transformedData.length === 0) {
-      console.log('[renderChart] transformedData is empty, showing empty message.');
       chartContainer.value.innerHTML = `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
       chartInstance = null;
       return;
@@ -63,20 +57,14 @@ export function useHierarchicalTreeChart(
     // Wrap the chart creation and update in nextTick
     await nextTick();
 
-    console.log('[renderChart] Creating chart instance...');
     chartInstance = f3Adapter.createChart(chartContainer.value, transformedData);
-    console.log('[renderChart] Chart instance created.');
 
-    console.log('[renderChart] Determining main chart ID...');
     const mainIdToSet = determineMainChartId(filteredMembers, transformedData, props.rootId);
-    console.log('[renderChart] Main chart ID determined:', mainIdToSet);
 
     if (mainIdToSet) {
-      console.log('[renderChart] Updating chart with main ID:', mainIdToSet);
       f3Adapter.updateChart(chartInstance, mainIdToSet, { initial: true });
-      console.log('[renderChart] Chart updated with main ID.');
     } else {
-      console.warn('[renderChart] No main ID could be determined for the family tree chart.');
+      console.warn('No main ID could be determined for the family tree chart.');
     }
   };
 

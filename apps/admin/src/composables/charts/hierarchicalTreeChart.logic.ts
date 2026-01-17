@@ -23,7 +23,7 @@ interface CardDataPayload {
 }
 
 const MAX_NODES_TO_DISPLAY = 100; // Hardcoded limit for now, can be made configurable
-const MAX_RELATIONSHIPS_TO_DISPLAY = 80; // New hardcoded limit as per user's request
+const MAX_RELATIONSHIPS_TO_DISPLAY = 500; // New hardcoded limit as per user's request
 
 /**
  * Traverses the family tree from the rootId and collects a limited number of connected members and relationships.
@@ -42,10 +42,7 @@ function getLimitedFamilySubtree(
   maxNodes: number,
   maxRelationships: number // New parameter
 ): { filteredMembers: MemberDto[]; filteredRelationships: Relationship[] } {
-  console.log('[getLimitedFamilySubtree] Start. Total members:', members.length, 'Total relationships:', relationships.length, 'RootId:', rootId, 'MaxNodes:', maxNodes, 'MaxRelationships:', maxRelationships);
-
   if (!rootId || !members.some(m => m.id === rootId)) {
-    console.log('[getLimitedFamilySubtree] Invalid rootId or root member not found. Returning empty.');
     return { filteredMembers: [], filteredRelationships: [] };
   }
 
@@ -65,7 +62,6 @@ function getLimitedFamilySubtree(
     adjacencyList.get(rel.sourceMemberId)?.add(rel.targetMemberId);
     adjacencyList.get(rel.targetMemberId)?.add(rel.sourceMemberId);
   });
-  console.log('[getLimitedFamilySubtree] Adjacency list built.');
 
   const selectedMemberIds = new Set<string>();
   const selectedRelationshipIds = new Set<string>(); // To store unique relationship IDs
@@ -94,7 +90,6 @@ function getLimitedFamilySubtree(
     for (const neighborId of neighbors) {
       // Check limits before adding
       if (selectedMemberIds.size + 1 > maxNodes || selectedRelationshipIds.size + 1 > maxRelationships) {
-          console.log(`[getLimitedFamilySubtree] Node or relationship limit hit before adding neighbor ${neighborId}.`);
           break; // Stop if limits are reached
       }
 
@@ -107,7 +102,6 @@ function getLimitedFamilySubtree(
         const newRelationsToAdd = relationsBetween.filter(rel => !selectedRelationshipIds.has(rel.id));
 
         if (selectedRelationshipIds.size + newRelationsToAdd.length > maxRelationships) {
-          console.log(`[getLimitedFamilySubtree] Relationship limit hit when trying to add relations for neighbor ${neighborId}.`);
           continue; // Skip this neighbor, try next one
         }
 
@@ -117,12 +111,9 @@ function getLimitedFamilySubtree(
       }
     }
   }
-  console.log('[getLimitedFamilySubtree] BFS complete. Selected member IDs count:', selectedMemberIds.size, 'Selected relationship IDs count:', selectedRelationshipIds.size);
 
   const filteredMembers = members.filter(m => selectedMemberIds.has(m.id));
   const filteredRelationships = relationships.filter(rel => selectedRelationshipIds.has(rel.id));
-
-  console.log('[getLimitedFamilySubtree] Filtered members count:', filteredMembers.length, 'Filtered relationships count:', filteredRelationships.length);
 
   return { filteredMembers, filteredRelationships };
 }
@@ -140,8 +131,6 @@ export function transformFamilyData(
   relationships: Relationship[],
   rootId: string | null
 ): { filteredMembers: MemberDto[]; transformedData: CardDataPayload[] } {
-  console.log('[transformFamilyData] Start. Initial members:', members.length, 'rootId:', rootId);
-
   // Apply the node and relationship limits before transforming the data
   const { filteredMembers, filteredRelationships } = getLimitedFamilySubtree(
     members,
@@ -150,7 +139,6 @@ export function transformFamilyData(
     MAX_NODES_TO_DISPLAY,
     MAX_RELATIONSHIPS_TO_DISPLAY // Pass the new limit
   );
-  console.log('[transformFamilyData] Limited subtree obtained. Filtered members:', filteredMembers.length, 'Filtered relationships:', filteredRelationships.length);
 
   const personMap = new Map<string, CardDataPayload>();
 
@@ -171,7 +159,6 @@ export function transformFamilyData(
       },
     });
   });
-  console.log('[transformFamilyData] Person map initialized. Map size:', personMap.size);
 
   // 2. Process relationships to build the tree structure
   filteredRelationships.forEach((rel) => {
@@ -211,7 +198,6 @@ export function transformFamilyData(
       // Add other relationship types if they influence tree structure
     }
   });
-  console.log('[transformFamilyData] Relationships processed.');
 
   // 3. Mark the root member and return the array of transformed data
   const transformedData = Array.from(personMap.values()).map(person => {
@@ -220,7 +206,6 @@ export function transformFamilyData(
     }
     return person;
   });
-  console.log('[transformFamilyData] Transformed data generated. Count:', transformedData.length);
 
   return { filteredMembers, transformedData };
 }
@@ -237,7 +222,6 @@ export function determineMainChartId(
   transformedData: CardDataPayload[],
   providedRootId: string | null
 ): string | undefined {
-  console.log('[determineMainChartId] Start. Filtered members count:', filteredMembers.length, 'Transformed data count:', transformedData.length, 'Provided rootId:', providedRootId);
   let mainIdToSet: string | undefined;
 
   if (providedRootId) {
@@ -245,9 +229,6 @@ export function determineMainChartId(
     const foundRootMember = transformedData.find(d => d.id === providedRootId);
     if (foundRootMember) {
       mainIdToSet = providedRootId;
-      console.log('[determineMainChartId] Provided rootId found in transformed data.');
-    } else {
-      console.log('[determineMainChartId] Provided rootId not found in transformed data.');
     }
   }
 
@@ -256,14 +237,9 @@ export function determineMainChartId(
     const rootMember = filteredMembers.find((m: MemberDto) => m.isRoot);
     if (rootMember) {
       mainIdToSet = rootMember.id;
-      console.log('[determineMainChartId] Fallback: Found an isRoot member in filtered members.');
     } else if (transformedData.length > 0) {
       mainIdToSet = transformedData[0].id; // Fallback to the first available member
-      console.log('[determineMainChartId] Fallback: Using first member in transformed data.');
-    } else {
-      console.log('[determineMainChartId] Fallback: No members in transformed data.');
     }
   }
-  console.log('[determineMainChartId] Returning mainIdToSet:', mainIdToSet);
   return mainIdToSet;
 }
