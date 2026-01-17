@@ -90,7 +90,7 @@ describe('f3.adapter', () => {
           expect(clickHandler).toBeDefined();
     
           // Manually invoke the click handler
-          clickHandler(new MouseEvent('click'));
+          (clickHandler as (event: Event) => void)(new MouseEvent('click'));
     
           expect(mockEmit).toHaveBeenCalledWith('show-member-detail-drawer', 'mockId');
           expect(mockOnNodeClick).toHaveBeenCalledWith('mockId', 'Mock MemberDto');
