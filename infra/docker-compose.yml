@@ -163,6 +163,7 @@ services:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
       - TZ=Asia/Ho_Chi_Minh
       - LANCEDB_PATH=/lancedb # Define LanceDB storage path inside the container
+      - LANCEDB_CONFIG_DIR=/tmp # Set LanceDB config directory to a writeable location to suppress warnings
     mem_limit: 2g # Set memory limit for knowledge search service
     volumes:
       - lancedb-data:/lancedb # Persistent volume for LanceDB

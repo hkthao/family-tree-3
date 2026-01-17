@@ -3,6 +3,7 @@ import pandas as pd
 from typing import List, Dict, Any
 from loguru import logger
 import numpy as np
+import pyarrow as pa
 
 from ..config import LANCEDB_PATH, EMBEDDING_DIMENSIONS
 
@@ -45,7 +46,8 @@ class LanceDBService:
             formatted_results = []
             for res in results:
                 formatted_results.append({
-                    "member_id": res.get("member_id"),
+                    "entity_id": res.get("entity_id"), # Renamed from member_id
+                    "type": res.get("type"), # Include the new type field
                     "name": res.get("name"),
                     "summary": res.get("summary"),
                     "score": res.get("_distance") # LanceDB returns _distance as score
@@ -73,7 +75,17 @@ class LanceDBService:
             {
                 "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
                 "family_id": family_id,
-                "member_id": "M001",
+                "entity_id": None, # No entity_id for family type
+                "type": "family",
+                "visibility": "public",
+                "name": "Dòng họ Nguyễn Văn (Demo)",
+                "summary": "Dòng họ có truyền thống lâu đời tại Việt Nam, nổi tiếng với nhiều nhân vật lịch sử và đóng góp cho cộng đồng."
+            },
+            {
+                "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
+                "family_id": family_id,
+                "entity_id": "M001",
+                "type": "member",
                 "visibility": "public",
                 "name": "Nguyễn Văn A",
                 "summary": "Ông tổ đời thứ 3 của dòng họ Nguyễn, có công khai phá vùng đất mới."
@@ -81,7 +93,8 @@ class LanceDBService:
             {
                 "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
                 "family_id": family_id,
-                "member_id": "M002",
+                "entity_id": "M002",
+                "type": "member",
                 "visibility": "private",
                 "name": "Trần Thị B",
                 "summary": "Vợ của Nguyễn Văn A, người phụ nữ hiền thục, đảm đang."
@@ -89,7 +102,8 @@ class LanceDBService:
             {
                 "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
                 "family_id": family_id,
-                "member_id": "M003",
+                "entity_id": "M003",
+                "type": "member",
                 "visibility": "public",
                 "name": "Lê Văn C",
                 "summary": "Người con trai cả của Nguyễn Văn A, nổi tiếng với tài trí hơn người."
@@ -97,7 +111,8 @@ class LanceDBService:
             {
                 "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
                 "family_id": family_id,
-                "member_id": "M004",
+                "entity_id": "M004",
+                "type": "member",
                 "visibility": "deleted", # Should not be searchable
                 "name": "Phạm Thị D",
                 "summary": "Thông tin thành viên đã bị xóa."
@@ -105,22 +120,24 @@ class LanceDBService:
             {
                 "vector": np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
                 "family_id": "ANOTHER_FAMILY", # Different family, should not be searchable under F123
-                "member_id": "M005",
+                "entity_id": "M005",
+                "type": "member",
                 "visibility": "public",
                 "name": "Nguyễn Văn X",
                 "summary": "Thành viên của một dòng họ khác."
             }
-        ]
+        ] # Added missing closing square bracket
         
         # Ensure vector column is of float[EMBEDDING_DIMENSIONS] type
-        schema = {
-            "vector": f"list<float:{EMBEDDING_DIMENSIONS}>",
-            "family_id": "string",
-            "member_id": "string",
-            "visibility": "string",
-            "name": "string",
-            "summary": "string"
-        }
+        schema = pa.schema([
+            pa.field("vector", pa.list_(pa.float32(), EMBEDDING_DIMENSIONS)),
+            pa.field("family_id", pa.string()),
+            pa.field("entity_id", pa.string()), # Renamed from member_id to entity_id
+            pa.field("type", pa.string()), # New field for differentiating entity types (e.g., 'family', 'member')
+            pa.field("visibility", pa.string()),
+            pa.field("name", pa.string()),
+            pa.field("summary", pa.string())
+        ])
 
         df = pd.DataFrame(data)
         self.db.create_table(table_name, data=df, schema=schema)
