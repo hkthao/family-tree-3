@@ -75,7 +75,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     (newVal) => {
       if (newVal) {
         isEditMode.value = true;
-        formData.id = newVal.id;
+        (formData as FamilyUpdateDto).id = newVal.id;
         formData.name = newVal.name;
         formData.description = newVal.description || '';
         formData.address = newVal.address || '';
