@@ -43,7 +43,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
         }
 
-        var newMember = new Domain.Entities.Member(
+        var newMember = new Member(
             request.LastName,
             request.FirstName,
             request.Code ?? GenerateUniqueCode("MEM"),
