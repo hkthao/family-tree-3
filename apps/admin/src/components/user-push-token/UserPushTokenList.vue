@@ -1,6 +1,8 @@
 <template>
   <v-data-table-server data-testid="user-push-token-list" :headers="headers" :items="items" :items-length="totalItems"
-    :loading="loading" item-value="id" @update:options="updateOptions">
+    :loading="loading" item-value="id" @update:options="updateOptions"
+    :page="page"
+    :items-per-page="itemsPerPage">
     <template #top>
       <ListToolbar :title="t('userPushToken.list.title')" :create-button-tooltip="t('common.add')"
         create-button-test-id="button-create-user-push-token" @create="emit('create')" :hide-create-button="!allowAdd"
@@ -59,6 +61,8 @@ interface UserPushTokenListProps {
   totalItems: number;
   loading: boolean;
   searchQuery?: string; // Add this prop
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;

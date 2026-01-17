@@ -55,7 +55,8 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .IsRequired();
 
         builder.HasIndex(m => m.Code)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("IsDeleted = 0");
 
         builder.HasOne(m => m.Family)
             .WithMany(f => f.Members) // Referencing the public property

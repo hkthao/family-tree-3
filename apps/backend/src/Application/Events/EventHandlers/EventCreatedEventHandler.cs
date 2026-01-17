@@ -27,7 +27,7 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
             ActionType = UserActionType.CreateEvent,
             TargetType = TargetType.Event,
             TargetId = notification.Event.Id.ToString(),
-            ActivitySummary = $"Created event '{notification.Event.Name}'."
+            ActivitySummary = $"Đã tạo sự kiện '{notification.Event.Name}'."
         }, cancellationToken);
 
         // Publish notification for event creation

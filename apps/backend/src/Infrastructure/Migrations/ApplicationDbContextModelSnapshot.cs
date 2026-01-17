@@ -292,10 +292,6 @@ namespace backend.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_families");
 
-                    b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_families_code");
-
                     b.ToTable("families");
                 });
 
@@ -1131,7 +1127,8 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("Code")
                         .IsUnique()
-                        .HasDatabaseName("ix_members_code");
+                        .HasDatabaseName("ix_members_code")
+                        .HasFilter("IsDeleted = 0");
 
                     b.HasIndex("FamilyId")
                         .HasDatabaseName("ix_members_family_id");

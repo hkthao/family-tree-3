@@ -1,7 +1,7 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
@@ -11,6 +11,7 @@ using FluentAssertions;
 using MediatR;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging; // Keep this one
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
@@ -19,6 +20,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IMemberRelationshipService> _memberRelationshipServiceMock;
     private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<ILogger<UpdateMemberCommandHandler>> _loggerMock;
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
@@ -26,7 +28,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _memberRelationshipServiceMock = new Mock<IMemberRelationshipService>();
         _mediatorMock = new Mock<IMediator>();
-        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _memberRelationshipServiceMock.Object, _mediatorMock.Object);
+        _loggerMock = new Mock<ILogger<UpdateMemberCommandHandler>>();
+        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _memberRelationshipServiceMock.Object, _mediatorMock.Object, _loggerMock.Object);
     }
 
     [Fact]

@@ -27,7 +27,7 @@ public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHan
             ActionType = UserActionType.CreateRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),
-            ActivitySummary = $"Created relationship between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId} (Type: {notification.Relationship.Type})."
+            ActivitySummary = $"Đã tạo mối quan hệ giữa {notification.Relationship.SourceMemberId} và {notification.Relationship.TargetMemberId} (Loại: {notification.Relationship.Type})."
         }, cancellationToken);
 
 

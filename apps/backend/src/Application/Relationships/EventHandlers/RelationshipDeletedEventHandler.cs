@@ -26,7 +26,7 @@ public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHan
             ActionType = UserActionType.DeleteRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),
-            ActivitySummary = $"Deleted relationship {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
+            ActivitySummary = $"Đã xóa mối quan hệ {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
         }, cancellationToken);
 
         // Publish notification for relationship deletion

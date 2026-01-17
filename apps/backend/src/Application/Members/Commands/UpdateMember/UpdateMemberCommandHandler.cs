@@ -9,14 +9,17 @@ using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
 
+using Microsoft.Extensions.Logging;
+
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMemberRelationshipService memberRelationshipService, IMediator mediator) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMemberRelationshipService memberRelationshipService, IMediator mediator, ILogger<UpdateMemberCommandHandler> logger) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
     private readonly IMediator _mediator = mediator;
+    private readonly ILogger<UpdateMemberCommandHandler> _logger = logger;
 
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -151,24 +154,26 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
     private async Task HandleLocationLink(Guid refId, Guid? locationId, LocationLinkType linkType, CancellationToken cancellationToken)
     {
+        var existingLink = await _context.LocationLinks
+            .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
+
         if (locationId.HasValue)
         {
             var location = await _context.Locations.FindAsync(new object[] { locationId.Value }, cancellationToken);
             if (location == null)
             {
-                // Log or handle error: location not found
+                // Log a warning if the provided locationId does not correspond to an existing location
+                _logger.LogWarning("Location with ID {LocationId} not found for {LinkType} link for member {RefId}.", locationId.Value, linkType, refId);
                 return;
             }
 
-            var existingLink = await _context.LocationLinks
-                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
-
             if (existingLink == null)
             {
+                // Create a new link if none exists
                 var newLocationLink = LocationLink.Create(
                     refId.ToString(),
                     RefType.Member,
-                    linkType.ToString(), // Description can be the LinkType itself
+                    linkType.ToString(),
                     locationId.Value,
                     linkType
                 );
@@ -176,7 +181,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
             else if (existingLink.LocationId != locationId.Value)
             {
-                // Update existing link if location has changed
+                // Update existing link if the location has changed
                 existingLink.Update(
                     existingLink.RefId,
                     existingLink.RefType,
@@ -185,13 +190,11 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     linkType
                 );
             }
+            // If existingLink is not null and LocationId is the same, no action is needed.
         }
         else
         {
             // If locationId is null, remove any existing link of this type for the member
-            var existingLink = await _context.LocationLinks
-                .FirstOrDefaultAsync(ll => ll.RefId == refId.ToString() && ll.RefType == RefType.Member && ll.LinkType == linkType, cancellationToken);
-
             if (existingLink != null)
             {
                 _context.LocationLinks.Remove(existingLink);

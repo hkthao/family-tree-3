@@ -5,6 +5,8 @@
     :items-length="props.totalItems"
     :loading="props.loading"
     item-value="id"
+    :page="props.page"
+    :items-per-page="props.itemsPerPage"
     @update:options="emit('update:options', $event)"
     data-testid="memory-item-list"
     class="elevation-1"
@@ -92,6 +94,8 @@ interface MemoryItemListProps {
   totalItems: number;
   loading: boolean;
   familyId: string;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;

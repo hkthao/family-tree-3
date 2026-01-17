@@ -6,6 +6,7 @@
       :total-items="totalItems"
       :loading="isLoading || isDeleting"
       :search="filters.searchQuery"
+      :page="page"
       :items-per-page="itemsPerPage"
       :sort-by="sortBy"
       @update:options="handleListOptionsUpdate"

@@ -30,7 +30,7 @@ export interface IF3Adapter {
 }
 
 // Custom Card Renderer function for f3
-function CardRenderer(emit: (event: 'show-member-detail-drawer', ...args: any[]) => void) {
+function CardRenderer(onNodeClick: (memberId: string, memberName: string) => void) {
   return function (this: HTMLElement, d: { data: F3CardData }) {
     this.innerHTML = `
       <div class="card">
@@ -41,7 +41,7 @@ function CardRenderer(emit: (event: 'show-member-detail-drawer', ...args: any[])
   };
 
   function onCardClick(_: Event, d: { data: F3CardData }) {
-    emit('show-member-detail-drawer', d.data.id);
+    onNodeClick(d.data.id, d.data.data.fullName);
   }
 
   function getCardInnerImage(d: { data: F3CardData }) {
@@ -82,7 +82,9 @@ export const F3Adapter: IF3Adapter = {
       .createChart(container, data)
       .setTransitionTime(1000)
       .setCardXSpacing(150)
-      .setCardYSpacing(150);
+      .setCardYSpacing(150)
+      .setSingleParentEmptyCard(false, {label: 'Unknown'})
+      ;
 
     return chart;
   },
@@ -102,7 +104,10 @@ export const F3Adapter: IF3Adapter = {
 };
 
 // This function provides the default F3Adapter with the emit function for card rendering
-export function createDefaultF3Adapter(emit: (event: 'show-member-detail-drawer', ...args: any[]) => void): IF3Adapter {
+export function createDefaultF3Adapter(
+  emit: (event: 'show-member-detail-drawer', ...args: any[]) => void,
+  onNodeClick: (memberId: string, memberName: string) => void // New parameter
+): IF3Adapter {
   const adapter = { ...F3Adapter }; // Create a copy to avoid modifying the base adapter directly
   // Override createChart to set the custom card renderer
   adapter.createChart = (container: HTMLElement, data: F3CardData[]): any => {
@@ -110,11 +115,13 @@ export function createDefaultF3Adapter(emit: (event: 'show-member-detail-drawer'
       .createChart(container, data)
       .setTransitionTime(1000)
       .setCardXSpacing(150)
-      .setCardYSpacing(150);
+      .setCardYSpacing(150)
+      .setSingleParentEmptyCard(false, {label: 'Unknown'})
+      ;
 
     chart.setCardHtml()
          .setCardDim({ w: 150, h: 200 })
-         .setOnCardUpdate(CardRenderer(emit)); // Inject emit into the CardRenderer
+         .setOnCardUpdate(CardRenderer(onNodeClick)); // Pass onNodeClick to CardRenderer
 
     return chart;
   };

@@ -26,7 +26,7 @@ public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, 
             ActionType = UserActionType.DeleteEvent,
             TargetType = TargetType.Event,
             TargetId = notification.Event.Id.ToString(),
-            ActivitySummary = $"Deleted event '{notification.Event.Name}'."
+            ActivitySummary = $"Đã xóa sự kiện '{notification.Event.Name}'."
         }, cancellationToken);
 
         // Publish notification for event deletion

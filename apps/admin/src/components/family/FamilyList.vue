@@ -1,8 +1,7 @@
 <template>
-  <v-data-table-server :items-per-page="props.itemsPerPage" @update:itemsPerPage="emit('update:itemsPerPage', $event)"
-    :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading" item-value="id"
-    :sort-by="props.sortBy" @update:options="emit('update:options', $event)" elevation="1">
-    <template #top>
+      <v-data-table-server :items-per-page="props.itemsPerPage" @update:itemsPerPage="emit('update:itemsPerPage', $event)"
+      :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading" item-value="id"
+      :sort-by="props.sortBy" :page="props.page" @update:options="emit('update:options', $event)" elevation="1">    <template #top>
       <ListToolbar
         :searchQuery="searchQuery"
         @update:search="searchQuery = $event"
@@ -111,6 +110,7 @@ const props = defineProps<{
   totalItems: number;
   loading: boolean;
   itemsPerPage: number;
+  page?: number; // Added
   search: string;
   sortBy: { key: string; order: 'asc' | 'desc' }[];
   onImportClick?: () => void;

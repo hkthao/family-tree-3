@@ -42,6 +42,7 @@ export function usePublicFamilyList(deps: UsePublicFamilyListDeps = defaultDeps)
       itemsPerPage,
       sortBy,
       filters,
+      page, // Added
     },
     actions: {
       setPage,
@@ -85,6 +86,7 @@ export function usePublicFamilyList(deps: UsePublicFamilyListDeps = defaultDeps)
       families,
       totalItems,
       loading,
+      page,
     },
     actions: {
       handleFilterUpdate,

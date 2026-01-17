@@ -6,6 +6,7 @@ using backend.Application.FamilyLocations.Commands.ImportFamilyLocations;
 using backend.Application.FamilyLocations.Commands.UpdateFamilyLocation;
 using backend.Application.FamilyLocations.Queries.ExportFamilyLocations;
 using backend.Application.FamilyLocations.Queries.GetFamilyLocationById;
+using backend.Application.FamilyLocations.Queries.GetFamilyLocationByAddress;
 using backend.Application.FamilyLocations.Queries.SearchFamilyLocations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,20 @@ public class FamilyLocationsController(IMediator mediator, ILogger<FamilyLocatio
     public async Task<IActionResult> SearchFamilyLocations([FromQuery] SearchFamilyLocationsQuery query)
     {
         var result = await _mediator.Send(query);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Lấy FamilyLocation theo địa chỉ.
+    /// </summary>
+    /// <param name="address">Địa chỉ của FamilyLocation.</param>
+    /// <returns>FamilyLocationDto.</returns>
+    [HttpGet("by-address")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetFamilyLocationByAddress([FromQuery] string address)
+    {
+        var result = await _mediator.Send(new GetFamilyLocationByAddressQuery(address));
         return result.ToActionResult(this, _logger);
     }
 

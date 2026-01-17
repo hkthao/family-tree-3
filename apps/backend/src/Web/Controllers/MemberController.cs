@@ -9,10 +9,15 @@ using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByFamilyId;
 using backend.Application.Members.Queries.GetMembersByIds;
+using backend.Application.Members.Queries.GetMemberByFamilyIdAndCode;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+
+using backend.Application.Members.Commands.UpdateMemberRelationships;
+using backend.Application.Members.Queries.ExportMembers;
+using backend.Application.Members.Commands.ImportMembers; // NEW using statement
 
 namespace backend.Web.Controllers;
 
@@ -90,6 +95,19 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
         return result.ToActionResult(this, _logger);
     }
 
+    /// <summary>
+    /// Xử lý GET request để lấy thông tin chi tiết của một thành viên theo ID gia đình và mã thành viên.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần lấy thành viên.</param>
+    /// <param name="memberCode">Mã của thành viên cần lấy.</param>
+    /// <returns>Thông tin chi tiết của thành viên.</returns>
+    [HttpGet("by-family/{familyId}/by-code/{memberCode}")]
+    public async Task<IActionResult> GetMemberByFamilyIdAndCode(Guid familyId, string memberCode)
+    {
+        var result = await _mediator.Send(new GetMemberByFamilyIdAndCodeQuery(familyId, memberCode));
+        return result.ToActionResult(this, _logger);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateMember([FromBody] CreateMemberCommand command)
     {
@@ -121,6 +139,24 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
         if (id != command.Id)
         {
             _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest();
+        }
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Xử lý PUT request để cập nhật các mối quan hệ của một thành viên (cha, mẹ, vợ, chồng).
+    /// </summary>
+    /// <param name="id">ID của thành viên cần cập nhật mối quan hệ.</param>
+    /// <param name="command">Lệnh cập nhật mối quan hệ thành viên.</param>
+    /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
+    [HttpPut("{id}/relationships")]
+    public async Task<IActionResult> UpdateMemberRelationships(Guid id, [FromBody] UpdateMemberRelationshipsCommand command)
+    {
+        if (id != command.MemberId)
+        {
+            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandMemberId}) for UpdateMemberRelationshipsCommand from {RemoteIpAddress}", id, command.MemberId, HttpContext.Connection.RemoteIpAddress);
             return BadRequest();
         }
         var result = await _mediator.Send(command);
@@ -167,7 +203,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ExportMembers([FromQuery] Guid familyId)
     {
-        var result = await _mediator.Send(new Application.Members.Queries.ExportMembers.ExportMembersQuery(familyId));
+        var result = await _mediator.Send(new ExportMembersQuery(familyId));
         return result.ToActionResult(this, _logger);
     }
 
@@ -179,7 +215,7 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     [HttpPost("import")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ImportMembers([FromBody] Application.Members.Commands.ImportMembers.ImportMembersCommand command)
+    public async Task<IActionResult> ImportMembers([FromBody] ImportMembersCommand command)
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201);

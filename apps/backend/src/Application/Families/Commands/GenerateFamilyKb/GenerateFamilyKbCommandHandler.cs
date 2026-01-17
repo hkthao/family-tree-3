@@ -27,34 +27,10 @@ namespace backend.Application.Families.Commands.GenerateFamilyKb
             _context = context;
         }
 
-        public async Task<Result<string>> Handle(GenerateFamilyKbCommand request, CancellationToken cancellationToken)
+        public Task<Result<string>> Handle(GenerateFamilyKbCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Generating Family KB record for FamilyId: {FamilyId}, RecordId: {RecordId}, Type: {RecordType}",
-                request.FamilyId, request.RecordId, request.RecordType);
-
-            BaseEmbeddingsDto? embeddingsDto;
-            switch (request.RecordType)
-            {
-                case KbRecordType.Member:
-                    embeddingsDto = await GenerateMemberEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
-                    break;
-                case KbRecordType.Family:
-                    embeddingsDto = await GenerateFamilyEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
-                    break;
-                case KbRecordType.Event:
-                    embeddingsDto = await GenerateEventEmbeddingsDto(request.FamilyId, request.RecordId, cancellationToken);
-                    break;
-                default:
-                    _logger.LogWarning("Unsupported KB Record Type: {RecordType}", request.RecordType);
-                    return Result<string>.Failure($"Unsupported KB Record Type: {request.RecordType}");
-            }
-
-            if (embeddingsDto == null)
-            {
-                return Result<string>.Failure($"Could not generate embeddings DTO for {request.RecordType} with ID {request.RecordId}");
-            }
-
-            return await _n8nService.CallEmbeddingsWebhookAsync(embeddingsDto, cancellationToken);
+            _logger.LogInformation("Embedding generation is temporarily disabled.");
+            return Task.FromResult(Result<string>.Success("Embedding generation is temporarily disabled."));
         }
 
         private string GetVietnameseRelationshipType(RelationshipType type)

@@ -27,7 +27,7 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
             ActionType = UserActionType.UpdateRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),
-            ActivitySummary = $"Updated relationship {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
+            ActivitySummary = $"Đã cập nhật mối quan hệ {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
         }, cancellationToken);
 
         // Publish notification for relationship update

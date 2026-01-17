@@ -27,7 +27,7 @@ public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEv
             ActionType = UserActionType.UpdateMember,
             TargetType = TargetType.Member,
             TargetId = notification.Member.Id.ToString(),
-            ActivitySummary = $"Updated biography for member '{notification.Member.FullName}'."
+            ActivitySummary = $"Đã cập nhật tiểu sử cho thành viên '{notification.Member.FullName}'."
         }, cancellationToken);
 
         // Update member data in Vector DB for search via GlobalSearchService

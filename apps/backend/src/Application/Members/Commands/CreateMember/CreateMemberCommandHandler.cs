@@ -30,6 +30,19 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
         }
 
+        // Kiểm tra xem mã thành viên đã tồn tại trong gia đình này chưa
+        if (!string.IsNullOrEmpty(request.Code))
+        {
+            var existingMember = await _context.Members
+                .Where(m => m.FamilyId == request.FamilyId && m.Code == request.Code)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existingMember != null)
+            {
+                return Result<Guid>.Failure(_localizer["Mã thành viên đã tồn tại trong gia đình này."], ErrorSources.Conflict);
+            }
+        }
+
         var newMember = new Domain.Entities.Member(
             request.LastName,
             request.FirstName,

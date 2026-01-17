@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, watch, onUnmounted, nextTick, type PropType } from 'vue';
 import * as d3 from 'd3';
 import type { MemberDto, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
@@ -16,18 +16,21 @@ import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const { t } = useI18n();
 
+defineEmits([
+  'update:rootId', // New emit event to update rootId
+]);
+
 const props = defineProps({
   familyId: { type: String, required: true },
   members: { type: Array<MemberDto>, default: () => [] },
   relationships: { type: Array<Relationship>, default: () => [] },
   isMobile: { type: Boolean, default: false }, // New prop
   rootId: { type: String, default: null }, // New prop for filtering
+  onNodeClick: {
+    type: Function as PropType<(memberId: string, memberName: string) => void>,
+    required: true,
+  }
 });
-
-const emit = defineEmits([
-  'show-member-detail-drawer',
-  'edit-member',
-]);
 
 const chartContainer = ref<HTMLDivElement | null>(null);
 let simulation: d3.Simulation<GraphNode, GraphLink> | null = null;
@@ -54,7 +57,6 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   if (props.rootId) {
     const rootMember = members.find(m => String(m.id) === props.rootId);
     if (!rootMember) {
-      console.warn(`Root member with ID ${props.rootId} not found.`);
       return { nodes: [], links: [] };
     }
 
@@ -121,6 +123,15 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
       relatedMemberIds.has(String(rel.sourceMemberId)) && relatedMemberIds.has(String(rel.targetMemberId))
     );
   }
+
+  const RENDER_LIMIT = 50;
+
+  // Apply rendering limit
+  if (filteredMembers.length > RENDER_LIMIT) {
+    filteredMembers = filteredMembers.slice(0, RENDER_LIMIT);
+  }
+
+  // Removed redundant RENDER_LIMIT block here
 
   const nodes: GraphNode[] = filteredMembers.map(m => ({
     id: String(m.id),
@@ -280,11 +291,11 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .on('click', () => svg.transition().call(zoom.transform as any, d3.zoomIdentity));
 
   simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 300).strength(1))
-    .force('charge', d3.forceManyBody().strength(-1200))
+    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 150).strength(1))
+    .force('charge', d3.forceManyBody().strength(-400))
     .force('collide', d3.forceCollide(67.5))
     .force('x', d3.forceX(width / 2).strength(0.1))
-    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 200).strength(0.8));
+    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 200).strength(0.5));
 
   const link = chartGroup.append('g') // Append to chartGroup
     .attr('stroke-opacity', 0.5)
@@ -396,8 +407,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   });
 
   node.on('click', (event, d) => {
-    emit('show-member-detail-drawer', d.id);
-    emit('edit-member', d.id);
+    props.onNodeClick(d.id, d.name || '');
   });
 
   simulation.on('tick', () => {

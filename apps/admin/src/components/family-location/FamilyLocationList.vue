@@ -1,7 +1,7 @@
 <template>
   <v-data-table-server :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading"
     item-value="id" @update:options="props.readOnly ? null : emit('update:options', $event)"
-    data-testid="family-location-list" class="elevation-1">
+    data-testid="family-location-list" class="elevation-1" :page="props.page" :items-per-page="props.itemsPerPage">
     <template #top>
       <ListToolbar :title="t('familyLocation.list.title')" :create-button-tooltip="t('familyLocation.list.add')"
         create-button-test-id="create-family-location-button" @create="emit('create')"
@@ -65,6 +65,8 @@ interface FamilyLocationListProps {
   loading: boolean;
   readOnly?: boolean;
   familyId: string;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;

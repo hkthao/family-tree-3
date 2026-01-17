@@ -59,8 +59,8 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
             .MaximumLength(200).WithMessage("Place of Death must not exceed 200 characters.");
 
         RuleFor(v => v.Order)
-            .GreaterThan(0).When(v => v.Order.HasValue)
-            .WithMessage("Order must be a positive number.");
+            .GreaterThanOrEqualTo(0).When(v => v.Order.HasValue)
+            .WithMessage("Order must be a positive number or zero.");
     }
 
     private bool BeAValidBase64StringOrEmpty(string? base64String)

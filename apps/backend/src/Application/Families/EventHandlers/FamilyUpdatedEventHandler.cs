@@ -30,7 +30,7 @@ public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger
                 ActionType = UserActionType.UpdateFamily,
                 TargetType = TargetType.Family,
                 TargetId = notification.Family.Id.ToString(),
-                ActivitySummary = $"Updated family '{notification.Family.Name}'."
+                ActivitySummary = $"Đã cập nhật gia đình '{notification.Family.Name}'."
             }, cancellationToken);
 
             // Publish notification for family update

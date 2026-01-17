@@ -28,10 +28,10 @@ describe('hierarchicalTreeChart.logic', () => {
     it('should correctly transform members and relationships into f3 format', () => {
       const transformed = transformFamilyData(mockMembers, mockRelationships, null);
 
-      const john = transformed.find(p => p.id === '1');
-      const jane = transformed.find(p => p.id === '2');
-      const child = transformed.find(p => p.id === '3');
-      const partner = transformed.find(p => p.id === '4');
+      const john = transformed.transformedData.find(p => p.id === '1');
+      const jane = transformed.transformedData.find(p => p.id === '2');
+      const child = transformed.transformedData.find(p => p.id === '3');
+      const partner = transformed.transformedData.find(p => p.id === '4');
 
       expect(john).toBeDefined();
       expect(john?.data.fullName).toBe('John Doe');
@@ -58,13 +58,13 @@ describe('hierarchicalTreeChart.logic', () => {
 
     it('should mark the root member if provided', () => {
       const transformed = transformFamilyData(mockMembers, mockRelationships, '1');
-      const john = transformed.find(p => p.id === '1');
+      const john = transformed.transformedData.find(p => p.id === '1');
       expect(john?.data.main).toBe(true);
     });
 
     it('should not mark a root member if not provided', () => {
       const transformed = transformFamilyData(mockMembers, mockRelationships, null);
-      const john = transformed.find(p => p.id === '1');
+      const john = transformed.transformedData.find(p => p.id === '1');
       expect(john?.data.main).toBeUndefined();
     });
 
@@ -73,16 +73,18 @@ describe('hierarchicalTreeChart.logic', () => {
         { id: '5', firstName: 'Lone', lastName: 'Wolf', fullName: 'Lone Wolf', gender: Gender.Male, isRoot: false, familyId: 'f1' },
       ];
       const transformed = transformFamilyData(loneMember, [], null);
-      expect(transformed.length).toBe(1);
-      expect(transformed[0].rels.spouses).toEqual([]);
-      expect(transformed[0].rels.children).toEqual([]);
-      expect(transformed[0].rels.father).toBeUndefined();
-      expect(transformed[0].rels.mother).toBeUndefined();
+      expect(transformed.transformedData.length).toBe(1);
+      expect(transformed.transformedData[0].rels.spouses).toEqual([]);
+      expect(transformed.transformedData[0].rels.children).toEqual([]);
+      expect(transformed.transformedData[0].rels.father).toBeUndefined();
+      expect(transformed.transformedData[0].rels.mother).toBeUndefined();
+      expect(transformed.filteredMembers.length).toBe(1);
     });
 
     it('should handle empty members array', () => {
       const transformed = transformFamilyData([], mockRelationships, null);
-      expect(transformed).toEqual([]);
+      expect(transformed.transformedData).toEqual([]);
+      expect(transformed.filteredMembers).toEqual([]);
     });
 
     it('should handle gender undefined', () => {
@@ -90,7 +92,7 @@ describe('hierarchicalTreeChart.logic', () => {
         { id: '6', firstName: 'Unknown', lastName: 'Gender', fullName: 'Unknown Gender', gender: Gender.Other, familyId: 'f1' },
       ];
       const transformed = transformFamilyData(unknownGenderMember, [], null);
-      expect(transformed[0].data.gender).toBe('F'); // Expect 'F' due to new logic
+      expect(transformed.transformedData[0].data.gender).toBe('F'); // Expect 'F' due to new logic
     });
   });
 

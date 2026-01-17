@@ -19,13 +19,14 @@ public class FamilyTreeService : IFamilyTreeService
 
     public async Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default)
     {
-        var family = await _context.Families.FindAsync([familyId], cancellationToken);
+        var family = await _context.Families
+            .Include(f => f.Members.Where(m => !m.IsDeleted)) // Load only non-deleted members
+            .Include(f => f.Relationships.Where(r => !r.IsDeleted)) // Load only non-deleted relationships
+            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
+
         if (family == null) return;
 
-        var memberCount = await _context.Members.CountAsync(m => m.FamilyId == familyId, cancellationToken);
-        var eventCount = await _context.Events.CountAsync(e => e.FamilyId == familyId, cancellationToken);
-
-        family.UpdateStats(memberCount, eventCount);
+        family.RecalculateStats(); // This will update TotalMembers and TotalGenerations
         await _context.SaveChangesAsync(cancellationToken);
     }
 

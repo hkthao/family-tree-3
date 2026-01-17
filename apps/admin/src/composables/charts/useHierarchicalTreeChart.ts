@@ -12,6 +12,7 @@ interface UseHierarchicalTreeChartProps {
 
 interface UseHierarchicalTreeChartEmits {
   (event: 'show-member-detail-drawer', memberId: string): void;
+  (event: 'update:rootId', memberId: string): void;
 }
 
 interface UseHierarchicalTreeChartDeps {
@@ -22,14 +23,15 @@ interface UseHierarchicalTreeChartDeps {
 export function useHierarchicalTreeChart(
   props: UseHierarchicalTreeChartProps,
   emit: UseHierarchicalTreeChartEmits,
-  deps?: Partial<UseHierarchicalTreeChartDeps>
+  deps: Partial<UseHierarchicalTreeChartDeps>,
+  onNodeClick: (memberId: string, memberName: string) => void
 ) {
   const chartContainer = ref<HTMLDivElement | null>(null);
   let chartInstance: any = null; // To hold the chart instance
 
   // Default dependencies
   const defaultDeps: UseHierarchicalTreeChartDeps = {
-    f3Adapter: createDefaultF3Adapter(emit),
+    f3Adapter: createDefaultF3Adapter(emit, onNodeClick),
     t: (key: string) => key, // Placeholder, should be injected via useI18n().t in actual usage
   };
   const { f3Adapter, t } = { ...defaultDeps, ...deps };
@@ -42,7 +44,7 @@ export function useHierarchicalTreeChart(
 
     f3Adapter.clearChart(chartContainer.value); // Clear existing chart
 
-    const transformedData = transformFamilyData(
+    const { filteredMembers, transformedData } = transformFamilyData(
       currentMembers,
       props.relationships,
       props.rootId
@@ -59,7 +61,7 @@ export function useHierarchicalTreeChart(
 
     chartInstance = f3Adapter.createChart(chartContainer.value, transformedData);
 
-    const mainIdToSet = determineMainChartId(currentMembers, transformedData, props.rootId);
+    const mainIdToSet = determineMainChartId(filteredMembers, transformedData, props.rootId);
 
     if (mainIdToSet) {
       f3Adapter.updateChart(chartInstance, mainIdToSet, { initial: true });

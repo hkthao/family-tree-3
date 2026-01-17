@@ -29,7 +29,7 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
             ActionType = UserActionType.UpdateMember,
             TargetType = TargetType.Member,
             TargetId = notification.Member.Id.ToString(),
-            ActivitySummary = $"Updated member '{notification.Member.FullName}' in family '{notification.Member.FamilyId}'."
+            ActivitySummary = $"Đã cập nhật thành viên '{notification.Member.FullName}' trong gia đình '{notification.Member.FamilyId}'."
         }, cancellationToken);
 
         // Publish notification for member update
@@ -44,5 +44,8 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
             notification.Member.FullName,
             cancellationToken
         );
+
+        // Update family stats
+        await _familyTreeService.UpdateFamilyStats(notification.Member.FamilyId, cancellationToken);
     }
 }

@@ -1,7 +1,7 @@
 <template>
-  <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy"
-    :headers="headers" :items="items" :items-length="totalItems" :loading="loading" class="elevation-0"
-    item-value="id" @update:options="props.readOnly ? null : handleUpdateOptions($event)">
+  <v-data-table-server :headers="headers" :items="items" :items-length="totalItems" :loading="loading" class="elevation-0"
+    item-value="id" @update:options="props.readOnly ? null : handleUpdateOptions($event)"
+    :items-per-page="props.itemsPerPage" :page="props.page" v-model:sort-by="sortBy">
     <template #top>
       <ListToolbar
         :title="t('memberFace.list.title')"
@@ -99,6 +99,8 @@ interface MemberFaceListProps {
   totalItems: number;
   loading: boolean;
   search?: string;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   readOnly?: boolean;
   isExporting: boolean;
   isImporting: boolean;
@@ -112,8 +114,7 @@ const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create', 
 
 const { t } = useI18n();
 
-const page = ref(1);
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
 const sortBy = ref<any[]>([]);
 
 const searchQuery = ref(props.search);
@@ -147,22 +148,10 @@ const headers = computed<DataTableHeader[]>(() => [
 ]);
 
 
-watch([page, itemsPerPage, sortBy, searchQuery], () => { // Watch searchQuery
-  emit('update:options', {
-    page: page.value,
-    itemsPerPage: itemsPerPage.value,
-    sortBy: sortBy.value,
-    search: searchQuery.value, // Pass search query
-  });
-}, { deep: true });
+
 
 
 const handleUpdateOptions = (options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[]; search?: string; }) => {
-  page.value = options.page;
-  itemsPerPage.value = options.itemsPerPage;
-  sortBy.value = options.sortBy;
-  if (options.search !== undefined) {
-    searchQuery.value = options.search;
-  }
+  emit('update:options', options);
 };
 </script>
