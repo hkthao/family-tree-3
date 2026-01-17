@@ -19,12 +19,16 @@ public class MemberDeletedEventHandlerTests
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly MemberDeletedEventHandler _handler;
 
+    private readonly Mock<IFamilyTreeService> _familyTreeServiceMock; // Add this
+
     public MemberDeletedEventHandlerTests()
     {
         _loggerMock = new Mock<ILogger<MemberDeletedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
+        _familyTreeServiceMock = new Mock<IFamilyTreeService>(); // Initialize this
+
+        _handler = new MemberDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _familyTreeServiceMock.Object); // Pass this
     }
 
     [Fact]

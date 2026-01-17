@@ -133,19 +133,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         ContactInfo = contactInfo;
     }
 
-    /// <summary>
-    /// Cập nhật số liệu thống kê của gia đình (số thành viên, số sự kiện).
-    /// </summary>
-    /// <param name="memberCount">Tổng số thành viên.</param>
-    /// <param name="eventCount">Tổng số sự kiện.</param>
-    public void UpdateStats(int memberCount, int eventCount)
-    {
-        TotalMembers = memberCount;
-        // Assuming there is a TotalEvents property or similar to update, if not, this part needs adjustment.
-        // For now, let's assume eventCount might be used in a different stat or it's implicitly handled.
-        // If there's a specific property for total events, it should be updated here.
-        // Example: TotalEvents = eventCount;
-    }
+
 
     public void UpdateAvatar(string? newAvatarUrl)
     {
