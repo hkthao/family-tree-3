@@ -26,7 +26,7 @@ public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger
             ActionType = UserActionType.DeleteMember,
             TargetType = TargetType.Member,
             TargetId = notification.Member.Id.ToString(),
-            ActivitySummary = $"Deleted member '{notification.Member.FullName}' from family '{notification.Member.FamilyId}'."
+            ActivitySummary = $"Đã xóa thành viên '{notification.Member.FullName}' khỏi gia đình '{notification.Member.FamilyId}'."
         }, cancellationToken);
 
         // Publish notification for member deletion

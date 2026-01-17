@@ -33,7 +33,7 @@ public class EventUpdatedEventHandler(ILogger<EventUpdatedEventHandler> logger, 
             ActionType = UserActionType.UpdateEvent,
             TargetType = TargetType.Event,
             TargetId = notification.Event.Id.ToString(),
-            ActivitySummary = $"Updated event '{notification.Event.Name}'."
+            ActivitySummary = $"Đã cập nhật sự kiện '{notification.Event.Name}'."
         }, cancellationToken);
 
         // Publish notification for event update

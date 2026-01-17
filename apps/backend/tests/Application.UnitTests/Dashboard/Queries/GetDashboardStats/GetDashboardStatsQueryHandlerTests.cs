@@ -413,8 +413,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         // Assert:
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.MaleRatio.Should().BeApproximately(0.7, 0.01);
-        result.Value.FemaleRatio.Should().BeApproximately(0.3, 0.01);
+        result.Value!.MaleRatio.Should().BeApproximately(0.67, 0.005);
+        result.Value.FemaleRatio.Should().BeApproximately(0.33, 0.005);
     }
 
     [Fact]

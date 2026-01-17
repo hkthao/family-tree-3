@@ -26,8 +26,7 @@ public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger
             ActionType = UserActionType.DeleteFamily,
             TargetType = TargetType.Family,
             TargetId = notification.Family.Id.ToString(),
-            ActivitySummary = $"Deleted family '{notification.Family.Name}'."
-        }, cancellationToken);
+                            ActivitySummary = $"Đã xóa gia đình '{notification.Family.Name}'."        }, cancellationToken);
 
         // Publish notification for family deletion
 
