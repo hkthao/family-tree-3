@@ -45,7 +45,7 @@ export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
     }
   });
 
-  const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
 
   const headers = computed<DataTableHeader[]>(() => {
     const baseHeaders: DataTableHeader[] = [
@@ -112,7 +112,6 @@ export function useFamilyDictList(props: FamilyDictListProps, emit: any) {
   return {
     state: {
       debouncedSearch,
-      itemsPerPage,
       headers,
       canPerformActions,
     },

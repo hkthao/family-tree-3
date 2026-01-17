@@ -3,7 +3,7 @@
     <FamilyDictSearch v-if="!computedHideSearch" @update:filters="handleFilterUpdate" />
 
     <FamilyDictList :items="familyDicts" :total-items="totalItems" :loading="loading"
-      :items-per-page="itemsPerPage" :search="searchQuery" :sortBy="sortBy"
+      :items-per-page="itemsPerPage" :page="page" :search="searchQuery" :sortBy="sortBy"
       @update:options="handleListOptionsUpdate" @update:search="handleSearchUpdate"
       @view="item => openDetailDrawer(item.id)" @edit="item => openEditDrawer(item.id)" @delete="confirmDelete" @create="openAddDrawer"
       @import="openImportDialog" :read-only="computedReadOnly">
@@ -60,7 +60,7 @@ const computedHideSearch = computed(() => props.hideSearch);
 const computedReadOnly = computed(() => props.readOnly);
 
 const {
-  state: { searchQuery, itemsPerPage, sortBy, filters },
+  state: { searchQuery, itemsPerPage, sortBy, filters, page },
   actions: { setPage, setItemsPerPage, setSortBy, setSearchQuery, setFilters },
 } = useFamilyDictListFilters();
 

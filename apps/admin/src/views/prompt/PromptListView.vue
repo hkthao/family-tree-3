@@ -1,7 +1,7 @@
 <template>
   <div data-testid="prompt-list-view">
     <PromptList :items="items" :total-items="totalItems" :loading="loading"
-      :items-per-page="(listOptions.itemsPerPage as number)" :search="searchQuery" @update:search="handleSearchUpdate"
+      :items-per-page="listOptions.itemsPerPage" :page="listOptions.page" :search="searchQuery" @update:search="handleSearchUpdate"
       @update:options="handleListOptionsUpdate" @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete"
       @create="openAddDrawer">
       <template #top>

@@ -1,7 +1,7 @@
 <template>
-  <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
+  <v-data-table-server :headers="headers" :items="items"
     :items-length="totalItems" :loading="loading" item-value="id" @update:options="memberListActions.loadMembers"
-    elevation="0" data-testid="member-list" fixed-header>
+    elevation="0" data-testid="member-list" fixed-header :items-per-page="props.itemsPerPage" :page="props.page">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
@@ -132,13 +132,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Gender, type MemberDto } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import FamilyName from '@/components/common/FamilyName.vue';
 import { MemberName, MemberAvatarDisplay, MemberGenderChip } from '@/components/member';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { useDebouncedSearch } from '@/composables/family/logic/useDebouncedSearch';
 
 const props = defineProps<{
@@ -146,6 +145,8 @@ const props = defineProps<{
   totalItems: number;
   loading: boolean;
   search?: string;
+  page?: number;
+  itemsPerPage?: number;
   readOnly?: boolean;
   allowAdd?: boolean;
   allowEdit?: boolean;
@@ -182,7 +183,7 @@ watch(() => props.search, (newSearch) => {
   }
 });
 
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
 
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [

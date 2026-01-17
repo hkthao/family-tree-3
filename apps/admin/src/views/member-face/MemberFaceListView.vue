@@ -4,7 +4,7 @@
       <MemberFaceSearch @update:filters="handleFilterUpdate" />
 
       <MemberFaceList :items="memberFaces" :total-items="totalItems" :loading="queryLoading || isDeleting"
-        :search="searchQuery" :items-per-page="itemsPerPage" :sortBy="sortBy" @update:options="handleListOptionsUpdate"
+        :search="searchQuery" :page="page" :items-per-page="itemsPerPage" :sortBy="sortBy" @update:options="handleListOptionsUpdate"
         @view="openDetailDrawer" @delete="confirmDelete" @create="openAddDrawer()" @update:search="handleSearchUpdate"
         :is-exporting="isExporting" :is-importing="isImporting" :can-perform-actions="true" :on-export="exportMemberFaces"
         :on-import-click="() => importDialog = true" />

@@ -4,6 +4,8 @@
       :items="voiceProfiles"
       :total-items="currentTotalItems"
       :loading="isLoadingVoiceProfiles"
+      :page="paginationOptions.page"
+      :items-per-page="paginationOptions.itemsPerPage"
       @update:options="handleListOptionsUpdate"
       @create="openAddDrawer()"
       @view="openDetailDrawer"
@@ -120,16 +122,8 @@ const {
   filters
 );
 
-const voiceProfiles = ref<VoiceProfile[]>(queryVoiceProfiles.value || []);
-const currentTotalItems = ref(totalItems.value || 0);
-
-watch(queryVoiceProfiles, (newData) => {
-  voiceProfiles.value = newData || [];
-});
-
-watch(totalItems, (newTotal) => {
-  currentTotalItems.value = newTotal || 0;
-});
+const voiceProfiles = computed<VoiceProfile[]>(() => queryVoiceProfiles.value || []);
+const currentTotalItems = computed(() => totalItems.value || 0);
 
 const { mutate: deleteVoiceProfile } = useDeleteVoiceProfileMutation();
 

@@ -40,7 +40,7 @@ export function useEventListComposable(props: {
 
   watch(() => props.search, handlePropsSearchChange);
 
-  const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
 
   const headers = computed<DataTableHeader[]>(() => [
     {
@@ -109,7 +109,6 @@ export function useEventListComposable(props: {
   return {
     state: {
       debouncedSearch,
-      itemsPerPage,
       headers,
       // REMOVED: isGeneratingOccurrences,
     },

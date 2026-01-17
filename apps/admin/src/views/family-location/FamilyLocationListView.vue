@@ -5,6 +5,8 @@
       :items="familyLocations"
       :total-items="totalItems"
       :loading="isLoadingFamilyLocations || isDeletingFamilyLocation"
+      :page="paginationOptions.page"
+      :items-per-page="paginationOptions.itemsPerPage"
       @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer"
       @edit="openEditDrawer"
@@ -96,13 +98,8 @@ const {
 } = useFamilyLocationDataManagement(toRef(props, 'familyId'));
 
 const { data: familyLocationsData, isLoading: isLoadingFamilyLocations, refetch } = useFamilyLocationsQuery(paginationOptions, filters);
-const familyLocations = ref(familyLocationsData.value?.items || []);
-const totalItems = ref(familyLocationsData.value?.totalItems || 0);
-
-watch(familyLocationsData, (newData) => {
-  familyLocations.value = newData?.items || [];
-  totalItems.value = newData?.totalItems || 0;
-}, { deep: true });
+const familyLocations = computed(() => familyLocationsData.value?.items || []);
+const totalItems = computed(() => familyLocationsData.value?.totalItems || 0);
 
 watch(() => props.familyId, (newFamilyId) => {
   setFilters({ familyId: newFamilyId });

@@ -5,6 +5,8 @@
       :total-items="currentTotalItems"
       :loading="isLoadingMemoryItems"
       :family-id="props.familyId"
+      :page="paginationOptions.page"
+      :items-per-page="paginationOptions.itemsPerPage"
       @update:options="handleListOptionsUpdate"
       @create="openAddDrawer()"
       @view="openDetailDrawer"
@@ -94,16 +96,8 @@ const {
   filters
 );
 
-const memoryItems = ref<MemoryItem[]>(queryMemoryItems.value || []);
-const currentTotalItems = ref(totalItems.value || 0);
-
-watch(queryMemoryItems, (newData) => {
-  memoryItems.value = newData || [];
-});
-
-watch(totalItems, (newTotal) => {
-  currentTotalItems.value = newTotal || 0;
-});
+const memoryItems = computed(() => queryMemoryItems.value || []);
+const currentTotalItems = computed(() => totalItems.value || 0);
 
 const { mutate: deleteMemoryItem } = useDeleteMemoryItemMutation();
 

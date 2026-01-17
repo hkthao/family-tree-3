@@ -5,6 +5,8 @@
       :total-items="totalItems"
       :loading="isLoadingUserPushTokens"
       :search-query="searchQuery"
+      :page="paginationOptions.page"
+      :items-per-page="paginationOptions.itemsPerPage"
       @update:options="handleListOptionsUpdate"
       @update:search="handleSearchUpdate"
       @create="openAddDrawer()"

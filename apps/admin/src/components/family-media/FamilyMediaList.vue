@@ -1,6 +1,7 @@
 <template>
   <v-data-table-server
     :items-per-page="props.itemsPerPage"
+    :page="props.page"
     :headers="headers"
     :items="props.items"
     :items-length="props.totalItems"
@@ -76,8 +77,9 @@ interface FamilyMediaListProps {
   allowEdit?: boolean;
   allowDelete?: boolean;
   allowAddLink?: boolean;
-  itemsPerPage: number; // New prop
-  sortBy: ListOptions['sortBy']; // New prop
+  page?: number; // New prop added
+  itemsPerPage: number;
+  sortBy: ListOptions['sortBy'];
 }
 
 const props = defineProps<FamilyMediaListProps>();

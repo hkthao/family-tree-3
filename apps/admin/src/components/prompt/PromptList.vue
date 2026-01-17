@@ -1,7 +1,7 @@
 <template>
-  <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
+  <v-data-table-server :headers="headers" :items="items"
     :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadPrompts" elevation="0"
-    data-testid="prompt-list" fixed-header>
+    data-testid="prompt-list" fixed-header :page="props.page" :items-per-page="props.itemsPerPage">
     <template #top>
       <slot name="top">
         <v-toolbar flat>
@@ -95,6 +95,8 @@ const props = defineProps<{
   totalItems: number;
   loading: boolean;
   search?: string;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   readOnly?: boolean;
 }>();
 
@@ -137,7 +139,7 @@ watch(() => props.search, (newSearch) => {
   }
 });
 
-const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
+
 
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [

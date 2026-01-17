@@ -2,7 +2,7 @@
   <div data-testid="member-list-view">
     <MemberSearch @update:filters="handleFilterUpdate" />
     <MemberList :items="members" :total-items="totalItems" :loading="isLoadingMembers || isDeletingMember"
-      :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
+      :search="searchQuery" :page="paginationOptions.page" :items-per-page="paginationOptions.itemsPerPage" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="openDetailDrawer" @edit="openEditDrawer" @delete="confirmDelete" @create="openAddDrawer()"
       :read-only="props.readOnly" :allow-add="allowAdd" :allow-edit="allowEdit" :allow-delete="allowDelete"
       :is-exporting="isExporting" :is-importing="isImporting" :can-perform-actions="true" :on-export="exportMembers"
@@ -74,12 +74,8 @@ const {
   actions: { setSearchQuery, setFilters, setPage, setItemsPerPage, setSortBy },
 } = useMemberDataManagement(props.familyId);
 const { data: membersData, isLoading: isLoadingMembers, refetch } = useMembersQuery(paginationOptions, filters);
-const members = ref(membersData.value?.items || []);
-const totalItems = ref(membersData.value?.totalItems || 0);
-watch(membersData, (newData) => {
-  members.value = newData?.items || [];
-  totalItems.value = newData?.totalItems || 0;
-}, { deep: true });
+const members = computed(() => membersData.value?.items || []);
+const totalItems = computed(() => membersData.value?.totalItems || 0);
 watch(() => props.familyId, (newFamilyId) => {
   setFilters({ familyId: newFamilyId });
   refetch();

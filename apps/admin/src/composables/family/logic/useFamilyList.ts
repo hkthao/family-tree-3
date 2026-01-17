@@ -55,6 +55,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
       itemsPerPage,
       sortBy,
       filters,
+      page, // Added
     },
     actions: {
       setPage,
@@ -141,6 +142,7 @@ export function useFamilyList(deps: UseFamilyListDeps = defaultDeps) {
       totalItems,
       loading,
       addDrawer,
+      page,
     },
     actions: {
       handleFilterUpdate,

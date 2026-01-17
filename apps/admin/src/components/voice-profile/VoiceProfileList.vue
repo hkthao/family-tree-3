@@ -15,9 +15,8 @@
       </template>
     </ListToolbar>
 
-    <v-data-table-server v-model:items-per-page="itemsPerPage" v-model:page="page" v-model:sort-by="sortBy"
-      :headers="headers" :items="items" :items-length="totalItems" :loading="loading" item-value="id"
-      class="elevation-1">
+    <v-data-table-server :headers="headers" :items="items" :items-length="totalItems" :loading="loading" item-value="id"
+      class="elevation-1" :page="page" :items-per-page="itemsPerPage" v-model:sort-by="sortBy">
       <template #item.label="{ item }">
         <span @click.stop="emit('view', item.id)" class="text-primary font-weight-bold" style="cursor: pointer;">
           {{ item.label }}
@@ -86,6 +85,8 @@ interface VoiceProfileListProps {
   items: VoiceProfile[];
   totalItems: number;
   loading: boolean;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   allowAdd?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
@@ -137,8 +138,6 @@ interface DataTableHeader {
   width?: string | number;
 }
 
-const itemsPerPage = ref(10);
-const page = ref(1);
 const sortBy = ref<any[]>([]);
 
 const headers = computed<DataTableHeader[]>(() => [
@@ -160,13 +159,7 @@ const getStatusColor = (status: VoiceProfileStatus) => {
   }
 };
 
-watch([itemsPerPage, page, sortBy], () => {
-  emit('update:options', {
-    page: page.value,
-    itemsPerPage: itemsPerPage.value,
-    sortBy: sortBy.value,
-  });
-});
+
 </script>
 
 <style scoped></style>

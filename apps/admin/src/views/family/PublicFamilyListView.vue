@@ -5,6 +5,7 @@
       :items="state.families.value"
       :total-items="state.totalItems.value"
       :loading="state.loading.value"
+      :page="state.page.value!"
       :items-per-page="state.itemsPerPage.value!"
       :search="state.familyListSearchQuery.value!"
       :sortBy="state.sortBy.value!"

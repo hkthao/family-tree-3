@@ -1,6 +1,7 @@
 <template>
-  <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="events"
-    :items-length="totalEvents" :loading="loading" item-value="id" @update:options="loadEvents" elevation="0">
+  <v-data-table-server :headers="headers" :items="events"
+    :items-length="totalEvents" :loading="loading" item-value="id" @update:options="loadEvents" elevation="0"
+    :page="props.page" :items-per-page="props.itemsPerPage">
     <template #top>
       <!-- REFACTOR: Use ListToolbar component -->
       <ListToolbar
@@ -162,6 +163,8 @@ const props = defineProps<{
   totalEvents: number;
   loading: boolean;
   search: string;
+  page?: number; // Added
+  itemsPerPage?: number; // Added
   isExporting?: boolean;
   isImporting?: boolean;
   canPerformActions?: boolean;
@@ -191,7 +194,6 @@ const {
 
 const {
   debouncedSearch,
-  itemsPerPage,
   headers,
 } = state;
 
