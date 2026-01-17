@@ -16,7 +16,7 @@ using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
 using backend.Application.Families.Commands.Import;
-
+using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +31,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
-// [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
+[EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
 {
     /// <summary>
@@ -298,5 +298,18 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     {
         var result = await _mediator.Send(new ResetFamilyAiChatQuotaCommand { FamilyId = familyId });
         return result.ToActionResult(this, _logger, 204);
+    }
+
+    /// <summary>
+    /// Xử lý POST request để tính toán lại tổng số thành viên và tổng số thế hệ cho một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần tính toán lại.</param>
+    /// <returns>Thống kê gia đình đã được cập nhật.</returns>
+    [HttpPost("{familyId}/recalculate-stats")]
+    public async Task<IActionResult> RecalculateFamilyStats([FromRoute] Guid familyId)
+    {
+        var command = new RecalculateFamilyStatsCommand { FamilyId = familyId };
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 }

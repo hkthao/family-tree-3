@@ -91,7 +91,7 @@ import type { MemberFace } from '@/types';
 import MemberName from '@/components/member/MemberName.vue';
 import FamilyName from '@/components/common/FamilyName.vue';
 import ListToolbar from '@/components/common/ListToolbar.vue';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
 import type { DataTableHeader } from 'vuetify';
 
 interface MemberFaceListProps {

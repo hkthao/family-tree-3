@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { VoiceProfileStatus, type VoiceProfile } from '@/types';
 import ListToolbar from '@/components/common/ListToolbar.vue';

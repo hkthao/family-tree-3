@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import type { FamilyDict } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
 import { useAuth } from '@/composables';
 import { getFamilyDictTypeTitle, getFamilyDictLineageTitle } from '@/composables/utils/familyDictOptions';
 
