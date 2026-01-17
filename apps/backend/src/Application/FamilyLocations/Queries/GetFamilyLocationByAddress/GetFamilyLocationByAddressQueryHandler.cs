@@ -1,8 +1,5 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyLocations.Queries.GetFamilyLocationByAddress;
 

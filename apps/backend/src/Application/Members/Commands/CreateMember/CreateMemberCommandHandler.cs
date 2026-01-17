@@ -3,8 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
-using System.Linq; // Thêm namespace này
-using Microsoft.EntityFrameworkCore; // Thêm namespace này
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
