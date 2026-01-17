@@ -47,6 +47,10 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   type: 'parent-child' | 'spouse';
 }
 
+
+
+
+
 const transformData = (members: MemberDto[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
   let filteredMembers = [...members];
   let filteredRelationships = [...relationships];
@@ -120,6 +124,20 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
     filteredRelationships = relationships.filter(rel =>
       relatedMemberIds.has(String(rel.sourceMemberId)) && relatedMemberIds.has(String(rel.targetMemberId))
     );
+  }
+
+  const RENDER_LIMIT = 50;
+
+  // Apply rendering limit
+  if (filteredMembers.length > RENDER_LIMIT) {
+    console.warn(`Limiting rendering to ${RENDER_LIMIT} members out of ${filteredMembers.length} to improve performance.`);
+    filteredMembers = filteredMembers.slice(0, RENDER_LIMIT);
+  }
+
+  // Apply rendering limit
+  if (filteredMembers.length > RENDER_LIMIT) {
+    console.warn(`Limiting rendering to ${RENDER_LIMIT} members out of ${filteredMembers.length} to improve performance.`);
+    filteredMembers = filteredMembers.slice(0, RENDER_LIMIT);
   }
 
   const nodes: GraphNode[] = filteredMembers.map(m => ({
@@ -280,11 +298,11 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .on('click', () => svg.transition().call(zoom.transform as any, d3.zoomIdentity));
 
   simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 300).strength(1))
-    .force('charge', d3.forceManyBody().strength(-1200))
+    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 150).strength(1))
+    .force('charge', d3.forceManyBody().strength(-400))
     .force('collide', d3.forceCollide(67.5))
     .force('x', d3.forceX(width / 2).strength(0.1))
-    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 200).strength(0.8));
+    .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 200).strength(0.5));
 
   const link = chartGroup.append('g') // Append to chartGroup
     .attr('stroke-opacity', 0.5)
