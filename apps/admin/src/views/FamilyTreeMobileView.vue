@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, type PropType } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import HierarchicalFamilyTree from '@/components/family/HierarchicalFamilyTree.vue';
 import ForceDirectedFamilyTree from '@/components/family/ForceDirectedFamilyTree.vue';
