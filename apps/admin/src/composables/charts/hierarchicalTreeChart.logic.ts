@@ -131,19 +131,25 @@ export function transformFamilyData(
   relationships: Relationship[],
   rootId: string | null
 ): { filteredMembers: MemberDto[]; transformedData: CardDataPayload[] } {
-  // Apply the node and relationship limits before transforming the data
-  const { filteredMembers, filteredRelationships } = getLimitedFamilySubtree(
-    members,
-    relationships,
-    rootId,
-    MAX_NODES_TO_DISPLAY,
-    MAX_RELATIONSHIPS_TO_DISPLAY // Pass the new limit
-  );
+  let processedMembers: MemberDto[] = members;
+  let processedRelationships: Relationship[] = relationships;
+
+  if (rootId) { // Only limit the subtree if a rootId is provided
+    const { filteredMembers, filteredRelationships } = getLimitedFamilySubtree(
+      members,
+      relationships,
+      rootId,
+      MAX_NODES_TO_DISPLAY,
+      MAX_RELATIONSHIPS_TO_DISPLAY
+    );
+    processedMembers = filteredMembers;
+    processedRelationships = filteredRelationships;
+  }
 
   const personMap = new Map<string, CardDataPayload>();
 
   // 1. Initialize all members in a map for quick access
-  filteredMembers.forEach((person) => {
+  processedMembers.forEach((person) => {
     personMap.set(String(person.id), {
       id: String(person.id),
       data: {
@@ -161,7 +167,7 @@ export function transformFamilyData(
   });
 
   // 2. Process relationships to build the tree structure
-  filteredRelationships.forEach((rel) => {
+  processedRelationships.forEach((rel) => {
     const sourcePerson = personMap.get(String(rel.sourceMemberId));
     const targetPerson = personMap.get(String(rel.targetMemberId));
 
@@ -207,7 +213,7 @@ export function transformFamilyData(
     return person;
   });
 
-  return { filteredMembers, transformedData };
+  return { filteredMembers: processedMembers, transformedData };
 }
 
 /**

@@ -46,7 +46,7 @@ describe('useHierarchicalTreeChart', () => {
     vi.clearAllMocks();
     mockF3Adapter = createDefaultF3Adapter(mockEmit);
 
-    vi.mocked(transformFamilyData).mockReturnValue(mockTransformedData as any);
+    vi.mocked(transformFamilyData).mockReturnValue({ filteredMembers: mockMembers, transformedData: mockTransformedData } as any);
     vi.mocked(determineMainChartId).mockReturnValue('1');
   });
 
@@ -213,20 +213,19 @@ describe('useHierarchicalTreeChart', () => {
     expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
   });
 
-  it('should display empty message if transformedData is empty', async () => {
-    vi.mocked(transformFamilyData).mockReturnValue([]);
-
-    const { actions, chartContainer } = useHierarchicalTreeChart({
-      familyId: 'f1',
-      members: [], // Empty members to simulate empty transformed data
-      relationships: [],
-      rootId: null,
-    }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter });
-
-    chartContainer.value = document.createElement('div');
-    await actions.renderChart([]);
-
-    expect(chartContainer.value.innerHTML).toContain('familyTree.noMembersMessage');
-    expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
-  });
-});
+      it('should display empty message if transformedData is empty', async () => {
+        vi.mocked(transformFamilyData).mockReturnValue({ filteredMembers: [], transformedData: [] });
+  
+        const { actions, chartContainer } = useHierarchicalTreeChart({
+          familyId: 'f1',
+          members: [], // Empty members to simulate empty transformed data
+          relationships: [],
+          rootId: null,
+        }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter });
+  
+        chartContainer.value = document.createElement('div');
+        await actions.renderChart([]);
+  
+        expect(chartContainer.value.innerHTML).toContain('familyTree.noMembersMessage');
+        expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
+      });});
