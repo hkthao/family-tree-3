@@ -5,6 +5,7 @@ public class MemberDto
     public Guid Id { get; set; }
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
+    public string FullName { get; set; } = null!; // For Family Tree display
     public string Code { get; set; } = null!;
     public string? Nickname { get; set; }
     public string? Gender { get; set; }
