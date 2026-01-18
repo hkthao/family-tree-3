@@ -1,6 +1,9 @@
 ﻿using backend.Application.Common.Behaviours;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using backend.Application.Knowledge; // Added for IKnowledgeService and KnowledgeService
+using backend.Application.Common.Models.AppSetting; // Added for KnowledgeSearchServiceSettings
+using Microsoft.Extensions.Options; // Added for IOptions
 
 namespace backend.Application;
 
@@ -25,6 +28,18 @@ public static class DependencyInjection
         services.AddTransient<Common.Services.ILunarCalendarService, Common.Services.LunarCalendarService>();
         services.AddTransient<Events.EventOccurrences.Jobs.IGenerateEventOccurrencesJob, Events.EventOccurrences.Jobs.GenerateEventOccurrencesJob>();
         services.AddTransient<Events.EventOccurrences.Jobs.IEventNotificationJob, Events.EventOccurrences.Jobs.EventNotificationJob>();
+
+        services.Configure<KnowledgeSearchServiceSettings>(configuration.GetSection(nameof(KnowledgeSearchServiceSettings)));
+        services.AddHttpClient<IKnowledgeService, KnowledgeService>((serviceProvider, httpClient) =>
+        {
+            var settings = serviceProvider.GetRequiredService<IOptions<KnowledgeSearchServiceSettings>>().Value;
+            if (!string.IsNullOrEmpty(settings.BaseUrl))
+            {
+                httpClient.BaseAddress = new Uri(settings.BaseUrl);
+            }
+            // Optional: Add other HttpClient configurations like timeouts, default headers etc.
+            // httpClient.Timeout = TimeSpan.FromSeconds(30); 
+        });
 
         return services;
     }

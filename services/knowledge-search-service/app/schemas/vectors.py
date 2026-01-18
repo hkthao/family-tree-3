@@ -23,8 +23,11 @@ class UpdateVectorRequest(BaseModel):
 
 class DeleteVectorRequest(BaseModel):
     family_id: str = Field(..., description="The ID of the family the entity belongs to.")
+    # Either entity_id or where_clause should be provided for deletion
     entity_id: Optional[str] = Field(None, description="The ID of the entity to delete. If None, deletes all entities of specified type within the family.")
     type: Optional[str] = Field(None, description="The type of the entity to delete. Required if entity_id is None and family_id is specified.")
+    where_clause: Optional[str] = Field(None, description="A SQL-like WHERE clause to filter vectors for deletion. E.g., 'id = \"some_id\" AND content_type = \"Member\"'.")
+
 
 class RebuildVectorRequest(BaseModel):
     family_id: str = Field(..., description="The ID of the family to rebuild vectors for.")

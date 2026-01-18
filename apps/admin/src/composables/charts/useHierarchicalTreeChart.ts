@@ -20,7 +20,7 @@ interface UseHierarchicalTreeChartDeps {
   t: (key: string, values?: Record<string, unknown>) => string; // The translation function, updated to support interpolation
 }
 
-const RENDER_SAFE_THRESHOLD = 100; // Define a safe threshold for rendering nodes
+export const RENDER_SAFE_THRESHOLD = 100; // Define a safe threshold for rendering nodes
 
 export function useHierarchicalTreeChart(
   props: UseHierarchicalTreeChartProps,

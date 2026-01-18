@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { useHierarchicalTreeChart, RENDER_SAFE_THRESHOLD } from '@/composables/charts/useHierarchicalTreeChart';
+import { useHierarchicalTreeChart } from '@/composables/charts/useHierarchicalTreeChart';
 import { transformFamilyData, determineMainChartId } from '@/composables/charts/hierarchicalTreeChart.logic';
 import { createDefaultF3Adapter } from '@/composables/charts/f3.adapter';
 import type { MemberDto, Relationship } from '@/types';

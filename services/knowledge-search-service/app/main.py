@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, status
 from fastapi.responses import ORJSONResponse
 from loguru import logger
 
-from .api import search, vectors
+from .api import search, vectors, knowledge
 from .core.lancedb import lancedb_service
 from .core.embeddings import embedding_service # Import the instance directly
 
@@ -15,6 +15,8 @@ app = FastAPI(
 # Include API routers
 app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
 app.include_router(vectors.router, prefix="/api/v1/vectors", tags=["Vectors"])
+app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["Knowledge"])
+
 
 @app.on_event("startup")
 async def startup_event():

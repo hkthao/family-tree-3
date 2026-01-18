@@ -198,20 +198,24 @@ class LanceDBService:
         logger.info(f"Finished update operation for table '{table_name}' with filter '{filter_str}'.")
     def delete_vectors(self, table_name: str, delete_request: DeleteVectorRequest):
         """
-        Deletes vector entries from the specified LanceDB table based on family_id and optionally entity_id and type.
+        Deletes vector entries from the specified LanceDB table based on family_id and optionally entity_id, type, or a custom where_clause.
         """
-        filter_str = f"family_id = '{delete_request.family_id}'"
-        
-        if delete_request.entity_id is not None:
-            filter_str += f" AND entity_id = '{delete_request.entity_id}'"
-        elif delete_request.type is not None:
-            # If entity_id is None but type is provided, delete all entities of that type within the family
-            filter_str += f" AND type = '{delete_request.type}'"
+        if delete_request.where_clause:
+            filter_str = delete_request.where_clause
+            logger.info(f"Deleting vectors from table '{table_name}' using custom where_clause: '{filter_str}'.")
         else:
-            # If neither entity_id nor type is provided, it implies deleting all for the family.
-            # This is a dangerous operation, so we should add a safeguard or require explicit confirmation.
-            # For now, let's assume if only family_id is provided, it means delete all for that family.
-            logger.warning(f"No specific entity_id or type provided for deletion. Deleting all entries for family_id: {delete_request.family_id}")
+            filter_str = f"family_id = '{delete_request.family_id}'"
+            
+            if delete_request.entity_id is not None:
+                filter_str += f" AND entity_id = '{delete_request.entity_id}'"
+            elif delete_request.type is not None:
+                # If entity_id is None but type is provided, delete all entities of that type within the family
+                filter_str += f" AND type = '{delete_request.type}'"
+            else:
+                # If neither entity_id nor type is provided, it implies deleting all for the family.
+                # This is a dangerous operation, so we should add a safeguard or require explicit confirmation.
+                # For now, let's assume if only family_id is provided, it means delete all for that family.
+                logger.warning(f"No specific entity_id or type provided for deletion. Deleting all entries for family_id: {delete_request.family_id}")
 
         table = self.db.open_table(table_name)
         
