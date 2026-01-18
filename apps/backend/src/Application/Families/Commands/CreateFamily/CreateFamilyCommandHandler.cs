@@ -23,7 +23,11 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
             request.Description,
             request.Address,
             request.Visibility,
-            _user.UserId
+            _user.UserId,
+            genealogyRecord: request.GenealogyRecord,
+            progenitorName: request.ProgenitorName,
+            familyCovenant: request.FamilyCovenant,
+            contactInfo: request.ContactInfo
         );
 
         _context.Families.Add(entity);
