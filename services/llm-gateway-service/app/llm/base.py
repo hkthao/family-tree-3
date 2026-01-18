@@ -16,3 +16,15 @@ class BaseLLM(ABC):
             A dictionary representing the LLM's response, compatible with OpenAI's chat completion format.
         """
         pass
+
+    @abstractmethod
+    async def embed(self, model: str, input_text: str) -> Dict[str, Any]:
+        """
+        Abstract method to get embeddings for a given text.
+        Args:
+            model: The specific embedding model name (e.g., "nomic-embed-text").
+            input_text: The text string to embed.
+        Returns:
+            A dictionary representing the embedding response, compatible with OpenAI's embedding format.
+        """
+        pass

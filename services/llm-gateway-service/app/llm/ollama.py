@@ -4,7 +4,10 @@ from typing import List, Dict, Any
 
 from app.llm.base import BaseLLM
 from app.config import settings
-from app.schemas.chat import ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage
+from app.schemas import ( # Corrected import
+    ChatMessage, ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage, 
+    EmbeddingResponse, EmbeddingData, EmbeddingUsage
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +39,7 @@ class OllamaLLM(BaseLLM):
                 "num_predict": max_tokens, 
             }
         }
-        logger.info(f"Ollama Request: Model={ollama_model_name}, Temp={temperature}, MaxTokens={max_tokens}")
+        logger.info(f"Ollama Chat Request: Model={ollama_model_name}, Temp={temperature}, MaxTokens={max_tokens}")
         try:
             response = await self.client.post("/api/chat", json=payload, timeout=None)
             response.raise_for_status() # This is a synchronous call on httpx.Response
@@ -52,8 +55,54 @@ class OllamaLLM(BaseLLM):
             return openai_response.model_dump()
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"Ollama API error: {e.response.status_code} - {e.response.text}")
+            logger.error(f"Ollama Chat API error: {e.response.status_code} - {e.response.text}")
             raise
         except httpx.RequestError as e:
-            logger.error(f"Ollama network error: {e}")
+            logger.error(f"Ollama Chat network error: {e}")
+            raise
+
+    async def embed(self, model: str, input_text: str) -> Dict[str, Any]:
+        """
+        Interacts with the Ollama API to get embeddings.
+        Args:
+            model: The Ollama embedding model name (e.g., "nomic-embed-text").
+            input_text: The text string to embed.
+        Returns:
+            A dictionary representing the embedding response, compatible with OpenAI's embedding format.
+        """
+        ollama_model_name = model.split("ollama:", 1)[1] if model.startswith("ollama:") else model
+
+        payload = {
+            "model": ollama_model_name,
+            "prompt": input_text,
+            "options": {
+                "num_predict": -1 # Instruct Ollama to generate embeddings only
+            }
+        }
+        logger.info(f"Ollama Embed Request: Model={ollama_model_name}, Text='{input_text[:50]}...'")
+        try:
+            response = await self.client.post("/api/embeddings", json=payload, timeout=None)
+            response.raise_for_status()
+            ollama_response = await response.json()
+
+            embedding_vector = ollama_response.get("embedding", [])
+            # Ollama doesn't provide token usage directly for embeddings API in the same format.
+            # We can approximate or leave it default as per OpenAI spec.
+            # For simplicity, we'll return a default usage.
+
+            embedding_data = EmbeddingData(embedding=embedding_vector)
+            embedding_usage = EmbeddingUsage(prompt_tokens=len(input_text.split()), total_tokens=len(input_text.split())) # Simple token count
+            
+            embedding_response = EmbeddingResponse(
+                data=[embedding_data],
+                model=model,
+                usage=embedding_usage
+            )
+            return embedding_response.model_dump()
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Ollama Embed API error: {e.response.status_code} - {e.response.text}")
+            raise
+        except httpx.RequestError as e:
+            logger.error(f"Ollama Embed network error: {e}")
             raise

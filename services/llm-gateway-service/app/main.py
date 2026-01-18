@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.api import chat
+from app.api import chat, embeddings # Import embeddings router
 from app.config import settings
 import logging
 
@@ -16,6 +16,8 @@ async def lifespan(app: FastAPI):
     logger.info(f"OpenAI API Key (first 5 chars): {settings.OPENAI_API_KEY[:5]}...")
     yield
     # Ensure httpx client is closed on shutdown
+    # This assumes both chat.ollama_llm_client and embeddings.ollama_llm_client
+    # reference the same global instance, which they do.
     await chat.ollama_llm_client.client.aclose()
     logger.info("LLM Gateway Service shut down.")
 
@@ -27,6 +29,7 @@ app = FastAPI(
 )
 
 app.include_router(chat.router)
+app.include_router(embeddings.router) # Include the new embeddings router
 
 @app.get("/")
 async def root():

@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any
 
 from fastapi import APIRouter, HTTPException, status
-from app.schemas.chat import ChatCompletionRequest, ChatCompletionResponse
+from app.schemas import ChatCompletionRequest, ChatCompletionResponse # Corrected import
 from app.llm.ollama import OllamaLLM
 from app.llm.openai import OpenAILLM
 from app.config import settings

@@ -3,7 +3,7 @@ from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock, patch
 
 from app.main import app
-from app.schemas.chat import ChatMessage
+from app.schemas import ChatMessage # Corrected import
 from app.config import settings
 
 @pytest.fixture
@@ -42,7 +42,7 @@ async def test_chat_completion_ollama_success(mocker, sample_chat_request):
     mock_ollama_chat.assert_called_once()
     args, kwargs = mock_ollama_chat.call_args
     assert kwargs["model"] == sample_chat_request["model"]
-    assert kwargs["messages"] == sample_chat_request["messages"]
+    assert kwargs["messages"] == sample_chat_request["messages"] # Corrected assertion
     assert kwargs["temperature"] == sample_chat_request["temperature"]
     assert kwargs["max_tokens"] == sample_chat_request["max_tokens"]
     assert kwargs["stream"] == sample_chat_request["stream"]
@@ -73,6 +73,7 @@ async def test_chat_completion_openai_success(mocker, sample_chat_request):
     mock_openai_chat.assert_called_once()
     args, kwargs = mock_openai_chat.call_args
     assert kwargs["model"] == sample_chat_request["model"]
+    assert kwargs["messages"] == sample_chat_request["messages"] # Corrected assertion
 
 
 @pytest.mark.asyncio

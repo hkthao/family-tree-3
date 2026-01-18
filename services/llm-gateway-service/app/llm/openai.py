@@ -4,7 +4,10 @@ from typing import List, Dict, Any
 from openai import AsyncOpenAI
 from app.llm.base import BaseLLM
 from app.config import settings
-from app.schemas.chat import ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage
+from app.schemas import ( # Corrected import
+    ChatMessage, ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage, 
+    EmbeddingResponse, EmbeddingData, EmbeddingUsage
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,7 @@ class OpenAILLM(BaseLLM):
         """
         openai_model_name = model.split("openai:", 1)[1] if model.startswith("openai:") else model
 
-        logger.info(f"OpenAI Request: Model={openai_model_name}, Temp={temperature}, MaxTokens={max_tokens}")
+        logger.info(f"OpenAI Chat Request: Model={openai_model_name}, Temp={temperature}, MaxTokens={max_tokens}")
         try:
             # The OpenAI SDK handles the streaming part if stream=True
             # For this gateway, we are currently only returning non-streaming responses.
@@ -43,8 +46,6 @@ class OpenAILLM(BaseLLM):
             )
 
             if stream:
-                # This block will not be reached due to forcing stream=False above,
-                # but kept as a placeholder if streaming is to be supported later.
                 content_accumulator = ""
                 async for chunk in response:
                     if chunk.choices and chunk.choices[0].delta.content:
@@ -61,5 +62,41 @@ class OpenAILLM(BaseLLM):
             return openai_response.model_dump()
 
         except Exception as e:
-            logger.error(f"OpenAI API error: {e}")
+            logger.error(f"OpenAI Chat API error: {e}")
+            raise
+
+    async def embed(self, model: str, input_text: str) -> Dict[str, Any]:
+        """
+        Interacts with the OpenAI API to get embeddings.
+        Args:
+            model: The OpenAI embedding model name (e.g., "text-embedding-ada-002").
+            input_text: The text string to embed.
+        Returns:
+            A dictionary representing the embedding response, compatible with OpenAI's embedding format.
+        """
+        openai_model_name = model.split("openai:", 1)[1] if model.startswith("openai:") else model
+
+        logger.info(f"OpenAI Embed Request: Model={openai_model_name}, Text='{input_text[:50]}...'")
+        try:
+            response = await self.client.embeddings.create(
+                model=openai_model_name,
+                input=input_text
+            )
+
+            embedding_vector = response.data[0].embedding
+            prompt_tokens = response.usage.prompt_tokens
+            total_tokens = response.usage.total_tokens
+
+            embedding_data = EmbeddingData(embedding=embedding_vector)
+            embedding_usage = EmbeddingUsage(prompt_tokens=prompt_tokens, total_tokens=total_tokens)
+            
+            embedding_response = EmbeddingResponse(
+                data=[embedding_data],
+                model=model,
+                usage=embedding_usage
+            )
+            return embedding_response.model_dump()
+
+        except Exception as e:
+            logger.error(f"OpenAI Embed API error: {e}")
             raise

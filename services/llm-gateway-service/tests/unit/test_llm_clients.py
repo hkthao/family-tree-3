@@ -5,7 +5,7 @@ import openai
 
 from app.llm.ollama import OllamaLLM
 from app.llm.openai import OpenAILLM
-from app.schemas.chat import ChatMessage, ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage
+from app.schemas import ChatMessage, ChatCompletionResponse, ChatCompletionChoice, ChatCompletionMessage # Corrected import
 from app.config import settings
 
 @pytest.fixture

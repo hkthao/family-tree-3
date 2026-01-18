@@ -4,7 +4,7 @@ This is a Python microservice acting as an OpenAI-style LLM Gateway. It allows r
 
 ## Features
 
-- **OpenAI-compatible API**: Provides a `/v1/chat/completions` endpoint.
+- **OpenAI-compatible API**: Provides `/v1/chat/completions` and `/v1/embeddings` endpoints.
 - **Backend Routing**: Automatically routes requests to Ollama (local) or OpenAI (cloud) based on the `model` field (e.g., `ollama:qwen2.5`, `openai:gpt-4.1-mini`).
 - **Configurable**: Uses environment variables for API keys and URLs.
 - **Asynchronous**: Built with FastAPI and httpx for efficient I/O operations.
@@ -27,13 +27,15 @@ llm-gateway-service/
 ├── app/
 │   ├── main.py             # FastAPI application entry point
 │   ├── api/
-│   │   └── chat.py         # Chat completion API endpoint logic
+│   │   ├── chat.py         # Chat completion API endpoint logic
+│   │   └── embeddings.py   # Embeddings API endpoint logic
 │   ├── llm/
 │   │   ├── base.py         # Base interface for LLM implementations
 │   │   ├── ollama.py       # Ollama LLM implementation
 │   │   └── openai.py       # OpenAI LLM implementation
 │   ├── schemas/
-│   │   └── chat.py         # Pydantic models for request/response
+│   │   ├── __init__.py     # Exports Pydantic models for chat and embeddings
+│   │   └── embeddings.py   # Pydantic models specific to embeddings
 │   ├── config.py           # Configuration settings
 │   └── prompt_utils.py     # (Currently empty, as per requirements for forwarding messages)
 ├── requirements.txt        # Python dependencies
@@ -94,10 +96,11 @@ If you want to use Ollama locally, ensure it's running. You can typically run it
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
 
-Then, pull a model, e.g., Qwen 2.5:
+Then, pull a model, e.g., Qwen 2.5 and Nomic Embed:
 
 ```bash
 docker exec -it ollama ollama run qwen2.5
+docker exec -it ollama ollama run nomic-embed-text
 ```
 
 *(You might need to let it download completely then `Ctrl+C` to exit the interactive mode).*
@@ -106,7 +109,7 @@ docker exec -it ollama ollama run qwen2.5
 
 You can test the API using `curl`.
 
-#### Test with Ollama
+#### Test Chat Completion with Ollama
 
 Ensure Ollama is running and the specified model is downloaded.
 
@@ -124,7 +127,7 @@ curl http://localhost:8000/v1/chat/completions \
   }'
 ```
 
-#### Test with OpenAI
+#### Test Chat Completion with OpenAI
 
 Ensure `OPENAI_API_KEY` is set correctly in your `.env` file.
 
@@ -139,6 +142,32 @@ curl http://localhost:8000/v1/chat/completions \
     ],
     "temperature": 0.7,
     "max_tokens": 150
+  }'
+```
+
+#### Test Embeddings with Ollama
+
+Ensure Ollama is running and the specified embedding model is downloaded.
+
+```bash
+curl http://localhost:8000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama:nomic-embed-text",
+    "input": "This is a test sentence for embedding."
+  }'
+```
+
+#### Test Embeddings with OpenAI
+
+Ensure `OPENAI_API_KEY` is set correctly in your `.env` file.
+
+```bash
+curl http://localhost:8000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai:text-embedding-ada-002",
+    "input": "This is another test sentence for OpenAI embedding."
   }'
 ```
 
