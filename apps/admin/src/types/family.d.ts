@@ -107,3 +107,13 @@ export interface UpdateFamilyLimitConfigurationDto {
 export interface FamilyImportDto {
   families: FamilyAddDto[];
 }
+
+import type { MemberDto } from './member.d';
+import type { Relationship } from './relationship.d';
+
+export interface IFamilyTreeData {
+  members: MemberDto[];
+  relationships: Relationship[];
+  rootMemberId?: string;
+}
+

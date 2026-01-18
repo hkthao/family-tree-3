@@ -7,6 +7,7 @@ import {
   type FamilyUpdateDto,
   type FamilyLimitConfiguration, // NEW
   type FamilyImportDto, // NEW
+  type IFamilyTreeData, // NEWLY ADDED
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
@@ -30,10 +31,6 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
   async getUserFamilyAccess(): Promise<Result<IFamilyAccess[]>> {
     return this.http.get<IFamilyAccess[]>(`/family/my-access`);
   }
-
-
-
-
 
   async exportFamilyPdf(familyId: string, htmlContent: string): Promise<Result<Blob>> {
     return this.http.post<Blob>(`/family-data/${familyId}/export-pdf`, htmlContent, { headers: { 'Content-Type': 'text/html' }, responseType: 'blob' });
@@ -92,5 +89,14 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
   async importFamilyData(familyData: FamilyImportDto, clearExistingData: boolean): Promise<Result<string>> {
     return this.http.post<string>(`/family/import?clearExistingData=${clearExistingData}`, familyData);
   }
+
+  async fetchFamilyTreeData(familyId: string, initialMemberId: string | null): Promise<Result<IFamilyTreeData>> {
+    const params: Record<string, any> = {};
+    if (initialMemberId) {
+      params.initialMemberId = initialMemberId;
+    }
+    return this.http.get<IFamilyTreeData>(`/family/${familyId}/tree-data`, { params });
+  }
 }
+
 

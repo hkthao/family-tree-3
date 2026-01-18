@@ -17,6 +17,7 @@ using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
 using backend.Application.Families.Commands.Import;
 using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
+using backend.Application.Families.Queries.GetFamilyTreeData; // NEWLY ADDED
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -310,6 +311,22 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     {
         var command = new RecalculateFamilyStatsCommand { FamilyId = familyId };
         var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Lấy dữ liệu cây gia phả (thành viên và mối quan hệ) cho một gia đình.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình.</param>
+    /// <param name="initialMemberId">ID thành viên ban đầu để làm gốc. Nếu null, sẽ lấy thành viên gốc của gia phả.</param>
+    /// <returns>Dữ liệu cây gia phả.</returns>
+    [HttpGet("{familyId}/tree-data")]
+    public async Task<IActionResult> GetFamilyTreeData(
+        [FromRoute] Guid familyId,
+        [FromQuery] Guid? initialMemberId)
+    {
+        var query = new GetFamilyTreeDataQuery(familyId, initialMemberId);
+        var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);
     }
 }
