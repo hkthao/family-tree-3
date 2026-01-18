@@ -20,14 +20,97 @@ public class FamilyTreeService : IFamilyTreeService
     public async Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default)
     {
         var family = await _context.Families
-            .Include(f => f.Members.Where(m => !m.IsDeleted)) // Load only non-deleted members
-            .Include(f => f.Relationships.Where(r => !r.IsDeleted)) // Load only non-deleted relationships
             .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
 
         if (family == null) return;
 
-        family.RecalculateStats(); // This will update TotalMembers and TotalGenerations
+        // Optimized: Count members directly from the database
+        family.TotalMembers = await _context.Members
+            .CountAsync(m => m.FamilyId == familyId && !m.IsDeleted, cancellationToken);
+
+        // Optimized: Calculate TotalGenerations without loading all entities
+        // 1. Fetch only necessary data (IDs and relationship types)
+        var memberIds = await _context.Members
+            .AsNoTracking() // Add AsNoTracking for read-only query
+            .Where(m => m.FamilyId == familyId && !m.IsDeleted)
+            .Select(m => m.Id)
+            .ToListAsync(cancellationToken);
+
+        var relationships = await _context.Relationships
+            .AsNoTracking() // Add AsNoTracking for read-only query
+            .Where(r => r.FamilyId == familyId && !r.IsDeleted && (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother))
+            .Select(r => new { r.SourceMemberId, r.TargetMemberId })
+            .ToListAsync(cancellationToken);
+
+        // 2. Build a simplified graph in memory
+        var graph = new Dictionary<Guid, List<Guid>>();
+        var parents = new Dictionary<Guid, List<Guid>>();
+
+        foreach (var memberId in memberIds)
+        {
+            graph[memberId] = new List<Guid>();
+            parents[memberId] = new List<Guid>();
+        }
+
+        foreach (var rel in relationships)
+        {
+            if (memberIds.Contains(rel.SourceMemberId) && memberIds.Contains(rel.TargetMemberId)) // Ensure both members exist and are not deleted
+            {
+                if (graph.ContainsKey(rel.SourceMemberId))
+                {
+                    graph[rel.SourceMemberId].Add(rel.TargetMemberId);
+                }
+                if (parents.ContainsKey(rel.TargetMemberId))
+                {
+                    parents[rel.TargetMemberId].Add(rel.SourceMemberId);
+                }
+            }
+        }
+
+        // 3. Find all root members (members with no parents in the filtered relationships)
+        var rootMembers = memberIds.Where(mId => !parents.ContainsKey(mId) || parents[mId].Count == 0).ToList();
+
+        // If no explicit roots found via relationships, consider members who are not target of any parent relationship as roots
+        if (rootMembers.Count == 0 && memberIds.Any()) 
+        {
+            rootMembers = memberIds.Where(mId => !relationships.Any(r => r.TargetMemberId == mId)).ToList();
+        }
+
+        // Fallback: if still no roots, and there are members, pick the first member (arbitrary root for generation calculation)
+        if (rootMembers.Count == 0 && memberIds.Any())
+        {
+            rootMembers.Add(memberIds.First());
+        }
+
+        int maxGenerations = 0;
+        foreach (var root in rootMembers)
+        {
+            maxGenerations = Math.Max(maxGenerations, GetGenerations(root, graph, new HashSet<Guid>()));
+        }
+
+        family.TotalGenerations = maxGenerations;
+        
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    // Helper method for calculating generations (moved from Family entity)
+    private int GetGenerations(Guid memberId, Dictionary<Guid, List<Guid>> graph, HashSet<Guid> visited)
+    {
+        if (visited.Contains(memberId)) return 0; // Avoid infinite loops in case of circular relationships
+        visited.Add(memberId);
+
+        if (!graph.ContainsKey(memberId) || graph[memberId].Count == 0)
+        {
+            return 1; // Base case: leaf member is 1 generation
+        }
+
+        int maxChildGenerations = 0;
+        foreach (var childId in graph[memberId])
+        {
+            maxChildGenerations = Math.Max(maxChildGenerations, GetGenerations(childId, graph, visited));
+        }
+
+        return 1 + maxChildGenerations;
     }
 
     public async Task SyncMemberLifeEvents(Guid memberId, Guid familyId, DateOnly? dateOfBirth, DateOnly? dateOfDeath, string memberFullName, CancellationToken cancellationToken)

@@ -115,7 +115,11 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
         // --- End Handle AvatarBase64 upload ---
 
-        member.AddDomainEvent(new MemberCreatedEvent(member));
+        // Conditionally add domain event based on request
+        if (!request.SkipDomainEvent)
+        {
+            member.AddDomainEvent(new MemberCreatedEvent(member));
+        }
         await _context.SaveChangesAsync(cancellationToken);
 
         // Cập nhật các mối quan hệ bằng phương thức mới

@@ -30,4 +30,5 @@ public record MemberInput
     public Guid? MotherId { get; set; }
     public Guid? HusbandId { get; set; }
     public Guid? WifeId { get; set; }
+    public bool SkipDomainEvent { get; init; } = false; // NEW: Option to skip domain event
 }
