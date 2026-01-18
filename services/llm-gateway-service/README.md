@@ -82,11 +82,31 @@ DEFAULT_MAX_TOKENS=512
 
 ### Running the Service
 
+You can run the service directly or using Docker.
+
+#### Running Natively
+
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 The API documentation will be available at `http://localhost:8000/docs`.
+
+#### Running with Docker
+
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t llm-gateway-service .
+    ```
+2.  **Run the Docker container:**
+    ```bash
+    docker run -d --name llm-gateway -p 8000:8000 llm-gateway-service
+    ```
+    *   Remember to configure your environment variables (e.g., `OPENAI_API_KEY`) when running the Docker container. You can pass them using the `-e` flag:
+        ```bash
+        docker run -d --name llm-gateway -p 8000:8000 -e OPENAI_API_KEY=your_openai_key llm-gateway-service
+        ```
+    *   If using Ollama, ensure your Ollama container is running and accessible from the `llm-gateway` container. You might need to use Docker's network features (e.g., `--network host` or custom Docker networks) to allow communication. For example, if Ollama is running on the host, you can set `OLLAMA_BASE_URL` to `http://host.docker.internal:11434` (on Docker Desktop) or the host's IP address.
 
 ### Running Ollama (Optional, for local LLM)
 
