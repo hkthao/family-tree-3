@@ -3,13 +3,6 @@ using backend.Application.Common.Models;
 using backend.Application.Members.Queries;
 using backend.Application.Relationships.Queries;
 using backend.Domain.Entities;
-using MediatR;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Families.Queries.GetFamilyTreeData;
 
