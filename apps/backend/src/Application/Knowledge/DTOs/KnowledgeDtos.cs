@@ -1,46 +1,26 @@
+using System.Collections.Generic;
+using backend.Application.Common.Models; // For Result
+using backend.Application.Knowledge.DTOs; // For KnowledgeSearchResultDto
+
+
 namespace backend.Application.Knowledge.DTOs;
 
-public class FamilyKnowledgeDto
+public class GenericKnowledgeDto
 {
-    public Guid FamilyId { get; set; }
-    public string Name { get; set; } = null!;
-    public string Code { get; set; } = null!;
-    public string? Description { get; set; }
-    public string? GenealogyRecord { get; set; }
-    public string? ProgenitorName { get; set; }
-    public string? FamilyCovenant { get; set; }
-    public string Visibility { get; set; } = "Private";
-    public string ContentType { get; set; } = "Family";
+    public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
+    // Summary is a condensed text representation of the knowledge.
+    public string Summary { get; set; } = string.Empty;
 }
 
-public class MemberKnowledgeDto
+public class KnowledgeIndexRequest
 {
-    public Guid FamilyId { get; set; }
-    public Guid MemberId { get; set; }
-    public string FullName { get; set; } = null!;
-    public string Code { get; set; } = null!;
-    public string? Gender { get; set; }
-    public string? Biography { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public DateTime? DateOfDeath { get; set; }
-    public string ContentType { get; set; } = "Member";
-}
-
-public class EventKnowledgeDto
-{
-    public Guid FamilyId { get; set; }
-    public Guid EventId { get; set; }
-    public string Name { get; set; } = null!;
-    public string Code { get; set; } = null!;
-    public string? Description { get; set; }
-    public string? Location { get; set; }
-    public string? CalendarType { get; set; }
-    public DateTime? SolarDate { get; set; }
-    public string ContentType { get; set; } = "Event";
-}
-
-public class KnowledgeIndexRequest<T>
-{
-    public T Data { get; set; } = default!;
+    public GenericKnowledgeDto Data { get; set; } = new GenericKnowledgeDto();
     public string Action { get; set; } = "index"; // "index" or "delete"
+}
+
+public class KnowledgeSearchResultDto
+{
+    public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
+    public string Summary { get; set; } = string.Empty; // Corresponds to summary
+    public double Score { get; set; } // Relevance score
 }
