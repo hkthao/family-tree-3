@@ -1,4 +1,4 @@
-import type { ApiError, FamilyDto, PrivacyConfiguration, Result, FamilyAddDto, FamilyUpdateDto, ListOptions, FilterOptions, Paginated, FamilyLimitConfiguration, IFamilyAccess, FamilyImportDto } from "@/types";
+import type { ApiError, FamilyDto, PrivacyConfiguration, Result, FamilyAddDto, FamilyUpdateDto, ListOptions, FilterOptions, Paginated, FamilyLimitConfiguration, IFamilyAccess, FamilyImportDto, IFamilyTreeData } from "@/types";
 import type { ICrudService } from "../common/crud.service.interface";
 
 export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, FamilyUpdateDto> {
@@ -11,6 +11,7 @@ export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, Fa
   getFamilyLimitConfiguration(familyId: string): Promise<Result<FamilyLimitConfiguration, ApiError>>;
   updateFamilyLimitConfiguration(familyId: string, payload: { maxMembers: number; maxStorageMb: number; aiChatMonthlyLimit: number }): Promise<Result<void, ApiError>>;
   importFamilyData(familyData: FamilyImportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>;
+  fetchFamilyTreeData(familyId: string, initialMemberId: string | null): Promise<Result<IFamilyTreeData, ApiError>>;
 }
 
 

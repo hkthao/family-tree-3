@@ -28,6 +28,7 @@ export const queryKeys = {
     membersByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'members'] as const,
     relationshipsByFamilyId: (familyId: string) => [...queryKeys.families.all, familyId, 'relationships'] as const,
     memberRelationshipsByMemberId: (memberId: string) => [...queryKeys.families.all, memberId, 'relationships'] as const,
+    treeData: (familyId: string, initialMemberId?: string) => [...queryKeys.families.all, familyId, 'tree-data', initialMemberId] as const, // NEWLY ADDED
   },
   publicFamilies: { // NEW
     all: ['publicFamilies'] as const,

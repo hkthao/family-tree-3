@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, toRef } from 'vue';
+import { ref, onMounted, computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/family';
 import MemberAddView from '@/views/member/MemberAddView.vue';
@@ -135,7 +135,7 @@ const handleAddMember = () => {
 const handleMemberAdded = () => {
   addMemberDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
   }
 };
 
@@ -149,7 +149,7 @@ const handleShowMemberDetailDrawer = (memberId: string) => {
 const handleMemberDeleted = () => {
   memberDetailDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
   }
 };
 
@@ -170,25 +170,28 @@ const handleEditMember = (memberId: string) => {
 const handleMemberEdited = () => {
   editMemberDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
   }
 };
 
 const handleRefresh = () => {
   if (props.familyId) {
-    fetchTreeData(props.familyId);
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
   }
 };
 
-// Initialize and watch for changes
+// No need for onMounted and watch here, useTreeVisualization handles it internally
+// However, ensure fetchTreeData is called initially
 onMounted(() => {
   if (props.familyId) {
     fetchTreeData(props.familyId, props.initialMemberId ?? undefined);
   }
 });
 
-watch([() => props.familyId, () => props.initialMemberId], ([newFamilyId, newInitialMemberId]) => {
-  if (newFamilyId) {
-    fetchTreeData(newFamilyId, newInitialMemberId ?? undefined);
-  }
-});</script>
+// Remove the watch below as it's now handled internally by useTreeVisualization's watch effects.
+// watch([() => props.familyId, () => props.initialMemberId], ([newFamilyId, newInitialMemberId]) => {
+//   if (newFamilyId) {
+//     fetchTreeData(newFamilyId, newInitialMemberId ?? undefined);
+//   }
+// });
+</script>

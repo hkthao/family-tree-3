@@ -3,7 +3,7 @@ from typing import List
 from loguru import logger
 
 from ..models.schemas import SearchRequest, SearchResponse, SearchResultItem
-from ..core.embeddings import embedding_service
+from ..core.embeddings import embedding_service # Import the instance directly
 from ..core.lancedb import lancedb_service
 
 router = APIRouter()
