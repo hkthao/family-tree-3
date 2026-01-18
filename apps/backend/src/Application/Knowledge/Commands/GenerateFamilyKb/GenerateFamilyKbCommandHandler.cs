@@ -1,12 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Knowledge.Commands.GenerateFamilyKb;
 

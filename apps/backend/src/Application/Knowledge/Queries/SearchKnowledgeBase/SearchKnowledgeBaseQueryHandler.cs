@@ -1,11 +1,6 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Knowledge.DTOs;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Knowledge.Queries.SearchKnowledgeBase;
 

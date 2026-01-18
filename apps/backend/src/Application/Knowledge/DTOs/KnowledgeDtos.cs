@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using backend.Application.Common.Models; // For Result
-using backend.Application.Knowledge.DTOs; // For KnowledgeSearchResultDto
-
-
 namespace backend.Application.Knowledge.DTOs;
 
 public class GenericKnowledgeDto

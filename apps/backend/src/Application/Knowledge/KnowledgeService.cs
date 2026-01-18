@@ -4,9 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums; // Added
-using System.Linq; // Added for LINQ extension methods
 
 namespace backend.Application.Knowledge;
 

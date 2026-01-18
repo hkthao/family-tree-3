@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Models;
 using backend.Application.Knowledge.DTOs;
 

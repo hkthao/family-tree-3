@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic; // Added for List
 using backend.Application.Knowledge.DTOs; // Added for KnowledgeSearchResultDto
 
 namespace backend.Application.Knowledge;

@@ -14,4 +14,9 @@ public class OcrResultDto
     /// Văn bản được trích xuất từ tài liệu đã OCR.
     /// </summary>
     public string? Text { get; set; }
+
+    /// <summary>
+    /// Mảng byte của tệp đã được xử lý (ví dụ: hình ảnh đã tải xuống, PDF).
+    /// </summary>
+    public byte[]? ProcessedBytes { get; set; }
 }
