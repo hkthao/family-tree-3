@@ -22,7 +22,7 @@ interface CardDataPayload {
   };
 }
 
-const MAX_NODES_TO_DISPLAY = 100; // Hardcoded limit for now, can be made configurable
+const MAX_NODES_TO_DISPLAY = 50; // Hardcoded limit for now, can be made configurable
 const MAX_RELATIONSHIPS_TO_DISPLAY = 500; // New hardcoded limit as per user's request
 
 /**

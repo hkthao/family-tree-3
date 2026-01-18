@@ -2,9 +2,9 @@ from fastapi import FastAPI, Response, status
 from fastapi.responses import ORJSONResponse
 from loguru import logger
 
-from .api import search
+from .api import search, vectors
 from .core.lancedb import lancedb_service
-from .core.embeddings import embedding_service # Ensure model is loaded on startup
+from .core.embeddings import embedding_service # Import the instance directly
 
 app = FastAPI(
     title="Knowledge Search Service",
@@ -13,13 +13,14 @@ app = FastAPI(
 )
 
 # Include API routers
-app.include_router(search.router, prefix="/api/v1")
+app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
+app.include_router(vectors.router, prefix="/api/v1/vectors", tags=["Vectors"])
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up Knowledge Search Service...")
     # Initialize embedding service to load model
-    _ = embedding_service
+    _ = embedding_service # Access the already imported global instance
     # Create a dummy LanceDB table for testing/demonstration
     # In a real scenario, this would be handled by data ingestion
     lancedb_service.create_dummy_table("F123") # Example family_id
