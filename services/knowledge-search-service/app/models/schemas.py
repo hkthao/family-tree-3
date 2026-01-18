@@ -1,5 +1,6 @@
-from typing import List, Literal
+from typing import List, Literal, Any
 from pydantic import BaseModel
+
 
 class SearchRequest(BaseModel):
     family_id: str
@@ -7,11 +8,13 @@ class SearchRequest(BaseModel):
     top_k: int = 10
     allowed_visibility: List[Literal["public", "private"]]
 
+
 class SearchResultItem(BaseModel):
-    member_id: str
-    name: str
+    # To store original_id, family_id, content_type, and other specific details
+    metadata: dict[str, Any]
     summary: str
     score: float
+
 
 class SearchResponse(BaseModel):
     results: List[SearchResultItem]
