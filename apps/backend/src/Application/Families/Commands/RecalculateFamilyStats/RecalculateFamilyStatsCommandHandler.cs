@@ -16,20 +16,19 @@ public class RecalculateFamilyStatsCommandHandler : IRequestHandler<RecalculateF
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<RecalculateFamilyStatsCommandHandler> _logger;
+    private readonly IFamilyTreeService _familyTreeService; // NEW: Inject IFamilyTreeService
 
-    public RecalculateFamilyStatsCommandHandler(IApplicationDbContext context, ILogger<RecalculateFamilyStatsCommandHandler> logger)
+    public RecalculateFamilyStatsCommandHandler(IApplicationDbContext context, ILogger<RecalculateFamilyStatsCommandHandler> logger, IFamilyTreeService familyTreeService) // NEW: Add IFamilyTreeService
     {
         _context = context;
         _logger = logger;
+        _familyTreeService = familyTreeService; // NEW
     }
 
     public async Task<Result<FamilyStatsDto>> Handle(RecalculateFamilyStatsCommand request, CancellationToken cancellationToken)
     {
+        // Fetch family without includes, as stats will be calculated by FamilyTreeService
         var family = await _context.Families
-            .Include(f => f.Members)
-                .ThenInclude(m => m.SourceRelationships)
-            .Include(f => f.Members)
-                .ThenInclude(m => m.TargetRelationships)
             .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
 
         if (family == null)
@@ -40,10 +39,22 @@ public class RecalculateFamilyStatsCommandHandler : IRequestHandler<RecalculateF
 
         try
         {
-            family.RecalculateTotalMembers();
-            family.RecalculateTotalGenerations();
+            // Delegate recalculation to the optimized FamilyTreeService
+            await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
 
-            await _context.SaveChangesAsync(cancellationToken);
+            // Re-fetch the family or just its stats to get the updated values
+            // Alternatively, the FamilyTreeService could return the updated stats directly.
+            // For now, re-fetching is simple and ensures consistency.
+            family = await _context.Families
+                .Where(f => f.Id == request.FamilyId)
+                .Select(f => new Family { TotalMembers = f.TotalMembers, TotalGenerations = f.TotalGenerations, Id = f.Id }) // Select only needed properties
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (family == null) // Should not happen if it was found before
+            {
+                _logger.LogWarning("Family with ID {FamilyId} not found after stats update.", request.FamilyId);
+                throw new NotFoundException(nameof(Family), request.FamilyId);
+            }
 
             var familyStats = new FamilyStatsDto
             {

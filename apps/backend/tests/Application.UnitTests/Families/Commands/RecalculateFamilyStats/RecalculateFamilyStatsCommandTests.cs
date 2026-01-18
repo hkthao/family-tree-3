@@ -16,10 +16,12 @@ namespace backend.Application.UnitTests.Families.Commands.RecalculateFamilyStats
 public class RecalculateFamilyStatsCommandTests : TestBase
 {
     private readonly Mock<ILogger<RecalculateFamilyStatsCommandHandler>> _loggerMock;
+    private readonly Mock<IFamilyTreeService> _familyTreeServiceMock; // NEW: Mock IFamilyTreeService
 
     public RecalculateFamilyStatsCommandTests() // Changed from SetUp method to constructor
     {
         _loggerMock = new Mock<ILogger<RecalculateFamilyStatsCommandHandler>>();
+        _familyTreeServiceMock = new Mock<IFamilyTreeService>(); // NEW: Initialize mock
     }
 
     [Fact] // Changed from [Test]
@@ -28,7 +30,7 @@ public class RecalculateFamilyStatsCommandTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var command = new RecalculateFamilyStatsCommand { FamilyId = familyId };
-        var handler = new RecalculateFamilyStatsCommandHandler(_context, _loggerMock.Object);
+        var handler = new RecalculateFamilyStatsCommandHandler(_context, _loggerMock.Object, _familyTreeServiceMock.Object); // NEW: Pass mock
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -46,21 +48,23 @@ public class RecalculateFamilyStatsCommandTests : TestBase
         _context.Families.Add(family);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var originalTotalMembers = family.TotalMembers; // Should be 0 initially
-        var originalTotalGenerations = family.TotalGenerations; // Should be 0 initially
+        // Configure mock service to update family stats
+        _familyTreeServiceMock.Setup(s => s.UpdateFamilyStats(family.Id, CancellationToken.None))
+            .Callback<Guid, CancellationToken>(async (fId, ct) =>
+            {
+                // Simulate service updating the family stats on the actual family entity in the context
+                var f = await _context.Families.FindAsync(fId);
+                if (f != null)
+                {
+                    f.TotalMembers = 3; // Hardcode expected value for test
+                    f.TotalGenerations = 2; // Hardcode expected value for test
+                    await _context.SaveChangesAsync(ct); // Save changes to reflect in the context
+                }
+            })
+            .Returns(Task.CompletedTask);
 
-        // Add some members to simulate a family tree
-        var member1 = new Member("Smith", "John", "M001", family.Id, false);
-        var member2 = new Member("Doe", "Jane", "M002", family.Id, false);
-        var member3 = new Member("Smith", "Junior", "M003", family.Id, false);
-
-        _context.Members.AddRange(member1, member2, member3);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        // For this test, we expect the domain methods to update TotalMembers and TotalGenerations correctly.
-        // We ensure members are loaded for these methods to work.
         var command = new RecalculateFamilyStatsCommand { FamilyId = family.Id };
-        var handler = new RecalculateFamilyStatsCommandHandler(_context, _loggerMock.Object);
+        var handler = new RecalculateFamilyStatsCommandHandler(_context, _loggerMock.Object, _familyTreeServiceMock.Object); // NEW: Pass mock
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -70,19 +74,19 @@ public class RecalculateFamilyStatsCommandTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value!.Should().NotBeNull();
         
-        // After recalculation, these should be updated by the Family domain methods
-        result.Value!.TotalMembers.Should().Be(3); // Based on 3 members added
-        result.Value.TotalGenerations.Should().BeGreaterThanOrEqualTo(1); // At least one generation, depends on relationships
+        result.Value!.TotalMembers.Should().Be(3);
+        result.Value.TotalGenerations.Should().Be(2);
 
         // Verify that SaveChangesAsync was called. This is implicitly tested by the data being updated.
         var updatedFamily = await _context.Families
             .FirstOrDefaultAsync(f => f.Id == family.Id, CancellationToken.None);
 
-        updatedFamily.Should().NotBeNull(); // FluentAssertions check
-        var nonNullableUpdatedFamily = updatedFamily!; // Explicitly cast to non-nullable
-        
-        nonNullableUpdatedFamily.TotalMembers.Should().Be(result.Value!.TotalMembers);
-        nonNullableUpdatedFamily.TotalGenerations.Should().Be(result.Value!.TotalGenerations);
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.TotalMembers.Should().Be(3);
+        updatedFamily.TotalGenerations.Should().Be(2);
+
+        // Verify that the service method was called
+        _familyTreeServiceMock.Verify(s => s.UpdateFamilyStats(family.Id, CancellationToken.None), Times.Once);
     }
 }
 
