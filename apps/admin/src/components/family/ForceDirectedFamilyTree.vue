@@ -51,89 +51,10 @@ interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 }
 
 const transformData = (members: MemberDto[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
-  let filteredMembers = [...members];
-  let filteredRelationships = [...relationships];
+  // Rely on the backend to provide the already filtered and limited data.
+  // The 'members' and 'relationships' props should already be the relevant subset.
 
-  if (props.rootId) {
-    const rootMember = members.find(m => String(m.id) === props.rootId);
-    if (!rootMember) {
-      return { nodes: [], links: [] };
-    }
-
-    const childrenMap = new Map<string, string[]>(); // parentId -> childIds
-    const parentsMap = new Map<string, string[]>(); // childId -> parentIds
-    const spousesMap = new Map<string, string[]>(); // memberId -> spouseIds
-
-    relationships.forEach(rel => {
-      const sourceId = String(rel.sourceMemberId);
-      const targetId = String(rel.targetMemberId);
-
-      if (rel.type === RelationshipType.Husband || rel.type === RelationshipType.Wife) {
-        if (!spousesMap.has(sourceId)) spousesMap.set(sourceId, []);
-        spousesMap.get(sourceId)!.push(targetId);
-        if (!spousesMap.has(targetId)) spousesMap.set(targetId, []);
-        spousesMap.get(targetId)!.push(sourceId);
-      } else if (rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother) {
-        if (!childrenMap.has(sourceId)) childrenMap.set(sourceId, []);
-        childrenMap.get(sourceId)!.push(targetId);
-        if (!parentsMap.has(targetId)) parentsMap.set(targetId, []);
-        parentsMap.get(targetId)!.push(sourceId);
-      }
-    });
-
-    const relatedMemberIds = new Set<string>();
-
-    const addMemberAndSpouses = (memberId: string) => {
-      if (!relatedMemberIds.has(memberId)) {
-        relatedMemberIds.add(memberId);
-        (spousesMap.get(memberId) || []).forEach(spouseId => {
-          relatedMemberIds.add(spouseId);
-        });
-      }
-    };
-
-    const findAncestors = (memberId: string) => {
-      addMemberAndSpouses(memberId);
-      (parentsMap.get(memberId) || []).forEach(parentId => {
-        if (!relatedMemberIds.has(parentId)) { // Prevent reprocessing already added members
-          findAncestors(parentId);
-        }
-      });
-    };
-
-    const findDescendants = (memberId: string) => {
-      addMemberAndSpouses(memberId);
-      (childrenMap.get(memberId) || []).forEach(childId => {
-        if (!relatedMemberIds.has(childId)) { // Prevent reprocessing already added members
-          findDescendants(childId);
-        }
-      });
-    };
-
-    findAncestors(props.rootId);
-    findDescendants(props.rootId);
-
-    // Also explicitly add spouses of the root if not already added by ancestor/descendant traversal
-    (spousesMap.get(props.rootId) || []).forEach(spouseId => {
-      relatedMemberIds.add(spouseId);
-    });
-
-    filteredMembers = members.filter(m => relatedMemberIds.has(String(m.id)));
-    filteredRelationships = relationships.filter(rel =>
-      relatedMemberIds.has(String(rel.sourceMemberId)) && relatedMemberIds.has(String(rel.targetMemberId))
-    );
-  }
-
-  const RENDER_LIMIT = 50;
-
-  // Apply rendering limit
-  if (filteredMembers.length > RENDER_LIMIT) {
-    filteredMembers = filteredMembers.slice(0, RENDER_LIMIT);
-  }
-
-  // Removed redundant RENDER_LIMIT block here
-
-  const nodes: GraphNode[] = filteredMembers.map(m => ({
+  const nodes: GraphNode[] = members.map(m => ({
     id: String(m.id),
     name: m.fullName || `${m.firstName} ${m.lastName}`,
     gender: m.gender,
@@ -147,7 +68,7 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   const links: GraphLink[] = [];
   const spouseLinks = new Set<string>();
 
-  filteredRelationships.forEach(rel => {
+  relationships.forEach(rel => {
     const sourceId = String(rel.sourceMemberId);
     const targetId = String(rel.targetMemberId);
 
@@ -176,7 +97,7 @@ const transformData = (members: MemberDto[], relationships: Relationship[]): { n
   });
 
   // Calculate depth based on new relationships
-  const parentChildRelationships = filteredRelationships.filter(rel => rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother);
+  const parentChildRelationships = relationships.filter(rel => rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother);
   const childrenOf = new Map<string, string[]>(); // Map parentId to array of childIds
   const parentsOf = new Map<string, string[]>(); // Map childId to array of parentIds
 

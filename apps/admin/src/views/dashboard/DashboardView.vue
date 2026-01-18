@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col id="family-auto-complete" cols="12" md="4">
+      <v-col id="family-auto-complete" cols="12" md="6">
         <family-auto-complete v-model="selectedFamilyId" :label="t('dashboard.filterByFamily')" clearable hide-details
           prepend-inner-icon="mdi-filter-variant" />
       </v-col>

@@ -39,6 +39,7 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
         else
         {
             currentRootMemberId = await _context.Members
+                .AsNoTracking() // Add AsNoTracking for read-only query
                 .Where(m => m.FamilyId == familyId && m.IsRoot)
                 .Select(m => m.Id)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -46,7 +47,12 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
 
         if (currentRootMemberId == Guid.Empty)
         {
-            return Result<FamilyTreeDataDto>.NotFound("Family does not have a root member or initial member not found.");
+            return Result<FamilyTreeDataDto>.Success(new FamilyTreeDataDto
+            {
+                Members = new List<MemberDto>(),
+                Relationships = new List<RelationshipDto>(),
+                RootMemberId = null
+            });
         }
 
         var membersQueue = new Queue<Guid>();
@@ -67,8 +73,9 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
                 continue;
             }
 
-            // Fetch the current member
+            // Fetch the current member (full entity needed for MemberDto mapping)
             var member = await _context.Members
+                .AsNoTracking() // Add AsNoTracking for read-only query
                 .Where(m => m.Id == currentMemberId && m.FamilyId == familyId)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -76,13 +83,11 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
             {
                 allFetchedMembers.Add(member);
 
-                // Fetch relationships involving this member
+                // Fetch relationships involving this member without including related members
                 var relatedRelationships = await _context.Relationships
-                    .Where(r => r.FamilyId == familyId &&
-                                (r.SourceMemberId == currentMemberId || r.TargetMemberId == currentMemberId))
-                    .Include(r => r.SourceMember)
-                    .Include(r => r.TargetMember)
-                    .ToListAsync(cancellationToken);
+                    .AsNoTracking() // Add AsNoTracking for read-only query
+                    .Where(r => r.FamilyId == familyId && (r.SourceMemberId == currentMemberId || r.TargetMemberId == currentMemberId))
+                    .ToListAsync(cancellationToken); // Removed .Include(r => r.SourceMember).Include(r => r.TargetMember)
 
                 foreach (var rel in relatedRelationships)
                 {
@@ -99,16 +104,61 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
                             }
                             if (rel.TargetMemberId != currentMemberId && !visitedMembers.Contains(rel.TargetMemberId))
                             {
-                                membersQueue.Enqueue(rel.TargetMemberId);
+                            // Important: Ensure we don't exceed MAX_LIMIT when enqueuing
+                                if (allFetchedMembers.Count < MAX_LIMIT)
+                                {
+                                    membersQueue.Enqueue(rel.TargetMemberId);
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        // Collect all unique member IDs involved in fetched relationships for batch lookup
+        var allRelatedMemberIds = new HashSet<Guid>();
+        foreach (var rel in allFetchedRelationships)
+        {
+            allRelatedMemberIds.Add(rel.SourceMemberId);
+            allRelatedMemberIds.Add(rel.TargetMemberId);
+        }
+        // Also include the currentRootMemberId and any members fetched explicitly if not already included
+        allRelatedMemberIds.UnionWith(allFetchedMembers.Select(m => m.Id));
+
+
+        // Batch fetch details for all related members (to populate RelationshipMemberDto)
+        var relatedMemberDetails = await _context.Members
+            .AsNoTracking()
+            .Where(m => allRelatedMemberIds.Contains(m.Id))
+            .Select(m => new RelationshipMemberDto // Project directly to RelationshipMemberDto to get only needed fields
+            {
+                Id = m.Id,
+                FullName = m.LastName + " " + m.FirstName, // Construct FullName here
+                IsRoot = m.IsRoot,
+                AvatarUrl = m.AvatarUrl,
+                DateOfBirth = m.DateOfBirth
+            })
+            .ToDictionaryAsync(m => m.Id, cancellationToken);
         
+        // Map relationships and populate SourceMember/TargetMember
+        var relationshipDtos = new List<RelationshipDto>();
+        foreach (var rel in allFetchedRelationships)
+        {
+            var relDto = _mapper.Map<RelationshipDto>(rel);
+            
+            if (relatedMemberDetails.TryGetValue(rel.SourceMemberId, out var sourceMemberDto))
+            {
+                relDto.SourceMember = sourceMemberDto;
+            }
+            if (relatedMemberDetails.TryGetValue(rel.TargetMemberId, out var targetMemberDto))
+            {
+                relDto.TargetMember = targetMemberDto;
+            }
+            relationshipDtos.Add(relDto);
+        }
+
         var memberDtos = _mapper.Map<List<MemberDto>>(allFetchedMembers);
-        var relationshipDtos = _mapper.Map<List<RelationshipDto>>(allFetchedRelationships);
 
         var familyTreeData = new FamilyTreeDataDto
         {

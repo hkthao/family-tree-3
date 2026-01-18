@@ -31,6 +31,11 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
         }
 
+        if (request.SourceMemberId == request.TargetMemberId)
+        {
+            return Result<bool>.Failure("Source member and target member cannot be the same.", ErrorSources.Validation);
+        }
+
         relationship.Update(request.SourceMemberId, request.TargetMemberId, request.Type, request.Order);
 
         await _context.SaveChangesAsync(cancellationToken);
