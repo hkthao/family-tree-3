@@ -1,20 +1,23 @@
 from fastapi import APIRouter, HTTPException, status
-from typing import List
 from loguru import logger
 
 from ..models.schemas import SearchRequest, SearchResponse, SearchResultItem
-from ..core.embeddings import embedding_service # Import the instance directly
+from ..core.embeddings import embedding_service  # Import the instance directly
 from ..core.lancedb import lancedb_service
+
 
 router = APIRouter()
 
-@router.post("/search", response_model=SearchResponse)
+
+@router.post("/", response_model=SearchResponse)
 async def search_knowledge(request: SearchRequest):
     """
-    Performs a vector search for knowledge within a specific family's LanceDB table.
+    Performs a vector search for knowledge within a specific family's LanceDB
+    table.
     """
     try:
-        logger.info(f"Received search request for family_id: {request.family_id}, query: '{request.query[:50]}...'")
+        logger.info(f"Received search request for family_id: "
+                    f"{request.family_id}, query: '{request.query[:50]}...'")
 
         # 1. Embed the query
         query_vector = embedding_service.embed_query(request.query)
@@ -30,14 +33,14 @@ async def search_knowledge(request: SearchRequest):
         # 3. Format results to SearchResultItem
         formatted_results = [
             SearchResultItem(
-                member_id=item["member_id"],
-                name=item["name"],
+                metadata=item["metadata"],
                 summary=item["summary"],
                 score=item["score"]
             ) for item in results
         ]
 
-        logger.info(f"Search for family_id {request.family_id} returned {len(formatted_results)} results.")
+        logger.info(f"Search for family_id {request.family_id} returned "
+                    f"{len(formatted_results)} results.")
         return SearchResponse(results=formatted_results)
 
     except Exception as e:

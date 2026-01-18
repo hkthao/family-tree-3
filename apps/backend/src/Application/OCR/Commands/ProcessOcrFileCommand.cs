@@ -11,7 +11,12 @@ public record ProcessOcrFileCommand : IRequest<Result<OcrResultDto>>
     /// <summary>
     /// Nội dung tệp dưới dạng mảng byte.
     /// </summary>
-    public byte[] FileBytes { get; init; } = Array.Empty<byte>();
+    public byte[]? FileBytes { get; init; } // Made nullable
+
+    /// <summary>
+    /// URL của tệp cần xử lý.
+    /// </summary>
+    public string? FileUrl { get; init; } // New property
 
     /// <summary>
     /// Loại nội dung của tệp (ví dụ: image/jpeg, application/pdf).

@@ -1,119 +1,87 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Union
+from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
 from ..core.lancedb import lancedb_service
 from ..core.embeddings import embedding_service
 from ..schemas.vectors import VectorData, DeleteVectorRequest
-from ..schemas.knowledge_dtos import (
-    FamilyKnowledgeDto,
-    MemberKnowledgeDto,
-    EventKnowledgeDto,
-    KnowledgeIndexRequest,
-)
+from ..schemas.knowledge_dtos import KnowledgeIndexRequest
 
 router = APIRouter()
 
-@router.post("/family-data", status_code=status.HTTP_200_OK)
-async def process_family_knowledge(
-    request: KnowledgeIndexRequest[FamilyKnowledgeDto],
+
+@router.post("/index", status_code=status.HTTP_200_OK)
+async def index_knowledge_data(
+    request: KnowledgeIndexRequest,
 ):
+    """
+    Indexes or deletes knowledge data based on the provided request.
+    The request data should contain metadata and a summary.
+    """
+    # Log relevant metadata for traceability
     logger.info(
-        "Received family knowledge request for family_id: {family_id}, action: {action}",
-        request.data.family_id,
-        request.action,
+        f"Received knowledge index request for family_id: "
+        f"{request.data.metadata.get('family_id')}, "
+        f"content_type: {request.data.metadata.get('content_type')}, "
+        f"action: {request.action}"
     )
-    return await _process_knowledge_request(
-        request,
-        lambda dto: f"{dto.name} {dto.description} {dto.genealogy_record} {dto.progenitor_name} {dto.family_covenant}",
-        "family_id",
-        request.data.family_id,
-        request.data.family_id,
-        request.data.content_type,
-    )
-
-
-@router.post("/member-data", status_code=status.HTTP_200_OK)
-async def process_member_knowledge(
-    request: KnowledgeIndexRequest[MemberKnowledgeDto],
-):
-    logger.info(
-        "Received member knowledge request for member_id: {member_id}, action: {action}",
-        request.data.member_id,
-        request.action,
-    )
-    return await _process_knowledge_request(
-        request,
-        lambda dto: f"{dto.full_name} {dto.biography} {dto.gender}",
-        "member_id",
-        request.data.member_id,
-        request.data.family_id,
-        request.data.content_type,
-    )
-
-
-@router.post("/event-data", status_code=status.HTTP_200_OK)
-async def process_event_knowledge(
-    request: KnowledgeIndexRequest[EventKnowledgeDto],
-):
-    logger.info(
-        "Received event knowledge request for event_id: {event_id}, action: {action}",
-        request.data.event_id,
-        request.action,
-    )
-    return await _process_knowledge_request(
-        request,
-        lambda dto: f"{dto.name} {dto.description} {dto.location} {dto.calendar_type} {dto.solar_date}",
-        "event_id",
-        request.data.event_id,
-        request.data.family_id,
-        request.data.content_type,
-    )
+    return await _process_knowledge_request(request)
 
 
 async def _process_knowledge_request(
-    request: Union[
-        KnowledgeIndexRequest[FamilyKnowledgeDto],
-        KnowledgeIndexRequest[MemberKnowledgeDto],
-        KnowledgeIndexRequest[EventKnowledgeDto],
-    ],
-    text_extractor: callable,
-    id_field_name: str,
-    id_value: str,
-    family_id: str,
-    content_type: str,
+    request: KnowledgeIndexRequest,
 ):
+    # Extract necessary information from the new GenericKnowledgeDto structure
+    summary = request.data.summary
+    metadata = request.data.metadata
+
+    # Ensure essential metadata fields are present
+    family_id = metadata.get("family_id")
+    content_type = metadata.get("content_type")
+    # Assuming 'original_id' is the unique identifier for the item
+    original_id = metadata.get("original_id")
+
+    if not all([family_id, content_type, original_id]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=("Missing essential metadata: family_id, content_type, "
+                    "or original_id."),
+        )
+
     table_name = lancedb_service._get_table_name(family_id)
 
     if request.action == "index":
-        content_to_embed = text_extractor(request.data)
-        embedding = embedding_service.get_embedding(content_to_embed)
-
-        metadata = request.data.model_dump()
-        metadata["text_content"] = content_to_embed # Add for potential future use or debugging
-
+        # The metadata dictionary already contains all the necessary
+        # original fields
         vector_data = VectorData(
-            id=id_value,
-            vector=embedding,
             family_id=family_id,
-            content_type=content_type,
-            metadata=metadata,
+            entity_id=str(original_id),
+            type=content_type,
+            # Default to public if not provided in metadata
+            visibility=metadata.get("visibility", "public"),
+            # Default name to original_id if not provided
+            name=metadata.get("name", str(original_id)),
+            summary=summary,
+            metadata=metadata  # Pass the entire metadata dictionary
         )
 
         lancedb_service.add_vectors(table_name, [vector_data])
-        return {"message": f"{content_type} data for ID {id_value} indexed successfully."}
+        return {"message": (f"{content_type} data with original_id "
+                            f"{original_id} indexed successfully for family "
+                            f"{family_id}.")}
 
     elif request.action == "delete":
         delete_request = DeleteVectorRequest(
             family_id=family_id,
-            # LanceDB delete expects a list of IDs to delete
-            # We can leverage the filter capability if needed for more complex deletes
-            where_clause=f"{id_field_name} = '{id_value}'"
+            # Use original_id for deletion
+            # Assuming original_id is stored in metadata and indexed
+            where_clause=f"original_id = '{original_id}'"
         )
         lancedb_service.delete_vectors(table_name, delete_request)
-        return {"message": f"{content_type} data for ID {id_value} deleted successfully."}
+        return {"message": (f"{content_type} data with original_id "
+                            f"{original_id} deleted successfully for family "
+                            f"{family_id}.")}
     else:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid action specified."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid action specified."
         )
-

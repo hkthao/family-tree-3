@@ -1,9 +1,13 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants; // Add this for PromptConstants
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
+using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Prompts.Queries.GetPromptById; // Add this for GetPromptByIdQuery
 using Microsoft.Extensions.Logging;
+using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Options;
+using System.Text.Json; // NEW
 
 namespace backend.Application.AI.Commands.DetermineChatContext;
 
@@ -12,18 +16,21 @@ namespace backend.Application.AI.Commands.DetermineChatContext;
 /// </summary>
 public class DetermineChatContextCommandHandler : IRequestHandler<DetermineChatContextCommand, Result<ContextClassificationDto>>
 {
-    private readonly IAiGenerateService _aiGenerateService;
+    private readonly ILLMGatewayService _llmGatewayService; // Change to LLM Gateway Service
     private readonly ILogger<DetermineChatContextCommandHandler> _logger;
-    private readonly IMediator _mediator; // Add IMediator
+    private readonly IMediator _mediator;
+    private readonly LLMGatewaySettings _llmGatewaySettings; // Changed from ChatSettings
 
     public DetermineChatContextCommandHandler(
-        IAiGenerateService aiGenerateService,
+        ILLMGatewayService llmGatewayService, // Change injection
         ILogger<DetermineChatContextCommandHandler> logger,
-        IMediator mediator) // Inject IMediator
+        IMediator mediator,
+        IOptions<LLMGatewaySettings> llmGatewaySettings) // Inject IOptions for LLMGatewaySettings
     {
-        _aiGenerateService = aiGenerateService;
+        _llmGatewayService = llmGatewayService;
         _logger = logger;
-        _mediator = mediator; // Initialize IMediator
+        _mediator = mediator;
+        _llmGatewaySettings = llmGatewaySettings.Value; // Extract LLMGatewaySettings
     }
 
     public async Task<Result<ContextClassificationDto>> Handle(DetermineChatContextCommand request, CancellationToken cancellationToken)
@@ -47,28 +54,50 @@ public class DetermineChatContextCommandHandler : IRequestHandler<DetermineChatC
             return Result<ContextClassificationDto>.Failure($"Nội dung system prompt cho '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' là null hoặc trống.", "Configuration");
         }
 
-        var generateRequest = new GenerateRequest
+        var llmChatRequest = new LLMChatCompletionRequest
         {
-            SessionId = request.SessionId,
-            ChatInput = request.ChatMessage,
-            SystemPrompt = systemPrompt // Use the fetched prompt
+            Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
+            Messages = new List<LLMMessage>
+            {
+                new LLMMessage { Role = "system", Content = systemPrompt },
+                new LLMMessage { Role = "user", Content = request.ChatMessage }
+            },
+            Temperature = 0.0f, // Use a low temperature for classification tasks
+            MaxTokens = 500 // Limit output size for classification
         };
 
-        var aiResult = await _aiGenerateService.GenerateDataAsync<ContextClassificationDto>(generateRequest, cancellationToken);
+        var llmResult = await _llmGatewayService.GetChatCompletionAsync(llmChatRequest, cancellationToken); // Call LLM Gateway
 
-        if (!aiResult.IsSuccess)
+        if (!llmResult.IsSuccess)
         {
-            _logger.LogError("Phân tích ngữ cảnh AI thất bại: {Error}", aiResult.Error);
-            return Result<ContextClassificationDto>.Failure(aiResult.Error ?? "Không thể phân tích ngữ cảnh.", aiResult.ErrorSource ?? "Unknown");
+            _logger.LogError("Phân tích ngữ cảnh AI thất bại từ LLM Gateway: {Error}", llmResult.Error);
+            return Result<ContextClassificationDto>.Failure(llmResult.Error ?? "Không thể phân tích ngữ cảnh.", llmResult.ErrorSource ?? "ExternalServiceError");
         }
 
-        if (aiResult.Value == null)
+        if (llmResult.Value == null || !llmResult.Value.Choices.Any() || string.IsNullOrWhiteSpace(llmResult.Value.Choices[0].Message.Content))
         {
-            _logger.LogWarning("AI trả về kết quả rỗng khi phân tích ngữ cảnh cho tin nhắn: {ChatMessage}", request.ChatMessage);
-            return Result<ContextClassificationDto>.Failure("AI trả về kết quả rỗng khi phân tích ngữ cảnh.", "AIError");
+            _logger.LogWarning("LLM Gateway trả về kết quả rỗng hoặc không có nội dung khi phân tích ngữ cảnh cho tin nhắn: {ChatMessage}", request.ChatMessage);
+            return Result<ContextClassificationDto>.Failure("LLM Gateway trả về kết quả rỗng khi phân tích ngữ cảnh.", "AIError");
         }
 
-        _logger.LogInformation("Ngữ cảnh được xác định: {ContextType} với lý do: {Reasoning}", aiResult.Value.Context, aiResult.Value.Reasoning);
-        return Result<ContextClassificationDto>.Success(aiResult.Value);
+        // Parse the LLM's output into ContextClassificationDto
+        try
+        {
+            var contextClassification = JsonSerializer.Deserialize<ContextClassificationDto>(llmResult.Value.Choices[0].Message.Content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (contextClassification == null)
+            {
+                _logger.LogWarning("Không thể phân tích JSON từ phản hồi của LLM Gateway vào ContextClassificationDto. Phản hồi: {Content}", llmResult.Value.Choices[0].Message.Content);
+                return Result<ContextClassificationDto>.Failure("Không thể phân tích phản hồi của AI để xác định ngữ cảnh.", "AIError");
+            }
+
+            _logger.LogInformation("Ngữ cảnh được xác định: {ContextType} với lý do: {Reasoning}", contextClassification.Context, contextClassification.Reasoning);
+            return Result<ContextClassificationDto>.Success(contextClassification);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Lỗi phân tích JSON từ phản hồi của LLM Gateway: {Content}", llmResult.Value.Choices[0].Message.Content);
+            return Result<ContextClassificationDto>.Failure($"Lỗi phân tích phản hồi của AI: {ex.Message}", "AIError");
+        }
     }
 }

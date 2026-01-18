@@ -1,0 +1,207 @@
+# LLM Gateway Service
+
+This is a Python microservice acting as an OpenAI-style LLM Gateway. It allows routing chat completion requests to either an Ollama local instance or OpenAI's cloud API based on the model prefix provided in the request.
+
+## Features
+
+- **OpenAI-compatible API**: Provides `/v1/chat/completions` and `/v1/embeddings` endpoints.
+- **Backend Routing**: Automatically routes requests to Ollama (local) or OpenAI (cloud) based on the `model` field (e.g., `ollama:qwen2.5`, `openai:gpt-4.1-mini`).
+- **Configurable**: Uses environment variables for API keys and URLs.
+- **Asynchronous**: Built with FastAPI and httpx for efficient I/O operations.
+
+## Tech Stack
+
+- Python 3.10+
+- FastAPI
+- httpx (async)
+- pydantic
+- uvicorn
+- openai (Python SDK)
+- python-dotenv
+- pydantic-settings
+
+## Directory Structure
+
+```
+llm-gateway-service/
+├── app/
+│   ├── main.py             # FastAPI application entry point
+│   ├── api/
+│   │   ├── chat.py         # Chat completion API endpoint logic
+│   │   └── embeddings.py   # Embeddings API endpoint logic
+│   ├── llm/
+│   │   ├── base.py         # Base interface for LLM implementations
+│   │   ├── ollama.py       # Ollama LLM implementation
+│   │   └── openai.py       # OpenAI LLM implementation
+│   ├── schemas/
+│   │   ├── __init__.py     # Exports Pydantic models for chat and embeddings
+│   │   └── embeddings.py   # Pydantic models specific to embeddings
+│   ├── config.py           # Configuration settings
+│   └── prompt_utils.py     # (Currently empty, as per requirements for forwarding messages)
+├── requirements.txt        # Python dependencies
+├── .env                    # Environment variables (e.g., API keys, URLs)
+└── README.md               # This README file
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- Docker (for running Ollama locally, if desired)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/family-tree-3.git # (Assuming this is part of a larger project)
+    cd family-tree-3/services/llm-gateway-service
+    ```
+2.  **Create a virtual environment and install dependencies:**
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+### Configuration
+
+Create a `.env` file in the `llm-gateway-service/` directory with your configuration:
+
+```
+OLLAMA_BASE_URL=http://localhost:11434
+OPENAI_API_KEY=sk-your-openai-key-here
+DEFAULT_TEMPERATURE=0.0
+DEFAULT_MAX_TOKENS=512
+```
+
+-   `OLLAMA_BASE_URL`: The URL where your Ollama instance is running.
+-   `OPENAI_API_KEY`: Your OpenAI API key.
+-   `DEFAULT_TEMPERATURE`: Default sampling temperature for models.
+-   `DEFAULT_MAX_TOKENS`: Default maximum tokens to generate.
+
+### Running the Service
+
+You can run the service directly or using Docker.
+
+#### Running Natively
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+The API documentation will be available at `http://localhost:8000/docs`.
+
+#### Running with Docker
+
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t llm-gateway-service .
+    ```
+2.  **Run the Docker container:**
+    ```bash
+    docker run -d --name llm-gateway -p 8000:8000 llm-gateway-service
+    ```
+    *   Remember to configure your environment variables (e.g., `OPENAI_API_KEY`) when running the Docker container. You can pass them using the `-e` flag:
+        ```bash
+        docker run -d --name llm-gateway -p 8000:8000 -e OPENAI_API_KEY=your_openai_key llm-gateway-service
+        ```
+    *   If using Ollama, ensure your Ollama container is running and accessible from the `llm-gateway` container. You might need to use Docker's network features (e.g., `--network host` or custom Docker networks) to allow communication. For example, if Ollama is running on the host, you can set `OLLAMA_BASE_URL` to `http://host.docker.internal:11434` (on Docker Desktop) or the host's IP address.
+
+### Running Ollama (Optional, for local LLM)
+
+If you want to use Ollama locally, ensure it's running. You can typically run it via Docker:
+
+```bash
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+```
+
+Then, pull a model, e.g., Qwen 2.5 and Nomic Embed:
+
+```bash
+docker exec -it ollama ollama run qwen2.5
+docker exec -it ollama ollama run nomic-embed-text
+```
+
+*(You might need to let it download completely then `Ctrl+C` to exit the interactive mode).*
+
+### Testing the API
+
+You can test the API using `curl`.
+
+#### Test Chat Completion with Ollama
+
+Ensure Ollama is running and the specified model is downloaded.
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama:qwen2.5",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Tóm tắt thông tin về Cao Tải"}
+    ],
+    "temperature": 0,
+    "max_tokens": 100
+  }'
+```
+
+#### Test Chat Completion with OpenAI
+
+Ensure `OPENAI_API_KEY` is set correctly in your `.env` file.
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai:gpt-3.5-turbo",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Explain quantum physics in simple terms."}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 150
+  }'
+```
+
+#### Test Embeddings with Ollama
+
+Ensure Ollama is running and the specified embedding model is downloaded.
+
+```bash
+curl http://localhost:8000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama:nomic-embed-text",
+    "input": "This is a test sentence for embedding."
+  }'
+```
+
+#### Test Embeddings with OpenAI
+
+Ensure `OPENAI_API_KEY` is set correctly in your `.env` file.
+
+```bash
+curl http://localhost:8000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai:text-embedding-ada-002",
+    "input": "This is another test sentence for OpenAI embedding."
+  }'
+```
+
+## Development
+
+### Running tests
+
+To run the unit tests, make sure you have activated your virtual environment and installed all dependencies, including the development dependencies (`pytest`, `pytest-asyncio`, `pytest-mock`).
+
+```bash
+# From the llm-gateway-service directory
+pytest tests/unit
+```
+
+### Linting & Formatting
+
+*(Add linting/formatting instructions here)

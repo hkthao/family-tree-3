@@ -10,11 +10,25 @@ public class ProcessOcrFileCommandValidator : AbstractValidator<ProcessOcrFileCo
 
     public ProcessOcrFileCommandValidator()
     {
-        RuleFor(x => x.FileBytes)
-            .NotEmpty().WithMessage("Tệp không được để trống.")
-            .Must(bytes => bytes != null && bytes.Length > 0).WithMessage("Tệp không được để trống.")
-            .Must(bytes => bytes.Length <= MAX_FILE_SIZE_MB * 1024 * 1024)
+        // Xác thực rằng chỉ một trong hai FileBytes hoặc FileUrl được cung cấp
+        RuleFor(x => x)
+            .Must(x => (x.FileBytes != null && x.FileBytes.Length > 0 && string.IsNullOrEmpty(x.FileUrl)) ||
+                       (x.FileBytes == null || x.FileBytes.Length == 0 && !string.IsNullOrEmpty(x.FileUrl)))
+            .WithMessage("Phải cung cấp FileBytes hoặc FileUrl, không được cả hai hoặc không gì cả.");
+
+        When(x => x.FileBytes != null && x.FileBytes.Length > 0, () =>
+        {
+            RuleFor(x => x.FileBytes)
+                .Must(bytes => bytes != null && bytes.Length <= MAX_FILE_SIZE_MB * 1024 * 1024)
                 .WithMessage($"Kích thước tệp không được vượt quá {MAX_FILE_SIZE_MB} MB.");
+        });
+
+        When(x => !string.IsNullOrEmpty(x.FileUrl), () =>
+        {
+            RuleFor(x => x.FileUrl)
+                .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
+                .WithMessage("FileUrl phải là một URL hợp lệ.");
+        });
 
         RuleFor(x => x.ContentType)
             .NotEmpty().WithMessage("Loại nội dung không được để trống.")

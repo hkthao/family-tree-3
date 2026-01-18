@@ -4,31 +4,48 @@ using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
+using backend.Application.Common.Models.LLMGateway; // NEW
+using backend.Application.Common.Models.AppSetting; // NEW
 using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.GetPromptById;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // NEW
 using Moq;
+using System.Text.Json; // NEW
 using Xunit;
 
 namespace backend.Application.UnitTests.AI.Commands.DetermineChatContext;
 
 public class DetermineChatContextCommandTests
 {
-    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
+    private readonly Mock<ILLMGatewayService> _mockLLMGatewayService; // Changed from IAiGenerateService
     private readonly Mock<ILogger<DetermineChatContextCommandHandler>> _mockLogger;
     private readonly Mock<IMediator> _mockMediator;
+    private readonly Mock<IOptions<LLMGatewaySettings>> _mockLLMGatewaySettings; // NEW
     private readonly DetermineChatContextCommandHandler _handler;
     private readonly DetermineChatContextCommandValidator _validator;
 
     public DetermineChatContextCommandTests()
     {
-        _mockAiGenerateService = new Mock<IAiGenerateService>();
+        _mockLLMGatewayService = new Mock<ILLMGatewayService>(); // Changed
         _mockLogger = new Mock<ILogger<DetermineChatContextCommandHandler>>();
         _mockMediator = new Mock<IMediator>();
+        _mockLLMGatewaySettings = new Mock<IOptions<LLMGatewaySettings>>(); // NEW
 
-        _handler = new DetermineChatContextCommandHandler(_mockAiGenerateService.Object, _mockLogger.Object, _mockMediator.Object);
+        // Setup LLMGatewaySettings mock
+        _mockLLMGatewaySettings.Setup(o => o.Value).Returns(new LLMGatewaySettings
+        {
+            LlmModel = "ollama:test-context-model" // Provide a default model name for context
+        });
+
+        _handler = new DetermineChatContextCommandHandler(
+            _mockLLMGatewayService.Object, // Changed
+            _mockLogger.Object,
+            _mockMediator.Object,
+            _mockLLMGatewaySettings.Object); // NEW parameter
         _validator = new DetermineChatContextCommandValidator();
 
         // Setup default mediator behavior for prompt fetching
@@ -101,7 +118,7 @@ public class DetermineChatContextCommandTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain($"System prompt for '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' not configured or fetched from the database.");
         result.ErrorSource.Should().Be("Configuration");
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<ContextClassificationDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockLLMGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Changed
     }
 
     [Fact]
@@ -122,17 +139,17 @@ public class DetermineChatContextCommandTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain($"Nội dung system prompt cho '{PromptConstants.CONTEXT_CLASSIFICATION_PROMPT}' là null hoặc trống.");
         result.ErrorSource.Should().Be("Configuration");
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<ContextClassificationDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockLLMGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Changed
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenAiGenerateServiceFails()
+    public async Task Handle_ShouldReturnFailure_WhenLLMGatewayServiceFails() // Renamed test
     {
         // Arrange
         var command = new DetermineChatContextCommand { ChatMessage = "Test message", SessionId = "test_session" };
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<ContextClassificationDto>(
-            It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ContextClassificationDto>.Failure("AI service error", "ExternalService"));
+        _mockLLMGatewayService.Setup(s => s.GetChatCompletionAsync( // Changed
+            It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Failure("LLM Gateway service error", "ExternalService")); // Changed
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -140,18 +157,18 @@ public class DetermineChatContextCommandTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("AI service error");
+        result.Error.Should().Contain("LLM Gateway service error");
         result.ErrorSource.Should().Be("ExternalService");
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenAiReturnsNullValue()
+    public async Task Handle_ShouldReturnFailure_WhenLLMGatewayReturnsNullValue() // Renamed test
     {
         // Arrange
         var command = new DetermineChatContextCommand { ChatMessage = "Test message", SessionId = "test_session" };
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<ContextClassificationDto>(
-            It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ContextClassificationDto>.Success(null!)); // AI returns success but null value
+        _mockLLMGatewayService.Setup(s => s.GetChatCompletionAsync( // Changed
+            It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(null!)); // Changed: LLM Gateway returns success but null value
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -159,19 +176,93 @@ public class DetermineChatContextCommandTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("AI trả về kết quả rỗng khi phân tích ngữ cảnh.");
+        result.Error.Should().Contain("LLM Gateway trả về kết quả rỗng khi phân tích ngữ cảnh.");
         result.ErrorSource.Should().Be("AIError");
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnSuccess_WhenAiReturnsValidData()
+    public async Task Handle_ShouldReturnFailure_WhenLLMGatewayReturnsEmptyChoices() // NEW Test
+    {
+        // Arrange
+        var command = new DetermineChatContextCommand { ChatMessage = "Test message", SessionId = "test_session" };
+        var llmResponse = new LLMChatCompletionResponse
+        {
+            Id = "test-id",
+            Object = "chat.completion",
+            Choices = new List<LLMChatCompletionChoice>() // Empty choices
+        };
+        _mockLLMGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(llmResponse));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain("LLM Gateway trả về kết quả rỗng khi phân tích ngữ cảnh.");
+        result.ErrorSource.Should().Be("AIError");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenLLMGatewayReturnsInvalidJson() // NEW Test
+    {
+        // Arrange
+        var command = new DetermineChatContextCommand { ChatMessage = "Test message", SessionId = "test_session" };
+        var llmResponse = new LLMChatCompletionResponse
+        {
+            Id = "test-id",
+            Object = "chat.completion",
+            Choices = new List<LLMChatCompletionChoice>
+            {
+                new LLMChatCompletionChoice
+                {
+                    Index = 0,
+                    Message = new LLMChatCompletionMessage { Role = "assistant", Content = "{invalid json" },
+                    FinishReason = "stop"
+                }
+            }
+        };
+        _mockLLMGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(llmResponse));
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain("Lỗi phân tích phản hồi của AI:");
+        result.ErrorSource.Should().Be("AIError");
+    }
+
+
+    [Fact]
+    public async Task Handle_ShouldReturnSuccess_WhenLLMGatewayReturnsValidData() // Renamed test
     {
         // Arrange
         var command = new DetermineChatContextCommand { ChatMessage = "How to add a new member?", SessionId = "test_session" };
         var aiResponse = new ContextClassificationDto { Context = ContextType.QA, Reasoning = "User is asking a question about app usage." };
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<ContextClassificationDto>(
-            It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ContextClassificationDto>.Success(aiResponse));
+        var llmResponse = new LLMChatCompletionResponse
+        {
+            Id = "test-id",
+            Object = "chat.completion",
+            Choices = new List<LLMChatCompletionChoice>
+            {
+                new LLMChatCompletionChoice
+                {
+                    Index = 0,
+                    Message = new LLMChatCompletionMessage { Role = "assistant", Content = JsonSerializer.Serialize(aiResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }) },
+                    FinishReason = "stop"
+                }
+            }
+        };
+
+        _mockLLMGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(llmResponse));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -180,8 +271,14 @@ public class DetermineChatContextCommandTests
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEquivalentTo(aiResponse);
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<ContextClassificationDto>(
-            It.Is<GenerateRequest>(req => req.ChatInput == command.ChatMessage && req.SessionId == command.SessionId && req.SystemPrompt == "System Prompt Content"),
+        _mockLLMGatewayService.Verify(s => s.GetChatCompletionAsync(
+            It.Is<LLMChatCompletionRequest>(req =>
+                req.Model == "ollama:test-context-model" && // Check the model name
+                req.Messages.Count == 2 &&
+                req.Messages[0].Role == "system" &&
+                req.Messages[0].Content == "System Prompt Content" &&
+                req.Messages[1].Role == "user" &&
+                req.Messages[1].Content == command.ChatMessage),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

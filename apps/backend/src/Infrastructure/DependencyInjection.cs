@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using backend.Infrastructure.Services.LLMGateway; // NEW
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -187,6 +189,24 @@ public static class DependencyInjection
 
         // Register VoiceAISettings
         services.Configure<VoiceAISettings>(configuration.GetSection(VoiceAISettings.SectionName));
+
+        // Register LLMGatewaySettings
+        services.Configure<LLMGatewaySettings>(configuration.GetSection(LLMGatewaySettings.SectionName));
+
+        // Register LLMGatewayService as a typed HttpClient
+        services.AddHttpClient<ILLMGatewayService, LLMGatewayService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var llmGatewaySettings = serviceProvider.GetRequiredService<IOptions<LLMGatewaySettings>>().Value;
+                    if (!string.IsNullOrEmpty(llmGatewaySettings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(llmGatewaySettings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<LLMGatewayService>>().LogWarning("LLMGateway BaseUrl is not configured, falling back to default.");
+                    }
+                });
 
         // Register VoiceAIService as a typed HttpClient
         services.AddHttpClient<IVoiceAIService, VoiceAIService>()

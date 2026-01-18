@@ -1,3 +1,5 @@
+using backend.Application.Knowledge.DTOs; // Added for KnowledgeSearchResultDto
+
 namespace backend.Application.Knowledge;
 
 public interface IKnowledgeService
@@ -43,4 +45,14 @@ public interface IKnowledgeService
     /// <param name="eventId">ID của Event.</param>
     /// <returns>Task hoàn thành tác vụ.</returns>
     Task DeleteEventData(Guid eventId);
+
+    /// <summary>
+    /// Tìm kiếm trong knowledge-search-service.
+    /// </summary>
+    /// <param name="familyId">ID của Family để giới hạn phạm vi tìm kiếm.</param>
+    /// <param name="queryString">Chuỗi truy vấn.</param>
+    /// <param name="topK">Số lượng kết quả hàng đầu mong muốn.</param>
+    /// <param name="allowedVisibility">Danh sách các mức độ hiển thị được phép.</param>
+    /// <returns>Danh sách các KnowledgeSearchResultDto phù hợp.</returns>
+    Task<List<KnowledgeSearchResultDto>> SearchKnowledgeBase(Guid familyId, string queryString, int topK, List<string> allowedVisibility);
 }
