@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using System.Text.Json; // Added for JsonElement
 using backend.Application.Common.Configurations;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;

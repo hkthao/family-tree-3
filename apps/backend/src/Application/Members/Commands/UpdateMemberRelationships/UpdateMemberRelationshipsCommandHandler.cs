@@ -23,7 +23,17 @@ public class UpdateMemberRelationshipsCommandHandler(IApplicationDbContext conte
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
 
-        // 3. Update Relationships
+        // 3. Validate that member cannot be related to themselves
+        if (request.FatherId.HasValue && request.FatherId.Value == request.MemberId)
+            return Result<Guid>.Failure("Member cannot be their own father.", ErrorSources.Validation);
+        if (request.MotherId.HasValue && request.MotherId.Value == request.MemberId)
+            return Result<Guid>.Failure("Member cannot be their own mother.", ErrorSources.Validation);
+        if (request.HusbandId.HasValue && request.HusbandId.Value == request.MemberId)
+            return Result<Guid>.Failure("Member cannot be their own husband.", ErrorSources.Validation);
+        if (request.WifeId.HasValue && request.WifeId.Value == request.MemberId)
+            return Result<Guid>.Failure("Member cannot be their own wife.", ErrorSources.Validation);
+
+        // 4. Update Relationships
         await _memberRelationshipService.UpdateMemberRelationshipsAsync(
             request.MemberId,
             request.FatherId,

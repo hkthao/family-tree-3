@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col id="family-auto-complete" cols="12" md="4">
+      <v-col id="family-auto-complete" cols="12" md="6">
         <family-auto-complete v-model="selectedFamilyId" :label="t('dashboard.filterByFamily')" clearable hide-details
           prepend-inner-icon="mdi-filter-variant" />
       </v-col>
@@ -24,9 +24,11 @@
     <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
+      <div class="bg-surface pa-2 rounded">
         <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" id="dashboard-event-calendar" />
+      </div>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col  cols="12" md="6">
         <RecentActivity :family-id="selectedFamilyId || undefined" :activities="recentActivities" :loading="isLoadingRecentActivities" id="dashboard-recent-activity" />
       </v-col>
     </v-row>

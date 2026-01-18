@@ -128,7 +128,11 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         // Synchronize Birth and Death events (now handled by MemberUpdatedEventHandler)
 
-        member.AddDomainEvent(new MemberUpdatedEvent(member));
+        // Conditionally add domain event based on request
+        if (!request.SkipDomainEvent)
+        {
+            member.AddDomainEvent(new MemberUpdatedEvent(member));
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

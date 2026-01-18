@@ -2,9 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Events.EventOccurrences.Jobs;
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Infrastructure.Services;
 

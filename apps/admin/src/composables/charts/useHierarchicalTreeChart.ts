@@ -17,8 +17,10 @@ interface UseHierarchicalTreeChartEmits {
 
 interface UseHierarchicalTreeChartDeps {
   f3Adapter: IF3Adapter;
-  t: (key: string) => string; // The translation function
+  t: (key: string, values?: Record<string, unknown>) => string; // The translation function, updated to support interpolation
 }
+
+const RENDER_SAFE_THRESHOLD = 100; // Define a safe threshold for rendering nodes
 
 export function useHierarchicalTreeChart(
   props: UseHierarchicalTreeChartProps,
@@ -37,16 +39,16 @@ export function useHierarchicalTreeChart(
   const { f3Adapter, t } = { ...defaultDeps, ...deps };
 
 
-  const renderChart = async (currentMembers: MemberDto[]) => {
+  const renderChart = async (currentMembers: MemberDto[], currentRelationships: Relationship[]) => { // Updated parameters
     if (!chartContainer.value) {
       return;
     }
 
     f3Adapter.clearChart(chartContainer.value); // Clear existing chart
 
-    const { filteredMembers, transformedData } = transformFamilyData(
+    const { members, transformedData } = transformFamilyData( // Changed filteredMembers to members
       currentMembers,
-      props.relationships,
+      currentRelationships,
       props.rootId
     );
 
@@ -55,13 +57,23 @@ export function useHierarchicalTreeChart(
       chartInstance = null;
       return;
     }
+    
+    // Safety check: Prevent rendering if data size is unexpectedly large
+    if (members.length > RENDER_SAFE_THRESHOLD) {
+      console.error(`Attempted to render ${members.length} nodes, exceeding safe threshold of ${RENDER_SAFE_THRESHOLD}. Preventing render.`);
+      chartContainer.value.innerHTML = `<div class="empty-message error-message">${t('familyTree.renderingLimitExceeded', { limit: RENDER_SAFE_THRESHOLD })}</div>`;
+      chartInstance = null;
+      return;
+    }
 
     // Wrap the chart creation and update in nextTick
     await nextTick();
 
+    console.log(`Rendering Hierarchical Family Tree with ${transformedData.length} nodes.`); // Simple log
+
     chartInstance = f3Adapter.createChart(chartContainer.value, transformedData);
 
-    const mainIdToSet = determineMainChartId(filteredMembers, transformedData, props.rootId);
+    const mainIdToSet = determineMainChartId(members, transformedData, props.rootId); // Changed filteredMembers to members
 
     if (mainIdToSet) {
       f3Adapter.updateChart(chartInstance, mainIdToSet, { initial: true });
@@ -78,7 +90,7 @@ export function useHierarchicalTreeChart(
 
   onMounted(() => {
     if (props.familyId) {
-      renderChart(props.members);
+      renderChart(props.members, props.relationships);
     }
   });
 
@@ -91,11 +103,11 @@ export function useHierarchicalTreeChart(
 
   watch(
     [toRef(props, 'familyId'), toRef(props, 'members'), toRef(props, 'relationships'), toRef(props, 'rootId')],
-    () => {
-      if (props.familyId) {
-        renderChart(props.members);
+    ([newFamilyId, newMembers, newRelationships]) => {
+      if (newFamilyId) {
+        renderChart(newMembers, newRelationships);
       } else {
-        renderChart([]);
+        renderChart([], []);
       }
     },
     { deep: true, immediate: true }

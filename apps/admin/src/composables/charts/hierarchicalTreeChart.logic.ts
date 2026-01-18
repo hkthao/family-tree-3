@@ -22,102 +22,6 @@ interface CardDataPayload {
   };
 }
 
-const MAX_NODES_TO_DISPLAY = 50; // Hardcoded limit for now, can be made configurable
-const MAX_RELATIONSHIPS_TO_DISPLAY = 500; // New hardcoded limit as per user's request
-
-/**
- * Traverses the family tree from the rootId and collects a limited number of connected members and relationships.
- * This function ensures that the displayed tree is manageable in size.
- * @param members An array of all available MemberDto objects.
- * @param relationships An array of all available Relationship objects.
- * @param rootId The ID of the central member to start the traversal from.
- * @param maxNodes The maximum number of nodes to include in the subtree.
- * @param maxRelationships The maximum number of relationships to include in the subtree.
- * @returns An object containing the filtered members and relationships.
- */
-function getLimitedFamilySubtree(
-  members: MemberDto[],
-  relationships: Relationship[],
-  rootId: string | null,
-  maxNodes: number,
-  maxRelationships: number // New parameter
-): { filteredMembers: MemberDto[]; filteredRelationships: Relationship[] } {
-  if (!rootId || !members.some(m => m.id === rootId)) {
-    return { filteredMembers: [], filteredRelationships: [] };
-  }
-
-  const memberMap = new Map<string, MemberDto>(members.map(m => [m.id, m]));
-  const adjacencyList = new Map<string, Set<string>>();
-
-  // Build adjacency list (graph representation) from relationships - O(R)
-  relationships.forEach(rel => {
-    if (!adjacencyList.has(rel.sourceMemberId)) {
-      adjacencyList.set(rel.sourceMemberId, new Set<string>());
-    }
-    if (!adjacencyList.has(rel.targetMemberId)) {
-      adjacencyList.set(rel.targetMemberId, new Set<string>());
-    }
-
-    // Add bidirectional connections
-    adjacencyList.get(rel.sourceMemberId)?.add(rel.targetMemberId);
-    adjacencyList.get(rel.targetMemberId)?.add(rel.sourceMemberId);
-  });
-
-  const selectedMemberIds = new Set<string>();
-  const selectedRelationshipIds = new Set<string>(); // To store unique relationship IDs
-  const queue: string[] = [rootId];
-  selectedMemberIds.add(rootId);
-
-  // Map for quick lookup of relationships by source-target pair
-  const relationshipLookup = new Map<string, Relationship[]>();
-  relationships.forEach(rel => {
-    const key1 = `${rel.sourceMemberId}-${rel.targetMemberId}`;
-    const key2 = `${rel.targetMemberId}-${rel.sourceMemberId}`; // For bidirectional lookup
-
-    if (!relationshipLookup.has(key1)) relationshipLookup.set(key1, []);
-    relationshipLookup.get(key1)?.push(rel);
-
-    if (!relationshipLookup.has(key2)) relationshipLookup.set(key2, []);
-    relationshipLookup.get(key2)?.push(rel);
-  });
-
-
-  let head = 0;
-  while (head < queue.length && selectedMemberIds.size < maxNodes && selectedRelationshipIds.size < maxRelationships) {
-    const currentMemberId = queue[head++];
-    const neighbors = adjacencyList.get(currentMemberId) || new Set<string>();
-
-    for (const neighborId of neighbors) {
-      // Check limits before adding
-      if (selectedMemberIds.size + 1 > maxNodes || selectedRelationshipIds.size + 1 > maxRelationships) {
-          break; // Stop if limits are reached
-      }
-
-      if (memberMap.has(neighborId) && !selectedMemberIds.has(neighborId)) {
-        // Find relationship(s) between currentMemberId and neighborId
-        const relationsBetween = relationshipLookup.get(`${currentMemberId}-${neighborId}`) || [];
-
-        // Check if adding these relationships would exceed maxRelationships
-        // Only count relationships that are not already selected
-        const newRelationsToAdd = relationsBetween.filter(rel => !selectedRelationshipIds.has(rel.id));
-
-        if (selectedRelationshipIds.size + newRelationsToAdd.length > maxRelationships) {
-          continue; // Skip this neighbor, try next one
-        }
-
-        selectedMemberIds.add(neighborId);
-        queue.push(neighborId);
-        newRelationsToAdd.forEach(rel => selectedRelationshipIds.add(rel.id));
-      }
-    }
-  }
-
-  const filteredMembers = members.filter(m => selectedMemberIds.has(m.id));
-  const filteredRelationships = relationships.filter(rel => selectedRelationshipIds.has(rel.id));
-
-  return { filteredMembers, filteredRelationships };
-}
-
 /**
  * Transforms raw Member and Relationship data into a format suitable for the family-chart (f3) library.
  * This function is pure and does not interact with the DOM or external libraries directly.
@@ -130,21 +34,9 @@ export function transformFamilyData(
   members: MemberDto[],
   relationships: Relationship[],
   rootId: string | null
-): { filteredMembers: MemberDto[]; transformedData: CardDataPayload[] } {
-  let processedMembers: MemberDto[] = members;
-  let processedRelationships: Relationship[] = relationships;
-
-  if (rootId) { // Only limit the subtree if a rootId is provided
-    const { filteredMembers, filteredRelationships } = getLimitedFamilySubtree(
-      members,
-      relationships,
-      rootId,
-      MAX_NODES_TO_DISPLAY,
-      MAX_RELATIONSHIPS_TO_DISPLAY
-    );
-    processedMembers = filteredMembers;
-    processedRelationships = filteredRelationships;
-  }
+): { members: MemberDto[]; transformedData: CardDataPayload[] } { // Changed filteredMembers to members
+  const processedMembers: MemberDto[] = members;
+  const processedRelationships: Relationship[] = relationships.filter(rel => rel.sourceMemberId !== rel.targetMemberId);
 
   const personMap = new Map<string, CardDataPayload>();
 
@@ -176,6 +68,12 @@ export function transformFamilyData(
       // console.warn('Could not find person for relationship after filtering:', rel);
       return;
     }
+    // Frontend workaround: Ensure a person is not their own parent/child/spouse in rels
+    if (sourcePerson.id === targetPerson.id) {
+        console.warn(`Skipping self-referencing relationship for member ${sourcePerson.id}`);
+        return;
+    }
+
     switch (rel.type) {
       case RelationshipType.Wife:
       case RelationshipType.Husband:
@@ -213,7 +111,7 @@ export function transformFamilyData(
     return person;
   });
 
-  return { filteredMembers: processedMembers, transformedData };
+  return { members: processedMembers, transformedData }; // Changed filteredMembers to members
 }
 
 /**
@@ -224,7 +122,7 @@ export function transformFamilyData(
  * @returns The ID of the main person to set for the chart, or undefined if none can be determined.
  */
 export function determineMainChartId(
-  filteredMembers: MemberDto[], // Changed from currentMembers to filteredMembers
+  members: MemberDto[], // Changed filteredMembers to members
   transformedData: CardDataPayload[],
   providedRootId: string | null
 ): string | undefined {
@@ -240,7 +138,7 @@ export function determineMainChartId(
 
   if (!mainIdToSet) {
     // Fallback to existing logic if providedRootId is not found or not provided
-    const rootMember = filteredMembers.find((m: MemberDto) => m.isRoot);
+    const rootMember = members.find((m: MemberDto) => m.isRoot);
     if (rootMember) {
       mainIdToSet = rootMember.id;
     } else if (transformedData.length > 0) {

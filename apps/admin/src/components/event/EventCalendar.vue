@@ -19,6 +19,7 @@
         v-model="showFamilyEventsOnly"
         :label="t('event.filter.familyEventsOnly')"
         color="primary"
+        class="mr-4"
         hide-details
         inset
       ></v-switch>

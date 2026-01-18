@@ -40,8 +40,11 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             family.RemoveMember(request.Id);
             _context.Members.Remove(member);
 
-            member.AddDomainEvent(new MemberDeletedEvent(member));
-            member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
+            if (!request.SkipDomainEvent)
+            {
+                member.AddDomainEvent(new MemberDeletedEvent(member));
+                member.AddDomainEvent(new FamilyStatsUpdatedEvent(member.FamilyId));
+            }
 
             await _context.SaveChangesAsync(cancellationToken);
 
