@@ -43,7 +43,7 @@ class OllamaLLM(BaseLLM):
         try:
             response = await self.client.post("/api/chat", json=payload, timeout=None)
             response.raise_for_status() # This is a synchronous call on httpx.Response
-            ollama_response = await response.json() # Await the json() method
+            ollama_response = response.json() # Remove await
 
             content = ollama_response.get("message", {}).get("content", "")
 

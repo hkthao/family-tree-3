@@ -4,10 +4,10 @@ using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces; // NEW
-using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Re-add this
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Common.Queries.ValidateUserAuthentication;
+using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
@@ -28,37 +28,25 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 {
     private readonly ILogger<ChatWithAssistantCommandHandler> _logger;
     private readonly IMediator _mediator;
-    private readonly N8nSettings _n8nSettings;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IAuthorizationService _authorizationService; // NEW
+    private readonly LLMGatewaySettings _llmGatewaySettings; // Changed from ChatSettings
+    private readonly IAuthorizationService _authorizationService;
 
     public ChatWithAssistantCommandHandler(
         ILogger<ChatWithAssistantCommandHandler> logger,
         IMediator mediator,
-        IOptions<N8nSettings> n8nSettings,
-        IHttpClientFactory httpClientFactory,
-        IAuthorizationService authorizationService) // NEW parameter
+        IOptions<LLMGatewaySettings> llmGatewaySettings, // Inject IOptions<LLMGatewaySettings>
+        IAuthorizationService authorizationService)
     {
         _logger = logger;
         _mediator = mediator;
-        _n8nSettings = n8nSettings.Value;
-        _httpClientFactory = httpClientFactory;
-        _authorizationService = authorizationService; // Assign to field
+        _llmGatewaySettings = llmGatewaySettings.Value; // Extract LLMGatewaySettings
+        _authorizationService = authorizationService;
     }
 
 
     public async Task<Result<ChatResponse>> Handle(ChatWithAssistantCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Bắt đầu xử lý yêu cầu trợ lý chat cho FamilyId: {FamilyId}", request.FamilyId);
-
-        // 1. Kiểm tra xác thực người dùng và quyền truy cập
-        var authResult = await _mediator.Send(new ValidateUserAuthenticationQuery(), cancellationToken);
-        if (!authResult.IsSuccess)
-        {
-            string error = authResult.Error ?? ErrorMessages.Unauthorized;
-            string errorSource = authResult.ErrorSource ?? ErrorSources.Authentication;
-            return Result<ChatResponse>.Failure(error, errorSource);
-        }
 
         // 2. Đảm bảo cấu hình giới hạn AI cho gia đình tồn tại
         var ensureConfigResult = await _mediator.Send(new EnsureFamilyAiConfigExistsCommand { FamilyId = request.FamilyId }, cancellationToken);
@@ -143,33 +131,33 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 break;
 
             case ContextType.QA:
-                _logger.LogInformation("Ngữ cảnh là QA. Gọi dịch vụ AI Chat truyền thống với prompt QA.");
-                var qaChatRequest = new ChatRequest
+                _logger.LogInformation("Ngữ cảnh là QA. Gọi dịch vụ LLM Gateway Chat với prompt QA.");
+                var qaLlmChatRequest = new LLMChatCompletionRequest // New LLM DTO
                 {
-                    SessionId = request.SessionId,
-                    ChatInput = request.ChatInput,
-                    Metadata = request.Metadata ?? new Dictionary<string, object>(),
-                    Context = determinedContext,
-                    SystemPrompt = qaSystemPromptContent,
-                    CollectionName = _n8nSettings.Chat.CollectionName
+                    Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
+                    Messages = new List<LLMMessage>
+                    {
+                        new LLMMessage { Role = "system", Content = qaSystemPromptContent! }, // System prompt
+                        new LLMMessage { Role = "user", Content = request.ChatInput } // User input
+                    }
+                    // Temperature, MaxTokens, Stream can be defaulted or configured as needed in the future
                 };
-                qaChatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
-                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { ChatRequest = qaChatRequest }, cancellationToken);
+                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { LLMChatCompletionRequest = qaLlmChatRequest }, cancellationToken);
                 break;
 
             case ContextType.FamilyDataLookup:
-                _logger.LogInformation("Ngữ cảnh là FamilyDataLookup. Gọi dịch vụ AI Chat truyền thống với prompt Family Data Lookup.");
-                var familyDataLookupChatRequest = new ChatRequest
+                _logger.LogInformation("Ngữ cảnh là FamilyDataLookup. Gọi dịch vụ LLM Gateway Chat với prompt Family Data Lookup.");
+                var familyDataLlmChatRequest = new LLMChatCompletionRequest // New LLM DTO
                 {
-                    SessionId = request.SessionId,
-                    ChatInput = request.ChatInput,
-                    Metadata = request.Metadata ?? new Dictionary<string, object>(),
-                    Context = determinedContext,
-                    SystemPrompt = familyDataLookupSystemPromptContent, // Use specific prompt
-                    CollectionName = _n8nSettings.Chat.CollectionName
+                    Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
+                    Messages = new List<LLMMessage>
+                    {
+                        new LLMMessage { Role = "system", Content = familyDataLookupSystemPromptContent! }, // System prompt
+                        new LLMMessage { Role = "user", Content = request.ChatInput } // User input
+                    }
+                    // Temperature, MaxTokens, Stream can be defaulted or configured as needed in the future
                 };
-                familyDataLookupChatRequest.Metadata[MetadataConstants.FamilyId] = request.FamilyId.ToString();
-                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { ChatRequest = familyDataLookupChatRequest }, cancellationToken);
+                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { LLMChatCompletionRequest = familyDataLlmChatRequest }, cancellationToken);
                 break;
 
             case ContextType.DataGeneration:
@@ -214,32 +202,24 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                         {
                             try
                             {
-                                var fileBytes = await DownloadImageBytesAsync(attachment.Url, cancellationToken); // This method can also download PDFs
-                                if (fileBytes != null && fileBytes.Length > 0)
+                                _logger.LogInformation("Đang xử lý tệp đính kèm qua OCR: {FileName} ({ContentType})", attachment.Url, attachment.ContentType);
+                                var ocrResult = await _mediator.Send(new ProcessOcrFileCommand
                                 {
-                                    _logger.LogInformation("Đang xử lý tệp đính kèm qua OCR: {FileName} ({ContentType})", attachment.Url, attachment.ContentType);
-                                    var ocrResult = await _mediator.Send(new ProcessOcrFileCommand
-                                    {
-                                        FileBytes = fileBytes,
-                                        ContentType = attachment.ContentType,
-                                        FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
-                                    }, cancellationToken);
+                                    FileUrl = attachment.Url, // Pass URL directly
+                                    ContentType = attachment.ContentType,
+                                    FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
+                                }, cancellationToken);
 
-                                    if (ocrResult.IsSuccess && !string.IsNullOrWhiteSpace(ocrResult.Value?.Text))
-                                    {
-                                        combinedChatInput.AppendLine().AppendLine("--- Nội dung được trích xuất từ tệp đính kèm ---");
-                                        combinedChatInput.AppendLine(ocrResult.Value.Text);
-                                        combinedChatInput.AppendLine("--------------------------------------------------");
-                                        _logger.LogInformation("Đã trích xuất thành công nội dung từ tệp đính kèm {FileName}. Độ dài: {Length}", attachment.Url, ocrResult.Value.Text.Length);
-                                    }
-                                    else
-                                    {
-                                        _logger.LogWarning("Không thể trích xuất nội dung từ tệp đính kèm {FileName} qua OCR: {Error}", attachment.Url, ocrResult.Error ?? "Kết quả Text rỗng");
-                                    }
+                                if (ocrResult.IsSuccess && !string.IsNullOrWhiteSpace(ocrResult.Value?.Text))
+                                {
+                                    combinedChatInput.AppendLine().AppendLine("--- Nội dung được trích xuất từ tệp đính kèm ---");
+                                    combinedChatInput.AppendLine(ocrResult.Value.Text);
+                                    combinedChatInput.AppendLine("--------------------------------------------------");
+                                    _logger.LogInformation("Đã trích xuất thành công nội dung từ tệp đính kèm {FileName}. Độ dài: {Length}", attachment.Url, ocrResult.Value.Text.Length);
                                 }
                                 else
                                 {
-                                    _logger.LogWarning("Không thể tải xuống hoặc tệp đính kèm rỗng từ URL: {Url}", attachment.Url);
+                                    _logger.LogWarning("Không thể trích xuất nội dung từ tệp đính kèm {FileName} qua OCR: {Error}", attachment.Url, ocrResult.Error ?? "Kết quả Text rỗng");
                                 }
                             }
                             catch (Exception ex)
@@ -311,33 +291,41 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                     {
                         try
                         {
-                            var imageBytes = await DownloadImageBytesAsync(attachment.Url, cancellationToken);
-                            if (imageBytes != null && imageBytes.Length > 0)
+                            _logger.LogInformation("Đang tải và xử lý hình ảnh cho nhận dạng khuôn mặt: {ImageUrl}", attachment.Url);
+                            var processImageCommand = new ProcessOcrFileCommand
                             {
-                                var detectFacesCommand = new DetectFacesCommand
-                                {
-                                    FamilyId = request.FamilyId,
-                                    ImageBytes = imageBytes,
-                                    FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath),
-                                    ContentType = attachment.ContentType,
-                                    ReturnCrop = true,
-                                    ResizeImageForAnalysis = false
-                                };
+                                FileUrl = attachment.Url,
+                                ContentType = attachment.ContentType,
+                                FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
+                            };
+                            var processedImageResult = await _mediator.Send(processImageCommand, cancellationToken);
 
-                                var detectionResult = await _mediator.Send(detectFacesCommand, cancellationToken);
-                                if (detectionResult.IsSuccess && detectionResult.Value != null)
-                                {
-                                    detectionResult.Value.OriginalImageUrl = attachment.Url;
-                                    faceDetectionResults.Add(detectionResult.Value);
-                                }
-                                else
-                                {
-                                    _logger.LogWarning("Không thể nhận dạng khuôn mặt từ URL {ImageUrl}: {Error}", attachment.Url, detectionResult.Error);
-                                }
+                            if (!processedImageResult.IsSuccess || processedImageResult.Value?.ProcessedBytes == null)
+                            {
+                                _logger.LogWarning("Không thể tải hoặc xử lý hình ảnh từ URL {ImageUrl} để nhận dạng khuôn mặt: {Error}", attachment.Url, processedImageResult.Error);
+                                continue; // Skip to next attachment
+                            }
+
+                            // Now use the processed bytes with DetectFacesCommand
+                            var detectFacesCommand = new DetectFacesCommand
+                            {
+                                FamilyId = request.FamilyId,
+                                ImageBytes = processedImageResult.Value.ProcessedBytes, // Use processed bytes
+                                FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath),
+                                ContentType = attachment.ContentType,
+                                ReturnCrop = true,
+                                ResizeImageForAnalysis = false
+                            };
+
+                            var detectionResult = await _mediator.Send(detectFacesCommand, cancellationToken);
+                            if (detectionResult.IsSuccess && detectionResult.Value != null)
+                            {
+                                detectionResult.Value.OriginalImageUrl = attachment.Url;
+                                faceDetectionResults.Add(detectionResult.Value);
                             }
                             else
                             {
-                                _logger.LogWarning("Không thể tải xuống hoặc tệp hình ảnh rỗng từ URL: {ImageUrl}", attachment.Url);
+                                _logger.LogWarning("Không thể nhận dạng khuôn mặt từ URL {ImageUrl}: {Error}", attachment.Url, detectionResult.Error);
                             }
                         }
                         catch (Exception ex)
@@ -391,23 +379,6 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
         return finalChatResponseResult;
     }
 
-    private async Task<byte[]?> DownloadImageBytesAsync(string imageUrl, CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var httpClient = _httpClientFactory.CreateClient();
-            return await httpClient.GetByteArrayAsync(imageUrl, cancellationToken);
-        }
-        catch (HttpRequestException httpEx)
-        {
-            _logger.LogError(httpEx, "Lỗi HTTP khi tải xuống hình ảnh từ URL: {ImageUrl}", imageUrl);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Lỗi khi tải xuống hình ảnh từ URL: {ImageUrl}", imageUrl);
-            return null;
-        }
-    }
+
 }
 
