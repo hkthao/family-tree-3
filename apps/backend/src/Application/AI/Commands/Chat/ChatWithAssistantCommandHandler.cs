@@ -14,7 +14,9 @@ using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.OCR.Commands; // NEW
+using backend.Application.Knowledge.DTOs; // NEW
 using backend.Application.Prompts.Queries.GetPromptById;
+using backend.Application.Knowledge; // NEW
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -30,17 +32,39 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
     private readonly IMediator _mediator;
     private readonly LLMGatewaySettings _llmGatewaySettings; // Changed from ChatSettings
     private readonly IAuthorizationService _authorizationService;
+    private readonly IKnowledgeService _knowledgeService; // NEW
 
     public ChatWithAssistantCommandHandler(
         ILogger<ChatWithAssistantCommandHandler> logger,
         IMediator mediator,
         IOptions<LLMGatewaySettings> llmGatewaySettings, // Inject IOptions<LLMGatewaySettings>
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        IKnowledgeService knowledgeService) // NEW
     {
         _logger = logger;
         _mediator = mediator;
         _llmGatewaySettings = llmGatewaySettings.Value; // Extract LLMGatewaySettings
         _authorizationService = authorizationService;
+        _knowledgeService = knowledgeService; // NEW
+    }
+
+    private async Task<Result<string>> GetSystemPromptContent(string promptCode, CancellationToken cancellationToken)
+    {
+        var promptResult = await _mediator.Send(new GetPromptByIdQuery { Code = promptCode }, cancellationToken);
+
+        if (!promptResult.IsSuccess)
+        {
+            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database. Lỗi: {Error}", promptCode, promptResult.Error);
+            return Result<string>.Failure($"Không thể cấu hình hệ thống AI chat. Lỗi khi lấy prompt '{promptCode}'.", promptResult.ErrorSource ?? "Unknown");
+        }
+
+        if (string.IsNullOrWhiteSpace(promptResult.Value?.Content))
+        {
+            _logger.LogError("Nội dung system prompt cho '{PromptCode}' lấy từ database là null hoặc trống.", promptCode);
+            return Result<string>.Failure($"Không thể cấu hình hệ thống AI chat. Nội dung prompt '{promptCode}' rỗng.", "Configuration");
+        }
+
+        return Result<string>.Success(promptResult.Value.Content);
     }
 
 
@@ -89,34 +113,6 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
             determinedContext = ContextType.QA; // Fallback to QA
         }
 
-        // 5. Lấy System Prompt chung cho QA (dùng cho các ngữ cảnh chat thông thường)
-        string? qaSystemPromptContent = null;
-        var qaPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_QA_PROMPT }, cancellationToken);
-        if (qaPromptResult.IsSuccess && qaPromptResult.Value?.Content != null)
-        {
-            qaSystemPromptContent = qaPromptResult.Value.Content;
-        }
-
-        if (string.IsNullOrWhiteSpace(qaSystemPromptContent))
-        {
-            return Result<ChatResponse>.Failure("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.", ErrorSources.InvalidConfiguration);
-        }
-
-        // --- NEW: Lấy System Prompt cho Family Data Lookup --- 
-        string? familyDataLookupSystemPromptContent = null;
-        var familyDataLookupPromptResult = await _mediator.Send(new GetPromptByIdQuery { Code = PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT }, cancellationToken);
-        if (familyDataLookupPromptResult.IsSuccess && familyDataLookupPromptResult.Value?.Content != null)
-        {
-            familyDataLookupSystemPromptContent = familyDataLookupPromptResult.Value.Content;
-        }
-
-        if (string.IsNullOrWhiteSpace(familyDataLookupSystemPromptContent))
-        {
-            _logger.LogError("Không thể lấy system prompt '{PromptCode}' từ database và không có prompt mặc định. Trả về lỗi.", PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT);
-            return Result<ChatResponse>.Failure("Không thể cấu hình hệ thống AI chat. Vui lòng liên hệ quản trị viên.", ErrorSources.InvalidConfiguration);
-        }
-        // --- END NEW ---
-
         // 6. Xử lý dựa trên ngữ cảnh
         Result<ChatResponse> finalChatResponseResult;
         switch (determinedContext)
@@ -131,7 +127,13 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 break;
 
             case ContextType.QA:
-                _logger.LogInformation("Ngữ cảnh là QA. Gọi dịch vụ LLM Gateway Chat với prompt QA.");
+                _logger.LogInformation("Ngữ cảnh là QA. Lấy prompt QA và gọi dịch vụ LLM Gateway Chat.");
+                var qaSystemPromptResult = await GetSystemPromptContent(PromptConstants.CHAT_QA_PROMPT, cancellationToken);
+                if (!qaSystemPromptResult.IsSuccess)
+                {
+                    return Result<ChatResponse>.Failure(qaSystemPromptResult.Error!, qaSystemPromptResult.ErrorSource!);
+                }
+                string qaSystemPromptContent = qaSystemPromptResult.Value!;
                 var qaLlmChatRequest = new LLMChatCompletionRequest // New LLM DTO
                 {
                     Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
@@ -146,18 +148,59 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 break;
 
             case ContextType.FamilyDataLookup:
-                _logger.LogInformation("Ngữ cảnh là FamilyDataLookup. Gọi dịch vụ LLM Gateway Chat với prompt Family Data Lookup.");
-                var familyDataLlmChatRequest = new LLMChatCompletionRequest // New LLM DTO
+                _logger.LogInformation("Ngữ cảnh là FamilyDataLookup. Lấy prompt Family Data Lookup, thực hiện tìm kiếm tri thức và gọi LLM Gateway.");
+                var familyDataLookupSystemPromptResult = await GetSystemPromptContent(PromptConstants.CHAT_FAMILY_DATA_LOOKUP_PROMPT, cancellationToken);
+                if (!familyDataLookupSystemPromptResult.IsSuccess)
                 {
-                    Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
+                    return Result<ChatResponse>.Failure(familyDataLookupSystemPromptResult.Error!, familyDataLookupSystemPromptResult.ErrorSource!);
+                }
+                string familyDataLookupSystemPromptContent = familyDataLookupSystemPromptResult.Value!;
+
+                var knowledgeResult = await _knowledgeService.SearchKnowledgeBase(
+                    request.FamilyId,
+                    request.ChatInput,
+                    topK: 15, // Lấy top 15 kết quả
+                    allowedVisibility: new List<string> { "public", "private" } // Convert to lowercase
+                );
+                _logger.LogInformation("Tìm thấy {Count} kết quả từ cơ sở tri thức cho FamilyId: {FamilyId}", knowledgeResult?.Count ?? 0, request.FamilyId);
+
+                StringBuilder enrichedPrompt = new StringBuilder();
+                enrichedPrompt.AppendLine("Dưới đây là một số thông tin liên quan từ cơ sở tri thức:");
+
+                if (knowledgeResult != null && knowledgeResult.Any())
+                {
+                    // Lọc và lấy top 5 kết quả có điểm cao nhất
+                    var top5Knowledge = knowledgeResult.OrderByDescending(r => r.Score)
+                                                        .Take(5)
+                                                        .ToList();
+
+                    foreach (var item in top5Knowledge)
+                    {
+                        enrichedPrompt.AppendLine($"- Nội dung: {item.Summary}");
+                        // Thêm các trường thông tin khác nếu cần
+                    }
+                    enrichedPrompt.AppendLine();
+                }
+                else
+                {
+                    enrichedPrompt.AppendLine("Không tìm thấy thông tin liên quan trong cơ sở tri thức.");
+                }
+
+                enrichedPrompt.AppendLine("Dựa trên thông tin trên và câu hỏi của người dùng, hãy trả lời:");
+                enrichedPrompt.AppendLine(request.ChatInput);
+
+
+                _logger.LogInformation("Đã tạo prompt được làm giàu cho FamilyDataLookup.");
+                var enrichedLlmChatRequest = new LLMChatCompletionRequest
+                {
+                    Model = _llmGatewaySettings.LlmModel,
                     Messages = new List<LLMMessage>
                     {
-                        new LLMMessage { Role = "system", Content = familyDataLookupSystemPromptContent! }, // System prompt
-                        new LLMMessage { Role = "user", Content = request.ChatInput } // User input
+                        new LLMMessage { Role = "system", Content = familyDataLookupSystemPromptContent! },
+                        new LLMMessage { Role = "user", Content = enrichedPrompt.ToString() }
                     }
-                    // Temperature, MaxTokens, Stream can be defaulted or configured as needed in the future
                 };
-                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { LLMChatCompletionRequest = familyDataLlmChatRequest }, cancellationToken);
+                finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { LLMChatCompletionRequest = enrichedLlmChatRequest }, cancellationToken);
                 break;
 
             case ContextType.DataGeneration:

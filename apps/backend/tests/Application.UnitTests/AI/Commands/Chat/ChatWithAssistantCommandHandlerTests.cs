@@ -22,6 +22,7 @@ using Moq;
 using Xunit;
 using backend.Application.OCR.Commands; // NEW
 using backend.Application.Files.DTOs; // NEW
+using backend.Application.Knowledge; // NEW
 
 namespace backend.Application.UnitTests.AI.Commands.Chat;
 
@@ -31,6 +32,7 @@ public class ChatWithAssistantCommandHandlerTests
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IOptions<LLMGatewaySettings>> _mockLLMGatewaySettings;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IKnowledgeService> _mockKnowledgeService; // NEW
     private readonly ChatWithAssistantCommandHandler _handler;
 
     public ChatWithAssistantCommandHandlerTests()
@@ -39,6 +41,7 @@ public class ChatWithAssistantCommandHandlerTests
         _mockMediator = new Mock<IMediator>();
         _mockLLMGatewaySettings = new Mock<IOptions<LLMGatewaySettings>>();
         _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockKnowledgeService = new Mock<IKnowledgeService>(); // NEW
 
         _mockLLMGatewaySettings.Setup(o => o.Value).Returns(new LLMGatewaySettings
         {
@@ -52,7 +55,8 @@ public class ChatWithAssistantCommandHandlerTests
             _loggerMock.Object,
             _mockMediator.Object,
             _mockLLMGatewaySettings.Object,
-            _mockAuthorizationService.Object
+            _mockAuthorizationService.Object,
+            _mockKnowledgeService.Object // NEW
         );
     }
 }
