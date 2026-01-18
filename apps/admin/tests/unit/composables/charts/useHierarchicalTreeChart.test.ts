@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { useHierarchicalTreeChart } from '@/composables/charts/useHierarchicalTreeChart';
+import { useHierarchicalTreeChart, RENDER_SAFE_THRESHOLD } from '@/composables/charts/useHierarchicalTreeChart';
 import { transformFamilyData, determineMainChartId } from '@/composables/charts/hierarchicalTreeChart.logic';
 import { createDefaultF3Adapter } from '@/composables/charts/f3.adapter';
 import type { MemberDto, Relationship } from '@/types';
@@ -28,9 +28,19 @@ vi.mock('@/composables/charts/f3.adapter', () => ({
   })),
 }));
 
+const mockEmit = vi.fn();
+const mockT = vi.fn((key, values) => {
+  if (values && typeof values === 'object') {
+    let result = key;
+    for (const [k, v] of Object.entries(values)) {
+      result = result.replace(`{${k}}`, String(v));
+    }
+    return result;
+  }
+  return key;
+});
+
 describe('useHierarchicalTreeChart', () => {
-  const mockEmit = vi.fn();
-  const mockT = vi.fn((key) => key);
   const mockMembers: MemberDto[] = [
     { id: '1', firstName: 'John', lastName: 'Doe', fullName: 'John Doe', gender: Gender.Male, isRoot: true, familyId: 'f1' },
     { id: '2', firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', gender: Gender.Female, isRoot: false, familyId: 'f1' },
@@ -38,15 +48,17 @@ describe('useHierarchicalTreeChart', () => {
   const mockRelationships: Relationship[] = [
     { id: 'r1', sourceMemberId: '1', targetMemberId: '2', type: RelationshipType.Husband, familyId: 'f1' },
   ];
-  const mockTransformedData = [{ id: '1', data: {}, rels: {} }];
+  const mockTransformedData = [{ id: '1', data: { fullName: 'John Doe', gender: 'M' }, rels: { spouses: [], children: [] } }];
 
-    let mockF3Adapter: ReturnType<typeof createDefaultF3Adapter>;
-    const mockOnNodeClick = vi.fn(); // NEW: Mock onNodeClick function
+  let mockF3Adapter: ReturnType<typeof createDefaultF3Adapter>;
+  const mockOnNodeClick = vi.fn(); // NEW: Mock onNodeClick function
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockF3Adapter = createDefaultF3Adapter(mockEmit, mockOnNodeClick);
 
-    vi.mocked(transformFamilyData).mockReturnValue({ filteredMembers: mockMembers, transformedData: mockTransformedData } as any);
+    // Updated mockReturnValue to match new transformFamilyData return type
+    vi.mocked(transformFamilyData).mockReturnValue({ members: mockMembers, transformedData: mockTransformedData } as any);
     vi.mocked(determineMainChartId).mockReturnValue('1');
   });
 
@@ -69,7 +81,7 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     expect(transformFamilyData).toHaveBeenCalledWith(
       mockMembers,
@@ -87,7 +99,7 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     expect(mockF3Adapter.clearChart).toHaveBeenCalledWith(chartContainer.value);
   });
@@ -101,7 +113,7 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     expect(mockF3Adapter.createChart).toHaveBeenCalledWith(
       chartContainer.value,
@@ -118,10 +130,10 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     expect(determineMainChartId).toHaveBeenCalledWith(
-      mockMembers,
+      mockMembers, // Now direct members not filteredMembers
       mockTransformedData,
       '1'
     );
@@ -138,7 +150,7 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     // Get the chart instance created by createChart mock
     const createdChartInstance = (mockF3Adapter.createChart as Mock).mock.results[0].value;
@@ -156,7 +168,7 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = document.createElement('div');
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
 
     expect(mockF3Adapter.updateChart).not.toHaveBeenCalled();
   });
@@ -175,16 +187,7 @@ describe('useHierarchicalTreeChart', () => {
 
     // Simulate rendering
     const { actions } = useHierarchicalTreeChart({ familyId: 'f1', members: mockMembers, relationships: mockRelationships, rootId: null }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
-    await actions.renderChart(mockMembers);
-    
-    // Simulate onUnmounted: The composable's onUnmounted hook should call clearChart
-    // This is tested by ensuring cleanup logic is triggered. For a composable,
-    // this often means testing the effect of the component unmounting.
-    // In a unit test for a composable, you might not directly trigger Vue lifecycle hooks.
-    // Instead, you'd test the behavior that the hook is responsible for.
-    // For now, let's just verify clearChart is called if a chart instance exists.
-    // The previous test block was convoluted. Simpler: if chartInstance was created,
-    // and cleanup is assumed to run, then clearChart should be called.
+    await actions.renderChart(mockMembers, mockRelationships); // Updated arguments
     
     // As the `useHierarchicalTreeChart` creates the chart on `onMounted`, and cleans it on `onUnmounted`.
     // In Vitest, you can simulate unmount by calling `cleanup` if the composable returns a dispose function,
@@ -214,14 +217,14 @@ describe('useHierarchicalTreeChart', () => {
     }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
 
     chartContainer.value = null; // Ensure container is null
-    await actions.renderChart(mockMembers);
+    await actions.renderChart(mockMembers, mockRelationships);
 
     expect(mockF3Adapter.clearChart).not.toHaveBeenCalled();
     expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
   });
 
       it('should display empty message if transformedData is empty', async () => {
-        vi.mocked(transformFamilyData).mockReturnValue({ filteredMembers: [], transformedData: [] });
+        vi.mocked(transformFamilyData).mockReturnValue({ members: [], transformedData: [] }); // Updated mock return type
   
         const { actions, chartContainer } = useHierarchicalTreeChart({
           familyId: 'f1',
@@ -231,8 +234,28 @@ describe('useHierarchicalTreeChart', () => {
         }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
   
         chartContainer.value = document.createElement('div');
-        await actions.renderChart([]);
+        await actions.renderChart([], []); // Updated arguments
   
         expect(chartContainer.value.innerHTML).toContain('familyTree.noMembersMessage');
         expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
-      });});
+      });
+    
+      it('should prevent rendering and display error message if transformedData exceeds RENDER_SAFE_THRESHOLD', async () => {
+        const mockMembersLarge = Array.from({ length: 101 }, (_, i) => ({ id: String(i), firstName: `Test ${i}`, lastName: 'Member', fullName: `Test ${i} Member`, gender: Gender.Male, familyId: 'f1' }));
+        const largeTransformedData = Array.from({ length: 101 }, (_, i) => ({ id: String(i), data: { fullName: `Test ${i}`, gender: 'M' }, rels: { spouses: [], children: [] } }));
+        vi.mocked(transformFamilyData).mockReturnValue({ members: mockMembersLarge, transformedData: largeTransformedData as any }); // Mock large data
+  
+        const { actions, chartContainer } = useHierarchicalTreeChart({
+          familyId: 'f1',
+          members: mockMembersLarge, // Updated to provide members matching the large data size
+          relationships: [],
+          rootId: null,
+        }, mockEmit, { t: mockT, f3Adapter: mockF3Adapter }, mockOnNodeClick);
+  
+        chartContainer.value = document.createElement('div');
+        await actions.renderChart(mockMembersLarge, []); // Also updated renderChart call
+  
+        expect(mockT).toHaveBeenCalledWith('familyTree.renderingLimitExceeded', { limit: 100 });
+        expect(mockF3Adapter.createChart).not.toHaveBeenCalled();
+      });
+});

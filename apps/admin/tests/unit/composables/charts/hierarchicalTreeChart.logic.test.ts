@@ -78,13 +78,13 @@ describe('hierarchicalTreeChart.logic', () => {
       expect(transformed.transformedData[0].rels.children).toEqual([]);
       expect(transformed.transformedData[0].rels.father).toBeUndefined();
       expect(transformed.transformedData[0].rels.mother).toBeUndefined();
-      expect(transformed.filteredMembers.length).toBe(1);
+      expect(transformed.members.length).toBe(1); // Updated
     });
 
     it('should handle empty members array', () => {
       const transformed = transformFamilyData([], mockRelationships, null);
       expect(transformed.transformedData).toEqual([]);
-      expect(transformed.filteredMembers).toEqual([]);
+      expect(transformed.members).toEqual([]); // Updated
     });
 
     it('should handle gender undefined', () => {
@@ -104,18 +104,18 @@ describe('hierarchicalTreeChart.logic', () => {
     ] as any; // Cast to any to simplify mock type
 
     it('should return providedRootId if it exists in transformedData', () => {
-      const result = determineMainChartId(mockMembers, transformedData, '2');
+      const result = determineMainChartId(mockMembers, transformedData, '2'); // Updated parameter name
       expect(result).toBe('2');
     });
 
     it('should return the ID of the root member if providedRootId is null or not found', () => {
-      const result = determineMainChartId(mockMembers, transformedData, null);
+      const result = determineMainChartId(mockMembers, transformedData, null); // Updated parameter name
       expect(result).toBe('1'); // John Doe is marked as isRoot: true in mockMembers
     });
 
     it('should return the first transformedData ID if no root member and no providedRootId', () => {
       const noRootMembers: MemberDto[] = mockMembers.map(m => ({ ...m, isRoot: false }));
-      const result = determineMainChartId(noRootMembers, transformedData, null);
+      const result = determineMainChartId(noRootMembers, transformedData, null); // Updated parameter name
       expect(result).toBe('1'); // First item in transformedData is '1'
     });
 
