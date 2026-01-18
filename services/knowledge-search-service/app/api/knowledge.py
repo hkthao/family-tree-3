@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
 from ..core.lancedb import lancedb_service
+from ..core.embeddings import embedding_service
 from ..schemas.vectors import VectorData, DeleteVectorRequest
 from ..schemas.knowledge_dtos import KnowledgeIndexRequest
 

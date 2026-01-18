@@ -23,6 +23,29 @@ class LanceDBService:
     def _get_table_name(self, family_id: str) -> str:
         return f"family_{family_id}"
 
+    def _create_table_if_not_exists(self, table_name: str):
+        """
+        Ensures a LanceDB table exists. If not, it creates a new one
+        with a schema derived from VectorData.
+        """
+        if table_name not in self.db.table_names():
+            logger.info(f"Table '{table_name}' does not exist. Creating it.")
+            # Define schema based on VectorData for initial table creation
+            schema = pa.schema([
+                pa.field("vector", pa.list_(pa.float32(),
+                                            EMBEDDING_DIMENSIONS)),
+                pa.field("family_id", pa.string()),
+                pa.field("entity_id", pa.string()),
+                pa.field("type", pa.string()),
+                pa.field("visibility", pa.string()),
+                pa.field("name", pa.string()),
+                pa.field("summary", pa.string()),
+                pa.field("metadata", pa.string())
+            ])
+            # Create an empty table with the defined schema
+            self.db.create_table(table_name, schema=schema)
+            logger.info(f"Table '{table_name}' created successfully.")
+
     def search_family_table(
         self,
         family_id: str,
@@ -190,6 +213,9 @@ class LanceDBService:
             logger.warning("No vector data provided to add.")
             return
 
+        # Ensure the table exists
+        self._create_table_if_not_exists(table_name)
+
         processed_data = []
         for v_data in vectors_data:
             item = v_data.model_dump(exclude_none=True)
@@ -250,6 +276,8 @@ class LanceDBService:
         Deletes vector entries from the specified LanceDB table based on
         family_id and optionally entity_id, type, or a custom where_clause.
         """
+        # Ensure the table exists before trying to delete
+        self._create_table_if_not_exists(table_name)
         if delete_request.where_clause:
             filter_str = delete_request.where_clause
             logger.info(f"Deleting vectors from table '{table_name}' using "
