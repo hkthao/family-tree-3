@@ -1,0 +1,268 @@
+## Service: `llm-gateway-service`
+
+### 🎯 Mục tiêu
+
+Xây dựng một **Python microservice** đóng vai trò **LLM Gateway**, cung cấp API tương thích OpenAI-style, cho phép:
+
+* Nhận `system prompt`
+* Nhận `chat messages`
+* Nhận các config như `temperature`, `max_tokens`
+* Gọi backend LLM:
+
+  * Ollama (local)
+  * OpenAI (cloud)
+* Trả kết quả text thuần (không agent, không search)
+
+---
+
+## 1. Tech stack BẮT BUỘC
+
+* Python 3.10+
+* FastAPI
+* httpx (async)
+* pydantic
+* uvicorn
+
+**KHÔNG dùng**:
+
+* LangChain
+* Agent framework
+* Vector DB
+* Tool calling
+
+---
+
+## 2. Cấu trúc thư mục PHẢI TẠO
+
+```text
+llm-gateway-service/
+├── app/
+│   ├── main.py
+│   ├── api/
+│   │   └── chat.py
+│   ├── llm/
+│   │   ├── base.py
+│   │   ├── ollama.py
+│   │   └── openai.py
+│   ├── schemas/
+│   │   └── chat.py
+│   ├── config.py
+│   └── prompt_utils.py
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 3. API SPEC (PHẢI GIỐNG OPENAI)
+
+### Endpoint
+
+```
+POST /v1/chat/completions
+```
+
+### Request body
+
+```json
+{
+  "model": "ollama:qwen2.5",
+  "messages": [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "Tóm tắt thông tin về Cao Tải" }
+  ],
+  "temperature": 0.0,
+  "max_tokens": 512,
+  "stream": false
+}
+```
+
+---
+
+### Response body (tối giản nhưng tương thích)
+
+```json
+{
+  "id": "chatcmpl-001",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Cao Tải được ghi nhận là..."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+---
+
+## 4. Quy ước chọn backend LLM
+
+* Nếu `model` bắt đầu bằng:
+
+  * `ollama:` → dùng Ollama
+  * `openai:` → dùng OpenAI
+
+Ví dụ:
+
+* `ollama:qwen2.5`
+* `openai:gpt-4.1-mini`
+
+---
+
+## 5. Interface LLM (PHẢI TÁCH RIÊNG)
+
+### `app/llm/base.py`
+
+```python
+from abc import ABC, abstractmethod
+
+class BaseLLM(ABC):
+    @abstractmethod
+    async def chat(self, messages, temperature, max_tokens):
+        pass
+```
+
+---
+
+## 6. Ollama implementation
+
+### `app/llm/ollama.py`
+
+* Gọi API:
+
+  ```
+  POST http://localhost:11434/api/chat
+  ```
+
+* Payload:
+
+  ```json
+  {
+    "model": "qwen2.5",
+    "messages": [...],
+    "stream": false,
+    "options": {
+      "temperature": 0.0
+    }
+  }
+  ```
+
+* Parse:
+
+  ```json
+  response.message.content
+  ```
+
+---
+
+## 7. OpenAI implementation
+
+### `app/llm/openai.py`
+
+* Dùng OpenAI Python SDK (async)
+* Dùng API `responses.create`
+* Map `messages` sang input text
+* Chỉ cần lấy `output_text`
+
+---
+
+## 8. Router logic (QUAN TRỌNG)
+
+### `app/api/chat.py`
+
+Luồng xử lý:
+
+1. Parse request
+2. Tách provider từ `model`
+3. Init LLM tương ứng
+4. Gọi `llm.chat(...)`
+5. Wrap kết quả về OpenAI-style response
+
+---
+
+## 9. Prompt handling
+
+* **KHÔNG** hard-code prompt
+* Client gửi:
+
+  * `system`
+  * `user`
+  * `assistant` (nếu có)
+
+Service chỉ **forward nguyên messages**
+
+---
+
+## 10. Config file
+
+### `app/config.py`
+
+```python
+OLLAMA_BASE_URL=http://localhost:11434
+OPENAI_API_KEY=sk-xxx
+DEFAULT_TEMPERATURE=0.0
+```
+
+---
+
+## 11. Yêu cầu chất lượng
+
+* Async hoàn toàn
+* Không crash nếu model không tồn tại
+* Log rõ:
+
+  * provider
+  * model
+  * token config
+* Trả lỗi HTTP 400 nếu request sai
+
+---
+
+## 12. Những thứ KHÔNG ĐƯỢC LÀM
+
+❌ Không gộp Ollama + OpenAI vào cùng file
+❌ Không viết logic task / summary / gia phả
+❌ Không parse nội dung trả về thành JSON
+❌ Không tự thêm system prompt
+
+---
+
+## 13. Tiêu chí hoàn thành
+
+Service được coi là hoàn thành khi:
+
+* Có thể gọi bằng curl giống OpenAI
+* Đổi `model` là đổi backend
+* knowledge-search-service có thể gọi thẳng
+
+---
+
+## 14. Gợi ý test nhanh
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama:qwen2.5",
+    "messages": [
+      {"role": "system", "content": "You summarize text."},
+      {"role": "user", "content": "Tóm tắt về Cao Tải"}
+    ],
+    "temperature": 0
+  }'
+```
+
+---
+
+## 15. GHI CHÚ CUỐI (rất quan trọng)
+
+> `llm-gateway-service` **KHÔNG PHẢI AI AGENT**
+> Nó là **infra service**, càng ngu càng tốt
+> Toàn bộ intelligence nằm ở prompt phía caller
+
+---
