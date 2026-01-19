@@ -4,6 +4,7 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
+using backend.Application.MemberFaces.Commands.SyncMemberFacesToKnowledgeService; // NEW
 using backend.Application.MemberFaces.Queries.ExportMemberFaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.GetMemberFacesByMemberId;
@@ -123,5 +124,20 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
         // Validation check for familyId is now done within the command handler or implicitly by model binding
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201);
+    }
+
+    /// <summary>
+    /// Đồng bộ hóa dữ liệu khuôn mặt thành viên với knowledge service.
+    /// </summary>
+    /// <param name="command">Lệnh đồng bộ hóa với các tùy chọn như FamilyId và ForceResyncAll.</param>
+    /// <returns>Kết quả của quá trình đồng bộ hóa.</returns>
+    [HttpPost("sync-to-knowledge")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)] // For unauthorized (non-admin) access
+    public async Task<IActionResult> SyncMemberFacesToKnowledgeService([FromBody] SyncMemberFacesToKnowledgeServiceCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 }
