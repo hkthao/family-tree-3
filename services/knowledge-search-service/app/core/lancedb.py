@@ -6,100 +6,45 @@ import pyarrow as pa
 import json
 from uuid import UUID
 
-
 from ..config import LANCEDB_PATH, TEXT_EMBEDDING_DIMENSIONS, FACE_EMBEDDING_DIMENSIONS
 from ..schemas.vectors import (
     VectorData, UpdateVectorRequest, DeleteVectorRequest, RebuildVectorRequest
 )
-from ..core.embeddings import embedding_service
+from ..schemas.lancedb_schemas import KNOWLEDGE_LANCEDB_SCHEMA, FACE_LANCEDB_SCHEMA
+from ..core.embeddings import EmbeddingService # Import the class, not the instance
 
 
-class LanceDBService:
+class LanceDBBaseService:
     def __init__(self):
-        logger.info("Connecting to LanceDB at: "
-                    f"{LANCEDB_PATH}")
+        logger.info(f"Connecting to LanceDB at: {LANCEDB_PATH}")
         self.db = lancedb.connect(LANCEDB_PATH)
         logger.info("Connected to LanceDB.")
 
-    def _get_table_name(self, family_id: str) -> str:
-        return f"family_{family_id}"
-
-    def _create_table_if_not_exists(self, table_name: str):
+    def _create_table_if_not_exists(self, table_name: str, schema: pa.Schema):
         """
-        Ensures a LanceDB table exists. If not, it creates a new one
-        with a schema derived from VectorData.
+        Ensures a LanceDB table exists with the given schema.
+        If not, it creates a new one.
         """
         if table_name not in self.db.table_names():
             logger.info(f"Table '{table_name}' does not exist. Creating it.")
-            # Define schema based on VectorData for initial table creation
-            schema = pa.schema([
-                pa.field("vector", pa.list_(pa.float32(),
-                                            TEXT_EMBEDDING_DIMENSIONS)),
-                pa.field("family_id", pa.string()),
-                pa.field("entity_id", pa.string()),
-                pa.field("type", pa.string()),
-                pa.field("visibility", pa.string()),
-                pa.field("name", pa.string()),
-                pa.field("summary", pa.string()),
-                pa.field("metadata", pa.string())
-            ])
-            # Create an empty table with the defined schema
             self.db.create_table(table_name, schema=schema)
             logger.info(f"Table '{table_name}' created successfully.")
 
-    def search_family_table(
-        self,
-        family_id: str,
-        query_vector: List[float],
-        allowed_visibility: List[str],
-        top_k: int
-    ) -> List[Dict[str, Any]]:
-        table_name = self._get_table_name(family_id)
 
-        if table_name not in self.db.table_names():
-            logger.warning(
-                f"Family table '{table_name}' does not exist. "
-                "Returning empty results."
-            )
-            return []
+class KnowledgeLanceDBService(LanceDBBaseService):
+    def __init__(self, embedding_service: EmbeddingService):
+        super().__init__()
+        self.embedding_service = embedding_service
 
-        try:
-            table = self.db.open_table(table_name)
-
-            # Construct the visibility filter
-            visibility_filter = " OR ".join([f"visibility = '{v}'"
-                                             for v in allowed_visibility])
-
-            results = (
-                table.search(query_vector)
-                .where(visibility_filter)
-                .limit(top_k)
-                .to_list()
-            )
-
-            # Format results
-            formatted_results = []
-            for res in results:
-                # Deserialize metadata back to dictionary
-                metadata = json.loads(res.get("metadata", "{}"))
-                formatted_results.append({
-                    "metadata": metadata,  # Return the full metadata dictionary
-                    "summary": res.get("summary"),
-                    # LanceDB returns _distance as score
-                    "score": res.get("_distance")
-                })
-            return formatted_results
-
-        except Exception as e:
-            logger.error(f"Error searching LanceDB table '{table_name}': {e}")
-            return []
+    def _get_knowledge_table_name(self, family_id: str) -> str:
+        return f"family_knowledge_{family_id}"
 
     def create_dummy_table(self, family_id: str):
         """
         Creates a dummy table for testing and demonstration purposes.
         This method should ideally be called once for setup.
         """
-        table_name = self._get_table_name(family_id)
+        table_name = self._get_knowledge_table_name(family_id)
         if table_name in self.db.table_names():
             logger.info(f"Dummy table '{table_name}' already exists. "
                         "Deleting and recreating.")
@@ -183,25 +128,13 @@ class LanceDBService:
         # Generate embeddings for each entry and serialize metadata
         processed_data = []
         for item in data_to_embed:
-            item["vector"] = embedding_service.embed_query(item["summary"])
+            item["vector"] = self.embedding_service.embed_query(item["summary"])
             # Serialize metadata to JSON string
             item["metadata"] = json.dumps(item["metadata"])
             processed_data.append(item)
 
-        # Ensure vector column is of float[EMBEDDING_DIMENSIONS] type
-        # and metadata is string
-        schema = pa.schema([
-            pa.field("vector", pa.list_(pa.float32(), TEXT_EMBEDDING_DIMENSIONS)),
-            pa.field("family_id", pa.string()),
-            pa.field("entity_id", pa.string()),
-            pa.field("type", pa.string()),
-            pa.field("visibility", pa.string()),
-            pa.field("name", pa.string()),
-            pa.field("summary", pa.string()),
-            pa.field("metadata", pa.string())  # Added metadata field
-        ])
         df = pd.DataFrame(processed_data)
-        self.db.create_table(table_name, data=df, schema=schema)
+        self.db.create_table(table_name, data=df, schema=KNOWLEDGE_LANCEDB_SCHEMA)
         logger.info(f"Dummy table '{table_name}' created with "
                     f"{len(processed_data)} entries.")
 
@@ -215,12 +148,12 @@ class LanceDBService:
             return
 
         # Ensure the table exists
-        self._create_table_if_not_exists(table_name)
+        self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
 
         processed_data = []
         for v_data in vectors_data:
             item = v_data.model_dump(exclude_none=True)
-            item["vector"] = embedding_service.embed_query(item["summary"])
+            item["vector"] = self.embedding_service.embed_query(item["summary"])
             # Serialize metadata from Pydantic model to JSON string for
             # LanceDB storage
             item["metadata"] = json.dumps(v_data.metadata)
@@ -250,7 +183,7 @@ class LanceDBService:
 
         # If summary is updated, generate a new vector
         if 'summary' in updates:
-            updates['vector'] = embedding_service.embed_query(
+            updates['vector'] = self.embedding_service.embed_query(
                 updates['summary']
             )
             logger.info(f"Generated new embedding for updated summary in "
@@ -272,13 +205,17 @@ class LanceDBService:
         logger.info(f"Finished update operation for table '{table_name}' "
                     f"with filter '{filter_str}'.")
 
-    def delete_vectors(self, table_name: str, delete_request: DeleteVectorRequest):
+    def delete_vectors(self, table_name: str, delete_request: DeleteVectorRequest) -> int:
         """
         Deletes vector entries from the specified LanceDB table based on
         family_id and optionally entity_id, type, or a custom where_clause.
+        Returns the number of deleted rows.
         """
         # Ensure the table exists before trying to delete
-        self._create_table_if_not_exists(table_name)
+        self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
+        
+        table = self.db.open_table(table_name)
+        
         if delete_request.where_clause:
             filter_str = delete_request.where_clause
             logger.info(f"Deleting vectors from table '{table_name}' using "
@@ -289,33 +226,25 @@ class LanceDBService:
             if delete_request.entity_id is not None:
                 filter_str += f" AND entity_id = '{delete_request.entity_id}'"
             elif delete_request.type is not None:
-                # If entity_id is None but type is provided, delete all
-                # entities of that type within the family
                 filter_str += f" AND type = '{delete_request.type}'"
             else:
-                # If neither entity_id nor type is provided, it implies
-                # deleting all for the family.
-                # This is a dangerous operation, so we should add a safeguard
-                # or require explicit confirmation.
-                # For now, let's assume if only family_id is provided, it
-                # means delete all for that family.
                 logger.warning("No specific entity_id or type provided for "
                                "deletion. Deleting all entries for family_id: "
                                f"{delete_request.family_id}")
-
-        table = self.db.open_table(table_name)
-
-        # LanceDB delete method
-        table.delete(where=filter_str)
-        logger.info(f"Deleted vectors from table '{table_name}' with filter "
+        
+        # LanceDB delete method returns the number of rows deleted.
+        deleted_count = table.delete(where=filter_str)
+        logger.info(f"Deleted {deleted_count} vectors from table '{table_name}' with filter "
                     f"'{filter_str}'.")
+        return deleted_count
+
 
     def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
         """
         Rebuilds vectors for the specified family_id and optional entity_ids
         by re-embedding their summaries.
         """
-        table_name = self._get_table_name(rebuild_request.family_id)
+        table_name = self._get_knowledge_table_name(rebuild_request.family_id)
         if table_name not in self.db.table_names():
             logger.warning(f"Table '{table_name}' does not exist for "
                            "rebuilding. Creating dummy table.")
@@ -335,7 +264,6 @@ class LanceDBService:
             logger.info(f"Rebuilding all vectors for table '{table_name}'.")
 
         # Fetch existing data that needs to be rebuilt
-        # Need to select the 'summary' and 'metadata' field to re-embed
         current_data = table.query().select(["entity_id", "summary", "type",
                                              "visibility", "name",
                                              "family_id", "metadata"]).where(
@@ -348,7 +276,7 @@ class LanceDBService:
 
         re_embedded_data_for_add = []
         for item in current_data:
-            new_vector = embedding_service.embed_query(item["summary"])
+            new_vector = self.embedding_service.embed_query(item["summary"])
             re_embedded_data_for_add.append({
                 "entity_id": item["entity_id"],
                 "family_id": item["family_id"],
@@ -374,63 +302,95 @@ class LanceDBService:
         logger.info(f"Rebuild process for table '{table_name}' completed for "
                     f"{len(re_embedded_data_for_add)} entries.")
 
+    def search_knowledge_table(
+        self,
+        family_id: str,
+        query_vector: List[float],
+        allowed_visibility: List[str],
+        top_k: int
+    ) -> List[Dict[str, Any]]:
+        table_name = self._get_knowledge_table_name(family_id)
+
+        if table_name not in self.db.table_names():
+            logger.warning(
+                f"Family knowledge table '{table_name}' does not exist. "
+                "Returning empty results."
+            )
+            return []
+
+        try:
+            table = self.db.open_table(table_name)
+
+            # Construct the visibility filter
+            visibility_filter = " OR ".join([f"visibility = '{v}'"
+                                             for v in allowed_visibility])
+
+            results = (
+                table.search(query_vector)
+                .where(visibility_filter)
+                .limit(top_k)
+                .to_list()
+            )
+
+            # Format results
+            formatted_results = []
+            for res in results:
+                # Deserialize metadata back to dictionary
+                metadata = json.loads(res.get("metadata", "{}"))
+                formatted_results.append({
+                    "metadata": metadata,  # Return the full metadata dictionary
+                    "summary": res.get("summary"),
+                    # LanceDB returns _distance as score
+                    "score": res.get("_distance")
+                })
+            return formatted_results
+
+        except Exception as e:
+            logger.error(f"Error searching LanceDB knowledge table '{table_name}': {e}")
+            return []
+
+
+class FaceLanceDBService(LanceDBBaseService):
+    def __init__(self):
+        super().__init__()
+
     def _get_face_table_name(self, family_id: str) -> str:
         return f"faces_{family_id}"
-
-    def _create_face_table_if_not_exists(self, family_id: str):
-        table_name = self._get_face_table_name(family_id)
-        if table_name not in self.db.table_names():
-            logger.info(f"Face table '{table_name}' does not exist. Creating it.")
-            # Define schema for face data
-            schema = pa.schema([
-                pa.field("vector", pa.list_(pa.float32(), FACE_EMBEDDING_DIMENSIONS)),
-                pa.field("face_id", pa.string()),
-                pa.field("member_id", pa.string()),
-                pa.field("bounding_box", pa.string()), # Store as JSON string
-                pa.field("confidence", pa.float64()),
-                pa.field("thumbnail_url", pa.string()),
-                pa.field("original_image_url", pa.string()),
-                pa.field("emotion", pa.string()),
-                pa.field("emotion_confidence", pa.float64()),
-                pa.field("vector_db_id", pa.string()),
-                pa.field("is_vector_db_synced", pa.bool_())
-            ])
-            self.db.create_table(table_name, schema=schema)
-            logger.info(f"Face table '{table_name}' created successfully.")
 
     async def add_face_data(self, family_id: str, faces_data: List[Dict]) -> None:
         if not faces_data:
             logger.warning("No face data provided to add.")
             return
 
-        self._create_face_table_if_not_exists(family_id)
         table_name = self._get_face_table_name(family_id)
+        self._create_table_if_not_exists(table_name, FACE_LANCEDB_SCHEMA)
+        
         table = self.db.open_table(table_name)
 
         processed_faces = []
         for face in faces_data:
+            face_copy = face.copy() # Work on a copy to avoid modifying original dict during iteration
             # Chuyển đổi UUID sang string
-            face["member_id"] = str(face["member_id"])
-            face["face_id"] = str(face["face_id"])
-            if face.get("bounding_box"):
-                face["bounding_box"] = json.dumps(face["bounding_box"]) # Chuyển BoundingBox thành JSON string
+            if "member_id" in face_copy:
+                face_copy["member_id"] = str(face_copy["member_id"])
+            if "face_id" in face_copy:
+                face_copy["face_id"] = str(face_copy["face_id"])
+            if face_copy.get("bounding_box"):
+                face_copy["bounding_box"] = json.dumps(face_copy["bounding_box"]) # Chuyển BoundingBox thành JSON string
             
             # Đảm bảo có embedding
-            if not face.get("embedding"):
+            if not face_copy.get("embedding"):
                 raise ValueError("Embedding must be provided for face data.")
-            face["vector"] = face["embedding"]
+            face_copy["vector"] = face_copy["embedding"]
             # Remove embedding field as it's now 'vector'
-            del face["embedding"]
+            del face_copy["embedding"]
             
-            processed_faces.append(face)
+            processed_faces.append(face_copy)
         
         df = pd.DataFrame(processed_faces)
         table.add(df)
         logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
 
-        # The face.vector_db_id (from C# backend) is now stored in LanceDB.
-        # No explicit return from this method is needed, as the API endpoint
-        # will construct the FaceEmbeddingResponse with the ID it received.
     async def search_faces(self, family_id: str, query_embedding: List[float], member_id: Optional[str] = None, top_k: int = 5) -> List[Dict[str, Any]]:
         if not query_embedding:
             raise ValueError("Query embedding must be provided for face search.")
@@ -461,9 +421,28 @@ class LanceDBService:
             # Deserialize bounding_box
             if res.get("bounding_box"):
                 res["bounding_box"] = json.loads(res["bounding_box"])
+            
+            # Try converting face_id to UUID, log error if fails
+            face_uuid = None
+            face_id_str = res.get("face_id")
+            if face_id_str:
+                try:
+                    face_uuid = UUID(face_id_str)
+                except ValueError as e:
+                    logger.error(f"Error converting face_id '{face_id_str}' to UUID: {e}")
+
+            # Try converting member_id to UUID, log error if fails
+            member_uuid = None
+            member_id_str = res.get("member_id")
+            if member_id_str:
+                try:
+                    member_uuid = UUID(member_id_str)
+                except ValueError as e:
+                    logger.error(f"Error converting member_id '{member_id_str}' to UUID: {e}")
+
             formatted_results.append({
-                "face_id": UUID(res.get("face_id")),
-                "member_id": UUID(res.get("member_id")),
+                "face_id": face_uuid,
+                "member_id": member_uuid,
                 "score": res.get("_distance"),  # LanceDB returns _distance as score
                 "bounding_box": res.get("bounding_box"),
                 "confidence": res.get("confidence"),
@@ -497,33 +476,10 @@ class LanceDBService:
         else:
             raise ValueError("Either face_id or member_id must be provided for deletion.")
         
-        # First, count how many items match the filter before deleting
-        df = table.to_pandas()
+        deleted_count = table.delete(where=filter_str)
         
-        # Parse filter_str to extract column and value
-        column, value = "", ""
-        if "face_id =" in filter_str:
-            column = "face_id"
-            value = filter_str.split("face_id = '")[1].split("'")[0]
-        elif "member_id =" in filter_str:
-            column = "member_id"
-            value = filter_str.split("member_id = '")[1].split("'")[0]
-        
-        if not column or not value:
-            # Fallback or raise error if filter_str format is unexpected
-            logger.error(f"Unexpected filter_str format: {filter_str}")
-            return 0
-
-        matching_items_df = df[df[column] == value]
-        deleted_count = len(matching_items_df)
-        
-        if deleted_count > 0:
-            table.delete(where=filter_str)
-            logger.info(f"Deleted {deleted_count} entries from face table "
-                        f"'{table_name}' with filter '{filter_str}'.")
-        else:
-            logger.info(f"No entries found to delete from face table "
-                        f"'{table_name}' with filter '{filter_str}'.")
+        logger.info(f"Deleted {deleted_count} entries from face table "
+                    f"'{table_name}' with filter '{filter_str}'.")
         return deleted_count
 
     async def update_face_data(self, family_id: str, face_id: str, update_data: Dict) -> int:
@@ -547,6 +503,8 @@ class LanceDBService:
                 processed_update_data[key] = str(value)
             elif key == "face_id" and value is not None:
                 processed_update_data[key] = str(value)
+            elif key == "embedding" and value is not None: # Update vector if embedding is provided
+                processed_update_data["vector"] = value
             else:
                 processed_update_data[key] = value
 
@@ -554,27 +512,21 @@ class LanceDBService:
             logger.warning("No valid update fields provided. Nothing to update.")
             return 0
 
-        # LanceDB update operation
-        # Returns the number of rows updated (not directly, need to check its behavior)
-        # For now, assuming `update` returns number of rows affected.
-        # Or, we can query before and after to get the count.
+        updated_count = table.update(where=filter_str, **processed_update_data)
         
-        # First, count how many items match the filter before updating
-        df = table.to_pandas()
-        matching_items_df = df[df['face_id'] == face_id]
-        updated_count = len(matching_items_df)
-
         if updated_count > 0:
-            logger.info(f"Updating face data for face_id '{face_id}' in table "
+            logger.info(f"Updated {updated_count} entries for face_id '{face_id}' in table "
                         f"'{table_name}'. Changes: {processed_update_data}")
-            table.update(where=filter_str, values=processed_update_data)
         else:
             logger.info(f"No entries found to update for face_id '{face_id}' in table "
                         f"'{table_name}'.")
         return updated_count
 
 
+# Initialize LanceDB service instances globally
+# This will be replaced by dependency injection later
+from .embeddings import embedding_service as global_embedding_service # Use the global instance for now
 
+knowledge_lancedb_service = KnowledgeLanceDBService(global_embedding_service)
+face_lancedb_service = FaceLanceDBService()
 
-# Initialize LanceDB service globally
-lancedb_service = LanceDBService()

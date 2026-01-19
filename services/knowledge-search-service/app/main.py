@@ -9,7 +9,7 @@ async def health_check():
 
 # Include the routers
 app.include_router(faces.router, prefix="/api/v1", tags=["faces"])
-app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["knowledge"])
+app.include_router(knowledge.router, prefix="/api/v1", tags=["knowledge"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
 
 if __name__ == "__main__":
