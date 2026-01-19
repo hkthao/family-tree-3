@@ -1,12 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app.core.lancedb import LanceDBService
+from app.core.lancedb import KnowledgeLanceDBService
 from app.config import TEXT_EMBEDDING_DIMENSIONS
 from app.schemas.vectors import VectorData, UpdateVectorRequest, DeleteVectorRequest, RebuildVectorRequest
 import numpy as np
 import pyarrow as pa
 import json
 import pandas as pd
+from app.core.embeddings import EmbeddingService # Needed for type hinting
 
 @pytest.fixture
 def mock_lancedb_connect():
@@ -17,35 +18,37 @@ def mock_lancedb_connect():
         yield mock_connect, mock_db
 
 @pytest.fixture
-def lancedb_service_instance(mock_lancedb_connect):
-    """Fixture to provide a LanceDBService instance with mocked lancedb."""
+def mock_embedding_service(mocker):
+    """Fixture to mock the embedding service."""
+    mock_service = mocker.patch('app.core.embeddings.embedding_service', autospec=True)
+    mock_service.embed_query.return_value = np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist()
+    return mock_service
+
+@pytest.fixture
+def knowledge_lancedb_service_instance(mock_lancedb_connect, mock_embedding_service):
+    """Fixture to provide a KnowledgeLanceDBService instance with mocked lancedb."""
     mock_connect, mock_db = mock_lancedb_connect
     # Reset the singleton instance for a clean test
-    LanceDBService._instance = None
-    service = LanceDBService()
+    # KnowledgeLanceDBService does not use _instance directly (base class handles that)
+    service = KnowledgeLanceDBService(mock_embedding_service)
     # The assertion for connect being called will now correctly pass here
     mock_connect.assert_called_once()
     return service, mock_connect, mock_db
 
-@pytest.fixture
-def mock_embedding_service():
-    """Fixture to mock the embedding service."""
-    with patch('app.core.lancedb.embedding_service') as mock_embed:
-        mock_embed.embed_query.return_value = np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist()
-        yield mock_embed
 
-def test_lancedb_service_initialization(lancedb_service_instance):
+
+def test_lancedb_service_initialization(knowledge_lancedb_service_instance):
     """Test that LanceDBService initializes and connects to LanceDB."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     assert service is not None
 
-def test_search_family_table_not_exists(lancedb_service_instance):
+def test_search_family_table_not_exists(knowledge_lancedb_service_instance):
     """Test searching a non-existent family table."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "non_existent_family"
     mock_db.table_names.return_value = [] # Simulate no tables
     
-    results = service.search_family_table(
+    results = service.search_knowledge_table(
         family_id=family_id,
         query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public"],
@@ -54,12 +57,12 @@ def test_search_family_table_not_exists(lancedb_service_instance):
     assert results == []
     mock_db.table_names.assert_called_with()
 
-def test_search_family_table_exists_no_results(lancedb_service_instance):
+def test_search_family_table_exists_no_results(knowledge_lancedb_service_instance):
     """Test searching an existing table but with no matching results."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123"
-    table_name = f"family_{family_id}"
-    mock_db.table_names.return_value = [table_name]
+    mock_db.table_names.return_value = [f"family_knowledge_{family_id}"] # Adjusted to match actual behavior
+    table_name = f"family_knowledge_{family_id}" # for assertions later
 
     mock_table = MagicMock()
     mock_db.open_table.return_value = mock_table
@@ -67,29 +70,28 @@ def test_search_family_table_exists_no_results(lancedb_service_instance):
     # Mock the search chain
     mock_table.search.return_value.where.return_value.limit.return_value.to_list.return_value = []
 
-    results = service.search_family_table(
+    results = service.search_knowledge_table(
         family_id=family_id,
         query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public"],
         top_k=5
     )
     assert results == []
-    mock_db.open_table.assert_called_with(table_name)
+    mock_db.open_table.assert_called_with(table_name) # table_name is now correctly prefixed
     mock_table.search.assert_called_once()
     mock_table.search.return_value.where.assert_called_with("visibility = 'public'")
     mock_table.search.return_value.where.return_value.limit.assert_called_with(5)
 
 
-def test_search_family_table_with_results(lancedb_service_instance):
+def test_search_family_table_with_results(knowledge_lancedb_service_instance):
     """
     Test searching an existing table with matching results.
     Updated to handle metadata deserialization.
     """
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123"
-    table_name = f"family_{family_id}"
-    mock_db.table_names.return_value = [table_name]
-
+    mock_db.table_names.return_value = [f"family_knowledge_{family_id}"] # Adjusted to match actual behavior
+    table_name = f"family_knowledge_{family_id}" # for assertions later
     mock_table = MagicMock()
     mock_db.open_table.return_value = mock_table
 
@@ -100,7 +102,7 @@ def test_search_family_table_with_results(lancedb_service_instance):
     ]
     mock_table.search.return_value.where.return_value.limit.return_value.to_list.return_value = lancedb_results
 
-    results = service.search_family_table(
+    results = service.search_knowledge_table(
         family_id=family_id,
         query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public", "private"],
@@ -112,16 +114,16 @@ def test_search_family_table_with_results(lancedb_service_instance):
         {"metadata": {"original_id": "M002", "name": "Tran Thi B", "content_type": "member"}, "summary": "Desc B", "score": 0.8}
     ]
     assert results == expected_results
-    mock_db.open_table.assert_called_with(table_name)
+    mock_db.open_table.assert_called_with(table_name) # table_name is now correctly prefixed
     mock_table.search.assert_called_once()
     mock_table.search.return_value.where.assert_called_with("visibility = 'public' OR visibility = 'private'")
     mock_table.search.return_value.where.return_value.limit.assert_called_with(2)
 
-def test_create_dummy_table_new(lancedb_service_instance, mock_embedding_service):
+def test_create_dummy_table_new(knowledge_lancedb_service_instance, mock_embedding_service):
     """
     Test creating a dummy table when it doesn't exist, asserting the schema includes metadata.
     """
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_new"
     table_name = f"family_{family_id}"
     mock_db.table_names.return_value = []
@@ -130,7 +132,7 @@ def test_create_dummy_table_new(lancedb_service_instance, mock_embedding_service
 
     mock_db.create_table.assert_called_once()
     args, kwargs = mock_db.create_table.call_args
-    assert args[0] == table_name
+    assert args[0] == f"family_knowledge_{family_id}"
     assert "data" in kwargs
     assert len(kwargs["data"]) > 0 # Check that data was provided
     assert "schema" in kwargs
@@ -149,25 +151,25 @@ def test_create_dummy_table_new(lancedb_service_instance, mock_embedding_service
     mock_db.drop_table.assert_not_called()
     mock_embedding_service.embed_query.assert_called()
 
-def test_create_dummy_table_recreate_existing(lancedb_service_instance, mock_embedding_service):
+def test_create_dummy_table_recreate_existing(knowledge_lancedb_service_instance, mock_embedding_service):
     """Test recreating a dummy table when it already exists."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_existing"
     table_name = f"family_{family_id}"
-    mock_db.table_names.return_value = [table_name]
+    mock_db.table_names.return_value = [f"family_knowledge_{family_id}"]
 
     service.create_dummy_table(family_id)
 
-    mock_db.drop_table.assert_called_once_with(table_name)
+    mock_db.drop_table.assert_called_once_with(f"family_knowledge_{family_id}")
     mock_db.create_table.assert_called_once()
     mock_embedding_service.embed_query.assert_called()
 
-def test_add_vectors_success(lancedb_service_instance, mock_embedding_service):
+def test_add_vectors_success(knowledge_lancedb_service_instance, mock_embedding_service):
     """Test adding vectors to a table."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_add"
-    table_name = f"family_{family_id}"
-    mock_db.table_names.return_value = [table_name] # Table exists
+    table_name = f"family_knowledge_{family_id}" # Table exists
+    mock_db.table_names.return_value = [table_name]
 
     mock_table = MagicMock()
     mock_db.open_table.return_value = mock_table
@@ -212,11 +214,11 @@ def test_add_vectors_success(lancedb_service_instance, mock_embedding_service):
     assert added_df.loc[0, 'summary'] == "This is a test summary for member 1."
 
 
-def test_update_vectors_success(lancedb_service_instance, mock_embedding_service):
+def test_update_vectors_success(knowledge_lancedb_service_instance, mock_embedding_service):
     """Test updating vectors in a table."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_update"
-    table_name = f"family_{family_id}"
+    table_name = f"family_knowledge_{family_id}"
     mock_db.table_names.return_value = [table_name]
 
     mock_table = MagicMock()
@@ -246,11 +248,11 @@ def test_update_vectors_success(lancedb_service_instance, mock_embedding_service
 
     mock_embedding_service.embed_query.assert_called_once_with(update_request.summary)
 
-def test_delete_vectors_by_entity_id_success(lancedb_service_instance):
+def test_delete_vectors_by_entity_id_success(knowledge_lancedb_service_instance):
     """Test deleting vectors by entity ID."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_delete"
-    table_name = f"family_{family_id}"
+    table_name = f"family_knowledge_{family_id}"
     mock_db.table_names.return_value = [table_name]
 
     mock_table = MagicMock()
@@ -266,11 +268,11 @@ def test_delete_vectors_by_entity_id_success(lancedb_service_instance):
     mock_db.open_table.assert_called_once_with(table_name)
     mock_table.delete.assert_called_once_with(where=f"family_id = '{family_id}' AND entity_id = 'M001'")
 
-def test_delete_vectors_by_type_success(lancedb_service_instance):
+def test_delete_vectors_by_type_success(knowledge_lancedb_service_instance):
     """Test deleting vectors by type within a family."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_delete_type"
-    table_name = f"family_{family_id}"
+    table_name = f"family_knowledge_{family_id}"
     mock_db.table_names.return_value = [table_name]
 
     mock_table = MagicMock()
@@ -286,9 +288,9 @@ def test_delete_vectors_by_type_success(lancedb_service_instance):
     mock_db.open_table.assert_called_once_with(table_name)
     mock_table.delete.assert_called_once_with(where=f"family_id = '{family_id}' AND type = 'event'")
 
-def test_rebuild_vectors_success(lancedb_service_instance, mock_embedding_service):
+def test_rebuild_vectors_success(knowledge_lancedb_service_instance, mock_embedding_service):
     """Test rebuilding vectors for a family."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_rebuild"
     table_name = f"family_{family_id}"
     mock_db.table_names.return_value = [table_name]
@@ -306,7 +308,7 @@ def test_rebuild_vectors_success(lancedb_service_instance, mock_embedding_servic
 
     service.rebuild_vectors(rebuild_request)
 
-    mock_db.open_table.assert_called_once_with(table_name)
+    mock_db.open_table.assert_called_once_with(f"family_knowledge_{family_id}")
     
     # Assert select includes metadata
     mock_table.query.return_value.select.assert_called_once_with(["entity_id", "summary", "type", "visibility", "name", "family_id", "metadata"])
@@ -324,9 +326,9 @@ def test_rebuild_vectors_success(lancedb_service_instance, mock_embedding_servic
     assert "vector" in added_df.columns
     mock_embedding_service.embed_query.call_count == 2
 
-def test_rebuild_vectors_specific_entities_success(lancedb_service_instance, mock_embedding_service):
+def test_rebuild_vectors_specific_entities_success(knowledge_lancedb_service_instance, mock_embedding_service):
     """Test rebuilding vectors for specific entities."""
-    service, mock_connect, mock_db = lancedb_service_instance
+    service, mock_connect, mock_db = knowledge_lancedb_service_instance
     family_id = "F123_rebuild_specific"
     table_name = f"family_{family_id}"
     mock_db.table_names.return_value = [table_name]
@@ -343,7 +345,7 @@ def test_rebuild_vectors_specific_entities_success(lancedb_service_instance, moc
 
     service.rebuild_vectors(rebuild_request)
 
-    mock_db.open_table.assert_called_once_with(table_name)
+    mock_db.open_table.assert_called_once_with(f"family_knowledge_{family_id}")
     
     # Assert select includes metadata
     mock_table.query.return_value.select.assert_called_once_with(["entity_id", "summary", "type", "visibility", "name", "family_id", "metadata"])
