@@ -18,11 +18,10 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
     {
-        if (request.Vector == null || !request.Vector.Any())
+        if (request.Vector == null || request.Vector.Count == 0)
         {
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
         }
-        
         // Call knowledge service to search faces
         var searchResults = await _knowledgeService.SearchFaces(
             request.FamilyId,
@@ -30,11 +29,10 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             request.MemberId,
             request.Limit
         );
-        
-        if (searchResults == null || !searchResults.Any())
+        if (searchResults == null || searchResults.Count == 0)
         {
             _logger.LogInformation("No face vectors found for FamilyId: {FamilyId}", request.FamilyId);
-            return Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>());
+            return Result<List<FoundFaceDto>>.Success([]);
         }
 
         var foundFaces = new List<FoundFaceDto>();
@@ -45,11 +43,11 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             // The FaceSearchResultDto contains FaceId (which is the VectorDbId from Python service)
             // and MemberId, Score.
             // We need to fetch the full MemberFace entity to get localDbId, thumbnailUrl, etc.
-            
+
             // First, check if a MemberFace entity exists with this VectorDbId
             var memberFace = await _context.MemberFaces.AsNoTracking()
-                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.FaceId.ToString(), cancellationToken); // FaceId from searchResult is actually VectorDbId
-            
+                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.VectorDbId, cancellationToken); // FaceId from searchResult is actually VectorDbId
+
             if (memberFace == null)
             {
                 _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from knowledge service search.", searchResult.FaceId);
@@ -71,7 +69,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             memberIds.Add(memberFace.MemberId); // Collect member IDs for further enrichment
         }
 
-        if (memberIds.Any())
+        if (memberIds.Count != 0)
         {
             // Now, enrich with MemberName and FamilyAvatarUrl from local database
             var membersQuery = _context.Members

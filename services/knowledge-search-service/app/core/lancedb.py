@@ -20,7 +20,7 @@ class LanceDBBaseService:
         self.db = lancedb.connect(LANCEDB_PATH)
         logger.info("Connected to LanceDB.")
 
-    def _create_table_if_not_exists(self, table_name: str, expected_schema: pa.Schema):
+    async def _create_table_if_not_exists(self, table_name: str, expected_schema: pa.Schema):
         """
         Ensures a LanceDB table exists with the given schema.
         If not, it creates a new one. If it exists but has an incompatible
@@ -28,13 +28,26 @@ class LanceDBBaseService:
         """
         if table_name not in self.db.table_names():
             logger.info(f"Table '{table_name}' does not exist. Creating it.")
-            self.db.create_table(table_name, schema=expected_schema)
-            logger.info(f"Table '{table_name}' created successfully.")
+            new_table = self.db.create_table(table_name, schema=expected_schema)
+            new_schema = new_table.schema
+            new_vector_dim = None
+            if 'vector' in new_schema.names and new_schema.field('vector').type.list_size is not None:
+                new_vector_dim = new_schema.field('vector').type.list_size
+            logger.info(f"Table '{table_name}' created successfully with schema: "
+                        f"vector_dim={new_vector_dim}, "
+                        f"fields={new_schema.names}.")
         else:
+            logger.info(f"Table '{table_name}' already exists. Checking schema.")
             table = self.db.open_table(table_name)
             current_schema = table.schema
 
-            # Check if vector field exists in both schemas and compare dimensions
+            # Log current table info
+            current_vector_dim = None
+            if 'vector' in current_schema.names and current_schema.field('vector').type.list_size is not None:
+                current_vector_dim = current_schema.field('vector').type.list_size
+            logger.info(f"Existing table '{table_name}' has schema: "
+                        f"vector_dim={current_vector_dim}, "
+                        f"fields={current_schema.names}")
             current_vector_dim = None
             expected_vector_dim = None
 
@@ -52,9 +65,14 @@ class LanceDBBaseService:
                     "recreating the table."
                 )
                 self.db.drop_table(table_name)
-                self.db.create_table(table_name, schema=expected_schema)
-                logger.info(f"Table '{table_name}' recreated with updated "
-                            "schema.")
+                recreated_table = self.db.create_table(table_name, schema=expected_schema)
+                recreated_schema = recreated_table.schema
+                recreated_vector_dim = None
+                if 'vector' in recreated_schema.names and recreated_schema.field('vector').type.list_size is not None:
+                    recreated_vector_dim = recreated_schema.field('vector').type.list_size
+                logger.info(f"Table '{table_name}' recreated with updated schema: "
+                            f"vector_dim={recreated_vector_dim}, "
+                            f"fields={recreated_schema.names}.")
             else:
                 logger.info(f"Table '{table_name}' already exists and has "
                             "a compatible schema. No action needed.")
@@ -379,6 +397,9 @@ class KnowledgeLanceDBService(LanceDBBaseService):
 class FaceLanceDBService(LanceDBBaseService):
     def __init__(self):
         super().__init__()
+        # Ensure the Face LanceDB schema is correctly applied on service initialization
+        # Use a dummy family_id to trigger schema check/creation
+        self._create_table_if_not_exists(self._get_face_table_name("temp_init_family_id"), FACE_LANCEDB_SCHEMA)
 
     def _get_face_table_name(self, family_id: str) -> str:
         return f"faces_{family_id}"
@@ -388,7 +409,7 @@ class FaceLanceDBService(LanceDBBaseService):
             logger.warning("No face data provided to add.")
             return
         table_name = self._get_face_table_name(family_id)
-        self._create_table_if_not_exists(table_name, FACE_LANCEDB_SCHEMA)
+
         
         table = self.db.open_table(table_name)
         processed_faces = []
@@ -411,6 +432,7 @@ class FaceLanceDBService(LanceDBBaseService):
             # Remove embedding field as it's now 'vector'
             del face_copy["embedding"]
             processed_faces.append(face_copy)
+            logger.debug(f"Adding face with face_id: {face_copy.get('face_id')}, member_id: {face_copy.get('member_id')}, vector_db_id: {face_copy.get('vector_db_id')} to processed_faces.")
         
         df = pd.DataFrame(processed_faces)
         table.add(df)
@@ -490,7 +512,8 @@ class FaceLanceDBService(LanceDBBaseService):
                 "emotion_confidence": res.get("emotion_confidence"),
                 "vector_db_id": res.get("vector_db_id"),
                 "is_vector_db_synced": res.get("is_vector_db_synced")
-            })        
+            })
+            logger.debug(f"Retrieved face from LanceDB with face_id: {face_uuid}, member_id: {member_uuid}, vector_db_id: {res.get('vector_db_id')}")        
         return formatted_results
 
     async def delete_face_data(self, family_id: str, face_id: Optional[str] = None, member_id: Optional[str] = None) -> int:

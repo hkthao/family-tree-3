@@ -27,6 +27,7 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
         }
         // Generate VectorDbId here in the backend
         var generatedVectorDbId = Guid.NewGuid().ToString();
+        _logger.LogDebug("Generated VectorDbId for MemberFaceId {MemberFaceId}: {GeneratedVectorDbId}", memberFace.Id, generatedVectorDbId);
         // Map MemberFace to MemberFaceDto for IKnowledgeService
         var memberFaceDto = new MemberFaceDto
         {
@@ -53,6 +54,7 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
         {
             // Call IndexMemberFaceData and expect VectorDbId in return
             string returnedVectorDbId = await _knowledgeService.IndexMemberFaceData(memberFaceDto);
+            _logger.LogDebug("Returned VectorDbId from knowledge-search-service for MemberFaceId {MemberFaceId}: {ReturnedVectorDbId}", memberFace.Id, returnedVectorDbId);
             if (!string.IsNullOrEmpty(returnedVectorDbId))
             {
                 memberFace.VectorDbId = returnedVectorDbId; // Update with the ID returned by knowledge service
@@ -70,5 +72,6 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
             _logger.LogError(ex, "Failed to index MemberFaceId {MemberFaceId} to knowledge-search-service: {Error}", memberFace.Id, ex.Message);
             memberFace.IsVectorDbSynced = false; // Mark as not synced
         }
+        _logger.LogDebug("Saving MemberFaceId {MemberFaceId} with VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
         await _context.SaveChangesAsync(cancellationToken);    }
 }

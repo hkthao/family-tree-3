@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from uuid import UUID
 from loguru import logger # Add this import
-from ..core.lancedb import FaceLanceDBService, face_lancedb_service # Import the class and global instance
+from ..core.lancedb import FaceLanceDBService, face_lancedb_service, FACE_LANCEDB_SCHEMA # Import the class and global instance, and SCHEMA
 from ..core.face_embeddings import FaceEmbeddingService, face_embedding_service # Import the face embedding service
 from ..models.face_models import (
     FaceEmbeddingResponse,
@@ -34,34 +34,49 @@ async def add_face(
     được tạo ra từ original_image_url sử dụng dịch vụ nhúng.
     """
     try:
-        face_metadata = request.face_metadata
-        if not face_metadata.embedding:
-            if not face_metadata.original_image_url:
+        # Explicitly ensure the table exists and has the correct schema
+        # This will drop and recreate if dimensions mismatch
+        await lancedb_service._create_table_if_not_exists(
+            lancedb_service._get_face_table_name(str(request.family_id)), 
+            FACE_LANCEDB_SCHEMA
+        )
+        logger.info(f"Incoming add_face request: {request.model_dump_json()}")
+        
+        # request is now directly the FaceMetadata
+        if not request.embedding:
+            if not request.original_image_url:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Cần cung cấp 'embedding' hoặc 'original_image_url' để tạo nhúng."
                 )
             # Use the face embedding service to create embedding from image URL
-            face_metadata.embedding = face_embed_service.embed_image_url(
-                face_metadata.original_image_url
+            request.embedding = face_embed_service.embed_image_url(
+                request.original_image_url
             )
             logger.info(f"Generated embedding from original_image_url for face_id: "
-                        f"{face_metadata.face_id}")
+                        f"{request.face_id}")
+        
         # Tạo FaceId nếu chưa có
-        if not face_metadata.face_id:
-            face_metadata.face_id = UUID(str(UUID.random_uuid()))
+        if not request.face_id:
+            request.face_id = UUID(str(UUID.random_uuid()))
+
         # Lưu thông tin khuôn mặt vào LanceDB
-        face_data_dict = face_metadata.model_dump()
-        await lancedb_service.add_face_data(str(face_metadata.family_id), [face_data_dict])
+        face_data_dict = request.model_dump()
+
+        logger.debug(f"Attempting to add face data to LanceDB for family_id: {request.family_id}, face_id: {request.face_id}")
+        await lancedb_service.add_face_data(str(request.family_id), [face_data_dict])
+        logger.debug(f"Successfully added face data to LanceDB.")
+        
         return FaceEmbeddingResponse(
-            face_id=face_metadata.face_id,
-            member_id=face_metadata.member_id,
-            vector_db_id=face_metadata.vector_db_id, # Return the vector_db_id that was passed in
+            face_id=request.face_id,
+            member_id=request.member_id,
+            vector_db_id=request.vector_db_id,
             message="Thông tin khuôn mặt đã được thêm thành công."
         )
     except HTTPException as e:
         raise e
     except Exception as e:
+        logger.exception(f"Đã xảy ra lỗi nội bộ khi thêm khuôn mặt: {e}") # Log full traceback
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Đã xảy ra lỗi nội bộ khi thêm khuôn mặt: {e}"
@@ -76,7 +91,7 @@ async def search_faces(
     lancedb_service: FaceLanceDBService = Depends(get_face_lancedb_service),
     face_embed_service: FaceEmbeddingService = Depends(get_face_embedding_service)
 ):
-    logger.info(f"Incoming search_faces request: {request.model_dump_json()}") # Add this line
+    # logger.info(f"Incoming search_faces request: {request.model_dump_json()}") # Add this line
     try:
         query_embedding = request.query_embedding
         if not query_embedding:
@@ -118,6 +133,7 @@ async def search_faces(
                 face_id=res.get("face_id"),
                 member_id=res.get("member_id"),
                 score=res.get("score"),
+                vector_db_id=res.get("vector_db_id"), # Pass vector_db_id here
                 metadata=face_metadata_obj
             ))
         return SearchFacesResponse(results=search_results)

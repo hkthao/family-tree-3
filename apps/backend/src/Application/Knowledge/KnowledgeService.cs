@@ -346,11 +346,6 @@ public class KnowledgeService : IKnowledgeService
 
     private class FaceAddRequest
     {
-        public FaceMetadataRequest FaceMetadata { get; set; } = new();
-    }
-
-    private class FaceMetadataRequest
-    {
         public Guid FamilyId { get; set; }
         public Guid MemberId { get; set; }
         public Guid FaceId { get; set; }
@@ -398,21 +393,18 @@ public class KnowledgeService : IKnowledgeService
         {
             var requestBody = new FaceAddRequest
             {
-                FaceMetadata = new FaceMetadataRequest
-                {
-                    FamilyId = faceData.FamilyId,
-                    MemberId = faceData.MemberId,
-                    FaceId = faceData.FaceId,
-                    BoundingBox = faceData.BoundingBox,
-                    Confidence = faceData.Confidence,
-                    ThumbnailUrl = faceData.ThumbnailUrl,
-                    OriginalImageUrl = faceData.OriginalImageUrl,
-                    Embedding = faceData.Embedding,
-                    Emotion = faceData.Emotion,
-                    EmotionConfidence = faceData.EmotionConfidence,
-                    IsVectorDbSynced = faceData.IsVectorDbSynced,
-                    VectorDbId = faceData.VectorDbId // Pass the generated VectorDbId from C#
-                }
+                FamilyId = faceData.FamilyId,
+                MemberId = faceData.MemberId,
+                FaceId = faceData.FaceId,
+                BoundingBox = faceData.BoundingBox,
+                Confidence = faceData.Confidence,
+                ThumbnailUrl = faceData.ThumbnailUrl,
+                OriginalImageUrl = faceData.OriginalImageUrl,
+                Embedding = faceData.Embedding,
+                Emotion = faceData.Emotion,
+                EmotionConfidence = faceData.EmotionConfidence,
+                IsVectorDbSynced = faceData.IsVectorDbSynced,
+                VectorDbId = faceData.VectorDbId
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
@@ -520,11 +512,9 @@ public class KnowledgeService : IKnowledgeService
             response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            var searchResponse = JsonSerializer.Deserialize<List<FaceSearchResultDto>>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
-
-            _logger.LogInformation("Successfully performed face search in knowledge service for FamilyId: {FamilyId}", familyId);
-
-            return searchResponse ?? new List<FaceSearchResultDto>();
+            var searchResponse = JsonSerializer.Deserialize<FaceSearchApiResponse>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            _logger.LogInformation("Successfully performed face search in knowledge service for FamilyId: {FamilyId}. Found {ResultCount} faces.", familyId, searchResponse?.Results?.Count ?? 0);
+            return searchResponse?.Results ?? new List<FaceSearchResultDto>();
         }
         catch (HttpRequestException ex)
         {

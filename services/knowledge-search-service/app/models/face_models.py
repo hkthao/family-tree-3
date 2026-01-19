@@ -3,14 +3,13 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 class BoundingBox(BaseModel):
-    """
-    Biểu diễn một hộp giới hạn xung quanh khuôn mặt được phát hiện.
-    """
-    x_min: float = Field(..., description="Tọa độ X tối thiểu của hộp giới hạn.")
-    y_min: float = Field(..., description="Tọa độ Y tối thiểu của hộp giới hạn.")
-    x_max: float = Field(..., description="Tọa độ X tối đa của hộp giới hạn.")
-    y_max: float = Field(..., description="Tọa độ Y tối đa của hộp giới hạn.")
-
+        """
+        Biểu diễn một hộp giới hạn xung quanh khuôn mặt được phát hiện.
+        """
+        x_min: Optional[float] = Field(None, description="Tọa độ X tối thiểu của hộp giới hạn.")
+        y_min: Optional[float] = Field(None, description="Tọa độ Y tối thiểu của hộp giới hạn.")
+        x_max: Optional[float] = Field(None, description="Tọa độ X tối đa của hộp giới hạn.")
+        y_max: Optional[float] = Field(None, description="Tọa độ Y tối đa của hộp giới hạn.")
 class FaceMetadata(BaseModel):
     """
     Metadata cho một khuôn mặt, phản ánh cấu trúc của MemberFace.
@@ -33,11 +32,11 @@ class FaceMetadata(BaseModel):
     vector_db_id: Optional[str] = Field(None, description="ID của vector trong cơ sở dữ liệu vector (LanceDB/Qdrant).")
     is_vector_db_synced: bool = Field(False, description="Đánh dấu xem thông tin khuôn mặt đã được đồng bộ hóa với cơ sở dữ liệu vector hay chưa.")
 
-class AddFaceRequest(BaseModel):
+class AddFaceRequest(FaceMetadata):
     """
     Yêu cầu để thêm một khuôn mặt mới vào cơ sở dữ liệu.
+    Kế thừa trực tiếp từ FaceMetadata để làm phẳng cấu trúc.
     """
-    face_metadata: FaceMetadata = Field(..., description="Metadata đầy đủ của khuôn mặt.")
 
 class FaceEmbeddingResponse(BaseModel):
     """
@@ -82,6 +81,7 @@ class SearchResult(BaseModel):
     face_id: UUID = Field(..., description="ID của khuôn mặt được tìm thấy.")
     member_id: UUID = Field(..., description="ID của thành viên sở hữu khuôn mặt.")
     score: float = Field(..., description="Điểm số tương đồng với vector truy vấn.")
+    vector_db_id: Optional[str] = Field(None, description="ID của vector trong cơ sở dữ liệu vector (LanceDB/Qdrant).")
     metadata: Optional[FaceMetadata] = Field(None, description="Metadata đầy đủ của khuôn mặt được tìm thấy.")
 
 class SearchFacesResponse(BaseModel):
