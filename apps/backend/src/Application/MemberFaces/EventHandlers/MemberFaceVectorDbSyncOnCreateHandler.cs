@@ -1,23 +1,21 @@
-using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Events.MemberFaces;
 using Microsoft.Extensions.Logging;
-
+using backend.Application.Knowledge; // Added for IKnowledgeService
+using backend.Application.Knowledge.DTOs; // Added for MemberFaceDto
+using backend.Domain.ValueObjects; // Ensure BoundingBox is recognized
 namespace backend.Application.MemberFaces.EventHandlers;
-
 public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<MemberFaceCreatedEvent>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IN8nService _n8nService;
+    private readonly IKnowledgeService _knowledgeService; // Changed from IN8nService
     private readonly ILogger<MemberFaceVectorDbSyncOnCreateHandler> _logger;
-
-    public MemberFaceVectorDbSyncOnCreateHandler(IApplicationDbContext context, IN8nService n8nService, ILogger<MemberFaceVectorDbSyncOnCreateHandler> logger)
+    public MemberFaceVectorDbSyncOnCreateHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<MemberFaceVectorDbSyncOnCreateHandler> logger) // Changed from IN8nService
     {
         _context = context;
-        _n8nService = n8nService;
+        _knowledgeService = knowledgeService; // Changed from IN8nService
         _logger = logger;
     }
-
     public async Task Handle(MemberFaceCreatedEvent notification, CancellationToken cancellationToken)
     {
         var memberFace = notification.MemberFace;
@@ -27,39 +25,50 @@ public class MemberFaceVectorDbSyncOnCreateHandler : INotificationHandler<Member
             _logger.LogWarning("Member not found for MemberFaceId {MemberFaceId}. Cannot sync familyId to vector DB.", memberFace.Id);
             return; // Exit if member is not found
         }
-
-        string? effectiveThumbnailUrl = memberFace.ThumbnailUrl;
-        var upsertFaceVectorDto = new UpsertFaceVectorOperationDto
+        // Generate VectorDbId here in the backend
+        var generatedVectorDbId = Guid.NewGuid().ToString();
+        // Map MemberFace to MemberFaceDto for IKnowledgeService
+        var memberFaceDto = new MemberFaceDto
         {
-            Id = Guid.TryParse(memberFace.VectorDbId, out var vectorDbId) ? vectorDbId : Guid.NewGuid(),
-            Vector = [.. memberFace.Embedding.Select(d => (float)d)], // Convert double to float
-            Payload = new Dictionary<string, object>
+            FamilyId = member.FamilyId, // Get FamilyId from member
+            MemberId = memberFace.MemberId,
+            FaceId = memberFace.Id, // Use MemberFace.Id as FaceId for the DTO
+            BoundingBox = new BoundingBox // Map BoundingBox
             {
-                { "localDbId", memberFace.Id.ToString() },
-                { "memberId", memberFace.MemberId.ToString() },
-                { "familyId", member.FamilyId.ToString() }, // Add FamilyId to payload
-                { "faceId", memberFace.FaceId },
-                { "thumbnailUrl", effectiveThumbnailUrl ?? "" },
-                { "originalImageUrl", memberFace.OriginalImageUrl ?? "" },
-                { "emotion", memberFace.Emotion ?? "" },
-                { "emotionConfidence", memberFace.EmotionConfidence },
-                { "vectorDbId", memberFace.VectorDbId ?? Guid.NewGuid().ToString() } // Use existing or generate new
-            }
+                X = memberFace.BoundingBox.X,
+                Y = memberFace.BoundingBox.Y,
+                Width = memberFace.BoundingBox.Width,
+                Height = memberFace.BoundingBox.Height
+            },
+            Confidence = memberFace.Confidence,
+            ThumbnailUrl = memberFace.ThumbnailUrl,
+            OriginalImageUrl = memberFace.OriginalImageUrl,
+            Embedding = memberFace.Embedding,
+            Emotion = memberFace.Emotion,
+            EmotionConfidence = memberFace.EmotionConfidence,
+            IsVectorDbSynced = false, // Will be set to true by knowledge service if successful
+            VectorDbId = generatedVectorDbId // Use the generated VectorDbId from C#
         };
-
-        var n8nUpsertResult = await _n8nService.CallUpsertFaceVectorWebhookAsync(upsertFaceVectorDto, cancellationToken);
-        if (!n8nUpsertResult.IsSuccess || n8nUpsertResult.Value == null || !n8nUpsertResult.Value.Success)
+        try
         {
-            _logger.LogError("Failed to upsert face vector for MemberFaceId {MemberFaceId} in n8n (event handler): {Error}", memberFace.Id, n8nUpsertResult.Error ?? n8nUpsertResult.Value?.Message);
+            // Call IndexMemberFaceData and expect VectorDbId in return
+            string returnedVectorDbId = await _knowledgeService.IndexMemberFaceData(memberFaceDto);
+            if (!string.IsNullOrEmpty(returnedVectorDbId))
+            {
+                memberFace.VectorDbId = returnedVectorDbId; // Update with the ID returned by knowledge service
+                memberFace.IsVectorDbSynced = true;
+                _logger.LogInformation("Successfully indexed MemberFaceId {MemberFaceId} to knowledge-search-service. Returned VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
+            }
+            else
+            {
+                _logger.LogError("Failed to get VectorDbId from knowledge-search-service for MemberFaceId {MemberFaceId}.", memberFace.Id);
+                memberFace.IsVectorDbSynced = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to index MemberFaceId {MemberFaceId} to knowledge-search-service: {Error}", memberFace.Id, ex.Message);
             memberFace.IsVectorDbSynced = false; // Mark as not synced
         }
-        else
-        {
-            memberFace.IsVectorDbSynced = true;
-            memberFace.VectorDbId = upsertFaceVectorDto.Id.ToString(); // Ensure VectorDbId is set correctly from the DTO sent to n8n
-            _logger.LogInformation("Successfully upserted face vector for MemberFaceId {MemberFaceId} in n8n (event handler). VectorDbId: {VectorDbId}", memberFace.Id, memberFace.VectorDbId);
-        }
-
-        await _context.SaveChangesAsync(cancellationToken);
-    }
+        await _context.SaveChangesAsync(cancellationToken);    }
 }

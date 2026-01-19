@@ -53,6 +53,7 @@ async def add_face(request: AddFaceRequest):
         return FaceEmbeddingResponse(
             face_id=face_metadata.face_id,
             member_id=face_metadata.member_id,
+            vector_db_id=face_metadata.vector_db_id, // Return the vector_db_id that was passed in
             message="Thông tin khuôn mặt đã được thêm thành công."
         )
     except HTTPException as e:

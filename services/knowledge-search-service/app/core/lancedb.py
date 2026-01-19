@@ -418,13 +418,15 @@ class LanceDBService:
             if not face.get("embedding"):
                 raise ValueError("Embedding must be provided for face data.")
             
-            processed_faces.append(face)
-
-        df = pd.DataFrame(processed_faces)
-        table.add(df)
-        logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
-
-    async def search_faces(self, query_embedding: List[float], member_id: Optional[str] = None, top_k: int = 5) -> List[Dict[str, Any]]:
+                                    processed_faces.append(face)
+                                
+                                df = pd.DataFrame(processed_faces)
+                                table.add(df)
+                                logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
+                        
+                                # The face.vector_db_id (from C# backend) is now stored in LanceDB.
+                                # No explicit return from this method is needed, as the API endpoint
+                                # will construct the FaceEmbeddingResponse with the ID it received.                async def search_faces(self, query_embedding: List[float], member_id: Optional[str] = None, top_k: int = 5) -> List[Dict[str, Any]]:
         if not query_embedding:
             raise ValueError("Query embedding must be provided for face search.")
         

@@ -378,12 +378,20 @@ public class KnowledgeService : IKnowledgeService
         public List<FaceSearchResultDto>? Results { get; set; }
     }
 
-    public async Task IndexMemberFaceData(MemberFaceDto faceData)
+    private class FaceAddApiResponse
+    {
+        public string? FaceId { get; set; }
+        public string? MemberId { get; set; }
+        public string? Message { get; set; }
+        public string? VectorDbId { get; set; } // VectorDbId is expected in the response again
+    }
+
+    public async Task<string> IndexMemberFaceData(MemberFaceDto faceData)
     {
         if (string.IsNullOrEmpty(_settings.BaseUrl))
         {
             _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot index face data.");
-            return;
+            return string.Empty;
         }
 
         try
@@ -402,8 +410,8 @@ public class KnowledgeService : IKnowledgeService
                     Embedding = faceData.Embedding,
                     Emotion = faceData.Emotion,
                     EmotionConfidence = faceData.EmotionConfidence,
-                    VectorDbId = faceData.VectorDbId,
-                    IsVectorDbSynced = faceData.IsVectorDbSynced
+                    IsVectorDbSynced = faceData.IsVectorDbSynced,
+                    VectorDbId = faceData.VectorDbId // Pass the generated VectorDbId from C#
                 }
             };
 
@@ -413,15 +421,27 @@ public class KnowledgeService : IKnowledgeService
             var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/faces", httpContent);
             response.EnsureSuccessStatusCode();
 
-            _logger.LogInformation("Successfully indexed face data for FaceId: {FaceId}", faceData.FaceId);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var faceAddResponse = JsonSerializer.Deserialize<FaceAddApiResponse>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+
+            if (faceAddResponse?.VectorDbId == null)
+            {
+                _logger.LogError("KnowledgeSearchService did not return VectorDbId for FaceId: {FaceId}", faceData.FaceId);
+                return string.Empty;
+            }
+
+            _logger.LogInformation("Successfully indexed face data for FaceId: {FaceId}. Returned VectorDbId: {VectorDbId}", faceData.FaceId, faceAddResponse.VectorDbId);
+            return faceAddResponse.VectorDbId;
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Error indexing face data for FaceId: {FaceId}. Status Code: {StatusCode}", faceData.FaceId, ex.StatusCode);
+            return string.Empty;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred while indexing face data for FaceId: {FaceId}.", faceData.FaceId);
+            return string.Empty;
         }
     }
 

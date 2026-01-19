@@ -47,6 +47,7 @@ class FaceEmbeddingResponse(BaseModel):
     member_id: UUID = Field(..., description="ID của thành viên liên quan.")
     message: str = Field(..., description="Thông báo về kết quả hoạt động.")
     score: Optional[float] = Field(None, description="Điểm số tương đồng khi tìm kiếm.")
+    vector_db_id: Optional[str] = Field(None, description="ID của vector trong cơ sở dữ liệu vector (LanceDB/Qdrant).")
 
 class UpdateFaceRequest(BaseModel):
     """

@@ -1,5 +1,5 @@
-using backend.Application.AI.Models;
 using backend.Application.Common.Interfaces;
+using backend.Application.Knowledge;
 using backend.Domain.Events.MemberFaces;
 using Microsoft.Extensions.Logging;
 
@@ -7,43 +7,43 @@ namespace backend.Application.MemberFaces.EventHandlers;
 
 public class MemberFaceVectorDbSyncOnDeleteHandler : INotificationHandler<MemberFaceDeletedEvent>
 {
-    private readonly IN8nService _n8nService;
+    private readonly IApplicationDbContext _context;
+    private readonly IKnowledgeService _knowledgeService;
     private readonly ILogger<MemberFaceVectorDbSyncOnDeleteHandler> _logger;
 
-    public MemberFaceVectorDbSyncOnDeleteHandler(IN8nService n8nService, ILogger<MemberFaceVectorDbSyncOnDeleteHandler> logger)
+    public MemberFaceVectorDbSyncOnDeleteHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<MemberFaceVectorDbSyncOnDeleteHandler> logger)
     {
-        _n8nService = n8nService;
+        _context = context;
+        _knowledgeService = knowledgeService;
         _logger = logger;
     }
 
     public async Task Handle(MemberFaceDeletedEvent notification, CancellationToken cancellationToken)
     {
-        var memberFaceId = notification.MemberFace.Id;
-        var vectorDbId = notification.MemberFace.VectorDbId;
+        var memberFace = notification.MemberFace;
 
-        if (string.IsNullOrEmpty(vectorDbId))
+        if (string.IsNullOrEmpty(memberFace.VectorDbId))
         {
-            _logger.LogWarning("MemberFaceId {MemberFaceId} does not have a valid VectorDbId. Skipping vector DB deletion.", memberFaceId);
+            _logger.LogWarning("MemberFaceId {MemberFaceId} does not have a VectorDbId. Skipping deletion from knowledge-search-service.", memberFace.Id);
             return;
         }
 
-        var deleteFaceVectorDto = new DeleteFaceVectorOperationDto
+        var member = await _context.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Id == memberFace.MemberId, cancellationToken);
+        if (member == null)
         {
-            PointIds = new List<string> { vectorDbId }
-        };
-
-        var n8nDeleteResult = await _n8nService.CallDeleteFaceVectorWebhookAsync(deleteFaceVectorDto, cancellationToken);
-
-        if (!n8nDeleteResult.IsSuccess || n8nDeleteResult.Value == null || !n8nDeleteResult.Value.Success)
-        {
-            _logger.LogError("Failed to delete face vector for MemberFaceId {MemberFaceId} (VectorDbId: {VectorDbId}) in n8n (on delete event handler): {Error}", memberFaceId, vectorDbId, n8nDeleteResult.Error ?? n8nDeleteResult.Value?.Message);
-            // Optionally, mark local entity as not synced if it's a soft delete and we need to retry
+            _logger.LogWarning("Member not found for MemberFaceId {MemberFaceId}. Cannot delete from knowledge-search-service.", memberFace.Id);
+            return; // Exit if member is not found
         }
-        else
+
+        try
         {
-            _logger.LogInformation("Successfully deleted face vector for MemberFaceId {MemberFaceId} (VectorDbId: {VectorDbId}) in n8n (on delete event handler).", memberFaceId, vectorDbId);
-            // If it's a soft delete, update the local entity to reflect successful vector DB deletion.
-            // For a hard delete, the local entity is already gone.
+            await _knowledgeService.DeleteMemberFaceData(member.FamilyId, Guid.Parse(memberFace.VectorDbId));
+            _logger.LogInformation("Successfully deleted MemberFaceId {MemberFaceId} (VectorDbId: {VectorDbId}) from knowledge-search-service.", memberFace.Id, memberFace.VectorDbId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete MemberFaceId {MemberFaceId} (VectorDbId: {VectorDbId}) from knowledge-search-service: {Error}", memberFace.Id, memberFace.VectorDbId, ex.Message);
+            // Optionally rethrow or handle specific error types
         }
     }
 }
