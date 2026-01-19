@@ -16,7 +16,7 @@
               :relationships="relationships"
               :root-id="rootId"
               @update:rootId="(newRootId: string) => rootId = newRootId"
-              :onNodeClick="handleNodeClick"
+              @nodeClick="handleNodeClick"
             />
             <v-alert v-else type="info" prominent>{{ t('familyTree.noDataMessage') }}</v-alert>
           </v-window-item>
@@ -30,7 +30,7 @@
               :relationships="relationships"
               :root-id="rootId"
               @update:rootId="(newRootId: string) => rootId = newRootId"
-              :onNodeClick="handleNodeClick"
+              @nodeClick="handleNodeClick"
             />
             <v-alert v-else type="info" prominent>{{ t('familyTree.noDataMessage') }}</v-alert>
           </v-window-item>
@@ -79,14 +79,24 @@ const handleNodeClick = (memberId: string, memberName: string) => {
   selectedMemberIdForAction.value = memberId;
   selectedMemberNameForAction.value = memberName;
   isActionDialogOpen.value = true;
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({ type: 'NODE_CLICK', payload: { memberId, memberName } })
+    );
+  } else {
+    console.log(`Node clicked: ${memberName} (${memberId})`);
+  }
 };
 
 const handleViewDetails = (memberId: string) => {
-  // In a mobile view, this might navigate to a details page or open a different drawer
-  // For now, let's just log and close the action dialog
-  console.log(`View Details for member: ${memberId}`);
   isActionDialogOpen.value = false;
-  // TODO: Implement actual navigation or drawer for member details in mobile view
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({ type: 'VIEW_MEMBER_DETAILS', payload: { memberId } })
+    );
+  } else {
+    console.log(`View Details for member: ${memberId}`);
+  }
 };
 
 const handleViewRelationships = (memberId: string) => {

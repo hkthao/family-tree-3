@@ -18,6 +18,7 @@ const { t } = useI18n();
 
 defineEmits([
   'update:rootId', // New emit event to update rootId
+  'nodeClick', // Emit event for node clicks
 ]);
 
 const props = defineProps({
@@ -26,10 +27,6 @@ const props = defineProps({
   relationships: { type: Array<Relationship>, default: () => [] },
   isMobile: { type: Boolean, default: false }, // New prop
   rootId: { type: String, default: null }, // New prop for filtering
-  onNodeClick: {
-    type: Function as PropType<(memberId: string, memberName: string) => void>,
-    required: true,
-  }
 });
 
 const chartContainer = ref<HTMLDivElement | null>(null);
@@ -328,7 +325,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   });
 
   node.on('click', (event, d) => {
-    props.onNodeClick(d.id, d.name || '');
+    emit('nodeClick', d.id, d.name || '');
   });
 
   simulation.on('tick', () => {
