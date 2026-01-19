@@ -9,16 +9,26 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
     private readonly IApplicationDbContext _context;
     private readonly IKnowledgeService _knowledgeService;
     private readonly ILogger<GenerateFamilyKbCommandHandler> _logger;
+    private readonly IAuthorizationService _authorizationService;
 
-    public GenerateFamilyKbCommandHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<GenerateFamilyKbCommandHandler> logger)
+    public GenerateFamilyKbCommandHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<GenerateFamilyKbCommandHandler> logger, IAuthorizationService authorizationService)
     {
         _context = context;
         _knowledgeService = knowledgeService;
         _logger = logger;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result> Handle(GenerateFamilyKbCommand request, CancellationToken cancellationToken)
     {
+        // Kiểm tra phân quyền: Chỉ cho phép Admin thực hiện
+        var authResult = await _authorizationService.AuthorizeAsync("Administrator");
+        if (!authResult.IsSuccess)
+        {
+            _logger.LogWarning("Authorization failed for user to generate knowledge base for FamilyId: {FamilyId}. Reason: {Reason}", request.FamilyId, authResult.Error);
+            return authResult; // Return the unauthorized result directly
+        }
+        
         _logger.LogInformation("Generating knowledge base for FamilyId: {FamilyId}", request.FamilyId);
 
         var family = await _context.Families
