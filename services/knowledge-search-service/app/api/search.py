@@ -9,7 +9,7 @@ from ..core.lancedb import lancedb_service
 router = APIRouter()
 
 
-@router.post("/", response_model=SearchResponse)
+@router.post("/search", response_model=SearchResponse)
 async def search_knowledge(request: SearchRequest):
     """
     Performs a vector search for knowledge within a specific family's LanceDB

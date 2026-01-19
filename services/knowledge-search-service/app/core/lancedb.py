@@ -1,12 +1,13 @@
 import lancedb
 import pandas as pd
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from loguru import logger
 import pyarrow as pa
 import json
+from uuid import UUID
 
 
-from ..config import LANCEDB_PATH, EMBEDDING_DIMENSIONS
+from ..config import LANCEDB_PATH, TEXT_EMBEDDING_DIMENSIONS, FACE_EMBEDDING_DIMENSIONS
 from ..schemas.vectors import (
     VectorData, UpdateVectorRequest, DeleteVectorRequest, RebuildVectorRequest
 )
@@ -33,7 +34,7 @@ class LanceDBService:
             # Define schema based on VectorData for initial table creation
             schema = pa.schema([
                 pa.field("vector", pa.list_(pa.float32(),
-                                            EMBEDDING_DIMENSIONS)),
+                                            TEXT_EMBEDDING_DIMENSIONS)),
                 pa.field("family_id", pa.string()),
                 pa.field("entity_id", pa.string()),
                 pa.field("type", pa.string()),
@@ -190,7 +191,7 @@ class LanceDBService:
         # Ensure vector column is of float[EMBEDDING_DIMENSIONS] type
         # and metadata is string
         schema = pa.schema([
-            pa.field("vector", pa.list_(pa.float32(), EMBEDDING_DIMENSIONS)),
+            pa.field("vector", pa.list_(pa.float32(), TEXT_EMBEDDING_DIMENSIONS)),
             pa.field("family_id", pa.string()),
             pa.field("entity_id", pa.string()),
             pa.field("type", pa.string()),
@@ -382,7 +383,7 @@ class LanceDBService:
             logger.info(f"Face table '{table_name}' does not exist. Creating it.")
             # Define schema for face data
             schema = pa.schema([
-                pa.field("vector", pa.list_(pa.float32(), EMBEDDING_DIMENSIONS)),
+                pa.field("vector", pa.list_(pa.float32(), FACE_EMBEDDING_DIMENSIONS)),
                 pa.field("face_id", pa.string()),
                 pa.field("member_id", pa.string()),
                 pa.field("bounding_box", pa.string()), # Store as JSON string
@@ -417,68 +418,64 @@ class LanceDBService:
             # Đảm bảo có embedding
             if not face.get("embedding"):
                 raise ValueError("Embedding must be provided for face data.")
+            face["vector"] = face["embedding"]
+            # Remove embedding field as it's now 'vector'
+            del face["embedding"]
             
-                                    processed_faces.append(face)
-                                
-                                df = pd.DataFrame(processed_faces)
-                                table.add(df)
-                                logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
-                        
-                                # The face.vector_db_id (from C# backend) is now stored in LanceDB.
-                                # No explicit return from this method is needed, as the API endpoint
-                                # will construct the FaceEmbeddingResponse with the ID it received.                async def search_faces(self, query_embedding: List[float], member_id: Optional[str] = None, top_k: int = 5) -> List[Dict[str, Any]]:
+            processed_faces.append(face)
+        
+        df = pd.DataFrame(processed_faces)
+        table.add(df)
+        logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
+
+        # The face.vector_db_id (from C# backend) is now stored in LanceDB.
+        # No explicit return from this method is needed, as the API endpoint
+        # will construct the FaceEmbeddingResponse with the ID it received.
+    async def search_faces(self, family_id: str, query_embedding: List[float], member_id: Optional[str] = None, top_k: int = 5) -> List[Dict[str, Any]]:
         if not query_embedding:
             raise ValueError("Query embedding must be provided for face search.")
         
-        # Need a family_id to determine the table. For now, assume a default or pass it.
-        # This needs to be handled: how to know which family's faces to search?
-        # For now, let's assume `member_id` implies `family_id` can be derived or it's always one table.
-        # Or perhaps, we search across all face tables? (More complex)
-        # Let's simplify: require family_id. Or, search across all relevant tables.
-        # For initial implementation, let's assume we search within a specific family.
-        # The API request in faces.py doesn't have family_id, so let's adjust.
-        # For now, I will assume member_id is enough to form a filter.
-        # If we have a dedicated face table per family, we need family_id.
-        # Let's add family_id to SearchFaceRequest in face_models.py later.
-
-        # For now, let's just search globally across all face tables, which is not ideal for large scale.
-        # Or, we enforce family_id for face search.
-        # Given the `search_family_table` method uses `family_id`, it's consistent to use it here.
-
-        # *** This part needs clarification on how to get family_id for face search ***
-        # For now, I will make a placeholder or assume family_id is somehow known
-        # Let's assume for now the face table name could be "faces_global" or we need family_id in the request.
-        # The `faces.py` router `search_faces` will pass `member_id` as filter.
-        
-        # For simplicity, let's iterate through all face tables in the DB
-        all_face_tables = [name for name in self.db.table_names() if name.startswith("faces_")]
-        if not all_face_tables:
-            logger.warning("No face tables found in LanceDB.")
+        table_name = self._get_face_table_name(family_id)
+        if table_name not in self.db.table_names():
+            logger.warning(
+                f"Face table '{table_name}' does not exist. "
+                "Returning empty results."
+            )
             return []
 
-        combined_results = []
-        for table_name in all_face_tables:
-            table = self.db.open_table(table_name)
-            
-            face_filter = None
-            if member_id:
-                face_filter = f"member_id = '{member_id}'"
-            
-            query = table.search(query_embedding)
-            if face_filter:
-                query = query.where(face_filter)
-            
-            results = query.limit(top_k).to_list()
-            
-            for res in results:
-                # Deserialize bounding_box
-                if res.get("bounding_box"):
-                    res["bounding_box"] = json.loads(res["bounding_box"])
-                combined_results.append(res)
+        table = self.db.open_table(table_name)
         
-        # Sort results by _distance (score) and return top_k overall
-        combined_results.sort(key=lambda x: x.get("_distance", float('inf')))
-        return combined_results[:top_k]
+        face_filter = None
+        if member_id:
+            face_filter = f"member_id = '{member_id}'"
+        
+        query = table.search(query_embedding)
+        if face_filter:
+            query = query.where(face_filter)
+        
+        results = query.limit(top_k).to_list()
+        
+        # Format results
+        formatted_results = []
+        for res in results:
+            # Deserialize bounding_box
+            if res.get("bounding_box"):
+                res["bounding_box"] = json.loads(res["bounding_box"])
+            formatted_results.append({
+                "face_id": UUID(res.get("face_id")),
+                "member_id": UUID(res.get("member_id")),
+                "score": res.get("_distance"),  # LanceDB returns _distance as score
+                "bounding_box": res.get("bounding_box"),
+                "confidence": res.get("confidence"),
+                "thumbnail_url": res.get("thumbnail_url"),
+                "original_image_url": res.get("original_image_url"),
+                "emotion": res.get("emotion"),
+                "emotion_confidence": res.get("emotion_confidence"),
+                "vector_db_id": res.get("vector_db_id"),
+                "is_vector_db_synced": res.get("is_vector_db_synced")
+            })
+        
+        return formatted_results
 
 
     async def delete_face_data(self, family_id: str, face_id: Optional[str] = None, member_id: Optional[str] = None) -> int:
@@ -500,10 +497,33 @@ class LanceDBService:
         else:
             raise ValueError("Either face_id or member_id must be provided for deletion.")
         
-        # LanceDB's delete method returns the number of deleted rows
-        deleted_count = table.delete(where=filter_str)
-        logger.info(f"Deleted {deleted_count} entries from face table "
-                    f"'{table_name}' with filter '{filter_str}'.")
+        # First, count how many items match the filter before deleting
+        df = table.to_pandas()
+        
+        # Parse filter_str to extract column and value
+        column, value = "", ""
+        if "face_id =" in filter_str:
+            column = "face_id"
+            value = filter_str.split("face_id = '")[1].split("'")[0]
+        elif "member_id =" in filter_str:
+            column = "member_id"
+            value = filter_str.split("member_id = '")[1].split("'")[0]
+        
+        if not column or not value:
+            # Fallback or raise error if filter_str format is unexpected
+            logger.error(f"Unexpected filter_str format: {filter_str}")
+            return 0
+
+        matching_items_df = df[df[column] == value]
+        deleted_count = len(matching_items_df)
+        
+        if deleted_count > 0:
+            table.delete(where=filter_str)
+            logger.info(f"Deleted {deleted_count} entries from face table "
+                        f"'{table_name}' with filter '{filter_str}'.")
+        else:
+            logger.info(f"No entries found to delete from face table "
+                        f"'{table_name}' with filter '{filter_str}'.")
         return deleted_count
 
     async def update_face_data(self, family_id: str, face_id: str, update_data: Dict) -> int:
@@ -539,28 +559,19 @@ class LanceDBService:
         # For now, assuming `update` returns number of rows affected.
         # Or, we can query before and after to get the count.
         
-        # LanceDB's update takes a `where` clause and a dictionary of `changes`
-        table.update(where=filter_str, changes=processed_update_data)
-        logger.info(f"Updated face data for face_id '{face_id}' in table "
-                    f"'{table_name}'. Changes: {processed_update_data}")
-        # LanceDB's update doesn't directly return count.
-        # For simplicity, we can return 1 if filter is found, else 0.
-        # Or query to get the count. For now, let's assume it updates.
-        # We can implement checking affected rows if needed later.
-        
-        # To get affected rows, we would query the table before and after,
-        # or use a more advanced LanceDB feature if available.
-        # For now, I'll return 1 if an update was attempted, assuming success.
-        # A more robust solution might query `table.to_pandas()` then filter.
-        
-        # Let's count before for more accuracy.
-        # current_count = len(table.to_pandas().query(filter_str))
-        # if current_count > 0:
-        #    return 1 # At least one row was intended to be updated
-        # return 0
+        # First, count how many items match the filter before updating
+        df = table.to_pandas()
+        matching_items_df = df[df['face_id'] == face_id]
+        updated_count = len(matching_items_df)
 
-        # Simplified for now, just return 1 if successful.
-        return 1 # Assume 1 row is updated if no exception.
+        if updated_count > 0:
+            logger.info(f"Updating face data for face_id '{face_id}' in table "
+                        f"'{table_name}'. Changes: {processed_update_data}")
+            table.update(where=filter_str, values=processed_update_data)
+        else:
+            logger.info(f"No entries found to update for face_id '{face_id}' in table "
+                        f"'{table_name}'.")
+        return updated_count
 
 
 

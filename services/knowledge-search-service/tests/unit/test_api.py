@@ -5,7 +5,7 @@ import numpy as np
 
 # Import the main FastAPI app
 from app.main import app
-from app.config import EMBEDDING_DIMENSIONS
+from app.config import TEXT_EMBEDDING_DIMENSIONS
 
 # Create a test client for the FastAPI app
 # client = TestClient(app) # Moved inside fixture for proper mocking
@@ -13,8 +13,7 @@ from app.config import EMBEDDING_DIMENSIONS
 # Fixture to provide a TestClient
 @pytest.fixture() # Removed autouse=True
 def test_client():
-    from app.main import app as test_app
-    with TestClient(test_app) as client:
+    with TestClient(app) as client:
         yield client
 
 
@@ -40,7 +39,7 @@ def test_search_endpoint_success(test_client, mocker):
         {"metadata": {"original_id": "M002", "name": "Trần Thị B", "content_type": "member"}, "summary": "Vợ ông A", "score": 0.75},
     ]
     # Ensure embedding_service.embed_query returns a predictable vector
-    mock_embedding_service.embed_query.return_value = np.random.rand(EMBEDDING_DIMENSIONS).tolist()
+    mock_embedding_service.embed_query.return_value = np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist()
 
     request_payload = {
         "family_id": "F123",
@@ -132,7 +131,7 @@ def test_index_knowledge_data_success_index_action(test_client, mocker):
     mock_lancedb_service._get_table_name.return_value = "family_F123"
 
     mock_lancedb_service.add_vectors.return_value = None
-    mock_embedding_service.embed_query.return_value = np.random.rand(EMBEDDING_DIMENSIONS).tolist()
+    mock_embedding_service.embed_query.return_value = np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist()
 
     sample_metadata = {
         "family_id": "F123",

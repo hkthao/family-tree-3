@@ -1,3 +1,5 @@
+
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -6,12 +8,16 @@ from uuid import UUID
 from ..core.lancedb import lancedb_service
 from ..core.embeddings import embedding_service
 from ..models.face_models import (
-    FaceEmbeddingRequest, FaceEmbeddingResponse,
+    FaceEmbeddingResponse,
     AddFaceRequest, FaceMetadata, UpdateFaceRequest,
-    DeleteFacesByMemberIdRequest, SearchFaceRequest
+    SearchFaceRequest, SearchFacesResponse
 )
 
 router = APIRouter()
+
+@router.get("/faces/test", status_code=status.HTTP_200_OK)
+async def test_faces_endpoint():
+    return {"message": "Faces test endpoint reachable."}
 
 @router.post(
     "/faces",
@@ -48,12 +54,12 @@ async def add_face(request: AddFaceRequest):
         # Lưu thông tin khuôn mặt vào LanceDB
         face_data_dict = face_metadata.model_dump()
         
-        await lancedb_service.add_face_data(face_metadata.family_id, [face_data_dict])
+        await lancedb_service.add_face_data(str(face_metadata.family_id), [face_data_dict])
 
         return FaceEmbeddingResponse(
             face_id=face_metadata.face_id,
             member_id=face_metadata.member_id,
-            vector_db_id=face_metadata.vector_db_id, // Return the vector_db_id that was passed in
+            vector_db_id=face_metadata.vector_db_id, # Return the vector_db_id that was passed in
             message="Thông tin khuôn mặt đã được thêm thành công."
         )
     except HTTPException as e:
@@ -66,7 +72,7 @@ async def add_face(request: AddFaceRequest):
 
 @router.post(
     "/faces/search",
-    response_model=List[FaceEmbeddingResponse], # Cần một response model chi tiết hơn cho search results
+    response_model=SearchFacesResponse,
     summary="Tìm kiếm các khuôn mặt tương tự dựa trên vector nhúng đầu vào hoặc URL hình ảnh."
 )
 async def search_faces(request: SearchFaceRequest):
@@ -96,17 +102,30 @@ async def search_faces(request: SearchFaceRequest):
             top_k=request.top_k
         )
         
-        # Chuyển đổi kết quả từ LanceDB sang định dạng FaceEmbeddingResponse
-        response_results = []
+        # Chuyển đổi kết quả từ LanceDB sang định dạng SearchResult
+        search_results = []
         for res in results:
-            # Giả định res là một dict hoặc đối tượng có các thuộc tính tương ứng
-            response_results.append(FaceEmbeddingResponse(
-                face_id=UUID(res.get("face_id")),
-                member_id=UUID(res.get("member_id")),
-                score=res.get("_distance"), # LanceDB thường trả về khoảng cách/score
-                message="Tìm kiếm thành công."
+            # Tạo một đối tượng FaceMetadata từ các trường đã deserialize
+            face_metadata_obj = FaceMetadata(
+                family_id=res.get("family_id"),
+                member_id=res.get("member_id"),
+                face_id=res.get("face_id"),
+                bounding_box=res.get("bounding_box"),
+                confidence=res.get("confidence"),
+                thumbnail_url=res.get("thumbnail_url"),
+                original_image_url=res.get("original_image_url"),
+                emotion=res.get("emotion"),
+                emotion_confidence=res.get("emotion_confidence"),
+                vector_db_id=res.get("vector_db_id"),
+                is_vector_db_synced=res.get("is_vector_db_synced")
+            )
+            search_results.append(SearchResult(
+                face_id=res.get("face_id"),
+                member_id=res.get("member_id"),
+                score=res.get("score"),
+                metadata=face_metadata_obj
             ))
-        return response_results
+        return SearchFacesResponse(results=search_results)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -199,9 +218,14 @@ async def update_face(family_id: UUID, face_id: UUID, request: UpdateFaceRequest
                 detail=f"Không tìm thấy khuôn mặt với face_id '{face_id}' trong family_id '{family_id}' để cập nhật."
             )
 
+        
+        response_member_id = request.member_id if request.member_id else None
+        response_vector_db_id = update_data.get("vector_db_id")
+        
         return FaceEmbeddingResponse(
             face_id=face_id,
-            member_id=request.member_id if request.member_id else UUID(str(UUID.random_uuid())), # Cần lấy lại member_id từ DB nếu không có trong request, tạm thời tạo random
+            member_id=response_member_id,
+            vector_db_id=response_vector_db_id,
             message=f"Thông tin khuôn mặt với face_id '{face_id}' đã được cập nhật thành công."
         )
     except HTTPException as e:

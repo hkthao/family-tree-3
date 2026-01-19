@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from app.core.lancedb import LanceDBService
-from app.config import EMBEDDING_DIMENSIONS
+from app.config import TEXT_EMBEDDING_DIMENSIONS
 from app.schemas.vectors import VectorData, UpdateVectorRequest, DeleteVectorRequest, RebuildVectorRequest
 import numpy as np
 import pyarrow as pa
@@ -31,7 +31,7 @@ def lancedb_service_instance(mock_lancedb_connect):
 def mock_embedding_service():
     """Fixture to mock the embedding service."""
     with patch('app.core.lancedb.embedding_service') as mock_embed:
-        mock_embed.embed_query.return_value = np.random.rand(EMBEDDING_DIMENSIONS).tolist()
+        mock_embed.embed_query.return_value = np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist()
         yield mock_embed
 
 def test_lancedb_service_initialization(lancedb_service_instance):
@@ -47,7 +47,7 @@ def test_search_family_table_not_exists(lancedb_service_instance):
     
     results = service.search_family_table(
         family_id=family_id,
-        query_vector=np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
+        query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public"],
         top_k=5
     )
@@ -69,7 +69,7 @@ def test_search_family_table_exists_no_results(lancedb_service_instance):
 
     results = service.search_family_table(
         family_id=family_id,
-        query_vector=np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
+        query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public"],
         top_k=5
     )
@@ -102,7 +102,7 @@ def test_search_family_table_with_results(lancedb_service_instance):
 
     results = service.search_family_table(
         family_id=family_id,
-        query_vector=np.random.rand(EMBEDDING_DIMENSIONS).tolist(),
+        query_vector=np.random.rand(TEXT_EMBEDDING_DIMENSIONS).tolist(),
         allowed_visibility=["public", "private"],
         top_k=2
     )
@@ -137,7 +137,7 @@ def test_create_dummy_table_new(lancedb_service_instance, mock_embedding_service
     
     # Assert specific fields in the schema
     schema = kwargs["schema"]
-    assert schema.field("vector").type == pa.list_(pa.float32(), EMBEDDING_DIMENSIONS)
+    assert schema.field("vector").type == pa.list_(pa.float32(), TEXT_EMBEDDING_DIMENSIONS)
     assert schema.field("family_id").type == pa.string()
     assert schema.field("entity_id").type == pa.string()
     assert schema.field("type").type == pa.string()
