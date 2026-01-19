@@ -4,7 +4,8 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Options;
-using backend.Domain.Enums; // Added
+using backend.Domain.Enums;
+using backend.Domain.ValueObjects; // Added for BoundingBox
 
 namespace backend.Application.Knowledge;
 
@@ -342,4 +343,179 @@ public class KnowledgeService : IKnowledgeService
     {
         public List<KnowledgeSearchResultDto>? Results { get; set; }
     }
+
+    private class FaceAddRequest
+    {
+        public FaceMetadataRequest FaceMetadata { get; set; } = new();
+    }
+
+    private class FaceMetadataRequest
+    {
+        public Guid FamilyId { get; set; }
+        public Guid MemberId { get; set; }
+        public Guid FaceId { get; set; }
+        public BoundingBox? BoundingBox { get; set; }
+        public double Confidence { get; set; }
+        public string? ThumbnailUrl { get; set; }
+        public string? OriginalImageUrl { get; set; }
+        public List<double>? Embedding { get; set; }
+        public string? Emotion { get; set; }
+        public double EmotionConfidence { get; set; }
+        public string? VectorDbId { get; set; }
+        public bool IsVectorDbSynced { get; set; }
+    }
+
+    private class FaceSearchRequest
+    {
+        public Guid FamilyId { get; set; }
+        public List<double>? QueryEmbedding { get; set; }
+        public Guid? MemberId { get; set; }
+        public int TopK { get; set; }
+    }
+
+    private class FaceSearchApiResponse
+    {
+        public List<FaceSearchResultDto>? Results { get; set; }
+    }
+
+    public async Task IndexMemberFaceData(MemberFaceDto faceData)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot index face data.");
+            return;
+        }
+
+        try
+        {
+            var requestBody = new FaceAddRequest
+            {
+                FaceMetadata = new FaceMetadataRequest
+                {
+                    FamilyId = faceData.FamilyId,
+                    MemberId = faceData.MemberId,
+                    FaceId = faceData.FaceId,
+                    BoundingBox = faceData.BoundingBox,
+                    Confidence = faceData.Confidence,
+                    ThumbnailUrl = faceData.ThumbnailUrl,
+                    OriginalImageUrl = faceData.OriginalImageUrl,
+                    Embedding = faceData.Embedding,
+                    Emotion = faceData.Emotion,
+                    EmotionConfidence = faceData.EmotionConfidence,
+                    VectorDbId = faceData.VectorDbId,
+                    IsVectorDbSynced = faceData.IsVectorDbSynced
+                }
+            };
+
+            var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/faces", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully indexed face data for FaceId: {FaceId}", faceData.FaceId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error indexing face data for FaceId: {FaceId}. Status Code: {StatusCode}", faceData.FaceId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while indexing face data for FaceId: {FaceId}.", faceData.FaceId);
+        }
+    }
+
+    public async Task DeleteMemberFaceData(Guid familyId, Guid faceId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete face data.");
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/faces/{familyId}/{faceId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted face data for FaceId: {FaceId} in FamilyId: {FamilyId}", faceId, familyId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting face data for FaceId: {FaceId} in FamilyId: {FamilyId}. Status Code: {StatusCode}", faceId, familyId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting face data for FaceId: {FaceId} in FamilyId: {FamilyId}.", faceId, familyId);
+        }
+    }
+
+    public async Task DeleteMemberFacesByMemberId(Guid familyId, Guid memberId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete member faces.");
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/faces/member/{familyId}/{memberId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted all faces for MemberId: {MemberId} in FamilyId: {FamilyId}", memberId, familyId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting all faces for MemberId: {MemberId} in FamilyId: {FamilyId}. Status Code: {StatusCode}", memberId, familyId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting all faces for MemberId: {MemberId} in FamilyId: {FamilyId}.", memberId, familyId);
+        }
+    }
+
+    public async Task<List<FaceSearchResultDto>> SearchFaces(Guid familyId, List<double> embedding, Guid? memberId = null, int topK = 5)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot perform face search.");
+            return new List<FaceSearchResultDto>();
+        }
+
+        try
+        {
+            var requestBody = new FaceSearchRequest
+            {
+                FamilyId = familyId,
+                QueryEmbedding = embedding,
+                MemberId = memberId,
+                TopK = topK
+            };
+
+            var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/faces/search", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var searchResponse = JsonSerializer.Deserialize<List<FaceSearchResultDto>>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+
+            _logger.LogInformation("Successfully performed face search in knowledge service for FamilyId: {FamilyId}", familyId);
+
+            return searchResponse ?? new List<FaceSearchResultDto>();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error performing face search in knowledge service for FamilyId: {FamilyId}. Status Code: {StatusCode}", familyId, ex.StatusCode);
+            return new List<FaceSearchResultDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while performing face search in knowledge service for FamilyId: {FamilyId}.", familyId);
+            return new List<FaceSearchResultDto>();
+        }
+    }
 }
+

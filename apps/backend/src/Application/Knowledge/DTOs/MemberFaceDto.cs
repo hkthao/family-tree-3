@@ -1,0 +1,26 @@
+using backend.Domain.ValueObjects;
+using System;
+using System.Collections.Generic;
+
+namespace backend.Application.Knowledge.DTOs;
+
+public class MemberFaceDto
+{
+    public Guid FamilyId { get; set; }
+    public Guid MemberId { get; set; }
+    public Guid FaceId { get; set; }
+    
+    public BoundingBox BoundingBox { get; set; } = new BoundingBox();
+    public double Confidence { get; set; }
+
+    public string? ThumbnailUrl { get; set; }
+    public string? OriginalImageUrl { get; set; }
+
+    public List<double>? Embedding { get; set; }
+
+    public string? Emotion { get; set; }
+    public double EmotionConfidence { get; set; }
+
+    public string? VectorDbId { get; set; }
+    public bool IsVectorDbSynced { get; set; } = false;
+}
