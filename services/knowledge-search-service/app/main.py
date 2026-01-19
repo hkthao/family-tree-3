@@ -3,7 +3,7 @@ from fastapi.responses import ORJSONResponse
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from .api import search, vectors, knowledge
+from .api import search, vectors, knowledge, faces
 from .core.lancedb import lancedb_service
 from .core.embeddings import embedding_service  # Import the instance directly
 
@@ -38,6 +38,7 @@ app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
 app.include_router(vectors.router, prefix="/api/v1/vectors", tags=["Vectors"])
 app.include_router(knowledge.router, prefix="/api/v1/knowledge",
                    tags=["Knowledge"])
+app.include_router(faces.router, prefix="/api/v1/faces", tags=["Faces"])
 
 
 @app.on_event("startup")
