@@ -79,13 +79,6 @@ const handleNodeClick = (memberId: string, memberName: string) => {
   selectedMemberIdForAction.value = memberId;
   selectedMemberNameForAction.value = memberName;
   isActionDialogOpen.value = true;
-  if (window.ReactNativeWebView) {
-    window.ReactNativeWebView.postMessage(
-      JSON.stringify({ type: 'NODE_CLICK', payload: { memberId, memberName } })
-    );
-  } else {
-    console.log(`Node clicked: ${memberName} (${memberId})`);
-  }
 };
 
 const handleViewDetails = (memberId: string) => {
@@ -102,6 +95,13 @@ const handleViewDetails = (memberId: string) => {
 const handleViewRelationships = (memberId: string) => {
   rootId.value = memberId;
   isActionDialogOpen.value = false;
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({ type: 'VIEW_MEMBER_RELATIONSHIPS', payload: { memberId } })
+    );
+  } else {
+    console.log(`View Relationships for member: ${memberId}`);
+  }
 };
 
 onMounted(() => {
