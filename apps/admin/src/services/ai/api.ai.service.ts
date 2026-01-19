@@ -9,7 +9,7 @@ export class ApiAiService implements IAiService {
 
   async generateFamilyKb(familyId: string): Promise<Result<any, ApiError>> {
     try {
-      const apiResponse = await this.apiClient.post<any>(`/api/ai/generate-kb/${familyId}`);
+      const apiResponse = await this.apiClient.post<any>(`/ai/generate-kb/${familyId}`);
       if (apiResponse.ok) {
         return ok(apiResponse.value); // Use apiResponse.value if apiResponse.ok is true
       } else {
