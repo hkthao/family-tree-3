@@ -35,10 +35,28 @@
       <v-btn color="info" @click="emit('openUpdateFamilyLimitDrawer', familyData.id)" data-testid="button-update-limits" v-if="isAdmin">
         {{ t('family.updateLimits') }}
       </v-btn>
+      <!-- New button for admin to generate KB -->
+      <v-btn
+        v-if="isAdmin"
+        color="success"
+        :loading="generateKbMutation.isPending.value"
+        @click="triggerGenerateKb"
+        data-testid="button-generate-kb"
+        class="ml-2"
+      >
+        {{ t('family.generateKb.button') }}
+      </v-btn>
     </v-card-actions>
   </div>
 
-
+  <v-snackbar
+    v-model="snackbar.show"
+    :color="snackbar.color"
+    :timeout="snackbar.timeout"
+    location="bottom right"
+  >
+    {{ snackbar.message }}
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -46,13 +64,14 @@ import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FamilyForm } from '@/components/family';
 import { useFamilyDetail } from '@/composables/family/logic/useFamilyDetail';
-import { useFamilyFollow } from '@/composables/family/logic/useFamilyFollow'; // Import useFamilyFollow
-import { useAuthStore } from '@/stores/auth.store'; // Import auth store
-import PrivacyAlert from '@/components/common/PrivacyAlert.vue'; // Import PrivacyAlert
+import { useFamilyFollow } from '@/composables/family/logic/useFamilyFollow';
+import { useAuthStore } from '@/stores/auth.store';
+import PrivacyAlert from '@/components/common/PrivacyAlert.vue';
+import { useGenerateFamilyKb } from '@/composables/family/logic/useGenerateFamilyKb'; // Import the new composable
 
 const { t } = useI18n();
 const authStore = useAuthStore();
-const isAdmin = authStore.isAdmin; // Get admin status
+const isAdmin = authStore.isAdmin;
 
 const props = defineProps<{
   familyId: string;
@@ -62,7 +81,10 @@ const props = defineProps<{
 const emit = defineEmits(['openEditDrawer', 'openUpdateFamilyLimitDrawer', 'toggle-follow-settings']);
 
 const { state: { familyData, isLoading, canManageFamily }, actions } = useFamilyDetail(props, emit);
-const { state: familyFollowState } = useFamilyFollow(toRef(props, 'familyId')); // Remove actions: familyFollowActions as toggleFollow is removed
+const { state: familyFollowState } = useFamilyFollow(toRef(props, 'familyId'));
+
+// Use the new composable for generate KB logic
+const { generateKbMutation, triggerGenerateKb, snackbar } = useGenerateFamilyKb(props.familyId);
 
 const emitToggleFollowSettings = () => {
   emit('toggle-follow-settings', {
