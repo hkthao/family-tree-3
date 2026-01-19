@@ -26,11 +26,11 @@ def cleanup_lancedb():
 def face_lancedb_service_instance(): # Renamed fixture
     """Provides a FaceLanceDBService instance connected to a test database."""
     with patch('app.config.LANCEDB_PATH', TEST_LANCEDB_PATH), \
-         patch('lancedb.connect') as mock_lancedb_connect:
-        
+        patch('lancedb.connect') as mock_lancedb_connect:
+
         mock_db = MagicMock()
         mock_lancedb_connect.return_value = mock_db
-        
+
         # This will hold the "data" for our mocked LanceDB table
         mock_table_data = [] 
         _mock_created_tables = [] # List to track names of "created" tables
@@ -92,11 +92,11 @@ def face_lancedb_service_instance(): # Renamed fixture
         def mock_delete(where):
             deleted_count = 0
             new_table_data = []
-            
+
             # Extract face_id or member_id from where clause
             target_face_id = None
             target_member_id = None
-            
+
             if "face_id =" in where:
                 target_face_id = where.split("=")[-1].strip().strip("'")
             elif "member_id =" in where:
@@ -117,7 +117,7 @@ def face_lancedb_service_instance(): # Renamed fixture
                     deleted_count += 1
                 else:
                     new_table_data.append(item)
-            
+
             mock_table_data[:] = new_table_data # Update in place
             return deleted_count
 
@@ -129,9 +129,9 @@ def face_lancedb_service_instance(): # Renamed fixture
             target_face_id = None
             if "face_id =" in where:
                 target_face_id = where.split("=")[-1].strip().strip("'")
-            
-            changes = kwargs
-            
+
+            changes = kwargs['changes'] # Access 'changes' directly from kwargs
+
             for item in mock_table_data:
                 if target_face_id and item.get("face_id") == target_face_id:
                     for key, value in changes.items():
@@ -185,14 +185,14 @@ async def test_add_face_data(face_lancedb_service_instance, mock_embedding_servi
         "vector_db_id": None,
         "is_vector_db_synced": True
     }
-    
+
     original_embedding = face_data['embedding']
-    
+
     await service.add_face_data(family_id, [face_data])
-    
+
     table_name = service._get_face_table_name(family_id)
     table = service.db.open_table(table_name)
-    
+
     results = table.to_pandas().to_dict('records')
     assert len(results) == 1
     assert results[0]['face_id'] == face_id
@@ -207,7 +207,7 @@ async def test_add_face_data_no_embedding_raises_error(face_lancedb_service_inst
     family_id = str(uuid.uuid4())
     member_id = str(uuid.uuid4())
     face_id = str(uuid.uuid4())
-    
+
     face_data = {
         "family_id": family_id,
         "member_id": member_id,
