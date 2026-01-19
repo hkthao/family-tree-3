@@ -432,6 +432,7 @@
   "family.form.description": "Description",
   "family.form.editTitle": "Edit Family",
   "family.form.name": "Name",
+  "family.form.code": "Code",
   "family.form.rules.nameRequired": "Name is required.",
   "family.form.visibility.private": "Private",
   "family.form.visibility.public": "Public",

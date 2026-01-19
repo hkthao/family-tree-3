@@ -561,6 +561,7 @@
   "family.form.father": "Cha",
   "family.form.mother": "Mẹ",
   "family.form.name": "Tên gia đình",
+  "family.form.code": "Mã",
   "family.form.maxMembers": "Số thành viên tối đa",
   "family.form.maxStorageMb": "Dung lượng lưu trữ tối đa (MB)",
   "family.form.aiChatMonthlyLimit": "Giới hạn Chat AI hàng tháng",

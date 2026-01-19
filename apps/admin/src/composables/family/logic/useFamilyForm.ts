@@ -23,6 +23,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
       return {
         id: props.data.id,
         name: props.data.name,
+        code: props.data.code,
         description: props.data.description || '',
         address: props.data.address || '',
         genealogyRecord: props.data.genealogyRecord || '',
@@ -40,6 +41,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     }
     return {
       name: '',
+      code: '',
       description: '',
       address: '',
       genealogyRecord: '',
@@ -77,6 +79,7 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
         isEditMode.value = true;
         (formData as FamilyUpdateDto).id = newVal.id;
         formData.name = newVal.name;
+        formData.code = newVal.code; // Set the code field
         formData.description = newVal.description || '';
         formData.address = newVal.address || '';
         formData.genealogyRecord = newVal.genealogyRecord || '';
@@ -135,20 +138,20 @@ export function useFamilyForm(props: UseFamilyFormProps, formRef: Ref<VForm | nu
     return dataToSubmit;
   };
 
-  return {
-    state: {
-      formData,
-      initialAvatarDisplay,
-      managers,
-      viewers,
-      visibilityItems,
-      getFamilyAvatarUrl,
-      rules,
-      isLoadingUsers: ref(false),
-    },
-    actions: {
-      validate,
-      getFormData,
-    },
-  };
-}
+      return {
+        state: {
+          formData,
+          initialAvatarDisplay,
+          managers,
+          viewers,
+          visibilityItems,
+          getFamilyAvatarUrl,
+          rules,
+          isLoadingUsers: ref(false),
+          isEditMode, // Export isEditMode
+        },
+        actions: {
+          validate,
+          getFormData,
+        },
+      };}

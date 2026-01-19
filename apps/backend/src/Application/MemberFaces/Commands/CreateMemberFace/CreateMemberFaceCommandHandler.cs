@@ -27,7 +27,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         }
         var searchMemberFaceQuery = new SearchMemberFaceQuery(member.FamilyId)
         {
-            Vector = request.Embedding.ToList(),
+            Vector = [.. request.Embedding],
             Limit = 1,
             Threshold = 0.95f
         };

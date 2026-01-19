@@ -10,9 +10,13 @@
         <v-text-field v-model="formData.name" :label="$t('family.form.name')" :rules="rules.name" required
           data-testid="family-name-input" prepend-inner-icon="mdi-home-group"></v-text-field>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="3">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
           required data-testid="family-visibility-select" prepend-inner-icon="mdi-eye"></v-select>
+      </v-col>
+      <v-col cols="3">
+        <v-text-field v-model="formData.code" :label="$t('family.form.code')" :rules="rules.code" required
+          data-testid="family-code-input" prepend-inner-icon="mdi-identifier" :disabled="props.readOnly || isEditMode"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -122,9 +126,7 @@ import type { FamilyDto } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import LocationInputField from '@/components/common/LocationInputField.vue'; // Import the new component
-import { useFamilyForm } from '@/composables';
-// Removed useLocationDrawerStore as its logic is now in LocationInputField
-// import { useLocationDrawerStore } from '@/stores/locationDrawer.store'; 
+import { useFamilyForm } from '@/composables/family/logic/useFamilyForm'; // Corrected import path
 
 const props = defineProps<{
   data?: FamilyDto;
@@ -135,11 +137,9 @@ const props = defineProps<{
 defineEmits(['submit']);
 
 const formRef = ref<VForm | null>(null);
-// Removed locationDrawerStore as its logic is now in LocationInputField
-// const locationDrawerStore = useLocationDrawerStore(); 
 
 const {
-  state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
+  state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers, isEditMode },
   actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
 

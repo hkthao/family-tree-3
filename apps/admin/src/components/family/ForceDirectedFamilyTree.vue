@@ -16,7 +16,7 @@ import { getAvatarUrl } from '@/utils/avatar.utils'; // NEW
 
 const { t } = useI18n();
 
-defineEmits([
+const emit = defineEmits([
   'update:rootId', // New emit event to update rootId
   'nodeClick', // Emit event for node clicks
 ]);
