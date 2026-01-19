@@ -9,9 +9,9 @@ using backend.Domain.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Logging; // Keep this one
 using Moq;
 using Xunit;
-using Microsoft.Extensions.Logging; // Keep this one
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 

@@ -209,6 +209,33 @@ async def delete_faces_by_member_id(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Đã xảy ra lỗi nội bộ khi xóa khuôn mặt của thành viên: {e}"
         )
+@router.delete(
+    "/faces/family/{family_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Xóa tất cả khuôn mặt của một gia đình khỏi cơ sở dữ liệu LanceDB."
+)
+async def delete_faces_by_family_id(
+    family_id: UUID,
+    lancedb_service: FaceLanceDBService = Depends(get_face_lancedb_service)
+):
+    """
+    Xóa tất cả các khuôn mặt liên quan đến một family_id cụ thể.
+    """
+    try:
+        await lancedb_service.delete_faces_by_family_id(
+            family_id=str(family_id)
+        )
+        return {"message": f"Tất cả khuôn mặt trong family_id '{family_id}' đã được xóa thành công."
+        }
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.exception(f"Đã xảy ra lỗi nội bộ khi xóa khuôn mặt theo gia đình: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Đã xảy ra lỗi nội bộ khi xóa khuôn mặt theo gia đình: {e}"
+        )
+
 @router.put(
     "/faces/{family_id}/{face_id}",
     response_model=FaceEmbeddingResponse,

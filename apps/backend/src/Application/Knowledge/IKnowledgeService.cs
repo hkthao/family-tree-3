@@ -80,6 +80,13 @@ public interface IKnowledgeService
     Task DeleteMemberFacesByMemberId(Guid familyId, Guid memberId);
 
     /// <summary>
+    /// Xóa tất cả dữ liệu khuôn mặt của một gia đình khỏi knowledge-search-service.
+    /// </summary>
+    /// <param name="familyId">ID của Family mà các khuôn mặt thuộc về.</param>
+    /// <returns>Task hoàn thành tác vụ.</returns>
+    Task DeleteFamilyFacesData(Guid familyId);
+
+    /// <summary>
     /// Tìm kiếm khuôn mặt tương tự trong knowledge-search-service.
     /// </summary>
     /// <param name="familyId">ID của Family để giới hạn phạm vi tìm kiếm.</param>

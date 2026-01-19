@@ -3,9 +3,8 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
 using backend.Application.Knowledge; // Added for IKnowledgeService
-using backend.Application.Knowledge.DTOs; // Added for FaceSearchResultDto
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 

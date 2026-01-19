@@ -28,7 +28,7 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
             _logger.LogWarning("Authorization failed for user to generate knowledge base for FamilyId: {FamilyId}. Reason: {Reason}", request.FamilyId, authResult.Error);
             return authResult; // Return the unauthorized result directly
         }
-        
+
         _logger.LogInformation("Generating knowledge base for FamilyId: {FamilyId}", request.FamilyId);
 
         var family = await _context.Families

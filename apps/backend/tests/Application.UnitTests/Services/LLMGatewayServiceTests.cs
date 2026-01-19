@@ -1,21 +1,21 @@
 #nullable disable
 
-using Xunit;
-using Moq;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using backend.Infrastructure.Services.LLMGateway;
 using backend.Application.Common.Models.LLMGateway;
-using System.Text.Json;
-using System.Net;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using System.Text;
-using Moq.Protected;
-using FluentAssertions; // Fluent Assertions
 using backend.Application.UnitTests.Common; // For TestBase
+using backend.Infrastructure.Services.LLMGateway;
+using FluentAssertions; // Fluent Assertions
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
+using Xunit;
 
 // Inherit from TestBase
 public class LLMGatewayServiceTests : TestBase

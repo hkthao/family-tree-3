@@ -3,7 +3,10 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.FixFamilyRelationships; // NEW
 using backend.Application.Families.Commands.GenerateFamilyData; // ADDED: New using directive
+using backend.Application.Families.Commands.Import;
+using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
 using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
@@ -11,14 +14,11 @@ using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetFamilyTreeData; // NEWLY ADDED
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
-using backend.Application.Families.Commands.Import;
-using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
-using backend.Application.Families.Commands.FixFamilyRelationships; // NEW
-using backend.Application.Families.Queries.GetFamilyTreeData; // NEWLY ADDED
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

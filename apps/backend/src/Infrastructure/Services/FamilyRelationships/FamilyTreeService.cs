@@ -71,7 +71,7 @@ public class FamilyTreeService : IFamilyTreeService
         var rootMembers = memberIds.Where(mId => !parents.ContainsKey(mId) || parents[mId].Count == 0).ToList();
 
         // If no explicit roots found via relationships, consider members who are not target of any parent relationship as roots
-        if (rootMembers.Count == 0 && memberIds.Any()) 
+        if (rootMembers.Count == 0 && memberIds.Any())
         {
             rootMembers = memberIds.Where(mId => !relationships.Any(r => r.TargetMemberId == mId)).ToList();
         }
@@ -89,7 +89,7 @@ public class FamilyTreeService : IFamilyTreeService
         }
 
         family.TotalGenerations = maxGenerations;
-        
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 

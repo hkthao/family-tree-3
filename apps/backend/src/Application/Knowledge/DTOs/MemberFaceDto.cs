@@ -1,6 +1,4 @@
 using backend.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
 
 namespace backend.Application.Knowledge.DTOs;
 
@@ -9,7 +7,7 @@ public class MemberFaceDto
     public Guid FamilyId { get; set; }
     public Guid MemberId { get; set; }
     public Guid FaceId { get; set; }
-    
+
     public BoundingBox BoundingBox { get; set; } = new BoundingBox();
     public double Confidence { get; set; }
 

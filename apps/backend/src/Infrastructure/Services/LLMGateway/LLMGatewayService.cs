@@ -1,9 +1,9 @@
+using System.Text;
+using System.Text.Json;
 using backend.Application.Common.Interfaces.Services.LLMGateway;
 using backend.Application.Common.Models; // Add this using directive for Result
 using backend.Application.Common.Models.LLMGateway;
 using Microsoft.Extensions.Configuration;
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Logging; // Add this
 
 namespace backend.Infrastructure.Services.LLMGateway;

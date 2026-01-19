@@ -1,12 +1,12 @@
+using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
 using backend.CompositionRoot;
+using backend.Infrastructure.Data;
+using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
+using backend.Web.Formatters; // Added for custom HTML input formatter
 using Hangfire; // RE-ADDED
 using Hangfire.Redis.StackExchange; // RE-ADDED
-using backend.Infrastructure.Data;
-using backend.Web.Formatters; // Added for custom HTML input formatter
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
-using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.

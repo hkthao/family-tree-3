@@ -1,8 +1,8 @@
 ﻿using backend.Application.Common.Behaviours;
+using backend.Application.Common.Models.AppSetting; // Added for KnowledgeSearchServiceSettings
+using backend.Application.Knowledge; // Added for IKnowledgeService and KnowledgeService
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Application.Knowledge; // Added for IKnowledgeService and KnowledgeService
-using backend.Application.Common.Models.AppSetting; // Added for KnowledgeSearchServiceSettings
 using Microsoft.Extensions.Options; // Added for IOptions
 
 namespace backend.Application;

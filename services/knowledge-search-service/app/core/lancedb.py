@@ -545,6 +545,17 @@ class FaceLanceDBService(LanceDBBaseService):
         logger.info(f"Deleted {deleted_count} face entries from table '{table_name}' with filter '{filter_str}'.")
         return deleted_count
 
+    async def delete_faces_by_family_id(self, family_id: str) -> None:
+        """
+        Deletes all face entries for a given family by dropping the LanceDB table.
+        """
+        table_name = self._get_face_table_name(family_id)
+        if table_name in self.db.table_names():
+            logger.info(f"Dropping LanceDB table '{table_name}' for family_id '{family_id}'.")
+            self.db.drop_table(table_name)
+        else:
+            logger.warning(f"Face table '{table_name}' does not exist for family_id '{family_id}'. No action needed.")
+
     async def update_face_data(self, family_id: str, face_id: str, update_info: Dict) -> int:
         """
         Updates existing face entries in the specified LanceDB face table.

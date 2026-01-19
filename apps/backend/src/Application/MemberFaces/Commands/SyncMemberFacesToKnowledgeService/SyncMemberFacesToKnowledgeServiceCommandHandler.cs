@@ -1,13 +1,11 @@
+using backend.Application.Common.Constants; // Added for ErrorMessages and ErrorSources
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Knowledge;
 using backend.Application.Knowledge.DTOs;
 using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using backend.Application.Common.Constants; // Added for ErrorMessages and ErrorSources
 using backend.Domain.ValueObjects; // Added for BoundingBox
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.SyncMemberFacesToKnowledgeService;
 
@@ -35,18 +33,17 @@ public class SyncMemberFacesToKnowledgeServiceCommandHandler(
 
         if (request.FamilyId.HasValue)
         {
+            await _knowledgeService.DeleteFamilyFacesData(request.FamilyId.Value);
+            _logger.LogInformation("Deleted existing faces for FamilyId {FamilyId} from knowledge service before synchronization.", request.FamilyId.Value);
             query = query.Where(mf => mf.Member != null && mf.Member.FamilyId == request.FamilyId.Value);
         }
 
-        if (!request.ForceResyncAll)
-        {
-            query = query.Where(mf => !mf.IsVectorDbSynced || mf.VectorDbId == null || mf.VectorDbId == "");
-        }
+
 
         var memberFacesToSync = await query.ToListAsync(cancellationToken);
 
-        _logger.LogInformation("Found {Count} member faces to synchronize with knowledge service (ForceResyncAll: {ForceResyncAll}).",
-            memberFacesToSync.Count, request.ForceResyncAll);
+        _logger.LogInformation("Found {Count} member faces to synchronize with knowledge service.",
+            memberFacesToSync.Count);
 
         foreach (var memberFace in memberFacesToSync)
         {

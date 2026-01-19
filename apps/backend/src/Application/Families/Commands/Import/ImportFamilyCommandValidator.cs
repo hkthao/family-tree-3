@@ -19,7 +19,7 @@ public class ImportFamilyCommandValidator : AbstractValidator<ImportFamilyComman
 
         RuleFor(v => v.FamilyData.Visibility)
             .NotEmpty().WithMessage("Family Visibility is required.");
-            // No IsEnumName validation, as Visibility is a string in domain entity
+        // No IsEnumName validation, as Visibility is a string in domain entity
 
 
     }

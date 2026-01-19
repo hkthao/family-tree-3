@@ -1,22 +1,22 @@
-using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Events.Commands.SendEventNotification;
-using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Common.Services; // NEW
+using backend.Application.Events.Commands.SendEventNotification;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Domain.ValueObjects; // NEW
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.SendEventNotification;
 
@@ -174,7 +174,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
             Times.Once
         );
     }
-    
+
     // Test case for no recipients
     [Fact]
     public async Task Handle_ShouldReturnSuccessAndSkipNotification_WhenNoRecipientsFound()
@@ -196,7 +196,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         // No family users or followers added to context
 
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // User is admin
-        
+
         var command = new SendEventNotificationCommand { EventId = @event.Id };
 
         // Act

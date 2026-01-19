@@ -2,19 +2,19 @@ using System.Net.Http.Headers;
 using backend.Application.Common.Configurations;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.Background;
+using backend.Infrastructure.Services.LLMGateway; // NEW
 using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using backend.Infrastructure.Services.LLMGateway; // NEW
-using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

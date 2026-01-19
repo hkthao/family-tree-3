@@ -12,11 +12,10 @@ using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
+using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.OCR.Commands; // NEW
-using backend.Application.Knowledge.DTOs; // NEW
 using backend.Application.Prompts.Queries.GetPromptById;
-using backend.Application.Knowledge; // NEW
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

@@ -1,5 +1,5 @@
-using Hangfire.Dashboard;
 using backend.Application.Common.Interfaces; // Assuming ICurrentUser is here
+using Hangfire.Dashboard;
 
 namespace backend.Web;
 

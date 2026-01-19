@@ -5,10 +5,10 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging; // Keep for Mock<ILogger> in constructor
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Events.EventOccurrences.Jobs;
 

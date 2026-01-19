@@ -1,26 +1,26 @@
-using FluentAssertions; 
-using backend.Domain.ValueObjects; // Add this
-using Xunit;
-using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq; // For LINQ extension methods
+using System.Linq.Expressions; // For Expression<Func<T, bool>> in Setup
 using System.Net.Http;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Knowledge;
 using backend.Application.Knowledge.DTOs;
-using backend.Application.Common.Models.AppSetting;
+using backend.Application.UnitTests.Common; // Assuming TestBase is here
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using System.Collections.Generic;
-using System.Threading;
-using System;
-using System.Text.Json;
-using System.Linq.Expressions; // For Expression<Func<T, bool>> in Setup
+using backend.Domain.ValueObjects; // Add this
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore; // For FirstOrDefaultAsync, Include
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using Moq.Protected; // For Protected methods
-using backend.Application.UnitTests.Common; // Assuming TestBase is here
-using System.Linq; // For LINQ extension methods
+using Xunit;
 
 namespace backend.Application.UnitTests.Knowledge;
 
@@ -34,7 +34,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
     public KnowledgeServiceTests()
     {
         _mockLogger = new Mock<ILogger<KnowledgeService>>();
-        
+
         _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         _httpClient = new HttpClient(_mockHttpMessageHandler.Object)
         {
@@ -60,7 +60,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         // Arrange
         var familyId = Guid.NewGuid();
         var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
-            family.Id = familyId;
+        family.Id = familyId;
         family.GenealogyRecord = "Chi nhánh Hà Nội";
         family.FamilyCovenant = "Đoàn kết";
         family.TotalMembers = 10;
@@ -88,8 +88,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
                 VerifyFamilyIndexRequestContent(req.Content, family)
@@ -152,7 +152,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var child2 = new Member(child2Id, "Thị F", "Nguyễn", "M006", familyId, family); child2.Update("Thị F", "Nguyễn", "M006", null, "Female", null, null, null, null, null, null, null, null, null, null, null, false);
 
 
-                var relationships = new List<Relationship>
+        var relationships = new List<Relationship>
 
                 {
 
@@ -168,13 +168,13 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
 
                 };
 
-        
 
-                var members = new List<Member> { member, father, mother, spouse, child1, child2 }; // Inserted here
 
-        
+        var members = new List<Member> { member, father, mother, spouse, child1, child2 }; // Inserted here
 
-                _context.Families.Add(family); // Add the family as well
+
+
+        _context.Families.Add(family); // Add the family as well
         _context.Members.AddRange(members);
         _context.Relationships.AddRange(relationships);
         await _context.SaveChangesAsync();
@@ -199,11 +199,11 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
-                VerifyMemberIndexRequestContent(req.Content, member, father, mother, spouse, new List<Member>{child1, child2})
+                VerifyMemberIndexRequestContent(req.Content, member, father, mother, spouse, new List<Member> { child1, child2 })
             ),
             ItExpr.IsAny<CancellationToken>()
         );
@@ -250,7 +250,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
                               $"Tiểu sử: {member.Biography ?? "N/A"}.{Environment.NewLine}" +
                               $"Khu vực sinh sống chính: {member.Family?.Address ?? "N/A"}.{Environment.NewLine}" +
                               $"Là con thứ {(member.Order?.ToString() ?? "N/A")} trong nhà.";
-        
+
         request?.Data.Summary.Should().Be(expectedSummary);
 
         return true;
@@ -305,8 +305,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
                 VerifyEventIndexRequestContent(req.Content, @event)
@@ -336,7 +336,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
                               $"Địa điểm: {@event.Location ?? "N/A"}.{Environment.NewLine}" +
                               $"Ngày diễn ra: {@event.SolarDate?.ToShortDateString() ?? "N/A"}.{Environment.NewLine}" +
                               $"Thuộc gia đình họ: {@event.Family?.Name ?? "N/A"}.";
-        
+
         request?.Data.Summary.Should().Be(expectedSummary);
 
         return true;
@@ -368,8 +368,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
                 VerifyDeleteRequestContent(req.Content, familyId, "Family")
@@ -404,8 +404,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
                 VerifyDeleteRequestContent(req.Content, memberId, "Member")
@@ -440,8 +440,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/knowledge/index") &&
                 req.Content != null &&
                 VerifyDeleteRequestContent(req.Content, eventId, "Event")
@@ -480,19 +480,19 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var topK = 5;
         var allowedVisibility = new List<string> { "public" };
 
-        var mockSearchResults = new List<KnowledgeSearchResultDto> 
+        var mockSearchResults = new List<KnowledgeSearchResultDto>
         {
-            new KnowledgeSearchResultDto 
-            { 
+            new KnowledgeSearchResultDto
+            {
                 Metadata = new Dictionary<string, object> { { "original_id", "M001" }, { "name", "Member 1" }, { "content_type", "Member" } },
-                Summary = "Summary of Member 1", 
-                Score = 0.9 
+                Summary = "Summary of Member 1",
+                Score = 0.9
             },
-            new KnowledgeSearchResultDto 
-            { 
+            new KnowledgeSearchResultDto
+            {
                 Metadata = new Dictionary<string, object> { { "original_id", "E001" }, { "name", "Event 1" }, { "content_type", "Event" } },
-                Summary = "Summary of Event 1", 
-                Score = 0.8 
+                Summary = "Summary of Event 1",
+                Score = 0.8
             }
         };
 
@@ -527,8 +527,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         _mockHttpMessageHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => 
-                req.Method == HttpMethod.Post && 
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Post &&
                 req.RequestUri == new Uri("http://localhost:8000/api/v1/search") &&
                 req.Content != null &&
                 VerifySearchRequestContent(req.Content, familyId, queryString, topK, allowedVisibility)

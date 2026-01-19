@@ -1,15 +1,15 @@
+using System.Collections.Generic; // NEW
 using backend.Application.Common.Interfaces;
-using backend.Application.Events.EventOccurrences.Jobs;
 using backend.Application.Common.Models;
+using backend.Application.Events.EventOccurrences.Jobs;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // Add this line
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic; // NEW
 
 namespace backend.Application.UnitTests.EventOccurrences.Jobs;
 

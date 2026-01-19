@@ -1,9 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Knowledge;
 using backend.Domain.Events.MemberFaces; // Add this line
 using Microsoft.Extensions.Logging;
-using backend.Application.Knowledge;
 
 namespace backend.Application.MemberFaces.Commands.DeleteMemberFace;
 

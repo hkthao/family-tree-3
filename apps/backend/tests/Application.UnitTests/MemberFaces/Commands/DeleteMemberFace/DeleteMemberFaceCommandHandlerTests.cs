@@ -1,5 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces; // Added
@@ -10,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.EntityFrameworkCore; // Added for mock DbSet
 using Xunit;
-using backend.Application.Knowledge; // NEW
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.DeleteMemberFace;
 

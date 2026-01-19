@@ -94,8 +94,9 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             returnedVectorDbId = await _knowledgeService.IndexMemberFaceData(memberFaceDto);
             if (!string.IsNullOrEmpty(returnedVectorDbId))
             {
-                                    entity.MarkAsVectorDbSynced(returnedVectorDbId);
-                                    _logger.LogInformation("Successfully indexed MemberFace {MemberFaceId} to knowledge-search-service. Returned VectorDbId: {VectorDbId}", entity.Id, entity.VectorDbId);            }
+                entity.MarkAsVectorDbSynced(returnedVectorDbId);
+                _logger.LogInformation("Successfully indexed MemberFace {MemberFaceId} to knowledge-search-service. Returned VectorDbId: {VectorDbId}", entity.Id, entity.VectorDbId);
+            }
             else
             {
                 _logger.LogError("Failed to get VectorDbId from knowledge-search-service for MemberFace {MemberFaceId}. MemberFace will be created but not synced.", entity.Id);

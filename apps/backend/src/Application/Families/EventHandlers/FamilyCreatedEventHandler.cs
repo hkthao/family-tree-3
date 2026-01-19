@@ -28,7 +28,8 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
             ActionType = UserActionType.CreateFamily,
             TargetType = TargetType.Family,
             TargetId = notification.Family.Id.ToString(),
-                            ActivitySummary = $"Đã tạo gia đình '{notification.Family.Name}'."        }, cancellationToken);
+            ActivitySummary = $"Đã tạo gia đình '{notification.Family.Name}'."
+        }, cancellationToken);
 
         // Publish notification for family creation
         await _mediator.Send(new GenerateFamilyKbCommand(notification.Family.Id.ToString(), notification.Family.Id.ToString(), KbRecordType.Family), cancellationToken);

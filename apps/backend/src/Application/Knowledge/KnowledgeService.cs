@@ -1,11 +1,11 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Knowledge.DTOs;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using Microsoft.Extensions.Options;
+using backend.Application.Knowledge.DTOs;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects; // Added for BoundingBox
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.Knowledge;
 
@@ -484,6 +484,31 @@ public class KnowledgeService : IKnowledgeService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred while deleting all faces for MemberId: {MemberId} in FamilyId: {FamilyId}.", memberId, familyId);
+        }
+    }
+
+    public async Task DeleteFamilyFacesData(Guid familyId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete family faces.");
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/faces/family/{familyId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted all faces for FamilyId: {FamilyId}", familyId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting all faces for FamilyId: {FamilyId}. Status Code: {StatusCode}", familyId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting all faces for FamilyId: {FamilyId}.", familyId);
         }
     }
 

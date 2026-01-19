@@ -12,6 +12,9 @@ using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
+using backend.Application.Files.DTOs; // NEW
+using backend.Application.Knowledge; // NEW
+using backend.Application.OCR.Commands; // NEW
 using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.GetPromptById;
 using FluentAssertions;
@@ -20,9 +23,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
-using backend.Application.OCR.Commands; // NEW
-using backend.Application.Files.DTOs; // NEW
-using backend.Application.Knowledge; // NEW
 
 namespace backend.Application.UnitTests.AI.Commands.Chat;
 

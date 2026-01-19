@@ -62,7 +62,7 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
             .AsNoTracking()
             .Where(m => relatedMemberIds.Contains(m.Id))
             .ToDictionaryAsync(m => m.Id, m => new { m.FirstName, m.LastName, m.AvatarUrl }, cancellationToken);
-        
+
         // 4. Map to DTOs and manually populate related fields
         var memberListDtos = _mapper.Map<List<MemberListDto>>(paginatedMemberEntities.Items);
 
