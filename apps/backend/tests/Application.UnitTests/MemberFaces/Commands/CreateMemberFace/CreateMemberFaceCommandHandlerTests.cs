@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Knowledge; // NEW
+using backend.Application.Knowledge.DTOs; // NEW
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
@@ -20,13 +22,15 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
-    private readonly Mock<IMediator> _mediatorMock; // NEW
+    private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<IKnowledgeService> _knowledgeServiceMock; // NEW
 
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
-        _mediatorMock = new Mock<IMediator>(); // NEW
+        _mediatorMock = new Mock<IMediator>();
+        _knowledgeServiceMock = new Mock<IKnowledgeService>(); // NEW
 
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
@@ -34,7 +38,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _knowledgeServiceMock.Object);
     }
 
     [Fact]
@@ -70,6 +74,10 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>())); // No conflicts found
 
+        // Mock knowledge service IndexMemberFaceData
+        _knowledgeServiceMock.Setup(x => x.IndexMemberFaceData(It.IsAny<backend.Application.Knowledge.DTOs.MemberFaceDto>()))
+            .ReturnsAsync(Guid.NewGuid().ToString());
+
         var handler = CreateCreateHandler();
 
         // Act
@@ -85,6 +93,8 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         createdMemberFace.FaceId.Should().Be(command.FaceId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
         createdMemberFace.ThumbnailUrl.Should().BeNull(); // Assert against the mocked URL
+        createdMemberFace.IsVectorDbSynced.Should().BeTrue();
+        createdMemberFace.VectorDbId.Should().NotBeNullOrEmpty();
 
         // Verify that the domain event was added
         _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>

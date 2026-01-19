@@ -4,7 +4,6 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Commands.ImportMemberFaces;
-using backend.Application.MemberFaces.Commands.UpdateMemberFace;
 using backend.Application.MemberFaces.Queries.ExportMemberFaces;
 using backend.Application.MemberFaces.Queries.GetMemberFaceById;
 using backend.Application.MemberFaces.Queries.GetMemberFacesByMemberId;
@@ -50,18 +49,6 @@ public class MemberFacesController(IMediator mediator, ILogger<MemberFacesContro
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201, nameof(GetMemberFaceById), new { id = result.Value });
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMemberFace(Guid id, UpdateMemberFaceCommand command)
-    {
-        if (id != command.Id)
-        {
-            _logger.LogWarning("Mismatched ID in URL ({Id}) and request body ({CommandId}) for UpdateMemberFaceCommand from {RemoteIpAddress}", id, command.Id, HttpContext.Connection.RemoteIpAddress);
-            return Result.Failure("Mismatched ID in URL and request body.", ErrorSources.Validation).ToActionResult(this, _logger); // Changed Result<Unit> to Result
-        }
-        var result = await _mediator.Send(command);
-        return result.ToActionResult(this, _logger, 204);
     }
 
     [HttpDelete("{id}")]
