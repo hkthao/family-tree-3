@@ -399,6 +399,8 @@ class FaceLanceDBService(LanceDBBaseService):
                 face_copy["member_id"] = str(face_copy["member_id"])
             if "face_id" in face_copy:
                 face_copy["face_id"] = str(face_copy["face_id"])
+            if "family_id" in face_copy: # Add this line
+                face_copy["family_id"] = str(face_copy["family_id"]) # Add this line
             if face_copy.get("bounding_box"):
                 face_copy["bounding_box"] = json.dumps(face_copy["bounding_box"])  # Chuyển BoundingBox thành JSON string
 
@@ -433,7 +435,13 @@ class FaceLanceDBService(LanceDBBaseService):
         query = table.search(query_embedding)
         if face_filter:
             query = query.where(face_filter)
-        results = query.limit(top_k).to_list()
+        
+        # Select all necessary columns to be returned, excluding _distance as it's a meta-column
+        results = query.select([
+            "family_id", "face_id", "member_id",
+            "bounding_box", "confidence", "thumbnail_url", "original_image_url",
+            "emotion", "emotion_confidence", "vector_db_id", "is_vector_db_synced"
+        ]).limit(top_k).to_list()
         
         # Format results
         formatted_results = []
@@ -460,9 +468,20 @@ class FaceLanceDBService(LanceDBBaseService):
                 except ValueError as e:
                     logger.error(f"Error converting member_id '{member_id_str}' to UUID: {e}")
 
+            # Try converting family_id to UUID
+            family_uuid = None
+            family_id_str = res.get("family_id")
+            if family_id_str:
+                try:
+                    family_uuid = UUID(family_id_str)
+                except ValueError as e:
+                    logger.error(f"Error converting family_id '{family_id_str}' to UUID: {e}")
+
             formatted_results.append({
                 "face_id": face_uuid,
-                "member_id": member_uuid,                "score": res.get("_distance"),  # LanceDB returns _distance as score
+                "member_id": member_uuid,
+                "family_id": family_uuid, # Add family_id here
+                "score": res.get("_distance"),  # LanceDB returns _distance as score
                 "bounding_box": res.get("bounding_box"),
                 "confidence": res.get("confidence"),
                 "thumbnail_url": res.get("thumbnail_url"),

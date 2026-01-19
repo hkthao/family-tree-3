@@ -17,6 +17,7 @@ KNOWLEDGE_LANCEDB_SCHEMA = pa.schema([
 # Schema for face data in LanceDB
 FACE_LANCEDB_SCHEMA = pa.schema([
     pa.field("vector", pa.list_(pa.float32(), FACE_EMBEDDING_DIMENSIONS)),
+    pa.field("family_id", pa.string()), # Add family_id here
     pa.field("face_id", pa.string()), # Unique ID for this specific face embedding
     pa.field("member_id", pa.string()), # ID of the family member this face belongs to
     pa.field("bounding_box", pa.string()), # JSON string of bounding box coordinates
