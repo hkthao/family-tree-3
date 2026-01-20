@@ -1,7 +1,7 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Constants;
 
 namespace backend.Application.Knowledge.Commands.GenerateFamilyKb;
 

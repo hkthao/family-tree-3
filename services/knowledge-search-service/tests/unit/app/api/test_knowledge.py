@@ -17,6 +17,8 @@ def mock_knowledge_lancedb_service():
     service._get_knowledge_table_name.return_value = "test_table"
     service.delete_vectors.return_value = 1 # Assume 1 item deleted for upsert test
     service.add_vectors.return_value = None # No return value for add_vectors
+    # Mock the new method
+    service.delete_knowledge_by_family_id.return_value = None
     return service
 
 @pytest.fixture
@@ -97,3 +99,23 @@ def test_upsert_knowledge_data_missing_metadata(client):
 
     assert response.status_code == 400
     assert "Missing essential metadata" in response.json()["detail"]
+
+
+def test_delete_knowledge_by_family_id_success(client, mock_knowledge_lancedb_service):
+    family_id = str(UUID("12345678-1234-5678-1234-567812345678"))
+    mock_knowledge_lancedb_service.delete_knowledge_by_family_id.return_value = None # It returns None for success
+
+    response = client.delete(f"/api/v1/knowledge/family-data/{family_id}")
+
+    assert response.status_code == 200
+    assert response.json()["message"] == f"All knowledge data for family_id '{family_id}' deleted successfully."
+    mock_knowledge_lancedb_service.delete_knowledge_by_family_id.assert_called_once_with(family_id)
+
+def test_delete_knowledge_by_family_id_exception(client, mock_knowledge_lancedb_service):
+    family_id = str(UUID("12345678-1234-5678-1234-567812345678"))
+    mock_knowledge_lancedb_service.delete_knowledge_by_family_id.side_effect = Exception("Test exception")
+
+    response = client.delete(f"/api/v1/knowledge/family-data/{family_id}")
+
+    assert response.status_code == 500
+    assert "Error deleting knowledge data" in response.json()["detail"]

@@ -146,6 +146,26 @@ async def upsert_knowledge_data(
     }
 
 
+@router.delete("/knowledge/family-data/{family_id}", status_code=status.HTTP_200_OK)
+async def delete_knowledge_by_family_id(
+    family_id: str,
+    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+):
+    """
+    Deletes all knowledge data for a given family_id by dropping the associated LanceDB table.
+    """
+    logger.info(f"Received request to delete all knowledge for family_id: {family_id}")
+    try:
+        await lancedb_service.delete_knowledge_by_family_id(family_id)
+        return {"message": f"All knowledge data for family_id '{family_id}' deleted successfully."}
+    except Exception as e:
+        logger.exception(f"Error deleting knowledge by family_id '{family_id}': {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting knowledge data for family_id '{family_id}': {e}",
+        )
+
+
 @router.delete("/knowledge/{family_id}/{original_id}", status_code=status.HTTP_200_OK)
 async def delete_knowledge_data(
     family_id: str,

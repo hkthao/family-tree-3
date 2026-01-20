@@ -288,6 +288,17 @@ class KnowledgeLanceDBService(LanceDBBaseService):
                     f"'{filter_str}'.")
         return deleted_count
 
+    async def delete_knowledge_by_family_id(self, family_id: str) -> None:
+        """
+        Deletes all knowledge entries for a given family by dropping the LanceDB table.
+        """
+        table_name = self._get_knowledge_table_name(family_id)
+        if table_name in self.db.table_names():
+            logger.info(f"Dropping LanceDB table '{table_name}' for family_id '{family_id}'.")
+            self.db.drop_table(table_name)
+        else:
+            logger.warning(f"Knowledge table '{table_name}' does not exist for family_id '{family_id}'. No action needed.")
+
 
     async def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
         """
