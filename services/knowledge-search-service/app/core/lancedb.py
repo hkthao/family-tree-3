@@ -86,12 +86,15 @@ class KnowledgeLanceDBService(LanceDBBaseService):
     def _get_knowledge_table_name(self, family_id: str) -> str:
         return f"family_knowledge_{family_id}"
 
-    def create_dummy_table(self, family_id: str):
+    async def create_dummy_table(self, family_id: str):
         """
         Creates a dummy table for testing and demonstration purposes.
         This method should ideally be called once for setup.
         """
         table_name = self._get_knowledge_table_name(family_id)
+        # Ensure the table exists before trying to add data
+        await self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
+        
         if table_name in self.db.table_names():
             logger.info(f"Dummy table '{table_name}' already exists. "
                         "Deleting and recreating.")
@@ -185,7 +188,7 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         logger.info(f"Dummy table '{table_name}' created with "
                     f"{len(processed_data)} entries.")
 
-    def add_vectors(self, table_name: str, vectors_data: List[VectorData]):
+    async def add_vectors(self, table_name: str, vectors_data: List[VectorData]):
         """
         Adds new vector entries to the specified LanceDB table by generating
         embeddings from summaries.
@@ -195,7 +198,7 @@ class KnowledgeLanceDBService(LanceDBBaseService):
             return
 
         # Ensure the table exists
-        self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
+        await self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
 
         processed_data = []
         for v_data in vectors_data:
@@ -252,14 +255,14 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         logger.info(f"Finished update operation for table '{table_name}' "
                     f"with filter '{filter_str}'.")
 
-    def delete_vectors(self, table_name: str, delete_request: DeleteVectorRequest) -> int:
+    async def delete_vectors(self, table_name: str, delete_request: DeleteVectorRequest) -> int:
         """
         Deletes vector entries from the specified LanceDB table based on
         family_id and optionally entity_id, type, or a custom where_clause.
         Returns the number of deleted rows.
         """
         # Ensure the table exists before trying to delete
-        self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
+        await self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
         
         table = self.db.open_table(table_name)
         
@@ -280,12 +283,13 @@ class KnowledgeLanceDBService(LanceDBBaseService):
                                f"{delete_request.family_id}")
         
         # LanceDB delete method returns the number of rows deleted.
-        deleted_count = table.delete(where=filter_str)
+        deleted_count = await table.delete(where=filter_str)
         logger.info(f"Deleted {deleted_count} vectors from table '{table_name}' with filter "
-                    f"'{filter_str}'.")        
+                    f"'{filter_str}'.")
+        return deleted_count        
 
 
-    def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
+    async def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
         """
         Rebuilds vectors for the specified family_id and optional entity_ids
         by re-embedding their summaries.
@@ -294,7 +298,8 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         if table_name not in self.db.table_names():
             logger.warning(f"Table '{table_name}' does not exist for "
                            "rebuilding. Creating dummy table.")
-            self.create_dummy_table(rebuild_request.family_id)
+            await self.create_dummy_table(rebuild_request.family_id)
+            return
 
         table = self.db.open_table(table_name)
 
@@ -337,7 +342,7 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         # Perform delete and re-add for simplicity and correctness of vector        # updates.
         logger.info(f"Deleting existing entries for rebuild filter: "
                     f"'{filter_str}'.")
-        table.delete(where=filter_str)
+        await table.delete(where=filter_str)
         logger.info(f"Adding re-embedded entries to table '{table_name}'.")
 
         # Convert re_embedded_data_for_add back to DataFrame for adding
@@ -546,9 +551,6 @@ class FaceLanceDBService(LanceDBBaseService):
         logger.info(f"Deleted {deleted_count} face entries from table '{table_name}' with filter '{filter_str}'.")
         return deleted_count
 
-        logger.info(f"Deleted {deleted_count} face entries from table '{table_name}' with filter '{filter_str}'.")
-        return deleted_count
-
     async def delete_faces_by_family_id(self, family_id: str) -> None:
         """
         Deletes all face entries for a given family by dropping the LanceDB table.
@@ -596,11 +598,3 @@ class FaceLanceDBService(LanceDBBaseService):
 # This will be replaced by dependency injection later
 from .embeddings import embedding_service as global_embedding_service  # Use the global instance for now
 
-knowledge_lancedb_service: KnowledgeLanceDBService
-face_lancedb_service: FaceLanceDBService
-async def initialize_lancedb_services(embedding_service: EmbeddingService):
-    global knowledge_lancedb_service
-    global face_lancedb_service
-    knowledge_lancedb_service = KnowledgeLanceDBService(embedding_service)
-    face_lancedb_service = FaceLanceDBService()
-    await face_lancedb_service.async_init()
