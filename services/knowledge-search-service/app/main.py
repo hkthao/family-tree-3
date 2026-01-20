@@ -1,7 +1,18 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from app.api import faces, knowledge, search # Import the routers
+from app.core.lancedb import initialize_lancedb_services
+from app.core.embeddings import embedding_service as global_embedding_service
 
-app = FastAPI(title="Knowledge Search Service API") # Updated title
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize LanceDB services
+    await initialize_lancedb_services(global_embedding_service)
+    yield
+    # Shutdown: No specific cleanup needed for LanceDB connection as it's handled internally
+
+app = FastAPI(title="Knowledge Search Service API", lifespan=lifespan) # Updated title
 
 @app.get("/health")
 async def health_check():

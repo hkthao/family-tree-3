@@ -397,9 +397,11 @@ class KnowledgeLanceDBService(LanceDBBaseService):
 class FaceLanceDBService(LanceDBBaseService):
     def __init__(self):
         super().__init__()
-        # Ensure the Face LanceDB schema is correctly applied on service initialization
-        # Use a dummy family_id to trigger schema check/creation
-        self._create_table_if_not_exists(self._get_face_table_name("temp_init_family_id"), FACE_LANCEDB_SCHEMA)
+
+    async def async_init(self):
+        # The actual table creation/schema check for specific family_id tables
+        # will happen when data is added or accessed for that family_id.
+        pass
 
     def _get_face_table_name(self, family_id: str) -> str:
         return f"faces_{family_id}"
@@ -409,7 +411,9 @@ class FaceLanceDBService(LanceDBBaseService):
             logger.warning("No face data provided to add.")
             return
         table_name = self._get_face_table_name(family_id)
-
+        
+        # Ensure the table exists before trying to add data
+        await self._create_table_if_not_exists(table_name, FACE_LANCEDB_SCHEMA)
         
         table = self.db.open_table(table_name)
         processed_faces = []
@@ -592,5 +596,11 @@ class FaceLanceDBService(LanceDBBaseService):
 # This will be replaced by dependency injection later
 from .embeddings import embedding_service as global_embedding_service  # Use the global instance for now
 
-knowledge_lancedb_service = KnowledgeLanceDBService(global_embedding_service)
-face_lancedb_service = FaceLanceDBService()
+knowledge_lancedb_service: KnowledgeLanceDBService
+face_lancedb_service: FaceLanceDBService
+async def initialize_lancedb_services(embedding_service: EmbeddingService):
+    global knowledge_lancedb_service
+    global face_lancedb_service
+    knowledge_lancedb_service = KnowledgeLanceDBService(embedding_service)
+    face_lancedb_service = FaceLanceDBService()
+    await face_lancedb_service.async_init()
