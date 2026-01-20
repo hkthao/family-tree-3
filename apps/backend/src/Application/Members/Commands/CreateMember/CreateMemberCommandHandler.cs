@@ -5,6 +5,7 @@ using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
+using backend.Domain.ValueObjects; // NEW
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Localization;
 
@@ -52,6 +53,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Gender,
             request.DateOfBirth,
             request.DateOfDeath,
+            request.LunarDateOfDeath,
             request.PlaceOfBirth,
             request.PlaceOfDeath,
             request.Phone,

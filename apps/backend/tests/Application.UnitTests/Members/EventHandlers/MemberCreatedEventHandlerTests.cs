@@ -19,7 +19,7 @@ public class MemberCreatedEventHandlerTests
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IN8nService> _n8nServiceMock;
+
     private readonly Mock<IStringLocalizer<MemberCreatedEventHandler>> _localizerMock;
     private readonly Mock<IApplicationDbContext> _contextMock;
     private readonly MemberCreatedEventHandler _handler;
@@ -30,10 +30,10 @@ public class MemberCreatedEventHandlerTests
         _mediatorMock = new Mock<IMediator>();
         _familyTreeServiceMock = new Mock<IFamilyTreeService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _n8nServiceMock = new Mock<IN8nService>();
+
         _localizerMock = new Mock<IStringLocalizer<MemberCreatedEventHandler>>();
         _contextMock = new Mock<IApplicationDbContext>();
-        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object, _localizerMock.Object, _contextMock.Object);
+        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _localizerMock.Object, _contextMock.Object);
     }
 
     [Fact]

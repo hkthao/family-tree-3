@@ -244,7 +244,10 @@ public class KnowledgeService : IKnowledgeService
             { "gender", member.Gender ?? string.Empty },
             { "biography", member.Biography ?? string.Empty },
             { "date_of_birth", member.DateOfBirth?.ToString("yyyy-MM-dd") ?? string.Empty },
-            { "date_of_death", member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty }
+            { "date_of_death", member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty },
+            { "lunar_date_of_death_day", member.LunarDateOfDeath?.Day.ToString() ?? string.Empty },
+            { "lunar_date_of_death_month", member.LunarDateOfDeath?.Month.ToString() ?? string.Empty },
+            { "lunar_date_of_death_leap_month", member.LunarDateOfDeath?.IsLeapMonth.ToString() ?? string.Empty }
         };
 
         string genderVi = member.Gender switch
@@ -255,7 +258,8 @@ public class KnowledgeService : IKnowledgeService
         };
         string status = member.IsDeceased ? "Đã mất" : "Còn sống";
 
-        var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}).{Environment.NewLine}" +
+        var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
+                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
                       $"Thuộc đời thứ {("N/A")} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                       $"{parentsSummary}{Environment.NewLine}" +
                       $"{marriageSummary}{Environment.NewLine}" +
@@ -388,7 +392,10 @@ public class KnowledgeService : IKnowledgeService
             { "gender", member.Gender ?? string.Empty },
             { "biography", member.Biography ?? string.Empty },
             { "date_of_birth", member.DateOfBirth?.ToString("yyyy-MM-dd") ?? string.Empty },
-            { "date_of_death", member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty }
+            { "date_of_death", member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty },
+            { "lunar_date_of_death_day", member.LunarDateOfDeath?.Day.ToString() ?? string.Empty },
+            { "lunar_date_of_death_month", member.LunarDateOfDeath?.Month.ToString() ?? string.Empty },
+            { "lunar_date_of_death_leap_month", member.LunarDateOfDeath?.IsLeapMonth.ToString() ?? string.Empty }
         };
 
         string genderVi = member.Gender switch
@@ -399,7 +406,8 @@ public class KnowledgeService : IKnowledgeService
         };
         string status = member.IsDeceased ? "Đã mất" : "Còn sống";
 
-        var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}).{Environment.NewLine}" +
+        var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
+                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
                       $"Thuộc đời thứ {("N/A")} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                       $"{parentsSummary}{Environment.NewLine}" +
                       $"{marriageSummary}{Environment.NewLine}" +

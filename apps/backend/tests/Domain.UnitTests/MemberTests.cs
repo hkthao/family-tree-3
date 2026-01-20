@@ -65,6 +65,7 @@ public class MemberTests
         // Act
         var member = new Member(
             lastName, firstName, code, _familyId, nickname, gender, dateOfBirth, dateOfDeath,
+            null, // lunarDateOfDeath
             placeOfBirth, placeOfDeath, phone, email, address, occupation, avatarUrl, biography, order, isDeceased
         );
 
@@ -117,6 +118,7 @@ public class MemberTests
         // Act
         member.Update(
             newFirstName, newLastName, newCode, newNickname, newGender, newDateOfBirth, newDateOfDeath,
+            null, // lunarDateOfDeath
             newPlaceOfBirth, newPlaceOfDeath, newPhone, newEmail, newAddress, newOccupation, newAvatarUrl,
             newBiography, newOrder, newIsDeceased
         );

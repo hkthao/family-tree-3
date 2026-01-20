@@ -7,6 +7,7 @@ using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
+using backend.Domain.ValueObjects; // NEW
 using backend.Domain.Events.Members;
 
 using Microsoft.Extensions.Logging;
@@ -101,6 +102,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Gender,
             request.DateOfBirth,
             request.DateOfDeath,
+            request.LunarDateOfDeath,
             request.PlaceOfBirth,
             request.PlaceOfDeath,
             request.Phone,

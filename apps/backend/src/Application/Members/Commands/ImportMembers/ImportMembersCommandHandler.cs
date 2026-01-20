@@ -55,6 +55,7 @@ public class ImportMembersCommandHandler : IRequestHandler<ImportMembersCommand,
                 memberDto.Gender, // Gender is string?
                 memberDto.DateOfBirth,
                 memberDto.DateOfDeath,
+                null, // lunarDateOfDeath
                 memberDto.PlaceOfBirth,
                 memberDto.PlaceOfDeath,
                 memberDto.Phone,

@@ -1,6 +1,7 @@
 using System.Reflection;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -74,6 +75,30 @@ public abstract class TestBase : IDisposable
     public virtual void Dispose()
     {
         _context.Dispose();
+    }
+
+    /// <summary>
+    /// Helper method to create a Member instance with common defaults.
+    /// </summary>
+    protected Member CreateMember(string lastName, string firstName, string code, Guid familyId, bool isDeceased = false, Guid? id = null)
+    {
+        var member = new Member(lastName, firstName, code, familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, isDeceased);
+        if (id.HasValue)
+        {
+            member.SetId(id.Value);
+        }
+        return member;
+    }
+
+    protected Member CreateMember(string lastName, string firstName, string code, Guid familyId, bool isDeceased, Guid? id, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, bool isDeleted = false)
+    {
+        var member = new Member(lastName, firstName, code, familyId, null, gender, dateOfBirth, dateOfDeath, null, null, null, null, null, null, null, null, null, null, isDeceased);
+        if (id.HasValue)
+        {
+            member.SetId(id.Value);
+        }
+        member.IsDeleted = isDeleted; // Set IsDeleted explicitly
+        return member;
     }
 
     /// <summary>

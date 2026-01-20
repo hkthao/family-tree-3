@@ -6,13 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IFamilyTreeService familyTreeService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IFamilyTreeService familyTreeService, ICurrentUser _user) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
     private readonly ICurrentUser _user = _user;
-    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(MemberUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -37,8 +36,8 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
         await _familyTreeService.SyncMemberLifeEvents(
             notification.Member.Id,
             notification.Member.FamilyId,
-            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : (DateOnly?)null,
-            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : (DateOnly?)null,
+            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : null,
+            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : null,
             notification.Member.FullName,
             cancellationToken
         );

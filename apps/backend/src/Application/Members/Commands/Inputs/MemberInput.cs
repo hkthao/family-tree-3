@@ -1,3 +1,5 @@
+using backend.Domain.ValueObjects;
+
 namespace backend.Application.Members.Inputs;
 
 public record MemberInput
@@ -9,6 +11,7 @@ public record MemberInput
     public string? Nickname { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
+    public LunarDate? LunarDateOfDeath { get; init; }
     public string? PlaceOfBirth { get; set; }
     public string? PlaceOfDeath { get; set; }
     public string? Phone { get; set; }

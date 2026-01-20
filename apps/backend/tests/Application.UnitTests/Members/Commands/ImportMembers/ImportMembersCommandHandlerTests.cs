@@ -161,20 +161,21 @@ public class ImportMembersCommandHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF" };
         var existingFather = new Member(
             "Existing", "Father", "EF", family.Id,
-            null, // Nickname
-            "Male", // Gender
-            null, // DateOfBirth
-            null, // DateOfDeath
-            null, // PlaceOfBirth
-            null, // PlaceOfDeath
-            null, // Phone
-            null, // Email
-            null, // Address
-            null, // Occupation
-            null, // AvatarUrl
-            null, // Biography
-            null, // Order
-            false // IsDeceased
+            null, // nickname
+            "Male", // gender
+            null, // dateOfBirth
+            null, // dateOfDeath
+            null, // lunarDateOfDeath
+            null, // placeOfBirth
+            null, // placeOfDeath
+            null, // phone
+            null, // email
+            null, // address
+            null, // occupation
+            null, // avatarUrl
+            null, // biography
+            null, // order
+            false // isDeceased
         );
         _context.Families.Add(family);
         _context.Members.Add(existingFather);

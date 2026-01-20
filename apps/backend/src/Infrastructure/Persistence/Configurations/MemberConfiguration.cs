@@ -63,5 +63,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .HasForeignKey(m => m.FamilyId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.OwnsOne(m => m.LunarDateOfDeath);
     }
 }

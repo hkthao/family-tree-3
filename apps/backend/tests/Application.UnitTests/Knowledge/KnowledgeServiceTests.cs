@@ -145,10 +145,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
-        family.Id = familyId;
-
-        var member = new Member(memberId, "Văn A", "Nguyễn", "M001", familyId, family);
-        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
+        var member = new Member(memberId, "Văn A", "Nguyễn", "M001", familyId, family, false);
+        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), new LunarDate(1,1,false), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
 
         var fatherId = Guid.NewGuid();
         var motherId = Guid.NewGuid();
@@ -156,11 +154,11 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var child1Id = Guid.NewGuid();
         var child2Id = Guid.NewGuid();
 
-        var father = new Member(fatherId, "Văn B", "Nguyễn", "M002", familyId, family); father.Update("Văn B", "Nguyễn", "M002", null, "Male", null, null, null, null, null, null, null, null, null, null, null, false);
-        var mother = new Member(motherId, "Thị C", "Trần", "M003", familyId, family); mother.Update("Thị C", "Trần", "M003", null, "Female", null, null, null, null, null, null, null, null, null, null, null, false);
-        var spouse = new Member(spouseId, "Thị D", "Lê", "M004", familyId, family); spouse.Update("Thị D", "Lê", "M004", null, "Female", null, null, null, null, null, null, null, null, null, null, null, false);
-        var child1 = new Member(child1Id, "Văn E", "Nguyễn", "M005", familyId, family); child1.Update("Văn E", "Nguyễn", "M005", null, "Male", null, null, null, null, null, null, null, null, null, null, null, false);
-        var child2 = new Member(child2Id, "Thị F", "Nguyễn", "M006", familyId, family); child2.Update("Thị F", "Nguyễn", "M006", null, "Female", null, null, null, null, null, null, null, null, null, null, null, false);
+        var father = new Member(fatherId, "Văn B", "Nguyễn", "M002", familyId, family, false); father.Update("Văn B", "Nguyễn", "M002", null, "Male", null, null, null, null, null, null, null, null, null, null, null, null, false);
+        var mother = new Member(motherId, "Thị C", "Trần", "M003", familyId, family, false); mother.Update("Thị C", "Trần", "M003", null, "Female", null, null, null, null, null, null, null, null, null, null, null, null, false);
+        var spouse = new Member(spouseId, "Thị D", "Lê", "M004", familyId, family, false); spouse.Update("Thị D", "Lê", "M004", null, "Female", null, null, null, null, null, null, null, null, null, null, null, null, false);
+        var child1 = new Member(child1Id, "Văn E", "Nguyễn", "M005", familyId, family, false); child1.Update("Văn E", "Nguyễn", "M005", null, "Male", null, null, null, null, null, null, null, null, null, null, null, null, false);
+        var child2 = new Member(child2Id, "Thị F", "Nguyễn", "M006", familyId, family, false); child2.Update("Thị F", "Nguyễn", "M006", null, "Female", null, null, null, null, null, null, null, null, null, null, null, null, false);
 
 
         var relationships = new List<Relationship>
@@ -239,7 +237,11 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         metadata["gender"].ToString().Should().Be(member.Gender);
         metadata["biography"].ToString().Should().Be(member.Biography);
         metadata["date_of_birth"].ToString().Should().Be(member.DateOfBirth?.ToString("yyyy-MM-dd"));
-        metadata["date_of_death"].ToString().Should().Be(member.DateOfDeath?.ToString("yyyy-MM-dd"));
+        metadata["date_of_death"].ToString().Should().Be(member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty);
+        metadata["lunar_date_of_death_day"].ToString().Should().Be(member.LunarDateOfDeath?.Day.ToString() ?? string.Empty);
+        metadata["lunar_date_of_death_month"].ToString().Should().Be(member.LunarDateOfDeath?.Month.ToString() ?? string.Empty);
+        metadata["lunar_date_of_death_leap_month"].ToString().Should().Be(member.LunarDateOfDeath?.IsLeapMonth.ToString() ?? string.Empty);
+
 
         request?.Data.FamilyId.Should().Be(member.FamilyId.ToString());
         request?.Data.EntityId.Should().Be(member.Id.ToString());
@@ -258,7 +260,8 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var childrenNames = string.Join(", ", children.Select(c => c.FullName));
         var childrenSummary = $"Con cái: {childrenNames}.";
 
-        var expectedSummary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}).{Environment.NewLine}" +
+        var expectedSummary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
+                              $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
                               $"Thuộc đời thứ {"N/A"} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                               $"{parentsSummary}{Environment.NewLine}" +
                               $"{marriageSummary}{Environment.NewLine}" +

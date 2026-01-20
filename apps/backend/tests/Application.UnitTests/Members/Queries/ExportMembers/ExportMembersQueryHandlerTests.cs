@@ -46,13 +46,25 @@ public class ExportMembersQueryHandlerTests : TestBase
 
         var member1 = new Member(
             "John", "Doe", "JD1", family.Id, "Johnny", "Male",
-            new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc), null,
-            "Place A", null, "123-456-7890", "john@example.com", "Address A", "Engineer", "avatar1.png", "Biography 1", 1, false
+            new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc), null, // dateOfBirth, dateOfDeath
+            null, // lunarDateOfDeath
+            "Place A", null, // placeOfBirth, placeOfDeath
+            "123-456-7890", "john@example.com", // phone, email
+            "Address A", "Engineer", // address, occupation
+            "avatar1.png", "Biography 1", // avatarUrl, biography
+            1, // order
+            false // isDeceased
         );
         var member2 = new Member(
             "Jane", "Doe", "JD2", family.Id, "Janey", "Female",
-            new DateTime(1985, 5, 10, 0, 0, 0, DateTimeKind.Utc), null,
-            "Place B", null, "987-654-3210", "jane@example.com", "Address B", "Doctor", "avatar2.png", "Biography 2", 2, false
+            new DateTime(1985, 5, 10, 0, 0, 0, DateTimeKind.Utc), null, // dateOfBirth, dateOfDeath
+            null, // lunarDateOfDeath
+            "Place B", null, // placeOfBirth, placeOfDeath
+            "987-654-3210", "jane@example.com", // phone, email
+            "Address B", "Doctor", // address, occupation
+            "avatar2.png", "Biography 2", // avatarUrl, biography
+            2, // order
+            false // isDeceased
         );
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
-using backend.Domain.Enums; // Add this for RelationshipType
+using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 
 namespace backend.Domain.Entities;
 
@@ -12,6 +13,7 @@ public class Member : BaseAuditableEntity
     public string? Gender { get; private set; }
     public DateTime? DateOfBirth { get; private set; }
     public DateTime? DateOfDeath { get; private set; }
+    public LunarDate? LunarDateOfDeath { get; private set; }
     public string? PlaceOfBirth { get; private set; }
     public string? PlaceOfDeath { get; private set; }
     public string? Phone { get; private set; }
@@ -56,7 +58,7 @@ public class Member : BaseAuditableEntity
         Id = id;
     }
 
-    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
+    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, LunarDate? lunarDateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -65,6 +67,7 @@ public class Member : BaseAuditableEntity
         Gender = gender;
         DateOfBirth = dateOfBirth;
         DateOfDeath = dateOfDeath;
+        LunarDateOfDeath = lunarDateOfDeath;
         PlaceOfBirth = placeOfBirth;
         PlaceOfDeath = placeOfDeath;
         Phone = phone;
@@ -147,13 +150,14 @@ public class Member : BaseAuditableEntity
 
     public Member() { }
 
-    public Member(string lastName, string firstName, string code, Guid familyId, bool isDeceased = false)
+    public Member(string lastName, string firstName, string code, Guid familyId)
+        : this(lastName, firstName, code, familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false)
     {
-        LastName = lastName;
-        FirstName = firstName;
-        Code = code;
-        FamilyId = familyId;
-        IsDeceased = isDeceased;
+    }
+
+    public Member(string lastName, string firstName, string code, Guid familyId, bool isDeceased = false)
+        : this(lastName, firstName, code, familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, isDeceased)
+    {
     }
 
 
@@ -169,13 +173,17 @@ public class Member : BaseAuditableEntity
     }
 
 
-    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
-        : this(lastName, firstName, code, familyId)
+    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, LunarDate? lunarDateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
     {
+        LastName = lastName;
+        FirstName = firstName;
+        Code = code;
+        FamilyId = familyId;
         Nickname = nickname;
         Gender = gender;
         DateOfBirth = dateOfBirth;
         DateOfDeath = dateOfDeath;
+        LunarDateOfDeath = lunarDateOfDeath;
         PlaceOfBirth = placeOfBirth;
         PlaceOfDeath = placeOfDeath;
         Phone = phone;
@@ -196,7 +204,7 @@ public class Member : BaseAuditableEntity
     }
 
     public Member(Guid familyId)
+        : this(null!, null!, null!, familyId) // Call the simplified constructor with default values
     {
-        FamilyId = familyId;
     }
 }
