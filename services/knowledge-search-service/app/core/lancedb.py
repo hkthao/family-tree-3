@@ -94,7 +94,7 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         table_name = self._get_knowledge_table_name(family_id)
         # Ensure the table exists before trying to add data
         await self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
-        
+
         if table_name in self.db.table_names():
             logger.info(f"Dummy table '{table_name}' already exists. "
                         "Deleting and recreating.")
@@ -263,9 +263,9 @@ class KnowledgeLanceDBService(LanceDBBaseService):
         """
         # Ensure the table exists before trying to delete
         await self._create_table_if_not_exists(table_name, KNOWLEDGE_LANCEDB_SCHEMA)
-        
+
         table = self.db.open_table(table_name)
-        
+
         if delete_request.where_clause:
             filter_str = delete_request.where_clause
             logger.info(f"Deleting vectors from table '{table_name}' using "
@@ -281,12 +281,12 @@ class KnowledgeLanceDBService(LanceDBBaseService):
                 logger.warning("No specific entity_id or type provided for "
                                "deletion. Deleting all entries for family_id: "
                                f"{delete_request.family_id}")
-        
+
         # LanceDB delete method returns the number of rows deleted.
         deleted_count = await table.delete(where=filter_str)
         logger.info(f"Deleted {deleted_count} vectors from table '{table_name}' with filter "
                     f"'{filter_str}'.")
-        return deleted_count        
+        return deleted_count
 
 
     async def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
@@ -416,10 +416,10 @@ class FaceLanceDBService(LanceDBBaseService):
             logger.warning("No face data provided to add.")
             return
         table_name = self._get_face_table_name(family_id)
-        
+
         # Ensure the table exists before trying to add data
         await self._create_table_if_not_exists(table_name, FACE_LANCEDB_SCHEMA)
-        
+
         table = self.db.open_table(table_name)
         processed_faces = []
         for face in faces_data:
@@ -442,7 +442,7 @@ class FaceLanceDBService(LanceDBBaseService):
             del face_copy["embedding"]
             processed_faces.append(face_copy)
             logger.debug(f"Adding face with face_id: {face_copy.get('face_id')}, member_id: {face_copy.get('member_id')}, vector_db_id: {face_copy.get('vector_db_id')} to processed_faces.")
-        
+
         df = pd.DataFrame(processed_faces)
         table.add(df)
         logger.info(f"Added {len(faces_data)} face entries to table '{table_name}'.")
@@ -458,29 +458,29 @@ class FaceLanceDBService(LanceDBBaseService):
             )
             return []
         table = self.db.open_table(table_name)
-        
+
         face_filter = None
         if member_id:
             face_filter = f"member_id = '{member_id}'"
-        
+
         query = table.search(query_embedding)
         if face_filter:
             query = query.where(face_filter)
-        
+
         # Select all necessary columns to be returned, excluding _distance as it's a meta-column
         results = query.select([
             "family_id", "face_id", "member_id",
             "bounding_box", "confidence", "thumbnail_url", "original_image_url",
             "emotion", "emotion_confidence", "vector_db_id", "is_vector_db_synced"
         ]).limit(top_k).to_list()
-        
+
         # Format results
         formatted_results = []
         for res in results:
             # Deserialize bounding_box
             if res.get("bounding_box"):
                 res["bounding_box"] = json.loads(res["bounding_box"])
-            
+
             # Try converting face_id to UUID, log error if fails
             face_uuid = None
             face_id_str = res.get("face_id")
@@ -490,7 +490,7 @@ class FaceLanceDBService(LanceDBBaseService):
                 except ValueError as e:
                     logger.error(f"Error converting face_id '{face_id_str}' to UUID: {e}")
 
-            # Try converting member_id to UUID, log error if fails            # Try converting member_id to UUID, log error if fails            
+            # Try converting member_id to UUID, log error if fails            # Try converting member_id to UUID, log error if fails
             member_uuid = None
             member_id_str = res.get("member_id")
             if member_id_str:
@@ -522,7 +522,7 @@ class FaceLanceDBService(LanceDBBaseService):
                 "vector_db_id": res.get("vector_db_id"),
                 "is_vector_db_synced": res.get("is_vector_db_synced")
             })
-            logger.debug(f"Retrieved face from LanceDB with face_id: {face_uuid}, member_id: {member_uuid}, vector_db_id: {res.get('vector_db_id')}")        
+            logger.debug(f"Retrieved face from LanceDB with face_id: {face_uuid}, member_id: {member_uuid}, vector_db_id: {res.get('vector_db_id')}")
         return formatted_results
 
     async def delete_face_data(self, family_id: str, face_id: Optional[str] = None, member_id: Optional[str] = None) -> int:
@@ -533,20 +533,20 @@ class FaceLanceDBService(LanceDBBaseService):
         if table_name not in self.db.table_names():
             logger.warning(f"Face table '{table_name}' does not exist for deletion.")
             return 0
-        
+
         table = self.db.open_table(table_name)
-        
+
         filter_parts = [f"family_id = '{family_id}'"]
         if face_id:
             filter_parts.append(f"face_id = '{face_id}'")
         if member_id:
             filter_parts.append(f"member_id = '{member_id}'")
-            
+
         filter_str = " AND ".join(filter_parts)
-        
+
         if len(filter_parts) == 1 and filter_parts[0] == f"family_id = '{family_id}'":
             logger.warning("No specific face_id or member_id provided for deletion. Deleting all entries for family_id.")
-            
+
         deleted_count = table.delete(where=filter_str)
         logger.info(f"Deleted {deleted_count} face entries from table '{table_name}' with filter '{filter_str}'.")
         return deleted_count
@@ -570,31 +570,29 @@ class FaceLanceDBService(LanceDBBaseService):
         if table_name not in self.db.table_names():
             logger.warning(f"Face table '{table_name}' does not exist for update.")
             return 0
-        
+
         table = self.db.open_table(table_name)
-        
+
         filter_str = f"family_id = '{family_id}' AND face_id = '{face_id}'"
-        
+
         updates = update_info.copy()
-        
+
         # Handle special fields that need serialization or specific processing
         if "bounding_box" in updates and updates["bounding_box"] is not None:
             updates["bounding_box"] = json.dumps(updates["bounding_box"])
-        
+
         # If embedding is updated, it should become the 'vector'
         if "embedding" in updates and updates["embedding"] is not None:
             updates["vector"] = updates["embedding"]
             del updates["embedding"] # Remove original embedding field
-            
+
         if not updates:
             logger.warning("No update fields provided. Nothing to update.")
             return 0
-            
+
         updated_count = table.update(where=filter_str, changes=updates)
         logger.info(f"Updated {updated_count} face entries in table '{table_name}' with filter '{filter_str}'.")
         return updated_count
 
-# Initialize LanceDB service instances globally
-# This will be replaced by dependency injection later
-from .embeddings import embedding_service as global_embedding_service  # Use the global instance for now
+
 

@@ -17,7 +17,7 @@ class FaceMetadata(BaseModel):
     family_id: UUID = Field(..., description="ID của dòng họ mà khuôn mặt này thuộc về.")
     member_id: UUID = Field(..., description="ID của thành viên sở hữu khuôn mặt này.")
     face_id: Optional[UUID] = Field(None, description="ID duy nhất của khuôn mặt. Nếu không cung cấp, sẽ được tạo tự động.")
-    
+
     bounding_box: Optional[BoundingBox] = Field(None, description="Hộp giới hạn của khuôn mặt trong ảnh gốc.")
     confidence: Optional[float] = Field(None, description="Độ tin cậy của việc phát hiện khuôn mặt.")
 
