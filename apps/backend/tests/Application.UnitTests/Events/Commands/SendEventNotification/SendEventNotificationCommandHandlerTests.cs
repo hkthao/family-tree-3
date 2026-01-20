@@ -94,7 +94,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         _context.Families.Add(family);
 
         // Event has no SolarDate and no EventOccurrences for today
-        var @event = Event.CreateLunarEvent("Lunar Event", "LE1", Domain.Enums.EventType.Other, new LunarDate(1, 1, false), Domain.Enums.RepeatRule.Yearly, family.Id);
+        var @event = Event.CreateLunarEvent("Lunar Event", "LE1", Domain.Enums.EventType.Other, new LunarDate(1, 1, false, false), Domain.Enums.RepeatRule.Yearly, family.Id);
         _context.Events.Add(@event);
         await _context.SaveChangesAsync();
 

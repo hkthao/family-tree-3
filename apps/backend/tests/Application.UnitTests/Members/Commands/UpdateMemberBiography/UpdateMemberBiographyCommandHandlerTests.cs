@@ -1,4 +1,3 @@
-
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMemberBiography;

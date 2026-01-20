@@ -69,7 +69,8 @@ public class ImportEventsCommandHandler : IRequestHandler<ImportEventsCommand, R
                 var lunarDate = new LunarDate(
                     eventDto.LunarDate.Day,
                     eventDto.LunarDate.Month,
-                    eventDto.LunarDate.IsLeapMonth
+                    eventDto.LunarDate.IsLeapMonth,
+                    eventDto.LunarDate.IsEstimated
                 );
                 eventEntity = Event.CreateLunarEvent(
                     eventDto.Name,

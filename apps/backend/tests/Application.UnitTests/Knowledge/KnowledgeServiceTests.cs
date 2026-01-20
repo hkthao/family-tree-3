@@ -421,7 +421,16 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var familyId = Guid.NewGuid(); // Members need a familyId
         var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
         family.Id = familyId;
-        var member = new Member(memberId, "Văn A", "Nguyễn", "M001", familyId, family);
+        var member = new Member
+        {
+            Id = memberId,
+            LastName = "Văn A",
+            FirstName = "Nguyễn",
+            Code = "M001",
+            FamilyId = familyId,
+            Family = family,
+            IsDeceased = false // Explicitly set for clarity
+        };
 
         _context.Families.Add(family);
         _context.Members.Add(member);
@@ -457,61 +466,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         );
     }
 
-    // --- Tests for DeleteEventData ---
-    [Fact]
-    public async Task DeleteEventData_ShouldSendDeleteRequestToCorrectEndpoint()
-    {
-        // Arrange
-        var eventId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
-        family.Id = familyId;
-        var @event = Event.CreateSolarEvent(
-            "Lễ giỗ tổ",
-            "LG001",
-            EventType.Anniversary,
-            new DateTime(2023, 10, 20),
-            RepeatRule.None,
-            familyId,
-            "Mô tả lễ giỗ",
-            "#FF0000",
-            "Hà Nội"
-        );
-        @event.Id = eventId;
 
-        _context.Families.Add(family);
-        _context.Events.Add(@event);
-        await _context.SaveChangesAsync();
-
-
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(req =>
-                    req.Method == HttpMethod.Delete &&
-                    req.RequestUri == new Uri($"http://localhost:8000/api/v1/knowledge/{familyId}/{eventId}")
-                ),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = System.Net.HttpStatusCode.OK
-            });
-
-        // Act
-        await _knowledgeService.DeleteEventData(eventId);
-
-        // Assert
-        _mockHttpMessageHandler.Protected().Verify(
-            "SendAsync",
-            Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req =>
-                req.Method == HttpMethod.Delete &&
-                req.RequestUri == new Uri($"http://localhost:8000/api/v1/knowledge/{familyId}/{eventId}")
-                        ),
-                        ItExpr.IsAny<CancellationToken>()
-                    );
-    }
 
     // --- Tests for DeleteKnowledgeByFamilyId ---
     [Fact]

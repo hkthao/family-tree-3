@@ -1,3 +1,5 @@
+using backend.Application.Events.Commands.Inputs; // Add this
+
 namespace backend.Application.Members.DTOs;
 
 public class MemberImportDto
@@ -10,6 +12,8 @@ public class MemberImportDto
     public string? Gender { get; set; } // Stored as string, will be parsed to enum if needed by entity
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
+    public LunarDateInput? LunarDateOfDeath { get; set; }
+
     public string? PlaceOfBirth { get; set; }
     public string? PlaceOfDeath { get; set; }
     public string? Phone { get; set; }

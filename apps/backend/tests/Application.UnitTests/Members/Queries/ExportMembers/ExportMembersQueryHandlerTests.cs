@@ -3,6 +3,7 @@ using backend.Application.Members.Queries; // MemberDto is here
 using backend.Application.Members.Queries.ExportMembers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

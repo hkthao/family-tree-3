@@ -65,7 +65,7 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IAuthoriz
                 {
                     return Result<List<Guid>>.Failure("Lunar event cannot have a SolarDate.", ErrorSources.BadRequest);
                 }
-                var lunarDateVO = new LunarDate(command.LunarDate.Day, command.LunarDate.Month, command.LunarDate.IsLeapMonth);
+                var lunarDateVO = new LunarDate(command.LunarDate.Day, command.LunarDate.Month, command.LunarDate.IsLeapMonth, command.LunarDate.IsEstimated);
                 entity = Event.CreateLunarEvent(
                     command.Name,
                     eventCode,

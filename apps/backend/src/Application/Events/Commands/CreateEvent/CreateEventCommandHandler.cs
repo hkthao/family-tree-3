@@ -53,7 +53,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             {
                 return Result<Guid>.Failure("Lunar event must have a LunarDate.", ErrorSources.BadRequest);
             }
-            var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth);
+            var lunarDateVO = new LunarDate(request.LunarDate.Day, request.LunarDate.Month, request.LunarDate.IsLeapMonth, request.LunarDate.IsEstimated);
             entity = Event.CreateLunarEvent(
                 request.Name,
                 GenerateUniqueCode("EVT"),
@@ -101,17 +101,20 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
             if (!occurrenceExists)
             {
+                if (entity.LunarDate.Day.HasValue && entity.LunarDate.Month.HasValue)
+            {
                 DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(
-                    entity.LunarDate.Day,
-                    entity.LunarDate.Month,
+                    entity.LunarDate.Day.Value,
+                    entity.LunarDate.Month.Value,
                     currentYear,
-                    entity.LunarDate.IsLeapMonth);
+                    entity.LunarDate.IsLeapMonth.GetValueOrDefault(false));
 
                 if (solarOccurrenceDate.HasValue)
                 {
                     var newOccurrence = EventOccurrence.Create(entity.Id, currentYear, solarOccurrenceDate.Value);
                     _context.EventOccurrences.Add(newOccurrence);
                 }
+            }
             }
         }
 

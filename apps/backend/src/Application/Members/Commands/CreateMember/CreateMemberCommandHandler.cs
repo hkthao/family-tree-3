@@ -7,6 +7,7 @@ using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
 using backend.Domain.ValueObjects; // NEW
 using backend.Domain.Events.Members;
+using backend.Domain.ValueObjects; // Added
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;

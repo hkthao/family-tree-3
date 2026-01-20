@@ -1,32 +1,32 @@
-using backend.Domain.Enums;
-using backend.Domain.ValueObjects;
+using backend.Domain.Enums; // Add this for RelationshipType
+using backend.Domain.ValueObjects; // Add this
 
 namespace backend.Domain.Entities;
 
 public class Member : BaseAuditableEntity
 {
-    public string LastName { get; private set; } = null!; // Last name
-    public string FirstName { get; private set; } = null!; // First name
-    public string Code { get; private set; } = null!; // New property
+    public string LastName { get;  set; } = null!; // Last name
+    public string FirstName { get;  set; } = null!; // First name
+    public string Code { get;  set; } = null!; // New property
     public string FullName => $"{LastName} {FirstName}"; // Full name (derived)
-    public string? Nickname { get; private set; } // New
-    public string? Gender { get; private set; }
-    public DateTime? DateOfBirth { get; private set; }
-    public DateTime? DateOfDeath { get; private set; }
-    public LunarDate? LunarDateOfDeath { get; private set; }
-    public string? PlaceOfBirth { get; private set; }
-    public string? PlaceOfDeath { get; private set; }
-    public string? Phone { get; private set; }
-    public string? Email { get; private set; }
-    public string? Address { get; private set; }
-    public string? Occupation { get; private set; } // New
-    public string? AvatarUrl { get; private set; }
-    public string? Biography { get; private set; } // New
-    public bool IsDeceased { get; private set; } = false;
-    public Guid FamilyId { get; private set; }
-    public Family Family { get; private set; } = null!;
-    public bool IsRoot { get; private set; } = false;
-    public int? Order { get; private set; }
+    public string? Nickname { get;  set; } // New
+    public string? Gender { get;  set; }
+    public DateTime? DateOfBirth { get;  set; }
+    public DateTime? DateOfDeath { get;  set; }
+    public LunarDate? LunarDateOfDeath { get; set; }
+    public string? PlaceOfBirth { get;  set; }
+    public string? PlaceOfDeath { get;  set; }
+    public string? Phone { get;  set; }
+    public string? Email { get;  set; }
+    public string? Address { get;  set; }
+    public string? Occupation { get;  set; } // New
+    public string? AvatarUrl { get;  set; }
+    public string? Biography { get;  set; } // New
+    public bool IsDeceased { get;  set; } = false;
+    public Guid FamilyId { get;  set; }
+    public Family Family { get;  set; } = null!;
+    public bool IsRoot { get;  set; } = false;
+    public int? Order { get;  set; }
 
     // Denormalized relationship properties
     public Guid? FatherId { get; set; }
@@ -146,20 +146,9 @@ public class Member : BaseAuditableEntity
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 
 
-    public ICollection<MemberFace> MemberFaces { get; private set; } = new List<MemberFace>(); // NEW
+    public ICollection<MemberFace> MemberFaces { get;  set; } = new List<MemberFace>(); // NEW
 
     public Member() { }
-
-    public Member(string lastName, string firstName, string code, Guid familyId)
-        : this(lastName, firstName, code, familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false)
-    {
-    }
-
-    public Member(string lastName, string firstName, string code, Guid familyId, bool isDeceased = false)
-        : this(lastName, firstName, code, familyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, isDeceased)
-    {
-    }
-
 
 
     // New method to manage MemberFace
@@ -173,7 +162,12 @@ public class Member : BaseAuditableEntity
     }
 
 
-    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, LunarDate? lunarDateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order, bool isDeceased)
+    public Member(string lastName, string firstName, string code, Guid familyId,
+        string? nickname = null, string? gender = null, DateTime? dateOfBirth = null, DateTime? dateOfDeath = null,
+        LunarDate? lunarDateOfDeath = null, // Replaced
+        string? placeOfBirth = null, string? placeOfDeath = null, string? phone = null, string? email = null,
+        string? address = null, string? occupation = null, string? avatarUrl = null, string? biography = null,
+        int? order = null, bool isDeceased = false)
     {
         LastName = lastName;
         FirstName = firstName;
@@ -183,7 +177,7 @@ public class Member : BaseAuditableEntity
         Gender = gender;
         DateOfBirth = dateOfBirth;
         DateOfDeath = dateOfDeath;
-        LunarDateOfDeath = lunarDateOfDeath;
+        LunarDateOfDeath = lunarDateOfDeath; // Assigned
         PlaceOfBirth = placeOfBirth;
         PlaceOfDeath = placeOfDeath;
         Phone = phone;
@@ -197,14 +191,14 @@ public class Member : BaseAuditableEntity
     }
 
     public Member(Guid id, string lastName, string firstName, string code, Guid familyId, Family family, bool isDeceased = false)
-        : this(lastName, firstName, code, familyId, isDeceased)
+        : this(lastName, firstName, code, familyId, isDeceased: isDeceased)
     {
         Id = id;
         Family = family;
     }
 
     public Member(Guid familyId)
-        : this(null!, null!, null!, familyId) // Call the simplified constructor with default values
     {
+        FamilyId = familyId;
     }
 }

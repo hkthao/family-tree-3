@@ -257,7 +257,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             "Old Lunar Event",
             "EVT-LUNAR-OLD",
             EventType.Other,
-            new LunarDate(1, 1, false),
+            new LunarDate(1, 1, false, false),
             RepeatRule.None,
             familyId
         );
@@ -367,7 +367,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             "Lunar Event",
             "EVT-LUNAR",
             EventType.Other,
-            new LunarDate(1, 1, false),
+            new LunarDate(1, 1, false, false),
             RepeatRule.None,
             familyId
         );
@@ -464,7 +464,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             "Lunar Event",
             "EVT-LUNAR",
             EventType.Other,
-            new LunarDate(1, 1, false),
+            new LunarDate(1, 1, false, false),
             RepeatRule.None,
             familyId
         );

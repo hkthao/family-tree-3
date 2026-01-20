@@ -1,4 +1,5 @@
-using backend.Domain.ValueObjects;
+using backend.Application.Events.Commands.Inputs; // Add this
+using backend.Domain.ValueObjects; // Also keep this for other purposes
 
 namespace backend.Application.Members.Inputs;
 
@@ -11,7 +12,7 @@ public record MemberInput
     public string? Nickname { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
-    public LunarDate? LunarDateOfDeath { get; init; }
+    public LunarDateInput? LunarDateOfDeath { get; set; } // Consolidate into LunarDateInput
     public string? PlaceOfBirth { get; set; }
     public string? PlaceOfDeath { get; set; }
     public string? Phone { get; set; }
