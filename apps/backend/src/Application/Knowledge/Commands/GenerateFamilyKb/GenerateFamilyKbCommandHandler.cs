@@ -39,6 +39,11 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
             return Result.Failure($"Family with ID {request.FamilyId} not found.");
         }
 
+        // Delete existing knowledge for the family before re-indexing
+        _logger.LogInformation("Deleting existing knowledge base for FamilyId: {FamilyId}", family.Id);
+        await _knowledgeService.DeleteKnowledgeByFamilyId(family.Id);
+        _logger.LogInformation("Existing knowledge base deleted for FamilyId: {FamilyId}", family.Id);
+
         // 1. Index Family data
         await _knowledgeService.IndexFamilyData(family.Id);
         _logger.LogInformation("Family data indexed for FamilyId: {FamilyId}", family.Id);
