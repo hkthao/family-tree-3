@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -32,6 +31,5 @@ public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEv
 
         // Update member data in Vector DB for search via GlobalSearchService
         _logger.LogInformation("Member Biography Updated: {MemberId}", notification.Member.Id);
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
     }
 }

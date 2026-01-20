@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
+using backend.Application.Common.Constants;
 
 namespace backend.Application.Knowledge.Commands.GenerateFamilyKb;
 
@@ -21,12 +22,10 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
 
     public async Task<Result> Handle(GenerateFamilyKbCommand request, CancellationToken cancellationToken)
     {
-        // Kiểm tra phân quyền: Chỉ cho phép Admin thực hiện
-        var authResult = await _authorizationService.AuthorizeAsync("Administrator");
-        if (!authResult.IsSuccess)
+        if (!_authorizationService.IsAdmin())
         {
-            _logger.LogWarning("Authorization failed for user to generate knowledge base for FamilyId: {FamilyId}. Reason: {Reason}", request.FamilyId, authResult.Error);
-            return authResult; // Return the unauthorized result directly
+            _logger.LogWarning("Authorization failed for non-admin user to generate knowledge base for FamilyId: {FamilyId}.", request.FamilyId);
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         _logger.LogInformation("Generating knowledge base for FamilyId: {FamilyId}", request.FamilyId);

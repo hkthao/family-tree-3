@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Knowledge.DTOs;
 using backend.Domain.Enums;
-using backend.Domain.ValueObjects; // Added for BoundingBox
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -58,14 +57,40 @@ public class KnowledgeService : IKnowledgeService
             { "visibility", family.Visibility }
         };
 
-        var summary = $"Gia đình họ {family.Name}, chi nhánh {(family.GenealogyRecord ?? "N/A")}.{Environment.NewLine}" +
-                      $"Khu vực sinh sống chính: {(family.Address ?? "N/A")}.{Environment.NewLine}" +
-                      $"Đặc điểm nổi bật: {(family.Description ?? "N/A")}.{Environment.NewLine}" +
-                      $"Tổng số thành viên: {family.TotalMembers}.{Environment.NewLine}" +
+        var summary = $"Gia đình họ {family.Name}, chi nhánh {family.GenealogyRecord ?? "N/A"}.{Environment.NewLine}" +
+                      $"Khu vực sinh sống chính: {family.Address ?? "N/A"}.{Environment.NewLine}" +
+                      $"Đặc điểm nổi bật: {family.Description ?? "N/A"}.{Environment.NewLine}" +
                       $"Tổng số thế hệ: {family.TotalGenerations}.";
+        var vectorData = new VectorData
+        {
+            FamilyId = family.Id.ToString(),
+            EntityId = family.Id.ToString(),
+            Type = "family",
+            Visibility = family.Visibility,
+            Name = family.Name,
+            Summary = summary,
+            Metadata = metadata
+        };
+        var requestBody = new KnowledgeAddRequest { Data = vectorData };
+        
+        try
+        {
+            var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = summary };
-        await SendToKnowledgeService(genericDto, "index");
+            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/knowledge", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully indexed family data for FamilyId: {FamilyId}", family.Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error indexing family data for FamilyId: {FamilyId}. Status Code: {StatusCode}", family.Id, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while indexing family data for FamilyId: {FamilyId}.", family.Id);
+        }
     }
 
     public async Task IndexMemberData(Guid memberId)
@@ -179,11 +204,37 @@ public class KnowledgeService : IKnowledgeService
                       $"Nghề nghiệp: {member.Occupation ?? "N/A"}.{Environment.NewLine}" +
                       $"Tình trạng: {status}.{Environment.NewLine}" +
                       $"Tiểu sử: {member.Biography ?? "N/A"}.{Environment.NewLine}" +
-                      $"Khu vực sinh sống chính: {member.Family?.Address ?? "N/A"}.{Environment.NewLine}" +
-                      $"Là con thứ {(member.Order?.ToString() ?? "N/A")} trong nhà.";
+                      $"Khu vực sinh sống chính: {member.Family?.Address ?? "N/A"}.{Environment.NewLine}";
+        var vectorData = new VectorData
+        {
+            FamilyId = member.FamilyId.ToString(),
+            EntityId = member.Id.ToString(),
+            Type = "member",
+            Visibility = "public", // Assuming public for now, adjust if member has visibility
+            Name = member.FullName,
+            Summary = summary,
+            Metadata = metadata
+        };
+        var requestBody = new KnowledgeAddRequest { Data = vectorData };
 
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = summary };
-        await SendToKnowledgeService(genericDto, "index");
+        try
+        {
+            var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/knowledge", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully indexed member data for MemberId: {MemberId}", member.Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error indexing member data for MemberId: {MemberId}. Status Code: {StatusCode}", member.Id, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while indexing member data for MemberId: {MemberId}.", member.Id);
+        }
     }
 
     public async Task IndexEventData(Guid eventId)
@@ -219,81 +270,127 @@ public class KnowledgeService : IKnowledgeService
                       $"Ngày diễn ra: {@event.SolarDate?.ToShortDateString() ?? "N/A"}.{Environment.NewLine}" +
                       $"Thuộc gia đình họ: {@event.Family?.Name ?? "N/A"}.";
 
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = summary };
-        await SendToKnowledgeService(genericDto, "index");
+        var vectorData = new VectorData
+        {
+            FamilyId = (@event.FamilyId ?? Guid.Empty).ToString(),
+            EntityId = @event.Id.ToString(),
+            Type = "event",
+            Visibility = "public", // Assuming public for now, adjust if event has visibility
+            Name = @event.Name,
+            Summary = summary,
+            Metadata = metadata
+        };
+        var requestBody = new KnowledgeAddRequest { Data = vectorData };
+
+        try
+        {
+            var jsonContent = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/knowledge", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully indexed event data for EventId: {EventId}", @event.Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error indexing event data for EventId: {EventId}. Status Code: {StatusCode}", @event.Id, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while indexing event data for EventId: {EventId}.", @event.Id);
+        }
     }
 
     public async Task DeleteFamilyData(Guid familyId)
     {
-        var metadata = new Dictionary<string, object>
-        {
-            { "family_id", familyId.ToString() },
-            { "original_id", familyId.ToString() },
-            { "content_type", "Family" }
-        };
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = string.Empty }; // Summary not needed for delete
-        await SendToKnowledgeService(genericDto, "delete");
-    }
-
-    public async Task DeleteMemberData(Guid memberId)
-    {
-        // For deletion, we need the family_id and the original_id (member_id)
-        // If we don't have family_id from the member object, we might need to fetch it.
-        // For simplicity here, assuming member_id is enough for the Python service's 'where_clause'
-        var metadata = new Dictionary<string, object>
-        {
-            // { "family_id", "N/A" }, // If family_id is needed, fetch member first
-            { "original_id", memberId.ToString() },
-            { "content_type", "Member" }
-        };
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = string.Empty };
-        await SendToKnowledgeService(genericDto, "delete");
-    }
-
-    public async Task DeleteEventData(Guid eventId)
-    {
-        var metadata = new Dictionary<string, object>
-        {
-            // { "family_id", "N/A" }, // If family_id is needed, fetch event first
-            { "original_id", eventId.ToString() },
-            { "content_type", "Event" }
-        };
-        var genericDto = new GenericKnowledgeDto { Metadata = metadata, Summary = string.Empty };
-        await SendToKnowledgeService(genericDto, "delete");
-    }
-
-
-    private async Task SendToKnowledgeService(GenericKnowledgeDto data, string action)
-    {
         if (string.IsNullOrEmpty(_settings.BaseUrl))
         {
-            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot send data to knowledge service.");
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete family data.");
             return;
         }
 
         try
         {
-            var request = new KnowledgeIndexRequest { Data = data, Action = action };
-            var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-
-            var originalId = data.Metadata.TryGetValue("original_id", out var id) ? id.ToString() : "N/A";
-            var contentType = data.Metadata.TryGetValue("content_type", out var type) ? type.ToString() : "N/A";
-
-            var response = await _httpClient.PostAsync($"{_settings.BaseUrl}/api/v1/knowledge/index", httpContent);
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/knowledge/{familyId}/{familyId}");
             response.EnsureSuccessStatusCode();
 
-            _logger.LogInformation("Successfully sent {Action} {ContentType} data to knowledge service. Original ID: {OriginalId}", action, contentType, originalId);
+            _logger.LogInformation("Successfully deleted family data for FamilyId: {FamilyId}", familyId);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error sending {Action} {ContentType} data to knowledge service. Original ID: {OriginalId}. Status Code: {StatusCode}", action, data.Metadata.TryGetValue("content_type", out var type) ? type.ToString() : "N/A", data.Metadata.TryGetValue("original_id", out var id) ? id.ToString() : "N/A", ex.StatusCode);
+            _logger.LogError(ex, "Error deleting family data for FamilyId: {FamilyId}. Status Code: {StatusCode}", familyId, ex.StatusCode);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while sending {Action} {ContentType} data to knowledge service. Original ID: {OriginalId}.", action, data.Metadata.TryGetValue("content_type", out var type) ? type.ToString() : "N/A", data.Metadata.TryGetValue("original_id", out var id) ? id.ToString() : "N/A");
+            _logger.LogError(ex, "An unexpected error occurred while deleting family data for FamilyId: {FamilyId}.", familyId);
         }
     }
+
+    public async Task DeleteMemberData(Guid memberId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete member data.");
+            return;
+        }
+        var member = await _context.Members.FindAsync(memberId);
+        if (member == null)
+        {
+            _logger.LogWarning("Member with ID {MemberId} not found for deletion from knowledge service.", memberId);
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/knowledge/{member.FamilyId}/{memberId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted member data for MemberId: {MemberId} in FamilyId: {FamilyId}", memberId, member.FamilyId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting member data for MemberId: {MemberId} in FamilyId: {FamilyId}. Status Code: {StatusCode}", memberId, member.FamilyId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting member data for MemberId: {MemberId} in FamilyId: {FamilyId}.", memberId, member.FamilyId);
+        }
+    }
+
+    public async Task DeleteEventData(Guid eventId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete event data.");
+            return;
+        }
+        var @event = await _context.Events.FindAsync(eventId);
+        if (@event == null || !@event.FamilyId.HasValue)
+        {
+            _logger.LogWarning("Event with ID {EventId} not found or has no associated FamilyId for deletion from knowledge service.", eventId);
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/knowledge/{@event.FamilyId.Value}/{eventId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted event data for EventId: {EventId} in FamilyId: {FamilyId}", eventId, @event.FamilyId.Value);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting event data for EventId: {EventId} in FamilyId: {FamilyId}. Status Code: {StatusCode}", eventId, @event.FamilyId.Value, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting event data for EventId: {EventId} in FamilyId: {FamilyId}.", eventId, @event.FamilyId.Value);
+        }
+    }
+
+
+
 
     public async Task<List<KnowledgeSearchResultDto>> SearchKnowledgeBase(Guid familyId, string queryString, int topK, List<string> allowedVisibility)
     {
@@ -338,48 +435,7 @@ public class KnowledgeService : IKnowledgeService
         }
     }
 
-    // Helper class to deserialize the API response from knowledge-search-service
-    private class KnowledgeSearchApiResponse
-    {
-        public List<KnowledgeSearchResultDto>? Results { get; set; }
-    }
 
-    private class FaceAddRequest
-    {
-        public Guid FamilyId { get; set; }
-        public Guid MemberId { get; set; }
-        public Guid FaceId { get; set; }
-        public BoundingBox? BoundingBox { get; set; }
-        public double Confidence { get; set; }
-        public string? ThumbnailUrl { get; set; }
-        public string? OriginalImageUrl { get; set; }
-        public List<double>? Embedding { get; set; }
-        public string? Emotion { get; set; }
-        public double EmotionConfidence { get; set; }
-        public string? VectorDbId { get; set; }
-        public bool IsVectorDbSynced { get; set; }
-    }
-
-    private class FaceSearchRequest
-    {
-        public Guid FamilyId { get; set; }
-        public List<double>? QueryEmbedding { get; set; }
-        public Guid? MemberId { get; set; }
-        public int TopK { get; set; }
-    }
-
-    private class FaceSearchApiResponse
-    {
-        public List<FaceSearchResultDto>? Results { get; set; }
-    }
-
-    private class FaceAddApiResponse
-    {
-        public string? FaceId { get; set; }
-        public string? MemberId { get; set; }
-        public string? Message { get; set; }
-        public string? VectorDbId { get; set; } // VectorDbId is expected in the response again
-    }
 
     public async Task<string> IndexMemberFaceData(MemberFaceDto faceData)
     {

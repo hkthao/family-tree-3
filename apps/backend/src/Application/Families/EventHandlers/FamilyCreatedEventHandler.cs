@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Families;
@@ -31,8 +30,7 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
             ActivitySummary = $"Đã tạo gia đình '{notification.Family.Name}'."
         }, cancellationToken);
 
-        // Publish notification for family creation
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Family.Id.ToString(), notification.Family.Id.ToString(), KbRecordType.Family), cancellationToken);
+
     }
 }
 

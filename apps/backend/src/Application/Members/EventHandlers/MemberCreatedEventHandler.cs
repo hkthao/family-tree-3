@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -39,7 +38,6 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member creation
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
 
         // Sync member life events
         await _familyTreeService.SyncMemberLifeEvents(
