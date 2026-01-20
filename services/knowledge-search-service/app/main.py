@@ -2,13 +2,16 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from app.api import faces, knowledge, search # Import the routers
-from app.core.lancedb import initialize_lancedb_services
-from app.core.embeddings import embedding_service as global_embedding_service
+from app.core.lancedb import KnowledgeLanceDBService, FaceLanceDBService # Import the classes
+from app.core.embeddings import embedding_service as global_embedding_service # Still need embedding service
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize LanceDB services
-    await initialize_lancedb_services(global_embedding_service)
+    app.state.knowledge_lancedb_service = KnowledgeLanceDBService(global_embedding_service)
+    app.state.face_lancedb_service = FaceLanceDBService()
+    await app.state.face_lancedb_service.async_init()
     yield
     # Shutdown: No specific cleanup needed for LanceDB connection as it's handled internally
 

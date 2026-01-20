@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from uuid import UUID
 from loguru import logger # Add this import
-from ..core.lancedb import FaceLanceDBService, face_lancedb_service, FACE_LANCEDB_SCHEMA # Import the class and global instance, and SCHEMA
+from ..core.lancedb import FaceLanceDBService, FACE_LANCEDB_SCHEMA # Import the class and SCHEMA
 from ..core.face_embeddings import FaceEmbeddingService, face_embedding_service # Import the face embedding service
 from ..models.face_models import (
     FaceEmbeddingResponse,
@@ -10,8 +10,8 @@ from ..models.face_models import (
 )
 router = APIRouter()
 # Dependencies
-def get_face_lancedb_service() -> FaceLanceDBService:
-    return face_lancedb_service
+def get_face_lancedb_service(request: Request) -> FaceLanceDBService:
+    return request.app.state.face_lancedb_service
 def get_face_embedding_service() -> FaceEmbeddingService:
     return face_embedding_service
 @router.get("/faces/test", status_code=status.HTTP_200_OK)

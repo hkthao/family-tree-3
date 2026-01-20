@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from loguru import logger
 from typing import List, Optional
 from uuid import UUID
 
-from ..core.lancedb import KnowledgeLanceDBService, knowledge_lancedb_service
+from ..core.lancedb import KnowledgeLanceDBService
 from ..core.embeddings import EmbeddingService, embedding_service
 from ..schemas.vectors import VectorData, DeleteVectorRequest
 from ..schemas.knowledge_dtos import KnowledgeAddRequest
@@ -12,8 +12,8 @@ from ..schemas.knowledge_dtos import KnowledgeAddRequest
 router = APIRouter()
 
 # Dependencies
-def get_knowledge_lancedb_service() -> KnowledgeLanceDBService:
-    return knowledge_lancedb_service
+def get_knowledge_lancedb_service(request: Request) -> KnowledgeLanceDBService:
+    return request.app.state.knowledge_lancedb_service
 
 def get_embedding_service() -> EmbeddingService:
     return embedding_service
@@ -61,7 +61,7 @@ async def add_knowledge_data(
         metadata=metadata
     )
 
-    lancedb_service.add_vectors(table_name, [vector_data])
+    await lancedb_service.add_vectors(table_name, [vector_data])
     return {"message": (f"{content_type} data with original_id "
                         f"{original_id} added successfully for family "
                         f"{family_id}.")}
@@ -88,7 +88,7 @@ async def delete_knowledge_data(
         where_clause=None # Explicitly set to None as we're using entity_id
     )
     
-    deleted_count = lancedb_service.delete_vectors(table_name, delete_request)
+    deleted_count = await lancedb_service.delete_vectors(table_name, delete_request)
 
     if deleted_count == 0:
         raise HTTPException(

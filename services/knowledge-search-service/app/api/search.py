@@ -1,16 +1,16 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from loguru import logger
 
 from ..models.schemas import SearchRequest, SearchResponse, SearchResultItem
 from ..core.embeddings import EmbeddingService, embedding_service
-from ..core.lancedb import KnowledgeLanceDBService, knowledge_lancedb_service
+from ..core.lancedb import KnowledgeLanceDBService
 
 
 router = APIRouter()
 
 # Dependencies
-def get_knowledge_lancedb_service() -> KnowledgeLanceDBService:
-    return knowledge_lancedb_service
+def get_knowledge_lancedb_service(request: Request) -> KnowledgeLanceDBService:
+    return request.app.state.knowledge_lancedb_service
 
 def get_embedding_service() -> EmbeddingService:
     return embedding_service
