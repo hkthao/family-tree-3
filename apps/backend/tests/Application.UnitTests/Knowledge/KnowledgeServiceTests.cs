@@ -505,11 +505,46 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
             ItExpr.Is<HttpRequestMessage>(req =>
                 req.Method == HttpMethod.Delete &&
                 req.RequestUri == new Uri($"http://localhost:8000/api/v1/knowledge/{familyId}/{eventId}")
+                        ),
+                        ItExpr.IsAny<CancellationToken>()
+                    );
+    }
+
+    // --- Tests for DeleteKnowledgeByFamilyId ---
+    [Fact]
+    public async Task DeleteKnowledgeByFamilyId_ShouldSendDeleteRequestToCorrectEndpoint()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Delete &&
+                    req.RequestUri == new Uri($"http://localhost:8000/api/v1/knowledge/family-data/{familyId}")
+                ),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.OK
+            });
+
+        // Act
+        await _knowledgeService.DeleteKnowledgeByFamilyId(familyId);
+
+        // Assert
+        _mockHttpMessageHandler.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == HttpMethod.Delete &&
+                req.RequestUri == new Uri($"http://localhost:8000/api/v1/knowledge/family-data/{familyId}")
             ),
             ItExpr.IsAny<CancellationToken>()
         );
     }
-
 
 
     // --- Tests for SearchKnowledgeBase ---

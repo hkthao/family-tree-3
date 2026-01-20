@@ -659,7 +659,30 @@ public class KnowledgeService : IKnowledgeService
         }
     }
 
+    public async Task DeleteKnowledgeByFamilyId(Guid familyId)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogError("KnowledgeSearchService BaseUrl is not configured. Cannot delete knowledge by family ID.");
+            return;
+        }
 
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"{_settings.BaseUrl}/api/v1/knowledge/family-data/{familyId}");
+            response.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Successfully deleted all knowledge data for FamilyId: {FamilyId}", familyId);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error deleting all knowledge data for FamilyId: {FamilyId}. Status Code: {StatusCode}", familyId, ex.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while deleting all knowledge data for FamilyId: {FamilyId}.", familyId);
+        }
+    }
 
 
     public async Task<List<KnowledgeSearchResultDto>> SearchKnowledgeBase(Guid familyId, string queryString, int topK, List<string> allowedVisibility)

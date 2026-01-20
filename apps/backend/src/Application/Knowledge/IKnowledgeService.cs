@@ -68,6 +68,13 @@ public interface IKnowledgeService
     Task DeleteEventData(Guid eventId);
 
     /// <summary>
+    /// Xóa tất cả dữ liệu kiến thức của một Family khỏi knowledge-search-service.
+    /// </summary>
+    /// <param name="familyId">ID của Family.</param>
+    /// <returns>Task hoàn thành tác vụ.</returns>
+    Task DeleteKnowledgeByFamilyId(Guid familyId);
+
+    /// <summary>
     /// Tìm kiếm trong knowledge-search-service.
     /// </summary>
     /// <param name="familyId">ID của Family để giới hạn phạm vi tìm kiếm.</param>
