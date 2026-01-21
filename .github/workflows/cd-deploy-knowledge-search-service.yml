@@ -1,0 +1,23 @@
+name: CD Deploy Knowledge Search Service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-knowledge-search-service:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy Knowledge Search Service to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          docker compose -f docker-compose.prod.yml pull knowledge-search-service
+          docker compose -f docker-compose.prod.yml up -d --no-deps knowledge-search-service
+          echo "Knowledge Search Service deployment completed successfully!"
