@@ -730,7 +730,7 @@
   "familyLocation.source.userselected": "Người dùng chọn",
   "familyLocation.search.title": "Tìm kiếm nâng cao",
   "family.search.isFollowing": "Theo dõi",
-  "common.all": "Tất cả",
+  "common.none": "Không chọn",
   "family.search.isFollowingTrue": "Đang theo dõi",
   "family.search.isFollowingFalse": "Chưa theo dõi",
   "familyLocation.search.apply": "Áp dụng Bộ lọc",

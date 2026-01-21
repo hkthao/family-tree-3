@@ -69,15 +69,15 @@ const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 
 // Internal state to hold the lunar date, initialized from modelValue
-const internalLunarDate = ref<LunarDate>(props.modelValue || { day: 1, month: 1, isLeapMonth: false });
+const internalLunarDate = ref<LunarDate>(props.modelValue || { day: null, month: null, isLeapMonth: null });
 
 // Watch for changes in the parent's modelValue and update internal state
 watch(() => props.modelValue, (newValue) => {
   if (newValue) {
     internalLunarDate.value = { ...newValue };
   } else {
-    // If modelValue becomes null/undefined, reset to default or an empty state
-    internalLunarDate.value = { day: 1, month: 1, isLeapMonth: false };
+    // If modelValue becomes null/undefined, reset to an empty state
+    internalLunarDate.value = { day: null, month: null, isLeapMonth: null };
   }
 }, { deep: true });
 
@@ -85,28 +85,28 @@ watch(() => props.modelValue, (newValue) => {
 
 
 const lunarDays = computed(() => {
-  return Array.from({ length: 30 }, (_, i) => ({ title: `${i + 1}`, value: i + 1 }));
+  return [{ title: t('common.none'), value: null }, ...Array.from({ length: 30 }, (_, i) => ({ title: `${i + 1}`, value: i + 1 }))];
 });
 
 const lunarMonths = computed(() => {
-  return Array.from({ length: 12 }, (_, i) => ({ title: `${i + 1}`, value: i + 1 }));
+  return [{ title: t('common.none'), value: null }, ...Array.from({ length: 12 }, (_, i) => ({ title: `${i + 1}`, value: i + 1 }))];
 });
 
 // Event handlers to update internal state and trigger emit
-const updateDay = (value: number) => {
-  const newLunarDate = { ...internalLunarDate.value, day: value };
+const updateDay = (value: number | null) => {
+  const newLunarDate = { ...internalLunarDate.value, day: value ?? null };
   internalLunarDate.value = newLunarDate;
   emit('update:modelValue', newLunarDate);
 };
 
-const updateMonth = (value: number) => {
-  const newLunarDate = { ...internalLunarDate.value, month: value };
+const updateMonth = (value: number | null) => {
+  const newLunarDate = { ...internalLunarDate.value, month: value ?? null };
   internalLunarDate.value = newLunarDate;
   emit('update:modelValue', newLunarDate);
 };
 
 const updateIsLeapMonth = (value: boolean | null) => {
-  const newLunarDate = { ...internalLunarDate.value, isLeapMonth: value ?? false };
+  const newLunarDate = { ...internalLunarDate.value, isLeapMonth: value ?? null };
   internalLunarDate.value = newLunarDate;
   emit('update:modelValue', newLunarDate);
 };
@@ -116,18 +116,18 @@ const updateIsLeapMonth = (value: boolean | null) => {
 const dayRules = computed(() => {
   const rules = [];
   if (props.required) {
-    rules.push((v: number) => !!v || t('common.form.required'));
+    rules.push((v: number | null) => v !== null || t('common.form.required'));
   }
-  rules.push((v: number) => (v >= 1 && v <= 30) || t('common.form.invalidDay'));
+  rules.push((v: number | null) => (v === null || (v >= 1 && v <= 30)) || t('common.form.invalidDay'));
   return [...rules, ...props.rules];
 });
 
 const monthRules = computed(() => {
   const rules = [];
   if (props.required) {
-    rules.push((v: number) => !!v || t('common.form.required'));
+    rules.push((v: number | null) => v !== null || t('common.form.required'));
   }
-  rules.push((v: number) => (v >= 1 && v <= 12) || t('common.form.invalidMonth'));
+  rules.push((v: number | null) => (v === null || (v >= 1 && v <= 12)) || t('common.form.invalidMonth'));
   return [...rules, ...props.rules];
 });
 </script>
