@@ -15,6 +15,8 @@ services:
       - backend
       - face-service
       - ocr-service
+      - knowledge-search-service
+      - llm-gateway-service
 
   certbot:
     image: certbot/certbot
@@ -131,6 +133,32 @@ services:
         max-file: "3"
     networks:
       - app-network # Add to app-network for inter-service communication
+    restart: unless-stopped
+
+  knowledge-search-service:
+    image: hkthao/family-tree-knowledge-search-service:latest
+    platform: linux/amd64
+    container_name: family-tree-knowledge-search-service-prod
+    env_file:
+      - ./.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    mem_limit: 2g
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  llm-gateway-service:
+    image: hkthao/family-tree-llm-gateway-service:latest
+    platform: linux/amd64
+    container_name: family-tree-llm-gateway-service-prod
+    env_file:
+      - ./.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    mem_limit: 2g
+    networks:
+      - app-network
     restart: unless-stopped
 
   # promtail:
