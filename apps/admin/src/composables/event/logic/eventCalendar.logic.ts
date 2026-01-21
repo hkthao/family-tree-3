@@ -12,22 +12,29 @@ export function getSolarDateFromLunarDate(
   lunarDateAdapter: LunarDateAdapter,
   dateAdapter: DateAdapter,
 ): Date {
-  try {
-    // Get actual days in the lunar month to validate and adjust lunarDate.day if necessary
-    const maxDayInMonth = lunarDateAdapter.getLunarDaysInMonth(year, lunarDate.month);
-    const day = Math.min(lunarDate.day, maxDayInMonth); // Adjust day if it's too high
+  // Provide default values if day or month are null/undefined
+  const month = lunarDate.month ?? 1; // Default to 1 if null/undefined
+  const day = lunarDate.day ?? 1;     // Default to 1 if null/undefined
+  const isLeapMonth = lunarDate.isLeapMonth ?? false; // Default to false
 
-    const lunar: LunarInstance = lunarDateAdapter.lunarFromYmd(year, lunarDate.month, day);
+  try {
+    // Use the defaulted month and day
+    const maxDayInMonth = lunarDateAdapter.getLunarDaysInMonth(year, month);
+    const adjustedDay = Math.min(day, maxDayInMonth); // Adjust day if it's too high
+
+    // Use isLeapMonth if the adapter supports it, otherwise pass day directly
+    const lunar: LunarInstance = lunarDateAdapter.lunarFromYmd(year, month, adjustedDay);
     const solar: SolarInstance = lunarDateAdapter.getSolar(lunar);
     if (!solar) {
-      console.warn(`Could not get solar date for lunar date: year=${year}, month=${lunarDate.month}, day=${day}. Falling back.`);
-      return dateAdapter.newDate(year, lunarDate.month - 1, day); // Use adjusted day for fallback
+      console.warn(`Could not get solar date for lunar date: year=${year}, month=${month}, day=${adjustedDay}. Falling back.`);
+      // Fallback also uses defaulted values
+      return dateAdapter.newDate(year, month - 1, adjustedDay);
     }
     return dateAdapter.newDate(solar.getYear(), solar.getMonth() - 1, solar.getDay());
   } catch (e) {
     console.error('Error during lunar to solar conversion:', e);
-    // Fallback if conversion fails
-    return dateAdapter.newDate(year, lunarDate.month - 1, lunarDate.day);
+    // Fallback uses defaulted values
+    return dateAdapter.newDate(year, month - 1, day);
   }
 }
 

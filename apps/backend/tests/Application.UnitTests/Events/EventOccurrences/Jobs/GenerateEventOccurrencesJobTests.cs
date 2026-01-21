@@ -5,10 +5,10 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging; // Keep for Mock<ILogger> in constructor
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Events.EventOccurrences.Jobs;
 
@@ -38,7 +38,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         var familyId = Guid.NewGuid();
         var lunarEvent = Event.CreateLunarEvent(
             "Lunar New Year", "LNY", EventType.Anniversary,
-            new LunarDate(1, 1, false), RepeatRule.Yearly, familyId);
+            new LunarDate(1, 1, false, false), RepeatRule.Yearly, familyId);
         lunarEvent.ClearDomainEvents();
 
         await _context.Families.AddAsync(new Family { Id = familyId, Name = "Test Family", Code = "TF", CreatedBy = TestUserId.ToString() });
@@ -70,7 +70,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         var familyId = Guid.NewGuid();
         var lunarEvent = Event.CreateLunarEvent(
             "Lunar New Year", "LNY", EventType.Anniversary,
-            new LunarDate(1, 1, false), RepeatRule.Yearly, familyId);
+            new LunarDate(1, 1, false, false), RepeatRule.Yearly, familyId);
         lunarEvent.ClearDomainEvents();
 
         await _context.Families.AddAsync(new Family { Id = familyId, Name = "Test Family", Code = "TF", CreatedBy = TestUserId.ToString() });
@@ -102,7 +102,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         {
             var lunarEvent = Event.CreateLunarEvent(
                 $"Lunar Event {i}", $"LE{i}", EventType.Anniversary,
-                new LunarDate(1, 1, false), RepeatRule.Yearly, familyId);
+                new LunarDate(1, 1, false, false), RepeatRule.Yearly, familyId);
             lunarEvent.ClearDomainEvents();
             await _context.Events.AddAsync(lunarEvent);
         }
@@ -135,7 +135,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         {
             var lunarEvent = Event.CreateLunarEvent(
                 $"Lunar Event {i}", $"LE{i}", EventType.Anniversary,
-                new LunarDate(1, 1, false), RepeatRule.Yearly, familyId);
+                new LunarDate(1, 1, false, false), RepeatRule.Yearly, familyId);
             lunarEvent.ClearDomainEvents();
             await _context.Events.AddAsync(lunarEvent);
         }

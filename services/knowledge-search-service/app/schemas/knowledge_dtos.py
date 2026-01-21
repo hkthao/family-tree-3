@@ -10,6 +10,5 @@ class GenericKnowledgeDto(BaseModel):
     summary: str
 
 
-class KnowledgeIndexRequest(BaseModel):
+class KnowledgeAddRequest(BaseModel):
     data: GenericKnowledgeDto
-    action: str = "index"  # "index" or "delete"

@@ -1,12 +1,7 @@
-using System.IO;
-using System.Net;
 using System.Text;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Infrastructure;
 using backend.Infrastructure.Services;
 using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;

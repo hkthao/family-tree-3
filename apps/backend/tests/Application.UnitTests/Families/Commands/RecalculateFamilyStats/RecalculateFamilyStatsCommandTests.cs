@@ -1,15 +1,13 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.RecalculateFamilyStats;
-using backend.Application.Families.Queries;
+using backend.Application.UnitTests.Common; // NEW: Added missing using directive
 using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit; // Changed from NUnit.Framework
-using backend.Application.UnitTests.Common; // NEW: Added missing using directive
-using backend.Domain.Enums; // NEW: Added for Gender enum
 
 namespace backend.Application.UnitTests.Families.Commands.RecalculateFamilyStats;
 
@@ -73,7 +71,7 @@ public class RecalculateFamilyStatsCommandTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value!.Should().NotBeNull();
-        
+
         result.Value!.TotalMembers.Should().Be(3);
         result.Value.TotalGenerations.Should().Be(2);
 

@@ -1,14 +1,15 @@
-using Ardalis.Specification.EntityFrameworkCore;
+using Ardalis.Specification.EntityFrameworkCore; // Re-add this
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
+using backend.Application.Members.Inputs; // Added
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Members;
-
+using backend.Domain.ValueObjects; // NEW
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.Commands.UpdateMember;
@@ -101,6 +102,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Gender,
             request.DateOfBirth,
             request.DateOfDeath,
+            request.LunarDateOfDeath == null ? null : new LunarDate(request.LunarDateOfDeath.Day, request.LunarDateOfDeath.Month, request.LunarDateOfDeath.IsLeapMonth, request.LunarDateOfDeath.IsEstimated),
             request.PlaceOfBirth,
             request.PlaceOfDeath,
             request.Phone,

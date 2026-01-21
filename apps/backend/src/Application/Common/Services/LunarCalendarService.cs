@@ -21,7 +21,7 @@ public class LunarCalendarService : ILunarCalendarService
         {
             var lunarMonthParam = isLeapMonth ? -lunarMonth : lunarMonth;
             var lunar = Lunar.Lunar.FromYmdHms(lunarYear, lunarMonthParam, lunarDay, 0, 0, 0);
-            
+
             var solar = lunar.Solar;
             return new DateTime(solar.Year, solar.Month, solar.Day);
         }

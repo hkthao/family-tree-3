@@ -77,11 +77,11 @@ public class GenerateEventOccurrencesJob : IGenerateEventOccurrencesJob
                     continue;
                 }
 
-                if (evt.LunarDate != null)
+                if (evt.LunarDate != null && evt.LunarDate.Day.HasValue && evt.LunarDate.Month.HasValue)
                 {
-                    int lunarDay = evt.LunarDate.Day;
-                    int lunarMonth = evt.LunarDate.Month;
-                    bool isLeapMonth = evt.LunarDate.IsLeapMonth;
+                    int lunarDay = evt.LunarDate.Day.Value;
+                    int lunarMonth = evt.LunarDate.Month.Value;
+                    bool isLeapMonth = evt.LunarDate.IsLeapMonth.GetValueOrDefault(false);
 
                     DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(lunarDay, lunarMonth, year, isLeapMonth);
 

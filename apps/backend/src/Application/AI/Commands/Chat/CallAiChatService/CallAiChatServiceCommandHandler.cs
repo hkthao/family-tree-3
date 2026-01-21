@@ -1,7 +1,7 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
+using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Commands.Chat.CallAiChatService;

@@ -47,7 +47,7 @@ public class RecalculateFamilyStatsCommandHandler : IRequestHandler<RecalculateF
                 .Where(f => f.Id == request.FamilyId)
                 .Select(f => new Family { TotalMembers = f.TotalMembers, TotalGenerations = f.TotalGenerations, Id = f.Id }) // Select only needed properties
                 .FirstOrDefaultAsync(cancellationToken);
-            
+
             if (family == null) // Should not happen if it was found before
             {
                 _logger.LogWarning("Family with ID {FamilyId} not found after stats update.", request.FamilyId);

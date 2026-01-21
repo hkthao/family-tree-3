@@ -2,6 +2,7 @@
   <v-dialog v-model="dialog" max-width="400">
     <v-card>
       <v-card-title class="text-h5">{{ memberName }}</v-card-title>
+      <v-card-text>
       <v-list density="compact">
         <v-list-item
           prepend-icon="mdi-information-outline"
@@ -17,6 +18,7 @@
           @click="viewRelationships"
         ></v-list-item>
       </v-list>
+      </v-card-text> 
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" variant="text" @click="dialog = false">

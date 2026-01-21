@@ -54,7 +54,7 @@ public class ExportEventsQueryHandlerTests : TestBase
         event1.AddEventMember(member1.Id);
 
         var event2 = Event.CreateLunarEvent(
-            "Lunar Event 1", "EVT2", EventType.Other, new LunarDate(15, 8, false), RepeatRule.None, family.Id, "Description 2", "#00FF00"
+            "Lunar Event 1", "EVT2", EventType.Other, new LunarDate(15, 8, false, false), RepeatRule.None, family.Id, "Description 2", "#00FF00"
         );
         event2.AddEventMember(member2.Id);
 

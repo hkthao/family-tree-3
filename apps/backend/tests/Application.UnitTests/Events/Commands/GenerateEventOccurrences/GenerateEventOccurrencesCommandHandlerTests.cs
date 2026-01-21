@@ -1,16 +1,10 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Events.Commands.GenerateEventOccurrences;
 using backend.Application.Events.EventOccurrences.Jobs; // Needed for mocking
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
-using backend.Application.Common.Services; // NEW
 
 namespace backend.Application.UnitTests.Events.Commands.GenerateEventOccurrences;
 

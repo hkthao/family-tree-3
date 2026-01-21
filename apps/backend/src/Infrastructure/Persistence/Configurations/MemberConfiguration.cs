@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects; // Add this using statement
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -63,5 +64,17 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .HasForeignKey(m => m.FamilyId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(m => m.Order)
+            .IsRequired(false); // Make Order optional
+
+        builder.OwnsOne(m => m.LunarDateOfDeath, lunarDate =>
+        {
+            lunarDate.Property(ld => ld.Day).HasColumnName("LunarDateOfDeath_Day");
+            lunarDate.Property(ld => ld.Month).HasColumnName("LunarDateOfDeath_Month");
+            lunarDate.Property(ld => ld.IsLeapMonth).HasColumnName("LunarDateOfDeath_IsLeapMonth");
+            lunarDate.Property(ld => ld.IsEstimated).HasColumnName("LunarDateOfDeath_IsEstimated");
+            lunarDate.WithOwner().HasForeignKey("Id"); // Explicitly use the 'Id' of the owning Member as the foreign key
+        });
     }
 }

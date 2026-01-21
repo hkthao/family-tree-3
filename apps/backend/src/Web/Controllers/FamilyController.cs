@@ -3,7 +3,10 @@ using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.FixFamilyRelationships; // NEW
 using backend.Application.Families.Commands.GenerateFamilyData; // ADDED: New using directive
+using backend.Application.Families.Commands.Import;
+using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
 using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
@@ -11,13 +14,11 @@ using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.GetFamilyTreeData; // NEWLY ADDED
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
 using backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.Families.Queries.SearchPublicFamilies; // NEW
-using backend.Application.Families.Commands.Import;
-using backend.Application.Families.Commands.RecalculateFamilyStats; // NEW
-using backend.Application.Families.Queries.GetFamilyTreeData; // NEWLY ADDED
 using backend.Application.Members.Commands.UpdateDenormalizedFields;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -328,5 +329,18 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         var query = new GetFamilyTreeDataQuery(familyId, initialMemberId);
         var result = await _mediator.Send(query);
         return result.ToActionResult(this, _logger);
+    }
+
+    /// <summary>
+    /// Sửa lỗi quan hệ trong gia đình (ví dụ: hoán đổi Father/Mother nếu giới tính sai, suy luận cha/mẹ từ vợ/chồng).
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần sửa lỗi quan hệ.</param>
+    /// <returns>Kết quả của hoạt động sửa lỗi.</returns>
+    [HttpPost("{familyId}/fix-relationships")]
+    public async Task<IActionResult> FixRelationships([FromRoute] Guid familyId)
+    {
+        var command = new FixFamilyRelationshipsCommand { FamilyId = familyId };
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger, 204); // 204 No Content for successful operation with no return value
     }
 }

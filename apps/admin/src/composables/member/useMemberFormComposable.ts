@@ -1,9 +1,10 @@
 import { reactive, ref, computed } from 'vue';
-import type { MemberDto, MemberAddDto, MemberUpdateDto } from '@/types';
+import type { MemberDto, MemberAddDto, MemberUpdateDto, LunarDate } from '@/types';
 import { Gender } from '@/types';
 import { useMemberRules } from '@/validations/member.validation';
 import { useAuth } from '@/composables/auth/useAuth';
 import { getAvatarUrl } from '@/utils/avatar.utils';
+import { useI18n } from 'vue-i18n';
 
 
 interface UseMemberFormOptions {
@@ -14,6 +15,7 @@ interface UseMemberFormOptions {
 
 export function useMemberFormComposable(options: UseMemberFormOptions) {
   const { state } = useAuth();
+  const { t } = useI18n();
 
   const formRef = ref<HTMLFormElement | null>(null);
 
@@ -31,7 +33,9 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
           familyId: options.initialMemberData.familyId,
           gender: options.initialMemberData.gender,
           dateOfBirth: options.initialMemberData.dateOfBirth ? new Date(options.initialMemberData.dateOfBirth) : undefined,
+          lunarDateOfBirth: options.initialMemberData.lunarDateOfBirth || undefined,
           dateOfDeath: options.initialMemberData.dateOfDeath ? new Date(options.initialMemberData.dateOfDeath) : undefined,
+          lunarDateOfDeath: options.initialMemberData.lunarDateOfDeath || undefined,
           avatarUrl: options.initialMemberData.avatarUrl,
           avatarBase64: options.initialMemberData.avatarBase64,
           nickname: options.initialMemberData.nickname,
@@ -57,6 +61,9 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
           lastName: '',
           firstName: '',
           dateOfBirth: undefined,
+          lunarDateOfBirth: undefined,
+          dateOfDeath: undefined,
+          lunarDateOfDeath: undefined,
           gender: Gender.Male,
           familyId: options.familyId || '',
           fatherId: undefined,
@@ -81,7 +88,7 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
         } as MemberAddDto)
   );
 
-  const rules = useMemberRules(formData);
+  const validationRules = useMemberRules(formData);
 
   const validate = async () => {
     if (!formRef.value) {
@@ -109,6 +116,6 @@ export function useMemberFormComposable(options: UseMemberFormOptions) {
     validate,
     getFormData,
     getAvatarUrl,
-    validationRules: rules, // Expose the rules
+    validationRules, // Expose the rules
   };
 }

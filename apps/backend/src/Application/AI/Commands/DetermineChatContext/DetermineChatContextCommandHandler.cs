@@ -1,13 +1,13 @@
+using System.Text.Json; // NEW
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants; // Add this for PromptConstants
-using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
+using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Prompts.Queries.GetPromptById; // Add this for GetPromptByIdQuery
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Options;
-using System.Text.Json; // NEW
 
 namespace backend.Application.AI.Commands.DetermineChatContext;
 

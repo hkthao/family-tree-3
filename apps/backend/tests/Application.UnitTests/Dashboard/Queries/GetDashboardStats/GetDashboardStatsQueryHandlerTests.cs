@@ -55,18 +55,18 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Families.Add(family2);
         _context.Families.Add(family3);
 
-        var member1_f1 = new Member("Last1", "First1", "MEM001", family1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var member2_f1 = new Member("Last2", "First2", "MEM002", family1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var member3_f2 = new Member("Last3", "First3", "MEM003", family2.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var member4_f3 = new Member("Last4", "First4", "MEM004", family3.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var member1_f1 = CreateMember("Last1", "First1", "MEM001", family1.Id, false, Guid.NewGuid());
+        var member2_f1 = CreateMember("Last2", "First2", "MEM002", family1.Id, false, Guid.NewGuid());
+        var member3_f2 = CreateMember("Last3", "First3", "MEM003", family2.Id, false, Guid.NewGuid());
+        var member4_f3 = CreateMember("Last4", "First4", "MEM004", family3.Id, false, Guid.NewGuid());
 
         _context.Members.Add(member1_f1);
         _context.Members.Add(member2_f1);
         _context.Members.Add(member3_f2);
         _context.Members.Add(member4_f3);
 
-        var relMember1_f1 = new Member("RelLast1", "RelFirst1", "REL001", family1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var relMember2_f1 = new Member("RelLast2", "RelFirst2", "REL002", family1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var relMember1_f1 = CreateMember("RelLast1", "RelFirst1", "REL001", family1.Id, false, Guid.NewGuid());
+        var relMember2_f1 = CreateMember("RelLast2", "RelFirst2", "REL002", family1.Id, false, Guid.NewGuid());
         _context.Members.Add(relMember1_f1);
         _context.Members.Add(relMember2_f1);
 
@@ -119,18 +119,18 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.FamilyUsers.Add(new FamilyUser(accessibleFamily1.Id, userId, FamilyRole.Admin));
         _context.FamilyUsers.Add(new FamilyUser(accessibleFamily2.Id, userId, FamilyRole.Admin));
 
-        var accMember1_f1 = new Member("AccLast1", "AccFirst1", "ACC_MEM001", accessibleFamily1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var accMember2_f1 = new Member("AccLast2", "AccFirst2", "ACC_MEM002", accessibleFamily1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var accMember3_f2 = new Member("AccLast3", "AccFirst3", "ACC_MEM003", accessibleFamily2.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var inaccMember1_f3 = new Member("InaccLast1", "InaccFirst1", "INACC_MEM001", inaccessibleFamily.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var accMember1_f1 = CreateMember("AccLast1", "AccFirst1", "ACC_MEM001", accessibleFamily1.Id, false, Guid.NewGuid());
+        var accMember2_f1 = CreateMember("AccLast2", "AccFirst2", "ACC_MEM002", accessibleFamily1.Id, false, Guid.NewGuid());
+        var accMember3_f2 = CreateMember("AccLast3", "AccFirst3", "ACC_MEM003", accessibleFamily2.Id, false, Guid.NewGuid());
+        var inaccMember1_f3 = CreateMember("InaccLast1", "InaccFirst1", "INACC_MEM001", inaccessibleFamily.Id, false, Guid.NewGuid());
 
         _context.Members.Add(accMember1_f1);
         _context.Members.Add(accMember2_f1);
         _context.Members.Add(accMember3_f2);
         _context.Members.Add(inaccMember1_f3);
 
-        var accRelMember1 = new Member("AccRelLast1", "AccRelFirst1", "ACC_REL001", accessibleFamily1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var accRelMember2 = new Member("AccRelLast2", "AccRelFirst2", "ACC_REL002", accessibleFamily1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var accRelMember1 = CreateMember("AccRelLast1", "AccRelFirst1", "ACC_REL001", accessibleFamily1.Id, false, Guid.NewGuid());
+        var accRelMember2 = CreateMember("AccRelLast2", "AccRelFirst2", "ACC_REL002", accessibleFamily1.Id, false, Guid.NewGuid());
         _context.Members.Add(accRelMember1);
         _context.Members.Add(accRelMember2);
 
@@ -176,8 +176,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Families.Add(family1);
         _context.Families.Add(family2);
 
-        _context.Members.Add(new Member("Last1", "First1", "MEM001", family1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() });
-        _context.Members.Add(new Member("Last2", "First2", "MEM002", family2.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() });
+        _context.Members.Add(CreateMember("Last1", "First1", "MEM001", family1.Id, false, Guid.NewGuid()));
+        _context.Members.Add(CreateMember("Last2", "First2", "MEM002", family2.Id, false, Guid.NewGuid()));
 
         await _context.SaveChangesAsync();
 
@@ -218,16 +218,16 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Families.Add(otherFamily1);
         _context.Families.Add(otherFamily2);
 
-        var targetMember1 = new Member("TargetLast1", "TargetFirst1", "TMEM001", targetFamily.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var targetMember2 = new Member("TargetLast2", "TargetFirst2", "TMEM002", targetFamily.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var otherMember1 = new Member("OtherLast1", "OtherFirst1", "OMEM001", otherFamily1.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var targetMember1 = CreateMember("TargetLast1", "TargetFirst1", "TMEM001", targetFamily.Id, false, Guid.NewGuid());
+        var targetMember2 = CreateMember("TargetLast2", "TargetFirst2", "TMEM002", targetFamily.Id, false, Guid.NewGuid());
+        var otherMember1 = CreateMember("OtherLast1", "OtherFirst1", "OMEM001", otherFamily1.Id, false, Guid.NewGuid());
 
         _context.Members.Add(targetMember1);
         _context.Members.Add(targetMember2);
         _context.Members.Add(otherMember1);
 
-        var targetRelMember1 = new Member("TargetRelLast1", "TargetRelFirst1", "TREL001", targetFamily.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var targetRelMember2 = new Member("TargetRelLast2", "TargetRelFirst2", "TREL002", targetFamily.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var targetRelMember1 = CreateMember("TargetRelLast1", "TargetRelFirst1", "TREL001", targetFamily.Id, false, Guid.NewGuid());
+        var targetRelMember2 = CreateMember("TargetRelLast2", "TargetRelFirst2", "TREL002", targetFamily.Id, false, Guid.NewGuid());
         _context.Members.Add(targetRelMember1);
         _context.Members.Add(targetRelMember2);
 
@@ -266,10 +266,10 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Family Age", Code = "FAGE", IsDeleted = false };
         _context.Families.Add(family);
 
-        var member1 = new Member("Doe", "John", "JMD1", family.Id, null, Gender.Male.ToString(), new DateTime(1974, 6, 15), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Age: 49 (2024 - 1974, month/day not passed yet)
-        var member2 = new Member("Doe", "Jane", "JFD1", family.Id, null, Gender.Female.ToString(), new DateTime(1994, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Age: 30 (2024 - 1994)
-        var member3 = new Member("Doe", "Jim", "JID1", family.Id, null, Gender.Male.ToString(), new DateTime(2004, 12, 1), new DateTime(2020, 1, 1), null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid() }; // Deceased, not counted for living age
-        var member4 = new Member("Doe", "Jill", "JLD1", family.Id, null, Gender.Female.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true }; // Deleted, not counted
+        var member1 = CreateMember("Doe", "John", "JMD1", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(1974, 6, 15), null, false); // Age: 49 (2024 - 1974, month/day not passed yet)
+        var member2 = CreateMember("Doe", "Jane", "JFD1", family.Id, false, Guid.NewGuid(), Gender.Female.ToString(), new DateTime(1994, 1, 1), null, false); // Age: 30 (2024 - 1994)
+        var member3 = CreateMember("Doe", "Jim", "JID1", family.Id, true, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(2004, 12, 1), new DateTime(2020, 1, 1), false); // Deceased, not counted for living age
+        var member4 = CreateMember("Doe", "Jill", "JLD1", family.Id, true, Guid.NewGuid(), Gender.Female.ToString(), new DateTime(1980, 1, 1), null, true);
 
         _context.Members.AddRange(member1, member2, member3, member4);
         await _context.SaveChangesAsync();
@@ -298,10 +298,10 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Families.Add(family);
 
         // Members with no birth date or are deceased/deleted
-        var member1 = new Member("Doe", "John", "JMD1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // No birth date
-        var member2 = new Member("Doe", "Jane", "JFD1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Null birth date
-        var member3 = new Member("Doe", "Jim", "JID1", family.Id, null, Gender.Male.ToString(), new DateTime(1950, 1, 1), new DateTime(2000, 1, 1), null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid() }; // Deceased
-        var member4 = new Member("Doe", "Jill", "JLD1", family.Id, null, Gender.Female.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true }; // Deleted
+        var member1 = CreateMember("Doe", "John", "JMD1", family.Id, false, Guid.NewGuid()); // No birth date
+        var member2 = CreateMember("Doe", "Jane", "JFD1", family.Id, false, Guid.NewGuid()); // Null birth date
+        var member3 = CreateMember("Doe", "Jim", "JID1", family.Id, true, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(1950, 1, 1), new DateTime(2000, 1, 1), false); // Deceased
+        var member4 = CreateMember("Doe", "Jill", "JLD1", family.Id, true, Guid.NewGuid(), Gender.Female.ToString(), new DateTime(1980, 1, 1), null, true); // Deleted
 
         _context.Members.AddRange(member1, member2, member3, member4);
         await _context.SaveChangesAsync();
@@ -327,11 +327,11 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Family Generations", Code = "FGEN", IsDeleted = false };
         _context.Families.Add(family);
 
-        var gen1_parent1 = new Member("Parent1", "A", "P1", family.Id, null, Gender.Male.ToString(), new DateTime(1950, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var gen1_parent2 = new Member("Parent2", "B", "P2", family.Id, null, Gender.Female.ToString(), new DateTime(1955, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var gen2_child1 = new Member("Child1", "C", "C1", family.Id, null, Gender.Male.ToString(), new DateTime(1980, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var gen2_child2 = new Member("Child2", "D", "C2", family.Id, null, Gender.Female.ToString(), new DateTime(1985, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var gen3_grandchild1 = new Member("Grandchild1", "E", "G1", family.Id, null, Gender.Male.ToString(), new DateTime(2010, 1, 1), null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
+        var gen1_parent1 = CreateMember("Parent1", "A", "P1", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(1950, 1, 1), null, false);
+        var gen1_parent2 = CreateMember("Parent2", "B", "P2", family.Id, false, Guid.NewGuid(), Gender.Female.ToString(), new DateTime(1955, 1, 1), null, false);
+        var gen2_child1 = CreateMember("Child1", "C", "C1", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(1980, 1, 1), null, false);
+        var gen2_child2 = CreateMember("Child2", "D", "C2", family.Id, false, Guid.NewGuid(), Gender.Female.ToString(), new DateTime(1985, 1, 1), null, false);
+        var gen3_grandchild1 = CreateMember("Grandchild1", "E", "G1", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), new DateTime(2010, 1, 1), null, false);
 
         _context.Members.AddRange(gen1_parent1, gen1_parent2, gen2_child1, gen2_child2, gen3_grandchild1);
 
@@ -365,8 +365,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Family Deleted", Code = "FDELETED", IsDeleted = false };
         _context.Families.Add(family);
 
-        var activeMember = new Member("Active", "Mem", "AM1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var deletedMember = new Member("Deleted", "Mem", "DM1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true };
+        var activeMember = CreateMember("Active", "Mem", "AM1", family.Id, false, Guid.NewGuid());
+        var deletedMember = CreateMember("Deleted", "Mem", "DM1", family.Id, true, Guid.NewGuid(), null, null, null, true);
         _context.Members.AddRange(activeMember, deletedMember);
 
         var activeRelationship = new Relationship(family.Id, activeMember.Id, activeMember.Id, RelationshipType.Father, null);
@@ -397,10 +397,10 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Family Gender", Code = "FGENDER", IsDeleted = false };
         _context.Families.Add(family);
 
-        var maleMember1 = new Member("Male", "One", "M1", family.Id, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var maleMember2 = new Member("Male", "Two", "M2", family.Id, null, Gender.Male.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var femaleMember1 = new Member("Female", "One", "F1", family.Id, null, Gender.Female.ToString(), null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var unknownGenderMember = new Member("Unknown", "Gender", "UG", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() }; // Should not be counted in ratio calculation
+        var maleMember1 = CreateMember("Male", "One", "M1", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), null, null, false);
+        var maleMember2 = CreateMember("Male", "Two", "M2", family.Id, false, Guid.NewGuid(), Gender.Male.ToString(), null, null, false);
+        var femaleMember1 = CreateMember("Female", "One", "F1", family.Id, false, Guid.NewGuid(), Gender.Female.ToString(), null, null, false);
+        var unknownGenderMember = CreateMember("Unknown", "Gender", "UG", family.Id, false, Guid.NewGuid()); // Should not be counted in ratio calculation
 
         _context.Members.AddRange(maleMember1, maleMember2, femaleMember1, unknownGenderMember);
         await _context.SaveChangesAsync();
@@ -427,10 +427,10 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         var family = new Family { Id = Guid.NewGuid(), Name = "Family Status", Code = "FSTATUS", IsDeleted = false };
         _context.Families.Add(family);
 
-        var livingMember1 = new Member("Living", "One", "L1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var livingMember2 = new Member("Living", "Two", "L2", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, false) { Id = Guid.NewGuid() };
-        var deceasedMember1 = new Member("Deceased", "One", "D1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid() };
-        var deletedMember = new Member("Deleted", "One", "DEL1", family.Id, null, null, null, null, null, null, null, null, null, null, null, null, null, true) { Id = Guid.NewGuid(), IsDeleted = true }; // Should not be counted
+        var livingMember1 = CreateMember("Living", "One", "L1", family.Id, false, Guid.NewGuid());
+        var livingMember2 = CreateMember("Living", "Two", "L2", family.Id, false, Guid.NewGuid());
+        var deceasedMember1 = CreateMember("Deceased", "One", "D1", family.Id, true, Guid.NewGuid());
+        var deletedMember = CreateMember("Deleted", "One", "DEL1", family.Id, true, Guid.NewGuid(), null, null, null, true); // Should not be counted
 
         _context.Members.AddRange(livingMember1, livingMember2, deceasedMember1, deletedMember);
         await _context.SaveChangesAsync();

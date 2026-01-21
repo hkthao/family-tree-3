@@ -41,7 +41,7 @@ public class ProcessOcrFileCommandHandler : IRequestHandler<ProcessOcrFileComman
             var downloadResult = await DownloadFileBytesAsync(request.FileUrl, cancellationToken);
             if (!downloadResult.IsSuccess)
             {
-                    _logger.LogError("Không thể tải tệp từ URL {FileUrl}: {Error}", request.FileUrl, downloadResult.Error);
+                _logger.LogError("Không thể tải tệp từ URL {FileUrl}: {Error}", request.FileUrl, downloadResult.Error);
                 return Result<OcrResultDto>.Failure(downloadResult.Error ?? "Không thể tải tệp.", downloadResult.ErrorSource ?? "NetworkError");
             }
             fileBytesToProcess = downloadResult.Value;

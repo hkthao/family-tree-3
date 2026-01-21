@@ -2190,15 +2190,19 @@ namespace backend.Infrastructure.Migrations
                                 .HasColumnType("char(36)")
                                 .HasColumnName("id");
 
-                            b1.Property<int>("Day")
+                            b1.Property<int?>("Day")
                                 .HasColumnType("int")
                                 .HasColumnName("day");
 
-                            b1.Property<bool>("IsLeapMonth")
+                            b1.Property<bool>("IsEstimated")
+                                .HasColumnType("tinyint(1)")
+                                .HasColumnName("is_estimated");
+
+                            b1.Property<bool?>("IsLeapMonth")
                                 .HasColumnType("tinyint(1)")
                                 .HasColumnName("is_leap_month");
 
-                            b1.Property<int>("Month")
+                            b1.Property<int?>("Month")
                                 .HasColumnType("int")
                                 .HasColumnName("month");
 
@@ -2389,7 +2393,41 @@ namespace backend.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_members_families_family_id");
 
+                    b.OwnsOne("backend.Domain.ValueObjects.LunarDate", "LunarDateOfDeath", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("char(36)")
+                                .HasColumnName("id");
+
+                            b1.Property<int?>("Day")
+                                .HasColumnType("int")
+                                .HasColumnName("day");
+
+                            b1.Property<bool>("IsEstimated")
+                                .HasColumnType("tinyint(1)")
+                                .HasColumnName("is_estimated");
+
+                            b1.Property<bool?>("IsLeapMonth")
+                                .HasColumnType("tinyint(1)")
+                                .HasColumnName("is_leap_month");
+
+                            b1.Property<int?>("Month")
+                                .HasColumnType("int")
+                                .HasColumnName("month");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_members");
+
+                            b1.ToTable("members");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id")
+                                .HasConstraintName("fk_members_members_id");
+                        });
+
                     b.Navigation("Family");
+
+                    b.Navigation("LunarDateOfDeath");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.MemberFace", b =>

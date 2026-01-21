@@ -1,10 +1,8 @@
-
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW
-using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore; // NEW
 using Moq;
@@ -29,8 +27,8 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        member.Update("John", "Doe", member.Code, null, null, null, null, null, null, null, null, null, null, "Old biography.", null, 0, false); // Pass all required parameters
+        var member = CreateMember("John", "Doe", "JD", familyId, false, memberId);
+        member.Update("John", "Doe", member.Code, null, null, null, null, null, null, null, null, null, null, null, null, "Old biography.", 0, false);
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -76,7 +74,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
+        var member = CreateMember("John", "Doe", "JD", familyId, false, memberId);
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 

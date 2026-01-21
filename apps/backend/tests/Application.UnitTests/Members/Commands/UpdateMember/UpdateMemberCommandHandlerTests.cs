@@ -9,9 +9,9 @@ using backend.Domain.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Logging; // Keep this one
 using Moq;
 using Xunit;
-using Microsoft.Extensions.Logging; // Keep this one
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
@@ -39,7 +39,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
-        var member = new Member("John", "Doe", "JD", familyId, false) { Id = memberId };
+        var member = new Member { Id = memberId, FirstName = "John", LastName = "Doe", Code = "JD", FamilyId = familyId, IsDeceased = false };
         family.AddMember(member);
         _context.Families.Add(family);
         _context.Members.Add(member);
@@ -104,8 +104,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newFatherId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        var initialFather = new Member("Initial", "Father", "IF", familyId, false) { Id = initialFatherId };
-        var newFather = new Member("New", "Father", "NF", familyId, false) { Id = newFatherId };
+        var initialFather = new Member { Id = initialFatherId, FirstName = "Initial", LastName = "Father", Code = "IF", FamilyId = familyId, IsDeceased = false };
+        var newFather = new Member { Id = newFatherId, FirstName = "New", LastName = "Father", Code = "NF", FamilyId = familyId, IsDeceased = false };
 
         _context.Families.Add(family);
         _context.Members.AddRange(member, initialFather, newFather);
@@ -150,8 +150,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newMotherId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        var initialMother = new Member("Initial", "Mother", "IM", familyId, false) { Id = initialMotherId };
-        var newMother = new Member("New", "Mother", "NM", familyId, false) { Id = newMotherId };
+        var initialMother = new Member { Id = initialMotherId, FirstName = "Initial", LastName = "Mother", Code = "IM", FamilyId = familyId, IsDeceased = false };
+        var newMother = new Member { Id = newMotherId, FirstName = "New", LastName = "Mother", Code = "NM", FamilyId = familyId, IsDeceased = false };
 
         _context.Families.Add(family);
         _context.Members.AddRange(member, initialMother, newMother);

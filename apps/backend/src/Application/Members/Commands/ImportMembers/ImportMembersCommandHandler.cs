@@ -1,7 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Members.DTOs; // Add this using statement
 using backend.Domain.Entities;
+using backend.Domain.ValueObjects; // Add this using statement
 
 namespace backend.Application.Members.Commands.ImportMembers;
 
@@ -55,6 +57,12 @@ public class ImportMembersCommandHandler : IRequestHandler<ImportMembersCommand,
                 memberDto.Gender, // Gender is string?
                 memberDto.DateOfBirth,
                 memberDto.DateOfDeath,
+                memberDto.LunarDateOfDeath == null ? null : new LunarDate(
+                    memberDto.LunarDateOfDeath.Day,
+                    memberDto.LunarDateOfDeath.Month,
+                    memberDto.LunarDateOfDeath.IsLeapMonth,
+                    memberDto.LunarDateOfDeath.IsEstimated
+                ),
                 memberDto.PlaceOfBirth,
                 memberDto.PlaceOfDeath,
                 memberDto.Phone,

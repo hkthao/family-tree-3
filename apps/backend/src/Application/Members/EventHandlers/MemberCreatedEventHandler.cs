@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Families.Commands.GenerateFamilyKb;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -8,13 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IFamilyTreeService familyTreeService, ICurrentUser _user, IN8nService n8nService, IStringLocalizer<MemberCreatedEventHandler> localizer, IApplicationDbContext context) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IFamilyTreeService familyTreeService, ICurrentUser _user, IStringLocalizer<MemberCreatedEventHandler> localizer, IApplicationDbContext context) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
     private readonly ICurrentUser _user = _user;
-    private readonly IN8nService _n8nService = n8nService;
     private readonly IStringLocalizer<MemberCreatedEventHandler> _localizer = localizer;
     private readonly IApplicationDbContext _context = context;
 
@@ -26,7 +24,7 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             notification.Member.FullName, notification.Member.Id);
 
         // Record activity for member creation
-        var family = await _context.Families.FindAsync(new object[] { notification.Member.FamilyId }, cancellationToken);
+        var family = await _context.Families.FindAsync([notification.Member.FamilyId], cancellationToken);
         var familyName = family?.Name ?? notification.Member.FamilyId.ToString(); // Fallback to ID if name not found
 
         await _mediator.Send(new RecordActivityCommand
@@ -39,14 +37,13 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member creation
-        await _mediator.Send(new GenerateFamilyKbCommand(notification.Member.FamilyId.ToString(), notification.Member.Id.ToString(), KbRecordType.Member), cancellationToken);
 
         // Sync member life events
         await _familyTreeService.SyncMemberLifeEvents(
             notification.Member.Id,
             notification.Member.FamilyId,
-            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : (DateOnly?)null,
-            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : (DateOnly?)null,
+            notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : null,
+            notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : null,
             notification.Member.FullName,
             cancellationToken
         );

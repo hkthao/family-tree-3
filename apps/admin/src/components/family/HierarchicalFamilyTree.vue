@@ -11,27 +11,19 @@
         <span>{{ t('member.gender.female') }}</span>
       </div>
     </div>
-    <MemberActionDialog
-      v-model="isActionDialogOpen"
-      :member-id="selectedMemberId"
-      :member-name="selectedMemberName"
-      @view-details="handleViewDetails"
-      @view-relationships="handleViewRelationships"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables';
 import type { MemberDto, Relationship } from '@/types';
-import MemberActionDialog from '@/components/member/MemberActionDialog.vue';
 
 const { t } = useI18n();
 const emit = defineEmits([
   'show-member-detail-drawer', // New emit event
   'update:rootId', // New emit event to update rootId
+  'nodeClick', // New emit event for node clicks
 ]);
 
 const props = defineProps({
@@ -41,30 +33,14 @@ const props = defineProps({
   rootId: { type: String, default: null }, // New prop for specifying the root member ID
 });
 
-const isActionDialogOpen = ref(false);
-const selectedMemberId = ref('');
-const selectedMemberName = ref('');
-
-const onNodeClick = (memberId: string, memberName: string) => {
-  selectedMemberId.value = memberId;
-  selectedMemberName.value = memberName;
-  isActionDialogOpen.value = true;
-};
-
 const { chartContainer } = useHierarchicalTreeChart(
   props,
   emit,
   { t },
-  onNodeClick
+  (memberId: string, memberName: string) => {
+    emit('nodeClick', memberId, memberName);
+  }
 );
-
-const handleViewDetails = (memberId: string) => {
-  emit('show-member-detail-drawer', memberId);
-};
-
-const handleViewRelationships = (memberId: string) => {
-  emit('update:rootId', memberId);
-};
 </script>
 
 <style>

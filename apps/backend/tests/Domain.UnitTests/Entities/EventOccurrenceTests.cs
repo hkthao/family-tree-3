@@ -1,7 +1,7 @@
+using System;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
-using System;
 
 namespace backend.Domain.UnitTests.Entities;
 

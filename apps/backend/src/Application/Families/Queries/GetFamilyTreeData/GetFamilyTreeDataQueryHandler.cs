@@ -22,7 +22,7 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
     {
         var familyId = request.FamilyId;
         var initialMemberId = request.InitialMemberId;
-        
+
         // 1. Determine the root member if initialMemberId is null
         Guid currentRootMemberId;
         if (initialMemberId.HasValue && initialMemberId.Value != Guid.Empty)
@@ -31,11 +31,22 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
         }
         else
         {
-            currentRootMemberId = await _context.Members
+            var hasRoot = await _context.Members
                 .AsNoTracking() // Add AsNoTracking for read-only query
-                .Where(m => m.FamilyId == familyId && m.IsRoot)
-                .Select(m => m.Id)
-                .FirstOrDefaultAsync(cancellationToken);
+                .AnyAsync(m => m.FamilyId == familyId && m.IsRoot, cancellationToken);
+            if (hasRoot)
+                currentRootMemberId = await _context.Members
+                    .AsNoTracking() // Add AsNoTracking for read-only query
+                    .Where(m => m.FamilyId == familyId && m.IsRoot)
+                    .Select(m => m.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+            else
+                currentRootMemberId = await _context.Members
+                   .AsNoTracking() // Add AsNoTracking for read-only query
+                   .Where(m => m.FamilyId == familyId)
+                   .OrderBy(e => e.DateOfBirth)
+                   .Select(m => m.Id)
+                   .FirstOrDefaultAsync(cancellationToken);
         }
 
         if (currentRootMemberId == Guid.Empty)
@@ -55,9 +66,9 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
         var allFetchedRelationships = new List<Relationship>();
         var visitedMembers = new HashSet<Guid>();
         var visitedRelationships = new HashSet<Guid>();
-        
+
         // BFS traversal to fetch connected members and relationships, with a maximum limit
-        while (membersQueue.Any() && allFetchedMembers.Count < MAX_LIMIT) // Apply MAX_LIMIT here
+        while (membersQueue.Count != 0 && allFetchedMembers.Count < MAX_LIMIT) // Apply MAX_LIMIT here
         {
             var currentMemberId = membersQueue.Dequeue();
 
@@ -97,7 +108,7 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
                             }
                             if (rel.TargetMemberId != currentMemberId && !visitedMembers.Contains(rel.TargetMemberId))
                             {
-                            // Important: Ensure we don't exceed MAX_LIMIT when enqueuing
+                                // Important: Ensure we don't exceed MAX_LIMIT when enqueuing
                                 if (allFetchedMembers.Count < MAX_LIMIT)
                                 {
                                     membersQueue.Enqueue(rel.TargetMemberId);
@@ -133,13 +144,13 @@ public class GetFamilyTreeDataQueryHandler : IRequestHandler<GetFamilyTreeDataQu
                 DateOfBirth = m.DateOfBirth
             })
             .ToDictionaryAsync(m => m.Id, cancellationToken);
-        
+
         // Map relationships and populate SourceMember/TargetMember
         var relationshipDtos = new List<RelationshipDto>();
         foreach (var rel in allFetchedRelationships)
         {
             var relDto = _mapper.Map<RelationshipDto>(rel);
-            
+
             if (relatedMemberDetails.TryGetValue(rel.SourceMemberId, out var sourceMemberDto))
             {
                 relDto.SourceMember = sourceMemberDto;

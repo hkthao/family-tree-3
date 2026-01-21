@@ -1,92 +1,81 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.AI.Models;
+// using backend.Application.AI.Models; // Removed
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Knowledge; // Added for IKnowledgeService
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 
-public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IN8nService n8nService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
+public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IKnowledgeService knowledgeService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IN8nService _n8nService = n8nService;
+    private readonly IKnowledgeService _knowledgeService = knowledgeService; // Changed from IN8nService
     private readonly ILogger<SearchMemberFaceQueryHandler> _logger = logger;
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
     {
-        if (request.Vector == null || !request.Vector.Any())
+        if (request.Vector == null || request.Vector.Count == 0)
         {
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
         }
-
-        var searchFaceVectorDto = new SearchFaceVectorOperationDto
+        // Call knowledge service to search faces
+        var searchResults = await _knowledgeService.SearchFaces(
+            request.FamilyId,
+            request.Vector,
+            request.MemberId,
+            request.Limit
+        );
+        if (searchResults == null || searchResults.Count == 0)
         {
-            Vector = request.Vector.Select(d => (float)d).ToList(),
-            Limit = request.Limit,
-            Threshold = request.Threshold,
-            Filter = new Dictionary<string, object>(),
-            ReturnFields = new List<string> { "localDbId", "memberId", "familyId", "faceId", "thumbnailUrl", "originalImageUrl", "emotion", "emotionConfidence" }
-        };
-
-        // Apply FamilyId filter from request
-        // FamilyId is now mandatory, no need for HasValue check
-        searchFaceVectorDto.Filter.Add("familyId", request.FamilyId.ToString());
-        if (request.MemberId.HasValue)
-        {
-            searchFaceVectorDto.Filter.Add("memberId", request.MemberId.Value.ToString());
-        }
-
-        var n8nResult = await _n8nService.CallSearchFaceVectorWebhookAsync(searchFaceVectorDto, cancellationToken);
-
-        if (!n8nResult.IsSuccess || n8nResult.Value == null || !n8nResult.Value.Success)
-        {
-            _logger.LogError("Failed to search face vectors in n8n: {Error}", n8nResult.Error ?? n8nResult.Value?.Message);
-            return Result<List<FoundFaceDto>>.Failure($"Failed to search face vectors: {n8nResult.Error ?? n8nResult.Value?.Message}", ErrorSources.ExternalServiceError);
+            _logger.LogInformation("No face vectors found for FamilyId: {FamilyId}", request.FamilyId);
+            return Result<List<FoundFaceDto>>.Success([]);
         }
 
         var foundFaces = new List<FoundFaceDto>();
         var memberIds = new HashSet<Guid>();
 
-        if (n8nResult.Value.SearchResults != null)
+        foreach (var searchResult in searchResults)
         {
-            foreach (var searchResult in n8nResult.Value.SearchResults)
+            // The FaceSearchResultDto contains FaceId (which is the VectorDbId from Python service)
+            // and MemberId, Score.
+            // We need to fetch the full MemberFace entity to get localDbId, thumbnailUrl, etc.
+
+            // First, check if a MemberFace entity exists with this VectorDbId
+            var memberFace = await _context.MemberFaces.AsNoTracking()
+                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.VectorDbId, cancellationToken); // FaceId from searchResult is actually VectorDbId
+
+            if (memberFace == null)
             {
-                if (searchResult.Payload == null) continue;
-
-                var localDbId = Guid.Parse(searchResult.Id);
-
-                if (!searchResult.Payload.TryGetValue("memberId", out var memberIdObj) || !Guid.TryParse(memberIdObj?.ToString(), out var memberId))
-                {
-                    _logger.LogWarning("memberId missing or invalid in search result payload for vector {VectorId}.", searchResult.Id);
-                    continue;
-                }
-
-                var foundFaceDto = new FoundFaceDto
-                {
-                    MemberFaceId = localDbId,
-                    MemberId = memberId,
-                    FaceId = searchResult.Id.ToString(),
-                    Score = searchResult.Score,
-                    ThumbnailUrl = searchResult.Payload.TryGetValue("thumbnailUrl", out var thumbnailUrlObj) ? thumbnailUrlObj?.ToString() : null,
-                    OriginalImageUrl = searchResult.Payload.TryGetValue("originalImageUrl", out var originalImageUrlObj) ? originalImageUrlObj?.ToString() : null,
-                    Emotion = searchResult.Payload.TryGetValue("emotion", out var emotionObj) ? emotionObj?.ToString() : null,
-                    EmotionConfidence = searchResult.Payload.TryGetValue("emotionConfidence", out var emotionConfidenceObj) && double.TryParse(emotionConfidenceObj?.ToString(), out var emotionConfidence) ? emotionConfidence : 0
-                };
-                foundFaces.Add(foundFaceDto);
-                memberIds.Add(memberId);
+                _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from knowledge service search.", searchResult.FaceId);
+                continue;
             }
+
+            var foundFaceDto = new FoundFaceDto
+            {
+                MemberFaceId = memberFace.Id, // Local DB ID
+                MemberId = memberFace.MemberId,
+                FaceId = memberFace.FaceId, // FaceId from the local MemberFace entity
+                Score = (float)searchResult.Score, // Explicit cast from double to float
+                ThumbnailUrl = memberFace.ThumbnailUrl,
+                OriginalImageUrl = memberFace.OriginalImageUrl,
+                Emotion = memberFace.Emotion,
+                EmotionConfidence = memberFace.EmotionConfidence
+            };
+            foundFaces.Add(foundFaceDto);
+            memberIds.Add(memberFace.MemberId); // Collect member IDs for further enrichment
         }
 
-        if (memberIds.Any())
+        if (memberIds.Count != 0)
         {
+            // Now, enrich with MemberName and FamilyAvatarUrl from local database
             var membersQuery = _context.Members
-                .Where(m => memberIds.Contains(m.Id)); // Start with basic filter
+                .Where(m => memberIds.Contains(m.Id));
 
-            // Now, apply the Include and then select/tolist
             var members = await membersQuery
-                .Include(m => m.Family) // Apply Include here, after all Where clauses
+                .Include(m => m.Family)
                 .Select(m => new { m.Id, m.FirstName, m.LastName, m.Family, m.FamilyId })
                 .ToListAsync(cancellationToken);
 

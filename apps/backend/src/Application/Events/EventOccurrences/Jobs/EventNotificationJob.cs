@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using Microsoft.Extensions.Logging;
 using backend.Domain.Enums; // NEW: For Gender enum
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.EventOccurrences.Jobs;
 
@@ -88,8 +88,10 @@ public class EventNotificationJob : IEventNotificationJob
                 {
                     memberHonorific = $"Bà {memberName}";
                 }
-            } else {
-                 memberHonorific = $"Sự kiện sắp tới: {@event.Name}"; // Fallback if no specific member for honorific
+            }
+            else
+            {
+                memberHonorific = $"Sự kiện sắp tới: {@event.Name}"; // Fallback if no specific member for honorific
             }
 
             // NEW: Retrieve recipient user IDs

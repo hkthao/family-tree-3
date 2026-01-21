@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
@@ -9,16 +10,24 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
     private readonly IApplicationDbContext _context;
     private readonly IKnowledgeService _knowledgeService;
     private readonly ILogger<GenerateFamilyKbCommandHandler> _logger;
+    private readonly IAuthorizationService _authorizationService;
 
-    public GenerateFamilyKbCommandHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<GenerateFamilyKbCommandHandler> logger)
+    public GenerateFamilyKbCommandHandler(IApplicationDbContext context, IKnowledgeService knowledgeService, ILogger<GenerateFamilyKbCommandHandler> logger, IAuthorizationService authorizationService)
     {
         _context = context;
         _knowledgeService = knowledgeService;
         _logger = logger;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result> Handle(GenerateFamilyKbCommand request, CancellationToken cancellationToken)
     {
+        if (!_authorizationService.IsAdmin())
+        {
+            _logger.LogWarning("Authorization failed for non-admin user to generate knowledge base for FamilyId: {FamilyId}.", request.FamilyId);
+            return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
+        }
+
         _logger.LogInformation("Generating knowledge base for FamilyId: {FamilyId}", request.FamilyId);
 
         var family = await _context.Families
@@ -29,6 +38,11 @@ public class GenerateFamilyKbCommandHandler : IRequestHandler<GenerateFamilyKbCo
             _logger.LogWarning("Family with ID {FamilyId} not found. Cannot generate knowledge base.", request.FamilyId);
             return Result.Failure($"Family with ID {request.FamilyId} not found.");
         }
+
+        // Delete existing knowledge for the family before re-indexing
+        _logger.LogInformation("Deleting existing knowledge base for FamilyId: {FamilyId}", family.Id);
+        await _knowledgeService.DeleteKnowledgeByFamilyId(family.Id);
+        _logger.LogInformation("Existing knowledge base deleted for FamilyId: {FamilyId}", family.Id);
 
         // 1. Index Family data
         await _knowledgeService.IndexFamilyData(family.Id);

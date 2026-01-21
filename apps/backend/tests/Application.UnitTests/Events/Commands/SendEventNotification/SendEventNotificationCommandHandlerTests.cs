@@ -5,18 +5,11 @@ using backend.Application.Events.Commands.SendEventNotification;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects; // NEW
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
-using backend.Application.Common.Services; // NEW
-using backend.Domain.ValueObjects; // NEW
 
 namespace backend.Application.UnitTests.Events.Commands.SendEventNotification;
 
@@ -94,7 +87,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         _context.Families.Add(family);
 
         // Event has no SolarDate and no EventOccurrences for today
-        var @event = Event.CreateLunarEvent("Lunar Event", "LE1", Domain.Enums.EventType.Other, new LunarDate(1, 1, false), Domain.Enums.RepeatRule.Yearly, family.Id);
+        var @event = Event.CreateLunarEvent("Lunar Event", "LE1", Domain.Enums.EventType.Other, new LunarDate(1, 1, false, false), Domain.Enums.RepeatRule.Yearly, family.Id);
         _context.Events.Add(@event);
         await _context.SaveChangesAsync();
 
@@ -174,7 +167,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
             Times.Once
         );
     }
-    
+
     // Test case for no recipients
     [Fact]
     public async Task Handle_ShouldReturnSuccessAndSkipNotification_WhenNoRecipientsFound()
@@ -196,7 +189,7 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         // No family users or followers added to context
 
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true); // User is admin
-        
+
         var command = new SendEventNotificationCommand { EventId = @event.Id };
 
         // Act

@@ -20,13 +20,18 @@ public class MemberFace : BaseAuditableEntity
     public string? Emotion { get; set; }
     public double EmotionConfidence { get; set; }
 
-    /// <summary>
-    /// ID của vector trong cơ sở dữ liệu vector (Qdrant).
-    /// </summary>
+    public bool IsVectorDbSynced { get; set; }
     public string? VectorDbId { get; set; }
 
-    /// <summary>
-    /// Đánh dấu xem thông tin khuôn mặt đã được đồng bộ hóa với cơ sở dữ liệu vector hay chưa.
-    /// </summary>
-    public bool IsVectorDbSynced { get; set; } = false;
+    // Phương thức để đánh dấu khuôn mặt đã được đồng bộ hóa với Vector DB
+    public void MarkAsVectorDbSynced(string vectorDbId)
+    {
+        if (string.IsNullOrWhiteSpace(vectorDbId))
+        {
+            throw new ArgumentException("VectorDbId cannot be null or empty.", nameof(vectorDbId));
+        }
+        VectorDbId = vectorDbId;
+        IsVectorDbSynced = true;
+    }
+
 }

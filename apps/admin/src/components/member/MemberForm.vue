@@ -36,6 +36,7 @@
           prepend-inner-icon="mdi-account"></v-text-field>
       </v-col>
     </v-row>
+
     <v-row>
       <v-col cols="12" md="4">
         <GenderSelect v-model="formData.gender" :label="t('member.form.gender')" :read-only="isFormReadOnly"
@@ -44,14 +45,20 @@
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
           :rules="validationRules.dateOfBirth" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
-          data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar"
-          prepend-inner-icon="mdi-calendar" />
+          data-testid="member-date-of-birth-input" prepend-inner-icon="mdi-calendar" />
       </v-col>
       <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
           :rules="validationRules.dateOfDeath" :readonly="isFormReadOnly" :disabled="isFormReadOnly"
-          data-testid="member-date-of-death-input" append-inner-icon="mdi-calendar"
-          prepend-inner-icon="mdi-calendar" />
+          data-testid="member-date-of-death-input" prepend-inner-icon="mdi-calendar" />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" md="12">
+        <LunarDateInput v-model="formData.lunarDateOfBirth" :read-only="isFormReadOnly"
+          :label-day="t('member.form.lunarBirthDay')" :label-month="t('member.form.lunarBirthMonth')"
+          :label-is-leap-month="t('member.form.isLeapMonth')" />
       </v-col>
     </v-row>
 
@@ -68,39 +75,21 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <LocationInputField
-          v-model:model-value="formData.address"
-          v-model:location-id="formData.residenceLocationId"
-          :label="t('member.form.address')"
-          :family-id="formData.familyId"
-          :read-only="isFormReadOnly"
-          data-testid="member-address-input"
-          prepend-inner-icon="mdi-map-marker"
-        ></LocationInputField>
+        <LocationInputField v-model:model-value="formData.address" v-model:location-id="formData.residenceLocationId"
+          :label="t('member.form.address')" :family-id="formData.familyId" :read-only="isFormReadOnly"
+          data-testid="member-address-input" prepend-inner-icon="mdi-map-marker"></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <LocationInputField
-          v-model:model-value="formData.placeOfBirth"
-          v-model:location-id="formData.birthLocationId"
-          :label="t('member.form.placeOfBirth')"
-          :family-id="formData.familyId"
-          :read-only="isFormReadOnly"
-          data-testid="member-place-of-birth-input"
-          prepend-inner-icon="mdi-map-marker"
-        ></LocationInputField>
+        <LocationInputField v-model:model-value="formData.placeOfBirth" v-model:location-id="formData.birthLocationId"
+          :label="t('member.form.placeOfBirth')" :family-id="formData.familyId" :read-only="isFormReadOnly"
+          data-testid="member-place-of-birth-input" prepend-inner-icon="mdi-map-marker"></LocationInputField>
       </v-col>
       <v-col cols="12">
-        <LocationInputField
-          v-model:model-value="formData.placeOfDeath"
-          v-model:location-id="formData.deathLocationId"
-          :label="t('member.form.placeOfDeath')"
-          :family-id="formData.familyId"
-          :read-only="isFormReadOnly"
-          data-testid="member-place-of-death-input"
-          prepend-inner-icon="mdi-map-marker"
-        ></LocationInputField>
+        <LocationInputField v-model:model-value="formData.placeOfDeath" v-model:location-id="formData.deathLocationId"
+          :label="t('member.form.placeOfDeath')" :family-id="formData.familyId" :read-only="isFormReadOnly"
+          data-testid="member-place-of-death-input" prepend-inner-icon="mdi-map-marker"></LocationInputField>
       </v-col>
     </v-row>
     <v-row>
@@ -126,8 +115,8 @@
     <v-row>
       <v-col cols="12" md="12">
         <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :rules="validationRules.order"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly" type="number" min="1"
-          data-testid="member-order-input" prepend-inner-icon="mdi-numeric"></v-text-field>
+          :readonly="isFormReadOnly" :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"
+          prepend-inner-icon="mdi-numeric"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :disabled="isFormReadOnly"
@@ -164,7 +153,8 @@ import { useI18n } from 'vue-i18n';
 import type { MemberDto } from '@/types';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
-import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
+import LocationInputField from '@/components/common/LocationInputField.vue';
+import LunarDateInput from '@/components/common/LunarDateInput.vue'; // NEW import
 import { useMemberFormComposable } from '@/composables/member/useMemberFormComposable';
 
 const props = defineProps<{

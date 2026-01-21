@@ -5,7 +5,9 @@ using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
+using backend.Domain.ValueObjects; // NEW
 using backend.Domain.Events.Members;
+
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
@@ -43,6 +45,10 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
         }
 
+        var domainLunarDateOfDeath = request.LunarDateOfDeath != null
+            ? new backend.Domain.ValueObjects.LunarDate(request.LunarDateOfDeath.Day, request.LunarDateOfDeath.Month, request.LunarDateOfDeath.IsLeapMonth, request.LunarDateOfDeath.IsEstimated)
+            : null;
+
         var newMember = new Member(
             request.LastName,
             request.FirstName,
@@ -52,6 +58,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Gender,
             request.DateOfBirth,
             request.DateOfDeath,
+            domainLunarDateOfDeath,
             request.PlaceOfBirth,
             request.PlaceOfDeath,
             request.Phone,

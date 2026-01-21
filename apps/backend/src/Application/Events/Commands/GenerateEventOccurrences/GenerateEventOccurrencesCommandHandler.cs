@@ -1,8 +1,8 @@
+using backend.Application.Common.Constants; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs; // Needed for IGenerateEventOccurrencesJob
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Constants; // NEW
 
 namespace backend.Application.Events.Commands.GenerateEventOccurrences;
 

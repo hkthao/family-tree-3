@@ -9,8 +9,6 @@ import {
   getEventOptionTypes,
   getCalendarTypes,
   getRepeatRules,
-  getLunarDays,
-  getLunarMonths,
   processEventFormDataForSave,
 } from './eventForm.logic';
 
@@ -57,8 +55,6 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
   const calendarTypes = computed(() => getCalendarTypes(t));
   const repeatRules = computed(() => getRepeatRules(t));
 
-  const lunarDays = computed(() => getLunarDays());
-  const lunarMonths = computed(() => getLunarMonths());
 
   const rules = deps.useEventRules(state); // Pass the reactive state object
 
@@ -79,8 +75,6 @@ export function useEventForm(props: EventFormProps, deps: UseEventFormDeps = def
       eventOptionTypes,
       calendarTypes,
       repeatRules,
-      lunarDays,
-      lunarMonths,
     },
     actions: {
       validate,
