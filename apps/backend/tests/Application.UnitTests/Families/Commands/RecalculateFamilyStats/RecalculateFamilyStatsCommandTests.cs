@@ -1,10 +1,8 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.RecalculateFamilyStats;
-using backend.Application.Families.Queries;
 using backend.Application.UnitTests.Common; // NEW: Added missing using directive
 using backend.Domain.Entities;
-using backend.Domain.Enums; // NEW: Added for Gender enum
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

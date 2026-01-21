@@ -1,4 +1,3 @@
-using System.Collections.Generic; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs;

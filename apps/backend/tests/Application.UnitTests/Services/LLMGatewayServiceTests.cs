@@ -1,12 +1,8 @@
 #nullable disable
 
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Models.LLMGateway;
 using backend.Application.UnitTests.Common; // For TestBase
 using backend.Infrastructure.Services.LLMGateway;

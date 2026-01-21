@@ -1,28 +1,11 @@
 using backend.Application.AI.Chat;
-using backend.Application.AI.Commands.Chat.CallAiChatService;
-using backend.Application.AI.Commands.DetermineChatContext;
-using backend.Application.AI.DTOs;
-using backend.Application.AI.Enums;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting; // Re-add this
-using backend.Application.Common.Models.LLMGateway; // Add this for LLMGatewaySettings
-using backend.Application.Families.Commands.EnsureFamilyAiConfigExists;
-using backend.Application.Families.Commands.GenerateFamilyData;
-using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
-using backend.Application.Families.Queries.CheckAiChatQuota;
-using backend.Application.Files.DTOs; // NEW
 using backend.Application.Knowledge; // NEW
-using backend.Application.OCR.Commands; // NEW
-using backend.Application.Prompts.DTOs;
-using backend.Application.Prompts.Queries.GetPromptById;
-using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Xunit;
 
 namespace backend.Application.UnitTests.AI.Commands.Chat;
 

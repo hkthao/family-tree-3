@@ -257,9 +257,10 @@ public class KnowledgeService : IKnowledgeService
             _ => "N/A"
         };
         string status = member.IsDeceased ? "Đã mất" : "Còn sống";
+        string leapMonth = member.LunarDateOfDeath != null && member.LunarDateOfDeath.IsLeapMonth.GetValueOrDefault() ? " nhuận" : "";
 
         var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
-                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
+                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{leapMonth})" : string.Empty)}).{Environment.NewLine}" +
                       $"Thuộc đời thứ {("N/A")} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                       $"{parentsSummary}{Environment.NewLine}" +
                       $"{marriageSummary}{Environment.NewLine}" +
@@ -405,9 +406,10 @@ public class KnowledgeService : IKnowledgeService
             _ => "N/A"
         };
         string status = member.IsDeceased ? "Đã mất" : "Còn sống";
+        string leapMonth = member.LunarDateOfDeath != null && member.LunarDateOfDeath.IsLeapMonth.GetValueOrDefault() ? " nhuận" : "";
 
         var summary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
-                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
+                      $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{leapMonth})" : string.Empty)}).{Environment.NewLine}" +
                       $"Thuộc đời thứ {("N/A")} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                       $"{parentsSummary}{Environment.NewLine}" +
                       $"{marriageSummary}{Environment.NewLine}" +

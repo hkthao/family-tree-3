@@ -55,24 +55,13 @@
     </v-row>
 
     <v-row v-if="formData.calendarType === CalendarType.Lunar">
-      <template v-if="formData.lunarDate">
-        <v-col cols="12" md="4">
-          <v-select v-model.number="formData.lunarDate.day" :items="lunarDays" :label="actions.t('event.form.lunarDay')"
-            :rules="rules.lunarDate.day"
-            :readonly="props.readOnly"
-            data-testid="event-lunar-day-input" prepend-inner-icon="mdi-calendar-today"></v-select>
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-select v-model.number="formData.lunarDate.month" :items="lunarMonths" :label="actions.t('event.form.lunarMonth')"
-            :rules="rules.lunarDate.month"
-            :readonly="props.readOnly"
-            data-testid="event-lunar-month-input" prepend-inner-icon="mdi-calendar-range"></v-select>
-        </v-col>
-        <v-col cols="12" md="4" class="d-flex align-center">
-          <v-checkbox v-model="formData.lunarDate.isLeapMonth" :label="actions.t('event.form.isLeapMonth')"
-            :readonly="props.readOnly" data-testid="event-lunar-is-leap-month-input"></v-checkbox>
-        </v-col>
-      </template>
+      <LunarDateInput
+        v-model="formData.lunarDate!"
+        :read-only="props.readOnly"
+        :label-day="actions.t('event.form.lunarDay')"
+        :label-month="actions.t('event.form.lunarMonth')"
+        :label-is-leap-month="actions.t('event.form.isLeapMonth')"
+      />
     </v-row>
 
     <v-row>
@@ -118,6 +107,7 @@ import type { EventDto } from '@/types'; // Import Event type
 import { CalendarType } from '@/types/enums'; // Import enums from enums.ts
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import LocationInputField from '@/components/common/LocationInputField.vue'; // NEW import
+import LunarDateInput from '@/components/common/LunarDateInput.vue';
 import { VColorInput } from 'vuetify/labs/VColorInput'; // Imported from vuetify/labs
 import { VDateInput } from 'vuetify/labs/VDateInput'; // Imported from vuetify/labs
 import { useEventForm } from '@/composables';
@@ -142,8 +132,6 @@ const {
   eventOptionTypes,
   calendarTypes,
   repeatRules,
-  lunarDays,
-  lunarMonths,
 } = state;
 
 const {

@@ -1,9 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Common.Services; // NEW
 using backend.Application.Events.Commands.GenerateEventOccurrences;
 using backend.Application.Events.EventOccurrences.Jobs; // Needed for mocking
 using backend.Application.UnitTests.Common;

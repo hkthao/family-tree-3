@@ -1,4 +1,4 @@
-import type { Relationship } from './relationship';
+import type { Relationship, LunarDate } from '@/types';
 
 export enum Gender {
   Male = 'Male',
@@ -15,7 +15,9 @@ export interface MemberDto {
   familyId: string;
   gender?: Gender;
   dateOfBirth?: Date; // Renamed from 'birthDate'
+  lunarDateOfBirth?: LunarDate; // New: Lunar date of birth
   dateOfDeath?: Date; // Renamed from 'deathDate'
+  lunarDateOfDeath?: LunarDate; // New: Lunar date of death
   birthDeathYears?: string; // Formatted birth and death years
   avatarUrl?: string;
   avatarBase64?: string | null;
