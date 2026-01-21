@@ -123,7 +123,7 @@ services:
     ports:
       - "3000:3000" # Expose port 3000 for the Node.js app
     env_file:
-      - ./.env.prod # Using .env.prod for production environment
+      - ./.env # Using .env for production environment
     environment:
       - TZ=Asia/Ho_Chi_Minh
     logging:
@@ -138,12 +138,13 @@ services:
   knowledge-search-service:
     image: hkthao/family-tree-knowledge-search-service:latest
     platform: linux/amd64
-    container_name: family-tree-knowledge-search-service-prod
-    env_file:
-      - ./.env
     environment:
       - PYTHONUNBUFFERED=1
+      - LANCEDB_PATH=/lancedb # Define LanceDB storage path inside the container
+      - LANCEDB_CONFIG_DIR=/tmp # Set LanceDB config directory to a writeable location to suppress warnings
     mem_limit: 2g
+    volumes:
+      - lancedb-data:/lancedb # Persistent volume for LanceDB
     networks:
       - app-network
     restart: unless-stopped
@@ -185,3 +186,4 @@ volumes:
   mysql-data:
   backend-dataprotection-keys:
   redis-data:
+  lancedb-data:
