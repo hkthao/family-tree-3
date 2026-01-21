@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq; // For LINQ extension methods
-using System.Linq.Expressions; // For Expression<Func<T, bool>> in Setup
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Knowledge;
 using backend.Application.Knowledge.DTOs;
@@ -15,7 +7,6 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects; // Add this
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore; // For FirstOrDefaultAsync, Include
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -146,7 +137,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var memberId = Guid.NewGuid();
         var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
         var member = new Member(memberId, "Văn A", "Nguyễn", "M001", familyId, family, false);
-        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), new LunarDate(1,1,false), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
+        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), new LunarDate(1,1,false, false), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
 
         var fatherId = Guid.NewGuid();
         var motherId = Guid.NewGuid();
@@ -240,7 +231,13 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         metadata["date_of_death"].ToString().Should().Be(member.DateOfDeath?.ToString("yyyy-MM-dd") ?? string.Empty);
         metadata["lunar_date_of_death_day"].ToString().Should().Be(member.LunarDateOfDeath?.Day.ToString() ?? string.Empty);
         metadata["lunar_date_of_death_month"].ToString().Should().Be(member.LunarDateOfDeath?.Month.ToString() ?? string.Empty);
-        metadata["lunar_date_of_death_leap_month"].ToString().Should().Be(member.LunarDateOfDeath?.IsLeapMonth.ToString() ?? string.Empty);
+        string expectedIsLeapMonthString = member.LunarDateOfDeath?.IsLeapMonth?.ToString() ?? string.Empty;
+
+        string actualIsLeapMonthString = (metadata.TryGetValue("lunar_date_of_death_leap_month", out object? leapMonthObj) && leapMonthObj != null)
+            ? leapMonthObj.ToString() ?? string.Empty
+            : string.Empty;
+
+        actualIsLeapMonthString.Should().Be(expectedIsLeapMonthString);
 
 
         request?.Data.FamilyId.Should().Be(member.FamilyId.ToString());
@@ -259,9 +256,10 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var marriageSummary = $"Hôn nhân: kết hôn với {spouse.FullName}.";
         var childrenNames = string.Join(", ", children.Select(c => c.FullName));
         var childrenSummary = $"Con cái: {childrenNames}.";
+        var isLeapMonth = member.LunarDateOfDeath!=null && member.LunarDateOfDeath.IsLeapMonth.GetValueOrDefault() ? " nhuận" : "";
 
         var expectedSummary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
-                              $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{(member.LunarDateOfDeath.IsLeapMonth ? " nhuận" : "")})" : string.Empty)}).{Environment.NewLine}" +
+                              $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{isLeapMonth})" : string.Empty)}).{Environment.NewLine}" +
                               $"Thuộc đời thứ {"N/A"} trong gia đình họ {member.Family?.Name ?? "N/A"}.{Environment.NewLine}" +
                               $"{parentsSummary}{Environment.NewLine}" +
                               $"{marriageSummary}{Environment.NewLine}" +
