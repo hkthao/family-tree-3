@@ -125,7 +125,7 @@ describe('eventCalendar.logic', () => {
       expect(result.getFullYear()).toBe(expectedSolarDate.getFullYear());
       expect(result.getMonth()).toBe(expectedSolarDate.getMonth());
       expect(result.getDate()).toBe(expectedSolarDate.getDate());
-      expect(mockLunarDateAdapter.getLunarDaysInMonth).toHaveBeenCalledWith(year, lunarDate.month);
+      expect(mockLunarDateAdapter.getLunarDaysInMonth).toHaveBeenCalledWith(year, lunarDate.month ?? 1);
     });
 
     it('should adjust day if lunarDate.day is too high', () => {
@@ -137,6 +137,8 @@ describe('eventCalendar.logic', () => {
       (mockLunarDateAdapter.getLunarDaysInMonth as Mock).mockReturnValueOnce(30); // Max day for mock month
       (mockLunarDateAdapter.lunarFromYmd as Mock).mockImplementationOnce((y: number, m: number, d: number) => {
         expect(d).toBe(adjustedDay); // Ensure day is adjusted before calling lunarFromYmd
+        // The month passed to lunarFromYmd should be lunarDate.month ?? 1
+        expect(m).toBe(lunarDate.month ?? 1);
         return {
           getYear: () => y,
           getMonth: () => m,
@@ -153,6 +155,8 @@ describe('eventCalendar.logic', () => {
       expect(result.getFullYear()).toBe(expectedSolarDate.getFullYear());
       expect(result.getMonth()).toBe(expectedSolarDate.getMonth());
       expect(result.getDate()).toBe(expectedSolarDate.getDate());
+      // Add this assertion to check getLunarDaysInMonth call
+      expect(mockLunarDateAdapter.getLunarDaysInMonth).toHaveBeenCalledWith(year, lunarDate.month ?? 1);
     });
 
     it('should handle errors during conversion and return fallback', () => {
@@ -163,10 +167,11 @@ describe('eventCalendar.logic', () => {
       const result = getSolarDateFromLunarDate(year, lunarDate, mockLunarDateAdapter, mockDateAdapter);
       expect(spy).toHaveBeenCalledWith('Error during lunar to solar conversion:', expect.any(Error));
       expect(result.getFullYear()).toBe(year);
-      expect(result.getMonth()).toBe(lunarDate.month - 1);
-      expect(result.getDate()).toBe(lunarDate.day);
+      expect(result.getMonth()).toBe((lunarDate.month ?? 1) - 1);
+      expect(result.getDate()).toBe(lunarDate.day ?? 1);
       spy.mockRestore();
     });
+
   });
 
   describe('getLunarDateForSolarDay', () => {
