@@ -92,6 +92,8 @@ services:
     image: hkthao/family-tree-face-service:latest
     platform: linux/amd64
     container_name: family-tree-face-service-prod
+    ports:
+      - "8002:8000" # Expose port 3000 for the Node.js app
     env_file:
       - ./.env
     environment:
@@ -108,6 +110,8 @@ services:
     image: hkthao/family-tree-ocr-service:latest # Assuming a pre-built image
     platform: linux/amd64
     container_name: family-tree-ocr-service-prod
+    ports:
+      - "8003:8000" # Expose port 3000 for the Node.js app
     env_file:
       - ./.env
     environment:
@@ -138,6 +142,8 @@ services:
   knowledge-search-service:
     image: hkthao/family-tree-knowledge-search-service:latest
     platform: linux/amd64
+    ports:
+      - "8001:8000" # Expose port 8001 for the LLM Gateway service
     environment:
       - PYTHONUNBUFFERED=1
       - LANCEDB_PATH=/lancedb # Define LanceDB storage path inside the container
@@ -153,6 +159,8 @@ services:
     image: hkthao/family-tree-llm-gateway-service:latest
     platform: linux/amd64
     container_name: family-tree-llm-gateway-service-prod
+    ports:
+      - "8000:8000" # Expose port 8000 for the LLM Gateway service
     env_file:
       - ./.env
     environment:

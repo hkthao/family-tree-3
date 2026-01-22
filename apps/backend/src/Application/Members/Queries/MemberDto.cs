@@ -1,3 +1,5 @@
+using backend.Application.Common.Dtos;
+
 namespace backend.Application.Members.Queries;
 
 public class MemberDto
@@ -20,6 +22,7 @@ public class MemberDto
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; }
     public bool IsDeceased { get; set; }
+    public LunarDateDto? LunarDateOfDeath { get; set; }
     public Guid FamilyId { get; set; }
     public bool IsRoot { get; set; }
 }

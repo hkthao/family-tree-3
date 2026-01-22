@@ -15,7 +15,6 @@ export interface MemberDto {
   familyId: string;
   gender?: Gender;
   dateOfBirth?: Date; // Renamed from 'birthDate'
-  lunarDateOfBirth?: LunarDate; // New: Lunar date of birth
   dateOfDeath?: Date; // Renamed from 'deathDate'
   lunarDateOfDeath?: LunarDate; // New: Lunar date of death
   birthDeathYears?: string; // Formatted birth and death years
