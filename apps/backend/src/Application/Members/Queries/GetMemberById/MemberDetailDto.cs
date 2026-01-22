@@ -25,6 +25,7 @@ public class MemberDetailDto : BaseAuditableDto
     public string? FamilyAvatarUrl { get; set; } // NEW
     public string? Biography { get; set; }
     public bool IsDeceased { get; set; }
+    public LunarDateDto? LunarDateOfDeath { get; set; }
     public bool IsRoot { get; set; }
     public int? Order { get; set; }
     public string? BirthDeathYears =>
