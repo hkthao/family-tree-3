@@ -46,7 +46,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
 
         var domainLunarDateOfDeath = request.LunarDateOfDeath != null
-            ? new backend.Domain.ValueObjects.LunarDate(request.LunarDateOfDeath.Day, request.LunarDateOfDeath.Month, request.LunarDateOfDeath.IsLeapMonth, request.LunarDateOfDeath.IsEstimated)
+            ? new LunarDate(request.LunarDateOfDeath.Day, request.LunarDateOfDeath.Month, request.LunarDateOfDeath.IsLeapMonth, request.LunarDateOfDeath.IsEstimated)
             : null;
 
         var newMember = new Member(

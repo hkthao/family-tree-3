@@ -56,8 +56,8 @@
 
     <v-row>
       <v-col cols="12" md="12">
-        <LunarDateInput v-model="formData.lunarDateOfBirth" :read-only="isFormReadOnly"
-          :label-day="t('member.form.lunarBirthDay')" :label-month="t('member.form.lunarBirthMonth')"
+        <LunarDateInput v-model="formData.lunarDateOfDeath" :read-only="isFormReadOnly"
+          :label-day="t('member.form.lunarDeathDay')" :label-month="t('member.form.lunarDeathMonth')"
           :label-is-leap-month="t('member.form.isLeapMonth')" />
       </v-col>
     </v-row>

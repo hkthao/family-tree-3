@@ -27,7 +27,7 @@ export function useMemberRules(formData: MemberAddDto | MemberUpdateDto) {
       lastName: [rulesVuetify.required()],
       firstName: [rulesVuetify.required()],
       dateOfBirth: [], // Now optional
-      lunarDateOfBirth: [], // Now optional and treated as number
+
       familyId: [rulesVuetify.required()],
       dateOfDeath: [dateOfDeathAfterBirth],
       lunarDateOfDeath: [], // Now optional and treated as number
