@@ -15,7 +15,8 @@ const mockApiEventService: IEventService = {
   getByIds: vi.fn(),
   exportEvents: vi.fn(),
   importEvents: vi.fn(),
-  getEventsByMemberId: vi.fn(), // Add this new method
+  getEventsByMemberId: vi.fn(),
+  generateAndNotifyEvents: vi.fn(),
 };
 
 describe('ApiEventServiceAdapter', () => {
