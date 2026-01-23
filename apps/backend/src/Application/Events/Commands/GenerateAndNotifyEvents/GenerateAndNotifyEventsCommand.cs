@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
 
 namespace backend.Application.Events.Commands.GenerateAndNotifyEvents;
 

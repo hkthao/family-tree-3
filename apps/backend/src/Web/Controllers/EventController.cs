@@ -3,6 +3,7 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.GenerateEventOccurrences;
+using backend.Application.Events.Commands.GenerateAndNotifyEvents;
 using backend.Application.Events.Commands.RescheduleRecurringEventOccurrences;
 using backend.Application.Events.Commands.SendEventNotification; // NEW
 using backend.Application.Events.Commands.UpdateEvent;
@@ -22,7 +23,7 @@ namespace backend.Web.Controllers;
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [Authorize]
 [ApiController]
-[Route("api/event")]
+[Route("api/events")]
 [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {
@@ -222,5 +223,18 @@ public class EventController(IMediator mediator, ILogger<EventController> logger
     {
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 201);
+    }
+
+    /// <summary>
+    /// Manually triggers the generation of event occurrences and then sends notifications.
+    /// Restricted to administrators.
+    /// </summary>
+    /// <param name="command">Command with optional FamilyId and Year.</param>
+    /// <returns>A confirmation message.</returns>
+    [HttpPost("generate-and-notify")]
+    public async Task<IActionResult> GenerateAndNotifyEvents([FromBody] GenerateAndNotifyEventsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.ToActionResult(this, _logger);
     }
 }

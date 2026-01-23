@@ -1,5 +1,4 @@
 using backend.Application.Events.Commands.Inputs; // Add this
-using backend.Domain.ValueObjects; // Also keep this for other purposes
 
 namespace backend.Application.Members.Inputs;
 

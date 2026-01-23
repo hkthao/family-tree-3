@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.DTOs; // Add this using statement
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects; // Add this using statement
 

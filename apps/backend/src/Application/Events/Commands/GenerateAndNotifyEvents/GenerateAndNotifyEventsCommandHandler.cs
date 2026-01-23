@@ -2,7 +2,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.GenerateAndNotifyEvents;

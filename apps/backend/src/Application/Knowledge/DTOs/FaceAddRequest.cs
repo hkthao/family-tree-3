@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using backend.Domain.ValueObjects;
 
 namespace backend.Application.Knowledge.DTOs;

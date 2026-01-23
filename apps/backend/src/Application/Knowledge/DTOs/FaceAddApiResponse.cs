@@ -1,5 +1,3 @@
-using System;
-
 namespace backend.Application.Knowledge.DTOs;
 
 public class FaceAddApiResponse
