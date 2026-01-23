@@ -1,5 +1,5 @@
 import apiClient from '@/plugins/axios';
-import type { Result } from '@/types';
+import type { Result, GenerateAndNotifyEventsCommand } from '@/types';
 import { useAuthStore } from '@/stores/auth.store';
 
 export const useEventService = () => {
@@ -30,8 +30,21 @@ export const useEventService = () => {
     }
   };
 
+  const generateAndNotifyEvents = async (command: GenerateAndNotifyEventsCommand): Promise<Result<string>> => {
+    try {
+      if (!authStore.isAdmin) {
+        return { ok: false, error: { name: 'ApiError', message: 'Unauthorized: Only administrators can perform this action.' } };
+      }
+      const response = await apiClient.post<string>(`/event/generate-and-notify`, command); // Assuming /event route prefix
+      return response;
+    } catch (error: any) {
+      return { ok: false, error: { name: 'ApiError', message: error.message || 'Failed to generate and notify events.' } };
+    }
+  };
+
   return {
     generateEventOccurrences,
     sendEventNotification,
+    generateAndNotifyEvents,
   };
 };

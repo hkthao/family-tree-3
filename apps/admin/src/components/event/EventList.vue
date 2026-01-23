@@ -1,12 +1,12 @@
 <template>
-  <v-data-table-server :headers="headers" :items="events"
-    :items-length="totalEvents" :loading="loading" item-value="id" @update:options="loadEvents" elevation="0"
+  <v-data-table-server :headers="state.headers.value" :items="events"
+    :items-length="totalEvents" :loading="loading" item-value="id" @update:options="actions.loadEvents" elevation="0"
     :page="props.page" :items-per-page="props.itemsPerPage">
     <template #top>
       <!-- REFACTOR: Use ListToolbar component -->
       <ListToolbar
         :title="t('event.list.title')"
-        :search-query="debouncedSearch"
+        :search-query="state.debouncedSearch.value"
         :search-label="t('common.search')"
         :create-button-tooltip="t('event.list.action.create')"
         create-button-test-id="add-new-event-button"
@@ -62,6 +62,22 @@
               </template>
             </v-tooltip>
           </v-btn>
+          <!-- Generate and Notify Events Button (Admin Only) -->
+          <v-btn
+            v-if="props.isAdmin"
+            color="primary"
+            icon
+            @click="emit('generateAndNotify', props.familyId)"
+            data-testid="generate-and-notify-events-button"
+            :aria-label="t('event.list.action.generateAndNotify')"
+            :loading="props.isGeneratingAndNotifying"
+          >
+            <v-tooltip :text="t('event.list.action.generateAndNotify')">
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-icon v-bind="tooltipProps">mdi-bell-alert</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
         </template>
       </ListToolbar>
     </template>
@@ -112,7 +128,7 @@
     <template #item.actions="{ item }">
       <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item.id)"
+          <v-btn icon size="small" variant="text" v-bind="props" @click="actions.editEvent(item.id)"
             data-testid="edit-event-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
@@ -135,7 +151,7 @@
       </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item.id)"
+          <v-btn icon size="small" variant="text" v-bind="props" @click="actions.confirmDelete(item.id)"
             data-testid="delete-event-button"> <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -158,51 +174,43 @@ import { CalendarType } from '@/types/enums';
 import ListToolbar from '@/components/common/ListToolbar.vue'; // NEW
 import { formatDate } from '@/utils/dateUtils'; // NEW
 
+import { useI18n } from 'vue-i18n'; // NEW
+
+const { t } = useI18n(); // Destructure t from useI18n
+
 const props = defineProps<{
-  events: EventDto[];
-  totalEvents: number;
-  loading: boolean;
-  search: string;
-  page?: number; // Added
-  itemsPerPage?: number; // Added
-  isExporting?: boolean;
-  isImporting?: boolean;
   canPerformActions?: boolean;
-  onExport?: () => void;
-  onImportClick?: () => void;
+  events: EventDto[];
+  familyId?: string;
+  isExporting?: boolean;
+  isGeneratingAndNotifying?: boolean; // NEW
+  isGeneratingOccurrences?: boolean;
+  isImporting?: boolean;
   isAdmin?: boolean;
-  familyId?: string; // NEW
-  isGeneratingOccurrences?: boolean; // NEW
-  isSendingNotification?: boolean; // NEW
+  isSendingNotification?: boolean;
+  itemsPerPage?: number;
+  loading: boolean;
+  onExport?: () => void;
+  onGenerateAndNotify?: (familyId?: string) => void; // NEW
+  onImportClick?: () => void;
+  page?: number;
+  search: string;
+  totalEvents: number;
 }>();
 
 const emit = defineEmits([
-  'update:options',
-  'view',
-  'edit',
-  'delete',
   'create',
-  'update:search',
-  'generateOccurrences', // NEW
+  'delete',
+  'edit',
+  'generateAndNotify', // NEW
+  'generateOccurrences',
   'sendNotification',
+  'update:options',
+  'update:search',
+  'view',
 ]);
 
-const {
-  state,
-  actions,
-} = useEventListComposable(props, emit);
-
-const {
-  debouncedSearch,
-  headers,
-} = state;
-
-const {
-  t,
-  loadEvents,
-  editEvent,
-  confirmDelete,
-} = actions;
+const { state, actions } = useEventListComposable(props, emit);
 </script>
 
 <style scoped></style>

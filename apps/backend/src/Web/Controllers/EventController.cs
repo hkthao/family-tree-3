@@ -23,7 +23,7 @@ namespace backend.Web.Controllers;
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [Authorize]
 [ApiController]
-[Route("api/events")]
+[Route("api/event")]
 [EnableRateLimiting(RateLimitConstants.PerUserPolicy)]
 public class EventController(IMediator mediator, ILogger<EventController> logger) : ControllerBase
 {

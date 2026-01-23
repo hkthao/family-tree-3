@@ -58,3 +58,8 @@ export interface EventFilter extends ListOptions {
   calendarType?: CalendarType | null;
   lunarMonthRange?: number[]; // New property
 }
+
+export interface GenerateAndNotifyEventsCommand {
+    familyId?: string;
+    year?: number;
+}

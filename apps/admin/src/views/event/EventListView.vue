@@ -14,7 +14,10 @@
     :is-generating-occurrences="isGeneratingOccurrences"
     @generateOccurrences="handleGenerateOccurrences"
     @sendNotification="handleSendNotification"
-    :is-sending-notification="isSendingNotification"/>
+    :is-sending-notification="isSendingNotification"
+    :is-generating-and-notifying="isGeneratingAndNotifying"
+    @generateAndNotify="handleGenerateAndNotify"
+  />
 
   <!-- Add Event Drawer -->
   <BaseCrudDrawer v-model="addDrawer" @close="closeAddDrawer">
@@ -83,6 +86,8 @@ const {
   triggerImport: actionsTriggerImport, // Rename to avoid conflict with local triggerImport
   handleGenerateOccurrences,
   handleSendNotification,
+  isGeneratingAndNotifying,
+  handleGenerateAndNotify,
 } = useEventActions(props, emit, refetchEvents);
 
 const {

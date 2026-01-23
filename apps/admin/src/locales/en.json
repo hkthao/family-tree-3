@@ -355,6 +355,8 @@
   "event.messages.importError": "Failed to import events.",
   "event.messages.sendNotificationSuccess": "Event notification sent successfully!",
   "event.messages.sendNotificationError": "Failed to send event notification.",
+  "event.messages.generateAndNotifyError": "Failed to generate event occurrences and trigger notifications.",
+  "event.messages.generateAndNotifySuccess": "Event occurrences generated and notifications triggered successfully!",
   "event.messages.noFileSelected": "No file selected.",
   "event.messages.noFamilyId": "No Family ID.",
   "event.search.apply": "Apply Filters",
