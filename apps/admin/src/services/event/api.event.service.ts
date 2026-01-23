@@ -1,6 +1,6 @@
 import type { IEventService } from './event.service.interface';
 import type { ApiClientMethods } from '@/plugins/axios';
-import type { EventDto, AddEventDto, UpdateEventDto } from '@/types';
+import type { EventDto, AddEventDto, UpdateEventDto, GenerateAndNotifyEventsCommand } from '@/types';
 import type { Result, ApiError } from '@/types';
 import { ApiCrudService } from '../common/api.crud.service';
 
@@ -37,5 +37,10 @@ export class ApiEventService extends ApiCrudService<EventDto, AddEventDto, Updat
   async importEvents(familyId: string, payload: any): Promise<Result<void, ApiError>> {
     const url = `${this.baseUrl}/import`;
         return this.http.post<void>(url, { familyId: familyId, events: payload });
+  }
+
+  async generateAndNotifyEvents(command: GenerateAndNotifyEventsCommand): Promise<Result<string, ApiError>> {
+    const url = `${this.baseUrl}/generate-and-notify`;
+    return this.http.post<string>(url, command);
   }
 }

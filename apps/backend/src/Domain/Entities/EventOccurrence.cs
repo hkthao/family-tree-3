@@ -19,7 +19,7 @@ public class EventOccurrence : BaseAuditableEntity
         {
             EventId = eventId,
             Year = year,
-            OccurrenceDate = occurrenceDate
+            OccurrenceDate = occurrenceDate.ToUniversalTime()
         };
     }
 }

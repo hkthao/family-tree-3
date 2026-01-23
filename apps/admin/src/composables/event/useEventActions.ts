@@ -6,7 +6,7 @@ import { useEventService } from '@/services/event.service';
 import { useEventImportExport } from './useEventImportExport'; // Assuming useEventImportExport is in the same directory
 
 import type { QueryObserverResult } from '@tanstack/vue-query';
-import type { Paginated, EventDto } from '@/types';
+import type { Paginated, EventDto, GenerateAndNotifyEventsCommand } from '@/types'; // NEW GenerateAndNotifyEventsCommand
 
 // ... (other imports)
 
@@ -23,6 +23,7 @@ export const useEventActions = (
   const importDialog = ref(false);
   const isGeneratingOccurrences = ref(false);
   const isSendingNotification = ref(false);
+  const isGeneratingAndNotifying = ref(false); // NEW
 
   // Extract familyId from props, ensuring it's reactive if props are reactive
   const { familyId } = toRefs(props);
@@ -74,6 +75,28 @@ export const useEventActions = (
     isSendingNotification.value = false;
   };
 
+  const triggerGenerateAndNotify = async (currentFamilyId?: string) => {
+    isGeneratingAndNotifying.value = true;
+    try {
+      const command: GenerateAndNotifyEventsCommand = {
+        familyId: currentFamilyId,
+        year: new Date().getFullYear(), // Use current year as default
+      };
+      const result = await eventService.generateAndNotifyEvents(command);
+      if (result.ok) {
+        showSnackbar(t('event.messages.generateAndNotifySuccess'), 'success');
+        refetchEvents(); // Refetch events as occurrences might have been generated
+      } else {
+        showSnackbar(result.error?.message || t('event.messages.generateAndNotifyError'), 'error');
+      }
+    } catch (error: any) {
+      console.error('Error generating and notifying events:', error);
+      showSnackbar(error.message || t('event.messages.generateAndNotifyError'), 'error');
+    } finally {
+      isGeneratingAndNotifying.value = false;
+    }
+  };
+
   const isAdmin = computed(() => authStore.isAdmin);
 
   return {
@@ -82,10 +105,12 @@ export const useEventActions = (
     isImporting,
     isGeneratingOccurrences,
     isSendingNotification,
+    isGeneratingAndNotifying, // NEW
     isAdmin,
     exportEvents,
     triggerImport,
     handleGenerateOccurrences,
     handleSendNotification,
+    handleGenerateAndNotify: triggerGenerateAndNotify, // NEW
   };
 };

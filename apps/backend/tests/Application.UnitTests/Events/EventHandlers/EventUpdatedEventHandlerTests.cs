@@ -18,7 +18,6 @@ public class EventUpdatedEventHandlerTests : TestBase
     private readonly Mock<ILogger<EventUpdatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly EventUpdatedEventHandler _handler;
 
     public EventUpdatedEventHandlerTests()
@@ -26,8 +25,7 @@ public class EventUpdatedEventHandlerTests : TestBase
         _loggerMock = new Mock<ILogger<EventUpdatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new EventUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _handler = new EventUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

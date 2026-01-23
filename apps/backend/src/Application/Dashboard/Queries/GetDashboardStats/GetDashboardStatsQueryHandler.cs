@@ -38,6 +38,18 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         stats.TotalRelationships = data.Relationships.Count();
         stats.TotalEvents = data.Events.Count();
 
+        // Calculate UpcomingEventsCount
+        var today = _dateTime.Now.Date;
+        var threeDaysLater = today.AddDays(3);
+
+        // Fetch EventOccurrences for the next 3 days, including their associated Event to filter by FamilyId
+        stats.UpcomingEventsCount = await _context.EventOccurrences
+            .Where(eo => !eo.Event.IsDeleted && eo.Event.FamilyId == request.FamilyId) // Filter by accessible families and non-deleted events
+            .Where(eo => eo.OccurrenceDate.Date >= today && eo.OccurrenceDate.Date <= threeDaysLater)
+            .Select(eo => eo.EventId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
         // Calculate Living/Deceased Members
         stats.LivingMembersCount = data.Members.Count(m => !m.IsDeceased);
         stats.DeceasedMembersCount = data.Members.Count(m => m.IsDeceased);

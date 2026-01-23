@@ -72,7 +72,7 @@ public class NotificationService : INotificationService
     {
         try
         {
-            var requestBody = new { userId = userId, expoPushTokens = expoPushTokens };
+            var requestBody = new { userId, expoPushTokens };
             var response = await _httpClient.PostAsJsonAsync("/subscribers/expo-token", requestBody, cancellationToken);
             response.EnsureSuccessStatusCode();
 
@@ -99,7 +99,7 @@ public class NotificationService : INotificationService
             // For DELETE with body, HttpClient.SendAsync is needed with HttpMethod.Delete
             var request = new HttpRequestMessage(HttpMethod.Delete, "/subscribers/expo-token")
             {
-                Content = JsonContent.Create(new { userId = userId, expoPushToken = expoPushToken })
+                Content = JsonContent.Create(new { userId, expoPushToken })
             };
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
@@ -125,7 +125,7 @@ public class NotificationService : INotificationService
     {
         try
         {
-            var requestBody = new { workflowId = workflowId, userId = userId, payload = payload };
+            var requestBody = new { workflowId, userId, payload };
             var response = await _httpClient.PostAsJsonAsync("/notifications/send", requestBody, cancellationToken);
             response.EnsureSuccessStatusCode();
 

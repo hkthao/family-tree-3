@@ -6,12 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly ICurrentUser _user = _user;
-    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(FamilyCreatedEvent notification, CancellationToken cancellationToken)
     {

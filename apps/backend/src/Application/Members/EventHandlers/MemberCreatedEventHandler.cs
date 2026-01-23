@@ -44,6 +44,7 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             notification.Member.FamilyId,
             notification.Member.DateOfBirth.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfBirth.Value) : null,
             notification.Member.DateOfDeath.HasValue ? DateOnly.FromDateTime(notification.Member.DateOfDeath.Value) : null,
+            notification.Member.LunarDateOfDeath,
             notification.Member.FullName,
             cancellationToken
         );

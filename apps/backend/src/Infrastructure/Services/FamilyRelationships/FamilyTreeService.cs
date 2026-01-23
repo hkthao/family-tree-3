@@ -1,20 +1,19 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
+
 
 namespace backend.Infrastructure.Services;
 
 public class FamilyTreeService : IFamilyTreeService
 {
     private readonly IApplicationDbContext _context;
-    private readonly IStringLocalizer<FamilyTreeService> _localizer;
 
-    public FamilyTreeService(IApplicationDbContext context, IStringLocalizer<FamilyTreeService> localizer)
+    public FamilyTreeService(IApplicationDbContext context)
     {
         _context = context;
-        _localizer = localizer;
     }
 
     public async Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default)
@@ -113,16 +112,20 @@ public class FamilyTreeService : IFamilyTreeService
         return 1 + maxChildGenerations;
     }
 
-    public async Task SyncMemberLifeEvents(Guid memberId, Guid familyId, DateOnly? dateOfBirth, DateOnly? dateOfDeath, string memberFullName, CancellationToken cancellationToken)
+    public async Task SyncMemberLifeEvents(Guid memberId, Guid familyId, DateOnly? dateOfBirth, DateOnly? dateOfDeath, LunarDate? lunarDateOfDeath, string memberFullName, CancellationToken cancellationToken)
     {
         // Find existing birth and death events for the member
         var birthEvent = await _context.Events
             .Include(e => e.EventMembers)
             .FirstOrDefaultAsync(e => e.Type == EventType.Birth && e.EventMembers.Any(em => em.MemberId == memberId), cancellationToken);
 
-        var deathEvent = await _context.Events
+        var solarDeathEvent = await _context.Events
             .Include(e => e.EventMembers)
-            .FirstOrDefaultAsync(e => e.Type == EventType.Death && e.EventMembers.Any(em => em.MemberId == memberId), cancellationToken);
+            .FirstOrDefaultAsync(e => e.Type == EventType.Death && e.CalendarType == CalendarType.Solar && e.EventMembers.Any(em => em.MemberId == memberId), cancellationToken);
+
+        var lunarDeathEvent = await _context.Events
+            .Include(e => e.EventMembers)
+            .FirstOrDefaultAsync(e => e.Type == EventType.Death && e.CalendarType == CalendarType.Lunar && e.EventMembers.Any(em => em.MemberId == memberId), cancellationToken);
 
         // Handle Birth Event
         if (dateOfBirth.HasValue)
@@ -143,15 +146,13 @@ public class FamilyTreeService : IFamilyTreeService
                         birthEvent.Color
                     );
                 }
-                // If it's a Lunar event, we don't update it with a Solar date here.
-                // Further logic would be needed if Lunar dates for members were directly supported and needed syncing.
             }
             else
             {
                 // Create new birth event
                 // Use CreateSolarEvent
                 var newBirthEvent = Event.CreateSolarEvent(
-                    _localizer["Birth of {0}", memberFullName],
+                    "Ngày sinh của " + memberFullName,
                     $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}",
                     EventType.Birth,
                     birthDateTime, // SolarDate
@@ -168,34 +169,29 @@ public class FamilyTreeService : IFamilyTreeService
             _context.Events.Remove(birthEvent);
         }
 
-        // Handle Death Event
+        // Handle Solar Death Event
         if (dateOfDeath.HasValue)
         {
             var deathDateTime = dateOfDeath.Value.ToDateTime(TimeOnly.MinValue);
-            if (deathEvent != null)
+            if (solarDeathEvent != null)
             {
-                if (deathEvent.CalendarType == CalendarType.Solar)
-                {
-                    // Update existing death event (Solar)
-                    deathEvent.UpdateSolarEvent(
-                        deathEvent.Name,
-                        deathEvent.Code,
-                        deathEvent.Description,
-                        deathDateTime, // New SolarDate
-                        RepeatRule.Yearly, // Death anniversaries are yearly
-                        deathEvent.Type,
-                        deathEvent.Color
-                    );
-                }
-                // If it's a Lunar event, we don't update it with a Solar date here.
-                // Further logic would be needed if Lunar dates for members were directly supported and needed syncing.
+                // Update existing death event (Solar)
+                solarDeathEvent.UpdateSolarEvent(
+                    solarDeathEvent.Name,
+                    solarDeathEvent.Code,
+                    solarDeathEvent.Description,
+                    deathDateTime, // New SolarDate
+                    RepeatRule.Yearly, // Death anniversaries are yearly
+                    solarDeathEvent.Type,
+                    solarDeathEvent.Color
+                );
             }
             else
             {
                 // Create new death event
                 // Use CreateSolarEvent
                 var newDeathEvent = Event.CreateSolarEvent(
-                    _localizer["Death of {0}", memberFullName],
+                    "Ngày mất của " + memberFullName,
                     $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}",
                     EventType.Death,
                     deathDateTime, // SolarDate
@@ -206,10 +202,47 @@ public class FamilyTreeService : IFamilyTreeService
                 _context.Events.Add(newDeathEvent);
             }
         }
-        else if (deathEvent != null)
+        else if (solarDeathEvent != null)
         {
             // Remove existing death event if date is cleared
-            _context.Events.Remove(deathEvent);
+            _context.Events.Remove(solarDeathEvent);
+        }
+
+        // Handle Lunar Death Event
+        if (lunarDateOfDeath != null)
+        {
+            if (lunarDeathEvent != null)
+            {
+                // Update existing lunar death event
+                lunarDeathEvent.UpdateLunarEvent(
+                    lunarDeathEvent.Name,
+                    lunarDeathEvent.Code,
+                    lunarDeathEvent.Description,
+                    lunarDateOfDeath, // New LunarDate
+                    RepeatRule.Yearly, // Death anniversaries are yearly
+                    lunarDeathEvent.Type,
+                    lunarDeathEvent.Color
+                );
+            }
+            else
+            {
+                // Create new lunar death event
+                var newLunarDeathEvent = Event.CreateLunarEvent(
+                    "Ngày giỗ của " + memberFullName, // Distinct name for lunar event
+                    $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}",
+                    EventType.Death,
+                    lunarDateOfDeath, // LunarDate
+                    RepeatRule.Yearly, // Death anniversaries are yearly
+                    familyId
+                );
+                newLunarDeathEvent.AddEventMember(memberId);
+                _context.Events.Add(newLunarDeathEvent);
+            }
+        }
+        else if (lunarDeathEvent != null)
+        {
+            // Remove existing lunar death event if date is cleared
+            _context.Events.Remove(lunarDeathEvent);
         }
 
         await _context.SaveChangesAsync(cancellationToken);

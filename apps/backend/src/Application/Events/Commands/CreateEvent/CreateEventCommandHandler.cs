@@ -70,7 +70,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             return Result<Guid>.Failure("Invalid CalendarType.", ErrorSources.BadRequest);
         }
 
-        foreach (var memberId in request.RelatedMemberIds)
+        foreach (var memberId in request.EventMemberIds)
         {
             entity.AddEventMember(memberId);
         }

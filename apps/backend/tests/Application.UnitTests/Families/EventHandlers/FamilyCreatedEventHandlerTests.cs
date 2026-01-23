@@ -16,7 +16,6 @@ public class FamilyCreatedEventHandlerTests : TestBase
     private readonly Mock<ILogger<FamilyCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly FamilyCreatedEventHandler _handler;
 
     public FamilyCreatedEventHandlerTests()
@@ -24,8 +23,7 @@ public class FamilyCreatedEventHandlerTests : TestBase
         _loggerMock = new Mock<ILogger<FamilyCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

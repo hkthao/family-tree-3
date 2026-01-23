@@ -13,6 +13,7 @@ export enum EventType {
 export interface EventMemberDto {
   memberId: string;
   fullName: string;
+  memberName: string;
   avatarUrl?: string;
   gender: Gender;
 }
@@ -57,4 +58,9 @@ export interface EventFilter extends ListOptions {
   endDate?: Date | null;
   calendarType?: CalendarType | null;
   lunarMonthRange?: number[]; // New property
+}
+
+export interface GenerateAndNotifyEventsCommand {
+    familyId?: string;
+    year?: number;
 }

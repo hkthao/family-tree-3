@@ -8,5 +8,5 @@ public class EventMemberDto
     public Guid MemberId { get; set; }
     public string MemberName { get; set; } = null!;
     public string? AvatarUrl { get; set; }
-    public Gender Gender { get; set; }
+    public string? Gender { get; set; }
 }

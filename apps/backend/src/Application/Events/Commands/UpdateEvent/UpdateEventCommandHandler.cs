@@ -10,11 +10,10 @@ using backend.Domain.ValueObjects;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, ILunarCalendarService lunarCalendarService) : IRequestHandler<UpdateEventCommand, Result<bool>>
+public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILunarCalendarService lunarCalendarService) : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
     private readonly ILunarCalendarService _lunarCalendarService = lunarCalendarService; // Injected service
 
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
@@ -96,7 +95,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.ClearEventMembers(); // Clear the in-memory collection
 
         // Add new members
-        foreach (var memberId in request.RelatedMemberIds)
+        foreach (var memberId in request.EventMemberIds)
         {
             entity.AddEventMember(memberId);
         }

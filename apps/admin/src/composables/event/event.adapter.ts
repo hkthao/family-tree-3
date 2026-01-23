@@ -2,7 +2,7 @@
 import { ApiEventService } from '@/services/event/api.event.service';
 import type { IEventService } from '@/services/event/event.service.interface';
 import { apiClient } from '@/plugins/axios';
-import type { EventDto, AddEventDto, UpdateEventDto, Result, ApiError } from '@/types';
+import type { EventDto, AddEventDto, UpdateEventDto, Result, ApiError, GenerateAndNotifyEventsCommand } from '@/types';
 
 /**
  * @interface EventServiceAdapter
@@ -61,6 +61,7 @@ export interface EventServiceAdapter extends IEventService {
   getEventsByMemberId(memberId: string): Promise<Result<EventDto[], ApiError>>; // NEW METHOD
 
   getByIds(ids: string[]): Promise<Result<EventDto[]>>;
+  generateAndNotifyEvents(command: GenerateAndNotifyEventsCommand): Promise<Result<string, ApiError>>;
 }
 
 /**
@@ -113,6 +114,10 @@ export class ApiEventServiceAdapter implements EventServiceAdapter {
 
   async importEvents(familyId: string, payload: any): Promise<Result<void, ApiError>> {
     return this.apiEventService.importEvents(familyId, payload);
+  }
+
+  async generateAndNotifyEvents(command: GenerateAndNotifyEventsCommand): Promise<Result<string, ApiError>> {
+    return this.apiEventService.generateAndNotifyEvents(command);
   }
 }
 

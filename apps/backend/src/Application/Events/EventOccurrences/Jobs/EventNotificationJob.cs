@@ -33,6 +33,10 @@ public class EventNotificationJob : IEventNotificationJob
             .OrderBy(eo => eo.OccurrenceDate)
             .ToListAsync(cancellationToken);
 
+        _logger.LogInformation("today: {today}", today);
+        _logger.LogInformation("threeDaysLater: {threeDaysLater}", threeDaysLater);
+        _logger.LogInformation("upcomingOccurrences: {Count} items", upcomingOccurrences.Count);
+
         var eventIds = upcomingOccurrences.Select(eo => eo.EventId).Distinct().ToList();
 
         // Lấy thông tin Event cho các EventId này, eager loading EventMembers và Member cho thông tin giới tính
@@ -54,7 +58,7 @@ public class EventNotificationJob : IEventNotificationJob
             // Kiểm tra xem thông báo đã được gửi cho sự kiện này vào ngày này chưa
             var existingDelivery = await _context.NotificationDeliveries
                 .FirstOrDefaultAsync(nd => nd.EventId == occurrence.EventId &&
-                                           nd.DeliveryDate.Date == occurrence.OccurrenceDate.Date &&
+                                           //nd.DeliveryDate.Date == occurrence.OccurrenceDate.Date &&
                                            nd.DeliveryMethod == "Push Notification",
                                            cancellationToken);
 
@@ -119,9 +123,9 @@ public class EventNotificationJob : IEventNotificationJob
                 event_id = @event.Id.ToString(),
                 event_name = @event.Name,
                 event_type = @event.Type.ToString(),
-                familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
+                familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : string.Empty,
                 member_name = memberName, // Use determined member name
-                lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : null,
+                lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : string.Empty,
                 event_date = occurrence.OccurrenceDate.ToString("dd/MM"), // Format as dd/MM
                 titles = memberHonorific // Use determined honorific
             };

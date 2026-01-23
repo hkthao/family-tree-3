@@ -23,7 +23,7 @@ public class LunarCalendarService : ILunarCalendarService
             var lunar = Lunar.Lunar.FromYmdHms(lunarYear, lunarMonthParam, lunarDay, 0, 0, 0);
 
             var solar = lunar.Solar;
-            return new DateTime(solar.Year, solar.Month, solar.Day);
+            return new DateTime(solar.Year, solar.Month, solar.Day, 12, 0, 0);
         }
         catch (Exception)
         {

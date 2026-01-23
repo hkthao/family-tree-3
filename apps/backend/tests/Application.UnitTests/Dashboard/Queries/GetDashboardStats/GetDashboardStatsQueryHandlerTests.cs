@@ -470,5 +470,54 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         result.Value!.FemaleRatio.Should().Be(0.0);
         result.Value!.LivingMembersCount.Should().Be(0);
         result.Value!.DeceasedMembersCount.Should().Be(0);
+    } // Closing brace for Handle_ShouldReturnZeroRatiosAndCounts_WhenNoMembers
+
+    [Fact]
+    public async Task Handle_ShouldCalculateUpcomingEventsCountCorrectly()
+    {
+        // 🎯 Mục tiêu của test: Đảm bảo handler tính toán số lượng sự kiện sắp tới trong 3 ngày tới chính xác.
+
+        // Arrange:
+        _authorizationServiceMock.Setup(s => s.IsAdmin()).Returns(true);
+        var today = new DateTime(2024, 1, 15);
+        _mockDateTime.Setup(dt => dt.Now).Returns(today);
+
+        var family = new Family { Id = Guid.NewGuid(), Name = "Family Upcoming Events", Code = "FUE", IsDeleted = false };
+        _context.Families.Add(family);
+
+        var member = CreateMember("Test", "Member", "TM", family.Id, isDeceased: false, id: Guid.NewGuid());
+        _context.Members.Add(member);
+
+        // Event 1: Occurs tomorrow (within 3 days)
+        var event1 = Event.CreateSolarEvent("Upcoming Event 1", "UE1", EventType.Other, today.AddDays(1), RepeatRule.None, family.Id);
+        _context.Events.Add(event1);
+        _context.EventOccurrences.Add(EventOccurrence.Create(event1.Id, today.AddDays(1).Year, today.AddDays(1)));
+
+        // Event 2: Occurs in 3 days (within 3 days)
+        var event2 = Event.CreateSolarEvent("Upcoming Event 2", "UE2", EventType.Other, today.AddDays(3), RepeatRule.None, family.Id);
+        _context.Events.Add(event2);
+        _context.EventOccurrences.Add(EventOccurrence.Create(event2.Id, today.AddDays(3).Year, today.AddDays(3)));
+
+        // Event 3: Occurs in 5 days (outside 3 days)
+        var event3 = Event.CreateSolarEvent("Future Event", "FE1", EventType.Other, today.AddDays(5), RepeatRule.None, family.Id);
+        _context.Events.Add(event3);
+        _context.EventOccurrences.Add(EventOccurrence.Create(event3.Id, today.AddDays(5).Year, today.AddDays(5)));
+
+        // Event 4: Occurs in the past
+        var event4 = Event.CreateSolarEvent("Past Event", "PE1", EventType.Other, today.AddDays(-1), RepeatRule.None, family.Id);
+        _context.Events.Add(event4);
+        _context.EventOccurrences.Add(EventOccurrence.Create(event4.Id, today.AddDays(-1).Year, today.AddDays(-1)));
+
+        await _context.SaveChangesAsync();
+
+        var query = new GetDashboardStatsQuery { FamilyId = family.Id };
+
+        // Act:
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert:
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.UpcomingEventsCount.Should().Be(2); // event1 and event2
     }
-}
+} // Closing brace for class GetDashboardStatsQueryHandlerTests

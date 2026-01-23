@@ -36,7 +36,9 @@ public class GenerateEventOccurrencesCommandHandler : IRequestHandler<GenerateEv
             return Result<string>.Failure("Generating occurrences directly requires a specific FamilyId.");
         }
 
+        await _generateEventOccurrencesJob.GenerateOccurrences(request.Year - 1, request.FamilyId.Value, cancellationToken);
         await _generateEventOccurrencesJob.GenerateOccurrences(request.Year, request.FamilyId.Value, cancellationToken);
+        await _generateEventOccurrencesJob.GenerateOccurrences(request.Year + 1, request.FamilyId.Value, cancellationToken);
 
         return Result<string>.Success($"Event occurrences generated directly for year {request.Year} and FamilyId {request.FamilyId.Value}.");
     }

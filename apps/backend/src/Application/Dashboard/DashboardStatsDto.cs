@@ -6,6 +6,7 @@ public class DashboardStatsDto
     public int TotalMembers { get; set; }
     public int TotalRelationships { get; set; }
     public int TotalEvents { get; set; } // From PublicDashboardDto
+    public int UpcomingEventsCount { get; set; } // NEW
     public int TotalGenerations { get; set; } // From PublicDashboardDto
 
     public double MaleRatio { get; set; }

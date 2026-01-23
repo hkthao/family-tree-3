@@ -17,21 +17,19 @@ public class RelationshipCreatedEventHandlerTests
     private readonly Mock<ILogger<RelationshipCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IN8nService> _n8nServiceMock;
 
     public RelationshipCreatedEventHandlerTests()
     {
         _loggerMock = new Mock<ILogger<RelationshipCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _n8nServiceMock = new Mock<IN8nService>();
     }
 
     [Fact]
     public async Task Handle_ShouldRecordActivity()
     {
         // Arrange
-        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
         var notification = new RelationshipCreatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
@@ -45,7 +43,7 @@ public class RelationshipCreatedEventHandlerTests
     public async Task Handle_ShouldPublishNotification()
     {
         // Arrange
-        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
         var notification = new RelationshipCreatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act

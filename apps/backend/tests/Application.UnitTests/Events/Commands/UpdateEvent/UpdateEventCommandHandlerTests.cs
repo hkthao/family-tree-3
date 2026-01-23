@@ -9,7 +9,6 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using MediatR; // Added
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -19,16 +18,14 @@ namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 public class UpdateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<IMediator> _mediatorMock; // Added
     private readonly Mock<ILunarCalendarService> _lunarCalendarServiceMock; // Added
     private readonly UpdateEventCommandHandler _handler;
 
     public UpdateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _mediatorMock = new Mock<IMediator>(); // Added
         _lunarCalendarServiceMock = new Mock<ILunarCalendarService>(); // Added
-        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object, _lunarCalendarServiceMock.Object); // Modified
+        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object,_lunarCalendarServiceMock.Object); // Modified
     }
 
     [Fact]
@@ -138,7 +135,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid> { member2Id, member3Id }
+            EventMemberIds = new List<Guid> { member2Id, member3Id }
         };
 
         // Act
@@ -181,7 +178,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid>() // Empty list
+            EventMemberIds = new List<Guid>() // Empty list
         };
 
         // Act
@@ -223,7 +220,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid> { member1Id, member3Id } // Remove member2Id
+            EventMemberIds = new List<Guid> { member1Id, member3Id } // Remove member2Id
         };
 
         // Act
@@ -524,7 +521,7 @@ public class UpdateEventCommandHandlerTests : TestBase
 
         var lunarDateInput = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false };
         var currentYear = DateTime.Now.Year;
-        var expectedSolarDate = new DateTime(currentYear, 9, 29); // Example date
+        var expectedSolarDate = new DateTime(currentYear, 9, 29, 0, 0, 0, DateTimeKind.Utc); // Example date
 
         _lunarCalendarServiceMock
             .Setup(x => x.ConvertLunarToSolar(lunarDateInput.Day, lunarDateInput.Month, currentYear, lunarDateInput.IsLeapMonth))

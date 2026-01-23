@@ -26,8 +26,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         _job = new GenerateEventOccurrencesJob(
             new Mock<ILogger<GenerateEventOccurrencesJob>>().Object, // Provide a dummy logger
             _context, // Use real in-memory context
-            _mockLunarCalendarService.Object,
-            _mockDateTime.Object); // Use _mockDateTime from TestBase
+            _mockLunarCalendarService.Object);
     }
 
     [Fact]
@@ -46,7 +45,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockLunarCalendarService.Setup(s => s.ConvertLunarToSolar(1, 1, year, false))
-            .Returns(new DateTime(year, 2, 10));
+            .Returns(new DateTime(year, 2, 10, 12, 0, 0));
 
         // Act
         await _job.GenerateOccurrences(year, null, CancellationToken.None);
@@ -58,7 +57,8 @@ public class GenerateEventOccurrencesJobTests : TestBase
         {
             generatedOccurrence.EventId.Should().Be(lunarEvent.Id);
             generatedOccurrence.Year.Should().Be(year);
-            generatedOccurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10));
+            generatedOccurrence.OccurrenceDate.Date.Day.Should().Be(10);
+            generatedOccurrence.OccurrenceDate.Date.Month.Should().Be(2);
         }
     }
 
@@ -109,7 +109,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockLunarCalendarService.Setup(s => s.ConvertLunarToSolar(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>()))
-            .Returns(new DateTime(year, 2, 10));
+            .Returns(new DateTime(year, 2, 10, 7, 0, 0));
 
         // Act
         await _job.GenerateOccurrences(year, null, CancellationToken.None);
@@ -119,7 +119,8 @@ public class GenerateEventOccurrencesJobTests : TestBase
         foreach (var occurrence in _context.EventOccurrences.ToList())
         {
             occurrence.Year.Should().Be(year);
-            occurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10, 0, 0, 0, DateTimeKind.Utc));
+            occurrence.OccurrenceDate.Date.Day.Should().Be(10);
+            occurrence.OccurrenceDate.Date.Month.Should().Be(2);
         }
     }
 

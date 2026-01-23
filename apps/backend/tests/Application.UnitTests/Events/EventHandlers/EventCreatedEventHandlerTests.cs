@@ -18,7 +18,6 @@ public class EventCreatedEventHandlerTests : TestBase
     private readonly Mock<ILogger<EventCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly EventCreatedEventHandler _handler;
 
     public EventCreatedEventHandlerTests()
@@ -26,8 +25,7 @@ public class EventCreatedEventHandlerTests : TestBase
         _loggerMock = new Mock<ILogger<EventCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new EventCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _handler = new EventCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

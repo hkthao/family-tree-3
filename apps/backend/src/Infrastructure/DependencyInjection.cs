@@ -53,9 +53,6 @@ public static class DependencyInjection
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
-        // Register N8nSettings
-        services.Configure<N8nSettings>(configuration.GetSection(N8nSettings.SectionName));
-
         // Register ImgbbSettings
         services.Configure<ImgbbSettings>(configuration.GetSection(ImgbbSettings.SectionName));
 
@@ -90,7 +87,6 @@ public static class DependencyInjection
         });
 
         // Register N8nService if it's used by N8nFileStorageService
-        services.AddScoped<IN8nService, N8nService>();
 
 
 
@@ -111,7 +107,6 @@ public static class DependencyInjection
                                         serviceProvider.GetRequiredService<IOptions<CloudinarySettings>>(),
                                         serviceProvider.GetRequiredService<ILogger<CloudinaryFileStorageService>>()
                                     ),
-                "N8n" => new N8nFileStorageService(serviceProvider.GetRequiredService<IN8nService>()),
                 _ => throw new ArgumentException($"Unknown file storage provider: {fileStorageSettings.Provider}")
             };
         });
@@ -154,15 +149,9 @@ public static class DependencyInjection
 
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
-        // Register n8n Service
-        services.AddScoped<IN8nService, N8nService>();
-        services.AddScoped<IAiChatService, AiChatService>();
-        services.AddScoped<IAiGenerateService, AiGenerateService>();
-
 
         // If you want to use N8nFileStorageService instead, comment out the Imgur registration above
         // and uncomment the line below.
-        // services.AddScoped<IFileStorageService, N8nFileStorageService>();
 
         // Register NotificationSettings
 

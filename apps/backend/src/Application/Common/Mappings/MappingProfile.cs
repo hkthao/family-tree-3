@@ -2,7 +2,6 @@ using backend.Application.Common.Dtos;
 using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
-
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.GetPrivacyConfiguration;
@@ -33,7 +32,6 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
 
 namespace backend.Application.Common.Mappings;
@@ -62,14 +60,7 @@ public class MappingProfile : Profile
         CreateMap<EventMember, EventMemberDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? src.Member.FullName : null))
             .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.Member != null ? src.Member.AvatarUrl : null))
-            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Member.Gender))
-            .AfterMap((src, dest) =>
-            {
-                if (src.Member == null)
-                {
-                    dest.Gender = Gender.Unknown;
-                }
-            });
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Member.Gender));
         CreateMap<LunarDate, LunarDateDto>();
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
@@ -90,7 +81,7 @@ public class MappingProfile : Profile
         CreateMap<NamesByRegionUpdateCommandDto, NamesByRegion>();
         CreateMap<NamesByRegionImportDto, NamesByRegion>();
         CreateMap<FamilyDictImportDto, FamilyDict>();
-        CreateMap<backend.Application.Families.Commands.Import.FamilyImportDto, Family>()
+        CreateMap<Families.Commands.Import.FamilyImportDto, Family>()
             .ForMember(dest => dest.Members, opt => opt.Ignore())
             .ForMember(dest => dest.Relationships, opt => opt.Ignore())
             .ForMember(dest => dest.Events, opt => opt.Ignore())
@@ -106,9 +97,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MotherId, opt => opt.Ignore())
             .ForMember(dest => dest.HusbandId, opt => opt.Ignore())
             .ForMember(dest => dest.WifeId, opt => opt.Ignore());
-
-
-
 
         CreateMap<MemberFace, MemberFaceDto>()
             .ForMember(dest => dest.MemberName, opt => opt.MapFrom(src => src.Member != null ? (src.Member.LastName + " " + src.Member.FirstName).Trim() : null))
@@ -181,7 +169,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.SolarDate, opt => opt.Ignore())
             .ForMember(dest => dest.LunarDate, opt => opt.Ignore());
         CreateMap<LunarDateDto, LunarDate>();
-        CreateMap<backend.Application.Members.DTOs.MemberImportDto, Member>()
+        CreateMap<MemberImportDto, Member>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())
             .ForMember(dest => dest.Family, opt => opt.Ignore())
