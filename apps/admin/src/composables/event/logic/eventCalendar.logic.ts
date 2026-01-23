@@ -15,7 +15,6 @@ export function getSolarDateFromLunarDate(
   // Provide default values if day or month are null/undefined
   const month = lunarDate.month ?? 1; // Default to 1 if null/undefined
   const day = lunarDate.day ?? 1;     // Default to 1 if null/undefined
-  const isLeapMonth = lunarDate.isLeapMonth ?? false; // Default to false
 
   try {
     // Use the defaulted month and day

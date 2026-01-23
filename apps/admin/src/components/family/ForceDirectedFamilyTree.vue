@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted, nextTick, type PropType } from 'vue';
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
 import * as d3 from 'd3';
 import type { MemberDto, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
