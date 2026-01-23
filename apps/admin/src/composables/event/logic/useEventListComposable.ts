@@ -72,7 +72,7 @@ export function useEventListComposable(props: {
     },
     {
       title: t('event.list.headers.relatedMembers'),
-      key: 'relatedMembers',
+      key: 'eventMembers',
       width: 'auto',
       align: 'start',
       sortable: false,

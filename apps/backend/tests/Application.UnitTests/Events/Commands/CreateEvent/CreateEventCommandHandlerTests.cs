@@ -137,7 +137,7 @@ public class CreateEventCommandHandlerTests : TestBase
             Type = EventType.Other,
             CalendarType = CalendarType.Solar,
             SolarDate = DateTime.Now,
-            RelatedMemberIds = new List<Guid> { member1Id, member2Id }
+            EventMemberIds = new List<Guid> { member1Id, member2Id }
         };
 
         // Act

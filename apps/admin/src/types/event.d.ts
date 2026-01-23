@@ -13,6 +13,7 @@ export enum EventType {
 export interface EventMemberDto {
   memberId: string;
   fullName: string;
+  memberName: string;
   avatarUrl?: string;
   gender: Gender;
 }

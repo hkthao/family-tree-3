@@ -6,12 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<RelationshipCreatedEvent>
+public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user) : INotificationHandler<RelationshipCreatedEvent>
 {
     private readonly ILogger<RelationshipCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly ICurrentUser _user = _user;
-    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(RelationshipCreatedEvent notification, CancellationToken cancellationToken)
     {

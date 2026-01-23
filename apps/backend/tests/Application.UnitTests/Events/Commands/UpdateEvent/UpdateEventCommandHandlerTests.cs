@@ -138,7 +138,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid> { member2Id, member3Id }
+            EventMemberIds = new List<Guid> { member2Id, member3Id }
         };
 
         // Act
@@ -181,7 +181,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid>() // Empty list
+            EventMemberIds = new List<Guid>() // Empty list
         };
 
         // Act
@@ -223,7 +223,7 @@ public class UpdateEventCommandHandlerTests : TestBase
             SolarDate = new DateTime(2024, 5, 10),
             RepeatRule = RepeatRule.None,
             Type = EventType.Other,
-            RelatedMemberIds = new List<Guid> { member1Id, member3Id } // Remove member2Id
+            EventMemberIds = new List<Guid> { member1Id, member3Id } // Remove member2Id
         };
 
         // Act

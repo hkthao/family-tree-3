@@ -119,7 +119,7 @@
     <!-- Event Members column -->
     <template #item.eventMembers="{ item }">
       <div class="d-flex flex-wrap">
-        <MemberName v-for="member in item.eventMembers" :key="member.memberId" :fullName="member.fullName"
+        <MemberName v-for="member in item.eventMembers" :key="member.memberId" :fullName="member.memberName"
           :avatarUrl="member.avatarUrl" :gender="member.gender" />
       </div>
     </template>

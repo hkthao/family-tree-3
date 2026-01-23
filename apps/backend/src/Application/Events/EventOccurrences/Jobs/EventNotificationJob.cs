@@ -33,6 +33,10 @@ public class EventNotificationJob : IEventNotificationJob
             .OrderBy(eo => eo.OccurrenceDate)
             .ToListAsync(cancellationToken);
 
+        _logger.LogInformation("today: {today}", today);
+        _logger.LogInformation("threeDaysLater: {threeDaysLater}", threeDaysLater);
+        _logger.LogInformation("upcomingOccurrences: {Count} items", upcomingOccurrences.Count);
+
         var eventIds = upcomingOccurrences.Select(eo => eo.EventId).Distinct().ToList();
 
         // Lấy thông tin Event cho các EventId này, eager loading EventMembers và Member cho thông tin giới tính
@@ -54,7 +58,7 @@ public class EventNotificationJob : IEventNotificationJob
             // Kiểm tra xem thông báo đã được gửi cho sự kiện này vào ngày này chưa
             var existingDelivery = await _context.NotificationDeliveries
                 .FirstOrDefaultAsync(nd => nd.EventId == occurrence.EventId &&
-                                           nd.DeliveryDate.Date == occurrence.OccurrenceDate.Date &&
+                                           //nd.DeliveryDate.Date == occurrence.OccurrenceDate.Date &&
                                            nd.DeliveryMethod == "Push Notification",
                                            cancellationToken);
 

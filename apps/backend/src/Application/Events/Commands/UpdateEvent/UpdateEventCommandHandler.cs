@@ -96,7 +96,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.ClearEventMembers(); // Clear the in-memory collection
 
         // Add new members
-        foreach (var memberId in request.RelatedMemberIds)
+        foreach (var memberId in request.EventMemberIds)
         {
             entity.AddEventMember(memberId);
         }

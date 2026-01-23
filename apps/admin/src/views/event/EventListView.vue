@@ -1,5 +1,6 @@
 <template>
   <EventSearch @update:filters="handleFilterUpdate" />
+
   <EventList :events="events" :total-events="totalItems" :loading="loading"
     :search="eventListSearchQuery || ''" :page="filters.page" :items-per-page="filters.itemsPerPage" @update:options="handleListOptionsUpdate"
     @update:search="handleSearchUpdate" @view="openDetailDrawer"

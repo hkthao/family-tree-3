@@ -42,7 +42,9 @@ public class GenerateAndNotifyEventsCommandHandler : IRequestHandler<GenerateAnd
         var year = request.Year ?? _dateTime.Now.Year;
 
         // Run GenerateEventOccurrencesJob
+        await _generateEventOccurrencesJob.GenerateOccurrences(year - 1, request.FamilyId, cancellationToken);
         await _generateEventOccurrencesJob.GenerateOccurrences(year, request.FamilyId, cancellationToken);
+        await _generateEventOccurrencesJob.GenerateOccurrences(year + 1, request.FamilyId, cancellationToken);
         _logger.LogInformation("GenerateEventOccurrencesJob completed for FamilyId: {FamilyId}, Year: {Year}", request.FamilyId, year);
 
         // Run EventNotificationJob
