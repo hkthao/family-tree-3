@@ -13,7 +13,7 @@ public class EventOccurrenceTests
         // Arrange
         var eventId = Guid.NewGuid();
         var year = 2024;
-        var occurrenceDate = new DateTime(2024, 1, 15);
+        var occurrenceDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc);
 
         // Act
         var eventOccurrence = EventOccurrence.Create(eventId, year, occurrenceDate);

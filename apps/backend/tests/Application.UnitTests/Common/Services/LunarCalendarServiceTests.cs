@@ -28,7 +28,7 @@ public class LunarCalendarServiceTests
 
         // Assert
         solarDate.Should().NotBeNull();
-        solarDate.Should().Be(new DateTime(expectedSolarYear, expectedSolarMonth, expectedSolarDay));
+        solarDate.Should().Be(new DateTime(expectedSolarYear, expectedSolarMonth, expectedSolarDay, 12, 0, 0));
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class LunarCalendarServiceTests
         DateTime? solarDate = _lunarCalendarService.ConvertLunarToSolar(1, 2, 2023, true);
 
         solarDate.Should().NotBeNull();
-        solarDate.Should().Be(new DateTime(2023, 3, 22));
+        solarDate.Should().Be(new DateTime(2023, 3, 22, 12, 0, 0));
     }
 
     [Theory]

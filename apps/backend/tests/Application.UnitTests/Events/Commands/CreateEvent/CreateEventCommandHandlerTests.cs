@@ -394,7 +394,7 @@ public class CreateEventCommandHandlerTests : TestBase
 
         var lunarDateInput = new LunarDateInput { Day = 15, Month = 8, IsLeapMonth = false };
         var currentYear = DateTime.Now.Year;
-        var expectedSolarDate = new DateTime(currentYear, 9, 29); // Example date
+        var expectedSolarDate = new DateTime(currentYear, 9, 29, 0, 0, 0, DateTimeKind.Utc); // Example date
 
         _lunarCalendarServiceMock
             .Setup(x => x.ConvertLunarToSolar(lunarDateInput.Day, lunarDateInput.Month, currentYear, lunarDateInput.IsLeapMonth))

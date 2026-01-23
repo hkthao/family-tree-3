@@ -45,7 +45,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockLunarCalendarService.Setup(s => s.ConvertLunarToSolar(1, 1, year, false))
-            .Returns(new DateTime(year, 2, 10));
+            .Returns(new DateTime(year, 2, 10, 12, 0, 0));
 
         // Act
         await _job.GenerateOccurrences(year, null, CancellationToken.None);
@@ -57,7 +57,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         {
             generatedOccurrence.EventId.Should().Be(lunarEvent.Id);
             generatedOccurrence.Year.Should().Be(year);
-            generatedOccurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10));
+            generatedOccurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10, 5, 0, 0, DateTimeKind.Utc));
         }
     }
 
@@ -108,7 +108,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockLunarCalendarService.Setup(s => s.ConvertLunarToSolar(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>()))
-            .Returns(new DateTime(year, 2, 10));
+            .Returns(new DateTime(year, 2, 10, 7, 0, 0));
 
         // Act
         await _job.GenerateOccurrences(year, null, CancellationToken.None);
