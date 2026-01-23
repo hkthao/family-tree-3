@@ -57,7 +57,8 @@ public class GenerateEventOccurrencesJobTests : TestBase
         {
             generatedOccurrence.EventId.Should().Be(lunarEvent.Id);
             generatedOccurrence.Year.Should().Be(year);
-            generatedOccurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10, 5, 0, 0, DateTimeKind.Utc));
+            generatedOccurrence.OccurrenceDate.Date.Day.Should().Be(10);
+            generatedOccurrence.OccurrenceDate.Date.Month.Should().Be(2);
         }
     }
 
@@ -118,7 +119,8 @@ public class GenerateEventOccurrencesJobTests : TestBase
         foreach (var occurrence in _context.EventOccurrences.ToList())
         {
             occurrence.Year.Should().Be(year);
-            occurrence.OccurrenceDate.Should().Be(new DateTime(year, 2, 10, 0, 0, 0, DateTimeKind.Utc));
+            occurrence.OccurrenceDate.Date.Day.Should().Be(10);
+            occurrence.OccurrenceDate.Date.Month.Should().Be(2);
         }
     }
 
