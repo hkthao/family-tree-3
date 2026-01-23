@@ -27,7 +27,6 @@ public class SendEventNotificationCommandHandlerTests : TestBase
         _handler = new SendEventNotificationCommandHandler(
             _context,
             _mockNotificationService.Object,
-            _mockDateTime.Object,
             _mockLogger.Object,
             _mockAuthorizationService.Object
         );

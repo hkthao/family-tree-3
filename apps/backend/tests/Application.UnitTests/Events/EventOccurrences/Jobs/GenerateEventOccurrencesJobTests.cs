@@ -26,8 +26,7 @@ public class GenerateEventOccurrencesJobTests : TestBase
         _job = new GenerateEventOccurrencesJob(
             new Mock<ILogger<GenerateEventOccurrencesJob>>().Object, // Provide a dummy logger
             _context, // Use real in-memory context
-            _mockLunarCalendarService.Object,
-            _mockDateTime.Object); // Use _mockDateTime from TestBase
+            _mockLunarCalendarService.Object);
     }
 
     [Fact]
