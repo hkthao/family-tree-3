@@ -10,20 +10,17 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
 {
     private readonly IApplicationDbContext _context;
     private readonly INotificationService _notificationService;
-    private readonly IDateTime _dateTime;
     private readonly ILogger<SendEventNotificationCommandHandler> _logger;
     private readonly IAuthorizationService _authorizationService;
 
     public SendEventNotificationCommandHandler(
         IApplicationDbContext context,
         INotificationService notificationService,
-        IDateTime dateTime,
         ILogger<SendEventNotificationCommandHandler> logger,
         IAuthorizationService authorizationService)
     {
         _context = context;
         _notificationService = notificationService;
-        _dateTime = dateTime;
         _logger = logger;
         _authorizationService = authorizationService;
     }
@@ -118,9 +115,9 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
             event_id = @event.Id.ToString(),
             event_name = @event.Name,
             event_type = @event.Type.ToString(),
-            family_id = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
+            family_id = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : string.Empty,
             member_name = memberName,
-            lunar_date = @event.LunarDate != null ? $"{@event.LunarDate.Day:D2}/{@event.LunarDate.Month:D2}" : null,
+            lunar_date = @event.LunarDate != null ? $"{@event.LunarDate.Day:D2}/{@event.LunarDate.Month:D2}" : string.Empty,
             event_date = notificationDate.ToString("dd/MM"), // Format as dd/MM
             titles = memberHonorific
         };

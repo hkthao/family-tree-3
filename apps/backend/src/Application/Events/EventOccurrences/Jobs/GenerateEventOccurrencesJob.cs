@@ -10,18 +10,15 @@ public class GenerateEventOccurrencesJob : IGenerateEventOccurrencesJob
     private readonly ILogger<GenerateEventOccurrencesJob> _logger;
     private readonly IApplicationDbContext _context;
     private readonly ILunarCalendarService _lunarCalendarService;
-    private readonly IDateTime _dateTime;
 
     public GenerateEventOccurrencesJob(
         ILogger<GenerateEventOccurrencesJob> logger,
         IApplicationDbContext context,
-        ILunarCalendarService lunarCalendarService,
-        IDateTime dateTime)
+        ILunarCalendarService lunarCalendarService)
     {
         _logger = logger;
         _context = context;
         _lunarCalendarService = lunarCalendarService;
-        _dateTime = dateTime;
     }
 
     public async Task GenerateOccurrences(int year, Guid? familyId, CancellationToken cancellationToken)

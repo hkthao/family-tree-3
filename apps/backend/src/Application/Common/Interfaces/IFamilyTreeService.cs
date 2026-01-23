@@ -1,3 +1,5 @@
+using backend.Domain.ValueObjects;
+
 namespace backend.Application.Common.Interfaces;
 
 /// <summary>
@@ -19,7 +21,8 @@ public interface IFamilyTreeService
     /// <param name="familyId">ID của gia đình.</param>
     /// <param name="dateOfBirth">Ngày sinh của thành viên.</param>
     /// <param name="dateOfDeath">Ngày mất của thành viên.</param>
+    /// <param name="lunarDateOfDeath">Ngày mất âm lịch của thành viên.</param>
     /// <param name="fullName">Tên đầy đủ của thành viên.</param>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-    Task SyncMemberLifeEvents(Guid memberId, Guid familyId, DateOnly? dateOfBirth, DateOnly? dateOfDeath, string fullName, CancellationToken cancellationToken = default);
+    Task SyncMemberLifeEvents(Guid memberId, Guid familyId, DateOnly? dateOfBirth, DateOnly? dateOfDeath, LunarDate? lunarDateOfDeath, string fullName, CancellationToken cancellationToken = default);
 }

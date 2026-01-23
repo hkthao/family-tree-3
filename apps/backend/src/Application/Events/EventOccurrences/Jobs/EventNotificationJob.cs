@@ -119,9 +119,9 @@ public class EventNotificationJob : IEventNotificationJob
                 event_id = @event.Id.ToString(),
                 event_name = @event.Name,
                 event_type = @event.Type.ToString(),
-                familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : null,
+                familyId = @event.FamilyId.HasValue ? @event.FamilyId.Value.ToString() : string.Empty,
                 member_name = memberName, // Use determined member name
-                lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : null,
+                lunar_date = @event.LunarDate != null ? @event.LunarDate.ToString() : string.Empty,
                 event_date = occurrence.OccurrenceDate.ToString("dd/MM"), // Format as dd/MM
                 titles = memberHonorific // Use determined honorific
             };
