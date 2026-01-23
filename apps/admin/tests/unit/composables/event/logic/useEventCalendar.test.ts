@@ -48,7 +48,8 @@ const mockEventService: IEventService = {
   getByIds: vi.fn() as Mock,
   exportEvents: vi.fn() as Mock,
   importEvents: vi.fn() as Mock,
-  getEventsByMemberId: vi.fn() as Mock, // Add this new method
+  getEventsByMemberId: vi.fn() as Mock,
+  generateAndNotifyEvents: vi.fn() as Mock,
 };
 
 const mockDateAdapter = {
