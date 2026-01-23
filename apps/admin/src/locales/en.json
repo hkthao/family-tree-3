@@ -281,6 +281,7 @@
   "dashboard.stats.totalGenerations": "Total Generations",
   "dashboard.stats.totalMembers": "Total Members",
   "dashboard.stats.totalRelationships": "Total Relationships",
+  "dashboard.stats.upcomingEvents": "Upcoming Events",
   "dashboard.upcomingEvents.loading": "Loading upcoming events...",
   "dashboard.upcomingEvents.noData": "No upcoming events.",
   "dashboard.upcomingEvents.title": "Upcoming Events",

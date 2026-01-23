@@ -51,7 +51,8 @@
         <v-card height="100%" class="pa-3 text-center" elevation="1">
           <div class="d-flex flex-column align-center justify-center fill-height">
             <v-icon size="40" color="red">mdi-database</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ (stats.usedStorageMb || 0).toFixed(0) }} / {{ (stats.maxStorageMb || 0).toFixed(0) }}</div>
+            <div class="text-h5 font-weight-bold mt-2">{{ (stats.usedStorageMb || 0).toFixed(0) }} / {{
+              (stats.maxStorageMb || 0).toFixed(0) }}</div>
             <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.storageUsed') }} (MB)</div>
           </div>
         </v-card>
@@ -69,8 +70,18 @@
         <v-card height="100%" class="pa-3 text-center" elevation="1">
           <div class="d-flex flex-column align-center justify-center fill-height">
             <v-icon size="40" color="blue-grey">mdi-robot</v-icon>
-            <div class="text-h5 font-weight-bold mt-2">{{ stats.aiChatMonthlyUsage || 0 }} / {{ stats.aiChatMonthlyLimit || 0 }}</div>
+            <div class="text-h5 font-weight-bold mt-2">{{ stats.aiChatMonthlyUsage || 0 }} / {{ stats.aiChatMonthlyLimit
+              || 0 }}</div>
             <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.aiChatMonthly') }}</div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <v-card height="100%" class="pa-3 text-center" elevation="1">
+          <div class="d-flex flex-column align-center justify-center fill-height">
+            <v-icon size="40" color="teal">mdi-calendar-check</v-icon>
+            <div class="text-h5 font-weight-bold mt-2">{{ stats.upcomingEventsCount || 0 }}</div>
+            <div class="text-subtitle-1 text-grey">{{ t('dashboard.stats.upcomingEvents') }}</div>
           </div>
         </v-card>
       </v-col>
@@ -96,8 +107,7 @@
 
         <v-row>
           <v-col>
-            <MembersPerGenerationChart :members-per-generation="stats.membersPerGeneration"
-              :loading="loading" />
+            <MembersPerGenerationChart :members-per-generation="stats.membersPerGeneration" :loading="loading" />
           </v-col>
         </v-row>
 

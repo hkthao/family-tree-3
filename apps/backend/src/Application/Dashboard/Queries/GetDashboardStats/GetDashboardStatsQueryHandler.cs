@@ -44,8 +44,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
 
         // Fetch EventOccurrences for the next 3 days, including their associated Event to filter by FamilyId
         stats.UpcomingEventsCount = await _context.EventOccurrences
-            .Include(eo => eo.Event) // Include the Event navigation property
-            .Where(eo => !eo.Event.IsDeleted && data.FilteredFamiliesQuery.Any(f => f.Id == eo.Event.FamilyId)) // Filter by accessible families and non-deleted events
+            .Where(eo => !eo.Event.IsDeleted && eo.Event.FamilyId == request.FamilyId) // Filter by accessible families and non-deleted events
             .Where(eo => eo.OccurrenceDate.Date >= today && eo.OccurrenceDate.Date <= threeDaysLater)
             .Select(eo => eo.EventId)
             .Distinct()

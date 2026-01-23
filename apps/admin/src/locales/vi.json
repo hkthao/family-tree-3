@@ -361,6 +361,7 @@
   "dashboard.stats.totalGenerations": "Tổng số Thế hệ",
   "dashboard.stats.totalMembers": "Tổng số Thành viên",
   "dashboard.stats.totalRelationships": "Tổng số Mối quan hệ",
+  "dashboard.stats.upcomingEvents": "Sự kiện sắp tới",
   "dashboard.title": "Tổng quan",
   "dashboard.upcomingEvents.loading": "Đang tải sự kiện sắp tới...",
   "dashboard.upcomingEvents.noData": "Không có sự kiện sắp tới.",

@@ -39,6 +39,7 @@ export interface DashboardStats {
   totalMembers: number;
   totalRelationships: number;
   totalGenerations?: number;
+  upcomingEventsCount?: number;
   maleRatio?: number;
   femaleRatio?: number;
   livingMembersCount?: number;
