@@ -32,7 +32,7 @@ class DlibFaceDetector:
         """
         try:
             # Convert image to grayscale for Dlib's detector
-            gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             # Perform face detection
             detections = self.detector(

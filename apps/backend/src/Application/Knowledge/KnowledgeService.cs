@@ -898,7 +898,7 @@ public class KnowledgeService : IKnowledgeService
             var responseContent = await response.Content.ReadAsStringAsync();
             var searchResponse = JsonSerializer.Deserialize<FaceSearchApiResponse>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
             _logger.LogInformation("Successfully performed face search in knowledge service for FamilyId: {FamilyId}. Found {ResultCount} faces.", familyId, searchResponse?.Results?.Count ?? 0);
-            return searchResponse?.Results ?? new List<FaceSearchResultDto>();
+            return searchResponse?.Results?.Where(e => e.Score < 0.3).ToList() ?? [];
         }
         catch (HttpRequestException ex)
         {
