@@ -7,7 +7,7 @@ public class MemberImportDto
     public Guid Id { get; set; } // Original ID, used for mapping relationships during import
     public string LastName { get; set; } = null!;
     public string FirstName { get; set; } = null!;
-    public string Code { get; set; } = null!;
+    public string? Code { get; set; } = null;
     public string? Nickname { get; set; }
     public string? Gender { get; set; } // Stored as string, will be parsed to enum if needed by entity
     public DateTime? DateOfBirth { get; set; }
