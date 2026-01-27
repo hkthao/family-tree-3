@@ -1,13 +1,10 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Form # Added Form
-from fastapi.responses import JSONResponse, Response # Added Response
-from typing import List, Optional, Tuple # Added Tuple
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Response
+from typing import List, Optional
 import uuid
 import base64
 import io
-import json # Added
 from PIL import Image
 import numpy as np
-import cv2 # Added
 
 from pydantic import BaseModel # Added for DTOs
 
@@ -15,7 +12,7 @@ from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
 
 
-from app.services.get_emotion import get_emotion
+
 import logging
 
 # Configure logging
@@ -27,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Models for face detection results (redefined here from app.models.face_detection)
+
 class BoundingBox(BaseModel):
     x: int
     y: int
@@ -40,15 +37,14 @@ class FaceDetectionResult(BaseModel):
     confidence: float
     thumbnail: Optional[str] = None
     embedding: Optional[List[float]] = None
-    emotion: Optional[str] = None
-    emotion_confidence: Optional[float] = None
+
 
 # New DTOs for image-processing integration
 
 app = FastAPI(
-    title="ImageFaceEmotionService", # Changed title
+    title="ImageFaceService", # Changed title
     description=(
-        "A FastAPI service for face detection, embedding, cropping, and emotion analysis." # Changed description
+        "A FastAPI service for face detection, embedding, and cropping." # Changed description
     ),
     version="1.0.0",
 )
@@ -108,17 +104,9 @@ async def detect_faces(
 
             # Crop face
             cropped_face = image.crop((x, y, x + w, y + h))
-
-            # Encode cropped face to base64 for emotion detection
-            buffered_emotion = io.BytesIO()
-            cropped_face.save(buffered_emotion, format="PNG")
-            cropped_face_base64_emotion = base64.b64encode(buffered_emotion.getvalue()).decode("utf-8")
-
-            # Perform emotion analysis
-            predicted_emotion, emotion_confidence = get_emotion(cropped_face_base64_emotion)
             
             # Generate embedding for the cropped face
-            face_embedding = face_embedding_service.get_facenet_embedding(
+            face_embedding = face_embedding_service.get_embedding( # Changed from get_facenet_embedding
                 cropped_face
             )
 
@@ -135,8 +123,6 @@ async def detect_faces(
                 confidence=float(confidence),
                 thumbnail=thumbnail_base64,
                 embedding=face_embedding,
-                emotion=predicted_emotion,
-                emotion_confidence=emotion_confidence,
             )
             results.append(face_result)
             logger.debug(
