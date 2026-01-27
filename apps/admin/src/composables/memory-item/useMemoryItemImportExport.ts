@@ -14,7 +14,7 @@ export function useMemoryItemImportExport(familyId: Ref<string | undefined>) {
     mutationFn: async () => {
       const result = await memoryItem.exportMemoryItems(familyId.value);
       if (result.ok && result.value) {
-        downloadFile(result.value, `memory-items-${familyId.value || 'all'}.json`, 'application/json');
+        downloadFile(JSON.stringify(result.value), `memory-items-${familyId.value || 'all'}.json`, 'application/json');
         showSnackbar(t('memoryItem.messages.exportSuccess'), 'success');
       } else if (!result.ok) {
         showSnackbar(result.error?.message || t('memoryItem.messages.exportError'), 'error');

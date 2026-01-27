@@ -14,7 +14,7 @@ export function useEventImportExport(familyId: Ref<string | undefined>) {
     mutationFn: async () => {
       const result = await eventService.exportEvents(familyId.value);
       if (result.ok && result.value) {
-        downloadFile(result.value, `events-${familyId.value || 'all'}.json`, 'application/json');
+        downloadFile(JSON.stringify(result.value), `events-${familyId.value || 'all'}.json`, 'application/json');
         showSnackbar(t('event.messages.exportSuccess'), 'success');
       } else if (!result.ok) {
         showSnackbar(result.error?.message || t('event.messages.exportError'), 'error');

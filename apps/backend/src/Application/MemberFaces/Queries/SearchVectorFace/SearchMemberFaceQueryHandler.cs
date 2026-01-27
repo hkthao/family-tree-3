@@ -39,6 +39,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
 
         foreach (var searchResult in searchResults)
         {
+                _logger.LogWarning("Score: {Score}.", searchResult.Score);
             // The FaceSearchResultDto contains FaceId (which is the VectorDbId from Python service)
             // and MemberId, Score.
             // We need to fetch the full MemberFace entity to get localDbId, thumbnailUrl, etc.

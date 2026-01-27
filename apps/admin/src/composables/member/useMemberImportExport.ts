@@ -14,7 +14,7 @@ export function useMemberImportExport(familyId: Ref<string | undefined>) {
     mutationFn: async () => {
       const result = await memberService.exportMembers(familyId.value);
       if (result.ok && result.value) {
-        downloadFile(result.value, `members-${familyId.value || 'all'}.json`, 'application/json');
+        downloadFile(JSON.stringify(result.value), `members-${familyId.value || 'all'}.json`, 'application/json');
         showSnackbar(t('member.messages.exportSuccess'), 'success');
       } else if (!result.ok) {
         showSnackbar(result.error?.message || t('member.messages.exportError'), 'error');

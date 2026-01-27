@@ -10,7 +10,7 @@ export function useFamilyRules() {
   const rules = computed(() => {
     return {
       name: [rulesVuetify.required(t('common.validations.required'))],
-      code: [rulesVuetify.required(t('common.validations.required'))], // Add code rule
+      code: [], // Add code rule
     };
   });
 

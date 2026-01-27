@@ -46,24 +46,22 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 var (width, height) = ImageUtils.GetImageDimensions(request.ImageBytes, _logger);
                 imageWidth = width;
                 imageHeight = height;
-
-                var originalUploadCommand = new UploadFileCommand
-                {
-                    ImageData = request.ImageBytes,
-                    FileName = effectiveFileName,
-                    Folder = uploadFolder,
-                    ContentType = request.ContentType
-                };
-                var originalUploadResult = await _mediator.Send(originalUploadCommand, cancellationToken);
-                if (originalUploadResult.IsSuccess && originalUploadResult.Value != null)
-                {
-                    originalImageUrl = originalUploadResult.Value.Url;
-                }
-                else
-                {
-                    return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
-                }
-
+                // var originalUploadCommand = new UploadFileCommand
+                // {
+                //     ImageData = request.ImageBytes,
+                //     FileName = effectiveFileName,
+                //     Folder = uploadFolder,
+                //     ContentType = request.ContentType
+                // };
+                // var originalUploadResult = await _mediator.Send(originalUploadCommand, cancellationToken);
+                // if (originalUploadResult.IsSuccess && originalUploadResult.Value != null)
+                // {
+                //     originalImageUrl = originalUploadResult.Value.Url;
+                // }
+                // else
+                // {
+                //     return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
+                // }
             }
             var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
             var imageId = Guid.NewGuid();
