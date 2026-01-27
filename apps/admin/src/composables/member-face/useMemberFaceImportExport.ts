@@ -15,7 +15,7 @@ export function useMemberFaceImportExport(memberId: Ref<string | undefined>, fam
       console.log('exportMemberFaces mutationFn triggered');
       const result = await memberFace.exportMemberFaces(memberId.value, familyId.value);
       if (result.ok && result.value) {
-        downloadFile(result.value, `member-faces-${memberId.value || familyId.value || 'all'}.json`, 'application/json');
+        downloadFile(JSON.stringify(result.value), `member-faces-${memberId.value || familyId.value || 'all'}.json`, 'application/json');
         showSnackbar(t('memberFace.messages.exportSuccess'), 'success');
       } else if (!result.ok) {
         showSnackbar(result.error?.message || t('memberFace.messages.exportError'), 'error');

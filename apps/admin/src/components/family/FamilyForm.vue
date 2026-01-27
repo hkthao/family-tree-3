@@ -15,8 +15,8 @@
           required data-testid="family-visibility-select" prepend-inner-icon="mdi-eye"></v-select>
       </v-col>
       <v-col cols="3">
-        <v-text-field v-model="formData.code" :label="$t('family.form.code')" :rules="rules.code" required
-          data-testid="family-code-input" prepend-inner-icon="mdi-identifier" :disabled="props.readOnly || isEditMode"></v-text-field>
+        <v-text-field v-model="formData.code" :label="$t('family.form.code')" :rules="rules.code" 
+          data-testid="family-code-input" prepend-inner-icon="mdi-identifier" :disabled="true"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -139,7 +139,7 @@ defineEmits(['submit']);
 const formRef = ref<VForm | null>(null);
 
 const {
-  state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers, isEditMode },
+  state: { formData, initialAvatarDisplay, managers, viewers, visibilityItems, getFamilyAvatarUrl, rules, isLoadingUsers },
   actions: { validate, getFormData },
 } = useFamilyForm(props, formRef);
 
