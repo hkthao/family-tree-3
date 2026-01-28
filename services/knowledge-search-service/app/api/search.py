@@ -3,14 +3,16 @@ from loguru import logger
 
 from ..models.schemas import SearchRequest, SearchResponse, SearchResultItem
 from ..core.embeddings import EmbeddingService, embedding_service
-from ..core.lancedb import KnowledgeLanceDBService
+from ..core.qdrant import KnowledgeQdrantService
 
 
 router = APIRouter()
 
+
 # Dependencies
-def get_knowledge_lancedb_service(request: Request) -> KnowledgeLanceDBService:
-    return request.app.state.knowledge_lancedb_service
+def get_knowledge_qdrant_service(request: Request) -> KnowledgeQdrantService:
+    return request.app.state.knowledge_qdrant_service
+
 
 def get_embedding_service() -> EmbeddingService:
     return embedding_service
@@ -19,7 +21,7 @@ def get_embedding_service() -> EmbeddingService:
 @router.post("/search", response_model=SearchResponse)
 async def search_knowledge(
     request: SearchRequest,
-    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+    qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
     embedding_service_dep: EmbeddingService = Depends(get_embedding_service)
 ):
     """
@@ -34,7 +36,7 @@ async def search_knowledge(
         query_vector = embedding_service_dep.embed_query(request.query)
 
         # 2. Search LanceDB
-        results = lancedb_service.search_knowledge_table(
+        results = qdrant_service.search_knowledge_table(
             family_id=request.family_id,
             query_vector=query_vector,
             allowed_visibility=request.allowed_visibility,

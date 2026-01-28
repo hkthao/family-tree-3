@@ -1,6 +1,6 @@
 fastapi==0.109.0
 uvicorn==0.27.0
-lancedb==0.5.2
+qdrant-client==1.8.0 # Replaced lancedb
 polars==0.20.18
 sentence-transformers==2.7.0
 pydantic==2.5.3
