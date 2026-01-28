@@ -1,7 +1,7 @@
+using Microsoft.Extensions.Configuration; // To get RabbitMQ configuration
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using Microsoft.Extensions.Configuration; // To get RabbitMQ configuration
 
 namespace backend.Infrastructure.Services.MessageBus;
 

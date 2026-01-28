@@ -2,8 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
-using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.MemberFaces.Messages;
+using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Domain.Entities;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
@@ -67,7 +67,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         _context.MemberFaces.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Created MemberFace {MemberFaceId} for Member {MemberId}.", entity.Id, request.MemberId);
-        
+
         // Fetch member to get FamilyId. This is crucial for the integration event metadata.
         // Assuming member is still available from earlier check
         // Map to FaceAddVectorRequestDto for FaceApiService

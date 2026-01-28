@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
-using RabbitMQ.Client;
 using backend.CompositionRoot;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services.MessageBus;
@@ -9,6 +8,7 @@ using Hangfire; // RE-ADDED
 using Hangfire.Redis.StackExchange; // RE-ADDED
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using RabbitMQ.Client;
 
 /// <summary>
 /// Lớp chính khởi tạo và chạy ứng dụng.

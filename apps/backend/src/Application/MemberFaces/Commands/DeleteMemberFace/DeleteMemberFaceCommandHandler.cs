@@ -1,9 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.MemberFaces.Messages; // Add this using statement
 using backend.Domain.Events.MemberFaces; // Add this line
 using Microsoft.Extensions.Logging;
-using backend.Application.MemberFaces.Messages; // Add this using statement
 
 namespace backend.Application.MemberFaces.Commands.DeleteMemberFace;
 
@@ -55,7 +55,9 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
             };
             await _messageBus.PublishAsync(MessageBusConstants.Exchanges.MemberFace, MessageBusConstants.RoutingKeys.MemberFaceDeleted, message, cancellationToken);
             _logger.LogInformation("Published MemberFaceDeletedMessage for MemberFace {MemberFaceId}.", entity.Id);
-        } else {
+        }
+        else
+        {
             _logger.LogWarning("Cannot publish MemberFaceDeletedMessage for MemberFace {MemberFaceId} because Member is null.", entity.Id);
         }
 

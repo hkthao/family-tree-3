@@ -8,7 +8,7 @@ public class LLMChatCompletionRequest
     public string Model { get; set; } = null!;
 
     [JsonPropertyName("messages")]
-    public List<LLMMessage> Messages { get; set; } = new List<LLMMessage>();
+    public List<LLMChatCompletionMessage> Messages { get; set; } = new List<LLMChatCompletionMessage>();
 
     [JsonPropertyName("temperature")]
     public float Temperature { get; set; } = 0.0f;
@@ -18,4 +18,10 @@ public class LLMChatCompletionRequest
 
     [JsonPropertyName("stream")]
     public bool Stream { get; set; } = false;
+
+    [JsonPropertyName("user")]
+    public string? User { get; set; }
+
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, object>? Metadata { get; set; }
 }

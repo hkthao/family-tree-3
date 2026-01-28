@@ -3,11 +3,10 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
+using backend.Application.MemberFaces.Messages;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
-using backend.Application.MemberFaces.Messages;
 using backend.Domain.Entities;
-
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;

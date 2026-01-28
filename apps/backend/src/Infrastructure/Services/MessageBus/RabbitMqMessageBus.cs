@@ -1,8 +1,8 @@
 using System.Text;
+using System.Text.Json; // For JSON serialization
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using System.Text.Json; // For JSON serialization
 
 namespace backend.Infrastructure.Services.MessageBus;
 
