@@ -19,23 +19,20 @@ class QdrantService:
 
 
     def _create_collection_if_not_exists(self):
-        try:
-            # Always try to delete the collection first to ensure a fresh start with the new index
-            self.client.delete_collection(collection_name=self.collection_name)
-            logger.info(f"Collection '{self.collection_name}' deleted (if it existed) to apply new index.")
-        except Exception as e:
-            logger.info(f"Collection '{self.collection_name}' did not exist or could not be deleted: {e}")
-
-        logger.info(f"Creating collection '{self.collection_name}' with familyId index...")
-        self.client.recreate_collection(
-            collection_name=self.collection_name,
-            vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
-        )
-        self.client.create_payload_index(
-            collection_name=self.collection_name,
-            field_name="family_id",
-                            field_schema=models.PayloadSchemaType.KEYWORD,        )
-        logger.info(f"Collection '{self.collection_name}' created successfully with familyId index.")
+        if not self.client.collection_exists(collection_name=self.collection_name):
+            logger.info(f"Collection '{self.collection_name}' does not exist. Creating it now...")
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+            )
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="family_id",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+            logger.info(f"Collection '{self.collection_name}' created successfully with family_id index.")
+        else:
+            logger.info(f"Collection '{self.collection_name}' already exists. Skipping creation.")
 
     def upsert_face_embedding(self, vector: List[float], metadata: Dict[str, Any], point_id: str):
         """
@@ -90,6 +87,8 @@ class QdrantService:
                     "score": hit.score,
                     "payload": hit.payload
                 })
+        logger.info(f"Qdrant search completed. Found {len(results)} hits above threshold. Results: "
+                    f"{[{'id': r['id'], 'score': r['score']} for r in results]}")
         return results
 
     def get_points_by_payload_filter(self, payload_filter: Dict[str, Any]) -> List[Dict[str, Any]]:

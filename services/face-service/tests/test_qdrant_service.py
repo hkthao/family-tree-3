@@ -35,15 +35,20 @@ def test_qdrant_service_init_creates_collection(mock_qdrant_client):
     Kiểm tra rằng collection được tạo nếu nó chưa tồn tại khi collection_name không được cung cấp.
     """
     # Configure mock to simulate collection not found
-    mock_qdrant_client.get_collection.side_effect = Exception("Collection not found")
+    mock_qdrant_client.collection_exists.return_value = False
     
     with patch('os.getenv', return_value="new_env_collection"):
         service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.delete_collection.assert_called_once_with(collection_name="new_env_collection")
-    mock_qdrant_client.recreate_collection.assert_called_once_with(
+    mock_qdrant_client.collection_exists.assert_called_once_with(collection_name="new_env_collection")
+    mock_qdrant_client.create_collection.assert_called_once_with(
         collection_name="new_env_collection",
         vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+    )
+    mock_qdrant_client.create_payload_index.assert_called_once_with(
+        collection_name="new_env_collection",
+        field_name="family_id",
+        field_schema=models.PayloadSchemaType.KEYWORD,
     )
     assert service.collection_name == "new_env_collection"
 
@@ -53,17 +58,16 @@ def test_qdrant_service_init_does_not_recreate_existing_collection(mock_qdrant_c
     Kiểm tra rằng collection không được tạo lại nếu nó đã tồn tại khi collection_name không được cung cấp.
     """
     # Configure mock to simulate collection found
-    mock_qdrant_client.get_collection.side_effect = None # Reset side effect
-    mock_qdrant_client.get_collection.return_value = Mock() # Return a dummy object
+    mock_qdrant_client.collection_exists.return_value = True
     
     with patch('os.getenv', return_value="existing_env_collection"):
         service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.delete_collection.assert_called_once_with(collection_name="existing_env_collection")
-    mock_qdrant_client.recreate_collection.assert_called_once_with(
-        collection_name="existing_env_collection",
-        vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
-    )
+    mock_qdrant_client.collection_exists.assert_called_once_with(collection_name="existing_env_collection")
+    mock_qdrant_client.create_collection.assert_not_called()
+    mock_qdrant_client.recreate_collection.assert_not_called()
+    mock_qdrant_client.delete_collection.assert_not_called()
+    mock_qdrant_client.create_payload_index.assert_not_called()
     assert service.collection_name == "existing_env_collection"
 
 def test_upsert_face_embedding(qdrant_service_instance, mock_qdrant_client):
