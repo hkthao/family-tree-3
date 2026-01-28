@@ -17,18 +17,25 @@ class QdrantService:
         )
         self._create_collection_if_not_exists()
 
+
     def _create_collection_if_not_exists(self):
-        # Kiểm tra xem collection đã tồn tại chưa
         try:
-            self.client.get_collection(collection_name=self.collection_name)
-            logger.info(f"Collection '{self.collection_name}' already exists.")
-        except Exception:  # QdrantClient.get_collection raises an exception if collection does not exist
-            logger.info(f"Collection '{self.collection_name}' not found. Creating it...")
-            self.client.recreate_collection(
-                collection_name=self.collection_name,
-                vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
-            )
-            logger.info(f"Collection '{self.collection_name}' created successfully.")
+            # Always try to delete the collection first to ensure a fresh start with the new index
+            self.client.delete_collection(collection_name=self.collection_name)
+            logger.info(f"Collection '{self.collection_name}' deleted (if it existed) to apply new index.")
+        except Exception as e:
+            logger.info(f"Collection '{self.collection_name}' did not exist or could not be deleted: {e}")
+
+        logger.info(f"Creating collection '{self.collection_name}' with familyId index...")
+        self.client.recreate_collection(
+            collection_name=self.collection_name,
+            vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+        )
+        self.client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="familyId",
+                            field_schema=models.PayloadSchemaType.KEYWORD,        )
+        logger.info(f"Collection '{self.collection_name}' created successfully with familyId index.")
 
     def upsert_face_embedding(self, vector: List[float], metadata: Dict[str, Any], point_id: str):
         """
@@ -65,15 +72,18 @@ class QdrantService:
                 ]
             )
 
-        search_result = self.client.search(
+        search_result_raw = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
-            query_filter=qdrant_filter,
+            query=query_vector,
             limit=limit,
-            score_threshold=score_threshold  # Add score_threshold here
+            query_filter=qdrant_filter,
+            score_threshold=score_threshold
         )
+        
+        search_hits = search_result_raw.points
+        
         results = []
-        for hit in search_result:
+        for hit in search_hits:
             results.append({
                 "id": hit.id,
                 "score": hit.score,

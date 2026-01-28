@@ -40,10 +40,10 @@ def test_qdrant_service_init_creates_collection(mock_qdrant_client):
     with patch('os.getenv', return_value="new_env_collection"):
         service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="new_env_collection")
+    mock_qdrant_client.delete_collection.assert_called_once_with(collection_name="new_env_collection")
     mock_qdrant_client.recreate_collection.assert_called_once_with(
         collection_name="new_env_collection",
-        vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE)
+        vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
     )
     assert service.collection_name == "new_env_collection"
 
@@ -59,8 +59,11 @@ def test_qdrant_service_init_does_not_recreate_existing_collection(mock_qdrant_c
     with patch('os.getenv', return_value="existing_env_collection"):
         service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="existing_env_collection")
-    mock_qdrant_client.recreate_collection.assert_not_called()
+    mock_qdrant_client.delete_collection.assert_called_once_with(collection_name="existing_env_collection")
+    mock_qdrant_client.recreate_collection.assert_called_once_with(
+        collection_name="existing_env_collection",
+        vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+    )
     assert service.collection_name == "existing_env_collection"
 
 def test_upsert_face_embedding(qdrant_service_instance, mock_qdrant_client):
@@ -91,11 +94,20 @@ def test_search_face_embeddings(qdrant_service_instance, mock_qdrant_client):
     mock_hit.id = "found_id"
     mock_hit.score = 0.95
     mock_hit.payload = {"memberId": "456", "familyId": "def"}
-    mock_qdrant_client.search.return_value = [mock_hit]
+    
+    mock_query_result = Mock()
+    mock_query_result.points = [mock_hit]
+    mock_qdrant_client.query_points.return_value = mock_query_result
     
     results = qdrant_service_instance.search_face_embeddings(query_vector)
     
-    mock_qdrant_client.search.assert_called_once()
+    mock_qdrant_client.query_points.assert_called_once_with(
+        collection_name=qdrant_service_instance.collection_name,
+        query=query_vector,
+        limit=5,
+        query_filter=None,
+        score_threshold=0.0
+    )
     assert len(results) == 1
     assert results[0]["id"] == "found_id"
     assert results[0]["score"] == 0.95
@@ -112,12 +124,19 @@ def test_search_face_embeddings_with_filter(qdrant_service_instance, mock_qdrant
     mock_hit.id = "filtered_id"
     mock_hit.score = 0.98
     mock_hit.payload = {"memberId": "789", "familyId": "family_xyz"}
-    mock_qdrant_client.search.return_value = [mock_hit]
+    
+    mock_query_result = Mock()
+    mock_query_result.points = [mock_hit]
+    mock_qdrant_client.query_points.return_value = mock_query_result
     
     results = qdrant_service_instance.search_face_embeddings(query_vector, query_filter=query_filter)
     
-    mock_qdrant_client.search.assert_called_once()
-    args, kwargs = mock_qdrant_client.search.call_args
+    mock_qdrant_client.query_points.assert_called_once()
+    args, kwargs = mock_qdrant_client.query_points.call_args
+    assert kwargs['collection_name'] == qdrant_service_instance.collection_name
+    assert kwargs['query'] == query_vector
+    assert kwargs['limit'] == 5
+    assert kwargs['score_threshold'] == 0.0
     assert isinstance(kwargs['query_filter'], models.Filter)
     assert len(kwargs['query_filter'].must) == 1
     assert kwargs['query_filter'].must[0].key == "familyId"
