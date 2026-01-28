@@ -1,8 +1,11 @@
+using System.Collections.Generic;
+
 namespace backend.Application.MemberFaces.Common;
 
 public class FaceSearchRequestDto
 {
-    public string QueryImage { get; set; } = null!; // base64 encoded image
+    public List<double> Embedding { get; set; } = null!;
     public string? FamilyId { get; set; }
-    public int Limit { get; set; } = 5;
+    public string? MemberId { get; set; }
+    public int TopK { get; set; } = 5;
 }

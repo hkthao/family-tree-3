@@ -4,15 +4,17 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Knowledge; // Added for IKnowledgeService
+using backend.Application.MemberFaces.Common;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 
-public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IKnowledgeService knowledgeService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
+public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IKnowledgeService knowledgeService, IFaceApiService faceApiService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IKnowledgeService _knowledgeService = knowledgeService; // Changed from IN8nService
+    private readonly IKnowledgeService _knowledgeService = knowledgeService;
+    private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly ILogger<SearchMemberFaceQueryHandler> _logger = logger;
 
     public async Task<Result<List<FoundFaceDto>>> Handle(SearchMemberFaceQuery request, CancellationToken cancellationToken)
@@ -21,13 +23,17 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
         {
             return Result<List<FoundFaceDto>>.Failure("Search vector cannot be empty.", ErrorSources.Validation);
         }
-        // Call knowledge service to search faces
-        var searchResults = await _knowledgeService.SearchFaces(
-            request.FamilyId,
-            request.Vector,
-            request.MemberId,
-            request.Limit
-        );
+
+        // Call Face API service to search faces
+        var searchRequest = new FaceSearchRequestDto
+        {
+            Embedding = request.Vector,
+            FamilyId = request.FamilyId.ToString(),
+            MemberId = request.MemberId?.ToString(),
+            TopK = request.Limit
+        };
+
+        var searchResults = await _faceApiService.SearchFacesAsync(searchRequest);
         if (searchResults == null || searchResults.Count == 0)
         {
             _logger.LogInformation("No face vectors found for FamilyId: {FamilyId}", request.FamilyId);
@@ -40,17 +46,16 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
         foreach (var searchResult in searchResults)
         {
             _logger.LogWarning("Score: {Score}.", searchResult.Score);
-            // The FaceSearchResultDto contains FaceId (which is the VectorDbId from Python service)
-            // and MemberId, Score.
+            // The FaceSearchResultDto from FaceApiService contains VectorDbId and Score.
             // We need to fetch the full MemberFace entity to get localDbId, thumbnailUrl, etc.
 
             // First, check if a MemberFace entity exists with this VectorDbId
             var memberFace = await _context.MemberFaces.AsNoTracking()
-                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.VectorDbId, cancellationToken); // FaceId from searchResult is actually VectorDbId
+                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.Id, cancellationToken);
 
             if (memberFace == null)
             {
-                _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from knowledge service search.", searchResult.FaceId);
+                _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from face API service search.", searchResult.Id);
                 continue;
             }
 

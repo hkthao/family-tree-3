@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces; // Added
@@ -22,7 +21,7 @@ public class DeleteMemberFaceCommandHandlerTests
     private readonly Mock<DbSet<Member>> _membersDbSetMock; // Added
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<DeleteMemberFaceCommandHandler>> _loggerMock;
-    private readonly Mock<IKnowledgeService> _knowledgeServiceMock; // NEW
+    private readonly Mock<IFaceApiService> _faceApiServiceMock; // NEW
     private readonly List<MemberFace> _memberFacesData;
     private readonly List<Family> _familiesData; // Added
     private readonly List<Member> _membersData; // Added
@@ -35,7 +34,7 @@ public class DeleteMemberFaceCommandHandlerTests
         _membersDbSetMock = new Mock<DbSet<Member>>(); // Initialized
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _loggerMock = new Mock<ILogger<DeleteMemberFaceCommandHandler>>();
-        _knowledgeServiceMock = new Mock<IKnowledgeService>(); // NEW
+        _faceApiServiceMock = new Mock<IFaceApiService>(); // NEW
 
         _memberFacesData = new List<MemberFace>();
         _familiesData = new List<Family>(); // Initialized
@@ -64,7 +63,7 @@ public class DeleteMemberFaceCommandHandlerTests
 
     private DeleteMemberFaceCommandHandler CreateHandler()
     {
-        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _knowledgeServiceMock.Object);
+        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _faceApiServiceMock.Object);
     }
 
     private MemberFace SeedMemberFace(Family family, Member member)
@@ -102,8 +101,8 @@ public class DeleteMemberFaceCommandHandlerTests
         var command = new DeleteMemberFaceCommand { Id = existingMemberFace.Id };
         var handler = CreateHandler();
 
-        _knowledgeServiceMock.Setup(x => x.DeleteMemberFaceData(family.Id, existingMemberFace.Id))
-            .Returns(Task.CompletedTask)
+        _faceApiServiceMock.Setup(x => x.DeleteFaceByIdAsync(existingMemberFace.VectorDbId!))
+            .ReturnsAsync(new Dictionary<string, string> { { "status", "deleted" } })
             .Verifiable();
 
         // Act
@@ -120,7 +119,7 @@ public class DeleteMemberFaceCommandHandlerTests
         domainEvent.MemberFace.Should().Be(existingMemberFace);
         domainEvent.VectorDbId.Should().Be(existingMemberFace.VectorDbId);
 
-        _knowledgeServiceMock.Verify(x => x.DeleteMemberFaceData(family.Id, existingMemberFace.Id), Times.Once);
+        _faceApiServiceMock.Verify(x => x.DeleteFaceByIdAsync(existingMemberFace.VectorDbId!), Times.Once);
     }
 
     [Fact]

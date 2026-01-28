@@ -12,14 +12,14 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<DeleteMemberFaceCommandHandler> _logger;
-    private readonly IKnowledgeService _knowledgeService;
+    private readonly IFaceApiService _faceApiService;
 
-    public DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IKnowledgeService knowledgeService)
+    public DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IFaceApiService faceApiService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _logger = logger;
-        _knowledgeService = knowledgeService;
+        _faceApiService = faceApiService;
     }
 
     public async Task<Result<Unit>> Handle(DeleteMemberFaceCommand request, CancellationToken cancellationToken)
@@ -40,23 +40,23 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
         }
 
         // If the member face was synced to the vector DB, delete it from there first
-        // The service DeleteMemberFaceData expects familyId and faceId (which is MemberFace.Id)
-        if (entity.Member != null) // Ensure Member is loaded
+        // The service DeleteFaceByIdAsync expects VectorDbId
+        if (entity.VectorDbId != null) // Ensure VectorDbId exists
         {
             try
             {
-                await _knowledgeService.DeleteMemberFaceData(entity.Member.FamilyId, entity.Id);
-                _logger.LogInformation("Successfully deleted MemberFace {MemberFaceId} from knowledge-search-service for Family {FamilyId}.", entity.Id, entity.Member.FamilyId);
+                await _faceApiService.DeleteFaceByIdAsync(entity.VectorDbId);
+                _logger.LogInformation("Successfully deleted MemberFace {MemberFaceId} from face API service with VectorDbId {VectorDbId}.", entity.Id, entity.VectorDbId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to delete MemberFace {MemberFaceId} from knowledge-search-service for Family {FamilyId}. Proceeding with local deletion.", entity.Id, entity.Member.FamilyId);
-                // Do not re-throw; proceed with local deletion even if knowledge service fails
+                _logger.LogError(ex, "Failed to delete MemberFace {MemberFaceId} from face API service with VectorDbId {VectorDbId}. Proceeding with local deletion.", entity.Id, entity.VectorDbId);
+                // Do not re-throw; proceed with local deletion even if face API service fails
             }
         }
         else
         {
-            _logger.LogWarning("Member navigation property is null for MemberFace {MemberFaceId}. Cannot delete from knowledge-search-service.", entity.Id);
+            _logger.LogWarning("MemberFace {MemberFaceId} does not have a VectorDbId. Skipping deletion from face API service.", entity.Id);
         }
 
         _context.MemberFaces.Remove(entity);
