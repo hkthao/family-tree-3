@@ -3,19 +3,21 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
+using backend.Application.MemberFaces.IntegrationEvents; // NEW
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 
-public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator, IFaceApiService faceApiService) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
+public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator, IFaceApiService faceApiService, IMessageBus messageBus) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<CreateMemberFaceCommandHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IFaceApiService _faceApiService = faceApiService;
+    private readonly IFaceApiService _faceApiService = faceApiService; // Keep for now, might be removed later if not needed elsewhere
+    private readonly IMessageBus _messageBus = messageBus;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
         var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
@@ -87,23 +89,21 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 EmotionConfidence = request.EmotionConfidence ?? 0.0
             }
         };
+
+        // Create integration event
+        var integrationEvent = new FaceAddIntegrationEvent
+        {
+            FaceAddRequest = faceAddVectorRequest,
+            MemberFaceLocalId = entity.Id
+        };
         try
         {
-            // Call AddFaceByVectorAsync and expect VectorDbId in return
-            var result = await _faceApiService.AddFaceByVectorAsync(faceAddVectorRequest);
-            if (result != null && result.TryGetValue("vector_db_id", out var vectorDbIdObject) && vectorDbIdObject is string vecDbId)
-            {
-                entity.MarkAsVectorDbSynced(vecDbId);
-                _logger.LogInformation("Successfully indexed MemberFace {MemberFaceId} to face API service. Returned VectorDbId: {VectorDbId}", entity.Id, entity.VectorDbId);
-            }
-            else
-            {
-                _logger.LogError("Failed to get VectorDbId from face API service for MemberFace {MemberFaceId}. MemberFace will be created but not synced.", entity.Id);
-            }
+            await _messageBus.PublishAsync("face_exchange", "face.add", integrationEvent, cancellationToken);
+            _logger.LogInformation("Published FaceAddIntegrationEvent for MemberFace {MemberFaceId} to RabbitMQ.", entity.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to index MemberFace {MemberFaceId} to face API service: {Error}. MemberFace will be created but not synced.", entity.Id, ex.Message);
+            _logger.LogError(ex, "Failed to publish FaceAddIntegrationEvent for MemberFace {MemberFaceId} to RabbitMQ. MemberFace will be created but not synced.", entity.Id);
         }
         _context.MemberFaces.Add(entity);
         entity.AddDomainEvent(new MemberFaceCreatedEvent(entity));

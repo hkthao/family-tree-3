@@ -1,6 +1,8 @@
 using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
+using RabbitMQ.Client;
 using backend.CompositionRoot;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services.MessageBus;
 using backend.Web; // NEW: Added for HangfireDashboardAuthorizationFilter
 using backend.Web.Formatters; // Added for custom HTML input formatter
 using Hangfire; // RE-ADDED
@@ -112,6 +114,26 @@ public class Startup
         });
         services.AddLocalization();
         services.AddHttpClient();
+
+        // New RabbitMQ Service Registrations for IHostedService pattern
+        services.AddSingleton(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            return new ConnectionFactory()
+            {
+                HostName = configuration["RabbitMQ:HostName"] ?? "localhost",
+                Port = configuration.GetValue<int?>("RabbitMQ:Port") ?? 5672,
+                UserName = configuration["RabbitMQ:UserName"] ?? ConnectionFactory.DefaultUser,
+                Password = configuration["RabbitMQ:Password"] ?? ConnectionFactory.DefaultPass,
+                AutomaticRecoveryEnabled = true, // Enable automatic recovery
+                TopologyRecoveryEnabled = true // Enable topology recovery
+            };
+        });
+
+        services.AddSingleton<RabbitMqMessageBus>();
+        services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<RabbitMqMessageBus>());
+        services.AddHostedService<RabbitMqMessageBusHostedService>();
+
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
             {

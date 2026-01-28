@@ -9,21 +9,14 @@
   <ItemGroup>
 
     <PackageReference Include="Auth0.AuthenticationApi" />
-
     <PackageReference Include="Auth0.ManagementApi" />
-
     <PackageReference Include="AWSSDK.S3" />
-
     <PackageReference Include="CloudinaryDotNet" />
-
     <PackageReference Include="Hangfire.Redis.StackExchange" />
-
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
-
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
-
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
@@ -35,10 +28,10 @@
     <PackageReference Include="Qdrant.Client" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
     <PackageReference Include="AWSSDK.SecurityToken" />
-        <PackageReference Include="UglyToad.PdfPig" />
-        <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
-
-      </ItemGroup>
+    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
+    <PackageReference Include="RabbitMQ.Client" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
