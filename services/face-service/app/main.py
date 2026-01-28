@@ -9,6 +9,7 @@ import numpy as np
 import asyncio
 from pydantic import BaseModel  # Added for DTOs
 from app.message_consumer import MessageConsumer, RABBITMQ_URL
+from contextlib import asynccontextmanager
 
 from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
@@ -68,6 +69,16 @@ class FaceAddVectorRequest(BaseModel):
     metadata: FaceMetadata
 
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting up application and message consumer...")
+    asyncio.create_task(message_consumer.start()) # Run consumer in a background task
+    yield
+    logger.info("Shutting down application and message consumer...")
+    await message_consumer.stop() # Stop consumer gracefully
+
+
 app = FastAPI(
     title="ImageFaceService",  # Changed title
     description=(
@@ -75,6 +86,7 @@ app = FastAPI(
         "Also provides face management and search using Qdrant."  # Updated description
     ),
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Initialize the face detector and embedding service
@@ -94,15 +106,7 @@ face_service = FaceService(
 # Initialize Message Consumer
 message_consumer = MessageConsumer(face_service=face_service)
 
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Starting up application and message consumer...")
-    asyncio.create_task(message_consumer.start()) # Run consumer in a background task
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("Shutting down application and message consumer...")
-    await message_consumer.stop() # Stop consumer gracefully
 
 
 @app.post("/detect", response_model=List[FaceDetectionResult])
