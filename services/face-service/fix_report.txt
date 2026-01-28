@@ -1,1 +1,0 @@
-The TypeError has been addressed by removing the `await` keyword from the call to `self.face_service.add_face_by_vector` in `app/message_consumer.py`, as the method is synchronous.
