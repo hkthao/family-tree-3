@@ -6,6 +6,7 @@ import io
 import base64
 import json
 from PIL import Image
+import uuid
 
 # Import the main FastAPI app and services for mocking
 # The actual import of 'app' will happen inside the 'client' fixture
@@ -120,6 +121,7 @@ def test_add_face_endpoint(client, dummy_image_bytes, dummy_metadata, mock_all_s
     """
     Test POST /faces endpoint for adding a new face.
     """
+    dummy_metadata["faceId"] = str(uuid.uuid4())
     response = client.post(
         "/faces",
         files={"file": ("test.png", dummy_image_bytes, "image/png")},
@@ -148,6 +150,7 @@ def test_add_face_by_vector_endpoint(client, dummy_metadata, mock_all_services_s
     Test POST /faces/vector endpoint for adding a new face by vector.
     """
     vector_data = [0.5] * 128
+    dummy_metadata["faceId"] = str(uuid.uuid4())
     payload = {
         "vector": vector_data,
         "metadata": dummy_metadata

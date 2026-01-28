@@ -43,7 +43,8 @@ def test_add_face_success(face_service_instance, mock_qdrant_service, mock_face_
         "thumbnailUrl": "http://example.com/thumb.png",
         "originalImageUrl": "http://example.com/orig.jpg",
         "emotion": "happy",
-        "emotionConfidence": 0.9
+        "emotionConfidence": 0.9,
+        "faceId": "face123"
     }
     
     result = face_service_instance.add_face(dummy_image, metadata)
@@ -56,10 +57,9 @@ def test_add_face_success(face_service_instance, mock_qdrant_service, mock_face_
     assert args[0] == [0.1] * 128  # The dummy embedding
     assert args[1]["memberId"] == metadata["memberId"]
     assert args[1]["familyId"] == metadata["familyId"]
-    assert "faceId" in args[1] # faceId should be added to metadata
-    assert args[2] == args[1]["faceId"] # point_id should be the faceId
+    assert args[2] == metadata["faceId"] # point_id should be the faceId
     
-    assert "faceId" in result
+    assert result["faceId"] == metadata["faceId"]
     assert result["embedding"] == [0.1] * 128
     assert result["metadata"]["memberId"] == metadata["memberId"]
 
@@ -174,7 +174,8 @@ def test_add_face_by_vector_success(face_service_instance, mock_qdrant_service):
         "thumbnailUrl": "http://example.com/thumb2.png",
         "originalImageUrl": "http://example.com/orig2.jpg",
         "emotion": "sad",
-        "emotionConfidence": 0.7
+        "emotionConfidence": 0.7,
+        "faceId": "face456"
     }
 
     result = face_service_instance.add_face_by_vector(vector, metadata)
@@ -185,10 +186,9 @@ def test_add_face_by_vector_success(face_service_instance, mock_qdrant_service):
     assert args[0] == vector
     assert args[1]["memberId"] == metadata["memberId"]
     assert args[1]["familyId"] == metadata["familyId"]
-    assert "faceId" in args[1]
-    assert args[2] == args[1]["faceId"]
+    assert args[2] == metadata["faceId"]
 
-    assert "faceId" in result
+    assert result["faceId"] == metadata["faceId"]
     assert result["embedding"] == vector
     assert result["metadata"]["memberId"] == metadata["memberId"]
 

@@ -24,12 +24,9 @@ class FaceService:
 
         embedding = self.face_embedding_service.get_embedding(face_image)
 
-        # Tạo một ID duy nhất cho điểm trong Qdrant
-        # Có thể sử dụng memberId hoặc một UUID mới nếu mỗi member có nhiều khuôn mặt
-        face_id = str(uuid.uuid4())
-
-        # Thêm faceId vào metadata để dễ dàng truy vấn sau này
-        metadata["faceId"] = face_id
+        if "faceId" not in metadata:
+            raise ValueError("Metadata phải chứa 'faceId'.")
+        face_id = metadata["faceId"]
 
         self.qdrant_service.upsert_face_embedding(embedding, metadata, face_id)
         logger.info(f"Đã thêm khuôn mặt {face_id} cho member {metadata['memberId']} trong family {metadata['familyId']}.")
@@ -98,8 +95,9 @@ class FaceService:
         if "memberId" not in metadata or "familyId" not in metadata:
             raise ValueError("Metadata phải chứa 'memberId' và 'familyId'.")
 
-        face_id = str(uuid.uuid4())
-        metadata["faceId"] = face_id
+        if "faceId" not in metadata:
+            raise ValueError("Metadata phải chứa 'faceId'.")
+        face_id = metadata["faceId"]
 
         self.qdrant_service.upsert_face_embedding(vector, metadata, face_id)
         logger.info(f"Đã thêm khuôn mặt {face_id} (từ vector) cho member {metadata['memberId']} trong family {metadata['familyId']}.")

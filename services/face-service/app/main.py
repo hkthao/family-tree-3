@@ -39,6 +39,7 @@ class FaceDetectionResult(BaseModel):
 
 
 class FaceMetadata(BaseModel):
+    faceId: str
     localDbId: str
     memberId: str
     familyId: str
