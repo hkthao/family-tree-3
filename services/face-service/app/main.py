@@ -167,7 +167,7 @@ async def add_face_with_metadata(
         metadata_dict = FaceMetadata.model_validate_json(metadata).model_dump()
 
         result = face_service.add_face(face_image, metadata_dict)
-        logger.info(f"Face added successfully: {result['faceId']}")
+        logger.info(f"Face added successfully: {result['face_id']}")
         return result
     except Exception as e:
         logger.error(f"Failed to add face: {e}", exc_info=True)
@@ -177,12 +177,12 @@ async def add_face_with_metadata(
 @app.post("/faces/vector", response_model=Dict[str, Any])
 async def add_face_by_vector(request: FaceAddVectorRequest):
     logger.info(
-        f"Received request to add face by vector for memberId: {request.metadata.memberId}"
+        f"Received request to add face by vector for memberId: {request.metadata.member_id}"
     )
     try:
         metadata_dict = request.metadata.model_dump()
         result = face_service.add_face_by_vector(request.vector, metadata_dict)
-        logger.info(f"Face added by vector successfully: {result['faceId']}")
+        logger.info(f"Face added by vector successfully: {result['face_id']}")
         return result
     except Exception as e:
         logger.error(f"Failed to add face by vector: {e}", exc_info=True)
@@ -268,7 +268,7 @@ async def delete_faces_by_family_id(family_id: str):
 @app.post("/faces/search", response_model=List[FaceSearchResult])
 async def search_faces(request: FaceSearchRequest):
     logger.info(
-        f"Received request to search faces. FamilyId: {request.familyId}, Limit: {request.limit}"
+        f"Received request to search faces. FamilyId: {request.family_id}, Limit: {request.limit}"
     )
     try:
         # Decode the base64 image
@@ -276,7 +276,7 @@ async def search_faces(request: FaceSearchRequest):
         query_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
         search_results = face_service.search_similar_faces(
-            query_image, request.familyId, request.limit
+            query_image, request.family_id, request.limit
         )
         logger.info(f"Returning {len(search_results)} search results.")
         return search_results

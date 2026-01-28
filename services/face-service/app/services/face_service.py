@@ -18,18 +18,18 @@ class FaceService:
         Thêm một khuôn mặt mới vào hệ thống, tạo embedding và lưu trữ vào Qdrant.
         Metadata phải chứa 'memberId' và 'familyId'.
         """
-        if "memberId" not in metadata or "familyId" not in metadata:
-            raise ValueError("Metadata phải chứa 'memberId' và 'familyId'.")
+        if "member_id" not in metadata or "family_id" not in metadata:
+            raise ValueError("Metadata phải chứa 'member_id' và 'family_id'.")
 
         embedding = self.face_embedding_service.get_embedding(face_image)
 
-        if "faceId" not in metadata:
-            raise ValueError("Metadata phải chứa 'faceId'.")
-        face_id = metadata["faceId"]
+        if "face_id" not in metadata:
+            raise ValueError("Metadata phải chứa 'face_id'.")
+        face_id = metadata["face_id"]
 
         self.qdrant_service.upsert_face_embedding(embedding, metadata, face_id)
-        logger.info(f"Đã thêm khuôn mặt {face_id} cho member {metadata['memberId']} trong family {metadata['familyId']}.")
-        return {"faceId": face_id, "embedding": embedding, "metadata": metadata}
+        logger.info(f"Đã thêm khuôn mặt {face_id} cho member {metadata['member_id']} trong family {metadata['family_id']}.")
+        return {"face_id": face_id, "embedding": embedding, "metadata": metadata}
 
     def get_faces_by_family_id(self, family_id: str) -> List[Dict[str, Any]]:
         """
@@ -56,7 +56,7 @@ class FaceService:
 
         # Assuming a method like this in QdrantService:
         faces_data = self.qdrant_service.get_points_by_payload_filter(
-            payload_filter={"familyId": family_id}
+            payload_filter={"family_id": family_id}
         )
         logger.info(f"Đã truy xuất {len(faces_data)} khuôn mặt cho family {family_id}.")
         return faces_data
@@ -67,7 +67,7 @@ class FaceService:
         """
         success = self.qdrant_service.delete_point_by_id(face_id)
         if success:
-            logger.info(f"Đã xóa khuôn mặt với faceId: {face_id}.")
+            logger.info(f"Đã xóa khuôn mặt với face_id: {face_id}.")
         else:
             logger.warning(f"Không tìm thấy hoặc không thể xóa khuôn mặt với faceId: {face_id}.")
         return success
@@ -78,7 +78,7 @@ class FaceService:
         """
         logger.info(f"Đang xóa các khuôn mặt cho family {family_id}...")
         success = self.qdrant_service.delete_points_by_payload_filter(
-            payload_filter={"familyId": family_id}
+            payload_filter={"family_id": family_id}
         )
         if success:
             logger.info(f"Đã xóa thành công các khuôn mặt cho family {family_id}.")
@@ -91,16 +91,16 @@ class FaceService:
         Thêm một khuôn mặt mới vào hệ thống trực tiếp bằng vector embedding và metadata.
         Metadata phải chứa 'memberId' và 'familyId'.
         """
-        if "memberId" not in metadata or "familyId" not in metadata:
-            raise ValueError("Metadata phải chứa 'memberId' và 'familyId'.")
+        if "member_id" not in metadata or "family_id" not in metadata:
+            raise ValueError("Metadata phải chứa 'member_id' và 'family_id'.")
 
-        if "faceId" not in metadata:
-            raise ValueError("Metadata phải chứa 'faceId'.")
-        face_id = metadata["faceId"]
+        if "face_id" not in metadata:
+            raise ValueError("Metadata phải chứa 'face_id'.")
+        face_id = metadata["face_id"]
 
         self.qdrant_service.upsert_face_embedding(vector, metadata, face_id)
-        logger.info(f"Đã thêm khuôn mặt {face_id} (từ vector) cho member {metadata['memberId']} trong family {metadata['familyId']}.")
-        return {"faceId": face_id, "embedding": vector, "metadata": metadata}
+        logger.info(f"Đã thêm khuôn mặt {face_id} (từ vector) cho member {metadata['member_id']} trong family {metadata['family_id']}.")
+        return {"face_id": face_id, "embedding": vector, "metadata": metadata}
 
     def search_similar_faces(self, face_image: Image.Image, family_id: Optional[str] = None, limit: int = 5) -> List[Dict[str, Any]]:
         """
@@ -111,7 +111,7 @@ class FaceService:
 
         search_filter = None
         if family_id:
-            search_filter = {"familyId": family_id}
+            search_filter = {"family_id": family_id}
 
         search_results = self.qdrant_service.search_face_embeddings(
             query_vector=query_embedding,
@@ -128,9 +128,9 @@ class FaceService:
         """
         search_filter = {}
         if family_id:
-            search_filter["familyId"] = family_id
+            search_filter["family_id"] = family_id
         if member_id:
-            search_filter["memberId"] = member_id
+            search_filter["member_id"] = member_id
 
         # Convert empty search_filter to None if no filters are applied
         final_filter = search_filter if search_filter else None

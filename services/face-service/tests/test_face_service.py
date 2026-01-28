@@ -37,16 +37,15 @@ def test_add_face_success(face_service_instance, mock_qdrant_service, mock_face_
     Kiểm tra chức năng add_face thành công.
     """
     metadata = {
-        "memberId": "member123",
-        "familyId": "familyabc",
+        "member_id": "member123",
+        "family_id": "familyabc",
         "localDbId": "local123",
         "thumbnailUrl": "http://example.com/thumb.png",
         "originalImageUrl": "http://example.com/orig.jpg",
         "emotion": "happy",
         "emotionConfidence": 0.9,
-        "faceId": "face123"
-    }
-    
+        "face_id": "face123"
+    }    
     result = face_service_instance.add_face(dummy_image, metadata)
     
     mock_face_embedding_service.get_embedding.assert_called_once_with(dummy_image)
@@ -55,19 +54,18 @@ def test_add_face_success(face_service_instance, mock_qdrant_service, mock_face_
     # Check upsert_face_embedding arguments
     args, kwargs = mock_qdrant_service.upsert_face_embedding.call_args
     assert args[0] == [0.1] * 128  # The dummy embedding
-    assert args[1]["memberId"] == metadata["memberId"]
-    assert args[1]["familyId"] == metadata["familyId"]
-    assert args[2] == metadata["faceId"] # point_id should be the faceId
-    
-    assert result["faceId"] == metadata["faceId"]
+    assert args[1]["member_id"] == metadata["member_id"]
+    assert args[1]["family_id"] == metadata["family_id"]
+    assert args[2] == metadata["face_id"] # point_id should be the faceId
+    assert result["face_id"] == metadata["face_id"]
     assert result["embedding"] == [0.1] * 128
-    assert result["metadata"]["memberId"] == metadata["memberId"]
+    assert result["metadata"]["member_id"] == metadata["member_id"]
 
 def test_add_face_missing_metadata(face_service_instance, dummy_image):
     """
     Kiểm tra add_face khi thiếu memberId hoặc familyId trong metadata.
     """
-    with pytest.raises(ValueError, match="Metadata phải chứa 'memberId' và 'familyId'."):
+    with pytest.raises(ValueError, match="Metadata phải chứa 'member_id' và 'family_id'."):
         face_service_instance.add_face(dummy_image, {"localDbId": "local123"})
 
 def test_get_faces_by_family_id(face_service_instance, mock_qdrant_service):
@@ -83,7 +81,7 @@ def test_get_faces_by_family_id(face_service_instance, mock_qdrant_service):
     faces = face_service_instance.get_faces_by_family_id(family_id)
     
     mock_qdrant_service.get_points_by_payload_filter.assert_called_once_with(
-        payload_filter={"familyId": family_id}
+        payload_filter={"family_id": family_id}
     )
     assert len(faces) == 2
     assert faces[0]["id"] == "face1"
@@ -133,7 +131,7 @@ def test_search_similar_faces(face_service_instance, mock_qdrant_service, mock_f
     mock_qdrant_service.search_face_embeddings.assert_called_once_with(
         query_vector=query_embedding,
         limit=limit,
-        query_filter={"familyId": family_id}
+        query_filter={"family_id": family_id}
     )
     assert len(results) == 2
     assert results[0]["id"] == "res1"
@@ -168,34 +166,33 @@ def test_add_face_by_vector_success(face_service_instance, mock_qdrant_service):
     """
     vector = [0.2] * 128
     metadata = {
-        "memberId": "member456",
-        "familyId": "familyxyz",
+        "member_id": "member456",
+        "family_id": "familyxyz",
         "localDbId": "local456",
         "thumbnailUrl": "http://example.com/thumb2.png",
         "originalImageUrl": "http://example.com/orig2.jpg",
         "emotion": "sad",
         "emotionConfidence": 0.7,
-        "faceId": "face456"
+        "face_id": "face456"
     }
-
     result = face_service_instance.add_face_by_vector(vector, metadata)
 
     mock_qdrant_service.upsert_face_embedding.assert_called_once()
     
     args, kwargs = mock_qdrant_service.upsert_face_embedding.call_args
     assert args[0] == vector
-    assert args[1]["memberId"] == metadata["memberId"]
-    assert args[1]["familyId"] == metadata["familyId"]
-    assert args[2] == metadata["faceId"]
+    assert args[1]["member_id"] == metadata["member_id"]
+    assert args[1]["family_id"] == metadata["family_id"]
+    assert args[2] == metadata["face_id"]
 
-    assert result["faceId"] == metadata["faceId"]
+    assert result["face_id"] == metadata["face_id"]
     assert result["embedding"] == vector
-    assert result["metadata"]["memberId"] == metadata["memberId"]
+    assert result["metadata"]["member_id"] == metadata["member_id"]
 
 def test_add_face_by_vector_missing_metadata(face_service_instance):
     """
     Kiểm tra add_face_by_vector khi thiếu memberId hoặc familyId trong metadata.
     """
     vector = [0.2] * 128
-    with pytest.raises(ValueError, match="Metadata phải chứa 'memberId' và 'familyId'."):
+    with pytest.raises(ValueError, match="Metadata phải chứa 'member_id' và 'family_id'."):
         face_service_instance.add_face_by_vector(vector, {"localDbId": "local456"})

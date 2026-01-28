@@ -5,56 +5,51 @@ from pydantic import BaseModel, Field, ConfigDict
 # --- Nested Models ---
 
 class BoundingBoxModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    x: float = Field(alias="X")
-    y: float = Field(alias="Y")
-    width: float = Field(alias="Width")
-    height: float = Field(alias="Height")
+    x: float
+    y: float
+    width: float
+    height: float
 
 
 class MetadataModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    family_id: str = Field(alias="FamilyId")
-    member_id: str = Field(alias="MemberId")
-    face_id: str = Field(alias="FaceId")  # Corresponds to MemberFace.Id in backend
-    bounding_box: BoundingBoxModel = Field(alias="BoundingBox")
-    confidence: float = Field(alias="Confidence")
-    thumbnail_url: Optional[str] = Field(alias="ThumbnailUrl", default=None)
-    original_image_url: Optional[str] = Field(alias="OriginalImageUrl", default=None)
-    emotion: Optional[str] = Field(alias="Emotion", default=None)
-    emotion_confidence: float = Field(alias="EmotionConfidence", default=0.0)
+    family_id: str
+    member_id: str
+    face_id: str  # Corresponds to MemberFace.Id in backend
+    bounding_box: BoundingBoxModel
+    confidence: float
+    thumbnail_url: Optional[str] = None
+    original_image_url: Optional[str] = None
+    emotion: Optional[str] = None
+    emotion_confidence: float = 0.0
 
 
 class FaceAddRequestModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    vector: List[float] = Field(alias="Vector")
-    metadata: MetadataModel = Field(alias="Metadata")
+    vector: List[float]
+    metadata: MetadataModel
 
 
 # --- Main Message Models ---
 
 class MemberFaceAddedMessage(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    face_add_request: FaceAddRequestModel = Field(alias="FaceAddRequest")
-    member_face_local_id: str = Field(alias="MemberFaceLocalId")  # Redundant with FaceAddRequest.Metadata.FaceId, but included as per description
+    face_add_request: FaceAddRequestModel
+    member_face_local_id: str  # Redundant with FaceAddRequest.Metadata.face_id, but included as per description
 
 
 class MemberFaceDeletedMessage(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    member_face_id: str = Field(alias="MemberFaceId")
-    vector_db_id: Optional[str] = Field(alias="VectorDbId", default=None)
-    member_id: str = Field(alias="MemberId")
-    family_id: str = Field(alias="FamilyId")
+    member_face_id: str
+    vector_db_id: Optional[str] = None
+    member_id: str
+    family_id: str
 
 
 # --- Constants ---
 class MessageBusConstants:
     class Exchanges:
-        MEMBER_FACE = "member-face-exchange"
+        MEMBER_FACE = "face_exchange"
 
     class RoutingKeys:
-        MEMBER_FACE_ADDED = "member-face.added"
-        MEMBER_FACE_DELETED = "member-face.deleted"
+        MEMBER_FACE_ADDED = "face.add"
+        MEMBER_FACE_DELETED = "face.delete"
 
 
 # --- API Models ---
@@ -75,19 +70,19 @@ class FaceDetectionResult(BaseModel):
 
 
 class FaceMetadata(BaseModel):
-    faceId: str
-    localDbId: str
-    memberId: str
-    familyId: str
-    thumbnailUrl: str
-    originalImageUrl: str
+    face_id: str
+    local_db_id: str
+    member_id: str
+    family_id: str
+    thumbnail_url: str
+    original_image_url: str
     emotion: str = ""
-    emotionConfidence: float = 0.0
+    emotion_confidence: float = 0.0
 
 
 class FaceSearchRequest(BaseModel):
     query_image: str  # base64 encoded image
-    familyId: Optional[str] = None
+    family_id: Optional[str] = None
     limit: int = 5
 
 

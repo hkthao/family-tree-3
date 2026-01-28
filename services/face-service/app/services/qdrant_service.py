@@ -33,7 +33,7 @@ class QdrantService:
         )
         self.client.create_payload_index(
             collection_name=self.collection_name,
-            field_name="familyId",
+            field_name="family_id",
                             field_schema=models.PayloadSchemaType.KEYWORD,        )
         logger.info(f"Collection '{self.collection_name}' created successfully with familyId index.")
 

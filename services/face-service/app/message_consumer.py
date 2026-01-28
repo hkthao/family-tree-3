@@ -18,7 +18,7 @@ logger.setLevel(logging.INFO)
 
 RABBITMQ_USERNAME = os.getenv("RABBITMQ__USERNAME", "guest")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ__PASSWORD", "guest")
-RABBITMQ_HOSTNAME = os.getenv("RABBITMQ__HOSTNAME", "localhost")
+RABBITMQ_HOSTNAME = os.getenv("RABBITMQ__HOSTNAME", "rabbitmq")
 RABBITMQ_PORT = os.getenv("RABBITMQ__PORT", "5672")
 
 RABBITMQ_URL = f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOSTNAME}:{RABBITMQ_PORT}/"
@@ -87,11 +87,7 @@ class MessageConsumer:
 
                 face_add_request = added_message.face_add_request
                 vector = face_add_request.vector
-                metadata = face_add_request.metadata.model_dump()  # Convert Pydantic model to dict
-
-                # Add faceId to metadata explicitly, which is expected by face_service.add_face_by_vector
-                # It's already present in FaceAddRequest.Metadata.FaceId
-                metadata["faceId"] = face_add_request.metadata.face_id
+                metadata = face_add_request.metadata.model_dump()
 
                 # The BoundingBox model has float fields, but FaceService's BoundingBox expects int.
                 # Need to convert BoundingBox fields to int.
@@ -104,10 +100,10 @@ class MessageConsumer:
                         "height": int(bbox["height"]),
                     }
 
-                await self.face_service.add_face_by_vector(vector, metadata)
+                self.face_service.add_face_by_vector(vector, metadata)
                 logger.info(f"Metadata passed to add_face_by_vector: {metadata}")
                 logger.info(
-                    f"Processed MemberFaceAddedMessage for FaceId: {metadata['faceId']} "
+                    f"Processed MemberFaceAddedMessage for FaceId: {metadata['face_id']} "
                     f"from MemberFaceLocalId: {added_message.member_face_local_id}"
                 )
             except json.JSONDecodeError:
@@ -137,7 +133,7 @@ class MessageConsumer:
                     )
                 else:
                     logger.warning(
-                        f"MemberFaceDeletedMessage for MemberFaceId: {deleted_message.MemberFaceId} "
+                        f"MemberFaceDeletedMessage for MemberFaceId: {deleted_message.member_face_id} "
                         "has no VectorDbId. Skipping deletion from vector DB."
                     )
             except json.JSONDecodeError:

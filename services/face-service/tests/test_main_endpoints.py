@@ -108,27 +108,27 @@ def dummy_metadata():
     Returns dummy metadata dictionary.
     """
     return {
-        "localDbId": "aa1272a1-ebdc-4b23-a49b-f108c3c8ab64",
-        "memberId": "ca107c9a-d013-46cb-8a33-552c8b7d385a",
-        "familyId": "e4757d91-509b-4ac0-8807-8d0b82e3b7ec",
-        "thumbnailUrl": "https://res.cloudinary.com/dcdjaqq41/image/upload/v1767275869/dong-ho-viet-prod/dong-ho-viet-prod_21c97af0-50b6-43aa-9377-eb456c8c4fcc.png",
-        "originalImageUrl": "https://res.cloudinary.com/dcdjaqq41/image/upload/v1767275867/dong-ho-viet-prod/dong-ho-viet-prod_a821a49a-a20e-45c7-ab0a-c99e4368143a.jpg",
+        "local_db_id": "aa1272a1-ebdc-4b23-a49b-f108c3c8ab64",
+        "member_id": "ca107c9a-d013-46cb-8a33-552c8b7d385a",
+        "family_id": "e4757d91-509b-4ac0-8807-8d0b82e3b7ec",
+        "thumbnail_url": "https://res.cloudinary.com/dcdjaqq41/image/upload/v1767275869/dong-ho-viet-prod/dong-ho-viet-prod_21c97af0-50b6-43aa-9377-eb456c8c4fcc.png",
+        "original_image_url": "https://res.cloudinary.com/dcdjaqq41/image/upload/v1767275867/dong-ho-viet-prod/dong-ho-viet-prod_a821a49a-a20e-45c7-ab0a-c99e4368143a.jpg",
         "emotion": "",
-        "emotionConfidence": 0
+        "emotion_confidence": 0
     }
 
 def test_add_face_endpoint(client, dummy_image_bytes, dummy_metadata, mock_all_services_session_scope):
     """
     Test POST /faces endpoint for adding a new face.
     """
-    dummy_metadata["faceId"] = str(uuid.uuid4())
+    dummy_metadata["face_id"] = str(uuid.uuid4())
     response = client.post(
         "/faces",
         files={"file": ("test.png", dummy_image_bytes, "image/png")},
         data={"metadata": json.dumps(dummy_metadata)}
     )
     assert response.status_code == 200
-    assert "faceId" in response.json()
+    assert "face_id" in response.json()
     assert response.json()["embedding"] == [0.1] * 128
     mock_all_services_session_scope["qdrant_service"].upsert_face_embedding.assert_called_once()
     mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_called_once()
@@ -150,7 +150,7 @@ def test_add_face_by_vector_endpoint(client, dummy_metadata, mock_all_services_s
     Test POST /faces/vector endpoint for adding a new face by vector.
     """
     vector_data = [0.5] * 128
-    dummy_metadata["faceId"] = str(uuid.uuid4())
+    dummy_metadata["face_id"] = str(uuid.uuid4())
     payload = {
         "vector": vector_data,
         "metadata": dummy_metadata
@@ -160,7 +160,7 @@ def test_add_face_by_vector_endpoint(client, dummy_metadata, mock_all_services_s
         json=payload
     )
     assert response.status_code == 200
-    assert "faceId" in response.json()
+    assert "face_id" in response.json()
     assert response.json()["embedding"] == vector_data
     mock_all_services_session_scope["qdrant_service"].upsert_face_embedding.assert_called_once()
     # FaceEmbeddingService.get_embedding should not be called for this endpoint
@@ -180,7 +180,7 @@ def test_get_faces_by_family_endpoint(client, mock_all_services_session_scope):
     assert len(response.json()) == 1
     assert response.json()[0]["id"] == "face1"
     mock_all_services_session_scope["qdrant_service"].get_points_by_payload_filter.assert_called_once_with(
-        payload_filter={"familyId": family_id}
+        payload_filter={"family_id": family_id}
     )
 
 def test_delete_face_endpoint(client, mock_all_services_session_scope):
@@ -211,7 +211,7 @@ def test_search_faces_endpoint(client, dummy_image_bytes, mock_all_services_sess
     """
     search_request_payload = {
         "query_image": base64.b64encode(dummy_image_bytes).decode("utf-8"),
-        "familyId": "e4757d91-509b-4ac0-8807-8d0b82e3b7ec",
+        "family_id": "e4757d91-509b-4ac0-8807-8d0b82e3b7ec",
         "limit": 2
     }
     mock_all_services_session_scope["qdrant_service"].search_face_embeddings.return_value = [
@@ -285,17 +285,4 @@ def test_detect_faces_endpoint_return_crop(client, dummy_image_bytes, mock_all_s
     assert "thumbnail" in response.json()[0]
     assert response.json()[0]["thumbnail"] is not None
     
-# Test the /resize endpoint again to ensure it's still working as expected
-def test_resize_image_endpoint(client, dummy_image_bytes):
-    """
-    Test POST /resize endpoint.
-    """
-    response = client.post(
-        "/resize?width=50",
-        files={"file": ("test.png", dummy_image_bytes, "image/png")}
-    )
-    assert response.status_code == 200
-    assert response.headers["content-type"] == "image/png"
-    # Further checks could involve loading the image and verifying its size
-    resized_image = Image.open(io.BytesIO(response.content))
-    assert resized_image.size == (50, 50)
+

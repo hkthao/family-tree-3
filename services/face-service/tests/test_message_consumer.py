@@ -91,7 +91,7 @@ async def test_consumer_setup_queue(message_consumer_instance, mock_aio_pika_con
 @pytest.mark.asyncio
 async def test_on_message_added_success(message_consumer_instance, mock_face_service):
     """Test processing of a valid MemberFaceAddedMessage."""
-    bounding_box_data = BoundingBoxModel(X=10.0, Y=20.0, Width=30.0, Height=40.0)
+    bounding_box_data = BoundingBoxModel(x=10.0, y=20.0, width=30.0, height=40.0)
     metadata_data = MetadataModel(
         family_id="family1",
         member_id="member1",
@@ -124,7 +124,7 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
         "original_image_url": "http://orig.url",
         "emotion": "happy",
         "emotion_confidence": 0.99,
-        "faceId": "face1",
+        "face_id": "face1",
     }
     mock_face_service.add_face_by_vector.assert_called_once()
     args, kwargs = mock_face_service.add_face_by_vector.call_args
