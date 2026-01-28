@@ -1,19 +1,15 @@
 using Ardalis.Specification.EntityFrameworkCore;
-// using backend.Application.AI.Models; // Removed
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Knowledge; // Added for IKnowledgeService
 using backend.Application.MemberFaces.Common;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Queries.SearchVectorFace;
 
-public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IKnowledgeService knowledgeService, IFaceApiService faceApiService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
+public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IFaceApiService faceApiService, ILogger<SearchMemberFaceQueryHandler> logger) : IRequestHandler<SearchMemberFaceQuery, Result<List<FoundFaceDto>>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IKnowledgeService _knowledgeService = knowledgeService;
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly ILogger<SearchMemberFaceQueryHandler> _logger = logger;
 
@@ -31,7 +27,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             FamilyId = request.FamilyId.ToString(),
             MemberId = request.MemberId?.ToString(),
             TopK = request.Limit,
-            Threshold = request.Threshold
+            Threshold = 0.9f
         };
 
         var searchResults = await _faceApiService.SearchFacesAsync(searchRequest);

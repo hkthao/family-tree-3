@@ -57,10 +57,10 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
         var llmRequest = new LLMChatCompletionRequest
         {
             Model = "gpt-3.5-turbo", // TODO: Make configurable
-            Messages = new List<LLMMessage>
+            Messages = new List<LLMChatCompletionMessage>
             {
-                new LLMMessage { Role = "system", Content = systemPromptContent },
-                new LLMMessage { Role = "user", Content = request.ChatInput }
+                new LLMChatCompletionMessage { Role = "system", Content = systemPromptContent },
+                new LLMChatCompletionMessage { Role = "user", Content = request.ChatInput }
             },
             User = request.FamilyId.ToString(), // Use FamilyId as user identifier for LLM Gateway
             Metadata = new Dictionary<string, object>

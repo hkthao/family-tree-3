@@ -131,10 +131,10 @@ public class RelationshipDetectionService : IRelationshipDetectionService
             var llmRequest = new LLMChatCompletionRequest
             {
                 Model = "gpt-3.5-turbo", // TODO: Make configurable
-                Messages = new List<LLMMessage>
+                Messages = new List<LLMChatCompletionMessage>
                 {
-                    new LLMMessage { Role = "system", Content = systemPromptContent },
-                    new LLMMessage { Role = "user", Content = combinedPromptBuilder.ToString() }
+                    new LLMChatCompletionMessage { Role = "system", Content = systemPromptContent },
+                    new LLMChatCompletionMessage { Role = "user", Content = combinedPromptBuilder.ToString() }
                 },
                 User = familyId.ToString(), // Use FamilyId as user identifier for LLM Gateway
                 Metadata = new Dictionary<string, object>

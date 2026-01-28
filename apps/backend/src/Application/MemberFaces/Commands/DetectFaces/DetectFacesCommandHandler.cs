@@ -79,8 +79,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     var searchFaceQuery = new SearchMemberFaceQuery(request.FamilyId)
                     {
                         Vector = detectedFaceDto.Embedding,
-                        Limit = 1,
-                        Threshold = 0.7f
+                        Limit = 1
                     };
 
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);

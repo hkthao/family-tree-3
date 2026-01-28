@@ -31,7 +31,6 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             Vector = [.. request.Embedding],
             Limit = 1,
-            Threshold = 0.7f
         };
         var searchQueryResult = await _mediator.Send(searchMemberFaceQuery, cancellationToken);
         if (searchQueryResult.IsSuccess && searchQueryResult.Value != null && searchQueryResult.Value.Any())

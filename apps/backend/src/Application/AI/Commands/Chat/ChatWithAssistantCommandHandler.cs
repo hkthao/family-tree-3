@@ -136,10 +136,10 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 var qaLlmChatRequest = new LLMChatCompletionRequest // New LLM DTO
                 {
                     Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
-                    Messages = new List<LLMMessage>
+                    Messages = new List<LLMChatCompletionMessage>
                     {
-                        new LLMMessage { Role = "system", Content = qaSystemPromptContent! }, // System prompt
-                        new LLMMessage { Role = "user", Content = request.ChatInput } // User input
+                        new LLMChatCompletionMessage { Role = "system", Content = qaSystemPromptContent! }, // System prompt
+                        new LLMChatCompletionMessage { Role = "user", Content = request.ChatInput } // User input
                     }
                     // Temperature, MaxTokens, Stream can be defaulted or configured as needed in the future
                 };
@@ -193,10 +193,10 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                 var enrichedLlmChatRequest = new LLMChatCompletionRequest
                 {
                     Model = _llmGatewaySettings.LlmModel,
-                    Messages = new List<LLMMessage>
+                    Messages = new List<LLMChatCompletionMessage>
                     {
-                        new LLMMessage { Role = "system", Content = familyDataLookupSystemPromptContent! },
-                        new LLMMessage { Role = "user", Content = enrichedPrompt.ToString() }
+                        new LLMChatCompletionMessage { Role = "system", Content = familyDataLookupSystemPromptContent! },
+                        new LLMChatCompletionMessage { Role = "user", Content = enrichedPrompt.ToString() }
                     }
                 };
                 finalChatResponseResult = await _mediator.Send(new CallAiChatServiceCommand { LLMChatCompletionRequest = enrichedLlmChatRequest }, cancellationToken);
