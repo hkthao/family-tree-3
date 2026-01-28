@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System.Text.Json; // For JSON serialization
-using System.Threading; // For CancellationToken
 
 namespace backend.Infrastructure.Services.MessageBus;
 
