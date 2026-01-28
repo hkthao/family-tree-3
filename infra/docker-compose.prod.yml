@@ -62,6 +62,23 @@ services:
       timeout: 3s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: family-tree-rabbitmq-prod
+    ports:
+      - "5672:5672" # Standard AMQP port
+      - "15672:15672" # Management UI port
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
   backend:
     image: hkthao/family-tree-backend:latest
     platform: linux/amd64
@@ -70,6 +87,8 @@ services:
       - ./.env
     depends_on:
       mysql:
+        condition: service_healthy
+      rabbitmq: # Add dependency on rabbitmq
         condition: service_healthy
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
@@ -195,3 +214,4 @@ volumes:
   backend-dataprotection-keys:
   redis-data:
   lancedb-data:
+  rabbitmq-data:

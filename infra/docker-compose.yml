@@ -230,8 +230,6 @@ services:
       - ./.env.dev
     environment:
       - TZ=Asia/Ho_Chi_Minh
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
