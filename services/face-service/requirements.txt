@@ -7,3 +7,4 @@ opencv-python-headless
 dlib
 pytest
 flake8
+qdrant-client
