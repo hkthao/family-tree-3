@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch, Mock
 
 import aio_pika
 
@@ -21,7 +21,7 @@ from app.models import (
 def mock_face_service():
     """Fixture for a mocked FaceService instance."""
     mock = MagicMock(spec=FaceService)
-    mock.add_face_by_vector = AsyncMock()
+    mock.add_face_by_vector = Mock()
     mock.delete_face = AsyncMock(return_value=True)
     return mock
 

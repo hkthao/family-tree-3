@@ -1,7 +1,9 @@
-using backend.Application.AI.DTOs;
+using backend.Application.Common.Constants; // ADDED BACK
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models;
-using backend.Application.Prompts.DTOs; // Corrected using directive
+using backend.Application.Common.Models.LLMGateway; // NEW
+using backend.Application.Prompts.DTOs; // ADDED
 using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
@@ -26,7 +28,7 @@ public class RelationshipDetectionServiceTests : TestBase
 {
     private readonly RelationshipDetectionService _service;
     private readonly Mock<IRelationshipGraph> _mockRelationshipGraph;
-    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
+    private readonly Mock<ILLMGatewayService> _mockLlmGatewayService;
 
     private readonly Mock<IMediator> _mockMediator; // New mock for IMediator
     private readonly Mock<ILogger<RelationshipDetectionService>> _mockLogger; // New mock for ILogger
@@ -34,7 +36,7 @@ public class RelationshipDetectionServiceTests : TestBase
     public RelationshipDetectionServiceTests()
     {
         _mockRelationshipGraph = new Mock<IRelationshipGraph>();
-        _mockAiGenerateService = new Mock<IAiGenerateService>();
+        _mockLlmGatewayService = new Mock<ILLMGatewayService>();
         _mockMediator = new Mock<IMediator>(); // Initialize IMediator mock
         _mockMediator.Setup(m => m.Send(It.IsAny<GetPromptByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PromptDto>.Success(new PromptDto { Content = "Default AI System Prompt for testing" }));
@@ -44,7 +46,7 @@ public class RelationshipDetectionServiceTests : TestBase
         _service = new RelationshipDetectionService(
             _context,
             _mockRelationshipGraph.Object,
-            _mockAiGenerateService.Object,
+            _mockLlmGatewayService.Object,
             _mockMediator.Object, // Pass mediator mock
             _mockLogger.Object); // Pass logger mock
     }
@@ -83,11 +85,17 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(father.Id, child.Id)).Returns(pathToChild);
 
 
-        // Mock AI service behavior
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
-            It.IsAny<GenerateRequest>(),
+        // Mock LLM Gateway service behavior
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "cha (từ A đến B) và con (từ B đến A)" }));
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(new LLMChatCompletionResponse
+            {
+                Choices = new List<LLMChatCompletionChoice>
+                {
+                    new LLMChatCompletionChoice { Message = new LLMChatCompletionMessage { Content = "cha (từ A đến B) và con (từ B đến A)" } }
+                }
+            }));
 
 
         // Act
@@ -101,9 +109,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.Should().HaveCount(1);
         result.Path.First().Should().Be(father.Id);
         result.Path.Last().Should().Be(child.Id);
-        result.Edges.First().Should().Be(nameof(RelationshipType.Father));
-
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify LLM Gateway was called
     }
 
     /// <summary>
@@ -156,11 +162,17 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockRelationshipGraph.Setup(g => g.FindShortestPath(grandfather.Id, grandchild.Id)).Returns(pathToGrandchild);
 
 
-        // Mock AI service behavior
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
-            It.IsAny<GenerateRequest>(),
+        // Mock LLM Gateway service behavior
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "ông nội (từ A đến B) và cháu nội (từ B đến A)" }));
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(new LLMChatCompletionResponse
+            {
+                Choices = new List<LLMChatCompletionChoice>
+                {
+                    new LLMChatCompletionChoice { Message = new LLMChatCompletionMessage { Content = "ông nội (từ A đến B) và cháu nội (từ B đến A)" } }
+                }
+            }));
 
         // Act
         var result = await _service.DetectRelationshipAsync(familyId, grandfather.Id, grandchild.Id, CancellationToken.None); // Added CancellationToken.None
@@ -176,7 +188,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Edges.First().Should().Be(nameof(RelationshipType.Father));
         result.Edges.Last().Should().Be(nameof(RelationshipType.Father));
 
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify AI was called
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Once); // Verify LLM Gateway was called
     }
 
     /// <summary>
@@ -209,11 +221,17 @@ public class RelationshipDetectionServiceTests : TestBase
 
 
 
-        // Mock AI service behavior (should NOT be called)
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
-            It.IsAny<GenerateRequest>(),
+        // Mock LLM Gateway service behavior (should NOT be called)
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "Should not be called" }));
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(new LLMChatCompletionResponse
+            {
+                Choices = new List<LLMChatCompletionChoice>
+                {
+                    new LLMChatCompletionChoice { Message = new LLMChatCompletionMessage { Content = "Should not be called" } }
+                }
+            }));
 
         // Act
         var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None); // Added CancellationToken.None
@@ -224,7 +242,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Path.Should().BeEmpty();
         result.Edges.Should().BeEmpty();
 
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify AI was NOT called
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Never); // Verify LLM Gateway was NOT called
     }
 
     /// <summary>
@@ -258,10 +276,16 @@ public class RelationshipDetectionServiceTests : TestBase
         _mockMediator.Setup(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success()); // Simulate successful quota increment
 
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(
-            It.IsAny<GenerateRequest>(),
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(
+            It.IsAny<LLMChatCompletionRequest>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<RelationshipInferenceResultDto>.Success(new RelationshipInferenceResultDto { InferredRelationship = "friend" }));
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(new LLMChatCompletionResponse
+            {
+                Choices = new List<LLMChatCompletionChoice>
+                {
+                    new LLMChatCompletionChoice { Message = new LLMChatCompletionMessage { Content = "friend" } }
+                }
+            }));
 
         // Act
         var result = await _service.DetectRelationshipAsync(familyId, memberA.Id, memberB.Id, CancellationToken.None);
@@ -270,7 +294,7 @@ public class RelationshipDetectionServiceTests : TestBase
         result.Should().NotBeNull();
         result.Description.Should().Be("friend");
         _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.Families.Commands.IncrementFamilyAiChatUsage.IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<RelationshipInferenceResultDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
 

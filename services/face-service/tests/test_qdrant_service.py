@@ -99,7 +99,7 @@ def test_search_face_embeddings(qdrant_service_instance, mock_qdrant_client):
     mock_query_result.points = [mock_hit]
     mock_qdrant_client.query_points.return_value = mock_query_result
     
-    results = qdrant_service_instance.search_face_embeddings(query_vector)
+    results = qdrant_service_instance.search_face_embeddings(query_vector, score_threshold=0.0)
     
     mock_qdrant_client.query_points.assert_called_once_with(
         collection_name=qdrant_service_instance.collection_name,
@@ -118,18 +118,18 @@ def test_search_face_embeddings_with_filter(qdrant_service_instance, mock_qdrant
     Kiểm tra phương thức search_face_embeddings với bộ lọc.
     """
     query_vector = [0.2] * 128
-    query_filter = {"familyId": "family_xyz"}
+    query_filter = {"family_id": "family_xyz"}
     
     mock_hit = Mock()
     mock_hit.id = "filtered_id"
     mock_hit.score = 0.98
-    mock_hit.payload = {"memberId": "789", "familyId": "family_xyz"}
+    mock_hit.payload = {"member_id": "789", "family_id": "family_xyz"}
     
     mock_query_result = Mock()
     mock_query_result.points = [mock_hit]
     mock_qdrant_client.query_points.return_value = mock_query_result
     
-    results = qdrant_service_instance.search_face_embeddings(query_vector, query_filter=query_filter)
+    results = qdrant_service_instance.search_face_embeddings(query_vector, query_filter=query_filter, score_threshold=0.0)
     
     mock_qdrant_client.query_points.assert_called_once()
     args, kwargs = mock_qdrant_client.query_points.call_args
@@ -139,7 +139,7 @@ def test_search_face_embeddings_with_filter(qdrant_service_instance, mock_qdrant
     assert kwargs['score_threshold'] == 0.0
     assert isinstance(kwargs['query_filter'], models.Filter)
     assert len(kwargs['query_filter'].must) == 1
-    assert kwargs['query_filter'].must[0].key == "familyId"
+    assert kwargs['query_filter'].must[0].key == "family_id"
     assert kwargs['query_filter'].must[0].match.value == "family_xyz"
     assert len(results) == 1
     assert results[0]["id"] == "filtered_id"

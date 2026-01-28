@@ -56,7 +56,7 @@ class QdrantService:
         )
         logger.info(f"Upserted embedding for point_id: {point_id} to collection '{self.collection_name}'.")
 
-    def search_face_embeddings(self, query_vector: List[float], limit: int = 5, query_filter: Optional[Dict[str, Any]] = None, score_threshold: float = 0.0) -> List[Dict[str, Any]]:
+    def search_face_embeddings(self, query_vector: List[float], limit: int = 5, query_filter: Optional[Dict[str, Any]] = None, score_threshold: float = 0.7) -> List[Dict[str, Any]]:
         """
         Tìm kiếm các khuôn mặt tương tự dựa trên vector truy vấn.
         Có thể lọc kết quả tìm kiếm bằng query_filter.
@@ -84,11 +84,12 @@ class QdrantService:
         
         results = []
         for hit in search_hits:
-            results.append({
-                "id": hit.id,
-                "score": hit.score,
-                "payload": hit.payload
-            })
+            if hit.score >= score_threshold:
+                results.append({
+                    "id": hit.id,
+                    "score": hit.score,
+                    "payload": hit.payload
+                })
         return results
 
     def get_points_by_payload_filter(self, payload_filter: Dict[str, Any]) -> List[Dict[str, Any]]:
