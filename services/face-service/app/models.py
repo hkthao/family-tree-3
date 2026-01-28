@@ -1,40 +1,45 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # --- Nested Models ---
 
 class BoundingBoxModel(BaseModel):
-    X: float
-    Y: float
-    Width: float
-    Height: float
+    model_config = ConfigDict(populate_by_name=True)
+    x: float = Field(alias="X")
+    y: float = Field(alias="Y")
+    width: float = Field(alias="Width")
+    height: float = Field(alias="Height")
 
 class MetadataModel(BaseModel):
-    FamilyId: str
-    MemberId: str
-    FaceId: str # Corresponds to MemberFace.Id in backend
-    BoundingBox: BoundingBoxModel
-    Confidence: float
-    ThumbnailUrl: Optional[str] = None
-    OriginalImageUrl: Optional[str] = None
-    Emotion: Optional[str] = None
-    EmotionConfidence: float = 0.0
+    model_config = ConfigDict(populate_by_name=True)
+    family_id: str = Field(alias="FamilyId")
+    member_id: str = Field(alias="MemberId")
+    face_id: str = Field(alias="FaceId") # Corresponds to MemberFace.Id in backend
+    bounding_box: BoundingBoxModel = Field(alias="BoundingBox")
+    confidence: float = Field(alias="Confidence")
+    thumbnail_url: Optional[str] = Field(alias="ThumbnailUrl", default=None)
+    original_image_url: Optional[str] = Field(alias="OriginalImageUrl", default=None)
+    emotion: Optional[str] = Field(alias="Emotion", default=None)
+    emotion_confidence: float = Field(alias="EmotionConfidence", default=0.0)
 
 class FaceAddRequestModel(BaseModel):
-    Vector: List[float]
-    Metadata: MetadataModel
+    model_config = ConfigDict(populate_by_name=True)
+    vector: List[float] = Field(alias="Vector")
+    metadata: MetadataModel = Field(alias="Metadata")
 
 # --- Main Message Models ---
 
 class MemberFaceAddedMessage(BaseModel):
-    FaceAddRequest: FaceAddRequestModel
-    MemberFaceLocalId: str # Redundant with FaceAddRequest.Metadata.FaceId, but included as per description
+    model_config = ConfigDict(populate_by_name=True)
+    face_add_request: FaceAddRequestModel = Field(alias="FaceAddRequest")
+    member_face_local_id: str = Field(alias="MemberFaceLocalId") # Redundant with FaceAddRequest.Metadata.FaceId, but included as per description
 
 class MemberFaceDeletedMessage(BaseModel):
-    MemberFaceId: str # Local ID of MemberFace entity
-    VectorDbId: Optional[str] = None # ID of the face in the external vector database (Qdrant faceId)
-    MemberId: str
-    FamilyId: str
+    model_config = ConfigDict(populate_by_name=True)
+    member_face_id: str = Field(alias="MemberFaceId")
+    vector_db_id: Optional[str] = Field(alias="VectorDbId", default=None)
+    member_id: str = Field(alias="MemberId")
+    family_id: str = Field(alias="FamilyId")
 
 # --- Constants ---
 class MessageBusConstants:

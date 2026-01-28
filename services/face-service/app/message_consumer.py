@@ -19,7 +19,12 @@ from app.models import (
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+RABBITMQ_USERNAME = os.getenv("RABBITMQ__USERNAME", "guest")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ__PASSWORD", "guest")
+RABBITMQ_HOSTNAME = os.getenv("RABBITMQ__HOSTNAME", "localhost")
+RABBITMQ_PORT = os.getenv("RABBITMQ__PORT", "5672")
+
+RABBITMQ_URL = f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOSTNAME}:{RABBITMQ_PORT}/"
 
 
 class MessageConsumer:
@@ -81,31 +86,32 @@ class MessageConsumer:
             try:
                 logger.info(f"Received MemberFaceAddedMessage: {message.routing_key}")
                 data = json.loads(message.body.decode())
-                added_message = MemberFaceAddedMessage(**data)
+                added_message = MemberFaceAddedMessage.model_validate(data)
 
-                face_add_request = added_message.FaceAddRequest
-                vector = face_add_request.Vector
-                metadata = face_add_request.Metadata.model_dump() # Convert Pydantic model to dict
+                face_add_request = added_message.face_add_request
+                vector = face_add_request.vector
+                metadata = face_add_request.metadata.model_dump() # Convert Pydantic model to dict
 
                 # Add faceId to metadata explicitly, which is expected by face_service.add_face_by_vector
                 # It's already present in FaceAddRequest.Metadata.FaceId
-                metadata["faceId"] = face_add_request.Metadata.FaceId
+                metadata["faceId"] = face_add_request.metadata.face_id
 
                 # The BoundingBox model has float fields, but FaceService's BoundingBox expects int.
                 # Need to convert BoundingBox fields to int.
-                if "BoundingBox" in metadata and metadata["BoundingBox"] is not None:
-                    bbox = metadata["BoundingBox"]
-                    metadata["BoundingBox"] = {
-                        "X": int(bbox["X"]),
-                        "Y": int(bbox["Y"]),
-                        "Width": int(bbox["Width"]),
-                        "Height": int(bbox["Height"]),
+                if "bounding_box" in metadata and metadata["bounding_box"] is not None:
+                    bbox = metadata["bounding_box"]
+                    metadata["bounding_box"] = {
+                        "x": int(bbox["x"]),
+                        "y": int(bbox["y"]),
+                        "width": int(bbox["width"]),
+                        "height": int(bbox["height"]),
                     }
 
                 await self.face_service.add_face_by_vector(vector, metadata)
+                logger.info(f"Metadata passed to add_face_by_vector: {metadata}")
                 logger.info(
                     f"Processed MemberFaceAddedMessage for FaceId: {metadata['faceId']} "
-                    f"from MemberFaceLocalId: {added_message.MemberFaceLocalId}"
+                    f"from MemberFaceLocalId: {added_message.member_face_local_id}"
                 )
             except json.JSONDecodeError:
                 logger.error(f"Failed to decode JSON from message: {message.body}", exc_info=True)
@@ -123,14 +129,14 @@ class MessageConsumer:
             try:
                 logger.info(f"Received MemberFaceDeletedMessage: {message.routing_key}")
                 data = json.loads(message.body.decode())
-                deleted_message = MemberFaceDeletedMessage(**data)
+                deleted_message = MemberFaceDeletedMessage.model_validate(data)
 
-                vector_db_id = deleted_message.VectorDbId
+                vector_db_id = deleted_message.vector_db_id
                 if vector_db_id:
                     await self.face_service.delete_face(vector_db_id)
                     logger.info(
                         f"Processed MemberFaceDeletedMessage for VectorDbId: {vector_db_id} "
-                        f"from MemberFaceId: {deleted_message.MemberFaceId}"
+                        f"from MemberFaceId: {deleted_message.member_face_id}"
                     )
                 else:
                     logger.warning(

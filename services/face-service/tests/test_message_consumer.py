@@ -93,19 +93,19 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
     """Test processing of a valid MemberFaceAddedMessage."""
     bounding_box_data = BoundingBoxModel(X=10.0, Y=20.0, Width=30.0, Height=40.0)
     metadata_data = MetadataModel(
-        FamilyId="family1",
-        MemberId="member1",
-        FaceId="face1",
-        BoundingBox=bounding_box_data,
-        Confidence=0.95,
-        ThumbnailUrl="http://thumb.url",
-        OriginalImageUrl="http://orig.url",
-        Emotion="happy",
-        EmotionConfidence=0.99,
+        family_id="family1",
+        member_id="member1",
+        face_id="face1",
+        bounding_box=bounding_box_data,
+        confidence=0.95,
+        thumbnail_url="http://thumb.url",
+        original_image_url="http://orig.url",
+        emotion="happy",
+        emotion_confidence=0.99,
     )
-    face_add_request_data = FaceAddRequestModel(Vector=[0.1] * 128, Metadata=metadata_data)
+    face_add_request_data = FaceAddRequestModel(vector=[0.1] * 128, metadata=metadata_data)
     message_body = MemberFaceAddedMessage(
-        FaceAddRequest=face_add_request_data, MemberFaceLocalId="local123"
+        face_add_request=face_add_request_data, member_face_local_id="local123"
     ).model_dump_json().encode()
 
     mock_message = AsyncMock(spec=aio_pika.abc.AbstractIncomingMessage)
@@ -115,20 +115,24 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
     await message_consumer_instance._on_message_added(mock_message)
 
     expected_metadata_for_service = {
-        "FamilyId": "family1",
-        "MemberId": "member1",
-        "FaceId": "face1",
-        "BoundingBox": {"X": 10, "Y": 20, "Width": 30, "Height": 40}, # Ensure int conversion
-        "Confidence": 0.95,
-        "ThumbnailUrl": "http://thumb.url",
-        "OriginalImageUrl": "http://orig.url",
-        "Emotion": "happy",
-        "EmotionConfidence": 0.99,
-        "faceId": "face1", # Ensure faceId is explicitly added/mapped
+        "family_id": "family1",
+        "member_id": "member1",
+        "face_id": "face1",
+        "bounding_box": {"x": 10, "y": 20, "width": 30, "height": 40},
+        "confidence": 0.95,
+        "thumbnail_url": "http://thumb.url",
+        "original_image_url": "http://orig.url",
+        "emotion": "happy",
+        "emotion_confidence": 0.99,
+        "faceId": "face1",
     }
-    mock_face_service.add_face_by_vector.assert_called_once_with(
-        [0.1] * 128, expected_metadata_for_service
-    )
+    mock_face_service.add_face_by_vector.assert_called_once()
+    args, kwargs = mock_face_service.add_face_by_vector.call_args
+    actual_vector = args[0]
+    actual_metadata = args[1]
+
+    assert actual_vector == [0.1] * 128
+    assert actual_metadata == expected_metadata_for_service
     mock_message.process.assert_called_once()
 
 
@@ -136,10 +140,10 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
 async def test_on_message_deleted_success(message_consumer_instance, mock_face_service):
     """Test processing of a valid MemberFaceDeletedMessage."""
     message_body = MemberFaceDeletedMessage(
-        MemberFaceId="local_del_id",
-        VectorDbId="qdrant_face_id",
-        MemberId="member_del_id",
-        FamilyId="family_del_id",
+        member_face_id="local_del_id",
+        vector_db_id="qdrant_face_id",
+        member_id="member_del_id",
+        family_id="family_del_id",
     ).model_dump_json().encode()
 
     mock_message = AsyncMock(spec=aio_pika.abc.AbstractIncomingMessage)
@@ -156,10 +160,10 @@ async def test_on_message_deleted_success(message_consumer_instance, mock_face_s
 async def test_on_message_deleted_no_vector_db_id(message_consumer_instance, mock_face_service):
     """Test processing of MemberFaceDeletedMessage when VectorDbId is null."""
     message_body = MemberFaceDeletedMessage(
-        MemberFaceId="local_del_id",
-        VectorDbId=None,
-        MemberId="member_del_id",
-        FamilyId="family_del_id",
+        member_face_id="local_del_id",
+        vector_db_id=None,
+        member_id="member_del_id",
+        family_id="family_del_id",
     ).model_dump_json().encode()
 
     mock_message = AsyncMock(spec=aio_pika.abc.AbstractIncomingMessage)
