@@ -40,31 +40,6 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         return result ?? [];
     }
 
-    public async Task<byte[]> ResizeImageAsync(byte[] imageBytes, string contentType, int width, int? height = null)
-    {
-        _logger.LogInformation("Calling Python Face Detection Service for image resizing.");
-
-        using var form = new MultipartFormDataContent();
-        using var fileContent = new ByteArrayContent(imageBytes);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-        form.Add(fileContent, "file", "image.jpg"); // "image.jpg" is a placeholder filename
-
-        var requestUri = $"/resize?width={width}";
-        if (height.HasValue)
-        {
-            requestUri += $"&height={height.Value}";
-        }
-
-        var response = await _httpClient.PostAsync(requestUri, form);
-
-        response.EnsureSuccessStatusCode();
-
-        var resizedImageBytes = await response.Content.ReadAsByteArrayAsync();
-        _logger.LogInformation("Successfully received resized image from Python Face Detection Service.");
-
-        return resizedImageBytes;
-    }
-
     public async Task<Dictionary<string, object>> AddFaceWithMetadataAsync(byte[] imageBytes, string contentType, FaceMetadataDto metadata)
     {
         _logger.LogInformation("Calling Python Face Detection Service to add face with metadata.");
@@ -74,8 +49,9 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         form.Add(fileContent, "file", "image.jpg");
 
-        // Serialize metadata to JSON string
-        var metadataJson = System.Text.Json.JsonSerializer.Serialize(metadata);
+        // Serialize metadata to JSON string with snake_case naming policy
+        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower };
+        var metadataJson = System.Text.Json.JsonSerializer.Serialize(metadata, options);
         var metadataContent = new StringContent(metadataJson);
         metadataContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         form.Add(metadataContent, "metadata");
@@ -84,7 +60,6 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         response.EnsureSuccessStatusCode();
 
         var jsonContent = await response.Content.ReadAsStringAsync();
-        var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonContent, options);
 
         _logger.LogInformation("Successfully added face with metadata.");
@@ -96,7 +71,7 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         _logger.LogInformation("Calling Python Face Detection Service to add face by vector.");
 
         var requestUri = "/faces/vector";
-        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower };
         var jsonContent = System.Text.Json.JsonSerializer.Serialize(request, options);
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 

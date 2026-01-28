@@ -5,17 +5,17 @@ using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.MemberFaces.Messages;
 using backend.Domain.Entities;
-using backend.Domain.Events.MemberFaces;
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 
-public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
+public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMediator mediator, IMessageBus messageBus) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<CreateMemberFaceCommandHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
+    private readonly IMessageBus _messageBus = messageBus;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
         var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
@@ -31,7 +31,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             Vector = [.. request.Embedding],
             Limit = 1,
-            Threshold = 0.95f
+            Threshold = 0.7f
         };
         var searchQueryResult = await _mediator.Send(searchMemberFaceQuery, cancellationToken);
         if (searchQueryResult.IsSuccess && searchQueryResult.Value != null && searchQueryResult.Value.Any())
@@ -43,11 +43,11 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 return Result<Guid>.Failure($"Face with similar embedding is already associated with another member in vector DB.", ErrorSources.Conflict);
             }
         }
+        var id = Guid.NewGuid();
         var entity = new MemberFace
         {
-            Id = Guid.NewGuid(),
+            Id = id,
             MemberId = request.MemberId,
-
             BoundingBox = new BoundingBox
             {
                 X = request.BoundingBox.X,
@@ -61,13 +61,56 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             Embedding = request.Embedding,
             Emotion = request.Emotion,
             EmotionConfidence = request.EmotionConfidence ?? 0.0,
-            IsVectorDbSynced = false, // Default to false
-            VectorDbId = null // Default to null
+            IsVectorDbSynced = true, // Default to false
+            VectorDbId = id.ToString() // Default to null
         };
         _context.MemberFaces.Add(entity);
-        entity.AddDomainEvent(new MemberFaceCreatedEvent(entity));
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Created MemberFace {MemberFaceId} for Member {MemberId}.", entity.Id, request.MemberId);
+        
+        // Fetch member to get FamilyId. This is crucial for the integration event metadata.
+        // Assuming member is still available from earlier check
+        // Map to FaceAddVectorRequestDto for FaceApiService
+        var faceAddVectorRequest = new FaceAddVectorRequestDto
+        {
+            Vector = entity.Embedding, // Embedding goes to Vector property
+            Metadata = new FaceMetadataDto
+            {
+                FamilyId = member.FamilyId.ToString(), // Get FamilyId from member
+                MemberId = entity.MemberId.ToString(),
+                FaceId = entity.Id.ToString(), // Use the newly generated MemberFace.Id for the DTO
+                BoundingBox = new BoundingBoxDto
+                {
+                    X = entity.BoundingBox.X,
+                    Y = entity.BoundingBox.Y,
+                    Width = entity.BoundingBox.Width,
+                    Height = entity.BoundingBox.Height
+                },
+                Confidence = (double)entity.Confidence,
+                ThumbnailUrl = entity.ThumbnailUrl,
+                OriginalImageUrl = entity.OriginalImageUrl,
+                Emotion = entity.Emotion,
+                EmotionConfidence = entity.EmotionConfidence
+            }
+        };
+
+        // Create integration event
+        var integrationEvent = new MemberFaceAddedMessage
+        {
+            FaceAddRequest = faceAddVectorRequest,
+            MemberFaceLocalId = entity.Id
+        };
+
+        try
+        {
+            await _messageBus.PublishAsync("face_exchange", "face.add", integrationEvent, cancellationToken);
+            _logger.LogInformation("Published MemberFaceAddedMessage for MemberFace {MemberFaceId} to RabbitMQ.", entity.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish MemberFaceAddedMessage for MemberFace {MemberFaceId} to RabbitMQ.", entity.Id);
+        }
+
         return Result<Guid>.Success(entity.Id);
     }
 }

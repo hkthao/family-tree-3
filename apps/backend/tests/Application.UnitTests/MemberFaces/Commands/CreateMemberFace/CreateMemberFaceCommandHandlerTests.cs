@@ -5,9 +5,9 @@ using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Common; // NEW
+using backend.Application.MemberFaces.Messages;
 using backend.Domain.Entities;
-using backend.Domain.Events.MemberFaces;
+
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -22,11 +22,14 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
     private readonly Mock<IMediator> _mediatorMock;
 
+    private readonly Mock<IMessageBus> _messageBusMock;
+
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
+        _messageBusMock = new Mock<IMessageBus>();
 
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
@@ -34,7 +37,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _messageBusMock.Object);
     }
 
     [Fact]
@@ -80,13 +83,17 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         createdMemberFace!.MemberId.Should().Be(command.MemberId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
         createdMemberFace.ThumbnailUrl.Should().BeNull();
-        createdMemberFace.IsVectorDbSynced.Should().BeFalse();
-        createdMemberFace.VectorDbId.Should().BeNull();
+        createdMemberFace.IsVectorDbSynced.Should().BeTrue();
+        createdMemberFace.VectorDbId.Should().NotBeNullOrEmpty();
+        createdMemberFace.VectorDbId.Should().Be(createdMemberFace.Id.ToString());
 
-        // Verify that the domain event was added
-        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
-            events.Any(e => e is MemberFaceCreatedEvent)
-        )), Times.Once);
+        // Verify that the message was published to RabbitMQ
+        _messageBusMock.Verify(m => m.PublishAsync(
+            "face_exchange",
+            "face.add",
+            It.IsAny<MemberFaceAddedMessage>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
