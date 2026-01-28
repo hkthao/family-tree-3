@@ -6,6 +6,7 @@ import io
 from PIL import Image
 import numpy as np
 
+import asyncio
 from pydantic import BaseModel  # Added for DTOs
 from app.message_consumer import MessageConsumer, RABBITMQ_URL
 
