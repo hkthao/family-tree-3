@@ -25,12 +25,13 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
         }
 
         // Call Face API service to search faces
-        var searchRequest = new FaceSearchRequestDto
+        var searchRequest = new FaceSearchVectorRequestDto
         {
             Embedding = request.Vector,
             FamilyId = request.FamilyId.ToString(),
             MemberId = request.MemberId?.ToString(),
-            TopK = request.Limit
+            TopK = request.Limit,
+            Threshold = request.Threshold
         };
 
         var searchResults = await _faceApiService.SearchFacesAsync(searchRequest);

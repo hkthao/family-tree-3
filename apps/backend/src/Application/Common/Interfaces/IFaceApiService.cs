@@ -61,5 +61,5 @@ public interface IFaceApiService
     /// </summary>
     /// <param name="request">Đối tượng chứa thông tin yêu cầu tìm kiếm.</param>
     /// <returns>Danh sách các kết quả tìm kiếm khuôn mặt.</returns>
-    Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchRequestDto request);
+    Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request);
 }

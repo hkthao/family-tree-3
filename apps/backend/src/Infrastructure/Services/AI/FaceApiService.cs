@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net.Http.Headers;
 using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Common;
@@ -143,12 +142,12 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         return result ?? new Dictionary<string, string>();
     }
 
-    public async Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchRequestDto request)
+    public async Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request)
     {
-        _logger.LogInformation("Calling Python Face Detection Service to search faces.");
+        _logger.LogInformation("Calling Python Face Detection Service to search faces by vector.");
 
-        var requestUri = "/faces/search";
-        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+        var requestUri = "/faces/search_by_vector";
+        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower };
         var jsonContent = System.Text.Json.JsonSerializer.Serialize(request, options);
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
@@ -158,7 +157,7 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         var responseJson = await response.Content.ReadAsStringAsync();
         var result = System.Text.Json.JsonSerializer.Deserialize<List<FaceSearchResultDto>>(responseJson, options);
 
-        _logger.LogInformation("Successfully searched faces.");
+        _logger.LogInformation("Successfully searched faces by vector.");
         return result ?? new List<FaceSearchResultDto>();
     }
 }
