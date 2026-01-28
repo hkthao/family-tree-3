@@ -58,6 +58,10 @@ class FaceSearchResult(BaseModel):
     score: float
     payload: Dict[str, Any]
 
+class FaceAddVectorRequest(BaseModel):
+    vector: List[float]
+    metadata: FaceMetadata
+
 
 app = FastAPI(
     title="ImageFaceService", # Changed title
@@ -72,7 +76,7 @@ app = FastAPI(
 face_detector = DlibFaceDetector()
 
 # Initialize Qdrant Service
-qdrant_service = QdrantService(collection_name="face_embeddings")
+qdrant_service = QdrantService()
 
 # Initialize Face Embedding Service
 face_embedding_service = FaceEmbeddingService()
@@ -196,6 +200,21 @@ async def add_face_with_metadata(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to add face: {e}"
+        )
+
+@app.post("/faces/vector", response_model=Dict[str, Any])
+async def add_face_by_vector(request: FaceAddVectorRequest):
+    logger.info(f"Received request to add face by vector for memberId: {request.metadata.memberId}")
+    try:
+        metadata_dict = request.metadata.model_dump()
+        result = face_service.add_face_by_vector(request.vector, metadata_dict)
+        logger.info(f"Face added by vector successfully: {result['faceId']}")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to add face by vector: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to add face by vector: {e}"
         )
 
 @app.get("/faces/family/{family_id}", response_model=List[Dict[str, Any]])

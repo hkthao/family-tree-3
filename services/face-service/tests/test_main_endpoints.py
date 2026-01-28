@@ -1,3 +1,4 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch
@@ -20,33 +21,44 @@ def mock_all_services_session_scope():
     Mock all external service dependencies (QdrantService, FaceEmbeddingService, DlibFaceDetector)
     for the duration of the endpoint tests. This runs once per session.
     """
-    # Patch the classes directly in app.services, as app.main imports them from there.
-    # We patch at the source where they are defined.
-    with patch('app.services.qdrant_service.QdrantService') as MockQdrantService, \
-         patch('app.services.face_embedding.FaceEmbeddingService') as MockFaceEmbeddingService, \
-         patch('app.services.face_detector.DlibFaceDetector') as MockDlibFaceDetector:
-                
-        # Mock QdrantService instance
-        mock_qdrant_instance = MockQdrantService.return_value
-        mock_qdrant_instance.upsert_face_embedding.return_value = None
-        mock_qdrant_instance.get_points_by_payload_filter.return_value = []
-        mock_qdrant_instance.delete_point_by_id.return_value = True
-        mock_qdrant_instance.search_face_embeddings.return_value = []
+    # Temporarily set environment variables
+    os.environ["QDRANT_HOST"] = "http://mock-qdrant:6333"
+    os.environ["QDRANT_API_KEY"] = "mock-api-key"
+    os.environ["QDRANT_COLLECTION_NAME"] = "test_collection_name"
 
-        # Mock FaceEmbeddingService instance
-        mock_face_embedding_instance = MockFaceEmbeddingService.return_value
-        mock_face_embedding_instance.get_embedding.return_value = [0.1] * 128
+    try:
+        # Patch the classes directly in app.services, as app.main imports them from there.
+        # We patch at the source where they are defined.
+        with patch('app.services.qdrant_service.QdrantService') as MockQdrantService, \
+             patch('app.services.face_embedding.FaceEmbeddingService') as MockFaceEmbeddingService, \
+             patch('app.services.face_detector.DlibFaceDetector') as MockDlibFaceDetector:
+                    
+            # Mock QdrantService instance
+            mock_qdrant_instance = MockQdrantService.return_value
+            mock_qdrant_instance.upsert_face_embedding.return_value = None
+            mock_qdrant_instance.get_points_by_payload_filter.return_value = []
+            mock_qdrant_instance.delete_point_by_id.return_value = True
+            mock_qdrant_instance.search_face_embeddings.return_value = []
 
-        # Mock DlibFaceDetector instance
-        mock_face_detector_instance = MockDlibFaceDetector.return_value
-        mock_face_detector_instance.detect_faces.return_value = [
-            {'box': (10, 10, 50, 50), 'confidence': 0.99}
-        ]
-        yield {
-            "qdrant_service": mock_qdrant_instance,
-            "face_embedding_service": mock_face_embedding_instance,
-            "face_detector": mock_face_detector_instance
-        }
+            # Mock FaceEmbeddingService instance
+            mock_face_embedding_instance = MockFaceEmbeddingService.return_value
+            mock_face_embedding_instance.get_embedding.return_value = [0.1] * 128
+
+            # Mock DlibFaceDetector instance
+            mock_face_detector_instance = MockDlibFaceDetector.return_value
+            mock_face_detector_instance.detect_faces.return_value = [
+                {'box': (10, 10, 50, 50), 'confidence': 0.99}
+            ]
+            yield {
+                "qdrant_service": mock_qdrant_instance,
+                "face_embedding_service": mock_face_embedding_instance,
+                "face_detector": mock_face_detector_instance
+            }
+    finally:
+        # Clean up environment variables
+        del os.environ["QDRANT_HOST"]
+        del os.environ["QDRANT_API_KEY"]
+        del os.environ["QDRANT_COLLECTION_NAME"]
 
 @pytest.fixture(autouse=True)
 def reset_mocks_for_each_test(mock_all_services_session_scope):
@@ -130,6 +142,27 @@ def test_add_face_endpoint_invalid_file_type(client, dummy_metadata):
     )
     assert response.status_code == 400
     assert "Invalid file type" in response.json()["detail"]
+
+def test_add_face_by_vector_endpoint(client, dummy_metadata, mock_all_services_session_scope):
+    """
+    Test POST /faces/vector endpoint for adding a new face by vector.
+    """
+    vector_data = [0.5] * 128
+    payload = {
+        "vector": vector_data,
+        "metadata": dummy_metadata
+    }
+    response = client.post(
+        "/faces/vector",
+        json=payload
+    )
+    assert response.status_code == 200
+    assert "faceId" in response.json()
+    assert response.json()["embedding"] == vector_data
+    mock_all_services_session_scope["qdrant_service"].upsert_face_embedding.assert_called_once()
+    # FaceEmbeddingService.get_embedding should not be called for this endpoint
+    mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_not_called()
+
 
 def test_get_faces_by_family_endpoint(client, mock_all_services_session_scope):
     """

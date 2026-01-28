@@ -16,50 +16,52 @@ def mock_qdrant_client():
         yield mock_instance
 
 @pytest.fixture
-def qdrant_service_instance(mock_qdrant_client):
+def qdrant_service_instance(mock_qdrant_client, monkeypatch):
     """Fixture to provide a QdrantService instance with a mocked client."""
-    # Temporarily set environment variables for the test
-    os.environ["QDRANT_HOST"] = "http://localhost:6333"
-    os.environ["QDRANT_API_KEY"] = "test_api_key"
+    # Temporarily set environment variables for the test using monkeypatch
+    monkeypatch.setenv("QDRANT_HOST", "http://localhost:6333")
+    monkeypatch.setenv("QDRANT_API_KEY", "test_api_key")
+    monkeypatch.setenv("QDRANT_COLLECTION_NAME", "env_test_collection") # Set the environment variable
+    
     # Ensure get_collection does not raise an exception for the service init
     mock_qdrant_client.get_collection.side_effect = None 
     mock_qdrant_client.get_collection.return_value = Mock() # Return a dummy object for existing collection
-    service = QdrantService(collection_name="test_collection")
+    service = QdrantService(collection_name=None) # Pass None to use environment variable
     yield service
-    del os.environ["QDRANT_HOST"]
-    del os.environ["QDRANT_API_KEY"]
 
 
 def test_qdrant_service_init_creates_collection(mock_qdrant_client):
     """
-    Kiểm tra rằng collection được tạo nếu nó chưa tồn tại.
+    Kiểm tra rằng collection được tạo nếu nó chưa tồn tại khi collection_name không được cung cấp.
     """
     # Configure mock to simulate collection not found
     mock_qdrant_client.get_collection.side_effect = Exception("Collection not found")
     
-    service = QdrantService(collection_name="new_collection")
+    with patch('os.getenv', return_value="new_env_collection"):
+        service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="new_collection")
+    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="new_env_collection")
     mock_qdrant_client.recreate_collection.assert_called_once_with(
-        collection_name="new_collection",
+        collection_name="new_env_collection",
         vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE)
     )
-    assert service.collection_name == "new_collection"
+    assert service.collection_name == "new_env_collection"
 
 
 def test_qdrant_service_init_does_not_recreate_existing_collection(mock_qdrant_client):
     """
-    Kiểm tra rằng collection không được tạo lại nếu nó đã tồn tại.
+    Kiểm tra rằng collection không được tạo lại nếu nó đã tồn tại khi collection_name không được cung cấp.
     """
     # Configure mock to simulate collection found
     mock_qdrant_client.get_collection.side_effect = None # Reset side effect
     mock_qdrant_client.get_collection.return_value = Mock() # Return a dummy object
     
-    service = QdrantService(collection_name="existing_collection")
+    with patch('os.getenv', return_value="existing_env_collection"):
+        service = QdrantService() # No collection_name provided
     
-    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="existing_collection")
+    mock_qdrant_client.get_collection.assert_called_once_with(collection_name="existing_env_collection")
     mock_qdrant_client.recreate_collection.assert_not_called()
-    assert service.collection_name == "existing_collection"
+    assert service.collection_name == "existing_env_collection"
 
 def test_upsert_face_embedding(qdrant_service_instance, mock_qdrant_client):
     """
@@ -73,7 +75,7 @@ def test_upsert_face_embedding(qdrant_service_instance, mock_qdrant_client):
     
     mock_qdrant_client.upsert.assert_called_once()
     args, kwargs = mock_qdrant_client.upsert.call_args
-    assert kwargs['collection_name'] == "test_collection"
+    assert kwargs['collection_name'] == qdrant_service_instance.collection_name
     assert len(kwargs['points']) == 1
     assert kwargs['points'][0].id == point_id
     assert kwargs['points'][0].vector == vector
@@ -159,7 +161,7 @@ def test_delete_point_by_id_success(qdrant_service_instance, mock_qdrant_client)
     success = qdrant_service_instance.delete_point_by_id(point_id)
     
     mock_qdrant_client.delete.assert_called_once_with(
-        collection_name="test_collection",
+        collection_name=qdrant_service_instance.collection_name,
         points=[point_id], # Correct points argument
         wait=True
     )
@@ -177,7 +179,7 @@ def test_delete_point_by_id_failure(qdrant_service_instance, mock_qdrant_client)
     success = qdrant_service_instance.delete_point_by_id(point_id)
     
     mock_qdrant_client.delete.assert_called_once_with(
-        collection_name="test_collection",
+        collection_name=qdrant_service_instance.collection_name,
         points=[point_id], # Correct points argument
         wait=True
     )

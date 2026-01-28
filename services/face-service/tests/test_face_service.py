@@ -161,3 +161,41 @@ def test_search_similar_faces_no_family_id(face_service_instance, mock_qdrant_se
     )
     assert len(results) == 1
     assert results[0]["id"] == "res1"
+
+def test_add_face_by_vector_success(face_service_instance, mock_qdrant_service):
+    """
+    Kiểm tra chức năng add_face_by_vector thành công.
+    """
+    vector = [0.2] * 128
+    metadata = {
+        "memberId": "member456",
+        "familyId": "familyxyz",
+        "localDbId": "local456",
+        "thumbnailUrl": "http://example.com/thumb2.png",
+        "originalImageUrl": "http://example.com/orig2.jpg",
+        "emotion": "sad",
+        "emotionConfidence": 0.7
+    }
+
+    result = face_service_instance.add_face_by_vector(vector, metadata)
+
+    mock_qdrant_service.upsert_face_embedding.assert_called_once()
+    
+    args, kwargs = mock_qdrant_service.upsert_face_embedding.call_args
+    assert args[0] == vector
+    assert args[1]["memberId"] == metadata["memberId"]
+    assert args[1]["familyId"] == metadata["familyId"]
+    assert "faceId" in args[1]
+    assert args[2] == args[1]["faceId"]
+
+    assert "faceId" in result
+    assert result["embedding"] == vector
+    assert result["metadata"]["memberId"] == metadata["memberId"]
+
+def test_add_face_by_vector_missing_metadata(face_service_instance):
+    """
+    Kiểm tra add_face_by_vector khi thiếu memberId hoặc familyId trong metadata.
+    """
+    vector = [0.2] * 128
+    with pytest.raises(ValueError, match="Metadata phải chứa 'memberId' và 'familyId'."):
+        face_service_instance.add_face_by_vector(vector, {"localDbId": "local456"})

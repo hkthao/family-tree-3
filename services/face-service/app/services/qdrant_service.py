@@ -9,8 +9,8 @@ logger.setLevel(logging.INFO)
 
 
 class QdrantService:
-    def __init__(self, collection_name: str):
-        self.collection_name = collection_name
+    def __init__(self, collection_name: Optional[str] = None):
+        self.collection_name = collection_name or os.getenv("QDRANT_COLLECTION_NAME", "face_embeddings")
         self.client = QdrantClient(
             host=os.getenv("QDRANT_HOST"),
             api_key=os.getenv("QDRANT_API_KEY"),

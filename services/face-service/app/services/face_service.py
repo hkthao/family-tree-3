@@ -75,6 +75,21 @@ class FaceService:
             logger.warning(f"Không tìm thấy hoặc không thể xóa khuôn mặt với faceId: {face_id}.")
         return success
     
+    def add_face_by_vector(self, vector: List[float], metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Thêm một khuôn mặt mới vào hệ thống trực tiếp bằng vector embedding và metadata.
+        Metadata phải chứa 'memberId' và 'familyId'.
+        """
+        if "memberId" not in metadata or "familyId" not in metadata:
+            raise ValueError("Metadata phải chứa 'memberId' và 'familyId'.")
+
+        face_id = str(uuid.uuid4())
+        metadata["faceId"] = face_id
+
+        self.qdrant_service.upsert_face_embedding(vector, metadata, face_id)
+        logger.info(f"Đã thêm khuôn mặt {face_id} (từ vector) cho member {metadata['memberId']} trong family {metadata['familyId']}.")
+        return {"faceId": face_id, "embedding": vector, "metadata": metadata}
+
     def search_similar_faces(self, face_image: Image.Image, family_id: Optional[str] = None, limit: int = 5) -> List[Dict[str, Any]]:
         """
         Tìm kiếm các khuôn mặt tương tự trong Qdrant.
