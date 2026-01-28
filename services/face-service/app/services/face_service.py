@@ -2,7 +2,6 @@ from typing import List, Dict, Any, Optional
 from app.services.qdrant_service import QdrantService
 from app.services.face_embedding import FaceEmbeddingService
 from PIL import Image
-import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -140,7 +139,7 @@ class FaceService:
             query_vector=query_embedding,
             limit=limit,
             query_filter=final_filter,
-            score_threshold=threshold # Pass threshold to Qdrant service
+            score_threshold=threshold  # Pass threshold to Qdrant service
         )
         logger.info(f"Đã tìm thấy {len(search_results)} khuôn mặt tương tự từ vector query.")
         return search_results

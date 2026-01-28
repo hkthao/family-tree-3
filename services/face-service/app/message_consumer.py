@@ -1,8 +1,7 @@
-import asyncio
 import json
 import logging
 import os
-from typing import Dict, Any
+from typing import Optional
 
 import aio_pika
 from aio_pika.abc import AbstractRobustConnection
@@ -12,8 +11,6 @@ from app.models import (
     MemberFaceAddedMessage,
     MemberFaceDeletedMessage,
     MessageBusConstants,
-    MetadataModel,
-    BoundingBoxModel
 )
 
 logger = logging.getLogger(__name__)
@@ -62,7 +59,7 @@ class MessageConsumer:
         self.queue = await self.channel.declare_queue(
             f"face_service_queue_{os.getenv('HOSTNAME', 'default')}",  # Unique queue per service instance
             durable=True,
-            arguments={"x-expires": 1800000} # Queue expires after 30 minutes of inactivity
+            arguments={"x-expires": 1800000}  # Queue expires after 30 minutes of inactivity
         )
         logger.info(f"Declared queue: {self.queue.name}")
 
@@ -90,7 +87,7 @@ class MessageConsumer:
 
                 face_add_request = added_message.face_add_request
                 vector = face_add_request.vector
-                metadata = face_add_request.metadata.model_dump() # Convert Pydantic model to dict
+                metadata = face_add_request.metadata.model_dump()  # Convert Pydantic model to dict
 
                 # Add faceId to metadata explicitly, which is expected by face_service.add_face_by_vector
                 # It's already present in FaceAddRequest.Metadata.FaceId
@@ -157,7 +154,7 @@ class MessageConsumer:
 
             if self.queue:
                 # For simplicity, we'll use a single queue and dispatch internally based on routing_key.
-                
+
                 # Re-setup queue consumption for delete messages, as consume blocks.
                 # Better approach: check message.routing_key inside _on_message_added
                 # and call corresponding handler or ensure each bind has its own consumer.
@@ -187,8 +184,7 @@ class MessageConsumer:
             await self._on_message_deleted(message)
         else:
             logger.warning(f"Received message with unhandled routing key: {message.routing_key}. Body: {message.body.decode()}")
-            await message.ack() # Acknowledge unhandled messages to remove them from the queue
-
+            await message.ack()  # Acknowledge unhandled messages to remove them from the queue
 
     async def stop(self):
         """Closes the RabbitMQ connection gracefully."""

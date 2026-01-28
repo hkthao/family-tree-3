@@ -70,7 +70,7 @@ class QdrantService:
             query_vector=query_vector,
             query_filter=qdrant_filter,
             limit=limit,
-            score_threshold=score_threshold # Add score_threshold here
+            score_threshold=score_threshold  # Add score_threshold here
         )
         results = []
         for hit in search_result:
