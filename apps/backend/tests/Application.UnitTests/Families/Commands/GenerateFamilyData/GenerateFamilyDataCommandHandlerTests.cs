@@ -16,6 +16,8 @@ using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // NEW
+using backend.Application.Common.Models.AppSetting; // NEW
 using Moq;
 using Xunit;
 
@@ -28,17 +30,21 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<ILLMGatewayService> _mockLlmGatewayService;
     private readonly Mock<ILogger<GenerateFamilyDataCommandHandler>> _mockLogger;
+    private readonly Mock<IOptions<LLMGatewaySettings>> _mockLlmGatewaySettings; // NEW
 
     public GenerateFamilyDataCommandHandlerTests()
     {
         _mockMediator = new Mock<IMediator>();
         _mockLlmGatewayService = new Mock<ILLMGatewayService>();
         _mockLogger = new Mock<ILogger<GenerateFamilyDataCommandHandler>>();
+        _mockLlmGatewaySettings = new Mock<IOptions<LLMGatewaySettings>>(); // NEW
+        _mockLlmGatewaySettings.Setup(o => o.Value).Returns(new LLMGatewaySettings { LlmModel = "test-model" }); // NEW
 
         _handler = new GenerateFamilyDataCommandHandler(
             _mockMediator.Object,
             _mockLlmGatewayService.Object,
-            _mockLogger.Object
+            _mockLogger.Object,
+            _mockLlmGatewaySettings.Object // NEW
         );
 
         // Setup default mediator behavior for prompt fetching
