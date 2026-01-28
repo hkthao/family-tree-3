@@ -6,5 +6,7 @@ numpy
 opencv-python-headless
 dlib
 pytest
+pytest-asyncio
 flake8
 qdrant-client
+aio-pika

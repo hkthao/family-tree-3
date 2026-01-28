@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 
 from pydantic import BaseModel  # Added for DTOs
+from app.message_consumer import MessageConsumer, RABBITMQ_URL
 
 from app.services.face_detector import DlibFaceDetector
 from app.services.face_embedding import FaceEmbeddingService
@@ -88,6 +89,19 @@ face_embedding_service = FaceEmbeddingService()
 face_service = FaceService(
     qdrant_service=qdrant_service, face_embedding_service=face_embedding_service
 )
+
+# Initialize Message Consumer
+message_consumer = MessageConsumer(face_service=face_service)
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting up application and message consumer...")
+    asyncio.create_task(message_consumer.start()) # Run consumer in a background task
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Shutting down application and message consumer...")
+    await message_consumer.stop() # Stop consumer gracefully
 
 
 @app.post("/detect", response_model=List[FaceDetectionResult])
