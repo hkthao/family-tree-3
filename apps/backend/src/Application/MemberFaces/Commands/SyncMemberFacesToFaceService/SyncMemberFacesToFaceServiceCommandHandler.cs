@@ -5,21 +5,21 @@ using backend.Application.MemberFaces.Common;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace backend.Application.MemberFaces.Commands.SyncMemberFacesToKnowledgeService;
+namespace backend.Application.MemberFaces.Commands.SyncMemberFacesToFaceService;
 
-public class SyncMemberFacesToKnowledgeServiceCommandHandler(
+public class SyncMemberFacesToFaceServiceCommandHandler(
     IApplicationDbContext context,
     IFaceApiService faceApiService,
-    ILogger<SyncMemberFacesToKnowledgeServiceCommandHandler> logger,
+    ILogger<SyncMemberFacesToFaceServiceCommandHandler> logger,
     IAuthorizationService authorizationService)
-    : IRequestHandler<SyncMemberFacesToKnowledgeServiceCommand, Result<Unit>>
+    : IRequestHandler<SyncMemberFacesToFaceServiceCommand, Result<Unit>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IFaceApiService _faceApiService = faceApiService;
-    private readonly ILogger<SyncMemberFacesToKnowledgeServiceCommandHandler> _logger = logger;
+    private readonly ILogger<SyncMemberFacesToFaceServiceCommandHandler> _logger = logger;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
-    public async Task<Result<Unit>> Handle(SyncMemberFacesToKnowledgeServiceCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Unit>> Handle(SyncMemberFacesToFaceServiceCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.IsAdmin())
         {
@@ -55,7 +55,7 @@ public class SyncMemberFacesToKnowledgeServiceCommandHandler(
 
         var memberFacesToSync = await query.ToListAsync(cancellationToken);
 
-        _logger.LogInformation("Found {Count} member faces to synchronize with knowledge service.",
+        _logger.LogInformation("Found {Count} member faces to synchronize with face service.",
             memberFacesToSync.Count);
 
         foreach (var memberFace in memberFacesToSync)
@@ -108,7 +108,7 @@ public class SyncMemberFacesToKnowledgeServiceCommandHandler(
             catch (Exception ex)
             {
                 memberFace.IsVectorDbSynced = false;
-                _logger.LogError(ex, "Failed to synchronize MemberFace {MemberFaceId} with knowledge service.", memberFace.Id);
+                _logger.LogError(ex, "Failed to synchronize MemberFace {MemberFaceId} with face service.", memberFace.Id);
             }
         }
 
