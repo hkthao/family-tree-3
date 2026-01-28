@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
 using backend.Domain.Entities;
-using backend.Domain.ValueObjects; // Added for BoundingBox
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.SyncMemberFacesToKnowledgeService;

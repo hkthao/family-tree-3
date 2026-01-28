@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace backend.Application.MemberFaces.Common;
 
 public class FaceSearchVectorRequestDto

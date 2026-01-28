@@ -1,5 +1,3 @@
-using backend.Application.MemberFaces.Common;
-
 namespace backend.Application.MemberFaces.Common;
 
 public class FaceMetadataDto
