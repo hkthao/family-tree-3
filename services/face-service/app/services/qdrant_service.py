@@ -1,6 +1,6 @@
 import os
 from qdrant_client import QdrantClient, models
-from qdrant_client.http.models import UpdateStatus # Import UpdateStatus
+from qdrant_client.http.models import UpdateStatus  # Import UpdateStatus
 from typing import List, Dict, Any, Optional
 import logging
 
@@ -22,7 +22,7 @@ class QdrantService:
         try:
             self.client.get_collection(collection_name=self.collection_name)
             logger.info(f"Collection '{self.collection_name}' already exists.")
-        except Exception: # QdrantClient.get_collection raises an exception if collection does not exist
+        except Exception:  # QdrantClient.get_collection raises an exception if collection does not exist
             logger.info(f"Collection '{self.collection_name}' not found. Creating it...")
             self.client.recreate_collection(
                 collection_name=self.collection_name,
@@ -92,14 +92,14 @@ class QdrantService:
                 ) for k, v in payload_filter.items()
             ]
         )
-        
+
         # Using scroll to get all points matching the filter
         hits, _ = self.client.scroll(
             collection_name=self.collection_name,
             scroll_filter=qdrant_filter,
             limit=10000,  # Adjust limit as necessary, or implement pagination
             with_payload=True,
-            with_vectors=False, # We don't need vectors for this operation
+            with_vectors=False,  # We don't need vectors for this operation
         )
         results = []
         for hit in hits:
@@ -110,6 +110,36 @@ class QdrantService:
         logger.info(f"Retrieved {len(results)} points with filter {payload_filter}.")
         return results
 
+    def delete_points_by_payload_filter(self, payload_filter: Dict[str, Any]) -> bool:
+        """
+        Xóa tất cả các điểm khớp với một payload filter cụ thể.
+        """
+        qdrant_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key=k,
+                    match=models.MatchValue(value=v)
+                ) for k, v in payload_filter.items()
+            ]
+        )
+        try:
+            response = self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.PointSelector(
+                    filter=qdrant_filter
+                ),
+                wait=True
+            )
+            if response.status == UpdateStatus.COMPLETED:
+                logger.info(f"Deleted points with filter {payload_filter} successfully.")
+                return True
+            else:
+                logger.warning(f"Failed to delete points with filter {payload_filter}. Status: {response.status}")
+                return False
+        except Exception as e:
+            logger.error(f"Error deleting points with filter {payload_filter}: {e}")
+            return False
+
     def delete_point_by_id(self, point_id: str) -> bool:
         """
         Xóa một điểm khỏi Qdrant bằng ID của nó.
@@ -117,7 +147,7 @@ class QdrantService:
         try:
             response = self.client.delete(
                 collection_name=self.collection_name,
-                points=[point_id], # Correct way to specify point IDs
+                points=[point_id],  # Correct way to specify point IDs
                 wait=True
             )
             if response.status == UpdateStatus.COMPLETED:
@@ -129,5 +159,3 @@ class QdrantService:
         except Exception as e:
             logger.error(f"Error deleting point with ID {point_id}: {e}")
             return False
-
-

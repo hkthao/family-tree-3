@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class FaceService:
     def __init__(self, qdrant_service: QdrantService, face_embedding_service: FaceEmbeddingService):
         self.qdrant_service = qdrant_service
@@ -22,11 +23,11 @@ class FaceService:
             raise ValueError("Metadata phải chứa 'memberId' và 'familyId'.")
 
         embedding = self.face_embedding_service.get_embedding(face_image)
-        
+
         # Tạo một ID duy nhất cho điểm trong Qdrant
         # Có thể sử dụng memberId hoặc một UUID mới nếu mỗi member có nhiều khuôn mặt
-        face_id = str(uuid.uuid4()) 
-        
+        face_id = str(uuid.uuid4())
+
         # Thêm faceId vào metadata để dễ dàng truy vấn sau này
         metadata["faceId"] = face_id
 
@@ -44,14 +45,14 @@ class FaceService:
         # We might need to adjust qdrant_service.search_face_embeddings or create a new method there.
         # For now, let's assume qdrant_service can filter by payload.
         # This will be refined as we implement the search in QdrantService.
-        
+
         # Placeholder for Qdrant payload filter
         # In Qdrant, you would typically use `client.scroll` with a filter for this
         # or `client.search` with a filter if you have a query vector (which we don't for 'get all')
 
         # For simplicity, let's assume a scroll-like operation to get all points matching the filter.
         # A more robust solution might involve creating a dedicated method in QdrantService for this.
-        
+
         # Dummy call for now, will refine based on QdrantClient capabilities
         # This part requires more thought on how QdrantClient allows fetching by filter without a vector.
         # For now, I will create a dummy QdrantClient.scroll in the qdrant_service
@@ -74,7 +75,21 @@ class FaceService:
         else:
             logger.warning(f"Không tìm thấy hoặc không thể xóa khuôn mặt với faceId: {face_id}.")
         return success
-    
+
+    def delete_faces_by_family_id(self, family_id: str) -> bool:
+        """
+        Xóa tất cả các khuôn mặt thuộc về một family_id cụ thể.
+        """
+        logger.info(f"Đang xóa các khuôn mặt cho family {family_id}...")
+        success = self.qdrant_service.delete_points_by_payload_filter(
+            payload_filter={"familyId": family_id}
+        )
+        if success:
+            logger.info(f"Đã xóa thành công các khuôn mặt cho family {family_id}.")
+        else:
+            logger.warning(f"Không thể xóa các khuôn mặt cho family {family_id}.")
+        return success
+
     def add_face_by_vector(self, vector: List[float], metadata: Dict[str, Any]) -> Dict[str, Any]:
         """
         Thêm một khuôn mặt mới vào hệ thống trực tiếp bằng vector embedding và metadata.
@@ -96,16 +111,15 @@ class FaceService:
         Có thể lọc theo family_id.
         """
         query_embedding = self.face_embedding_service.get_embedding(face_image)
-        
+
         search_filter = None
         if family_id:
             search_filter = {"familyId": family_id}
 
         search_results = self.qdrant_service.search_face_embeddings(
-            query_vector=query_embedding, 
-            limit=limit, 
+            query_vector=query_embedding,
+            limit=limit,
             query_filter=search_filter
         )
         logger.info(f"Đã tìm thấy {len(search_results)} khuôn mặt tương tự cho query.")
         return search_results
-
