@@ -1,0 +1,90 @@
+# Description of Message Bus Events for Python Face Service Consumer
+
+This document describes the structure of messages published to the message bus, which the Python face service will need to consume.
+
+## Message Bus Constants
+
+The following constants define the exchange and routing keys used for these messages:
+
+-   **Exchange Name:** `member-face-exchange` (from `MessageBusConstants.Exchanges.MemberFace`)
+-   **Routing Keys:**
+    -   `member-face.added` (for MemberFaceAddedMessage)
+    -   `member-face.deleted` (for MemberFaceDeletedMessage)
+
+## 1. MemberFaceAddedMessage
+
+**Purpose:** Notifies the face service that a new member face has been added and needs to be processed (e.g., added to a vector database).
+
+**Structure (JSON representation):**
+
+```json
+{
+  "FaceAddRequest": {
+    "Vector": [
+      0.1,
+      0.2,
+      0.3,
+      ...
+    ],
+    "Metadata": {
+      "FamilyId": "string",
+      "MemberId": "string",
+      "FaceId": "string",
+      "BoundingBox": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Width": 0.0,
+        "Height": 0.0
+      },
+      "Confidence": 0.0,
+      "ThumbnailUrl": "string or null",
+      "OriginalImageUrl": "string or null",
+      "Emotion": "string or null",
+      "EmotionConfidence": 0.0
+    }
+  },
+  "MemberFaceLocalId": "string"
+}
+```
+
+**Property Details:**
+
+*   `FaceAddRequest` (object): Contains the face vector and metadata for adding to the vector database.
+    *   `Vector` (list of float): The face embedding vector (e.g., `[0.1, 0.2, 0.3, ...]`).
+    *   `Metadata` (object): Additional metadata associated with the face.
+        *   `FamilyId` (string, GUID): The ID of the family the face belongs to.
+        *   `MemberId` (string, GUID): The ID of the member the face belongs to.
+        *   `FaceId` (string, GUID): The local ID of the `MemberFace` entity in the backend (corresponds to `MemberFace.Id`).
+        *   `BoundingBox` (object): Coordinates and dimensions of the detected face.
+            *   `X` (float): X-coordinate of the top-left corner.
+            *   `Y` (float): Y-coordinate of the top-left corner.
+            *   `Width` (float): Width of the bounding box.
+            *   `Height` (float): Height of the bounding box.
+        *   `Confidence` (float): Confidence score of the face detection.
+        *   `ThumbnailUrl` (string or null): URL to the face thumbnail image.
+        *   `OriginalImageUrl` (string or null): URL to the original image.
+        *   `Emotion` (string or null): Detected emotion.
+        *   `EmotionConfidence` (float): Confidence score of the detected emotion.
+*   `MemberFaceLocalId` (string, GUID): The local ID of the `MemberFace` entity in the backend. This is redundant with `FaceAddRequest.Metadata.FaceId` but included for clarity and backward compatibility with previous event structures if any.
+
+## 2. MemberFaceDeletedMessage
+
+**Purpose:** Notifies the face service that a member face has been deleted and should be removed from the vector database.
+
+**Structure (JSON representation):**
+
+```json
+{
+  "MemberFaceId": "string",
+  "VectorDbId": "string or null",
+  "MemberId": "string",
+  "FamilyId": "string"
+}
+```
+
+**Property Details:**
+
+*   `MemberFaceId` (string, GUID): The local ID of the `MemberFace` entity that was deleted.
+*   `VectorDbId` (string or null): The ID of the face in the external vector database. This is crucial for the face service to identify and remove the correct entry. Can be null if the face was never synced.
+*   `MemberId` (string, GUID): The ID of the member the deleted face belonged to.
+*   `FamilyId` (string, GUID): The ID of the family the deleted face belonged to.

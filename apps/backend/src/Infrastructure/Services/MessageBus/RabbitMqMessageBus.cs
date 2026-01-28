@@ -15,12 +15,16 @@ public class RabbitMqMessageBus : IMessageBus, IAsyncDisposable
     private IChannel? _channel; // Make nullable
     private bool _disposed;
     private readonly HashSet<string> _declaredExchanges = new HashSet<string>(); // To track declared exchanges
+    private readonly JsonSerializerOptions _jsonSerializerOptions; // Add JsonSerializerOptions
 
-    // Modified constructor: takes ConnectionFactory instead of established connection/channel
     public RabbitMqMessageBus(ILogger<RabbitMqMessageBus> logger, ConnectionFactory factory)
     {
         _logger = logger;
         _factory = factory;
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower // Configure snake_case
+        };
         _logger.LogInformation("RabbitMqMessageBus initialized with ConnectionFactory.");
     }
 
@@ -70,7 +74,7 @@ public class RabbitMqMessageBus : IMessageBus, IAsyncDisposable
             _declaredExchanges.Add(exchange);
         }
 
-        var json = JsonSerializer.Serialize(message);
+        var json = JsonSerializer.Serialize(message, _jsonSerializerOptions);
         var body = Encoding.UTF8.GetBytes(json);
 
         var properties = new BasicProperties
