@@ -53,9 +53,9 @@ public class ExportMemberFacesQueryHandlerTests : TestBase
         _context.Families.Add(family);
         _context.Members.Add(member1);
         _context.Members.Add(member2);
-        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, FaceId = "FACE_1" });
-        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId2, Member = member2, FaceId = "FACE_2" });
-        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), FaceId = "OTHER_FAMILY_FACE" }); // Other family face
+        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, IsVectorDbSynced = true, VectorDbId = "vector_db_id_1" });
+        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId2, Member = member2, IsVectorDbSynced = true, VectorDbId = "vector_db_id_2" });
+        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = Guid.NewGuid(), IsVectorDbSynced = true, VectorDbId = "vector_db_id_other" }); // Other family face
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportMemberFacesQuery(_testFamilyId);
@@ -67,10 +67,10 @@ public class ExportMemberFacesQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(2);
-        result.Value.Should().Contain(mf => mf.FaceId == "FACE_1");
-        result.Value.Should().Contain(mf => mf.FaceId == "FACE_2");
+        result.Value.Should().Contain(mf => mf.VectorDbId == "vector_db_id_1");
+        result.Value.Should().Contain(mf => mf.VectorDbId == "vector_db_id_2");
         result.Value.Should().NotBeNull().And.NotBeEmpty(); // Add null check before Any()
-        result.Value!.Any(mf => mf.FaceId == "OTHER_FAMILY_FACE").Should().BeFalse();
+        result.Value!.Any(mf => mf.VectorDbId == "vector_db_id_other").Should().BeFalse();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class ExportMemberFacesQueryHandlerTests : TestBase
 
         _context.Families.Add(family);
         _context.Members.Add(member1);
-        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, FaceId = "FACE_3" });
+        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, IsVectorDbSynced = true, VectorDbId = "vector_db_id_3" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportMemberFacesQuery(_testFamilyId);
@@ -97,7 +97,7 @@ public class ExportMemberFacesQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(1);
-        result.Value.Should().Contain(mf => mf.FaceId == "FACE_3");
+        result.Value.Should().Contain(mf => mf.VectorDbId == "vector_db_id_3");
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class ExportMemberFacesQueryHandlerTests : TestBase
 
         _context.Families.Add(family);
         _context.Members.Add(member1);
-        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, FaceId = "FACE_4" });
+        _context.MemberFaces.Add(new MemberFace { Id = Guid.NewGuid(), MemberId = _testMemberId1, Member = member1, IsVectorDbSynced = true, VectorDbId = "vector_db_id_4" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new ExportMemberFacesQuery(_testFamilyId);

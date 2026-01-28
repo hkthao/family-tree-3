@@ -63,7 +63,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IAuthor
             {
                 MemberFaceId = memberFace.Id, // Local DB ID
                 MemberId = memberFace.MemberId,
-                FaceId = memberFace.FaceId, // FaceId from the local MemberFace entity
+                FaceId = searchResult.Id, // ID from the Face API service (VectorDbId)
                 Score = (float)searchResult.Score, // Explicit cast from double to float
                 ThumbnailUrl = memberFace.ThumbnailUrl,
                 OriginalImageUrl = memberFace.OriginalImageUrl,

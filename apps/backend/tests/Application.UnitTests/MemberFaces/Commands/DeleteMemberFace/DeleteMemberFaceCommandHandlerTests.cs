@@ -21,20 +21,22 @@ public class DeleteMemberFaceCommandHandlerTests
     private readonly Mock<DbSet<Member>> _membersDbSetMock; // Added
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<DeleteMemberFaceCommandHandler>> _loggerMock;
-    private readonly Mock<IFaceApiService> _faceApiServiceMock; // NEW
+    private readonly Mock<IFaceApiService> _faceApiServiceMock;
+    private readonly Mock<IMessageBus> _messageBusMock; // Add IMessageBus mock
     private readonly List<MemberFace> _memberFacesData;
-    private readonly List<Family> _familiesData; // Added
-    private readonly List<Member> _membersData; // Added
+    private readonly List<Family> _familiesData;
+    private readonly List<Member> _membersData;
 
     public DeleteMemberFaceCommandHandlerTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
         _memberFacesDbSetMock = new Mock<DbSet<MemberFace>>();
-        _familiesDbSetMock = new Mock<DbSet<Family>>(); // Initialized
-        _membersDbSetMock = new Mock<DbSet<Member>>(); // Initialized
+        _familiesDbSetMock = new Mock<DbSet<Family>>();
+        _membersDbSetMock = new Mock<DbSet<Member>>();
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _loggerMock = new Mock<ILogger<DeleteMemberFaceCommandHandler>>();
-        _faceApiServiceMock = new Mock<IFaceApiService>(); // NEW
+        _faceApiServiceMock = new Mock<IFaceApiService>();
+        _messageBusMock = new Mock<IMessageBus>(); // Initialize IMessageBus mock
 
         _memberFacesData = new List<MemberFace>();
         _familiesData = new List<Family>(); // Initialized
@@ -63,7 +65,7 @@ public class DeleteMemberFaceCommandHandlerTests
 
     private DeleteMemberFaceCommandHandler CreateHandler()
     {
-        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _faceApiServiceMock.Object);
+        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _faceApiServiceMock.Object, _messageBusMock.Object);
     }
 
     private MemberFace SeedMemberFace(Family family, Member member)
@@ -75,7 +77,6 @@ public class DeleteMemberFaceCommandHandlerTests
             Id = Guid.NewGuid(), // Cần tạo Id rõ ràng vì không dùng DbContext
             MemberId = member.Id,
             Member = member, // Gán đối tượng Member
-            FaceId = "testFaceId",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.9,
             ThumbnailUrl = "http://thumbnail.url",

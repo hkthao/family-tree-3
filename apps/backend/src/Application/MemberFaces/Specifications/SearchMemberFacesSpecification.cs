@@ -71,9 +71,7 @@ public class SearchMemberFacesSpecification : Specification<MemberFace>
                 // Ardalis.Specification handles simple property names directly, or you can build Expression here if needed
                 switch (query.SortBy.ToLowerInvariant())
                 {
-                    case "faceid":
-                        if (sortOrder == "asc") Query.OrderBy(mf => mf.FaceId); else Query.OrderByDescending(mf => mf.FaceId);
-                        break;
+
                     case "confidence":
                         if (sortOrder == "asc") Query.OrderBy(mf => mf.Confidence); else Query.OrderByDescending(mf => mf.Confidence);
                         break;

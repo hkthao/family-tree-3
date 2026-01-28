@@ -7,7 +7,7 @@ public class MemberFace : BaseAuditableEntity
     public Guid MemberId { get; set; }
     public Member Member { get; set; } = null!; // Navigation property
 
-    public string FaceId { get; set; } = string.Empty; // ID from face detection service
+
 
     public BoundingBox BoundingBox { get; set; } = new BoundingBox();
     public double Confidence { get; set; }

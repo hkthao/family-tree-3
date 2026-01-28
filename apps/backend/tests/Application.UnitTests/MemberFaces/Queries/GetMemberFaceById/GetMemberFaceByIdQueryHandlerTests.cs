@@ -42,7 +42,6 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
         var memberFace = new MemberFace
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             ThumbnailUrl = "http://thumbnail.url",
@@ -50,7 +49,8 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
             Emotion = "happy",
             EmotionConfidence = 0.95,
-            IsVectorDbSynced = true
+            IsVectorDbSynced = true,
+            VectorDbId = "vector_db_id_123" // Set VectorDbId for synced face
         };
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member);
@@ -68,7 +68,7 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().Be(memberFace.Id);
         result.Value.MemberId.Should().Be(member.Id);
-        result.Value.FaceId.Should().Be(memberFace.FaceId);
+        result.Value.VectorDbId.Should().Be(memberFace.VectorDbId); // Assert against VectorDbId
         result.Value.FamilyId.Should().Be(family.Id);
     }
 
@@ -96,7 +96,6 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
         var memberFace = new MemberFace
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99f,
             ThumbnailUrl = "http://thumbnail.url",
@@ -104,7 +103,8 @@ public class GetMemberFaceByIdQueryHandlerTests : TestBase
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
             Emotion = "happy",
             EmotionConfidence = 0.95,
-            IsVectorDbSynced = true
+            IsVectorDbSynced = true,
+            VectorDbId = "vector_db_id_123" // Set VectorDbId for synced face
         };
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member);

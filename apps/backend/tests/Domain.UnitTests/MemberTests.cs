@@ -205,7 +205,6 @@ public class MemberTests
         var memberFace = new MemberFace
         {
             MemberId = member.Id,
-            FaceId = "face_id_123",
             OriginalImageUrl = "http://face.com/face.jpg",
             Confidence = 0.5f
         };
@@ -214,7 +213,7 @@ public class MemberTests
         member.AddFace(memberFace);
 
         // Assert
-        member.MemberFaces.Should().ContainSingle(f => f.FaceId == "face_id_123");
+        member.MemberFaces.Should().ContainSingle(f => f.OriginalImageUrl == "http://face.com/face.jpg");
     }
 
     [Fact]
@@ -226,7 +225,6 @@ public class MemberTests
         var memberFace = new MemberFace
         {
             MemberId = differentMemberId,
-            FaceId = "face_id_123",
             OriginalImageUrl = "http://face.com/face.jpg",
             Confidence = 0.5f
         };

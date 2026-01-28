@@ -5,7 +5,7 @@ namespace backend.Application.MemberFaces.Commands.ImportMemberFaces;
 public record ImportMemberFaceItemDto
 {
     public Guid? MemberId { get; set; } // Có thể null nếu khớp theo tên/tiêu chí khác trong quá trình nhập
-    public string FaceId { get; set; } = null!;
+
     public BoundingBoxDto BoundingBox { get; set; } = new BoundingBoxDto();
     public double Confidence { get; set; }
     public string? ThumbnailUrl { get; set; }

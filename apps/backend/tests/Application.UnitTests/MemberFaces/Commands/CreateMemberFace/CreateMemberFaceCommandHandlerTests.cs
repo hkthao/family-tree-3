@@ -21,16 +21,12 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IFaceApiService> _faceApiServiceMock;
-    private readonly Mock<IMessageBus> _messageBusMock; // NEW: Mock IMessageBus
 
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _faceApiServiceMock = new Mock<IFaceApiService>();
-        _messageBusMock = new Mock<IMessageBus>(); // NEW: Initialize IMessageBus mock
 
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
@@ -38,8 +34,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        // NEW: Pass the IMessageBus mock object
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _faceApiServiceMock.Object, _messageBusMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object);
     }
 
     [Fact]
@@ -55,7 +50,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring", // Provide a base64 string
@@ -66,18 +60,11 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             IsVectorDbSynced = false
         };
 
-        // Mock thumbnail upload service
-        // Return a mocked URL
-
         // Mock mediator for SearchMemberFaceQuery
         _mediatorMock.Setup(m => m.Send(
             It.IsAny<SearchMemberFaceQuery>(),
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>())); // No conflicts found
-
-        // Mock face API service AddFaceByVectorAsync
-        _faceApiServiceMock.Setup(x => x.AddFaceByVectorAsync(It.IsAny<FaceAddVectorRequestDto>()))
-            .ReturnsAsync(new Dictionary<string, object> { { "vector_db_id", Guid.NewGuid().ToString() } });
 
         var handler = CreateCreateHandler();
 
@@ -91,7 +78,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var createdMemberFace = await _context.MemberFaces.FindAsync(result.Value);
         createdMemberFace.Should().NotBeNull();
         createdMemberFace!.MemberId.Should().Be(command.MemberId);
-        createdMemberFace.FaceId.Should().Be(command.FaceId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
         createdMemberFace.ThumbnailUrl.Should().BeNull();
         createdMemberFace.IsVectorDbSynced.Should().BeFalse();
@@ -110,14 +96,10 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = Guid.NewGuid(), // Non-existent member
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-
-        // Mock thumbnail upload service (it won't be called if member not found, but good practice)
-
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if member not found)
         _mediatorMock.Setup(m => m.Send(
@@ -150,14 +132,10 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-
-        // Mock thumbnail upload service (won't be called if unauthorized)
-
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if unauthorized)
         _mediatorMock.Setup(m => m.Send(
@@ -196,7 +174,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring",
@@ -206,9 +183,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             EmotionConfidence = 0.95,
             IsVectorDbSynced = false
         };
-
-        // Mock thumbnail upload service
-
 
         // Mock mediator for SearchMemberFaceQuery to return a conflict
         _mediatorMock.Setup(m => m.Send(

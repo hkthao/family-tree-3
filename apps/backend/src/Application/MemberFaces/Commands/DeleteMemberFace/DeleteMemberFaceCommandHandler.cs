@@ -4,6 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Knowledge;
 using backend.Domain.Events.MemberFaces; // Add this line
 using Microsoft.Extensions.Logging;
+using backend.Application.MemberFaces.Messages; // Add this using statement
 
 namespace backend.Application.MemberFaces.Commands.DeleteMemberFace;
 
@@ -13,13 +14,15 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<DeleteMemberFaceCommandHandler> _logger;
     private readonly IFaceApiService _faceApiService;
+    private readonly IMessageBus _messageBus; // Add IMessageBus
 
-    public DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IFaceApiService faceApiService)
+    public DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IFaceApiService faceApiService, IMessageBus messageBus)
     {
         _context = context;
         _authorizationService = authorizationService;
         _logger = logger;
         _faceApiService = faceApiService;
+        _messageBus = messageBus;
     }
 
     public async Task<Result<Unit>> Handle(DeleteMemberFaceCommand request, CancellationToken cancellationToken)
@@ -63,6 +66,22 @@ public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCo
         entity.AddDomainEvent(new MemberFaceDeletedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Publish message to message bus
+        if (entity.Member != null)
+        {
+            var message = new MemberFaceDeletedMessage
+            {
+                MemberFaceId = entity.Id,
+                VectorDbId = entity.VectorDbId,
+                MemberId = entity.MemberId,
+                FamilyId = entity.Member.FamilyId
+            };
+            await _messageBus.PublishAsync(MessageBusConstants.Exchanges.MemberFace, MessageBusConstants.RoutingKeys.MemberFaceDeleted, message, cancellationToken);
+            _logger.LogInformation("Published MemberFaceDeletedMessage for MemberFace {MemberFaceId}.", entity.Id);
+        } else {
+            _logger.LogWarning("Cannot publish MemberFaceDeletedMessage for MemberFace {MemberFaceId} because Member is null.", entity.Id);
+        }
 
         _logger.LogInformation("Deleted MemberFace {MemberFaceId}.", entity.Id);
 
