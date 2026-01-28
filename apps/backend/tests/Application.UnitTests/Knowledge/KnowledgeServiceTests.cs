@@ -137,7 +137,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var memberId = Guid.NewGuid();
         var family = Family.Create("Nguyễn", "NguyenFamilyCode", "Mô tả", "Hà Nội", "Public", Guid.NewGuid());
         var member = new Member(memberId, "Văn A", "Nguyễn", "M001", familyId, family, false);
-        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), new LunarDate(1,1,false, false), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
+        member.Update("Văn A", "Nguyễn", "M001", "A", "Male", new DateTime(1955, 1, 1), new DateTime(2018, 1, 1), new LunarDate(1, 1, false, false), "Nghệ An", "TPHCM", null, null, "Hồ Chí Minh", "Kỹ sư", null, "Tiểu sử ông A", 1, true);
 
         var fatherId = Guid.NewGuid();
         var motherId = Guid.NewGuid();
@@ -256,7 +256,7 @@ public class KnowledgeServiceTests : TestBase // Assuming TestBase provides basi
         var marriageSummary = $"Hôn nhân: kết hôn với {spouse.FullName}.";
         var childrenNames = string.Join(", ", children.Select(c => c.FullName));
         var childrenSummary = $"Con cái: {childrenNames}.";
-        var isLeapMonth = member.LunarDateOfDeath!=null && member.LunarDateOfDeath.IsLeapMonth.GetValueOrDefault() ? " nhuận" : "";
+        var isLeapMonth = member.LunarDateOfDeath != null && member.LunarDateOfDeath.IsLeapMonth.GetValueOrDefault() ? " nhuận" : "";
 
         var expectedSummary = $"{member.FullName} ({genderVi}, sinh {member.DateOfBirth?.Year.ToString() ?? "N/A"}, mất {member.DateOfDeath?.Year.ToString() ?? "N/A"}" +
                               $"{(member.LunarDateOfDeath != null ? $" (âm lịch ngày {member.LunarDateOfDeath.Day} tháng {member.LunarDateOfDeath.Month}{isLeapMonth})" : string.Empty)}).{Environment.NewLine}" +

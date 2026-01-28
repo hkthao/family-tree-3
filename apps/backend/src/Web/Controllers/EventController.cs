@@ -2,8 +2,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
-using backend.Application.Events.Commands.GenerateEventOccurrences;
 using backend.Application.Events.Commands.GenerateAndNotifyEvents;
+using backend.Application.Events.Commands.GenerateEventOccurrences;
 using backend.Application.Events.Commands.RescheduleRecurringEventOccurrences;
 using backend.Application.Events.Commands.SendEventNotification; // NEW
 using backend.Application.Events.Commands.UpdateEvent;

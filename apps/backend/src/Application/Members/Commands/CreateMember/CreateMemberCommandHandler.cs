@@ -5,9 +5,8 @@ using backend.Application.Common.Utils;
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 using backend.Domain.Entities; // NEW
 using backend.Domain.Enums; // NEW
-using backend.Domain.ValueObjects; // NEW
 using backend.Domain.Events.Members;
-
+using backend.Domain.ValueObjects; // NEW
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
