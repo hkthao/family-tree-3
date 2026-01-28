@@ -11,20 +11,17 @@ public class HangfireJobService : IBackgroundJobService
     private readonly IRecurringJobManager _recurringJobManager;
     private readonly ILogger<HangfireJobService> _logger;
     private readonly IDateTime _dateTime;
-    private readonly IEventNotificationJob _eventNotificationJob; // Thêm IEventNotificationJob
 
     public HangfireJobService(
         IBackgroundJobClient backgroundJobClient,
         IRecurringJobManager recurringJobManager,
         ILogger<HangfireJobService> logger,
-        IDateTime dateTime,
-        IEventNotificationJob eventNotificationJob) // Inject IEventNotificationJob
+        IDateTime dateTime)
     {
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
         _logger = logger;
         _dateTime = dateTime;
-        _eventNotificationJob = eventNotificationJob; // Khởi tạo
     }
 
     public string EnqueueGenerateEventOccurrences(int year, Guid? familyId, CancellationToken cancellationToken)
