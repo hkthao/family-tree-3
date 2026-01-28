@@ -47,6 +47,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
       - /etc/localtime:/etc/localtime:ro
@@ -217,9 +218,29 @@ services:
       - notification-service
       - knowledge-search-service
       - llm-gateway-service
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: family-tree-rabbitmq
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    env_file:
+      - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   mysql-data:
   backend-dataprotection-keys:
   redis-data:
   lancedb-data:
+  rabbitmq-data:

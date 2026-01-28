@@ -1,4 +1,4 @@
-import os
+
 import dlib
 import cv2
 import numpy as np
@@ -6,8 +6,6 @@ from PIL import Image
 from typing import List
 import logging
 
-import torch
-from facenet_pytorch import InceptionResnetV1
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -30,17 +28,6 @@ class FaceEmbeddingService:
             encoder_path = "app/models/dlib_models/dlib_face_recognition_resnet_model_v1.dat"
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
             logger.info("FaceEmbeddingService initialized with Dlib models.")
-
-            # Load FaceNet model
-            self.device = torch.device(
-                'cuda:0' if torch.cuda.is_available() else 'cpu'
-            )
-            self.resnet = (
-                InceptionResnetV1(pretrained='vggface2')
-                .eval()
-                .to(self.device)
-            )
-            logger.info(f"FaceNet model initialized on {self.device}.")
 
         except Exception as e:
             logger.error(f"Error initializing Dlib face embedding models: {e}")
@@ -81,49 +68,7 @@ class FaceEmbeddingService:
                 aligned_face, landmarks
             )
             logger.info("Successfully generated Dlib face embedding.")
-            return list(
-                np.array(embedding)
-                .astype(np.float32)  # noqa: E501
-            )
+            return [float(x) for x in np.array(embedding).astype(np.float32)]
         except Exception as e:
             logger.error(f"Error generating Dlib face embedding: {e}")
-            raise
-
-    def get_facenet_embedding(self, face_image: Image.Image) -> List[float]:
-        """
-        Generates a 512-dimensional face embedding for a given face image
-        using FaceNet (InceptionResnetV1).
-
-        Args:
-            face_image (Image.Image): A PIL Image object
-                of the
-                cropped face.  # noqa: E501
-
-        Returns:
-            List[float]: A list of 512 floats representing the face embedding.
-        """
-        try:
-            # Preprocess image for FaceNet
-            # FaceNet expects input in a specific format (e.g., 160x160, normalized)
-            face_image_resized = face_image.resize(
-                size=(160, 160)  # noqa: E501
-            )
-            img_np = np.array(face_image_resized).astype(np.float32)
-            img_np = (img_np - 127.5) / 128.0  # Normalize to [-1, 1]
-            img_tensor = torch.tensor(img_np).permute(2, 0, 1).unsqueeze(0).to(self.device)
-
-            # Compute embedding
-            self.resnet.eval()
-            with torch.no_grad():
-                embedding = (
-                    self.resnet(img_tensor)
-                    .squeeze()
-                    .cpu()
-                    .numpy()  # noqa: E501
-                )
-
-            logger.info("Successfully generated FaceNet embedding.")
-            return list(embedding.astype(np.float32))  # noqa: E501
-        except Exception as e:
-            logger.error(f"Error generating FaceNet embedding: {e}")
             raise

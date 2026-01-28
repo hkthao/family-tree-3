@@ -1,19 +1,23 @@
 using backend.Application.AI.DTOs;
-using backend.Application.Common.Constants;
+using backend.Application.Common.Constants; // ADDED BACK
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.LLMGateway;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Events.Queries;
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.FamilyLocations; // NEW
 using backend.Application.Locations; // Added for LocationDto
 using backend.Application.Members.Queries;
-using backend.Application.Prompts.DTOs; // ADDED: Missing using directive
+using backend.Application.Prompts.DTOs;
 using backend.Application.Prompts.Queries.GetPromptById;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // NEW
+using backend.Application.Common.Models.AppSetting; // NEW
 using Moq;
 using Xunit;
 
@@ -24,19 +28,23 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
 {
     private readonly GenerateFamilyDataCommandHandler _handler;
     private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<IAiGenerateService> _mockAiGenerateService;
+    private readonly Mock<ILLMGatewayService> _mockLlmGatewayService;
     private readonly Mock<ILogger<GenerateFamilyDataCommandHandler>> _mockLogger;
+    private readonly Mock<IOptions<LLMGatewaySettings>> _mockLlmGatewaySettings; // NEW
 
     public GenerateFamilyDataCommandHandlerTests()
     {
         _mockMediator = new Mock<IMediator>();
-        _mockAiGenerateService = new Mock<IAiGenerateService>();
+        _mockLlmGatewayService = new Mock<ILLMGatewayService>();
         _mockLogger = new Mock<ILogger<GenerateFamilyDataCommandHandler>>();
+        _mockLlmGatewaySettings = new Mock<IOptions<LLMGatewaySettings>>(); // NEW
+        _mockLlmGatewaySettings.Setup(o => o.Value).Returns(new LLMGatewaySettings { LlmModel = "test-model" }); // NEW
 
         _handler = new GenerateFamilyDataCommandHandler(
             _mockMediator.Object,
-            _mockAiGenerateService.Object,
-            _mockLogger.Object
+            _mockLlmGatewayService.Object,
+            _mockLogger.Object,
+            _mockLlmGatewaySettings.Object // NEW
         );
 
         // Setup default mediator behavior for prompt fetching
@@ -76,7 +84,7 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Quota Exceeded");
         result.ErrorSource.Should().Be(ErrorSources.QuotaExceeded);
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -84,19 +92,17 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        var memberId = Guid.NewGuid();
-        var eventId = Guid.NewGuid();
-
-        var aiResponseDto = new CombinedAiContentDto
+        var expectedCombinedContent = "Generated combined content";
+        var llmResponse = new LLMChatCompletionResponse
         {
-            // Families = new List<FamilyDto> { new FamilyDto { Id = familyId, Name = "Generated Family", Description = "Family description" } }, // Removed
-            Members = new List<MemberDto> { new MemberDto { Id = memberId, FirstName = "Generated", LastName = "Member", DateOfBirth = new DateTime(1990, 1, 1), DateOfDeath = new DateTime(2050, 1, 1) } },
-            Events = new List<EventDto> { new EventDto { Id = eventId, Name = "Generated Event", Description = "Event description", SolarDate = new DateTime(2023, 1, 1) } },
-            Locations = new List<FamilyLocationDto> { new FamilyLocationDto { Location = new LocationDto { Name = "Generated Location", Latitude = 10.0, Longitude = 20.0 } } } // Added
+            Choices = new List<LLMChatCompletionChoice>
+            {
+                new LLMChatCompletionChoice { Message = new LLMChatCompletionMessage { Content = expectedCombinedContent } }
+            }
         };
 
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<CombinedAiContentDto>.Success(aiResponseDto));
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Success(llmResponse));
 
         var command = new GenerateFamilyDataCommand
         {
@@ -110,9 +116,10 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEquivalentTo(aiResponseDto); // Direct comparison to the DTO
+        result.Value.Should().NotBeNull();
+        result.Value!.CombinedContent.Should().Be(expectedCombinedContent);
 
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -121,8 +128,8 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
     {
         // Arrange
         var familyId = Guid.NewGuid();
-        _mockAiGenerateService.Setup(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<CombinedAiContentDto>.Failure("AI service unavailable", ErrorSources.ExternalServiceError));
+        _mockLlmGatewayService.Setup(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LLMChatCompletionResponse>.Failure("LLM Gateway unavailable", ErrorSources.ExternalServiceError));
 
         var command = new GenerateFamilyDataCommand
         {
@@ -136,9 +143,9 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("AI service unavailable");
+        result.Error.Should().Contain("LLM Gateway unavailable");
         result.ErrorSource.Should().Be(ErrorSources.ExternalServiceError);
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -166,7 +173,7 @@ public class GenerateFamilyDataCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain($"System prompt for '{PromptConstants.FAMILY_DATA_GENERATION_PROMPT}' not configured in the database.");
         result.ErrorSource.Should().Be(ErrorSources.InvalidConfiguration);
-        _mockAiGenerateService.Verify(s => s.GenerateDataAsync<CombinedAiContentDto>(It.IsAny<GenerateRequest>(), It.IsAny<CancellationToken>()), Times.Never); // No AI call if prompt not found
+        _mockLlmGatewayService.Verify(s => s.GetChatCompletionAsync(It.IsAny<LLMChatCompletionRequest>(), It.IsAny<CancellationToken>()), Times.Never); // No AI call if prompt not found
         _mockMediator.Verify(m => m.Send(It.IsAny<IncrementFamilyAiChatUsageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

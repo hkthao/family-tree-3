@@ -102,19 +102,19 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             if (!occurrenceExists)
             {
                 if (entity.LunarDate.Day.HasValue && entity.LunarDate.Month.HasValue)
-            {
-                DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(
-                    entity.LunarDate.Day.Value,
-                    entity.LunarDate.Month.Value,
-                    currentYear,
-                    entity.LunarDate.IsLeapMonth.GetValueOrDefault(false));
-
-                if (solarOccurrenceDate.HasValue)
                 {
-                    var newOccurrence = EventOccurrence.Create(entity.Id, currentYear, solarOccurrenceDate.Value);
-                    _context.EventOccurrences.Add(newOccurrence);
+                    DateTime? solarOccurrenceDate = _lunarCalendarService.ConvertLunarToSolar(
+                        entity.LunarDate.Day.Value,
+                        entity.LunarDate.Month.Value,
+                        currentYear,
+                        entity.LunarDate.IsLeapMonth.GetValueOrDefault(false));
+
+                    if (solarOccurrenceDate.HasValue)
+                    {
+                        var newOccurrence = EventOccurrence.Create(entity.Id, currentYear, solarOccurrenceDate.Value);
+                        _context.EventOccurrences.Add(newOccurrence);
+                    }
                 }
-            }
             }
         }
 

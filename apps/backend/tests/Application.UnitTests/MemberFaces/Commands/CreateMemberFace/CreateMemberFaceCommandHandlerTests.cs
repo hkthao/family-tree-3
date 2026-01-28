@@ -1,14 +1,12 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
+using backend.Application.MemberFaces.Messages;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Common; // NEW
 using backend.Domain.Entities;
-using backend.Domain.Events.MemberFaces;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -22,14 +20,15 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IKnowledgeService> _knowledgeServiceMock; // NEW
+
+    private readonly Mock<IMessageBus> _messageBusMock;
 
     public CreateMemberFaceCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _knowledgeServiceMock = new Mock<IKnowledgeService>(); // NEW
+        _messageBusMock = new Mock<IMessageBus>();
 
         // Default authorization setup for tests
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
@@ -37,7 +36,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _knowledgeServiceMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _messageBusMock.Object);
     }
 
     [Fact]
@@ -53,7 +52,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring", // Provide a base64 string
@@ -64,18 +62,11 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             IsVectorDbSynced = false
         };
 
-        // Mock thumbnail upload service
-        // Return a mocked URL
-
         // Mock mediator for SearchMemberFaceQuery
         _mediatorMock.Setup(m => m.Send(
             It.IsAny<SearchMemberFaceQuery>(),
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>())); // No conflicts found
-
-        // Mock knowledge service IndexMemberFaceData
-        _knowledgeServiceMock.Setup(x => x.IndexMemberFaceData(It.IsAny<backend.Application.Knowledge.DTOs.MemberFaceDto>()))
-            .ReturnsAsync(Guid.NewGuid().ToString());
 
         var handler = CreateCreateHandler();
 
@@ -89,16 +80,19 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var createdMemberFace = await _context.MemberFaces.FindAsync(result.Value);
         createdMemberFace.Should().NotBeNull();
         createdMemberFace!.MemberId.Should().Be(command.MemberId);
-        createdMemberFace.FaceId.Should().Be(command.FaceId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
-        createdMemberFace.ThumbnailUrl.Should().BeNull(); // Assert against the mocked URL
+        createdMemberFace.ThumbnailUrl.Should().BeNull();
         createdMemberFace.IsVectorDbSynced.Should().BeTrue();
         createdMemberFace.VectorDbId.Should().NotBeNullOrEmpty();
+        createdMemberFace.VectorDbId.Should().Be(createdMemberFace.Id.ToString());
 
-        // Verify that the domain event was added
-        _mockDomainEventDispatcher.Verify(d => d.DispatchEvents(It.Is<List<BaseEvent>>(events =>
-            events.Any(e => e is MemberFaceCreatedEvent)
-        )), Times.Once);
+        // Verify that the message was published to RabbitMQ
+        _messageBusMock.Verify(m => m.PublishAsync(
+            "face_exchange",
+            "face.add",
+            It.IsAny<MemberFaceAddedMessage>(),
+            It.IsAny<CancellationToken>()
+        ), Times.Once);
     }
 
     [Fact]
@@ -108,14 +102,10 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = Guid.NewGuid(), // Non-existent member
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-
-        // Mock thumbnail upload service (it won't be called if member not found, but good practice)
-
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if member not found)
         _mediatorMock.Setup(m => m.Send(
@@ -148,14 +138,10 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-
-        // Mock thumbnail upload service (won't be called if unauthorized)
-
 
         // Mock mediator for SearchMemberFaceQuery (won't be called if unauthorized)
         _mediatorMock.Setup(m => m.Send(
@@ -194,7 +180,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         var command = new CreateMemberFaceCommand
         {
             MemberId = member.Id,
-            FaceId = "face123",
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
             Thumbnail = "base64thumbnailstring",
@@ -204,9 +189,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             EmotionConfidence = 0.95,
             IsVectorDbSynced = false
         };
-
-        // Mock thumbnail upload service
-
 
         // Mock mediator for SearchMemberFaceQuery to return a conflict
         _mediatorMock.Setup(m => m.Send(

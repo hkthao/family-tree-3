@@ -38,8 +38,8 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
 
         var importItems = new List<ImportMemberFaceItemDto>
         {
-            new() { MemberId = _testMemberId1, FaceId = "FACE_NEW_1", Confidence = 0.9, Emotion = "Happy" },
-            new() { MemberId = _testMemberId1, FaceId = "FACE_NEW_2", Confidence = 0.8, Emotion = "Neutral" },
+            new() { MemberId = _testMemberId1, Confidence = 0.9, Emotion = "Happy" },
+            new() { MemberId = _testMemberId1, Confidence = 0.8, Emotion = "Neutral" },
         };
         var command = new ImportMemberFacesCommand(_testFamilyId, importItems);
 
@@ -52,8 +52,8 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty().And.HaveCount(2);
 
         _context.MemberFaces.Should().HaveCount(2);
-        _context.MemberFaces.Should().Contain(mf => mf.FaceId == "FACE_NEW_1");
-        _context.MemberFaces.Should().Contain(mf => mf.FaceId == "FACE_NEW_2");
+        _context.MemberFaces.Should().Contain(mf => mf.Confidence == 0.9 && mf.Emotion == "Happy");
+        _context.MemberFaces.Should().Contain(mf => mf.Confidence == 0.8 && mf.Emotion == "Neutral");
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
 
         var importItems = new List<ImportMemberFaceItemDto>
         {
-            new() { MemberId = _testMemberId1, FaceId = "FACE_NEW_3", Confidence = 0.7, Emotion = "Sad" },
+            new() { MemberId = _testMemberId1, Confidence = 0.7, Emotion = "Sad" },
         };
         var command = new ImportMemberFacesCommand(_testFamilyId, importItems);
 
@@ -83,42 +83,12 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty().And.HaveCount(1);
         _context.MemberFaces.Should().HaveCount(1);
-        _context.MemberFaces.First().FaceId.Should().Be("FACE_NEW_3");
+        _context.MemberFaces.First().Confidence.Should().Be(0.7);
+        _context.MemberFaces.First().Emotion.Should().Be("Sad");
     }
 
-    [Fact]
-    public async Task Handle_ShouldSkipExistingMemberFaces_WhenFacesAlreadyExist()
-    {
-        // Arrange
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-
-        var family = new Family { Id = _testFamilyId, Name = "Test Family", Code = "TEST_FAMILY_CODE" };
-        var member1 = new Member(_testMemberId1, "Doe", "John", "MEMBER_JOHN_3", _testFamilyId, family);
-        _context.Families.Add(family);
-        _context.Members.Add(member1);
-        _context.MemberFaces.Add(new MemberFace { MemberId = _testMemberId1, Member = member1, FaceId = "FACE_EXISTING", Confidence = 0.9 });
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var importItems = new List<ImportMemberFaceItemDto>
-        {
-            new() { MemberId = _testMemberId1, FaceId = "FACE_EXISTING", Confidence = 0.8, Emotion = "Neutral" }, // Should be skipped
-            new() { MemberId = _testMemberId1, FaceId = "FACE_NEW_4", Confidence = 0.7, Emotion = "Happy" },
-        };
-        var command = new ImportMemberFacesCommand(_testFamilyId, importItems);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeEmpty().And.HaveCount(1); // Only the new face should be imported
-
-        _context.MemberFaces.Should().HaveCount(2); // Existing + 1 new
-        _context.MemberFaces.Any(mf => mf.FaceId == "FACE_EXISTING").Should().BeTrue();
-        _context.MemberFaces.Any(mf => mf.FaceId == "FACE_NEW_4").Should().BeTrue();
-        _context.MemberFaces.First(mf => mf.FaceId == "FACE_EXISTING").Confidence.Should().Be(0.9); // Should not be updated
-    }
+    // Removed Handle_ShouldSkipExistingMemberFaces_WhenFacesAlreadyExist test
+    // as the underlying FaceId-based skipping logic has been removed.
 
     [Fact]
     public async Task Handle_ShouldReturnAccessDenied_WhenUserIsNotAdminAndNotFamilyManager()
@@ -135,7 +105,7 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
 
         var importItems = new List<ImportMemberFaceItemDto>
         {
-            new() { MemberId = _testMemberId1, FaceId = "FACE_X", Confidence = 0.6, Emotion = "Angry" },
+            new() { MemberId = _testMemberId1, Confidence = 0.6, Emotion = "Angry" },
         };
         var command = new ImportMemberFacesCommand(_testFamilyId, importItems);
 
@@ -174,13 +144,15 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
         var family = new Family { Id = _testFamilyId, Name = "Test Family", Code = "TEST_FAMILY_CODE" };
+        var member1 = new Member(_testMemberId1, "John", "Doe", "JDO", _testFamilyId, family); // Add a valid member
         _context.Families.Add(family);
+        _context.Members.Add(member1); // Add the member to the context
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var importItems = new List<ImportMemberFaceItemDto>
         {
-            new() { MemberId = Guid.NewGuid(), FaceId = "FACE_NOT_FOUND", Confidence = 0.9 }, // MemberId not in family
-            new() { MemberId = _testMemberId1, FaceId = "FACE_VALID", Confidence = 0.8 },
+            new() { MemberId = Guid.NewGuid(), Confidence = 0.9 }, // MemberId not in family - this face should be skipped
+            new() { MemberId = _testMemberId1, Confidence = 0.8 }, // This face should be imported
         };
         var command = new ImportMemberFacesCommand(_testFamilyId, importItems);
 
@@ -190,7 +162,8 @@ public class ImportMemberFacesCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty(); // No face imported
-        _context.MemberFaces.Should().BeEmpty();
+        result.Value.Should().NotBeEmpty().And.HaveCount(1); // Only the valid face should be imported
+        _context.MemberFaces.Should().HaveCount(1);
+        _context.MemberFaces.First().Confidence.Should().Be(0.8);
     }
 }

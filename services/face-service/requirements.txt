@@ -5,8 +5,8 @@ Pillow
 numpy
 opencv-python-headless
 dlib
-facenet-pytorch
-scikit-image
-face_recognition
-deepface
-tf-keras
+pytest
+pytest-asyncio
+flake8
+qdrant-client
+aio-pika

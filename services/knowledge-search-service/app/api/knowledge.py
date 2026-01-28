@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Request
 from loguru import logger
 
-from ..core.lancedb import KnowledgeLanceDBService
+from ..core.qdrant import KnowledgeQdrantService
 from ..core.embeddings import EmbeddingService, embedding_service
 from ..schemas.vectors import VectorData, DeleteVectorRequest
 from ..schemas.knowledge_dtos import KnowledgeAddRequest
@@ -11,8 +11,8 @@ router = APIRouter()
 
 
 # Dependencies
-def get_knowledge_lancedb_service(request: Request) -> KnowledgeLanceDBService:
-    return request.app.state.knowledge_lancedb_service
+def get_knowledge_qdrant_service(request: Request) -> KnowledgeQdrantService:
+    return request.app.state.knowledge_qdrant_service
 
 
 def get_embedding_service() -> EmbeddingService:
@@ -22,7 +22,7 @@ def get_embedding_service() -> EmbeddingService:
 @router.post("/knowledge", status_code=status.HTTP_201_CREATED)
 async def add_knowledge_data(
     request: KnowledgeAddRequest,
-    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+    qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
     embedding_service_dep: EmbeddingService = Depends(
         get_embedding_service
     ),  # Renamed to avoid conflict
@@ -52,8 +52,6 @@ async def add_knowledge_data(
             ),
         )
 
-    table_name = lancedb_service._get_knowledge_table_name(family_id)
-
     vector_data = VectorData(
         family_id=family_id,
         entity_id=str(original_id),
@@ -64,7 +62,7 @@ async def add_knowledge_data(
         metadata=metadata,
     )
 
-    await lancedb_service.add_vectors(table_name, [vector_data])
+    await qdrant_service.add_vectors([vector_data])
     return {
         "message": (
             f"{content_type} data with original_id "
@@ -77,7 +75,7 @@ async def add_knowledge_data(
 @router.post("/knowledge/upsert", status_code=status.HTTP_200_OK)
 async def upsert_knowledge_data(
     request: KnowledgeAddRequest,
-    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+    qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
     embedding_service_dep: EmbeddingService = Depends(get_embedding_service),
 ):
     """
@@ -106,8 +104,6 @@ async def upsert_knowledge_data(
             ),
         )
 
-    table_name = lancedb_service._get_knowledge_table_name(family_id)
-
     # First, delete any existing data with the same unique identifiers
     delete_where_clause = (
         f"family_id = '{family_id}' AND "
@@ -119,7 +115,7 @@ async def upsert_knowledge_data(
         entity_id=original_id,
         where_clause=delete_where_clause,
     )
-    await lancedb_service.delete_vectors(table_name, delete_request)
+    await qdrant_service.delete_vectors(delete_request)
     logger.info(
         f"Existing knowledge data (if any) deleted for family_id: {family_id}, "
         f"original_id: {original_id}, content_type: {content_type}"
@@ -136,7 +132,7 @@ async def upsert_knowledge_data(
         metadata=metadata,
     )
 
-    await lancedb_service.add_vectors(table_name, [vector_data])
+    await qdrant_service.add_vectors([vector_data])
     return {
         "message": (
             f"{content_type} data with original_id "
@@ -149,14 +145,14 @@ async def upsert_knowledge_data(
 @router.delete("/knowledge/family-data/{family_id}", status_code=status.HTTP_200_OK)
 async def delete_knowledge_by_family_id(
     family_id: str,
-    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+    qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
 ):
     """
     Deletes all knowledge data for a given family_id by dropping the associated LanceDB table.
     """
     logger.info(f"Received request to delete all knowledge for family_id: {family_id}")
     try:
-        await lancedb_service.delete_knowledge_by_family_id(family_id)
+        await qdrant_service.delete_knowledge_by_family_id(family_id)
         return {"message": f"All knowledge data for family_id '{family_id}' deleted successfully."}
     except Exception as e:
         logger.exception(f"Error deleting knowledge by family_id '{family_id}': {e}")
@@ -170,7 +166,7 @@ async def delete_knowledge_by_family_id(
 async def delete_knowledge_data(
     family_id: str,
     original_id: str,
-    lancedb_service: KnowledgeLanceDBService = Depends(get_knowledge_lancedb_service),
+    qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
 ):
     """
     Deletes knowledge data from LanceDB based on family_id and original_id.
@@ -180,14 +176,13 @@ async def delete_knowledge_data(
         f"original_id: {original_id}"
     )
 
-    table_name = lancedb_service._get_knowledge_table_name(family_id)
     delete_request = DeleteVectorRequest(
         family_id=family_id,
         entity_id=original_id,  # Use entity_id for deletion
         where_clause=None,  # Explicitly set to None as we're using entity_id
     )
 
-    deleted_count = await lancedb_service.delete_vectors(table_name, delete_request)
+    deleted_count = await qdrant_service.delete_vectors(delete_request)
 
     if deleted_count == 0:
         raise HTTPException(

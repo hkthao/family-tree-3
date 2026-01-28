@@ -1,5 +1,3 @@
-using backend.Domain.Enums; // Add this
-
 namespace backend.Application.Events.Queries;
 
 public class EventMemberDto

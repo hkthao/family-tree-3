@@ -1,10 +1,13 @@
 using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Prompts.Queries.GetPromptById;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // NEW
+using backend.Application.Common.Models.AppSetting; // NEW
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 
@@ -14,14 +17,20 @@ namespace backend.Application.Families.Commands.GenerateFamilyData;
 public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDataCommand, Result<CombinedAiContentDto>>
 {
     private readonly IMediator _mediator;
-    private readonly IAiGenerateService _aiGenerateService;
+    private readonly ILLMGatewayService _llmGatewayService;
     private readonly ILogger<GenerateFamilyDataCommandHandler> _logger;
+    private readonly LLMGatewaySettings _llmGatewaySettings; // NEW
 
-    public GenerateFamilyDataCommandHandler(IMediator mediator, IAiGenerateService aiGenerateService, ILogger<GenerateFamilyDataCommandHandler> logger)
+    public GenerateFamilyDataCommandHandler(
+        IMediator mediator,
+        ILLMGatewayService llmGatewayService,
+        ILogger<GenerateFamilyDataCommandHandler> logger,
+        IOptions<LLMGatewaySettings> llmGatewaySettings) // NEW
     {
         _mediator = mediator;
-        _aiGenerateService = aiGenerateService;
+        _llmGatewayService = llmGatewayService;
         _logger = logger;
+        _llmGatewaySettings = llmGatewaySettings.Value; // NEW
     }
 
     public async Task<Result<CombinedAiContentDto>> Handle(GenerateFamilyDataCommand request, CancellationToken cancellationToken)
@@ -51,32 +60,39 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
             return Result<CombinedAiContentDto>.Failure(errorMessage, ErrorSources.InvalidConfiguration);
         }
 
-        // 3. Chuẩn bị yêu cầu AI
-        var aiRequest = new GenerateRequest
+        // 3. Chuẩn bị yêu cầu LLM Gateway
+        var llmRequest = new LLMChatCompletionRequest
         {
-            SystemPrompt = systemPromptContent,
-            ChatInput = request.ChatInput,
-            SessionId = Guid.NewGuid().ToString(), // Tạo SessionId mới cho mỗi yêu cầu
+            Model = _llmGatewaySettings.LlmModel,
+            Messages = new List<LLMChatCompletionMessage>
+            {
+                new LLMChatCompletionMessage { Role = "system", Content = systemPromptContent },
+                new LLMChatCompletionMessage { Role = "user", Content = request.ChatInput }
+            },
+            User = request.FamilyId.ToString(), // Use FamilyId as user identifier for LLM Gateway
             Metadata = new Dictionary<string, object>
             {
-                { "familyId", request.FamilyId }
+                { "familyId", request.FamilyId.ToString() },
+                { "sessionId", Guid.NewGuid().ToString() } // New session ID for this request
             }
         };
 
-        // 4. Gửi yêu cầu đến dịch vụ AI và phân tích phản hồi tổng hợp
-        var combinedResult = await _aiGenerateService.GenerateDataAsync<CombinedAiContentDto>(aiRequest, cancellationToken);
+        // 4. Gửi yêu cầu đến dịch vụ LLM Gateway và phân tích phản hồi
+        var llmResponseResult = await _llmGatewayService.GetChatCompletionAsync(llmRequest, cancellationToken);
 
-        if (!combinedResult.IsSuccess)
+        if (!llmResponseResult.IsSuccess)
         {
-            return Result<CombinedAiContentDto>.Failure(combinedResult.Error ?? "Lỗi không xác định khi tạo nội dung AI tổng hợp.", combinedResult.ErrorSource ?? ErrorSources.ExternalServiceError);
+            return Result<CombinedAiContentDto>.Failure(llmResponseResult.Error ?? "Lỗi không xác định khi gọi LLM Gateway.", llmResponseResult.ErrorSource ?? ErrorSources.ExternalServiceError);
         }
 
-        if (combinedResult.Value == null)
+        if (llmResponseResult.Value == null || llmResponseResult.Value.Choices == null || !llmResponseResult.Value.Choices.Any())
         {
             return Result<CombinedAiContentDto>.Failure(ErrorMessages.NoAIResponse, ErrorSources.ExternalServiceError);
         }
 
-        return Result<CombinedAiContentDto>.Success(combinedResult.Value);
+        var combinedContent = llmResponseResult.Value.Choices.First().Message.Content;
+
+        return Result<CombinedAiContentDto>.Success(new CombinedAiContentDto { CombinedContent = combinedContent });
     }
 
 }

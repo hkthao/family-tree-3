@@ -159,8 +159,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
         CreateMap<UpdateMemoryMediaCommandDto, MemoryMedia>()
             .ForMember(dest => dest.MemoryItem, opt => opt.Ignore());
-        CreateMap<VoiceProfile, VoiceProfiles.Queries.VoiceProfileDto>();
-        CreateMap<VoiceGeneration, VoiceProfiles.Queries.VoiceGenerationDto>();
         CreateMap<EventDto, Event>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.DomainEvents, opt => opt.Ignore())

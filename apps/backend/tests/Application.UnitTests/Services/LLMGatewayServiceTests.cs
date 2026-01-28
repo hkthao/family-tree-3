@@ -62,7 +62,7 @@ public class LLMGatewayServiceTests : TestBase
         var request = new LLMChatCompletionRequest
         {
             Model = "ollama:llama2",
-            Messages = new List<LLMMessage> { new LLMMessage { Role = "user", Content = "Hello" } }
+            Messages = new List<LLMChatCompletionMessage> { new LLMChatCompletionMessage { Role = "user", Content = "Hello" } }
         };
 
         var expectedResponse = new LLMChatCompletionResponse
@@ -109,7 +109,7 @@ public class LLMGatewayServiceTests : TestBase
         var request = new LLMChatCompletionRequest
         {
             Model = "ollama:llama2",
-            Messages = new List<LLMMessage> { new LLMMessage { Role = "user", Content = "Hello" } }
+            Messages = new List<LLMChatCompletionMessage> { new LLMChatCompletionMessage { Role = "user", Content = "Hello" } }
         };
         SetupMockResponse(HttpStatusCode.InternalServerError, "Error from API");
 

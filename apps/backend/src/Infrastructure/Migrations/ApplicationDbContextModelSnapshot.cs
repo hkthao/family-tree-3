@@ -1181,11 +1181,6 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("double")
                         .HasColumnName("emotion_confidence");
 
-                    b.Property<string>("FaceId")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("face_id");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_deleted");

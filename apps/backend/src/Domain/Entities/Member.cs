@@ -5,28 +5,28 @@ namespace backend.Domain.Entities;
 
 public class Member : BaseAuditableEntity
 {
-    public string LastName { get;  set; } = null!; // Last name
-    public string FirstName { get;  set; } = null!; // First name
-    public string Code { get;  set; } = null!; // New property
+    public string LastName { get; set; } = null!; // Last name
+    public string FirstName { get; set; } = null!; // First name
+    public string Code { get; set; } = null!; // New property
     public string FullName => $"{LastName} {FirstName}"; // Full name (derived)
-    public string? Nickname { get;  set; } // New
-    public string? Gender { get;  set; }
-    public DateTime? DateOfBirth { get;  set; }
-    public DateTime? DateOfDeath { get;  set; }
+    public string? Nickname { get; set; } // New
+    public string? Gender { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public DateTime? DateOfDeath { get; set; }
     public LunarDate? LunarDateOfDeath { get; set; }
-    public string? PlaceOfBirth { get;  set; }
-    public string? PlaceOfDeath { get;  set; }
-    public string? Phone { get;  set; }
-    public string? Email { get;  set; }
-    public string? Address { get;  set; }
-    public string? Occupation { get;  set; } // New
-    public string? AvatarUrl { get;  set; }
-    public string? Biography { get;  set; } // New
-    public bool IsDeceased { get;  set; } = false;
-    public Guid FamilyId { get;  set; }
-    public Family Family { get;  set; } = null!;
-    public bool IsRoot { get;  set; } = false;
-    public int? Order { get;  set; }
+    public string? PlaceOfBirth { get; set; }
+    public string? PlaceOfDeath { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
+    public string? Occupation { get; set; } // New
+    public string? AvatarUrl { get; set; }
+    public string? Biography { get; set; } // New
+    public bool IsDeceased { get; set; } = false;
+    public Guid FamilyId { get; set; }
+    public Family Family { get; set; } = null!;
+    public bool IsRoot { get; set; } = false;
+    public int? Order { get; set; }
 
     // Denormalized relationship properties
     public Guid? FatherId { get; set; }
@@ -146,7 +146,7 @@ public class Member : BaseAuditableEntity
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 
 
-    public ICollection<MemberFace> MemberFaces { get;  set; } = new List<MemberFace>(); // NEW
+    public ICollection<MemberFace> MemberFaces { get; set; } = new List<MemberFace>(); // NEW
 
     public Member() { }
 

@@ -1,7 +1,8 @@
 using System.Text;
-using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
+using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED
 using backend.Application.Prompts.Queries.GetPromptById; // Add this
 using backend.Domain.Entities;
@@ -16,16 +17,16 @@ public class RelationshipDetectionService : IRelationshipDetectionService
 {
     private readonly IApplicationDbContext _context;
     private readonly IRelationshipGraph _relationshipGraph;
-    private readonly IAiGenerateService _aiGenerateService;
+    private readonly ILLMGatewayService _llmGatewayService;
 
     private readonly IMediator _mediator;
     private readonly ILogger<RelationshipDetectionService> _logger; // Inject ILogger
 
-    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, IAiGenerateService aiGenerateService, IMediator mediator, ILogger<RelationshipDetectionService> logger)
+    public RelationshipDetectionService(IApplicationDbContext context, IRelationshipGraph relationshipGraph, ILLMGatewayService llmGatewayService, IMediator mediator, ILogger<RelationshipDetectionService> logger)
     {
         _context = context;
         _relationshipGraph = relationshipGraph;
-        _aiGenerateService = aiGenerateService;
+        _llmGatewayService = llmGatewayService;
 
         _mediator = mediator;
         _logger = logger; // Initialize _logger
@@ -127,24 +128,28 @@ public class RelationshipDetectionService : IRelationshipDetectionService
                 };
             }
 
-            var aiRequest = new GenerateRequest
+            var llmRequest = new LLMChatCompletionRequest
             {
-                SystemPrompt = systemPromptContent,
-                ChatInput = combinedPromptBuilder.ToString(),
-                SessionId = Guid.NewGuid().ToString(),
+                Model = "gpt-3.5-turbo", // TODO: Make configurable
+                Messages = new List<LLMChatCompletionMessage>
+                {
+                    new LLMChatCompletionMessage { Role = "system", Content = systemPromptContent },
+                    new LLMChatCompletionMessage { Role = "user", Content = combinedPromptBuilder.ToString() }
+                },
+                User = familyId.ToString(), // Use FamilyId as user identifier for LLM Gateway
                 Metadata = new Dictionary<string, object>
                 {
-                    { "familyId", familyId },
-                    { "memberAId", memberAId },
-                    { "memberBId", memberBId }
+                    { "familyId", familyId.ToString() },
+                    { "memberAId", memberAId.ToString() },
+                    { "memberBId", memberBId.ToString() }
                 }
             };
 
-            var aiResponseResult = await _aiGenerateService.GenerateDataAsync<RelationshipInferenceResultDto>(aiRequest, cancellationToken);
+            var llmResponseResult = await _llmGatewayService.GetChatCompletionAsync(llmRequest, cancellationToken);
 
-            if (aiResponseResult.IsSuccess && aiResponseResult.Value != null)
+            if (llmResponseResult.IsSuccess && llmResponseResult.Value != null && llmResponseResult.Value.Choices.Any())
             {
-                inferredDescription = aiResponseResult.Value.InferredRelationship;
+                inferredDescription = llmResponseResult.Value.Choices.First().Message.Content;
             }
         }
         else

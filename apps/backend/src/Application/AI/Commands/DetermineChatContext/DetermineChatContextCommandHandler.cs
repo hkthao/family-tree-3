@@ -57,10 +57,10 @@ public class DetermineChatContextCommandHandler : IRequestHandler<DetermineChatC
         var llmChatRequest = new LLMChatCompletionRequest
         {
             Model = _llmGatewaySettings.LlmModel, // Use configured LLM Model
-            Messages = new List<LLMMessage>
+            Messages = new List<LLMChatCompletionMessage>
             {
-                new LLMMessage { Role = "system", Content = systemPrompt },
-                new LLMMessage { Role = "user", Content = request.ChatMessage }
+                new LLMChatCompletionMessage { Role = "system", Content = systemPrompt },
+                new LLMChatCompletionMessage { Role = "user", Content = request.ChatMessage }
             },
             Temperature = 0.0f, // Use a low temperature for classification tasks
             MaxTokens = 500 // Limit output size for classification

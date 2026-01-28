@@ -7,8 +7,7 @@ public class CreateMemberFaceCommandValidator : AbstractValidator<CreateMemberFa
         RuleFor(v => v.MemberId)
             .NotEmpty().WithMessage("Member ID is required.");
 
-        RuleFor(v => v.FaceId)
-            .NotEmpty().WithMessage("Face ID is required.");
+
 
         RuleFor(v => v.Embedding)
             .NotNull().WithMessage("Embedding cannot be null.")

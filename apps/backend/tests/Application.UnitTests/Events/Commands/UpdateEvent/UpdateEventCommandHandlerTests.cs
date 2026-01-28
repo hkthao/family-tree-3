@@ -25,7 +25,7 @@ public class UpdateEventCommandHandlerTests : TestBase
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _lunarCalendarServiceMock = new Mock<ILunarCalendarService>(); // Added
-        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object,_lunarCalendarServiceMock.Object); // Modified
+        _handler = new UpdateEventCommandHandler(_context, _authorizationServiceMock.Object, _lunarCalendarServiceMock.Object); // Modified
     }
 
     [Fact]

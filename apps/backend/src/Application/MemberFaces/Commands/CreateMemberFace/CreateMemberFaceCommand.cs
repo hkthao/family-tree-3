@@ -6,7 +6,7 @@ namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 public record CreateMemberFaceCommand : IRequest<Result<Guid>>
 {
     public Guid MemberId { get; init; }
-    public string FaceId { get; init; } = null!;
+
     public BoundingBoxDto BoundingBox { get; init; } = new BoundingBoxDto();
     public double Confidence { get; init; }
     public string? ThumbnailUrl { get; init; }

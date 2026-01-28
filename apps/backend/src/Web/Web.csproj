@@ -13,9 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-
     <PackageReference Include="Hangfire.AspNetCore" />
-
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
@@ -31,7 +29,7 @@
     </PackageReference>
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-
+    <PackageReference Include="RabbitMQ.Client" />
   </ItemGroup>
 
 

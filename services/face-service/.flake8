@@ -1,2 +1,15 @@
 [flake8]
-ignore = E501
+# Tăng giới hạn
+max-line-length = 120
+
+# Bỏ qua E501 và các lỗi format thừa thãi khác
+extend-ignore = E501
+
+# Loại trừ các thư mục không cần thiết
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    venv,
+    .venv

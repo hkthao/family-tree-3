@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using backend.Application.Common.Configurations;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
@@ -176,9 +175,6 @@ public static class DependencyInjection
             rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
-        // Register VoiceAISettings
-        services.Configure<VoiceAISettings>(configuration.GetSection(VoiceAISettings.SectionName));
-
         // Register LLMGatewaySettings
         services.Configure<LLMGatewaySettings>(configuration.GetSection(LLMGatewaySettings.SectionName));
 
@@ -194,21 +190,6 @@ public static class DependencyInjection
                     else
                     {
                         serviceProvider.GetRequiredService<ILogger<LLMGatewayService>>().LogWarning("LLMGateway BaseUrl is not configured, falling back to default.");
-                    }
-                });
-
-        // Register VoiceAIService as a typed HttpClient
-        services.AddHttpClient<IVoiceAIService, VoiceAIService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var voiceAISettings = serviceProvider.GetRequiredService<IOptions<VoiceAISettings>>().Value;
-                    if (!string.IsNullOrEmpty(voiceAISettings.BaseUrl))
-                    {
-                        httpClient.BaseAddress = new Uri(voiceAISettings.BaseUrl);
-                    }
-                    else
-                    {
-                        serviceProvider.GetRequiredService<ILogger<VoiceAIService>>().LogWarning("VoiceAISettings BaseUrl is not configured.");
                     }
                 });
 

@@ -117,7 +117,7 @@ const {
 .bounding-box__name {
   position: absolute;
   top: -40px;
-  left: -15px;
+  width: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 2px 5px;
@@ -126,7 +126,6 @@ const {
   border-radius: 3px;
   z-index: 10;
   min-width: 90px;
-  height: 35px;
   text-align: center;;
 }
 

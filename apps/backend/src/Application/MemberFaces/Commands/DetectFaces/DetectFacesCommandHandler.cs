@@ -4,7 +4,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
-using backend.Application.Files.UploadFile;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.Members.Specifications;
@@ -46,22 +45,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                 var (width, height) = ImageUtils.GetImageDimensions(request.ImageBytes, _logger);
                 imageWidth = width;
                 imageHeight = height;
-                // var originalUploadCommand = new UploadFileCommand
-                // {
-                //     ImageData = request.ImageBytes,
-                //     FileName = effectiveFileName,
-                //     Folder = uploadFolder,
-                //     ContentType = request.ContentType
-                // };
-                // var originalUploadResult = await _mediator.Send(originalUploadCommand, cancellationToken);
-                // if (originalUploadResult.IsSuccess && originalUploadResult.Value != null)
-                // {
-                //     originalImageUrl = originalUploadResult.Value.Url;
-                // }
-                // else
-                // {
-                //     return Result<FaceDetectionResponseDto>.Failure(originalUploadResult.Error ?? ErrorMessages.FileUploadFailed);
-                // }
             }
             var detectedFacesResult = await _faceApiService.DetectFacesAsync(request.ImageBytes!, request.ContentType, request.ReturnCrop);
             var imageId = Guid.NewGuid();
@@ -89,8 +72,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     FamilyName = null,
                     BirthYear = null,
                     DeathYear = null,
-                    Emotion = faceResult.Emotion,
-                    EmotionConfidence = faceResult.EmotionConfidence,
                     Status = "unrecognized"
                 };
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
@@ -98,8 +79,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     var searchFaceQuery = new SearchMemberFaceQuery(request.FamilyId)
                     {
                         Vector = detectedFaceDto.Embedding,
-                        Limit = 1,
-                        Threshold = 0.7f
+                        Limit = 1
                     };
 
                     var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);

@@ -41,18 +41,7 @@ public class ImportMemberFacesCommandHandler : IRequestHandler<ImportMemberFaces
 
         foreach (var importFaceItemDto in request.Faces)
         {
-            // Kiểm tra xem khuôn mặt đã tồn tại theo FaceId trong gia đình này chưa
-            // Hoặc có thể kiểm tra theo MemberId và FaceId nếu MemberId được cung cấp
-            var existingFace = await _context.MemberFaces
-                .Include(mf => mf.Member)
-                .Where(mf => mf.Member != null && mf.Member.FamilyId == request.FamilyId)
-                .FirstOrDefaultAsync(mf => mf.FaceId == importFaceItemDto.FaceId, cancellationToken);
 
-            if (existingFace != null)
-            {
-                _logger.LogInformation("Khuôn mặt với FaceId '{FaceId}' đã tồn tại cho FamilyId {FamilyId}. Bỏ qua nhập.", importFaceItemDto.FaceId, request.FamilyId);
-                continue;
-            }
 
             // Nếu MemberId được cung cấp, hãy kiểm tra xem Member có thuộc FamilyId này không
             if (importFaceItemDto.MemberId.HasValue)
@@ -71,7 +60,7 @@ public class ImportMemberFacesCommandHandler : IRequestHandler<ImportMemberFaces
             {
                 // Nếu MemberId không được cung cấp, khuôn mặt không thể liên kết với thành viên nào
                 // Có thể xử lý bằng cách bỏ qua hoặc tạo khuôn mặt không liên kết (tùy thuộc vào yêu cầu nghiệp vụ)
-                _logger.LogWarning("Khuôn mặt với FaceId '{FaceId}' không có MemberId được cung cấp. Bỏ qua nhập.", importFaceItemDto.FaceId);
+                _logger.LogWarning("Khuôn mặt không có MemberId được cung cấp. Bỏ qua nhập.");
                 continue;
             }
 

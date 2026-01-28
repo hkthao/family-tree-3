@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces; // Added
@@ -22,29 +21,29 @@ public class DeleteMemberFaceCommandHandlerTests
     private readonly Mock<DbSet<Member>> _membersDbSetMock; // Added
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<DeleteMemberFaceCommandHandler>> _loggerMock;
-    private readonly Mock<IKnowledgeService> _knowledgeServiceMock; // NEW
+    private readonly Mock<IMessageBus> _messageBusMock;
     private readonly List<MemberFace> _memberFacesData;
-    private readonly List<Family> _familiesData; // Added
-    private readonly List<Member> _membersData; // Added
+    private readonly List<Family> _familiesData;
+    private readonly List<Member> _membersData;
 
     public DeleteMemberFaceCommandHandlerTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
         _memberFacesDbSetMock = new Mock<DbSet<MemberFace>>();
-        _familiesDbSetMock = new Mock<DbSet<Family>>(); // Initialized
-        _membersDbSetMock = new Mock<DbSet<Member>>(); // Initialized
+        _familiesDbSetMock = new Mock<DbSet<Family>>();
+        _membersDbSetMock = new Mock<DbSet<Member>>();
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _loggerMock = new Mock<ILogger<DeleteMemberFaceCommandHandler>>();
-        _knowledgeServiceMock = new Mock<IKnowledgeService>(); // NEW
+        _messageBusMock = new Mock<IMessageBus>();
 
         _memberFacesData = new List<MemberFace>();
-        _familiesData = new List<Family>(); // Initialized
-        _membersData = new List<Member>(); // Initialized
+        _familiesData = new List<Family>();
+        _membersData = new List<Member>();
 
         // Setup mock DbSets
         _contextMock.Setup(x => x.MemberFaces).ReturnsDbSet(_memberFacesData);
-        _contextMock.Setup(x => x.Families).ReturnsDbSet(_familiesData); // Setup mock for Families
-        _contextMock.Setup(x => x.Members).ReturnsDbSet(_membersData); // Setup mock for Members
+        _contextMock.Setup(x => x.Families).ReturnsDbSet(_familiesData);
+        _contextMock.Setup(x => x.Members).ReturnsDbSet(_membersData);
         _contextMock.Setup(x => x.MemberFaces.FindAsync(It.IsAny<object[]>()))
             .ReturnsAsync((object[] ids) => _memberFacesData.FirstOrDefault(mf => mf.Id == (Guid)ids[0]));
 
@@ -64,7 +63,7 @@ public class DeleteMemberFaceCommandHandlerTests
 
     private DeleteMemberFaceCommandHandler CreateHandler()
     {
-        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _knowledgeServiceMock.Object);
+        return new DeleteMemberFaceCommandHandler(_contextMock.Object, _authorizationServiceMock.Object, _loggerMock.Object, _messageBusMock.Object);
     }
 
     private MemberFace SeedMemberFace(Family family, Member member)
@@ -76,7 +75,6 @@ public class DeleteMemberFaceCommandHandlerTests
             Id = Guid.NewGuid(), // Cần tạo Id rõ ràng vì không dùng DbContext
             MemberId = member.Id,
             Member = member, // Gán đối tượng Member
-            FaceId = "testFaceId",
             BoundingBox = new BoundingBox { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.9,
             ThumbnailUrl = "http://thumbnail.url",
@@ -102,9 +100,7 @@ public class DeleteMemberFaceCommandHandlerTests
         var command = new DeleteMemberFaceCommand { Id = existingMemberFace.Id };
         var handler = CreateHandler();
 
-        _knowledgeServiceMock.Setup(x => x.DeleteMemberFaceData(family.Id, existingMemberFace.Id))
-            .Returns(Task.CompletedTask)
-            .Verifiable();
+
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -120,7 +116,7 @@ public class DeleteMemberFaceCommandHandlerTests
         domainEvent.MemberFace.Should().Be(existingMemberFace);
         domainEvent.VectorDbId.Should().Be(existingMemberFace.VectorDbId);
 
-        _knowledgeServiceMock.Verify(x => x.DeleteMemberFaceData(family.Id, existingMemberFace.Id), Times.Once);
+
     }
 
     [Fact]
