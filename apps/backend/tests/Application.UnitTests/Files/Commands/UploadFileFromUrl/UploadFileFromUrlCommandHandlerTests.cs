@@ -1,8 +1,6 @@
 using System.Net;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Models;
 using backend.Application.Files.Commands.UploadFileFromUrl;
-using backend.Application.Files.DTOs;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;

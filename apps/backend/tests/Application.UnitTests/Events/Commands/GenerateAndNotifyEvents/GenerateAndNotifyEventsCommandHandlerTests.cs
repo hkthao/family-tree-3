@@ -1,10 +1,7 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Events.Commands.GenerateAndNotifyEvents;
 using backend.Application.Events.EventOccurrences.Jobs;
 using backend.Application.UnitTests.Common;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

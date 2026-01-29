@@ -1,14 +1,11 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Messages;
-using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -19,7 +16,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<CreateMemberFaceCommandHandler>> _createLoggerMock;
-    private readonly Mock<IMediator> _mediatorMock;
 
     private readonly Mock<IMessageBus> _messageBusMock;
 
@@ -27,7 +23,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _createLoggerMock = new Mock<ILogger<CreateMemberFaceCommandHandler>>();
-        _mediatorMock = new Mock<IMediator>();
         _messageBusMock = new Mock<IMessageBus>();
 
         // Default authorization setup for tests
@@ -36,7 +31,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _mediatorMock.Object, _messageBusMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object,_messageBusMock.Object);
     }
 
     [Fact]
@@ -61,12 +56,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             EmotionConfidence = 0.95,
             IsVectorDbSynced = false
         };
-
-        // Mock mediator for SearchMemberFaceQuery
-        _mediatorMock.Setup(m => m.Send(
-            It.IsAny<SearchMemberFaceQuery>(),
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>())); // No conflicts found
 
         var handler = CreateCreateHandler();
 
@@ -107,12 +96,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
 
-        // Mock mediator for SearchMemberFaceQuery (won't be called if member not found)
-        _mediatorMock.Setup(m => m.Send(
-            It.IsAny<SearchMemberFaceQuery>(),
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>()));
-
         var handler = CreateCreateHandler();
 
         // Act
@@ -142,12 +125,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             Confidence = 0.99,
             Embedding = new List<double> { 0.1, 0.2, 0.3 }
         };
-
-        // Mock mediator for SearchMemberFaceQuery (won't be called if unauthorized)
-        _mediatorMock.Setup(m => m.Send(
-            It.IsAny<SearchMemberFaceQuery>(),
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>()));
 
         var handler = CreateCreateHandler();
 
@@ -189,15 +166,6 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             EmotionConfidence = 0.95,
             IsVectorDbSynced = false
         };
-
-        // Mock mediator for SearchMemberFaceQuery to return a conflict
-        _mediatorMock.Setup(m => m.Send(
-            It.IsAny<SearchMemberFaceQuery>(),
-            It.IsAny<CancellationToken>()
-        )).ReturnsAsync(Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>
-        {
-            new FoundFaceDto { MemberId = conflictingMemberId, FaceId = "conflictingFaceId", Score = 0.98f }
-        }));
 
         var handler = CreateCreateHandler();
 

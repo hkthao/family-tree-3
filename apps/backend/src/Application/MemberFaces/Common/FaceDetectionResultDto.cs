@@ -6,5 +6,5 @@ public class FaceDetectionResultDto
     public BoundingBoxDto BoundingBox { get; set; } = null!;
     public float Confidence { get; set; }
     public string? Thumbnail { get; set; } // Base64 encoded image
-    public List<double>? Embedding { get; set; }
+    public List<float>? Embedding { get; set; }
 }
