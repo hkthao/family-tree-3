@@ -189,22 +189,6 @@ services:
       - app-network
     restart: unless-stopped
 
-  # promtail:
-  #   image: grafana/promtail:2.6.1 # Use a specific version of Promtail
-  #   container_name: family-tree-promtail
-  #   env_file:
-  #     - ./.env
-  #   volumes:
-  #     - ./promtail-config.yaml:/etc/promtail/config.yaml:ro # Mount the config file
-  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro # Mount Docker logs
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro # Mount Docker socket
-  #   command: -config.file=/etc/promtail/config.yaml
-  #   depends_on:
-  #     - backend
-  #     - admin
-  #     - face-service
-  #     - ocr-service
-
 networks:
   app-network:
     driver: bridge
