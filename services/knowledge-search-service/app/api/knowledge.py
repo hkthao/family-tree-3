@@ -23,9 +23,8 @@ def get_embedding_service() -> EmbeddingService:
 async def add_knowledge_data(
     request: KnowledgeAddRequest,
     qdrant_service: KnowledgeQdrantService = Depends(get_knowledge_qdrant_service),
-    embedding_service_dep: EmbeddingService = Depends(
-        get_embedding_service
-    ),  # Renamed to avoid conflict
+    # Renamed to avoid conflict
+    embedding_service_dep: EmbeddingService = Depends(get_embedding_service),
 ):
     """
     Adds new knowledge data to LanceDB.

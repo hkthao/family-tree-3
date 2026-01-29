@@ -36,7 +36,7 @@ async def search_knowledge(
         query_vector = embedding_service_dep.embed_query(request.query)
 
         # 2. Search LanceDB
-        results = qdrant_service.search_knowledge_table(
+        results = await qdrant_service.search_knowledge_table(
             family_id=request.family_id,
             query_vector=query_vector,
             allowed_visibility=request.allowed_visibility,
@@ -57,7 +57,7 @@ async def search_knowledge(
         return SearchResponse(results=formatted_results)
 
     except Exception as e:
-        logger.error(f"Error during knowledge search: {e}", exc_info=True)
+        logger.error("Error during knowledge search: {}", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal server error occurred during search."

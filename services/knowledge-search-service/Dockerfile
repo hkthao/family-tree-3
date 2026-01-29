@@ -8,9 +8,8 @@ RUN apt-get update && apt-get install -y libgomp1 build-essential && rm -rf /var
 ENV LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 # Copy and install all requirements (prod and dev)
-COPY requirements-prod.txt .
-COPY requirements-dev.txt .
-RUN pip install --no-cache-dir -r requirements-prod.txt -r requirements-dev.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY app/ app/
@@ -25,8 +24,8 @@ RUN apt-get update && apt-get install -y libgomp1 && rm -rf /var/lib/apt/lists/*
 ENV LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 # Copy only production requirements from the builder stage
-COPY requirements-prod.txt .
-RUN pip install --no-cache-dir -r requirements-prod.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code from the builder stage
 COPY --from=builder /app/app/ app/
