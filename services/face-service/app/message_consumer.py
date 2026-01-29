@@ -126,11 +126,17 @@ class MessageConsumer:
 
                 vector_db_id = deleted_message.vector_db_id
                 if vector_db_id:
-                    await self.face_service.delete_face(vector_db_id)
-                    logger.info(
-                        f"Processed MemberFaceDeletedMessage for VectorDbId: {vector_db_id} "
-                        f"from MemberFaceId: {deleted_message.member_face_id}"
-                    )
+                    success = self.face_service.delete_face(vector_db_id)
+                    if success:
+                        logger.info(
+                            f"Processed MemberFaceDeletedMessage for VectorDbId: {vector_db_id} "
+                            f"from MemberFaceId: {deleted_message.member_face_id}. Face deleted successfully."
+                        )
+                    else:
+                        logger.warning(
+                            f"Processed MemberFaceDeletedMessage for VectorDbId: {vector_db_id} "
+                            f"from MemberFaceId: {deleted_message.member_face_id}. Face deletion failed or face not found."
+                        )
                 else:
                     logger.warning(
                         f"MemberFaceDeletedMessage for MemberFaceId: {deleted_message.member_face_id} "

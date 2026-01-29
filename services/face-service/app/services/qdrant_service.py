@@ -158,7 +158,7 @@ class QdrantService:
         try:
             response = self.client.delete(
                 collection_name=self.collection_name,
-                points=[point_id],  # Correct way to specify point IDs
+                points_selector=models.PointIdsList(points=[point_id]),
                 wait=True
             )
             if response.status == UpdateStatus.COMPLETED:
