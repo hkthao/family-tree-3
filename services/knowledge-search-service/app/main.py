@@ -10,6 +10,7 @@ from app.core.embeddings import embedding_service as global_embedding_service  #
 async def lifespan(app: FastAPI):
     # Startup: Initialize Qdrant service
     app.state.knowledge_qdrant_service = KnowledgeQdrantService(global_embedding_service)
+    await app.state.knowledge_qdrant_service.async_init() # Initialize Qdrant service
     yield
     # Shutdown: No specific cleanup needed for Qdrant connection as it's handled internally
 

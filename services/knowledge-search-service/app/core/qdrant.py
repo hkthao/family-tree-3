@@ -1,9 +1,8 @@
 import os
-from qdrant_client import QdrantClient, models
+from qdrant_client import AsyncQdrantClient, models as qdrant_models
 from qdrant_client.http.models import UpdateStatus
 from typing import List, Dict, Any
 from loguru import logger
-
 from ..config import TEXT_EMBEDDING_DIMENSIONS
 from ..core.embeddings import EmbeddingService
 from ..schemas.vectors import (
@@ -14,27 +13,55 @@ from ..schemas.vectors import (
 class KnowledgeQdrantService:
     def __init__(self, embedding_service: EmbeddingService):
         self.embedding_service = embedding_service
-        self.client = QdrantClient(
+        self.client = AsyncQdrantClient(
             host=os.getenv("QDRANT_HOST"),
             api_key=os.getenv("QDRANT_API_KEY"),
         )
         self.collection_name = os.getenv("QDRANT_KNOWLEDGE_COLLECTION_NAME", "knowledge_embeddings")
-        self._create_collection_if_not_exists()
 
-    def _create_collection_if_not_exists(self):
+    async def async_init(self):
+        await self._create_collection_if_not_exists()
+
+    async def _create_collection_if_not_exists(self):
         try:
-            self.client.get_collection(collection_name=self.collection_name)
+            await self.client.get_collection(collection_name=self.collection_name)
             logger.info(f"Collection '{self.collection_name}' already exists.")
-        except Exception:
-            logger.info(f"Collection '{self.collection_name}' not found. Creating it...")
-            self.client.recreate_collection(
-                collection_name=self.collection_name,
-                vectors_config=models.VectorParams(
-                    size=TEXT_EMBEDDING_DIMENSIONS,
-                    distance=models.Distance.COSINE
-                ),
-            )
-            logger.info(f"Collection '{self.collection_name}' created successfully.")
+        except Exception as e:
+            if "Not found" in str(e): # Specific check for collection not found
+                logger.info(f"Collection '{self.collection_name}' not found. Creating it...")
+                await self.client.create_collection(
+                    collection_name=self.collection_name,
+                    vectors_config=qdrant_models.VectorParams(
+                        size=TEXT_EMBEDDING_DIMENSIONS,
+                        distance=qdrant_models.Distance.COSINE
+                    ),
+                )
+                logger.info(f"Collection '{self.collection_name}' created successfully.")
+            else:
+                logger.error(f"Error checking or creating collection '{self.collection_name}': {e}")
+                raise # Re-raise other unexpected exceptions
+        # Create payload index for family_id, entity_id, and type for efficient filtering
+        await self.client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="family_id",
+            field_schema=qdrant_models.PayloadSchemaType.KEYWORD
+        )
+        await self.client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="entity_id",
+            field_schema=qdrant_models.PayloadSchemaType.KEYWORD
+        )
+        await self.client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="type",
+            field_schema=qdrant_models.PayloadSchemaType.KEYWORD
+        )
+        await self.client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="visibility",
+            field_schema=qdrant_models.PayloadSchemaType.KEYWORD
+        )
+        logger.info(f"Payload indexes for 'family_id', 'entity_id', 'type', 'visibility' ensured in collection '{self.collection_name}'.")
 
     async def add_vectors(self, vectors_data: List[VectorData]):
         if not vectors_data:
@@ -46,9 +73,8 @@ class KnowledgeQdrantService:
             item = v_data.model_dump(exclude_none=True)
             vector = self.embedding_service.embed_query(item["summary"])
 
-            # Use a unique ID for the point. Assuming 'entity_id' is unique within 'family_id'
-            # For Qdrant, a point ID can be a string or integer. Let's use a combination for uniqueness.
-            # Qdrant recommends using UUID for point IDs.
+            # Use a unique, stable string ID for the point.
+            # This is derived from the combined family_id and entity_id.
             point_id = f"{item['family_id']}-{item['entity_id']}"
 
             # Prepare payload. Qdrant payload is a dict.
@@ -64,14 +90,14 @@ class KnowledgeQdrantService:
             }
 
             points.append(
-                models.PointStruct(
+                qdrant_models.PointStruct(
                     id=point_id,
                     vector=vector,
                     payload=payload,
                 )
             )
 
-        self.client.upsert(
+        await self.client.upsert(
             collection_name=self.collection_name,
             wait=True,
             points=points
@@ -79,16 +105,19 @@ class KnowledgeQdrantService:
         logger.info(f"Added {len(vectors_data)} vectors to collection '{self.collection_name}'.")
 
     async def update_vectors(self, update_request: UpdateVectorRequest):
+        # Use a unique, stable string ID for the point.
+        # This is derived from the combined family_id and entity_id.
         point_id = f"{update_request.family_id}-{update_request.entity_id}"
 
         # Fetch current payload to merge updates
         try:
-            current_point = self.client.retrieve(
+            retrieved_points = await self.client.retrieve(
                 collection_name=self.collection_name,
                 ids=[point_id],
                 with_payload=True,
-                with_vectors=False
-            ).pop()
+                with_vectors=True # Ensure current vector is fetched
+            )
+            current_point = retrieved_points.pop()
             current_payload = current_point.payload
         except IndexError:
             logger.warning(f"Point with ID '{point_id}' not found for update.")
@@ -109,18 +138,15 @@ class KnowledgeQdrantService:
 
         # Merge remaining updates (like 'summary')
         new_payload.update(updates)
-
-        # If summary is updated, generate a new vector
+        new_vector = None  # If summary is updated, generate a new vector
         if 'summary' in updates:
             new_vector = self.embedding_service.embed_query(new_payload['summary'])
-        else:
-            new_vector = None  # Keep original vector
 
-        self.client.upsert(
+        await self.client.upsert(
             collection_name=self.collection_name,
             wait=True,
             points=[
-                models.PointStruct(
+                qdrant_models.PointStruct(
                     id=point_id,
                     vector=new_vector if new_vector else current_point.vector,
                     payload=new_payload,
@@ -131,24 +157,24 @@ class KnowledgeQdrantService:
 
     async def delete_vectors(self, delete_request: DeleteVectorRequest) -> int:
         qdrant_filter_conditions = [
-            models.FieldCondition(
+            qdrant_models.FieldCondition(
                 key="family_id",
-                match=models.MatchValue(value=delete_request.family_id)
+                match=qdrant_models.MatchValue(value=delete_request.family_id)
             )
         ]
 
         if delete_request.entity_id is not None:
             qdrant_filter_conditions.append(
-                models.FieldCondition(
+                qdrant_models.FieldCondition(
                     key="entity_id",
-                    match=models.MatchValue(value=delete_request.entity_id)
+                    match=qdrant_models.MatchValue(value=delete_request.entity_id)
                 )
             )
         elif delete_request.type is not None:
             qdrant_filter_conditions.append(
-                models.FieldCondition(
+                qdrant_models.FieldCondition(
                     key="type",
-                    match=models.MatchValue(value=delete_request.type)
+                    match=qdrant_models.MatchValue(value=delete_request.type)
                 )
             )
         elif delete_request.where_clause:
@@ -160,12 +186,10 @@ class KnowledgeQdrantService:
             logger.warning("Raw where_clause not supported for deletion in Qdrant. "
                            "Only family_id, entity_id, or type filters are applied.")
             # We could raise an error here if strict adherence to where_clause is required.
-            # For this refactor, we'll proceed with supported filters only.
-
-        response = self.client.delete(
+        response = await self.client.delete(
             collection_name=self.collection_name,
-            points_selector=models.FilterSelector(
-                filter=models.Filter(
+            points_selector=qdrant_models.FilterSelector(
+                filter=qdrant_models.Filter(
                     must=qdrant_filter_conditions
                 )
             ),
@@ -180,15 +204,15 @@ class KnowledgeQdrantService:
 
     async def delete_knowledge_by_family_id(self, family_id: str) -> None:
         qdrant_filter_conditions = [
-            models.FieldCondition(
+            qdrant_models.FieldCondition(
                 key="family_id",
-                match=models.MatchValue(value=family_id)
+                match=qdrant_models.MatchValue(value=family_id)
             )
         ]
-        response = self.client.delete(
+        response = await self.client.delete(
             collection_name=self.collection_name,
-            points_selector=models.FilterSelector(
-                filter=models.Filter(
+            points_selector=qdrant_models.FilterSelector(
+                filter=qdrant_models.Filter(
                     must=qdrant_filter_conditions
                 )
             ),
@@ -201,24 +225,24 @@ class KnowledgeQdrantService:
 
     async def rebuild_vectors(self, rebuild_request: RebuildVectorRequest):
         qdrant_filter_conditions = [
-            models.FieldCondition(
+            qdrant_models.FieldCondition(
                 key="family_id",
-                match=models.MatchValue(value=rebuild_request.family_id)
+                match=qdrant_models.MatchValue(value=rebuild_request.family_id)
             )
         ]
         if rebuild_request.entity_ids:
             qdrant_filter_conditions.append(
-                models.FieldCondition(
+                qdrant_models.FieldCondition(
                     key="entity_id",
-                    match=models.MatchAny(any=rebuild_request.entity_ids)
+                    match=qdrant_models.MatchAny(any=rebuild_request.entity_ids)
                 )
             )
 
         # Retrieve points to re-embed
         # This will fetch max 10000 points. If more, pagination is needed.
-        points_to_rebuild, _ = self.client.scroll(
+        points_to_rebuild, _ = await self.client.scroll(
             collection_name=self.collection_name,
-            scroll_filter=models.Filter(must=qdrant_filter_conditions),
+            scroll_filter=qdrant_models.Filter(must=qdrant_filter_conditions),
             limit=10000,
             with_payload=True,
             with_vectors=True  # Need current vectors to reconstruct PointStruct
@@ -234,7 +258,7 @@ class KnowledgeQdrantService:
             if summary:
                 new_vector = self.embedding_service.embed_query(summary)
                 re_embedded_points.append(
-                    models.PointStruct(
+                    qdrant_models.PointStruct(
                         id=point.id,
                         vector=new_vector,
                         payload=point.payload  # Keep existing payload
@@ -244,7 +268,7 @@ class KnowledgeQdrantService:
                 logger.warning(f"Point {point.id} has no summary to re-embed. Skipping.")
 
         if re_embedded_points:
-            self.client.upsert(
+            await self.client.upsert(
                 collection_name=self.collection_name,
                 wait=True,
                 points=re_embedded_points
@@ -261,26 +285,26 @@ class KnowledgeQdrantService:
         top_k: int
     ) -> List[Dict[str, Any]]:
         qdrant_filter_conditions = [
-            models.FieldCondition(
+            qdrant_models.FieldCondition(
                 key="family_id",
-                match=models.MatchValue(value=family_id)
+                match=qdrant_models.MatchValue(value=family_id)
             ),
-            models.FieldCondition(
+            qdrant_models.FieldCondition(
                 key="visibility",
-                match=models.MatchAny(any=allowed_visibility)
+                match=qdrant_models.MatchAny(any=allowed_visibility)
             )
         ]
 
-        search_result = self.client.search(
+        search_result = await self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
-            query_filter=models.Filter(must=qdrant_filter_conditions),
+            query=query_vector,
+            query_filter=qdrant_models.Filter(must=qdrant_filter_conditions),
             limit=top_k,
             with_payload=True
         )
 
         formatted_results = []
-        for hit in search_result:
+        for hit in search_result.points:
             formatted_results.append({
                 "metadata": hit.payload,  # Qdrant payload is already the metadata
                 "summary": hit.payload.get("summary"),
