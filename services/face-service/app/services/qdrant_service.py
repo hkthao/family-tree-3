@@ -11,6 +11,7 @@ logger.setLevel(logging.INFO)
 class QdrantService:
     def __init__(self, collection_name: Optional[str] = None):
         self.collection_name = collection_name or os.getenv("QDRANT_COLLECTION_NAME", "face_embeddings")
+        self.vector_size = int(os.getenv("QDRANT_VECTOR_SIZE", 128)) # Retrieve vector size from env
         self.client = QdrantClient(
             host=os.getenv("QDRANT_HOST"),
             api_key=os.getenv("QDRANT_API_KEY"),
@@ -23,7 +24,7 @@ class QdrantService:
             logger.info(f"Collection '{self.collection_name}' does not exist. Creating it now...")
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+                vectors_config=models.VectorParams(size=self.vector_size, distance=models.Distance.COSINE), # Use dynamic size
             )
             self.client.create_payload_index(
                 collection_name=self.collection_name,
