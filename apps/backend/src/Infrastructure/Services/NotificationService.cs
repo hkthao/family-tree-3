@@ -1,70 +1,46 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
-using backend.Application.Notifications.DTOs; // New using directive
+using backend.Application.Notifications.DTOs;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using backend.Application.Common.Events; // New using directive for events
 
 namespace backend.Infrastructure.Services;
 
 public class NotificationService : INotificationService
 {
-    private readonly HttpClient _httpClient;
     private readonly ILogger<NotificationService> _logger;
-    private readonly NotificationSettings _settings; // Changed to NotificationSettings
+    private readonly IMessageBus _messageBus;
 
     public NotificationService(
-        HttpClient httpClient,
         ILogger<NotificationService> logger,
-        IOptions<NotificationSettings> settings) // Changed to NotificationSettings
+        IMessageBus messageBus)
     {
-        _httpClient = httpClient;
         _logger = logger;
-        _settings = settings.Value;
-
-        if (string.IsNullOrEmpty(_settings.BaseUrl))
-        {
-            _logger.LogWarning("NotificationService BaseUrl is not configured, falling back to default."); // Updated message
-            _httpClient.BaseAddress = new Uri("http://localhost:3000"); // Fallback for development
-        }
-        else
-        {
-            _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
-        }
+        _messageBus = messageBus;
     }
 
     public async Task<Result> SyncSubscriberAsync(SyncSubscriberDto subscriberDto, CancellationToken cancellationToken = default)
     {
         try
         {
-            var requestBody = new
-            {
-                userId = subscriberDto.UserId,
-                firstName = subscriberDto.FirstName,
-                lastName = subscriberDto.LastName,
-                email = subscriberDto.Email,
-                phone = subscriberDto.Phone,
-                avatar = subscriberDto.Avatar,
-                locale = subscriberDto.Locale,
-                timezone = subscriberDto.Timezone
-            };
-            var response = await _httpClient.PostAsJsonAsync("/subscribers/sync", requestBody, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully synced subscriber {UserId}. Response: {Response}", subscriberDto.UserId, content);
+            var userSyncEvent = new UserSyncEvent(
+                subscriberDto.UserId,
+                subscriberDto.FirstName,
+                subscriberDto.LastName,
+                subscriberDto.Email,
+                subscriberDto.Phone,
+                subscriberDto.Avatar,
+                subscriberDto.Locale,
+                subscriberDto.Timezone
+            );
+            await _messageBus.PublishAsync("notification", "user.sync", userSyncEvent, cancellationToken);
+            _logger.LogInformation("Published UserSyncEvent for UserId: {UserId}", subscriberDto.UserId);
             return Result.Success();
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "HTTP request failed while syncing subscriber {UserId}.", subscriberDto.UserId);
-            return Result.Failure($"Failed to sync subscriber: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+            _logger.LogError(ex, "Failed to publish UserSyncEvent for UserId: {UserId}", subscriberDto.UserId);
+            return Result.Failure($"Failed to sync subscriber via message bus: {ex.Message}");
         }
     }
 
@@ -72,23 +48,15 @@ public class NotificationService : INotificationService
     {
         try
         {
-            var requestBody = new { userId, expoPushTokens };
-            var response = await _httpClient.PostAsJsonAsync("/subscribers/expo-token", requestBody, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully saved Expo Push Tokens for subscriber {UserId}. Response: {Response}", userId, content);
+            var saveExpoPushTokenEvent = new SaveExpoPushTokenEvent(userId, expoPushTokens);
+            await _messageBus.PublishAsync("notification", "expo.save", saveExpoPushTokenEvent, cancellationToken);
+            _logger.LogInformation("Published SaveExpoPushTokenEvent for UserId: {UserId}", userId);
             return Result.Success();
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "HTTP request failed while saving Expo Push Tokens for subscriber {UserId}.", userId);
-            return Result.Failure($"Failed to save Expo Push Tokens: {ex.Message}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while saving Expo Push Tokens for subscriber {UserId}.", userId);
-            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+            _logger.LogError(ex, "Failed to publish SaveExpoPushTokenEvent for UserId: {UserId}", userId);
+            return Result.Failure($"Failed to save Expo Push Tokens via message bus: {ex.Message}");
         }
     }
 
@@ -96,28 +64,15 @@ public class NotificationService : INotificationService
     {
         try
         {
-            // For DELETE with body, HttpClient.SendAsync is needed with HttpMethod.Delete
-            var request = new HttpRequestMessage(HttpMethod.Delete, "/subscribers/expo-token")
-            {
-                Content = JsonContent.Create(new { userId, expoPushToken })
-            };
-
-            var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully deleted Expo Push Token for subscriber {UserId}. Response: {Response}", userId, content);
+            var deleteExpoPushTokenEvent = new DeleteExpoPushTokenEvent(userId, expoPushToken);
+            await _messageBus.PublishAsync("notification", "expo.delete", deleteExpoPushTokenEvent, cancellationToken);
+            _logger.LogInformation("Published DeleteExpoPushTokenEvent for UserId: {UserId}", userId);
             return Result.Success();
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "HTTP request failed while deleting Expo Push Token for subscriber {UserId}.", userId);
-            return Result.Failure($"Failed to delete Expo Push Token: {ex.Message}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while deleting Expo Push Token for subscriber {UserId}.", userId);
-            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+            _logger.LogError(ex, "Failed to publish DeleteExpoPushTokenEvent for UserId: {UserId}", userId);
+            return Result.Failure($"Failed to delete Expo Push Token via message bus: {ex.Message}");
         }
     }
 
@@ -125,31 +80,24 @@ public class NotificationService : INotificationService
     {
         try
         {
-            var requestBody = new { workflowId, userId, payload };
-            var response = await _httpClient.PostAsJsonAsync("/notifications/send", requestBody, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully sent notification for workflow {WorkflowId} to subscriber {UserId}. Response: {Response}", workflowId, userId, content);
+            var sendNotificationEvent = new SendNotificationEvent(workflowId, userId, payload);
+            await _messageBus.PublishAsync("notification", $"notification.send.{workflowId}", sendNotificationEvent, cancellationToken);
+            _logger.LogInformation("Published SendNotificationEvent for WorkflowId: {WorkflowId}, UserId: {UserId}.", workflowId, userId);
             return Result.Success();
-        }
-        catch (HttpRequestException ex)
-        {
-            _logger.LogError(ex, "HTTP request failed while sending notification for workflow {WorkflowId} to subscriber {UserId}.", workflowId, userId);
-            return Result.Failure($"Failed to send notification: {ex.Message}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while sending notification for workflow {WorkflowId} to subscriber {UserId}.", workflowId, userId);
-            return Result.Failure($"An unexpected error occurred: {ex.Message}");
+            _logger.LogError(ex, "Failed to publish SendNotificationEvent for WorkflowId: {WorkflowId}, UserId: {UserId}", workflowId, userId);
+            return Result.Failure($"Failed to send notification via message bus: {ex.Message}");
         }
     }
 
-    public async Task<Result> SendNotificationAsync(string workflowId, List<string> recipientUserIds, object? payload, CancellationToken cancellationToken = default) // NEW Overload
+    public async Task<Result> SendNotificationAsync(string workflowId, List<string> recipientUserIds, object? payload, CancellationToken cancellationToken = default)
     {
         var allResults = new List<Result>();
         foreach (var userId in recipientUserIds)
         {
+            // The single recipient overload will extract familyId from the payload
             var result = await SendNotificationAsync(workflowId, userId, payload, cancellationToken);
             allResults.Add(result);
         }
@@ -157,12 +105,14 @@ public class NotificationService : INotificationService
         // Return success only if all individual notifications were successful
         if (allResults.All(r => r.IsSuccess))
         {
+            _logger.LogInformation("Successfully sent notifications for workflow {WorkflowId} to {RecipientCount} recipients.", workflowId, recipientUserIds.Count);
             return Result.Success();
         }
         else
         {
             // Aggregate errors from failed notifications
             var errorMessages = allResults.Where(r => !r.IsSuccess).Select(r => r.Error).ToList();
+            _logger.LogError("Failed to send notifications for workflow {WorkflowId} to some recipients. Errors: {Errors}", workflowId, string.Join("; ", errorMessages));
             return Result.Failure($"Failed to send to some recipients: {string.Join("; ", errorMessages)}");
         }
     }

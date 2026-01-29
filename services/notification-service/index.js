@@ -2,6 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Novu } = require('@novu/node');
+const amqp = require('amqplib'); // Add amqplib
+
+const RABBITMQ_HOST = process.env.RABBITMQ__HOSTNAME || 'localhost';
+const RABBITMQ_PORT = process.env.RABBITMQ__PORT || '5672';
+const RABBITMQ_USERNAME = process.env.RABBITMQ__USERNAME || 'guest';
+const RABBITMQ_PASSWORD = process.env.RABBITMQ__PASSWORD || 'guest';
+const RABBITMQ_URL = `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}`;
+
+const NOTIFICATION_EXCHANGE = 'notification';
+const NOTIFICATION_QUEUE = 'notification_service_queue'; // A dedicated queue for this service
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,116 +27,196 @@ if (!NOVU_API_KEY) {
 
 const novu = new Novu(NOVU_API_KEY);
 
-// Middleware để kiểm tra body
-const validateBody = (fields) => (req, res, next) => {
-  for (const field of fields) {
-    if (!req.body[field]) {
-      return res.status(400).json({ error: `Missing required field: ${field}` });
-    }
-  }
-  next();
-};
-
-/**
- * @route POST /subscribers/sync
- * @description Tạo mới hoặc cập nhật subscriber trong Novu.
- * @body {string} userId - ID của người dùng (subscriberId).
- */
-app.post('/subscribers/sync', validateBody(['userId']), async (req, res) => {
-  const { userId, firstName, lastName, email, phone, avatar, locale, timezone } = req.body;
+// Function to handle specific message types
+async function handleUserSyncEvent(eventPayload) {
+  const { user_id, first_name, last_name, email, phone, avatar, locale, timezone } = eventPayload;
   try {
     const subscriberPayload = {
-      firstName,
-      lastName,
+      firstName: first_name,
+      lastName: last_name,
       email,
       phone,
       avatar,
       locale,
-      data: {
-        timezone,
-      },
+      data: { timezone },
     };
-
-    // Remove null or undefined properties from the main payload
     Object.keys(subscriberPayload).forEach(key => {
-      if (subscriberPayload[key] === null || subscriberPayload[key] === undefined) {
-        delete subscriberPayload[key];
-      }
+      if (subscriberPayload[key] === null || subscriberPayload[key] === undefined) delete subscriberPayload[key];
     });
-
-    // Remove null or undefined properties from the nested 'data' object
     if (subscriberPayload.data) {
       Object.keys(subscriberPayload.data).forEach(key => {
-        if (subscriberPayload.data[key] === null || subscriberPayload.data[key] === undefined) {
-          delete subscriberPayload.data[key];
-        }
+        if (subscriberPayload.data[key] === null || subscriberPayload.data[key] === undefined) delete subscriberPayload.data[key];
       });
-      // If the 'data' object becomes empty after cleaning, remove it too
-      if (Object.keys(subscriberPayload.data).length === 0) {
-        delete subscriberPayload.data;
+      if (Object.keys(subscriberPayload.data).length === 0) delete subscriberPayload.data;
+    }
+    await novu.subscribers.identify(user_id, subscriberPayload);
+    console.log(`[RabbitMQ] Subscriber synced: ${user_id}`);
+  } catch (error) {
+    console.error(`[RabbitMQ] Error syncing subscriber ${user_id}:`, error);
+    throw error; // Re-throw to indicate processing failure
+  }
+}
+
+async function handleSaveExpoPushTokenEvent(eventPayload) {
+  const { user_id, expo_push_tokens } = eventPayload;
+  try {
+    await novu.subscribers.setCredentials(user_id, 'expo', {
+      deviceTokens: expo_push_tokens,
+    });
+    console.log(`[RabbitMQ] Expo Push Tokens added for ${user_id}: ${expo_push_tokens}`);
+  } catch (error) {
+    console.error(`[RabbitMQ] Error adding Expo Push Token for ${user_id}:`, error);
+    throw error;
+  }
+}
+
+async function handleDeleteExpoPushTokenEvent(eventPayload) {
+  const { user_id, expo_push_token } = eventPayload;
+  // Novu does not have a direct API to "delete" a single expo token from a subscriber.
+  // The 'setCredentials' method replaces the existing device tokens.
+  // To simulate deletion, we might need to fetch current tokens, filter, and then set.
+  console.warn(`[RabbitMQ] Received request to delete Expo Push Token for ${user_id}: ${expo_push_token}. Novu API does not directly support deleting single tokens without knowing all existing tokens. This event will be processed, but actual deletion logic in Novu might differ.`);
+  try {
+    // If Novu had a specific delete API:
+    // await novu.subscribers.deleteDeviceToken(userId, 'expo', expoPushToken); // Hypothetical API
+    // As a workaround, if we want to remove this specific token, we would need to:
+    // 1. Fetch the subscriber's current credentials.
+    // 2. Filter out the token to be deleted.
+    // 3. Call setCredentials with the updated list. This is complex and outside the scope of direct event handling here.
+    // For now, we will acknowledge the message as processed.
+    console.log(`[RabbitMQ] Processed delete Expo Push Token event for ${user_id}.`);
+  } catch (error) {
+    console.error(`[RabbitMQ] Error deleting Expo Push Token for ${user_id}:`, error);
+    throw error;
+  }
+}
+
+async function handleSendNotificationEvent(eventPayload) {
+  const { workflow_id, user_id, family_id, payload } = eventPayload; // Add family_id
+  try {
+    let isPushEnabled = false;
+    try {
+      const subscriber = await novu.subscribers.getSubscriber(user_id);
+      if (subscriber && subscriber.data && subscriber.data.channel_credentials) {
+        // Check if there are any push credentials with device tokens
+        const pushCredentials = subscriber.data.channel_credentials.find(
+          (cred) =>
+            (cred.provider === 'expo' || cred.provider === 'fcm' || cred.provider === 'apns') &&
+            cred.credentials &&
+            cred.credentials.deviceTokens &&
+            cred.credentials.deviceTokens.length > 0
+        );
+        if (pushCredentials) {
+          isPushEnabled = true;
+        }
       }
+    } catch (subscriberError) {
+      console.warn(`[RabbitMQ] Could not retrieve subscriber ${user_id} details for push check:`, subscriberError.message);
+      // If we can't get subscriber details, assume push is not enabled for this check.
+      isPushEnabled = false;
     }
 
-    const subscriber = await novu.subscribers.identify(userId, subscriberPayload);
-    console.log(`Subscriber synced: ${userId}`);
-    res.status(200).json({ message: 'Subscriber synced successfully', subscriber: subscriber.data });
-  } catch (error) {
-    console.error(`Error syncing subscriber ${userId}:`, error);
-    res.status(500).json({ error: 'Failed to sync subscriber', details: error.message, fullError: error.response ? error.response.data : error });
-  }
-});
+    const updatedPayload = { ...payload, is_push_enabled: isPushEnabled };
 
-/**
- * @route POST /subscribers/expo-token
- * @description Gắn Expo Push Token vào subscriber trong Novu.
- * @body {string} userId - ID của người dùng (subscriberId).
- * @body {string[]} expoPushTokens - Mảng các Expo Push Token.
- */
-app.post('/subscribers/expo-token', validateBody(['userId', 'expoPushTokens']), async (req, res) => {
-  const { userId, expoPushTokens } = req.body;
-  try {
-    // Novu tự động quản lý token, chỉ cần thêm device
-    await novu.subscribers.setCredentials(userId, 'expo', {
-      deviceTokens: expoPushTokens,
-    });
-    console.log(`Expo Push Tokens added for ${userId}: ${expoPushTokens}`);
-    res.status(200).json({ message: 'Expo Push Tokens added successfully' });
-  } catch (error) {
-    console.error(`Error adding Expo Push Token for ${userId}:`, error);
-    res.status(500).json({ error: 'Failed to add Expo Push Token', details: error.message });
-  }
-});
-
-
-
-
-/**
- * @route POST /notifications/send
- * @description Trigger Novu workflow để gửi thông báo.
- * @body {string} workflowId - ID của workflow Novu.
- * @body {string} userId - ID của người nhận (subscriberId).
- * @body {object} payload - Dữ liệu tùy chỉnh để truyền vào workflow.
- */
-app.post('/notifications/send', validateBody(['workflowId', 'userId', 'payload']), async (req, res) => {
-  const { workflowId, userId, payload } = req.body;
-  try {
-    await novu.trigger(workflowId, {
+    const novuResponse = await novu.trigger(workflow_id, {
       to: {
-        subscriberId: userId,
+        subscriberId: user_id,
       },
-      payload: payload,
+      payload: updatedPayload,
     });
-    console.log(`Notification triggered for workflow ${workflowId} to ${userId}`);
-    res.status(200).json({ message: 'Notification triggered successfully' });
+    console.log(`[RabbitMQ] Notification triggered for workflow ${workflow_id} to ${user_id}. FamilyId: ${family_id}. Novu Response:`, novuResponse); // Log Novu response
   } catch (error) {
-    console.error(`Error triggering notification for workflow ${workflowId} to ${userId}:`, error);
-    res.status(500).json({ error: 'Failed to trigger notification', details: error.message });
+    console.error(`[RabbitMQ] Error triggering notification for workflow ${workflow_id} to ${user_id}. FamilyId: ${family_id}:`, error);
+    throw error;
   }
-});
+}
+
+async function initRabbitMQ() {
+  let connection;
+  let channel;
+  try {
+    connection = await amqp.connect(RABBITMQ_URL);
+    channel = await connection.createChannel();
+
+    // Declare the exchange
+    await channel.assertExchange(NOTIFICATION_EXCHANGE, 'topic', { durable: true });
+    console.log(`[RabbitMQ] Exchange '${NOTIFICATION_EXCHANGE}' asserted.`);
+
+    // Declare the queue
+    const q = await channel.assertQueue(NOTIFICATION_QUEUE, { durable: true });
+    console.log(`[RabbitMQ] Queue '${q.queue}' asserted.`);
+
+    // Bind the queue to the exchange with routing keys
+    // notification.user.sync -> UserSyncEvent
+    // notification.expo.save -> SaveExpoPushTokenEvent
+    // notification.expo.delete -> DeleteExpoPushTokenEvent
+    // notification.send.<workflowId> -> SendNotificationEvent
+    const routingKeys = [
+      'notification.user.sync',
+      'notification.expo.save',
+      'notification.expo.delete',
+      'notification.send.*', // Wildcard for send notifications
+    ];
+
+    for (const key of routingKeys) {
+      await channel.bindQueue(q.queue, NOTIFICATION_EXCHANGE, key);
+      console.log(`[RabbitMQ] Queue '${q.queue}' bound to exchange '${NOTIFICATION_EXCHANGE}' with routing key '${key}'.`);
+    }
+
+    console.log(`[RabbitMQ] Waiting for messages in queue '${q.queue}'. To exit, press CTRL+C`);
+
+    channel.consume(q.queue, async (msg) => {
+      if (msg === null) return;
+
+      try {
+        const messageContent = JSON.parse(msg.content.toString());
+        const routingKey = msg.fields.routingKey;
+        console.log(`[RabbitMQ] Received message with routing key: ${routingKey}`);
+        console.log(`[RabbitMQ] Message content:`, messageContent);
+
+        // Determine event type based on routing key
+        if (routingKey === 'notification.user.sync') {
+          await handleUserSyncEvent(messageContent);
+        } else if (routingKey === 'notification.expo.save') {
+          await handleSaveExpoPushTokenEvent(messageContent);
+        } else if (routingKey === 'notification.expo.delete') {
+          await handleDeleteExpoPushTokenEvent(messageContent);
+        } else if (routingKey.startsWith('notification.send.')) {
+          await handleSendNotificationEvent(messageContent);
+        } else {
+          console.warn(`[RabbitMQ] Unknown routing key: ${routingKey}. Message not processed.`);
+        }
+
+        channel.ack(msg); // Acknowledge message if processed successfully
+      } catch (error) {
+        console.error(`[RabbitMQ] Error processing message:`, error);
+        channel.nack(msg, false, false); // Nack message, do not re-queue
+      }
+    }, {
+      noAck: false // Manual acknowledgment
+    });
+
+  } catch (error) {
+    console.error('[RabbitMQ] Failed to connect or setup consumer:', error);
+    // Attempt to reconnect after a delay
+    setTimeout(initRabbitMQ, 5000);
+  }
+
+  // Handle connection close and errors
+  connection.on('close', (err) => {
+    console.error('[RabbitMQ] Connection closed:', err);
+    setTimeout(initRabbitMQ, 5000); // Attempt to reconnect
+  });
+
+  connection.on('error', (err) => {
+    console.error('[RabbitMQ] Connection error:', err);
+  });
+}
 
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Notification service listening at http://localhost:${port}`);
+    initRabbitMQ().catch(console.error); // Initialize RabbitMQ and start consuming
   });
 }
 

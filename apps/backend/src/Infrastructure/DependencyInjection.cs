@@ -8,6 +8,7 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.Background;
 using backend.Infrastructure.Services.LLMGateway; // NEW
+using backend.Infrastructure.Services.MessageBus; // NEW
 using backend.Infrastructure.Services.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -17,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
+using RabbitMQ.Client; // NEW
 
 namespace backend.Infrastructure;
 
@@ -46,10 +47,33 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
+        // Register NotificationSettings
+        services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
+
         // --- Common Services (always registered) ---
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IDateTime, DateTimeService>();
-        // Register NotificationSettings
+
+        // Register RabbitMQ ConnectionFactory
+        services.AddSingleton(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var hostName = config["RABBITMQ__HOSTNAME"] ?? "localhost";
+            var userName = config["RABBITMQ__USERNAME"] ?? "guest";
+            var password = config["RABBITMQ__PASSWORD"] ?? "guest";
+            var port = config.GetValue<int?>("RABBITMQ__PORT") ?? 5672;
+
+            return new ConnectionFactory()
+            {
+                HostName = hostName,
+                UserName = userName,
+                Password = password,
+                Port = port
+            };
+        });
+
+        // Register IMessageBus with RabbitMqMessageBus implementation
+        services.AddSingleton<IMessageBus, RabbitMqMessageBus>();
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
         // Register ImgbbSettings
@@ -154,20 +178,8 @@ public static class DependencyInjection
 
         // Register NotificationSettings
 
-        // Register NotificationService as a typed HttpClient
-        services.AddHttpClient<INotificationService, NotificationService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var settings = serviceProvider.GetRequiredService<IOptions<NotificationSettings>>().Value;
-                    if (!string.IsNullOrEmpty(settings.BaseUrl))
-                    {
-                        httpClient.BaseAddress = new Uri(settings.BaseUrl);
-                    }
-                    else
-                    {
-                        serviceProvider.GetRequiredService<ILogger<NotificationService>>().LogWarning("NotificationService BaseUrl is not configured, falling back to default.");
-                    }
-                });
+        // Register NotificationService
+        services.AddScoped<INotificationService, NotificationService>();
         // Add Rate Limiting services
         services.AddRateLimiter(rateLimiterOptions =>
         {
