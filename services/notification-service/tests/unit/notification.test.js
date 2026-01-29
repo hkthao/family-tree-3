@@ -59,7 +59,7 @@ describe('Notification Service API', () => {
 
       const response = await request(app)
         .post('/subscribers/sync')
-        .send(subscriberPayload)
+        .send(subscriberPayload) // Send the flat payload
         .expect(200);
 
       expect(response.body.message).toBe('Subscriber synced successfully');
@@ -71,7 +71,7 @@ describe('Notification Service API', () => {
         phone: subscriberPayload.phone,
         avatar: subscriberPayload.avatar,
         locale: subscriberPayload.locale,
-        data: {
+        data: { // This is how index.js constructs it
           timezone: subscriberPayload.timezone,
         }
       });
@@ -164,7 +164,7 @@ describe('Notification Service API', () => {
       expect(mockNovuInstance.trigger).toHaveBeenCalledTimes(1);
       expect(mockNovuInstance.trigger).toHaveBeenCalledWith('workflow1', {
         to: { subscriberId: 'user123' },
-        payload: { message: 'Hello' },
+        payload: { message: 'Hello', is_push_enabled: false },
       });
     });
 

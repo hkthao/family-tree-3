@@ -27,6 +27,115 @@ if (!NOVU_API_KEY) {
 
 const novu = new Novu(NOVU_API_KEY);
 
+// HTTP API Routes
+app.post('/subscribers/sync', async (req, res) => {
+  const { userId, firstName, lastName, email, phone, avatar, locale, timezone } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'Missing required field: userId' });
+  }
+
+  try {
+    const subscriberPayload = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      avatar,
+      locale,
+    };
+    if (timezone) {
+      subscriberPayload.data = { timezone };
+    }
+    // Remove undefined or null values from payload
+    Object.keys(subscriberPayload).forEach(key => {
+      if (subscriberPayload[key] === null || subscriberPayload[key] === undefined) delete subscriberPayload[key];
+    });
+    if (subscriberPayload.data) {
+      Object.keys(subscriberPayload.data).forEach(key => {
+        if (subscriberPayload.data[key] === null || subscriberPayload.data[key] === undefined) delete subscriberPayload.data[key];
+      });
+      if (Object.keys(subscriberPayload.data).length === 0) delete subscriberPayload.data;
+    }
+
+    await novu.subscribers.identify(userId, subscriberPayload);
+    res.status(200).json({ message: 'Subscriber synced successfully' });
+  } catch (error) {
+    console.error('Error syncing subscriber:', error);
+    res.status(500).json({ error: 'Failed to sync subscriber', details: error.message });
+  }
+});
+
+app.post('/subscribers/expo-token', async (req, res) => {
+  const { userId, expoPushTokens } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'Missing required field: userId' });
+  }
+  if (!expoPushTokens || !Array.isArray(expoPushTokens)) {
+    return res.status(400).json({ error: 'Missing required field: expoPushTokens' });
+  }
+
+  try {
+    await novu.subscribers.setCredentials(userId, 'expo', {
+      deviceTokens: expoPushTokens,
+    });
+    res.status(200).json({ message: 'Expo Push Tokens added successfully' });
+  } catch (error) {
+    console.error('Error adding Expo Push Token:', error);
+    res.status(500).json({ error: 'Failed to add Expo Push Token', details: error.message });
+  }
+});
+
+app.post('/notifications/send', async (req, res) => {
+  const { workflowId, userId, familyId, payload } = req.body;
+
+  if (!workflowId) {
+    return res.status(400).json({ error: 'Missing required field: workflowId' });
+  }
+  if (!userId) {
+    return res.status(400).json({ error: 'Missing required field: userId' });
+  }
+  if (!payload) {
+    return res.status(400).json({ error: 'Missing required field: payload' });
+  }
+
+  try {
+    let isPushEnabled = false;
+    try {
+      const subscriber = await novu.subscribers.getSubscriber(userId);
+      if (subscriber && subscriber.data && subscriber.data.channel_credentials) {
+        const pushCredentials = subscriber.data.channel_credentials.find(
+          (cred) =>
+            (cred.provider === 'expo' || cred.provider === 'fcm' || cred.provider === 'apns') &&
+            cred.credentials &&
+            cred.credentials.deviceTokens &&
+            cred.credentials.deviceTokens.length > 0
+        );
+        if (pushCredentials) {
+          isPushEnabled = true;
+        }
+      }
+    } catch (subscriberError) {
+      console.warn(`Could not retrieve subscriber ${userId} details for push check:`, subscriberError.message);
+      isPushEnabled = false;
+    }
+
+    const updatedPayload = { ...payload, is_push_enabled: isPushEnabled };
+
+    await novu.trigger(workflowId, {
+      to: {
+        subscriberId: userId,
+      },
+      payload: updatedPayload,
+    });
+    res.status(200).json({ message: 'Notification triggered successfully' });
+  } catch (error) {
+    console.error('Error triggering notification:', error);
+    res.status(500).json({ error: 'Failed to trigger notification', details: error.message });
+  }
+});
+
 // Function to handle specific message types
 async function handleUserSyncEvent(eventPayload) {
   const { user_id, first_name, last_name, email, phone, avatar, locale, timezone } = eventPayload;
@@ -43,12 +152,7 @@ async function handleUserSyncEvent(eventPayload) {
     Object.keys(subscriberPayload).forEach(key => {
       if (subscriberPayload[key] === null || subscriberPayload[key] === undefined) delete subscriberPayload[key];
     });
-    if (subscriberPayload.data) {
-      Object.keys(subscriberPayload.data).forEach(key => {
-        if (subscriberPayload.data[key] === null || subscriberPayload.data[key] === undefined) delete subscriberPayload.data[key];
-      });
-      if (Object.keys(subscriberPayload.data).length === 0) delete subscriberPayload.data;
-    }
+
     await novu.subscribers.identify(user_id, subscriberPayload);
     console.log(`[RabbitMQ] Subscriber synced: ${user_id}`);
   } catch (error) {
