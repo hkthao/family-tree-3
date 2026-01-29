@@ -94,11 +94,35 @@ async function handleDeleteExpoPushTokenEvent(eventPayload) {
 async function handleSendNotificationEvent(eventPayload) {
   const { workflow_id, user_id, family_id, payload } = eventPayload; // Add family_id
   try {
+    let isPushEnabled = false;
+    try {
+      const subscriber = await novu.subscribers.getSubscriber(user_id);
+      if (subscriber && subscriber.data && subscriber.data.channel_credentials) {
+        // Check if there are any push credentials with device tokens
+        const pushCredentials = subscriber.data.channel_credentials.find(
+          (cred) =>
+            (cred.provider === 'expo' || cred.provider === 'fcm' || cred.provider === 'apns') &&
+            cred.credentials &&
+            cred.credentials.deviceTokens &&
+            cred.credentials.deviceTokens.length > 0
+        );
+        if (pushCredentials) {
+          isPushEnabled = true;
+        }
+      }
+    } catch (subscriberError) {
+      console.warn(`[RabbitMQ] Could not retrieve subscriber ${user_id} details for push check:`, subscriberError.message);
+      // If we can't get subscriber details, assume push is not enabled for this check.
+      isPushEnabled = false;
+    }
+
+    const updatedPayload = { ...payload, is_push_enabled: isPushEnabled };
+
     const novuResponse = await novu.trigger(workflow_id, {
       to: {
         subscriberId: user_id,
       },
-      payload: payload,
+      payload: updatedPayload,
     });
     console.log(`[RabbitMQ] Notification triggered for workflow ${workflow_id} to ${user_id}. FamilyId: ${family_id}. Novu Response:`, novuResponse); // Log Novu response
   } catch (error) {

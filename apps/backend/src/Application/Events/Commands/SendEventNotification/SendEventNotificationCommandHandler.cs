@@ -75,7 +75,7 @@ public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNoti
         var primaryEventMember = @event.EventMembers?.FirstOrDefault();
         if (primaryEventMember?.Member != null)
         {
-            memberName = primaryEventMember.Member.FirstName ?? primaryEventMember.Member.FullName ?? "";
+            memberName = primaryEventMember.Member.FullName ?? "";
             if (Enum.TryParse<Gender>(primaryEventMember.Member.Gender, true, out var memberGender) && memberGender == Gender.Male)
             {
                 memberHonorific = $"Ông {memberName}";
