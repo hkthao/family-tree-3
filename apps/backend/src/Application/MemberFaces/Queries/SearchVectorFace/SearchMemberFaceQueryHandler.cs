@@ -43,16 +43,16 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IFaceAp
         foreach (var searchResult in searchResults)
         {
             _logger.LogWarning("Score: {Score}.", searchResult.Score);
-            // The FaceSearchResultDto from FaceApiService contains VectorDbId and Score.
+            // The FaceApiSearchResultDto from FaceApiService contains Id, Score and Payload.
             // We need to fetch the full MemberFace entity to get localDbId, thumbnailUrl, etc.
 
             // First, check if a MemberFace entity exists with this VectorDbId
             var memberFace = await _context.MemberFaces.AsNoTracking()
-                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.Id, cancellationToken);
+                .FirstOrDefaultAsync(mf => mf.VectorDbId == searchResult.Payload.FaceId.ToString(), cancellationToken);
 
             if (memberFace == null)
             {
-                _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from face API service search.", searchResult.Id);
+                _logger.LogWarning("Local MemberFace not found for VectorDbId {VectorDbId} returned from face API service search.", searchResult.Payload.FaceId);
                 continue;
             }
 
@@ -60,8 +60,8 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IFaceAp
             {
                 MemberFaceId = memberFace.Id, // Local DB ID
                 MemberId = memberFace.MemberId,
-                FaceId = searchResult.Id, // ID from the Face API service (VectorDbId)
-                Score = (float)searchResult.Score, // Explicit cast from double to float
+                FaceId = searchResult.Payload.FaceId.ToString(), // ID from the Face API service (VectorDbId)
+                Score = searchResult.Score,
                 ThumbnailUrl = memberFace.ThumbnailUrl,
                 OriginalImageUrl = memberFace.OriginalImageUrl,
                 Emotion = memberFace.Emotion,

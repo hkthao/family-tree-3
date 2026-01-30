@@ -96,3 +96,28 @@ class IFaceRepository(ABC):
             bool: True if faces were successfully deleted, False otherwise.
         """
         pass
+
+    @abstractmethod
+    async def batch_search_similar_faces(
+        self,
+        query_vectors: List[List[float]],
+        family_id: Optional[str] = None,
+        top_k: int = 5,
+        threshold: float = 0.75,
+    ) -> List[List[Dict[str, Any]]]:
+        """
+        Searches for similar faces based on a list of query vectors in a batch.
+
+        Args:
+            query_vectors (List[List[float]]): A list of embedding vectors to search with.
+            family_id (Optional[str]): Filters search results by family ID.
+            top_k (int): The maximum number of similar faces to return for each query vector.
+            threshold (float): The similarity threshold.
+
+        Returns:
+            List[List[Dict[str, Any]]]: A list of lists, where each inner list contains dictionaries
+                                        representing found faces for a corresponding query vector,
+                                        with its score and payload (metadata).
+        """
+        pass
+

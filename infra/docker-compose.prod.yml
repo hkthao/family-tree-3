@@ -121,6 +121,7 @@ services:
     mem_limit: 2g
     volumes:
       - ./face-service/models:/face-service/app/models/dlib_models
+      - ./face-service/models:/face-service/app/models/onnx_models
     networks:
       - app-network
     restart: unless-stopped

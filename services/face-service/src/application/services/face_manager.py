@@ -167,3 +167,17 @@ class FaceManager:
         )
         logger.info(f"Đã tìm thấy {len(search_results)} khuôn mặt tương tự từ vector query.")
         return search_results
+
+    async def search_similar_faces_by_vectors(self, query_embeddings: List[List[float]], family_id: Optional[str] = None, limit: int = 5, threshold: float = 0.7) -> List[List[Dict[str, Any]]]:
+        """
+        Tìm kiếm các khuôn mặt tương tự trong Qdrant sử dụng một danh sách các vector embedding trực tiếp.
+        Có thể lọc theo family_id.
+        """
+        batch_search_results = await self.face_repository.batch_search_similar_faces(
+            query_embeddings,
+            family_id=family_id,
+            top_k=limit,
+            threshold=threshold
+        )
+        logger.info(f"Đã tìm thấy {len(batch_search_results)} kết quả tìm kiếm hàng loạt từ các vector query.")
+        return batch_search_results

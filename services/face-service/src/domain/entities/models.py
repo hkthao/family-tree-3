@@ -103,3 +103,9 @@ class FaceSearchVectorRequest(BaseModel):
     member_id: Optional[str] = None
     top_k: int = 5
     threshold: float = 0.7  # Add threshold for vector search
+
+class BatchFaceSearchVectorRequest(BaseModel):
+    vectors: List[List[float]]
+    family_id: Optional[str] = None
+    top_k: int = 1 # Changed from 5 to 1 based on the context of DetectFacesCommandHandler
+    threshold: float = 0.7  # Add threshold for vector search

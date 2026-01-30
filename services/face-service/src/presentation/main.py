@@ -33,7 +33,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(face_endpoints.router)
+app.include_router(face_endpoints.router, prefix="")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

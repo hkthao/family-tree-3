@@ -36,11 +36,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     ContentType = "image/jpeg"
                 }));
 
-            // Default mock for IMediator.Send for SearchMemberFaceQuery
-            var emptyFoundFacesResult = Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>());
-            _mediatorMock.Setup(m => m.Send(It.IsAny<SearchMemberFaceQuery>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(emptyFoundFacesResult));
-
             // Default mock for IAuthorizationService
             _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
         }
@@ -68,25 +63,38 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(detectedFaces);
 
-            var memberId = Guid.NewGuid(); // Move declaration here
-            var foundFacesResult = Result<List<FoundFaceDto>>.Success(new List<FoundFaceDto>
-            {
-                new FoundFaceDto { MemberId = memberId, Score = 0.1f }
-            });
-
-            // Setup the mediator to return the found member for SearchMemberFaceQuery
-            _mediatorMock.Setup(m => m.Send(
-                It.Is<SearchMemberFaceQuery>(q => q.Vector != null && q.Vector.SequenceEqual(detectedFaces.First().Embedding!.Select(d => (float)d))),
-                It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(foundFacesResult));
-
+            var memberId = Guid.NewGuid();
+            _mockUser.Setup(x => x.UserId).Returns(memberId); // Set the current user to the member being added
             var familyId = Guid.NewGuid();
-            var family = new Family { Name = "Test Family", Code = "TF" };
-            var member = new Member(memberId, "Test", "Member", "TM", familyId, family); // Fixed: Using new constructor
-            family.Id = familyId; // Ensure family ID matches the one used for the member
+            var family = new Family { Id = familyId, Name = "Test Family", Code = "TF" };
             _context.Families.Add(family); // Add family to context
+
+            var member = new Member("Test", "Member", "TM", familyId);
+            member.SetId(memberId); // Explicitly set the ID
             _context.Members.Add(member);
             await _context.SaveChangesAsync(CancellationToken.None);
+
+            // Setup the _faceApiServiceMock to return the found member for BatchSearchSimilarFacesAsync
+            _faceApiServiceMock.Setup(x => x.BatchSearchSimilarFacesAsync(It.IsAny<BatchFaceSearchVectorRequestDto>()))
+                .ReturnsAsync(new List<List<FaceApiSearchResultDto>>
+                {
+                    new List<FaceApiSearchResultDto>
+                    {
+                        new FaceApiSearchResultDto
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Score = 0.9f,
+                            Payload = new FaceSearchResultPayloadDto
+                            {
+                                FaceId = Guid.NewGuid(),
+                                MemberId = memberId,
+                                FamilyId = familyId,
+                                BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
+                                Confidence = 0.88f
+                            }
+                        }
+                    }
+                });
 
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
@@ -100,7 +108,12 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var result = await handler.Handle(command, CancellationToken.None);
 
             // Assert
-            result.IsSuccess.Should().BeTrue();
+            if (!result.IsSuccess)
+            {
+                result.Error.Should().NotBeNullOrEmpty();
+                _loggerMock.Object.Log(LogLevel.Error, $"Test failed with error: {result.Error}");
+            }
+            result.IsSuccess.Should().BeTrue(because: result.Error);
             result.Value.Should().NotBeNull(); // Added null check
             if (result.Value != null)
             {
@@ -191,10 +204,15 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     {
                         BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                         Confidence = 0.99f,
-                        Embedding = new List<float> { 1.0f, 2.0f, 3.0f },
                         Thumbnail = null // Should be null when ReturnCrop is false
                     }
                 });
+
+            _faceApiServiceMock.Setup(x => x.BatchSearchSimilarFacesAsync(It.IsAny<BatchFaceSearchVectorRequestDto>()))
+                .ReturnsAsync(new List<List<FaceApiSearchResultDto>>());
+
+            _faceApiServiceMock.Setup(x => x.BatchSearchSimilarFacesAsync(It.IsAny<BatchFaceSearchVectorRequestDto>()))
+                .ReturnsAsync(new List<List<FaceApiSearchResultDto>>());
 
 
 

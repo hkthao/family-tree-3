@@ -220,3 +220,60 @@ class QdrantFaceRepository(IFaceRepository):
         except Exception as e:
             logger.error(f"Error deleting points with filter {payload_filter}: {e}")
             return False
+
+    async def batch_search_similar_faces(
+        self,
+        query_vectors: List[List[float]],
+        family_id: Optional[str] = None,
+        top_k: int = 5,
+        threshold: float = 0.75,
+    ) -> List[List[Dict[str, Any]]]:
+        """
+        Searches for similar faces based on a list of query vectors in a batch.
+        """
+        qdrant_filter_conditions = []
+
+        if family_id:
+            qdrant_filter_conditions.append(
+                models.FieldCondition(
+                    key="family_id",
+                    match=models.MatchValue(value=family_id)
+                )
+            )
+
+        qdrant_filter = None
+        if qdrant_filter_conditions:
+            qdrant_filter = models.Filter(
+                must=qdrant_filter_conditions
+            )
+        
+        # Prepare batch queries using models.QueryRequest
+        batch_queries = []
+        for query_vector in query_vectors:
+            batch_queries.append(
+                models.QueryRequest(
+                    query=query_vector,
+                    limit=top_k,
+                    filter=qdrant_filter, # parameter name is 'filter'
+                    score_threshold=threshold,
+                )
+            )
+
+        batch_search_results_raw = self.client.query_batch_points(
+            collection_name=self.collection_name,
+            requests=batch_queries, # parameter name is 'requests'
+        )
+        
+        all_results = []
+        for search_result_raw in batch_search_results_raw:
+            individual_results = []
+            for hit in search_result_raw.points:
+                individual_results.append({
+                    "id": hit.id,
+                    "score": hit.score,
+                    "payload": hit.payload
+                })
+            all_results.append(individual_results)
+        
+        logger.info(f"Qdrant batch search completed for {len(query_vectors)} queries.")
+        return all_results

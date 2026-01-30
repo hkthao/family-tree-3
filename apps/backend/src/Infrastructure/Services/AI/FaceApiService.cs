@@ -1,7 +1,8 @@
 using System.Net.Http.Headers;
+using System.Net.Http.Json; // NEW: Add this for PostAsJsonAsync
 using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Common;
-using Microsoft.Extensions.Logging; // NEW: Add this using for FaceDetectionResultDto
+using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Services;
 
@@ -19,7 +20,7 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
         form.Add(fileContent, "file", "image.jpg"); // "image.jpg" is a placeholder filename
 
-        var requestUri = $"/detect?return_crop={returnCrop}";
+        var requestUri = $"/faces/detect?return_crop={returnCrop}";
         var response = await _httpClient.PostAsync(requestUri, form);
 
         response.EnsureSuccessStatusCode();
@@ -117,22 +118,30 @@ public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClien
         return result ?? new Dictionary<string, string>();
     }
 
-    public async Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request)
+    public async Task<List<FaceApiSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request)
     {
-        _logger.LogInformation("Calling Python Face Detection Service to search faces by vector.");
+        _logger.LogInformation("Searching similar faces with FamilyId: {FamilyId}, TopK: {TopK}, Threshold: {Threshold}",
+            request.FamilyId, request.TopK, request.Threshold);
 
-        var requestUri = "/faces/search_by_vector";
-        var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower };
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(request, options);
-        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-
-        var response = await _httpClient.PostAsync(requestUri, httpContent);
+        var response = await _httpClient.PostAsJsonAsync("/faces/search-vector", request);
         response.EnsureSuccessStatusCode();
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        _logger.LogInformation("Raw JSON response from Face API service (SearchFacesAsync): {JsonResponse}", jsonResponse);
+        var result = System.Text.Json.JsonSerializer.Deserialize<List<FaceApiSearchResultDto>>(jsonResponse, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower });
+        return result ?? [];
+    }
 
-        var responseJson = await response.Content.ReadAsStringAsync();
-        var result = System.Text.Json.JsonSerializer.Deserialize<List<FaceSearchResultDto>>(responseJson, options);
+    public async Task<List<List<FaceApiSearchResultDto>>> BatchSearchSimilarFacesAsync(BatchFaceSearchVectorRequestDto request)
+    {
+        _logger.LogInformation("Batch searching similar faces with FamilyId: {FamilyId}, Limit: {Limit}, Threshold: {Threshold}",
+            request.FamilyId, request.Limit, request.Threshold);
 
-        _logger.LogInformation("Successfully searched faces by vector.");
-        return result ?? new List<FaceSearchResultDto>();
+        var response = await _httpClient.PostAsJsonAsync("/faces/batch-search-vectors", request);
+        response.EnsureSuccessStatusCode();
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        _logger.LogInformation("Raw JSON response from Face API service (BatchSearchSimilarFacesAsync): {JsonResponse}", jsonResponse);
+        var result = System.Text.Json.JsonSerializer.Deserialize<List<List<FaceApiSearchResultDto>>>(jsonResponse, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower });
+        _logger.LogInformation("Received {Count} batch search results from Face API service.", result?.Count ?? 0);
+        return result ?? [];
     }
 }
