@@ -12,6 +12,15 @@ from src.presentation.dependencies import get_face_manager
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+def _generate_thumbnail(image: Image.Image, bbox: List[int]) -> Optional[str]:
+    """Helper to generate base64 encoded thumbnail from cropped face."""
+    x, y, w, h = bbox
+    cropped_face = image.crop((x, y, x + w, y + h))
+    buffered = io.BytesIO()
+    cropped_face.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 @router.post("/detect", response_model=List[FaceDetectionResult])
 async def detect_faces(
@@ -38,7 +47,6 @@ async def detect_faces(
         image_data = await file.read()
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
 
-        # Sử dụng phương thức detect_and_embed_faces mới từ FaceManager
         detected_faces_with_embeddings = face_manager.detect_and_embed_faces(image)
         logger.info(f"Face manager returned {len(detected_faces_with_embeddings)} detections with embeddings.")
         logger.debug(f"Detections with embeddings: {detected_faces_with_embeddings}")
@@ -52,27 +60,13 @@ async def detect_faces(
         results: List[FaceDetectionResult] = []
         for det_with_embed in detected_faces_with_embeddings:
             x, y, w, h = det_with_embed["box"]
-            confidence = det_with_embed["confidence"]
-            embedding = det_with_embed["embedding"]
-
-            face_id = str(uuid.uuid4())
-            bounding_box = BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h))
-
-            thumbnail_base64 = None
-            if return_crop:
-                # Re-crop the face from the original image for thumbnail generation
-                # as detect_and_embed_faces returns box as [x, y, w, h]
-                cropped_face = image.crop((x, y, x + w, y + h))
-                buffered = io.BytesIO()
-                cropped_face.save(buffered, format="PNG")
-                thumbnail_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-
+            
             face_result = FaceDetectionResult(
-                id=face_id,
-                bounding_box=bounding_box,
-                confidence=float(confidence),
-                thumbnail=thumbnail_base64,
-                embedding=embedding,
+                id=str(uuid.uuid4()),
+                bounding_box=BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h)),
+                confidence=float(det_with_embed["confidence"]),
+                thumbnail=_generate_thumbnail(image, det_with_embed["box"]) if return_crop else None,
+                embedding=det_with_embed["embedding"],
             )
             results.append(face_result)
             logger.debug(

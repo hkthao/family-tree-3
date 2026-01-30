@@ -43,16 +43,27 @@ class FaceManager:
             x, y, w, h = [int(val) for val in face_data['box']]
             
             # Đảm bảo tọa độ hợp lệ và không vượt ra ngoài biên ảnh
-            x1 = max(0, x)
-            y1 = max(0, y)
-            x2 = min(image.width, x + w)
-            y2 = min(image.height, y + h)
+            # Thêm một khoảng đệm nhỏ (ví dụ: 10% chiều rộng/chiều cao)
+            padding_w = int(w * 0.1)
+            padding_h = int(h * 0.1)
+
+            x1 = max(0, x - padding_w)
+            y1 = max(0, y - padding_h)
+            x2 = min(image.width, x + w + padding_w)
+            y2 = min(image.height, y + h + padding_h)
 
             # Cắt khuôn mặt từ ảnh PIL
             cropped_face_image = image.crop((x1, y1, x2, y2))
             
+            # Debug: Log the size of the cropped face image
+            logger.debug(f"Kích thước ảnh khuôn mặt đã cắt (có đệm): {cropped_face_image.size}")
+            
             # Tạo embedding cho khuôn mặt đã cắt
             embedding = self.face_embedding_service.get_embedding(cropped_face_image)
+
+            if not embedding:
+                logger.warning(f"Embedding trả về rỗng cho khuôn mặt tại hộp: {[x1, y1, x2 - x1, y2 - y1]}. Bỏ qua khuôn mặt này.")
+                continue # Bỏ qua khuôn mặt nếu embedding trống
             
             results.append({
                 'box': [x1, y1, x2 - x1, y2 - y1], # Return box in x, y, w, h format

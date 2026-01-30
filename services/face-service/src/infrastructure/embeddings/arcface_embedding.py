@@ -1,18 +1,35 @@
+import os
 import numpy as np
 from typing import List
 from PIL import Image as PILImage
 import cv2
-from insightface.app import FaceAnalysis
+import onnxruntime
 
 from src.domain.interfaces.face_embedding import IFaceEmbedding
 
 class ArcFaceEmbedding(IFaceEmbedding):
     def __init__(self):
-        # Khởi tạo FaceAnalysis để tải mô hình nhúng.
-        # 'buffalo_l' thường bao gồm một mô hình nhúng mạnh mẽ.
-        self.app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
-        # Chuẩn bị ứng dụng. Nó sẽ tải tất cả các mô hình cần thiết, bao gồm mô hình nhận dạng.
-        self.app.prepare(ctx_id=0, det_size=(640, 640)) 
+        # Tải mô hình nhận dạng trực tiếp từ file .onnx
+        model_path = os.path.join('app', 'models', 'onnx_models', 'w600k_r50.onnx')
+
+        self.rec_session = onnxruntime.InferenceSession(model_path, providers=['CPUExecutionProvider'])
+        # Lấy tên input và output của mô hình
+        self.input_name = self.rec_session.get_inputs()[0].name
+        self.output_name = self.rec_session.get_outputs()[0].name 
+
+    def _preprocess(self, face_bgr: np.ndarray) -> np.ndarray:
+        """
+        Chuẩn hóa ảnh face cho ArcFace MobileFaceNet.
+        Output shape: (1, 3, 112, 112)
+        """
+        face = cv2.resize(face_bgr, (112, 112))
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        face = face.astype(np.float32)
+        face = (face - 127.5) / 128.0
+        face = np.transpose(face, (2, 0, 1))  # HWC → CHW
+        face = np.expand_dims(face, axis=0)
+        return face 
+
 
     def get_embedding(self, face_image: PILImage) -> List[float]:
         # Chuyển đổi PIL Image (RGB) sang mảng NumPy
@@ -20,27 +37,31 @@ class ArcFaceEmbedding(IFaceEmbedding):
 
         # Các mô hình của Insightface thường mong đợi định dạng ảnh BGR.
         # Chuyển đổi RGB (từ PIL) sang BGR (cho insightface).
-        if img_np.ndim == 3 and img_np.shape[2] == 3: # Kiểm tra xem đây có phải là ảnh 3 kênh (RGB) không
+        if img_np.ndim == 3 and img_np.shape[2] == 3:
             img_np_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
-        elif img_np.ndim == 2: # Ảnh xám, chuyển đổi sang BGR
+        elif img_np.ndim == 2:
             img_np_bgr = cv2.cvtColor(img_np, cv2.COLOR_GRAY2BGR)
-        elif img_np.shape[2] == 4: # RGBA, chuyển đổi sang BGR
+        elif img_np.shape[2] == 4:
             img_np_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGBA2BGR)
         else:
-            img_np_bgr = img_np # Giả sử nó đã là BGR hoặc định dạng khác mà insightface có thể xử lý
+            img_np_bgr = img_np
 
-        # Sử dụng app.get() để phát hiện, căn chỉnh và nhúng.
-        # Ngay cả khi đầu vào là một khuôn mặt đã được cắt, app.get() vẫn hoạt động.
-        faces = self.app.get(img_np_bgr)
+        # Tiền xử lý ảnh theo yêu cầu của model
+        preprocessed_face = self._preprocess(img_np_bgr)
 
-        if not faces:
-            # Nếu không tìm thấy khuôn mặt nào trong ảnh đã cắt, trả về nhúng rỗng hoặc báo lỗi.
-            # Trả về một danh sách rỗng có thể an toàn hơn để nhất quán.
-            print("Warning: No face detected in the provided cropped image for embedding.")
+
+        # Thực hiện suy luận bằng ONNX Runtime Session
+        # Input name và output name đã được lấy từ __init__
+        embedding_array = self.rec_session.run([self.output_name], {self.input_name: preprocessed_face})[0]
+        
+        # Flatten the array if it's 2D (e.g., (1, D)) to ensure .tolist() returns List[float]
+        if embedding_array.ndim == 2 and embedding_array.shape[0] == 1:
+            embedding_array = embedding_array[0] # Take the first (and only) row
+        
+        if embedding_array.size == 0:
             return []
-
-        # Giả sử ảnh đã cắt chỉ chứa một khuôn mặt, chúng ta lấy khuôn mặt đầu tiên.
-        face = faces[0]
-
-        # Nhúng là một mảng numpy, chuyển đổi sang danh sách các số float
-        return face.embedding.tolist()
+        
+        return embedding_array.tolist()
+        
+        # forward() method returns a numpy array, convert to list of floats
+        return embedding.tolist()
