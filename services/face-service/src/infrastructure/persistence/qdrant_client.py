@@ -106,7 +106,7 @@ class QdrantFaceRepository(IFaceRepository):
                     "payload": hit.payload
                 })   
         logger.info(f"Qdrant search completed. Found {len(results)} hits above threshold. Results: "
-                    f"{[{'id': r['id'], 'score': r['score']} for r in results]}")
+                    f"{[{'id': r['id'], 'score': r['score'], 'payload': r.get('payload', 'N/A')} for r in results]}")
         return results
 
     async def get_faces_by_family_id(self, family_id: str) -> List[Dict[str, Any]]:
@@ -256,6 +256,7 @@ class QdrantFaceRepository(IFaceRepository):
                     limit=top_k,
                     filter=qdrant_filter, # parameter name is 'filter'
                     score_threshold=threshold,
+                    with_payload=True
                 )
             )
 
@@ -268,10 +269,11 @@ class QdrantFaceRepository(IFaceRepository):
         for search_result_raw in batch_search_results_raw:
             individual_results = []
             for hit in search_result_raw.points:
+                logger.info(f"  Hit: id={hit.id}, score={hit.score}, payload={hit.payload}")
                 individual_results.append({
                     "id": hit.id,
                     "score": hit.score,
-                    "payload": hit.payload
+                    "payload": hit.payload if hit.payload is not None else {}
                 })
             all_results.append(individual_results)
         
