@@ -156,16 +156,19 @@ public static class DependencyInjection
         services.AddScoped<IBackgroundJobService, HangfireJobService>(); // NEW: Register HangfireJobService
 
 
-        // Register Face API Service and configure its HttpClient
-        services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
-        {
-            var faceDetectionSettings = configuration.GetSection(nameof(FaceDetectionSettings)).Get<FaceDetectionSettings>() ?? new FaceDetectionSettings();
-            var logger = serviceProvider.GetRequiredService<ILogger<FaceApiService>>(); // Get the logger
-            var client = new HttpClient { BaseAddress = new Uri(faceDetectionSettings.BaseUrl) };
-            return new FaceApiService(logger, client); // Pass both logger and client
-        });
-
-        services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
+        services.AddHttpClient<IFaceApiService, FaceApiService>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var faceDetectionSettings = serviceProvider.GetRequiredService<IConfiguration>().GetSection(nameof(FaceDetectionSettings)).Get<FaceDetectionSettings>() ?? new FaceDetectionSettings();
+                    if (!string.IsNullOrEmpty(faceDetectionSettings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(faceDetectionSettings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<FaceApiService>>().LogWarning("FaceDetection BaseUrl is not configured, falling back to default.");
+                    }
+                });
 
         // Register Configuration Provider
         services.AddMemoryCache();

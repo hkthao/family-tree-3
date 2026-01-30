@@ -53,5 +53,12 @@ public interface IFaceApiService
     /// </summary>
     /// <param name="request">Đối tượng chứa thông tin yêu cầu tìm kiếm.</param>
     /// <returns>Danh sách các kết quả tìm kiếm khuôn mặt.</returns>
-    Task<List<FaceSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request);
+    Task<List<FaceApiSearchResultDto>> SearchFacesAsync(FaceSearchVectorRequestDto request);
+
+    /// <summary>
+    /// Tìm kiếm hàng loạt các khuôn mặt tương tự trong dịch vụ nhận diện khuôn mặt.
+    /// </summary>
+    /// <param name="request">Đối tượng chứa thông tin yêu cầu tìm kiếm hàng loạt.</param>
+    /// <returns>Danh sách các danh sách kết quả tìm kiếm khuôn mặt, mỗi danh sách tương ứng với một vector truy vấn.</returns>
+    Task<List<List<FaceApiSearchResultDto>>> BatchSearchSimilarFacesAsync(BatchFaceSearchVectorRequestDto request);
 }

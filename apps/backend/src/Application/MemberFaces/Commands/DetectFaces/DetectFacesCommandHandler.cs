@@ -51,6 +51,11 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             var detectedFaceDtos = new List<DetectedFaceDto>();
             var memberIdsToFetch = new HashSet<Guid>();
             var faceMemberMap = new Dictionary<string, Guid>();
+
+            // Collect all embeddings for batch search
+            var embeddingsToSearch = new List<List<float>>();
+            var detectedFaceDtoMapping = new List<DetectedFaceDto>(); // To map back after batch search
+
             foreach (var faceResult in detectedFacesResult)
             {
                 var detectedFaceDto = new DetectedFaceDto
@@ -65,7 +70,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     },
                     Confidence = faceResult.Confidence,
                     Thumbnail = faceResult.Thumbnail,
-                    Embedding = faceResult.Embedding?.ToList(),
+                    Embedding = faceResult.Embedding?.Select(d => (float)d).ToList(),
                     MemberId = null,
                     MemberName = null,
                     FamilyId = null,
@@ -74,33 +79,44 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     DeathYear = null,
                     Status = "unrecognized"
                 };
+
+                detectedFaceDtos.Add(detectedFaceDto); // Add to the main list immediately
                 if (detectedFaceDto.Embedding != null && detectedFaceDto.Embedding.Any())
                 {
-                    var searchFaceQuery = new SearchMemberFaceQuery(request.FamilyId)
-                    {
-                        Vector = detectedFaceDto.Embedding,
-                        Limit = 1
-                    };
+                    embeddingsToSearch.Add(detectedFaceDto.Embedding);
+                    detectedFaceDtoMapping.Add(detectedFaceDto); // Keep track of which DTO corresponds to which embedding
+                }
+            }
 
-                    var searchResult = await _mediator.Send(searchFaceQuery, cancellationToken);
-                    if (searchResult.IsSuccess && searchResult.Value != null && searchResult.Value.Any())
+            if (embeddingsToSearch.Any())
+            {
+                var batchSearchRequest = new BatchFaceSearchVectorRequestDto
+                {
+                    Vectors = embeddingsToSearch,
+                    FamilyId = request.FamilyId,
+                    Limit = 1, // We only need the top match
+                    Threshold = 0.7f // Default threshold
+                };
+
+                var batchSearchResults = await _faceApiService.BatchSearchSimilarFacesAsync(batchSearchRequest);
+
+                for (int i = 0; i < batchSearchResults.Count; i++)
+                {
+                    var searchResult = batchSearchResults[i];
+                    var originalDetectedFaceDto = detectedFaceDtoMapping[i];
+
+                    if (searchResult != null && searchResult.Any())
                     {
-                        var foundFace = searchResult.Value.First();
-                        detectedFaceDto.MemberId = foundFace.MemberId;
-                        memberIdsToFetch.Add(foundFace.MemberId);
-                        faceMemberMap[detectedFaceDto.Id] = foundFace.MemberId;
-                    }
-                    else if (!searchResult.IsSuccess)
-                    {
-                        _logger.LogError("Failed to search face embedding for FaceId {FaceId}: {Error}", detectedFaceDto.Id, searchResult.Error);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No matching face found for FaceId {FaceId}.", detectedFaceDto.Id);
+                        var foundFace = searchResult.First();
+                        if (foundFace.Payload?.MemberId != null && foundFace.Payload.MemberId != Guid.Empty)
+                        {
+                            originalDetectedFaceDto.MemberId = foundFace.Payload.MemberId;
+                            memberIdsToFetch.Add(foundFace.Payload.MemberId);
+                            faceMemberMap[originalDetectedFaceDto.Id] = foundFace.Payload.MemberId;
+                            originalDetectedFaceDto.Status = "recognized";
+                        }
                     }
                 }
-                detectedFaceDto.Status = detectedFaceDto.MemberId.HasValue ? "recognized" : "unrecognized";
-                detectedFaceDtos.Add(detectedFaceDto);
             }
             if (memberIdsToFetch.Any())
             {
@@ -142,7 +158,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred during face detection.");
+            _logger.LogError(ex, "An unexpected error occurred during face detection: {ErrorMessage}", ex.Message);
             return Result<FaceDetectionResponseDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }

@@ -6,7 +6,7 @@ import io
 from PIL import Image
 import logging
 
-from src.domain.entities.models import BoundingBox, FaceDetectionResult, FaceMetadata, FaceSearchRequest, FaceSearchResult, FaceAddVectorRequest, FaceSearchVectorRequest
+from src.domain.entities.models import BoundingBox, FaceDetectionResult, FaceMetadata, FaceSearchRequest, FaceSearchResult, FaceAddVectorRequest, FaceSearchVectorRequest, BatchFaceSearchVectorRequest
 from src.application.services.face_manager import FaceManager
 from src.presentation.dependencies import get_face_manager
 
@@ -22,7 +22,7 @@ def _generate_thumbnail(image: Image.Image, bbox: List[int]) -> Optional[str]:
     cropped_face.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-@router.post("/detect", response_model=List[FaceDetectionResult])
+@router.post("/faces/detect", response_model=List[FaceDetectionResult])
 async def detect_faces(
     file: UploadFile = File(...),
     return_crop: Optional[bool] = Query(
@@ -240,3 +240,21 @@ async def search_faces(
     except Exception as e:
         logger.error(f"Failed to search faces: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to search faces: {e}")
+
+@router.post("/faces/batch-search-vectors", response_model=List[List[FaceSearchResult]])
+async def batch_search_faces_by_vectors(
+    request: BatchFaceSearchVectorRequest,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
+    logger.info(
+        f"Received request for batch search of faces by vectors. Number of vectors: {len(request.vectors)}, FamilyId: {request.family_id}, TopK: {request.top_k}, Threshold: {request.threshold}"
+    )
+    try:
+        search_results = await face_manager.search_similar_faces_by_vectors(
+            request.vectors, request.family_id, request.top_k, request.threshold
+        )
+        logger.info(f"Returning {len(search_results)} batch search results.")
+        return search_results
+    except Exception as e:
+        logger.error(f"Failed to perform batch search for faces by vectors: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to perform batch search for faces by vectors: {e}")

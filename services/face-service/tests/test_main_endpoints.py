@@ -46,6 +46,8 @@ def mock_all_services_session_scope():
             mock_qdrant_instance.delete_face = AsyncMock(return_value=True)
             mock_qdrant_instance.delete_faces_by_family_id = AsyncMock(return_value=True)
             mock_qdrant_instance.search_similar_faces = AsyncMock(return_value=[])
+            mock_qdrant_instance.batch_search_similar_faces = AsyncMock(return_value=[])
+
 
             mock_face_embedding_instance = MockFaceNetEmbeddingService.return_value
             mock_face_embedding_instance.get_embedding = Mock(return_value=[0.1] * 128)
@@ -84,12 +86,14 @@ def reset_mocks_for_each_test(mock_all_services_session_scope):
     mock_all_services_session_scope["qdrant_repository"].delete_face.reset_mock()
     mock_all_services_session_scope["qdrant_repository"].delete_faces_by_family_id.reset_mock()
     mock_all_services_session_scope["qdrant_repository"].search_similar_faces.reset_mock()
+    mock_all_services_session_scope["qdrant_repository"].batch_search_similar_faces.reset_mock()
     
     mock_all_services_session_scope["qdrant_repository"].upsert_face_vector.return_value = None
     mock_all_services_session_scope["qdrant_repository"].get_faces_by_family_id.return_value = []
     mock_all_services_session_scope["qdrant_repository"].delete_face.return_value = True
     mock_all_services_session_scope["qdrant_repository"].delete_faces_by_family_id.return_value = True
     mock_all_services_session_scope["qdrant_repository"].search_similar_faces.return_value = []
+    mock_all_services_session_scope["qdrant_repository"].batch_search_similar_faces.return_value = []
     
     # Reset QdrantClient mock methods as well
     mock_all_services_session_scope["qdrant_client_mock"].collection_exists.reset_mock()
@@ -120,12 +124,15 @@ def client(mock_all_services_session_scope):
     mock_face_manager_instance.delete_faces_by_family_id = AsyncMock(return_value=True)
     mock_face_manager_instance.search_similar_faces = AsyncMock(return_value=[])
     mock_face_manager_instance.search_similar_faces_by_vector = AsyncMock(return_value=[])
+    mock_face_manager_instance.search_similar_faces_by_vectors = AsyncMock(return_value=[]) # Add this mock
     mock_face_manager_instance.face_embedding_service = mock_all_services_session_scope["face_embedding_service"] # For /detect endpoint
 
-    with patch('src.presentation.dependencies.get_face_detector', return_value=mock_all_services_session_scope["face_detector"]), \
-         patch('src.presentation.dependencies.get_face_embedding_service', return_value=mock_all_services_session_scope["face_embedding_service"]), \
-         patch('src.presentation.dependencies.get_face_repository', return_value=mock_all_services_session_scope["qdrant_repository"]), \
-         patch('src.presentation.dependencies.get_face_manager', return_value=mock_face_manager_instance): # Patch get_face_manager
+    with (
+        patch('src.presentation.dependencies.get_face_detector', return_value=mock_all_services_session_scope["face_detector"]),
+        patch('src.presentation.dependencies.get_face_embedding_service', return_value=mock_all_services_session_scope["face_embedding_service"]),
+        patch('src.presentation.dependencies.get_face_repository', return_value=mock_all_services_session_scope["qdrant_repository"]),
+        patch('src.presentation.dependencies.get_face_manager', return_value=mock_face_manager_instance)
+    ): # Patch get_face_manager
         yield TestClient(fastapi_app)
 
 @pytest.fixture
@@ -271,7 +278,7 @@ def test_search_faces_endpoint_no_family_id(client, dummy_image_bytes, mock_all_
 # Test the /detect endpoint again to ensure it's still working as expected
 def test_detect_faces_endpoint(client, dummy_image_bytes, mock_all_services_session_scope):
     """
-    Test POST /detect endpoint.
+    Test POST /faces/detect endpoint.
     """
     mock_detected_faces = [
         {
@@ -282,7 +289,7 @@ def test_detect_faces_endpoint(client, dummy_image_bytes, mock_all_services_sess
     ]
     with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=mock_detected_faces) as mock_detect_and_embed:
         response = client.post(
-            "/detect",
+            "/faces/detect",
             files={"file": ("test.png", dummy_image_bytes, "image/png")}
         )
         assert response.status_code == 200
@@ -297,11 +304,11 @@ def test_detect_faces_endpoint(client, dummy_image_bytes, mock_all_services_sess
 
 def test_detect_faces_endpoint_no_faces(client, dummy_image_bytes, mock_all_services_session_scope):
     """
-    Test POST /detect endpoint when no faces are detected.
+    Test POST /faces/detect endpoint when no faces are detected.
     """
     with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=[]) as mock_detect_and_embed:
         response = client.post(
-            "/detect",
+            "/faces/detect",
             files={"file": ("test.png", dummy_image_bytes, "image/png")}
         )
         assert response.status_code == 404
@@ -310,7 +317,7 @@ def test_detect_faces_endpoint_no_faces(client, dummy_image_bytes, mock_all_serv
 
 def test_detect_faces_endpoint_return_crop(client, dummy_image_bytes, mock_all_services_session_scope):
     """
-    Test POST /detect endpoint with return_crop=True.
+    Test POST /faces/detect endpoint with return_crop=True.
     """
     mock_detected_faces = [
         {
@@ -321,7 +328,7 @@ def test_detect_faces_endpoint_return_crop(client, dummy_image_bytes, mock_all_s
     ]
     with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=mock_detected_faces) as mock_detect_and_embed:
         response = client.post(
-            "/detect?return_crop=true",
+            "/faces/detect?return_crop=true",
             files={"file": ("test.png", dummy_image_bytes, "image/png")}
         )
         assert response.status_code == 200
@@ -330,3 +337,37 @@ def test_detect_faces_endpoint_return_crop(client, dummy_image_bytes, mock_all_s
         assert response.json()[0]["thumbnail"] is not None
         mock_detect_and_embed.assert_called_once()
 
+def test_batch_search_faces_by_vectors_endpoint(client, mock_all_services_session_scope):
+    """
+    Test POST /faces/batch-search-vectors endpoint.
+    """
+    vectors_to_search = [[0.1]*128, [0.2]*128]
+    family_id = "e4757d91-509b-4ac0-8807-8d0b82e3b7ec"
+    top_k = 2
+    threshold = 0.5
+
+    payload = {
+        "vectors": vectors_to_search,
+        "family_id": family_id,
+        "top_k": top_k,
+        "threshold": threshold
+    }
+
+    mock_search_results = [
+        [
+            {"id": "face1", "score": 0.9, "payload": {"familyId": family_id, "memberId": "member1"}},
+            {"id": "face2", "score": 0.8, "payload": {"familyId": family_id, "memberId": "member2"}}
+        ],
+        [
+            {"id": "face3", "score": 0.95, "payload": {"familyId": family_id, "memberId": "member3"}}
+        ]
+    ]
+    mock_all_services_session_scope["qdrant_repository"].batch_search_similar_faces.return_value = mock_search_results
+
+    response = client.post("/faces/batch-search-vectors", json=payload)
+    
+    assert response.status_code == 200
+    assert response.json() == mock_search_results
+    mock_all_services_session_scope["qdrant_repository"].batch_search_similar_faces.assert_called_once_with(
+        vectors_to_search, family_id=family_id, top_k=top_k, threshold=threshold
+    )
