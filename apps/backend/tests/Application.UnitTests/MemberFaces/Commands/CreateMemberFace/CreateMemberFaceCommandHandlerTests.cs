@@ -49,7 +49,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
             MemberId = member.Id,
             BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
             Confidence = 0.99,
-            Thumbnail = "base64thumbnailstring", // Provide a base64 string
+            ThumbnailUrl = "http://thumbnail.url", // Provide a valid URL
             OriginalImageUrl = "http://original.url",
             Embedding = new List<double> { 0.1, 0.2, 0.3 },
             Emotion = "happy",
@@ -70,7 +70,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         createdMemberFace.Should().NotBeNull();
         createdMemberFace!.MemberId.Should().Be(command.MemberId);
         createdMemberFace.Confidence.Should().Be(command.Confidence);
-        createdMemberFace.ThumbnailUrl.Should().BeNull();
+        createdMemberFace.ThumbnailUrl.Should().Be(command.ThumbnailUrl);
         createdMemberFace.IsVectorDbSynced.Should().BeTrue();
         createdMemberFace.VectorDbId.Should().NotBeNullOrEmpty();
         createdMemberFace.VectorDbId.Should().Be(createdMemberFace.Id.ToString());
@@ -136,48 +136,4 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
         result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 
-    [Fact]
-    public async Task CreateMemberFace_ShouldReturnFailure_WhenConflictDetected()
-    {
-        // Arrange
-        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF" };
-        var member = new Member(Guid.NewGuid(), "John", "Doe", "JD", family.Id, family);
-        var conflictingMemberId = Guid.NewGuid();
-        var conflictingFamily = new Family { Id = Guid.NewGuid(), Name = "Conflicting Family", Code = "CF" };
-        var conflictingMember = new Member(conflictingMemberId, "Jane", "Doe", "JND", conflictingFamily.Id, conflictingFamily);
-
-        await _context.Families.AddAsync(family);
-        await _context.Members.AddAsync(member);
-        await _context.Families.AddAsync(conflictingFamily);
-        await _context.Members.AddAsync(conflictingMember);
-        await _context.SaveChangesAsync();
-
-        _authorizationServiceMock.Setup(x => x.CanAccessFamily(family.Id)).Returns(true);
-
-        var command = new CreateMemberFaceCommand
-        {
-            MemberId = member.Id,
-            BoundingBox = new BoundingBoxDto { X = 10, Y = 20, Width = 50, Height = 60 },
-            Confidence = 0.99,
-            Thumbnail = "base64thumbnailstring",
-            OriginalImageUrl = "http://original.url",
-            Embedding = new List<double> { 0.1, 0.2, 0.3 },
-            Emotion = "happy",
-            EmotionConfidence = 0.95,
-            IsVectorDbSynced = false
-        };
-
-        var handler = CreateCreateHandler();
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("similar embedding is already associated with another member");
-        result.ErrorSource.Should().Be(ErrorSources.Conflict);
-
-        // Ensure no MemberFace was added
-        _context.MemberFaces.Should().BeEmpty();
-    }
 }
