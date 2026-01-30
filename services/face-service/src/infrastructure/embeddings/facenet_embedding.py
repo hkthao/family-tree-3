@@ -1,10 +1,11 @@
-
 import dlib
 import cv2
 import numpy as np
 from PIL import Image
 from typing import List
 import logging
+
+from src.domain.interfaces.face_embedding import IFaceEmbedding
 
 
 # Configure logging
@@ -18,7 +19,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-class FaceEmbeddingService:
+class FaceNetEmbeddingService(IFaceEmbedding):
     def __init__(self):
         try:
             # Load Dlib's face landmark predictor
@@ -27,7 +28,7 @@ class FaceEmbeddingService:
             # Load Dlib's face recognition model
             encoder_path = "app/models/dlib_models/dlib_face_recognition_resnet_model_v1.dat"
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
-            logger.info("FaceEmbeddingService initialized with Dlib models.")
+            logger.info("FaceNetEmbeddingService initialized with Dlib models.")
 
         except Exception as e:
             logger.error(f"Error initializing Dlib face embedding models: {e}")

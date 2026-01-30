@@ -6,8 +6,8 @@ from typing import Optional
 import aio_pika
 from aio_pika.abc import AbstractRobustConnection
 
-from app.services.face_service import FaceService
-from app.models import (
+from src.application.services.face_manager import FaceManager
+from src.domain.entities.models import (
     MemberFaceAddedMessage,
     MemberFaceDeletedMessage,
     MessageBusConstants,
@@ -29,8 +29,8 @@ class MessageConsumer:
     Consumes messages from RabbitMQ related to member face events.
     """
 
-    def __init__(self, face_service: FaceService):
-        self.face_service = face_service
+    def __init__(self, face_manager: FaceManager):
+        self.face_manager = face_manager
         self.connection: Optional[AbstractRobustConnection] = None
         self.channel: Optional[aio_pika.abc.AbstractRobustChannel] = None
         self.queue: Optional[aio_pika.abc.AbstractRobustQueue] = None
@@ -89,7 +89,7 @@ class MessageConsumer:
                 vector = face_add_request.vector
                 metadata = face_add_request.metadata.model_dump()
 
-                # The BoundingBox model has float fields, but FaceService's BoundingBox expects int.
+                # The BoundingBox model has float fields, but FaceManager's BoundingBox expects int.
                 # Need to convert BoundingBox fields to int.
                 if "bounding_box" in metadata and metadata["bounding_box"] is not None:
                     bbox = metadata["bounding_box"]
@@ -100,7 +100,7 @@ class MessageConsumer:
                         "height": int(bbox["height"]),
                     }
 
-                self.face_service.add_face_by_vector(vector, metadata)
+                await self.face_manager.add_face_by_vector(vector, metadata)
                 logger.info(f"Metadata passed to add_face_by_vector: {metadata}")
                 logger.info(
                     f"Processed MemberFaceAddedMessage for FaceId: {metadata['face_id']} "
@@ -110,11 +110,6 @@ class MessageConsumer:
                 logger.error(f"Failed to decode JSON from message: {message.body}", exc_info=True)
             except Exception as e:
                 logger.error(f"Error processing MemberFaceAddedMessage: {e}", exc_info=True)
-                # Requeue message if processing failed (e.g., database error)
-                # or send to dead-letter queue
-                # For now, we'll let it be acknowledged to avoid reprocessing indefinitely
-                # In a real-world scenario, you might want to NACK and requeue
-                # or move to a dead-letter queue after several retries.
 
     async def _on_message_deleted(self, message: aio_pika.abc.AbstractIncomingMessage):
         """Callback for MemberFaceDeletedMessage."""
@@ -126,7 +121,7 @@ class MessageConsumer:
 
                 vector_db_id = deleted_message.vector_db_id
                 if vector_db_id:
-                    success = self.face_service.delete_face(vector_db_id)
+                    success = await self.face_manager.delete_face(vector_db_id)
                     if success:
                         logger.info(
                             f"Processed MemberFaceDeletedMessage for VectorDbId: {vector_db_id} "
@@ -155,22 +150,8 @@ class MessageConsumer:
             await self._setup_queue()
 
             if self.queue:
-                # For simplicity, we'll use a single queue and dispatch internally based on routing_key.
-
-                # Re-setup queue consumption for delete messages, as consume blocks.
-                # Better approach: check message.routing_key inside _on_message_added
-                # and call corresponding handler or ensure each bind has its own consumer.
-                # For now, let's just use one consume and dispatch within _on_message_added
-                # based on the routing key of the message itself.
-
-                # Aio-pika's `consume` method takes a callback that will be called for all messages
-                # on the queue. The routing key is available in `message.routing_key`.
-                # We need a single main consumer loop that dispatches to _on_message_added or _on_message_deleted
-                # based on the routing key.
                 logger.info("Starting consuming messages...")
                 await self.queue.consume(self._dispatch_message, no_ack=False)
-                # Keep the event loop running
-                # This will be run by FastAPI's startup event, so no need for asyncio.Future()
             else:
                 logger.error("Queue not initialized. Consumer will not start.")
         except Exception as e:
@@ -186,7 +167,7 @@ class MessageConsumer:
             await self._on_message_deleted(message)
         else:
             logger.warning(f"Received message with unhandled routing key: {message.routing_key}. Body: {message.body.decode()}")
-            await message.ack()  # Acknowledge unhandled messages to remove them from the queue
+            await message.ack()
 
     async def stop(self):
         """Closes the RabbitMQ connection gracefully."""

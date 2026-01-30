@@ -2,6 +2,9 @@ import numpy as np
 import dlib
 import cv2
 import logging
+from typing import List, Dict, Any
+
+from src.domain.interfaces.face_detector import IFaceDetector
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -13,12 +16,12 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-class DlibFaceDetector:
+class DlibFaceDetector(IFaceDetector):
     def __init__(self):
         self.detector = dlib.get_frontal_face_detector()
         logger.info("DlibFaceDetector initialized.")
 
-    def detect_faces(self, image: np.ndarray):
+    def detect_faces(self, image: np.ndarray) -> List[Dict[str, Any]]:
         """
         Detects faces in a given image using Dlib's frontal face detector.
 

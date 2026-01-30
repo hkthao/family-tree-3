@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, patch, Mock
 
 import aio_pika
 
-from app.message_consumer import MessageConsumer, RABBITMQ_URL
-from app.services.face_service import FaceService
-from app.models import (
+from src.infrastructure.message_bus.consumer_impl import MessageConsumer, RABBITMQ_URL
+from src.application.services.face_manager import FaceManager
+from src.domain.entities.models import (
     MemberFaceAddedMessage,
     MemberFaceDeletedMessage,
     MessageBusConstants,
@@ -18,12 +18,17 @@ from app.models import (
 
 
 @pytest.fixture
-def mock_face_service():
-    """Fixture for a mocked FaceService instance."""
-    mock = MagicMock(spec=FaceService)
-    mock.add_face_by_vector = Mock()
+def mock_face_manager():
+    """Fixture for a mocked FaceManager instance."""
+    mock = AsyncMock(spec=FaceManager)
+    mock.add_face_by_vector = AsyncMock()
     mock.delete_face = AsyncMock(return_value=True)
     return mock
+
+@pytest.fixture
+def message_consumer_instance(mock_face_manager):
+    """Fixture for a MessageConsumer instance with mocked FaceManager."""
+    return MessageConsumer(face_manager=mock_face_manager)
 
 
 @pytest.fixture
@@ -45,10 +50,7 @@ def mock_aio_pika_connection():
         yield mock_connect_robust, mock_connection, mock_channel, mock_exchange, mock_queue
 
 
-@pytest.fixture
-def message_consumer_instance(mock_face_service):
-    """Fixture for a MessageConsumer instance with mocked FaceService."""
-    return MessageConsumer(face_service=mock_face_service)
+
 
 
 @pytest.mark.asyncio
@@ -89,7 +91,7 @@ async def test_consumer_setup_queue(message_consumer_instance, mock_aio_pika_con
 
 
 @pytest.mark.asyncio
-async def test_on_message_added_success(message_consumer_instance, mock_face_service):
+async def test_on_message_added_success(message_consumer_instance, mock_face_manager):
     """Test processing of a valid MemberFaceAddedMessage."""
     bounding_box_data = BoundingBoxModel(x=10.0, y=20.0, width=30.0, height=40.0)
     metadata_data = MetadataModel(
@@ -126,8 +128,8 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
         "emotion_confidence": 0.99,
         "face_id": "face1",
     }
-    mock_face_service.add_face_by_vector.assert_called_once()
-    args, kwargs = mock_face_service.add_face_by_vector.call_args
+    mock_face_manager.add_face_by_vector.assert_called_once()
+    args, kwargs = mock_face_manager.add_face_by_vector.call_args
     actual_vector = args[0]
     actual_metadata = args[1]
 
@@ -137,7 +139,7 @@ async def test_on_message_added_success(message_consumer_instance, mock_face_ser
 
 
 @pytest.mark.asyncio
-async def test_on_message_deleted_success(message_consumer_instance, mock_face_service):
+async def test_on_message_deleted_success(message_consumer_instance, mock_face_manager):
     """Test processing of a valid MemberFaceDeletedMessage."""
     message_body = MemberFaceDeletedMessage(
         member_face_id="local_del_id",
@@ -152,12 +154,12 @@ async def test_on_message_deleted_success(message_consumer_instance, mock_face_s
 
     await message_consumer_instance._on_message_deleted(mock_message)
 
-    mock_face_service.delete_face.assert_called_once_with("qdrant_face_id")
+    mock_face_manager.delete_face.assert_called_once_with("qdrant_face_id")
     mock_message.process.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_on_message_deleted_no_vector_db_id(message_consumer_instance, mock_face_service):
+async def test_on_message_deleted_no_vector_db_id(message_consumer_instance, mock_face_manager):
     """Test processing of MemberFaceDeletedMessage when VectorDbId is null."""
     message_body = MemberFaceDeletedMessage(
         member_face_id="local_del_id",
@@ -172,7 +174,7 @@ async def test_on_message_deleted_no_vector_db_id(message_consumer_instance, moc
 
     await message_consumer_instance._on_message_deleted(mock_message)
 
-    mock_face_service.delete_face.assert_not_called()
+    mock_face_manager.delete_face.assert_not_called()
     mock_message.process.assert_called_once()
 
 
