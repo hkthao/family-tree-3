@@ -1,29 +1,31 @@
 import os
 from qdrant_client import QdrantClient, models
-from qdrant_client.http.models import UpdateStatus  # Import UpdateStatus
+from qdrant_client.http.models import UpdateStatus
 from typing import List, Dict, Any, Optional
 import logging
+
+from src.domain.interfaces.face_repository import IFaceRepository
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class QdrantService:
+class QdrantFaceRepository(IFaceRepository):
     def __init__(self, collection_name: Optional[str] = None):
         self.collection_name = collection_name or os.getenv("QDRANT_COLLECTION_NAME", "face_embeddings")
+        self.vector_size = int(os.getenv("QDRANT_VECTOR_SIZE", 128))
         self.client = QdrantClient(
             host=os.getenv("QDRANT_HOST"),
             api_key=os.getenv("QDRANT_API_KEY"),
         )
         self._create_collection_if_not_exists()
 
-
     def _create_collection_if_not_exists(self):
         if not self.client.collection_exists(collection_name=self.collection_name):
             logger.info(f"Collection '{self.collection_name}' does not exist. Creating it now...")
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=models.VectorParams(size=128, distance=models.Distance.COSINE),
+                vectors_config=models.VectorParams(size=self.vector_size, distance=models.Distance.COSINE),
             )
             self.client.create_payload_index(
                 collection_name=self.collection_name,
@@ -34,14 +36,13 @@ class QdrantService:
         else:
             logger.info(f"Collection '{self.collection_name}' already exists. Skipping creation.")
 
-    def upsert_face_embedding(self, vector: List[float], metadata: Dict[str, Any], point_id: str):
+    async def upsert_face_vector(self, face_id: str, vector: List[float], metadata: Dict[str, Any]):
         """
-        Lưu trữ embedding khuôn mặt và metadata vào Qdrant.
-        point_id sẽ được dùng làm ID của point trong Qdrant.
+        Inserts or updates a face vector and its associated metadata in the repository.
         """
         points = [
             models.PointStruct(
-                id=point_id,
+                id=face_id,
                 vector=vector,
                 payload=metadata,
             )
@@ -51,50 +52,68 @@ class QdrantService:
             wait=True,
             points=points
         )
-        logger.info(f"Upserted embedding for point_id: {point_id} to collection '{self.collection_name}'.")
+        logger.info(f"Upserted embedding for point_id: {face_id} to collection '{self.collection_name}'.")
 
-    def search_face_embeddings(self, query_vector: List[float], limit: int = 5, query_filter: Optional[Dict[str, Any]] = None, score_threshold: float = 0.7) -> List[Dict[str, Any]]:
+    async def search_similar_faces(
+        self,
+        query_vector: List[float],
+        family_id: Optional[str] = None,
+        member_id: Optional[str] = None,
+        top_k: int = 5,
+        threshold: float = 0.75,
+    ) -> List[Dict[str, Any]]:
         """
-        Tìm kiếm các khuôn mặt tương tự dựa trên vector truy vấn.
-        Có thể lọc kết quả tìm kiếm bằng query_filter.
+        Searches for similar faces based on a query vector.
         """
+        qdrant_filter_conditions = []
+
+        if family_id:
+            qdrant_filter_conditions.append(
+                models.FieldCondition(
+                    key="family_id",
+                    match=models.MatchValue(value=family_id)
+                )
+            )
+        if member_id:
+            qdrant_filter_conditions.append(
+                models.FieldCondition(
+                    key="member_id",
+                    match=models.MatchValue(value=member_id)
+                )
+            )
+
         qdrant_filter = None
-        if query_filter:
+        if qdrant_filter_conditions:
             qdrant_filter = models.Filter(
-                must=[
-                    models.FieldCondition(
-                        key=k,
-                        match=models.MatchValue(value=v)
-                    ) for k, v in query_filter.items()
-                ]
+                must=qdrant_filter_conditions
             )
 
         search_result_raw = self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector,
-            limit=limit,
+            limit=top_k,
             query_filter=qdrant_filter,
-            score_threshold=score_threshold
+            score_threshold=threshold, # Use score_threshold here
         )
         
         search_hits = search_result_raw.points
         
         results = []
         for hit in search_hits:
-            if hit.score >= score_threshold:
-                results.append({
+            results.append({
                     "id": hit.id,
                     "score": hit.score,
                     "payload": hit.payload
-                })
+                })   
         logger.info(f"Qdrant search completed. Found {len(results)} hits above threshold. Results: "
                     f"{[{'id': r['id'], 'score': r['score']} for r in results]}")
         return results
 
-    def get_points_by_payload_filter(self, payload_filter: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def get_faces_by_family_id(self, family_id: str) -> List[Dict[str, Any]]:
         """
-        Lấy tất cả các điểm khớp với một payload filter cụ thể.
+        Retrieves all faces associated with a given family ID.
         """
+        payload_filter = {"family_id": family_id}
         qdrant_filter = models.Filter(
             must=[
                 models.FieldCondition(
@@ -104,13 +123,12 @@ class QdrantService:
             ]
         )
 
-        # Using scroll to get all points matching the filter
         hits, _ = self.client.scroll(
             collection_name=self.collection_name,
             scroll_filter=qdrant_filter,
-            limit=10000,  # Adjust limit as necessary, or implement pagination
+            limit=10000,
             with_payload=True,
-            with_vectors=False,  # We don't need vectors for this operation
+            with_vectors=False,
         )
         results = []
         for hit in hits:
@@ -121,10 +139,31 @@ class QdrantService:
         logger.info(f"Retrieved {len(results)} points with filter {payload_filter}.")
         return results
 
-    def delete_points_by_payload_filter(self, payload_filter: Dict[str, Any]) -> bool:
+    async def delete_face(self, face_id: str) -> bool:
         """
-        Xóa tất cả các điểm khớp với một payload filter cụ thể.
+        Deletes a specific face by its ID.
         """
+        try:
+            response = self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.PointIdsList(points=[face_id]),
+                wait=True
+            )
+            if response.status == UpdateStatus.COMPLETED:
+                logger.info(f"Point with ID {face_id} deleted successfully.")
+                return True
+            else:
+                logger.warning(f"Failed to delete point with ID {face_id}. Status: {response.status}")
+                return False
+        except Exception as e:
+            logger.error(f"Error deleting point with ID {face_id}: {e}")
+            return False
+
+    async def delete_faces_by_family_id(self, family_id: str) -> bool:
+        """
+        Deletes all faces associated with a given family ID.
+        """
+        payload_filter = {"family_id": family_id}
         qdrant_filter = models.Filter(
             must=[
                 models.FieldCondition(
@@ -150,23 +189,34 @@ class QdrantService:
         except Exception as e:
             logger.error(f"Error deleting points with filter {payload_filter}: {e}")
             return False
-
-    def delete_point_by_id(self, point_id: str) -> bool:
+    
+    async def delete_faces_by_member_id(self, member_id: str) -> bool:
         """
-        Xóa một điểm khỏi Qdrant bằng ID của nó.
+        Deletes all faces associated with a given member ID.
         """
+        payload_filter = {"member_id": member_id}
+        qdrant_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key=k,
+                    match=models.MatchValue(value=v)
+                ) for k, v in payload_filter.items()
+            ]
+        )
         try:
             response = self.client.delete(
                 collection_name=self.collection_name,
-                points=[point_id],  # Correct way to specify point IDs
+                points_selector=models.PointSelector(
+                    filter=qdrant_filter
+                ),
                 wait=True
             )
             if response.status == UpdateStatus.COMPLETED:
-                logger.info(f"Point with ID {point_id} deleted successfully.")
+                logger.info(f"Deleted points with filter {payload_filter} successfully.")
                 return True
             else:
-                logger.warning(f"Failed to delete point with ID {point_id}. Status: {response.status}")
+                logger.warning(f"Failed to delete points with filter {payload_filter}. Status: {response.status}")
                 return False
         except Exception as e:
-            logger.error(f"Error deleting point with ID {point_id}: {e}")
+            logger.error(f"Error deleting points with filter {payload_filter}: {e}")
             return False

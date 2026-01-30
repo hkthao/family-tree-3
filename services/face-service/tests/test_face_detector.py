@@ -4,12 +4,13 @@ import numpy as np
 
 
 # Import the class to be tested
-from app.services.face_detector import DlibFaceDetector
+from src.infrastructure.detectors.dlib_detector import DlibFaceDetector
+from src.domain.interfaces.face_detector import IFaceDetector
 
 
 class TestDlibFaceDetector(unittest.TestCase):
 
-    @patch('app.services.face_detector.dlib.get_frontal_face_detector')
+    @patch('src.infrastructure.detectors.dlib_detector.dlib.get_frontal_face_detector')
     def setUp(self, mock_get_frontal_face_detector):
         # Setup run before each test method
         self.mock_dlib_detector = MagicMock()
@@ -68,7 +69,7 @@ class TestDlibFaceDetector(unittest.TestCase):
         self.assertEqual(detected_faces[1]['confidence'], 0.99)
         self.mock_dlib_detector.assert_called_once()
 
-    @patch('app.services.face_detector.cv2.cvtColor', side_effect=Exception("CV2 Error"))
+    @patch('src.infrastructure.detectors.dlib_detector.cv2.cvtColor', side_effect=Exception("CV2 Error"))
     def test_detect_faces_exception_handling(self, mock_cvtColor):
         # Test case for exception handling during face detection
         with self.assertRaises(Exception):

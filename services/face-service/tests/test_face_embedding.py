@@ -5,13 +5,14 @@ from PIL import Image
 
 
 # Import the class to be tested
-from app.services.face_embedding import FaceEmbeddingService
+from src.infrastructure.embeddings.facenet_embedding import FaceNetEmbeddingService
+from src.domain.interfaces.face_embedding import IFaceEmbedding
 
 
-class TestFaceEmbeddingService(unittest.TestCase):
+class TestFaceNetEmbeddingService(unittest.TestCase):
 
-    @patch('app.services.face_embedding.dlib.shape_predictor')
-    @patch('app.services.face_embedding.dlib.face_recognition_model_v1')
+    @patch('src.infrastructure.embeddings.facenet_embedding.dlib.shape_predictor')
+    @patch('src.infrastructure.embeddings.facenet_embedding.dlib.face_recognition_model_v1')
     def setUp(self, mock_face_recognition_model_v1, mock_shape_predictor):
         # Mock Dlib models
         self.mock_predictor = MagicMock()
@@ -20,14 +21,14 @@ class TestFaceEmbeddingService(unittest.TestCase):
         self.mock_face_encoder = MagicMock()
         mock_face_recognition_model_v1.return_value = self.mock_face_encoder
 
-        self.face_embedding_service = FaceEmbeddingService()
+        self.face_embedding_service = FaceNetEmbeddingService()
 
         # Create a dummy PIL Image for testing
         self.dummy_pil_image = Image.new('RGB', (100, 100), color='red')
 
-    @patch('app.services.face_embedding.cv2.cvtColor')
-    @patch('app.services.face_embedding.dlib.rectangle')
-    @patch('app.services.face_embedding.dlib.get_face_chip')
+    @patch('src.infrastructure.embeddings.facenet_embedding.cv2.cvtColor')
+    @patch('src.infrastructure.embeddings.facenet_embedding.dlib.rectangle')
+    @patch('src.infrastructure.embeddings.facenet_embedding.dlib.get_face_chip')
     def test_get_embedding_success(self, mock_get_face_chip, mock_dlib_rectangle, mock_cvtColor):
         # Mock the return values for Dlib functions
         mock_cvtColor.return_value = np.zeros((100, 100), dtype=np.uint8)  # Grayscale image
@@ -56,7 +57,7 @@ class TestFaceEmbeddingService(unittest.TestCase):
         self.mock_face_encoder.compute_face_descriptor.assert_called_once()
         mock_cvtColor.assert_called_once()
     
-    @patch('app.services.face_embedding.cv2.cvtColor', side_effect=Exception("CV2 Error"))
+    @patch('src.infrastructure.embeddings.facenet_embedding.cv2.cvtColor', side_effect=Exception("CV2 Error"))
     def test_get_embedding_exception_handling(self, mock_cvtColor):
         # Test case for exception handling during embedding generation
         with self.assertRaises(Exception):

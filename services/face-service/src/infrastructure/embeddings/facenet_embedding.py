@@ -1,10 +1,11 @@
-
 import dlib
 import cv2
 import numpy as np
 from PIL import Image
 from typing import List
 import logging
+
+from src.domain.interfaces.face_embedding import IFaceEmbedding
 
 
 # Configure logging
@@ -18,7 +19,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-class FaceEmbeddingService:
+class FaceNetEmbeddingService(IFaceEmbedding):
     def __init__(self):
         try:
             # Load Dlib's face landmark predictor
@@ -27,7 +28,7 @@ class FaceEmbeddingService:
             # Load Dlib's face recognition model
             encoder_path = "app/models/dlib_models/dlib_face_recognition_resnet_model_v1.dat"
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
-            logger.info("FaceEmbeddingService initialized with Dlib models.")
+            logger.info("FaceNetEmbeddingService initialized with Dlib models.")
 
         except Exception as e:
             logger.error(f"Error initializing Dlib face embedding models: {e}")
@@ -35,7 +36,7 @@ class FaceEmbeddingService:
 
     def get_embedding(self, face_image: Image.Image) -> List[float]:
         """
-        Generates a 128-dimensional face embedding for a given face image
+        Generates a 128-dimensional face embedding (Non-normalized) for a given face image
         using Dlib.
 
         Args:
@@ -67,8 +68,18 @@ class FaceEmbeddingService:
             embedding = self.face_encoder.compute_face_descriptor(
                 aligned_face, landmarks
             )
-            logger.info("Successfully generated Dlib face embedding.")
-            return [float(x) for x in np.array(embedding).astype(np.float32)]
+
+            # Convert to numpy array for normalization
+            embedding_np = np.array(embedding).astype(np.float32)
+            # Perform L2 normalization
+            norm = np.linalg.norm(embedding_np)
+            if norm > 0:
+                normalized_embedding = embedding_np / norm
+            else:
+                normalized_embedding = embedding_np # Avoid division by zero, though unlikely for face embeddings
+
+            logger.info("Successfully generated and L2-normalized Dlib face embedding.")
+            return [float(x) for x in normalized_embedding]
         except Exception as e:
             logger.error(f"Error generating Dlib face embedding: {e}")
             raise

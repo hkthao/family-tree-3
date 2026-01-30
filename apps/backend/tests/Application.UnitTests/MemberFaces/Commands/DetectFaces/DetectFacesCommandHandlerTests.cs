@@ -61,7 +61,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 {
                     BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                     Confidence = 0.99f,
-                    Embedding = new List<double> { 1.0, 2.0, 3.0 }
+                    Embedding = new List<float> { 1.0f, 2.0f, 3.0f }
                 }
             };
 
@@ -76,7 +76,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 
             // Setup the mediator to return the found member for SearchMemberFaceQuery
             _mediatorMock.Setup(m => m.Send(
-                It.Is<SearchMemberFaceQuery>(q => q.Vector != null && q.Vector.SequenceEqual(detectedFaces.First().Embedding!)),
+                It.Is<SearchMemberFaceQuery>(q => q.Vector != null && q.Vector.SequenceEqual(detectedFaces.First().Embedding!.Select(d => (float)d))),
                 It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(foundFacesResult));
 
@@ -191,7 +191,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     {
                         BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                         Confidence = 0.99f,
-                        Embedding = new List<double> { 1.0, 2.0, 3.0 },
+                        Embedding = new List<float> { 1.0f, 2.0f, 3.0f },
                         Thumbnail = null // Should be null when ReturnCrop is false
                     }
                 });

@@ -12,7 +12,7 @@ public class DetectedFaceDto
     public string? FamilyName { get; set; }
     public int? BirthYear { get; set; }
     public int? DeathYear { get; set; }
-    public List<double>? Embedding { get; set; }
+    public List<float>? Embedding { get; set; }
     public string? Emotion { get; set; }
     public float? EmotionConfidence { get; set; }
     public string? Status { get; set; } // NEW: Status property

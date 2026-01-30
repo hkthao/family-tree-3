@@ -3,42 +3,42 @@ import pytest
 from unittest.mock import Mock, patch
 from qdrant_client import models
 from qdrant_client.http.models import UpdateStatus # Import UpdateStatus for testing
-from app.services.qdrant_service import QdrantService
-
+from src.infrastructure.persistence.qdrant_client import QdrantFaceRepository
+from src.domain.interfaces.face_repository import IFaceRepository
 
 @pytest.fixture
 def mock_qdrant_client():
     """Fixture to provide a mocked QdrantClient instance."""
-    with patch('app.services.qdrant_service.QdrantClient') as MockClient:
+    with patch('src.infrastructure.persistence.qdrant_client.QdrantClient') as MockClient:
         mock_instance = MockClient.return_value
-        # Mock get_collection to raise an exception by default (collection not found)
-        mock_instance.get_collection.side_effect = Exception("Collection not found")
         yield mock_instance
 
 @pytest.fixture
-def qdrant_service_instance(mock_qdrant_client, monkeypatch):
-    """Fixture to provide a QdrantService instance with a mocked client."""
-    # Temporarily set environment variables for the test using monkeypatch
+def qdrant_repository_instance(mock_qdrant_client, monkeypatch):
+    """Fixture to provide a QdrantFaceRepository instance with a mocked client."""
     monkeypatch.setenv("QDRANT_HOST", "http://localhost:6333")
     monkeypatch.setenv("QDRANT_API_KEY", "test_api_key")
-    monkeypatch.setenv("QDRANT_COLLECTION_NAME", "env_test_collection") # Set the environment variable
-    
-    # Ensure get_collection does not raise an exception for the service init
-    mock_qdrant_client.get_collection.side_effect = None 
-    mock_qdrant_client.get_collection.return_value = Mock() # Return a dummy object for existing collection
-    service = QdrantService(collection_name=None) # Pass None to use environment variable
+    monkeypatch.setenv("QDRANT_COLLECTION_NAME", "env_test_collection")
+    monkeypatch.setenv("QDRANT_VECTOR_SIZE", "128") # Ensure vector size is set
+
+    mock_qdrant_client.collection_exists.return_value = False # Force collection creation logic
+    service = QdrantFaceRepository(collection_name=None)
+    mock_qdrant_client.collection_exists.return_value = True # For subsequent checks, assume it exists
     yield service
 
 
-def test_qdrant_service_init_creates_collection(mock_qdrant_client):
+def test_qdrant_repository_init_creates_collection(mock_qdrant_client, monkeypatch):
     """
     Kiểm tra rằng collection được tạo nếu nó chưa tồn tại khi collection_name không được cung cấp.
     """
-    # Configure mock to simulate collection not found
+    monkeypatch.setenv("QDRANT_HOST", "http://localhost:6333")
+    monkeypatch.setenv("QDRANT_API_KEY", "test_api_key")
+    monkeypatch.setenv("QDRANT_COLLECTION_NAME", "new_env_collection")
+    monkeypatch.setenv("QDRANT_VECTOR_SIZE", "128")
+
     mock_qdrant_client.collection_exists.return_value = False
     
-    with patch('os.getenv', return_value="new_env_collection"):
-        service = QdrantService() # No collection_name provided
+    repository = QdrantFaceRepository(collection_name=None)
     
     mock_qdrant_client.collection_exists.assert_called_once_with(collection_name="new_env_collection")
     mock_qdrant_client.create_collection.assert_called_once_with(
@@ -50,47 +50,52 @@ def test_qdrant_service_init_creates_collection(mock_qdrant_client):
         field_name="family_id",
         field_schema=models.PayloadSchemaType.KEYWORD,
     )
-    assert service.collection_name == "new_env_collection"
+    assert repository.collection_name == "new_env_collection"
 
 
-def test_qdrant_service_init_does_not_recreate_existing_collection(mock_qdrant_client):
+def test_qdrant_repository_init_does_not_recreate_existing_collection(mock_qdrant_client, monkeypatch):
     """
     Kiểm tra rằng collection không được tạo lại nếu nó đã tồn tại khi collection_name không được cung cấp.
     """
-    # Configure mock to simulate collection found
+    monkeypatch.setenv("QDRANT_HOST", "http://localhost:6333")
+    monkeypatch.setenv("QDRANT_API_KEY", "test_api_key")
+    monkeypatch.setenv("QDRANT_COLLECTION_NAME", "existing_env_collection")
+    monkeypatch.setenv("QDRANT_VECTOR_SIZE", "128")
+
     mock_qdrant_client.collection_exists.return_value = True
     
-    with patch('os.getenv', return_value="existing_env_collection"):
-        service = QdrantService() # No collection_name provided
+    repository = QdrantFaceRepository(collection_name=None)
     
     mock_qdrant_client.collection_exists.assert_called_once_with(collection_name="existing_env_collection")
     mock_qdrant_client.create_collection.assert_not_called()
     mock_qdrant_client.recreate_collection.assert_not_called()
     mock_qdrant_client.delete_collection.assert_not_called()
     mock_qdrant_client.create_payload_index.assert_not_called()
-    assert service.collection_name == "existing_env_collection"
+    assert repository.collection_name == "existing_env_collection"
 
-def test_upsert_face_embedding(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_upsert_face_vector(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức upsert_face_embedding.
+    Kiểm tra phương thức upsert_face_vector.
     """
     vector = [0.1] * 128
     metadata = {"memberId": "123", "familyId": "abc"}
-    point_id = "test_point_id"
+    face_id = "test_face_id"
     
-    qdrant_service_instance.upsert_face_embedding(vector, metadata, point_id)
+    await qdrant_repository_instance.upsert_face_vector(face_id, vector, metadata)
     
     mock_qdrant_client.upsert.assert_called_once()
     args, kwargs = mock_qdrant_client.upsert.call_args
-    assert kwargs['collection_name'] == qdrant_service_instance.collection_name
+    assert kwargs['collection_name'] == qdrant_repository_instance.collection_name
     assert len(kwargs['points']) == 1
-    assert kwargs['points'][0].id == point_id
+    assert kwargs['points'][0].id == face_id
     assert kwargs['points'][0].vector == vector
     assert kwargs['points'][0].payload == metadata
 
-def test_search_face_embeddings(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_search_similar_faces(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức search_face_embeddings.
+    Kiểm tra phương thức search_similar_faces.
     """
     query_vector = [0.2] * 128
     
@@ -103,10 +108,10 @@ def test_search_face_embeddings(qdrant_service_instance, mock_qdrant_client):
     mock_query_result.points = [mock_hit]
     mock_qdrant_client.query_points.return_value = mock_query_result
     
-    results = qdrant_service_instance.search_face_embeddings(query_vector, score_threshold=0.0)
+    results = await qdrant_repository_instance.search_similar_faces(query_vector, threshold=0.0)
     
     mock_qdrant_client.query_points.assert_called_once_with(
-        collection_name=qdrant_service_instance.collection_name,
+        collection_name=qdrant_repository_instance.collection_name,
         query=query_vector,
         limit=5,
         query_filter=None,
@@ -117,94 +122,99 @@ def test_search_face_embeddings(qdrant_service_instance, mock_qdrant_client):
     assert results[0]["score"] == 0.95
     assert results[0]["payload"] == {"memberId": "456", "familyId": "def"}
 
-def test_search_face_embeddings_with_filter(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_search_similar_faces_with_filter(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức search_face_embeddings với bộ lọc.
+    Kiểm tra phương thức search_similar_faces với bộ lọc.
     """
     query_vector = [0.2] * 128
-    query_filter = {"family_id": "family_xyz"}
+    family_id = "family_xyz"
     
     mock_hit = Mock()
     mock_hit.id = "filtered_id"
     mock_hit.score = 0.98
-    mock_hit.payload = {"member_id": "789", "family_id": "family_xyz"}
+    mock_hit.payload = {"member_id": "789", "family_id": family_id}
     
     mock_query_result = Mock()
     mock_query_result.points = [mock_hit]
     mock_qdrant_client.query_points.return_value = mock_query_result
     
-    results = qdrant_service_instance.search_face_embeddings(query_vector, query_filter=query_filter, score_threshold=0.0)
+    results = await qdrant_repository_instance.search_similar_faces(query_vector, family_id=family_id, threshold=0.0)
     
     mock_qdrant_client.query_points.assert_called_once()
     args, kwargs = mock_qdrant_client.query_points.call_args
-    assert kwargs['collection_name'] == qdrant_service_instance.collection_name
+    assert kwargs['collection_name'] == qdrant_repository_instance.collection_name
     assert kwargs['query'] == query_vector
     assert kwargs['limit'] == 5
     assert kwargs['score_threshold'] == 0.0
     assert isinstance(kwargs['query_filter'], models.Filter)
     assert len(kwargs['query_filter'].must) == 1
     assert kwargs['query_filter'].must[0].key == "family_id"
-    assert kwargs['query_filter'].must[0].match.value == "family_xyz"
+    assert kwargs['query_filter'].must[0].match.value == family_id
     assert len(results) == 1
     assert results[0]["id"] == "filtered_id"
 
 
-def test_get_points_by_payload_filter(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_get_faces_by_family_id(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức get_points_by_payload_filter.
+    Kiểm tra phương thức get_faces_by_family_id.
     """
-    payload_filter = {"familyId": "test_family"}
+    family_id = "test_family"
     
     mock_hit = Mock()
     mock_hit.id = "scroll_id"
-    mock_hit.payload = {"familyId": "test_family", "memberId": "member_xyz"}
+    mock_hit.payload = {"familyId": family_id, "memberId": "member_xyz"}
     mock_qdrant_client.scroll.return_value = ([mock_hit], None) # (hits, next_page_offset)
     
-    results = qdrant_service_instance.get_points_by_payload_filter(payload_filter)
+    results = await qdrant_repository_instance.get_faces_by_family_id(family_id)
     
     mock_qdrant_client.scroll.assert_called_once()
     args, kwargs = mock_qdrant_client.scroll.call_args
     assert isinstance(kwargs['scroll_filter'], models.Filter)
     assert len(kwargs['scroll_filter'].must) == 1
-    assert kwargs['scroll_filter'].must[0].key == "familyId"
-    assert kwargs['scroll_filter'].must[0].match.value == "test_family"
+    assert kwargs['scroll_filter'].must[0].key == "family_id" # Corrected key
+    assert kwargs['scroll_filter'].must[0].match.value == family_id
     assert len(results) == 1
     assert results[0]["id"] == "scroll_id"
-    assert results[0]["payload"] == {"familyId": "test_family", "memberId": "member_xyz"}
+    assert results[0]["payload"] == {"familyId": family_id, "memberId": "member_xyz"}
 
-def test_delete_point_by_id_success(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_delete_face_success(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức delete_point_by_id khi xóa thành công.
+    Kiểm tra phương thức delete_face khi xóa thành công.
     """
-    point_id = "point_to_delete"
+    face_id = "point_to_delete"
     mock_response = Mock()
-    mock_response.status = UpdateStatus.COMPLETED # Use imported UpdateStatus
+    mock_response.status = UpdateStatus.COMPLETED
     mock_qdrant_client.delete.return_value = mock_response
     
-    success = qdrant_service_instance.delete_point_by_id(point_id)
+    success = await qdrant_repository_instance.delete_face(face_id)
     
     mock_qdrant_client.delete.assert_called_once_with(
-        collection_name=qdrant_service_instance.collection_name,
-        points=[point_id], # Correct points argument
+        collection_name=qdrant_repository_instance.collection_name,
+        points_selector=models.PointIdsList(points=[face_id]), # Correct points argument
         wait=True
     )
     assert success is True
 
-def test_delete_point_by_id_failure(qdrant_service_instance, mock_qdrant_client):
+@pytest.mark.asyncio
+async def test_delete_face_failure(qdrant_repository_instance, mock_qdrant_client):
     """
-    Kiểm tra phương thức delete_point_by_id khi xóa thất bại.
+    Kiểm tra phương thức delete_face khi xóa thất bại.
     """
-    point_id = "point_to_fail_delete"
+    face_id = "point_to_fail_delete"
     mock_response = Mock()
-    mock_response.status = UpdateStatus.ACKNOWLEDGED # Use imported UpdateStatus
+    mock_response.status = UpdateStatus.ACKNOWLEDGED
     mock_qdrant_client.delete.return_value = mock_response
     
-    success = qdrant_service_instance.delete_point_by_id(point_id)
+    success = await qdrant_repository_instance.delete_face(face_id)
     
     mock_qdrant_client.delete.assert_called_once_with(
-        collection_name=qdrant_service_instance.collection_name,
-        points=[point_id], # Correct points argument
+        collection_name=qdrant_repository_instance.collection_name,
+        points_selector=models.PointIdsList(points=[face_id]), # Correct points argument
         wait=True
     )
     assert success is False
+
 

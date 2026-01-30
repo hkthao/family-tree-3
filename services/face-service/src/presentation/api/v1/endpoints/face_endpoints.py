@@ -1,75 +1,35 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Body
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Body, Depends
 from typing import List, Optional, Dict, Any
 import uuid
 import base64
 import io
 from PIL import Image
-import numpy as np
-
-import asyncio
-from app.message_consumer import MessageConsumer
-from app.models import BoundingBox, FaceDetectionResult, FaceMetadata, FaceSearchRequest, FaceSearchResult, FaceAddVectorRequest, FaceSearchVectorRequest
-from contextlib import asynccontextmanager
-
-from app.services.face_detector import DlibFaceDetector
-from app.services.face_embedding import FaceEmbeddingService
-from app.services.qdrant_service import QdrantService
-from app.services.face_service import FaceService
-import uvicorn
-
 import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format=("%(asctime)s - %(levelname)s - %(message)s")
-)
+from src.domain.entities.models import BoundingBox, FaceDetectionResult, FaceMetadata, FaceSearchRequest, FaceSearchResult, FaceAddVectorRequest, FaceSearchVectorRequest
+from src.application.services.face_manager import FaceManager
+from src.presentation.dependencies import get_face_manager
+
+router = APIRouter()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+def _generate_thumbnail(image: Image.Image, bbox: List[int]) -> Optional[str]:
+    """Helper to generate base64 encoded thumbnail from cropped face."""
+    x, y, w, h = bbox
+    cropped_face = image.crop((x, y, x + w, y + h))
+    buffered = io.BytesIO()
+    cropped_face.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("Starting up application and message consumer...")
-    asyncio.create_task(message_consumer.start())  # Run consumer in a background task
-    yield
-    logger.info("Shutting down application and message consumer...")
-    await message_consumer.stop()  # Stop consumer gracefully
-
-
-app = FastAPI(
-    title="ImageFaceService",  # Changed title
-    description=(
-        "A FastAPI service for face detection, embedding, and cropping. "
-        "Also provides face management and search using Qdrant."  # Updated description
-    ),
-    version="1.0.0",
-    lifespan=lifespan,
-)
-
-# Initialize the face detector and embedding service
-face_detector = DlibFaceDetector()
-
-# Initialize Qdrant Service
-qdrant_service = QdrantService()
-
-# Initialize Face Embedding Service
-face_embedding_service = FaceEmbeddingService()
-
-# Initialize Face Service
-face_service = FaceService(
-    qdrant_service=qdrant_service, face_embedding_service=face_embedding_service
-)
-
-# Initialize Message Consumer
-message_consumer = MessageConsumer(face_service=face_service)
-
-
-@app.post("/detect", response_model=List[FaceDetectionResult])
+@router.post("/detect", response_model=List[FaceDetectionResult])
 async def detect_faces(
     file: UploadFile = File(...),
     return_crop: Optional[bool] = Query(
         False,
         description="Whether to return base64 encoded cropped face images",
     ),
+    face_manager: FaceManager = Depends(get_face_manager)
 ):
     logger.info(
         "Received request to detect faces. Filename: %s, ReturnCrop: %s",
@@ -84,50 +44,29 @@ async def detect_faces(
         )
 
     try:
-        # Read image file
         image_data = await file.read()
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
-        image_np = np.array(image)
 
-        # Perform face detection
-        detections = face_detector.detect_faces(image_np)
-        logger.info(f"Face detector returned {len(detections)} detections.")
-        logger.debug(f"Detections: {detections}")  # Use debug for detailed output
+        detected_faces_with_embeddings = face_manager.detect_and_embed_faces(image)
+        logger.info(f"Face manager returned {len(detected_faces_with_embeddings)} detections with embeddings.")
+        logger.debug(f"Detections with embeddings: {detected_faces_with_embeddings}")
 
-        if not detections:
+        if not detected_faces_with_embeddings:
             logger.info("No faces detected in the image.")
             raise HTTPException(
                 status_code=404, detail="No faces detected in the image."
             )
 
         results: List[FaceDetectionResult] = []
-        for det in detections:
-            x, y, w, h = det["box"]
-            confidence = det["confidence"]
-
-            face_id = str(uuid.uuid4())
-            bounding_box = BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h))
-
-            thumbnail_base64 = None
-            face_embedding = None
-
-            # Crop face
-            cropped_face = image.crop((x, y, x + w, y + h))
-
-            # Generate embedding for the cropped face
-            face_embedding = face_embedding_service.get_embedding(cropped_face)
-
-            if return_crop:
-                buffered = io.BytesIO()
-                cropped_face.save(buffered, format="PNG")
-                thumbnail_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-
+        for det_with_embed in detected_faces_with_embeddings:
+            x, y, w, h = det_with_embed["box"]
+            
             face_result = FaceDetectionResult(
-                id=face_id,
-                bounding_box=bounding_box,
-                confidence=float(confidence),
-                thumbnail=thumbnail_base64,
-                embedding=face_embedding,
+                id=str(uuid.uuid4()),
+                bounding_box=BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h)),
+                confidence=float(det_with_embed["confidence"]),
+                thumbnail=_generate_thumbnail(image, det_with_embed["box"]) if return_crop else None,
+                embedding=det_with_embed["embedding"],
             )
             results.append(face_result)
             logger.debug(
@@ -144,12 +83,13 @@ async def detect_faces(
         raise HTTPException(status_code=500, detail=f"Face detection failed: {e}")
 
 
-@app.post("/faces", response_model=Dict[str, Any])
+@router.post("/faces", response_model=Dict[str, Any])
 async def add_face_with_metadata(
     file: UploadFile = File(...),
     metadata: str = Body(
         ..., description="JSON string of FaceMetadata"
-    ),  # Metadata as JSON string
+    ),
+    face_manager: FaceManager = Depends(get_face_manager),
 ):
     logger.info(
         "Received request to add face with metadata. Filename: %s", file.filename
@@ -166,7 +106,7 @@ async def add_face_with_metadata(
 
         metadata_dict = FaceMetadata.model_validate_json(metadata).model_dump()
 
-        result = face_service.add_face(face_image, metadata_dict)
+        result = await face_manager.add_face(face_image, metadata_dict)
         logger.info(f"Face added successfully: {result['face_id']}")
         return result
     except Exception as e:
@@ -174,14 +114,17 @@ async def add_face_with_metadata(
         raise HTTPException(status_code=500, detail=f"Failed to add face: {e}")
 
 
-@app.post("/faces/vector", response_model=Dict[str, Any])
-async def add_face_by_vector(request: FaceAddVectorRequest):
+@router.post("/faces/vector", response_model=Dict[str, Any])
+async def add_face_by_vector(
+    request: FaceAddVectorRequest,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(
         f"Received request to add face by vector for memberId: {request.metadata.member_id}"
     )
     try:
         metadata_dict = request.metadata.model_dump()
-        result = face_service.add_face_by_vector(request.vector, metadata_dict)
+        result = await face_manager.add_face_by_vector(request.vector, metadata_dict)
         logger.info(f"Face added by vector successfully: {result['face_id']}")
         return result
     except Exception as e:
@@ -191,13 +134,16 @@ async def add_face_by_vector(request: FaceAddVectorRequest):
         )
 
 
-@app.post("/faces/search_by_vector", response_model=List[FaceSearchResult])
-async def search_faces_by_vector(request: FaceSearchVectorRequest):
+@router.post("/faces/search_by_vector", response_model=List[FaceSearchResult])
+async def search_faces_by_vector(
+    request: FaceSearchVectorRequest,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(
         f"Received request to search faces by vector. FamilyId: {request.family_id}, MemberId: {request.member_id}, TopK: {request.top_k}, Threshold: {request.threshold}"
     )
     try:
-        search_results = face_service.search_similar_faces_by_vector(
+        search_results = await face_manager.search_similar_faces_by_vector(
             request.embedding, request.family_id, request.member_id, request.top_k, request.threshold
         )
         logger.info(f"Returning {len(search_results)} search results by vector.")
@@ -207,11 +153,14 @@ async def search_faces_by_vector(request: FaceSearchVectorRequest):
         raise HTTPException(status_code=500, detail=f"Failed to search faces by vector: {e}")
 
 
-@app.get("/faces/family/{family_id}", response_model=List[Dict[str, Any]])
-async def get_faces_by_family(family_id: str):
+@router.get("/faces/family/{family_id}", response_model=List[Dict[str, Any]])
+async def get_faces_by_family(
+    family_id: str,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(f"Received request to get faces for family_id: {family_id}")
     try:
-        faces = face_service.get_faces_by_family_id(family_id)
+        faces = await face_manager.get_faces_by_family_id(family_id)
         logger.info(f"Returning {len(faces)} faces for family_id: {family_id}")
         return faces
     except Exception as e:
@@ -221,11 +170,14 @@ async def get_faces_by_family(family_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to retrieve faces: {e}")
 
 
-@app.delete("/faces/{face_id}", response_model=Dict[str, str])
-async def delete_face_by_id(face_id: str):
+@router.delete("/faces/{face_id}", response_model=Dict[str, str])
+async def delete_face_by_id(
+    face_id: str,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(f"Received request to delete face with face_id: {face_id}")
     try:
-        success = face_service.delete_face(face_id)
+        success = await face_manager.delete_face(face_id)
         if success:
             logger.info(f"Face {face_id} deleted successfully.")
             return {"message": f"Face {face_id} deleted successfully."}
@@ -241,11 +193,14 @@ async def delete_face_by_id(face_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete face: {e}")
 
 
-@app.delete("/faces/family/{family_id}", response_model=Dict[str, str])
-async def delete_faces_by_family_id(family_id: str):
+@router.delete("/faces/family/{family_id}", response_model=Dict[str, str])
+async def delete_faces_by_family_id(
+    family_id: str,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(f"Received request to delete faces for family_id: {family_id}")
     try:
-        success = face_service.delete_faces_by_family_id(family_id)
+        success = await face_manager.delete_faces_by_family_id(family_id)
         if success:
             logger.info(f"Faces for family {family_id} deleted successfully.")
             return {"message": f"Faces for family {family_id} deleted successfully."}
@@ -265,17 +220,19 @@ async def delete_faces_by_family_id(family_id: str):
         )
 
 
-@app.post("/faces/search", response_model=List[FaceSearchResult])
-async def search_faces(request: FaceSearchRequest):
+@router.post("/faces/search", response_model=List[FaceSearchResult])
+async def search_faces(
+    request: FaceSearchRequest,
+    face_manager: FaceManager = Depends(get_face_manager),
+):
     logger.info(
         f"Received request to search faces. FamilyId: {request.family_id}, Limit: {request.limit}"
     )
     try:
-        # Decode the base64 image
         image_bytes = base64.b64decode(request.query_image)
         query_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-        search_results = face_service.search_similar_faces(
+        search_results = await face_manager.search_similar_faces(
             query_image, request.family_id, request.limit
         )
         logger.info(f"Returning {len(search_results)} search results.")
@@ -283,6 +240,3 @@ async def search_faces(request: FaceSearchRequest):
     except Exception as e:
         logger.error(f"Failed to search faces: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to search faces: {e}")
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

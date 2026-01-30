@@ -85,9 +85,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
   };
 
   const openSelectMemberDialog = (face: DetectedFace) => {
-    if (face.status === 'recognized') {
-      return;
-    }
     if (face) {
       faceToLabel.value = face;
       showSelectMemberDialog.value = true;
