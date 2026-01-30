@@ -466,3 +466,4 @@ dlib_face_recognition_resnet_model_v1.dat
 emotion_model.hdf5
 
 .venv/
+w600k_r50.onnx

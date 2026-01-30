@@ -27,7 +27,7 @@ public class SearchMemberFaceQueryHandler(IApplicationDbContext context, IFaceAp
             FamilyId = request.FamilyId.ToString(),
             MemberId = request.MemberId?.ToString(),
             TopK = request.Limit,
-            Threshold = 0.90f
+            Threshold = 0.70f
         };
 
         var searchResults = await _faceApiService.SearchFacesAsync(searchRequest);
