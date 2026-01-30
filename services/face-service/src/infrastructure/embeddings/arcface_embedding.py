@@ -63,5 +63,3 @@ class ArcFaceEmbedding(IFaceEmbedding):
         
         return embedding_array.tolist()
         
-        # forward() method returns a numpy array, convert to list of floats
-        return embedding.tolist()
