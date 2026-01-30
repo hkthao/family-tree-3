@@ -4,13 +4,11 @@ import uuid
 import base64
 import io
 from PIL import Image
-import numpy as np
 import logging
 
 from src.domain.entities.models import BoundingBox, FaceDetectionResult, FaceMetadata, FaceSearchRequest, FaceSearchResult, FaceAddVectorRequest, FaceSearchVectorRequest
-from src.domain.interfaces.face_detector import IFaceDetector
 from src.application.services.face_manager import FaceManager
-from src.presentation.dependencies import get_face_detector, get_face_manager
+from src.presentation.dependencies import get_face_manager
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,8 +20,7 @@ async def detect_faces(
         False,
         description="Whether to return base64 encoded cropped face images",
     ),
-    face_detector: IFaceDetector = Depends(get_face_detector),
-    face_manager: FaceManager = Depends(get_face_manager) # Use face_manager for embedding
+    face_manager: FaceManager = Depends(get_face_manager)
 ):
     logger.info(
         "Received request to detect faces. Filename: %s, ReturnCrop: %s",
@@ -40,35 +37,32 @@ async def detect_faces(
     try:
         image_data = await file.read()
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
-        image_np = np.array(image)
 
-        detections = face_detector.detect_faces(image_np)
-        logger.info(f"Face detector returned {len(detections)} detections.")
-        logger.debug(f"Detections: {detections}")
+        # Sử dụng phương thức detect_and_embed_faces mới từ FaceManager
+        detected_faces_with_embeddings = face_manager.detect_and_embed_faces(image)
+        logger.info(f"Face manager returned {len(detected_faces_with_embeddings)} detections with embeddings.")
+        logger.debug(f"Detections with embeddings: {detected_faces_with_embeddings}")
 
-        if not detections:
+        if not detected_faces_with_embeddings:
             logger.info("No faces detected in the image.")
-            # According to previous behavior, raise 404 if no faces detected
             raise HTTPException(
                 status_code=404, detail="No faces detected in the image."
             )
 
         results: List[FaceDetectionResult] = []
-        for det in detections:
-            x, y, w, h = det["box"]
-            confidence = det["confidence"]
+        for det_with_embed in detected_faces_with_embeddings:
+            x, y, w, h = det_with_embed["box"]
+            confidence = det_with_embed["confidence"]
+            embedding = det_with_embed["embedding"]
 
             face_id = str(uuid.uuid4())
             bounding_box = BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h))
 
             thumbnail_base64 = None
-            
-            cropped_face = image.crop((x, y, x + w, y + h))
-
-            # Generate embedding using face_manager's embedding service
-            face_embedding = face_manager.face_embedding_service.get_embedding(cropped_face)
-
             if return_crop:
+                # Re-crop the face from the original image for thumbnail generation
+                # as detect_and_embed_faces returns box as [x, y, w, h]
+                cropped_face = image.crop((x, y, x + w, y + h))
                 buffered = io.BytesIO()
                 cropped_face.save(buffered, format="PNG")
                 thumbnail_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
@@ -78,7 +72,7 @@ async def detect_faces(
                 bounding_box=bounding_box,
                 confidence=float(confidence),
                 thumbnail=thumbnail_base64,
-                embedding=face_embedding,
+                embedding=embedding,
             )
             results.append(face_result)
             logger.debug(

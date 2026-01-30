@@ -10,3 +10,6 @@ pytest-asyncio
 flake8
 qdrant-client
 aio-pika
+insightface
+onnxruntime
+python-dotenv

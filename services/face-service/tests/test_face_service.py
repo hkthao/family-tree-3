@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from src.application.services.face_manager import FaceManager
 from src.infrastructure.persistence.qdrant_client import QdrantFaceRepository
 from src.infrastructure.embeddings.facenet_embedding import FaceNetEmbeddingService
+from src.domain.interfaces.face_detector import IFaceDetector # Import IFaceDetector
 from PIL import Image
 import io
 import base64
@@ -27,11 +28,19 @@ def mock_face_embedding_service():
     return mock_service
 
 @pytest.fixture
-def face_manager_instance(mock_qdrant_repository, mock_face_embedding_service):
+def mock_face_detector_service():
+    """Fixture for a mocked IFaceDetector."""
+    mock_service = Mock(spec=IFaceDetector)
+    mock_service.detect_faces.return_value = [] # Default to no faces detected
+    return mock_service
+
+@pytest.fixture
+def face_manager_instance(mock_qdrant_repository, mock_face_embedding_service, mock_face_detector_service):
     """Fixture for a FaceManager instance with mocked dependencies."""
     return FaceManager(
         face_repository=mock_qdrant_repository,
-        face_embedding_service=mock_face_embedding_service
+        face_embedding_service=mock_face_embedding_service,
+        face_detector_service=mock_face_detector_service # Thêm detector service
     )
 
 @pytest.fixture

@@ -1,18 +1,65 @@
 from typing import List, Dict, Any, Optional
 from PIL import Image
+import numpy as np
 import logging
 
 from src.domain.interfaces.face_repository import IFaceRepository
 from src.domain.interfaces.face_embedding import IFaceEmbedding
+from src.domain.interfaces.face_detector import IFaceDetector
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
 class FaceManager:
-    def __init__(self, face_repository: IFaceRepository, face_embedding_service: IFaceEmbedding):
+    def __init__(self, face_repository: IFaceRepository, face_embedding_service: IFaceEmbedding, face_detector_service: IFaceDetector):
         self.face_repository = face_repository
         self.face_embedding_service = face_embedding_service
+        self.face_detector_service = face_detector_service
+
+    def detect_faces_in_image(self, image_np: np.ndarray) -> List[Dict[str, Any]]:
+        """
+        Phát hiện khuôn mặt trong một hình ảnh NumPy array.
+        """
+        return self.face_detector_service.detect_faces(image_np)
+
+    def detect_and_embed_faces(self, image: Image.Image) -> List[Dict[str, Any]]:
+        """
+        Phát hiện các khuôn mặt trong một ảnh, cắt từng khuôn mặt và tạo embedding cho chúng.
+        Args:
+            image (Image.Image): Ảnh đầu vào dưới dạng đối tượng PIL Image.
+        Returns:
+            List[Dict[str, Any]]: Danh sách các từ điển, mỗi từ điển chứa
+                                  'box' (bounding box), 'confidence' (điểm tin cậy),
+                                  và 'embedding' (vector nhúng).
+        """
+        # Convert PIL Image to numpy array for detection
+        image_np = np.array(image)
+
+        detected_faces_data = self.face_detector_service.detect_faces(image_np)
+        
+        results = []
+        for face_data in detected_faces_data:
+            x, y, w, h = [int(val) for val in face_data['box']]
+            
+            # Đảm bảo tọa độ hợp lệ và không vượt ra ngoài biên ảnh
+            x1 = max(0, x)
+            y1 = max(0, y)
+            x2 = min(image.width, x + w)
+            y2 = min(image.height, y + h)
+
+            # Cắt khuôn mặt từ ảnh PIL
+            cropped_face_image = image.crop((x1, y1, x2, y2))
+            
+            # Tạo embedding cho khuôn mặt đã cắt
+            embedding = self.face_embedding_service.get_embedding(cropped_face_image)
+            
+            results.append({
+                'box': [x1, y1, x2 - x1, y2 - y1], # Return box in x, y, w, h format
+                'confidence': face_data['confidence'],
+                'embedding': embedding
+            })
+        return results
 
     async def add_face(self, face_image: Image.Image, metadata: Dict[str, Any]) -> Dict[str, Any]:
         """

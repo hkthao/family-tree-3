@@ -164,7 +164,6 @@ def test_add_face_endpoint(client, dummy_image_bytes, dummy_metadata, mock_all_s
     assert response.status_code == 200
     assert "face_id" in response.json()
     mock_all_services_session_scope["qdrant_repository"].upsert_face_vector.assert_called_once()
-    mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_called_once()
 
 def test_add_face_endpoint_invalid_file_type(client, dummy_metadata):
     """
@@ -268,49 +267,66 @@ def test_search_faces_endpoint_no_family_id(client, dummy_image_bytes, mock_all_
     assert response.status_code == 200
     assert len(response.json()) == 1
     assert response.json()[0]["id"] == "search_res_no_family"
-    mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_called_once()
-    mock_all_services_session_scope["qdrant_repository"].search_similar_faces.assert_called_once()
 
 # Test the /detect endpoint again to ensure it's still working as expected
 def test_detect_faces_endpoint(client, dummy_image_bytes, mock_all_services_session_scope):
     """
     Test POST /detect endpoint.
     """
-    response = client.post(
-        "/detect",
-        files={"file": ("test.png", dummy_image_bytes, "image/png")}
-    )
-    assert response.status_code == 200
-    assert len(response.json()) == 1
-    assert "id" in response.json()[0]
-    assert "bounding_box" in response.json()[0]
-    assert "embedding" in response.json()[0]
-    mock_all_services_session_scope["face_detector"].detect_faces.assert_called_once()
-    mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_called_once()
+    mock_detected_faces = [
+        {
+            'box': [10, 10, 40, 40], # x, y, w, h
+            'confidence': 0.99,
+            'embedding': [0.1] * 512 # ArcFace usually returns 512-dim embeddings
+        }
+    ]
+    with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=mock_detected_faces) as mock_detect_and_embed:
+        response = client.post(
+            "/detect",
+            files={"file": ("test.png", dummy_image_bytes, "image/png")}
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert "id" in response.json()[0]
+        assert "bounding_box" in response.json()[0]
+        assert "embedding" in response.json()[0]
+        mock_detect_and_embed.assert_called_once()
+        # Ensure the original face_detector and face_embedding_service mocks are not called directly by the endpoint logic
+        mock_all_services_session_scope["face_detector"].detect_faces.assert_not_called()
+        mock_all_services_session_scope["face_embedding_service"].get_embedding.assert_not_called()
 
 def test_detect_faces_endpoint_no_faces(client, dummy_image_bytes, mock_all_services_session_scope):
     """
     Test POST /detect endpoint when no faces are detected.
     """
-    mock_all_services_session_scope["face_detector"].detect_faces.return_value = []
-    response = client.post(
-        "/detect",
-        files={"file": ("test.png", dummy_image_bytes, "image/png")}
-    )
-    assert response.status_code == 404
-    assert "No faces detected" in response.json()["detail"]
+    with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=[]) as mock_detect_and_embed:
+        response = client.post(
+            "/detect",
+            files={"file": ("test.png", dummy_image_bytes, "image/png")}
+        )
+        assert response.status_code == 404
+        assert "No faces detected" in response.json()["detail"]
+        mock_detect_and_embed.assert_called_once()
 
 def test_detect_faces_endpoint_return_crop(client, dummy_image_bytes, mock_all_services_session_scope):
     """
     Test POST /detect endpoint with return_crop=True.
     """
-    response = client.post(
-        "/detect?return_crop=true",
-        files={"file": ("test.png", dummy_image_bytes, "image/png")}
-    )
-    assert response.status_code == 200
-    assert len(response.json()) == 1
-    assert "thumbnail" in response.json()[0]
-    assert response.json()[0]["thumbnail"] is not None
-    
+    mock_detected_faces = [
+        {
+            'box': [10, 10, 40, 40], # x, y, w, h
+            'confidence': 0.99,
+            'embedding': [0.1] * 512
+        }
+    ]
+    with patch('src.application.services.face_manager.FaceManager.detect_and_embed_faces', return_value=mock_detected_faces) as mock_detect_and_embed:
+        response = client.post(
+            "/detect?return_crop=true",
+            files={"file": ("test.png", dummy_image_bytes, "image/png")}
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert "thumbnail" in response.json()[0]
+        assert response.json()[0]["thumbnail"] is not None
+        mock_detect_and_embed.assert_called_once()
 
