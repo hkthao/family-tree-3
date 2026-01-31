@@ -35,8 +35,9 @@ class EmbeddingService:
         """Embeds a single query string using the 'query:' prefix."""
         # FastEmbed expects a list of texts, even for a single item
         # The embed method returns a list of embeddings (numpy arrays)
-        embeddings = EmbeddingService._model.embed(texts=[f"query: {query}"])
-        return embeddings[0].tolist()  # Convert the first (and only) embedding to a list
+        embedding_generator = EmbeddingService._model.embed(documents=[f"query: {query}"])
+        first_embedding = next(embedding_generator)
+        return first_embedding.tolist()
 
     def embed_documents(self, documents: list[str]):
         """Embeds a list of document strings using the 'passage:' prefix."""

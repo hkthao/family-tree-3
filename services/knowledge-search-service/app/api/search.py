@@ -46,12 +46,11 @@ async def search_knowledge(
         # 3. Format results to SearchResultItem
         formatted_results = [
             SearchResultItem(
-                metadata=item["metadata"],
-                summary=item["summary"],
-                score=item["score"]
+                metadata=item.get("metadata", {}),
+                summary=item.get("summary"),
+                score=item.get("score", 0.0)
             ) for item in results
         ]
-
         logger.info(f"Search for family_id {request.family_id} returned "
                     f"{len(formatted_results)} results.")
         return SearchResponse(results=formatted_results)

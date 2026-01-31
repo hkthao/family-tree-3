@@ -326,7 +326,7 @@ class KnowledgeQdrantService:
             with_payload=True
         )
         formatted_results = []
-        for hit in search_result:
+        for hit in search_result.points:
             formatted_results.append({
                 "metadata": hit.payload,  # Qdrant payload is already the metadata
                 "summary": hit.payload.get("summary"),

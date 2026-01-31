@@ -26,9 +26,9 @@ def embedding_service_instance():
             def tolist(self):
                 return list(self)
         
-        mock_model_instance.embed.side_effect = lambda texts: [
-            MockNumpyArray([0.1] * TEXT_EMBEDDING_DIMENSIONS) for _ in texts
-        ] # Mock embedding logic
+        mock_model_instance.embed.side_effect = lambda documents: (
+            MockNumpyArray([0.1] * TEXT_EMBEDDING_DIMENSIONS) for _ in documents
+        ) # Mock embedding logic
         MockTextEmbedding.return_value = mock_model_instance
         
         # Reload the service to ensure the mock is used
@@ -50,7 +50,7 @@ def test_embed_query(embedding_service_instance):
     embedding = embedding_service_instance.embed_query(query)
     
     # Check if TextEmbedding.embed was called with the correct prefix
-    embedding_service_instance._model.embed.assert_called_with(texts=[expected_prefix_query])
+    embedding_service_instance._model.embed.assert_called_with(documents=[expected_prefix_query])
     assert isinstance(embedding, list)
     assert len(embedding) == 384 # Updated dimension
     
@@ -63,7 +63,7 @@ def test_embed_documents(embedding_service_instance):
     embeddings = embedding_service_instance.embed_documents(documents)
     
     # Check if TextEmbedding.embed was called with the correct prefixes
-    embedding_service_instance._model.embed.assert_called_with(texts=expected_prefix_docs)
+    embedding_service_instance._model.embed.assert_called_with(documents=expected_prefix_docs)
     assert isinstance(embeddings, list)
     assert len(embeddings) == len(documents)
     assert all(isinstance(e, list) for e in embeddings)

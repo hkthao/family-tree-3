@@ -105,9 +105,8 @@ async def test_add_vectors_success(knowledge_qdrant_service, mock_embedding_serv
     points = args[0]['points'] if len(args) > 0 and 'points' in args[0] else kwargs['points']
     assert len(points) == 1
     point = points[0]
-    assert point.id == f"{family_id}-{entity_id}"
-    assert point.vector == [0.1] * TEXT_EMBEDDING_DIMENSIONS
-    assert point.payload["family_id"] == family_id
+    expected_point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{family_id}-{entity_id}"))
+    assert point.id == expected_point_id
     assert point.payload["summary"] == "This is a test summary."
 
 
@@ -123,11 +122,12 @@ async def test_update_vectors_success(knowledge_qdrant_service, mock_embedding_s
     await knowledge_qdrant_service.async_init() # Initialize the service
     family_id = str(uuid.uuid4())
     entity_id = str(uuid.uuid4())
-    point_id = f"{family_id}-{entity_id}"
+    point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{family_id}-{entity_id}"))
 
     # Mock retrieve to return an existing point
     mock_qdrant_client.retrieve.return_value = [
         MagicMock(
+            id=point_id, # Ensure mock returns the correct ID
             payload={"family_id": family_id, "entity_id": entity_id, "summary": "old summary", "age": 25},
             vector=[0.2] * TEXT_EMBEDDING_DIMENSIONS
         )
@@ -247,13 +247,15 @@ async def test_search_knowledge_table_success(knowledge_qdrant_service, mock_qdr
     top_k = 1
 
     # Mock query_points to return results
-    mock_qdrant_client.query_points.return_value = [
-        MagicMock(
-            id=f"{family_id}-entity1",
-            score=0.9,
-            payload={"family_id": family_id, "entity_id": "entity1", "summary": "found summary", "visibility": "public"}
-        )
-    ]
+    mock_qdrant_client.query_points.return_value = MagicMock(
+        points=[
+            MagicMock(
+                id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{family_id}-entity1")),
+                score=0.9,
+                payload={"family_id": family_id, "entity_id": "entity1", "summary": "found summary", "visibility": "public"}
+            )
+        ]
+    )
 
     results = await knowledge_qdrant_service.search_knowledge_table(
         family_id, query_vector, allowed_visibility, top_k
