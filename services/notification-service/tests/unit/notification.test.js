@@ -5,6 +5,7 @@ const { Novu } = require('@novu/node');
 const mockSubscribers = {
   identify: jest.fn(),
   setCredentials: jest.fn(),
+  getSubscriber: jest.fn(), // Mock getSubscriber as well for triggerNotification logic
 };
 const mockNovuInstance = {
   subscribers: mockSubscribers,
@@ -26,20 +27,42 @@ jest.mock('dotenv', () => ({
 // Set a dummy NOVU_API_KEY for testing before importing the app
 process.env.NOVU_API_KEY = 'test_api_key';
 
+// Mock the rabbitmq connection to prevent it from trying to connect during tests
+jest.mock('../../src/rabbitmq', () => ({
+  connectRabbitMQ: jest.fn().mockResolvedValue(true),
+  closeRabbitMQ: jest.fn().mockResolvedValue(true),
+}));
+
 // Import the app after all mocks and environment variables are set
-const app = require('../../index');
+const app = require('../../src/app'); // Import from the new app.js
 
 describe('Notification Service API', () => {
+  let consoleErrorSpy;
+  let consoleWarnSpy;
+
   beforeEach(() => {
     // Clear all mocks for the Novu instance's methods before each test
     mockSubscribers.identify.mockClear();
     mockSubscribers.setCredentials.mockClear();
+    mockSubscribers.getSubscriber.mockClear();
     mockNovuInstance.trigger.mockClear();
+
+    // Reset default mock for getSubscriber
+    mockSubscribers.getSubscriber.mockResolvedValue({
+      data: {
+        channel_credentials: [], // Default to no push credentials
+      },
+    });
+
+    // Silence console.error and console.warn during tests
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  afterAll(() => {
-    // Clean up environment variables
-    delete process.env.NOVU_API_KEY;
+  afterEach(() => {
+    // Restore console.error and console.warn after each test
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   describe('POST /subscribers/sync', () => {
@@ -59,11 +82,13 @@ describe('Notification Service API', () => {
 
       const response = await request(app)
         .post('/subscribers/sync')
-        .send(subscriberPayload) // Send the flat payload
+        .send(subscriberPayload)
         .expect(200);
 
       expect(response.body.message).toBe('Subscriber synced successfully');
       expect(mockSubscribers.identify).toHaveBeenCalledTimes(1);
+      // The payload sent to novu.subscribers.identify will now be cleaned by removeUndefinedProps
+      // So we should expect it without undefined/null, and the data object if timezone is present.
       expect(mockSubscribers.identify).toHaveBeenCalledWith('user123', {
         firstName: subscriberPayload.firstName,
         lastName: subscriberPayload.lastName,
@@ -71,9 +96,31 @@ describe('Notification Service API', () => {
         phone: subscriberPayload.phone,
         avatar: subscriberPayload.avatar,
         locale: subscriberPayload.locale,
-        data: { // This is how index.js constructs it
+        data: {
           timezone: subscriberPayload.timezone,
-        }
+        },
+      });
+    });
+
+    test('should sync a subscriber successfully without optional fields', async () => {
+      mockSubscribers.identify.mockResolvedValueOnce({ data: { subscriberId: 'user456' } });
+
+      const subscriberPayload = {
+        userId: 'user456',
+        firstName: 'Jane',
+        email: 'jane.doe@example.com',
+      };
+
+      const response = await request(app)
+        .post('/subscribers/sync')
+        .send(subscriberPayload)
+        .expect(200);
+
+      expect(response.body.message).toBe('Subscriber synced successfully');
+      expect(mockSubscribers.identify).toHaveBeenCalledTimes(1);
+      expect(mockSubscribers.identify).toHaveBeenCalledWith('user456', {
+        firstName: subscriberPayload.firstName,
+        email: subscriberPayload.email,
       });
     });
 
@@ -119,20 +166,26 @@ describe('Notification Service API', () => {
     test('should return 400 if userId is missing', async () => {
       const response = await request(app)
         .post('/subscribers/expo-token')
-        .send({ expoPushToken: 'ExponentPushToken[abc]' })
+        .send({ expoPushTokens: ['ExponentPushToken[abc]'] })
         .expect(400);
 
       expect(response.body.error).toBe('Missing required field: userId');
       expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
     });
 
-    test('should return 400 if expoPushTokens is missing', async () => {
-      const response = await request(app)
+    test('should return 400 if expoPushTokens is missing or not an array', async () => {
+      const response1 = await request(app)
         .post('/subscribers/expo-token')
         .send({ userId: 'user123' })
         .expect(400);
+      expect(response1.body.error).toBe('Missing required field: expoPushTokens');
 
-      expect(response.body.error).toBe('Missing required field: expoPushTokens');
+      const response2 = await request(app)
+        .post('/subscribers/expo-token')
+        .send({ userId: 'user123', expoPushTokens: 'not_an_array' })
+        .expect(400);
+      expect(response2.body.error).toBe('Missing required field: expoPushTokens');
+
       expect(mockSubscribers.setCredentials).not.toHaveBeenCalled();
     });
 
@@ -149,10 +202,49 @@ describe('Notification Service API', () => {
     });
   });
 
-
-
   describe('POST /notifications/send', () => {
-    test('should trigger notification successfully', async () => {
+    test('should trigger notification successfully with push enabled if credentials exist', async () => {
+      mockSubscribers.getSubscriber.mockResolvedValueOnce({
+        data: {
+          channel_credentials: [
+            { provider: 'expo', credentials: { deviceTokens: ['token1'] } },
+          ],
+        },
+      });
+      mockNovuInstance.trigger.mockResolvedValueOnce({});
+
+      const response = await request(app)
+        .post('/notifications/send')
+        .send({ workflowId: 'workflow1', userId: 'user123', payload: { message: 'Hello' } })
+        .expect(200);
+
+      expect(response.body.message).toBe('Notification triggered successfully');
+      expect(mockNovuInstance.trigger).toHaveBeenCalledTimes(1);
+      expect(mockNovuInstance.trigger).toHaveBeenCalledWith('workflow1', {
+        to: { subscriberId: 'user123' },
+        payload: { message: 'Hello', is_push_enabled: true },
+      });
+    });
+
+    test('should trigger notification successfully with push disabled if no credentials', async () => {
+      // Default mock for getSubscriber returns no credentials
+      mockNovuInstance.trigger.mockResolvedValueOnce({});
+
+      const response = await request(app)
+        .post('/notifications/send')
+        .send({ workflowId: 'workflow1', userId: 'user123', payload: { message: 'Hello' } })
+        .expect(200);
+
+      expect(response.body.message).toBe('Notification triggered successfully');
+      expect(mockNovuInstance.trigger).toHaveBeenCalledTimes(1);
+      expect(mockNovuInstance.trigger).toHaveBeenCalledWith('workflow1', {
+        to: { subscriberId: 'user123' },
+        payload: { message: 'Hello', is_push_enabled: false },
+      });
+    });
+
+    test('should trigger notification successfully with push disabled if getSubscriber fails', async () => {
+      mockSubscribers.getSubscriber.mockRejectedValueOnce(new Error('Subscriber not found'));
       mockNovuInstance.trigger.mockResolvedValueOnce({});
 
       const response = await request(app)
