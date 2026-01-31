@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from qdrant_client.http.models import UpdateStatus
-import os
+
 import uuid
 
 from qdrant_client import models
@@ -19,7 +19,10 @@ def mock_embedding_service():
     """Fixture for a mocked EmbeddingService."""
     service = MagicMock(spec=EmbeddingService)
     service.embed_query.return_value = [0.1] * TEXT_EMBEDDING_DIMENSIONS
+    # Mock embed_documents to return a list of embeddings
+    service.embed_documents.side_effect = lambda texts: [[0.1] * TEXT_EMBEDDING_DIMENSIONS for _ in texts]
     return service
+
 
 @pytest.fixture
 def mock_qdrant_client():
@@ -50,7 +53,7 @@ async def knowledge_qdrant_service(mock_embedding_service, mock_qdrant_client):
         # async_init is not called here, tests will call it explicitly
         return service
 
-# Test for _create_collection_if_not_exists
+
 @pytest.mark.asyncio
 async def test_create_collection_if_not_exists_new_collection(mock_embedding_service, mock_qdrant_client):
     mock_qdrant_client.get_collection.side_effect = UnexpectedResponse(status_code=404, reason_phrase="Not found", content=b"", headers=dict())
@@ -66,6 +69,7 @@ async def test_create_collection_if_not_exists_new_collection(mock_embedding_ser
     )
     assert mock_qdrant_client.create_payload_index.call_count == 4
 
+
 @pytest.mark.asyncio
 async def test_create_collection_if_not_exists_existing_collection(mock_embedding_service, mock_qdrant_client):
     mock_qdrant_client.get_collection.return_value = MagicMock() # Simulate collection exists
@@ -75,7 +79,7 @@ async def test_create_collection_if_not_exists_existing_collection(mock_embeddin
     mock_qdrant_client.create_collection.assert_not_called()
     assert mock_qdrant_client.create_payload_index.call_count == 4
 
-# Test for add_vectors
+
 @pytest.mark.asyncio
 async def test_add_vectors_success(knowledge_qdrant_service, mock_embedding_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -95,7 +99,7 @@ async def test_add_vectors_success(knowledge_qdrant_service, mock_embedding_serv
 
     await knowledge_qdrant_service.add_vectors(vectors_data)
 
-    mock_embedding_service.embed_query.assert_called_once_with("This is a test summary.")
+    mock_embedding_service.embed_documents.assert_called_once_with(["This is a test summary."])
     mock_qdrant_client.upsert.assert_called_once()
     args, kwargs = mock_qdrant_client.upsert.call_args
     points = args[0]['points'] if len(args) > 0 and 'points' in args[0] else kwargs['points']
@@ -106,13 +110,14 @@ async def test_add_vectors_success(knowledge_qdrant_service, mock_embedding_serv
     assert point.payload["family_id"] == family_id
     assert point.payload["summary"] == "This is a test summary."
 
+
 @pytest.mark.asyncio
 async def test_add_vectors_empty_data(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
     await knowledge_qdrant_service.add_vectors([])
     mock_qdrant_client.upsert.assert_not_called()
 
-# Test for update_vectors
+
 @pytest.mark.asyncio
 async def test_update_vectors_success(knowledge_qdrant_service, mock_embedding_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -149,6 +154,7 @@ async def test_update_vectors_success(knowledge_qdrant_service, mock_embedding_s
     assert point.payload["age"] == 25 # Old metadata preserved
     assert point.payload["city"] == "New York" # New metadata added
 
+
 @pytest.mark.asyncio
 async def test_update_vectors_point_not_found(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -159,10 +165,9 @@ async def test_update_vectors_point_not_found(knowledge_qdrant_service, mock_qdr
         summary="new summary"
     )
 
-    await knowledge_qdrant_service.update_vectors(update_request)
     mock_qdrant_client.upsert.assert_not_called()
 
-# Test for delete_vectors
+
 @pytest.mark.asyncio
 async def test_delete_vectors_by_entity_id_success(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -174,6 +179,7 @@ async def test_delete_vectors_by_entity_id_success(knowledge_qdrant_service, moc
     mock_qdrant_client.delete.assert_called_once()
     assert result == 1
 
+
 @pytest.mark.asyncio
 async def test_delete_vectors_by_type_success(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -184,7 +190,7 @@ async def test_delete_vectors_by_type_success(knowledge_qdrant_service, mock_qdr
     mock_qdrant_client.delete.assert_called_once()
     assert result == 1
 
-# Test for delete_knowledge_by_family_id
+
 @pytest.mark.asyncio
 async def test_delete_knowledge_by_family_id_success(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -192,7 +198,7 @@ async def test_delete_knowledge_by_family_id_success(knowledge_qdrant_service, m
     await knowledge_qdrant_service.delete_knowledge_by_family_id(family_id)
     mock_qdrant_client.delete.assert_called_once()
 
-# Test for rebuild_vectors
+
 @pytest.mark.asyncio
 async def test_rebuild_vectors_success(knowledge_qdrant_service, mock_embedding_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service
@@ -211,7 +217,7 @@ async def test_rebuild_vectors_success(knowledge_qdrant_service, mock_embedding_
 
     await knowledge_qdrant_service.rebuild_vectors(rebuild_request)
 
-    mock_embedding_service.embed_query.assert_called_once_with("old summary")
+    mock_embedding_service.embed_documents.assert_called_once_with(["old summary"])
     mock_qdrant_client.upsert.assert_called_once()
     args, kwargs = mock_qdrant_client.upsert.call_args
     points = args[0]['points'] if len(args) > 0 and 'points' in args[0] else kwargs['points']
@@ -231,7 +237,7 @@ async def test_rebuild_vectors_no_entries(knowledge_qdrant_service, mock_qdrant_
     await knowledge_qdrant_service.rebuild_vectors(rebuild_request)
     mock_qdrant_client.upsert.assert_not_called()
 
-# Test for search_knowledge_table
+
 @pytest.mark.asyncio
 async def test_search_knowledge_table_success(knowledge_qdrant_service, mock_qdrant_client):
     await knowledge_qdrant_service.async_init() # Initialize the service

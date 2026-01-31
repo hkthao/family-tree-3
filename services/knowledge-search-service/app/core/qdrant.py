@@ -2,6 +2,7 @@ import os
 from qdrant_client import AsyncQdrantClient, models as qdrant_models
 from qdrant_client.http.models import UpdateStatus
 from typing import List, Dict, Any
+import uuid
 from loguru import logger
 from ..config import TEXT_EMBEDDING_DIMENSIONS
 from ..core.embeddings import EmbeddingService
@@ -27,7 +28,7 @@ class KnowledgeQdrantService:
             await self.client.get_collection(collection_name=self.collection_name)
             logger.info(f"Collection '{self.collection_name}' already exists.")
         except Exception as e:
-            if "Not found" in str(e): # Specific check for collection not found
+            if "Not found" in str(e):  # Specific check for collection not found
                 logger.info(f"Collection '{self.collection_name}' not found. Creating it...")
                 await self.client.create_collection(
                     collection_name=self.collection_name,
@@ -39,7 +40,7 @@ class KnowledgeQdrantService:
                 logger.info(f"Collection '{self.collection_name}' created successfully.")
             else:
                 logger.error(f"Error checking or creating collection '{self.collection_name}': {e}")
-                raise # Re-raise other unexpected exceptions
+                raise  # Re-raise other unexpected exceptions
         # Create payload index for family_id, entity_id, and type for efficient filtering
         await self.client.create_payload_index(
             collection_name=self.collection_name,
@@ -68,14 +69,21 @@ class KnowledgeQdrantService:
             logger.warning("No vector data provided to add.")
             return
 
-        points = []
-        for v_data in vectors_data:
-            item = v_data.model_dump(exclude_none=True)
-            vector = self.embedding_service.embed_query(item["summary"])
+        summaries = [v_data.summary for v_data in vectors_data]
+        # Embed all summaries in a single batch call
+        embedded_vectors = self.embedding_service.embed_documents(summaries)
 
-            # Use a unique, stable string ID for the point.
-            # This is derived from the combined family_id and entity_id.
-            point_id = f"{item['family_id']}-{item['entity_id']}"
+        if len(embedded_vectors) != len(vectors_data):
+            logger.error("Mismatch between number of summaries and embedded vectors.")
+            raise ValueError("Embedding failed for some documents.")
+
+        points = []
+        for i, v_data in enumerate(vectors_data):
+            item = v_data.model_dump(exclude_none=True)
+            vector = embedded_vectors[i]  # Get the pre-computed embedding
+
+            # Use a unique, stable UUID for the point, derived from family_id and entity_id.
+            point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{item['family_id']}-{item['entity_id']}"))
 
             # Prepare payload. Qdrant payload is a dict.
             # LanceDB had 'metadata' as JSON string, Qdrant can store dict directly.
@@ -105,9 +113,8 @@ class KnowledgeQdrantService:
         logger.info(f"Added {len(vectors_data)} vectors to collection '{self.collection_name}'.")
 
     async def update_vectors(self, update_request: UpdateVectorRequest):
-        # Use a unique, stable string ID for the point.
-        # This is derived from the combined family_id and entity_id.
-        point_id = f"{update_request.family_id}-{update_request.entity_id}"
+        # Use a unique, stable UUID for the point, derived from family_id and entity_id.
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{update_request.family_id}-{update_request.entity_id}"))
 
         # Fetch current payload to merge updates
         try:
@@ -115,7 +122,7 @@ class KnowledgeQdrantService:
                 collection_name=self.collection_name,
                 ids=[point_id],
                 with_payload=True,
-                with_vectors=True # Ensure current vector is fetched
+                with_vectors=True  # Ensure current vector is fetched
             )
             current_point = retrieved_points.pop()
             current_payload = current_point.payload
@@ -253,19 +260,35 @@ class KnowledgeQdrantService:
             return
 
         re_embedded_points = []
+        summaries_and_points = [] # Store tuples of (summary, original_point) to maintain mapping
+        
         for point in points_to_rebuild:
             summary = point.payload.get("summary")
             if summary:
-                new_vector = self.embedding_service.embed_query(summary)
-                re_embedded_points.append(
-                    qdrant_models.PointStruct(
-                        id=point.id,
-                        vector=new_vector,
-                        payload=point.payload  # Keep existing payload
-                    )
-                )
+                summaries_and_points.append((summary, point))
             else:
                 logger.warning(f"Point {point.id} has no summary to re-embed. Skipping.")
+        
+        if not summaries_and_points:
+            logger.info("No summaries found to re-embed during rebuild.")
+            return
+
+        summaries_only = [s for s, p in summaries_and_points]
+        re_embedded_vectors = self.embedding_service.embed_documents(summaries_only)
+
+        if len(re_embedded_vectors) != len(summaries_and_points):
+            logger.error("Mismatch between number of summaries and re-embedded vectors during rebuild.")
+            raise ValueError("Re-embedding failed for some documents during rebuild.")
+
+        for i, (summary, original_point) in enumerate(summaries_and_points):
+            new_vector = re_embedded_vectors[i]
+            re_embedded_points.append(
+                qdrant_models.PointStruct(
+                    id=original_point.id,
+                    vector=new_vector,
+                    payload=original_point.payload  # Keep existing payload
+                )
+            )
 
         if re_embedded_points:
             await self.client.upsert(
@@ -302,9 +325,8 @@ class KnowledgeQdrantService:
             limit=top_k,
             with_payload=True
         )
-
         formatted_results = []
-        for hit in search_result.points:
+        for hit in search_result:
             formatted_results.append({
                 "metadata": hit.payload,  # Qdrant payload is already the metadata
                 "summary": hit.payload.get("summary"),

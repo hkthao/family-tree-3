@@ -12,5 +12,5 @@ pytest
 pytest-asyncio
 pytest-mock
 qdrant-client==1.16.0
-sentence-transformers
+fastembed>=0.7.4
 uvicorn

@@ -6,10 +6,10 @@ from app.api.knowledge import get_knowledge_qdrant_service, get_embedding_servic
 from app.core.qdrant import KnowledgeQdrantService
 from app.core.embeddings import EmbeddingService
 from app.schemas.vectors import DeleteVectorRequest, VectorData
-from app.schemas.knowledge_dtos import KnowledgeAddRequest, GenericKnowledgeDto # Corrected import
+from app.schemas.knowledge_dtos import KnowledgeAddRequest, GenericKnowledgeDto  # Corrected import
 from uuid import UUID
 
-# Mock dependencies
+
 @pytest.fixture
 def mock_knowledge_qdrant_service():
     service = MagicMock(spec=KnowledgeQdrantService)
@@ -18,6 +18,7 @@ def mock_knowledge_qdrant_service():
     # Mock the new method
     service.delete_knowledge_by_family_id.return_value = None
     return service
+
 
 @pytest.fixture
 def mock_embedding_service():
@@ -35,6 +36,7 @@ def client(mock_knowledge_qdrant_service, mock_embedding_service):
             with TestClient(app) as c:
                 yield c
     app.dependency_overrides.clear() # Clear overrides after test
+
 
 def test_upsert_knowledge_data_success(client, mock_knowledge_qdrant_service):
     family_id = str(UUID("12345678-1234-5678-1234-567812345678"))
@@ -82,6 +84,7 @@ def test_upsert_knowledge_data_success(client, mock_knowledge_qdrant_service):
     assert vector_data.summary == summary
     assert vector_data.metadata["original_id"] == original_id
 
+
 def test_upsert_knowledge_data_missing_metadata(client):
     request_data = KnowledgeAddRequest(
         data=GenericKnowledgeDto( # Use GenericKnowledgeDto
@@ -110,6 +113,7 @@ def test_delete_knowledge_by_family_id_success(client, mock_knowledge_qdrant_ser
     assert response.status_code == 200
     assert response.json()["message"] == f"All knowledge data for family_id '{family_id}' deleted successfully."
     mock_knowledge_qdrant_service.delete_knowledge_by_family_id.assert_called_once_with(family_id)
+
 
 def test_delete_knowledge_by_family_id_exception(client, mock_knowledge_qdrant_service):
     family_id = str(UUID("12345678-1234-5678-1234-567812345678"))
