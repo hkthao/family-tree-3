@@ -14,7 +14,11 @@
     "amqplib": "^0.10.3",
     "body-parser": "^2.2.1",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "module-alias": "^2.2.3"
+  },
+  "_moduleAliases": {
+    "@": "./src"
   },
   "devDependencies": {
     "jest": "^30.2.0",
