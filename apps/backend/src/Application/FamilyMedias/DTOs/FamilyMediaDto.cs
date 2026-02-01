@@ -12,8 +12,7 @@ public class FamilyMediaDto
     public long FileSize { get; set; }
     public string? Description { get; set; }
     public string? ThumbnailPath { get; set; }
-    public Guid? UploadedBy { get; set; }
-    public string? UploadedByName { get; set; } // Display name of the uploader
+
     public DateTime Created { get; set; }
 
     public ICollection<MediaLinkDto> MediaLinks { get; set; } = new List<MediaLinkDto>();

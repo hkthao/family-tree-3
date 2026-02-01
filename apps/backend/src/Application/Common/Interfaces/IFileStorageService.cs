@@ -5,14 +5,16 @@ namespace backend.Application.Common.Interfaces;
 public interface IFileStorageService
 {
     /// <summary>
-    /// Tải file lên bộ nhớ.
+    /// Lưu file vào bộ nhớ.
     /// </summary>
-    /// <param name="fileStream">Stream của file cần tải lên.</param>
+    /// <param name="fileStream">Stream của file cần lưu.</param>
     /// <param name="fileName">Tên file.</param>
+    /// <param name="contentType">Loại nội dung (MIME type) của file.</param>
     /// <param name="folder">Thư mục lưu trữ (tùy chọn).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Đường dẫn đến file đã tải lên.</returns>
-    Task<Result<FileStorageResultDto>> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default);
+    /// <returns>Result chứa FileStorageResultDto với đường dẫn đến file đã lưu.</returns>
+    Task<Result<FileStorageResultDto>> SaveFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null, CancellationToken cancellationToken = default);
+
 
     /// <summary>
     /// Lấy file từ bộ nhớ.

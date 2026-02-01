@@ -62,8 +62,14 @@ public class RabbitMqMessageBus : IMessageBus, IAsyncDisposable
         // Ensure channel is initialized before publishing
         if (_channel == null || !_channel.IsOpen)
         {
-            _logger.LogError("RabbitMQ channel is not initialized or is closed. Cannot publish message.");
-            throw new InvalidOperationException("RabbitMQ channel is not initialized or is closed.");
+            _logger.LogWarning("RabbitMQ channel is not initialized or is closed. Attempting to initialize...");
+            await InitializeAsync(cancellationToken);
+        }
+
+        if (_channel == null || !_channel.IsOpen)
+        {
+            _logger.LogError("Failed to initialize RabbitMQ channel. Cannot publish message.");
+            throw new InvalidOperationException("Failed to initialize RabbitMQ channel.");
         }
 
         // Only declare the exchange if it hasn't been declared yet

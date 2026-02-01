@@ -2,12 +2,12 @@ using backend.Application.AI.DTOs;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting; // NEW
 using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Prompts.Queries.GetPromptById;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options; // NEW
-using backend.Application.Common.Models.AppSetting; // NEW
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 

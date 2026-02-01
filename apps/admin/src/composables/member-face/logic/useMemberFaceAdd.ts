@@ -2,8 +2,6 @@ import { ref, computed, watch } from 'vue';
 import type { DetectedFace, AddMemberFaceDto } from '@/types';
 import { useGlobalSnackbar } from '@/composables';
 import { useDetectFacesMutation, useAddMemberFaceMutation } from '@/composables';
-import { useAddFamilyMediaMutation } from '@/composables';
-import { dataURLtoFile } from '@/utils/file'; // Import the new utility
 
 interface UseMemberFaceAddOptions {
   familyId?: string;
@@ -18,7 +16,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
 
   const { mutate: detectFaces, isPending: isDetectingFaces, error: detectError } = useDetectFacesMutation();
   const { mutateAsync: addMemberFace, isPending: isAddingMemberFace, error: addError } = useAddMemberFaceMutation();
-  const { mutateAsync: addFamilyMedia, isPending: isAddingFamilyMedia } = useAddFamilyMediaMutation();
 
   const showSelectMemberDialog = ref(false);
   const faceToLabel = ref<DetectedFace | null>(null);
@@ -27,7 +24,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
   const uploadedImage = ref<string | null | undefined>(undefined);
   const uploadedFile = ref<File | null>(null);
   const detectedFaces = ref<DetectedFace[]>([]);
-  const originalImageUrl = ref<string | null>(null);
 
   watch(() => options.familyId, (newFamilyId) => {
     selectedFamilyId.value = newFamilyId;
@@ -48,7 +44,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
     uploadedImage.value = null;
     uploadedFile.value = null;
     detectedFaces.value = [];
-    originalImageUrl.value = null;
     faceToLabel.value = null;
     showSelectMemberDialog.value = false;
   };
@@ -60,7 +55,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
     }
 
     detectedFaces.value = [];
-    originalImageUrl.value = null;
 
     const fileToUpload = Array.isArray(file) ? file[0] : file;
     uploadedFile.value = fileToUpload;
@@ -132,51 +126,6 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
       return;
     }
 
-    // Step 1: Upload the original image as FamilyMedia
-    let mediaCreationResult;
-    try {
-      mediaCreationResult = await addFamilyMedia({
-        familyId: selectedFamilyId.value!,
-        file: uploadedFile.value,
-        description: options.t('memberFace.messages.uploadedImageDescription'), // Provide a generic description
-      });
-      originalImageUrl.value = mediaCreationResult.filePath; // Store the permanent URL
-    } catch (error: any) {
-      showSnackbar(error.message || options.t('memberFace.messages.uploadImageFailed'), 'error');
-      return;
-    }
-
-    const thumbnailUploadPromises = detectedFaces.value
-      .filter(face => face.thumbnail && face.memberId)
-      .map(async (face) => {
-        if (!face.thumbnail) {
-          // This case should ideally be caught by the filter, but for type safety
-          throw new Error('Thumbnail not found despite filter.');
-        }
-        const thumbnailFile = dataURLtoFile(`data:image/png;base64,${face.thumbnail}`, `thumbnail-${face.id}.png`); const thumbnailMediaResult = await addFamilyMedia({
-          familyId: selectedFamilyId.value!,
-          file: thumbnailFile
-        });
-        return { face, filePath: thumbnailMediaResult.filePath };
-      });
-
-    let uploadedThumbnailPaths: { face: DetectedFace; filePath: string }[];
-    try {
-      uploadedThumbnailPaths = await Promise.all(thumbnailUploadPromises);
-    } catch (error: any) {
-      const errorMessage = options.t('memberFace.messages.uploadThumbnailFailed') + (error.message || error.toString() || options.t('common.unknown'));
-      console.error('Failed to upload one or more thumbnails:', error);
-      showSnackbar(errorMessage, 'error');
-      return; // Stop the entire process
-    }
-
-    uploadedThumbnailPaths.forEach(item => {
-      const originalFace = detectedFaces.value.find(f => f.id === item.face.id);
-      if (originalFace) {
-        originalFace.thumbnailUrl = item.filePath;
-      }
-    });
-
     const facesToSave = detectedFaces.value
       .filter(face => face.memberId)
       .map(face => {
@@ -185,9 +134,7 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
           faceId: face.id,
           boundingBox: face.boundingBox,
           confidence: face.confidence,
-          thumbnail: face.thumbnail,
-          thumbnailUrl: face.thumbnailUrl, // Now this should be the permanent URL
-          originalImageUrl: originalImageUrl.value,
+          thumbnail: face.thumbnail, // Add thumbnail base64 data
           embedding: face.embedding || [],
           emotion: face.emotion,
           emotionConfidence: face.emotionConfidence,
@@ -226,7 +173,7 @@ export function useMemberFaceAdd(options: UseMemberFaceAddOptions) {
     }
   };
 
-  const isSaving = computed(() => isAddingMemberFace.value || isAddingFamilyMedia.value);
+  const isSaving = computed(() => isAddingMemberFace.value);
 
   const closeForm = () => {
     resetState();

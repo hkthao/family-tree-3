@@ -65,7 +65,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
             FilePath = expectedAvatarUrl,
             MediaType = Domain.Enums.MediaType.Image,
             FileSize = 12345,
-            UploadedBy = Guid.NewGuid()
+
         });
         await _context.SaveChangesAsync();
 

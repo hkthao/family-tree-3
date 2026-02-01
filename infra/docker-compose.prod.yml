@@ -117,7 +117,6 @@ services:
       - ./.env
     environment:
       - PYTHONUNBUFFERED=1
-      - PORT=${FACE_SERVICE_PORT}
     mem_limit: 2g
     volumes:
       - ./face-service/models:/face-service/app/models/dlib_models
@@ -164,13 +163,11 @@ services:
     platform: linux/amd64
     ports:
       - "8001:8000" # Expose port 8001 for the LLM Gateway service
+    env_file:
+      - ./.env
     environment:
       - PYTHONUNBUFFERED=1
-      - LANCEDB_PATH=/lancedb # Define LanceDB storage path inside the container
-      - LANCEDB_CONFIG_DIR=/tmp # Set LanceDB config directory to a writeable location to suppress warnings
     mem_limit: 2g
-    volumes:
-      - lancedb-data:/lancedb # Persistent volume for LanceDB
     networks:
       - app-network
     restart: unless-stopped

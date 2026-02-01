@@ -1,14 +1,13 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Files.DTOs;
-using backend.Application.Files.UploadFile; // NEW
+
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MediatR; // NEW
+using MediatR; // Re-add MediatR
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -27,14 +26,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
             _mediatorMock = new Mock<IMediator>();
 
-            // Setup for mediator to handle UploadFileCommand
-            _mediatorMock.Setup(m => m.Send(It.IsAny<UploadFileCommand>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<ImageUploadResponseDto>.Success(new ImageUploadResponseDto
-                {
-                    Url = "http://mock.uploaded.url/image.jpg",
-                    Filename = "mock.jpg",
-                    ContentType = "image/jpeg"
-                }));
+
 
             // Default mock for IAuthorizationService
             _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
@@ -100,7 +92,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object,
                 _mockUser.Object, // Pass ICurrentUser mock
                 _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
@@ -145,7 +136,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object,
                 _mockUser.Object, // Pass ICurrentUser mock
                 _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
@@ -174,7 +164,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object,
                 _mockUser.Object, // Pass ICurrentUser mock
                 _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
@@ -220,7 +209,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _loggerMock.Object,
-                _mediatorMock.Object,
                 _mockUser.Object, // Pass ICurrentUser mock
                 _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 

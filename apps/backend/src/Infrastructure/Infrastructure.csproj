@@ -28,9 +28,9 @@
     <PackageReference Include="Qdrant.Client" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
     <PackageReference Include="AWSSDK.SecurityToken" />
+    <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="UglyToad.PdfPig" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
-    <PackageReference Include="RabbitMQ.Client" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,19 +1,23 @@
 using backend.Application.Common.Constants;
+using backend.Application.Common.Utils; // NEW
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Messages;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // NEW
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 
-public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMessageBus messageBus) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
+public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMessageBus messageBus, IMediator mediator) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<CreateMemberFaceCommandHandler> _logger = logger;
     private readonly IMessageBus _messageBus = messageBus;
+    private readonly IMediator _mediator = mediator;
     public async Task<Result<Guid>> Handle(CreateMemberFaceCommand request, CancellationToken cancellationToken)
     {
         var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
@@ -25,22 +29,60 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
-        // var searchMemberFaceQuery = new SearchMemberFaceQuery(member.FamilyId)
-        // {
-        //     Vector = request.Embedding.Select(d => (float)d).ToList(),
-        //     Limit = 1,
-        // };
-        // var searchQueryResult = await _mediator.Send(searchMemberFaceQuery, cancellationToken);
-        // if (searchQueryResult.IsSuccess && searchQueryResult.Value != null && searchQueryResult.Value.Any())
-        // {
-        //     var foundFace = searchQueryResult.Value.First();
-        //     if (foundFace.MemberId != request.MemberId)
-        //     {
-        //         _logger.LogWarning("Face with embedding found in vector DB for a different MemberId {FoundMemberId} (requested: {RequestedMemberId}). Cannot create new MemberFace.", foundFace.MemberId, request.MemberId);
-        //         return Result<Guid>.Failure($"Face with similar embedding is already associated with another member in vector DB.", ErrorSources.Conflict);
-        //     }
-        // }
         var id = Guid.NewGuid();
+
+        string? finalThumbnailUrl = null; // Declare here
+        if (!string.IsNullOrEmpty(request.Thumbnail))
+        {
+            try
+            {
+                var imageData = ImageUtils.ConvertBase64ToBytes(request.Thumbnail);
+                var contentType = ImageUtils.GetMimeTypeFromBase64(request.Thumbnail);
+
+                var createFamilyMediaCommand = new CreateFamilyMediaCommand
+                {
+                    FamilyId = member.FamilyId,
+                    RefId = id, // Link media to the Member
+                    RefType = RefType.MemberFace, // Thumbnail for a MemberFace
+                    MediaLinkType = MediaLinkType.Thumbnail, // Specify it's a thumbnail
+                    AllowMultipleMediaLinks = true, // Allow multiple thumbnails per member (different faces)
+                    File = imageData,
+                    FileName = $"MemberFace_Thumbnail_{Guid.NewGuid()}.png",
+                    ContentType = contentType,
+                    Folder = string.Format(UploadConstants.FaceImagesFolder, member.FamilyId),
+                    MediaType = MediaType.Image // Explicitly set MediaType
+                };
+
+                var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
+
+                if (!uploadResult.IsSuccess)
+                {
+                    _logger.LogError("Failed to create FamilyMedia for MemberFace thumbnail: {Error}", uploadResult.Error);
+                    // Depending on desired behavior, could fail the command or proceed without thumbnail
+                    // For now, we'll return failure as thumbnail is important for face.
+                    return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
+                }
+
+                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FilePath))
+                {
+                    _logger.LogError("FamilyMedia creation for MemberFace thumbnail returned null or empty FilePath.");
+                    return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
+                }
+                finalThumbnailUrl = uploadResult.Value.FilePath; // Correctly assign the value
+
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError(ex, "Invalid Base64 format for MemberFace thumbnail.");
+                return Result<Guid>.Failure(ErrorMessages.InvalidBase64, ErrorSources.Validation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing MemberFace thumbnail: {Message}", ex.Message);
+                return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
+            }
+        }
+
         var entity = new MemberFace
         {
             Id = id,
@@ -53,12 +95,11 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 Height = request.BoundingBox.Height
             },
             Confidence = request.Confidence,
-            ThumbnailUrl = request.ThumbnailUrl,
-            OriginalImageUrl = request.OriginalImageUrl,
+            ThumbnailUrl = finalThumbnailUrl,
             Embedding = request.Embedding,
             Emotion = request.Emotion,
             EmotionConfidence = request.EmotionConfidence ?? 0.0,
-            IsVectorDbSynced = true, // Default to false
+            IsVectorDbSynced = false, // Set to false as the property is being removed from the command
             VectorDbId = id.ToString() // Default to null
         };
         _context.MemberFaces.Add(entity);
@@ -84,8 +125,6 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                     Height = entity.BoundingBox.Height
                 },
                 Confidence = (double)entity.Confidence,
-                ThumbnailUrl = entity.ThumbnailUrl,
-                OriginalImageUrl = entity.OriginalImageUrl,
                 Emotion = entity.Emotion,
                 EmotionConfidence = entity.EmotionConfidence
             }

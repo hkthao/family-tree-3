@@ -134,7 +134,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.TotalItems))
             .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages));
         CreateMap<FamilyMedia, FamilyMediaDto>()
-            .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.ToString() : null))
+
             .ForMember(dest => dest.MediaLinks, opt => opt.MapFrom(src => src.MediaLinks));
         CreateMap<MediaLink, MediaLinkDto>()
             .ForMember(dest => dest.RefName, opt => opt.Ignore());

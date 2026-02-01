@@ -23,6 +23,21 @@ public static class ImageUtils
     }
 
     /// <summary>
+    /// Extracts the MIME type from a base64 data URI string.
+    /// </summary>
+    /// <param name="base64String">The base64 string, potentially with a data URI prefix (e.g., "data:image/jpeg;base64,").</param>
+    /// <returns>The extracted MIME type (e.g., "image/jpeg"), or "application/octet-stream" if not found.</returns>
+    public static string GetMimeTypeFromBase64(string base64String)
+    {
+        var match = Regex.Match(base64String, @"data:(?<type>.+?);base64,");
+        if (match.Success)
+        {
+            return match.Groups["type"].Value;
+        }
+        return "application/octet-stream"; // Default MIME type
+    }
+
+    /// <summary>
     /// Identifies the width and height of an image from its byte array.
     /// </summary>
     /// <param name="imageBytes">The byte array of the image.</param>

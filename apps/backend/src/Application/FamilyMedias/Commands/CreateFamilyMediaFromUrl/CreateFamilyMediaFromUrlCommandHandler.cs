@@ -11,18 +11,15 @@ public class CreateFamilyMediaFromUrlCommandHandler : IRequestHandler<CreateFami
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
 
     public CreateFamilyMediaFromUrlCommandHandler(
         IApplicationDbContext context,
         IAuthorizationService authorizationService,
-        ICurrentUser currentUser,
         IMapper mapper)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _currentUser = currentUser;
         _mapper = mapper;
     }
 
@@ -57,7 +54,7 @@ public class CreateFamilyMediaFromUrlCommandHandler : IRequestHandler<CreateFami
             MediaType = request.MediaType ?? request.Url.InferMediaTypeFromUrl(), // Infer from URL using the new extension method
             FileSize = 0, // File size is 0 for URL-based media
             Description = request.Description,
-            UploadedBy = _currentUser.UserId // Current user uploading the file
+
         };
 
         _context.FamilyMedia.Add(familyMedia);

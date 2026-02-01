@@ -5,18 +5,16 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.MemberFaces.Common;
-using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.Members.Specifications;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IMediator mediator, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, ICurrentUser currentUser, IAuthorizationService authorizationService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
-    private readonly IMediator _mediator = mediator;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
@@ -31,8 +29,6 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             string effectiveFileName = string.IsNullOrWhiteSpace(request.FileName)
                 ? $"uploaded_image_{Guid.NewGuid()}{Path.GetExtension(request.ContentType)}"
                 : request.FileName;
-            string? originalImageUrl = null;
-
 
             string uploadFolder = string.Format(UploadConstants.FaceImagesFolder, request.FamilyId);
 
@@ -149,7 +145,7 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             return Result<FaceDetectionResponseDto>.Success(new FaceDetectionResponseDto
             {
                 ImageId = imageId,
-                OriginalImageUrl = originalImageUrl,
+                OriginalImageUrl = string.Empty,
                 ResizedImageUrl = null,
                 ImageWidth = imageWidth,
                 ImageHeight = imageHeight,

@@ -27,8 +27,7 @@ import { ApiFamilyLocationService } from './family-location/api.family-location.
 import type { IMemoryItemService } from './memory-item/memory-item.service.interface';
 import { ApiMemoryItemService } from './memory-item/api.memory-item.service';
 
-import type { IVoiceProfileService } from './voice-profile/voice-profile.service.interface';
-import { ApiVoiceProfileService } from './voice-profile/api.voice-profile.service';
+
 import type { IUserPushTokenService } from './user-push-token/user-push-token.service.interface';
 import { ApiUserPushTokenService } from './user-push-token/api.user-push-token.service';
 import type { INotificationService } from './notification/notification.service.interface';
@@ -54,8 +53,6 @@ export interface AppServices {
   familyMedia: IFamilyMediaService; // NEW: Add FamilyMediaService
   familyLocation: IFamilyLocationService; // NEW: Add FamilyLocationService
   memoryItem: IMemoryItemService; // NEW: Add MemoryItemService
-
-  voiceProfile: IVoiceProfileService;
   userPushToken: IUserPushTokenService;
   notification: INotificationService; // NEW: Add NotificationService
   familyFollow: IFamilyFollowService; // NEW: Add FamilyFollowService
@@ -122,11 +119,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === "real"
         ? new ApiMemoryItemService(apiClient)
         : testServices?.memoryItem || new ApiMemoryItemService(apiClient),
-
-    voiceProfile:
-      mode === 'real'
-        ? new ApiVoiceProfileService(apiClient)
-        : testServices?.voiceProfile || new ApiVoiceProfileService(apiClient),
     userPushToken:
       mode === 'real'
         ? new ApiUserPushTokenService(apiClient)

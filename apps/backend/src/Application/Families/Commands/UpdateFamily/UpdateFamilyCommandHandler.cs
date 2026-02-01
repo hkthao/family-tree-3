@@ -39,13 +39,20 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             try
             {
                 var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
+                var contentType = ImageUtils.GetMimeTypeFromBase64(request.AvatarBase64);
+
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    FamilyId = entity.Id, // Link media to the updated Family
+                    RefId = entity.Id, // Link media to the updated Family
+                    RefType = RefType.Family,
+                    FamilyId = entity.Id,
+                    MediaLinkType = MediaLinkType.Avatar,
+                    AllowMultipleMediaLinks = false, // Avatars should not allow multiple links
                     File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
+                    ContentType = contentType, // Use inferred content type
                     Folder = string.Format(UploadConstants.ImagesFolder, entity.Id),
-                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType
+                    MediaType = MediaType.Image // Explicitly set MediaType
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
@@ -55,15 +62,12 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                     return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
                 }
 
-                // CreateFamilyMediaCommand returns a Guid (the ID of the new FamilyMedia record).
-                // We need to fetch the FamilyMedia object to get its FilePath (URL).
-                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value!.Id);
-                if (familyMedia == null || string.IsNullOrEmpty(familyMedia.FilePath))
+                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FilePath))
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                finalAvatarUrl = familyMedia.FilePath; // Update finalAvatarUrl
+                finalAvatarUrl = uploadResult.Value.FilePath; // Update finalAvatarUrl
             }
             catch (FormatException)
             {
@@ -151,7 +155,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         // Add Managers
         foreach (var managerId in request.ManagerIds.Distinct())
         {
-            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
+            entity.AddFamilyUser(managerId, FamilyRole.Manager);
         }
 
         // Add Viewers
@@ -161,7 +165,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             // If they are a manager, they implicitly have viewer permissions.
             if (!request.ManagerIds.Contains(viewerId))
             {
-                entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
+                entity.AddFamilyUser(viewerId, FamilyRole.Viewer);
             }
         }
         // --- End Update FamilyUsers ---

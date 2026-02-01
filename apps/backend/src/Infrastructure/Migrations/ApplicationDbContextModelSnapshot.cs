@@ -652,7 +652,7 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("description");
 
-                    b.Property<Guid>("FamilyId")
+                    b.Property<Guid?>("FamilyId")
                         .HasColumnType("char(36)")
                         .HasColumnName("family_id");
 
@@ -686,15 +686,8 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("media_type");
 
-                    b.Property<Guid?>("UploadedBy")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("uploaded_by");
-
                     b.HasKey("Id")
                         .HasName("pk_family_media");
-
-                    b.HasIndex("FamilyId")
-                        .HasDatabaseName("ix_family_media_family_id");
 
                     b.ToTable("family_media");
                 });
@@ -929,6 +922,10 @@ namespace backend.Infrastructure.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
                         .HasColumnName("last_modified_by");
+
+                    b.Property<int>("MediaLinkType")
+                        .HasColumnType("int")
+                        .HasColumnName("media_link_type");
 
                     b.Property<Guid>("RefId")
                         .HasColumnType("char(36)")
@@ -2320,18 +2317,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Family");
 
                     b.Navigation("Location");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.FamilyMedia", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Family", "Family")
-                        .WithMany()
-                        .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_family_media_families_family_id");
-
-                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>

@@ -13,4 +13,4 @@ export * from './chat.validation';
 
 export * from './relationshipDetector.validation';
 export * from './chatDrawer.validation';
-export * from './voice-profile.validation';
+

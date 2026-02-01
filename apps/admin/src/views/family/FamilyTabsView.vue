@@ -59,9 +59,6 @@
         <v-window-item v-if="canManageFamily" value="family-settings">
           <FamilySettingsView :family-id="familyId" />
         </v-window-item>
-        <v-window-item v-if="canManageFamily" value="voice-profile">
-          <VoiceProfileListView :family-id="familyId" />
-        </v-window-item>
         <!-- NEW: AI Chat Tab -->
 
         <!-- NEW: Family Location Tab -->
@@ -126,7 +123,6 @@ import MemoryItemListView from '@/views/memory-item/MemoryItemListView.vue'; // 
 import BaseCrudDrawer from '@/components/common/BaseCrudDrawer.vue';
 import { useQueryClient } from '@tanstack/vue-query'; // NEW
 import UpdateFamilyLimitView from '@/views/family/UpdateFamilyLimitView.vue'; // NEW
-import VoiceProfileListView from '@/views/voice-profile/VoiceProfileListView.vue'; // NEW
 import FamilyFollowSettingsView from '@/views/family/FamilyFollowSettingsView.vue'; // NEW
 
 const { t } = useI18n();
@@ -229,7 +225,6 @@ const allTabDefinitions = computed(() => [
   { value: 'map', text: t('map.viewTitle'), condition: true as boolean }, // NEW Map Tab
 
   { value: 'family-settings', text: t('family.settings.title'), condition: canManageFamily.value as boolean },
-  { value: 'voice-profile', text: t('voiceProfile.title'), condition: canManageFamily.value as boolean },
 ]);
 const availableTabs = computed(() => allTabDefinitions.value.filter(tab => tab.condition));
 const visibleTabs = ref<TabItem[]>([]);
