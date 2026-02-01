@@ -3,7 +3,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils; // New using
-using backend.Application.Files.UploadFile; // New using
+using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Application.Users.Specifications;
 
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
@@ -33,27 +33,28 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMed
             try
             {
                 var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
-                var uploadCommand = new UploadFileCommand
+                var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    ImageData = imageData,
+                    File = imageData,
                     FileName = $"User_Avatar_{Guid.NewGuid()}.png",
-                    Folder = string.Format(UploadConstants.UserImagesFolder), // Use UserAvatarFolder
-                    ContentType = "image/png" // Assuming PNG for now
+                    Folder = string.Format(UploadConstants.UserImagesFolder), // User specific folder
+                    ContentType = "image/png", // Assuming PNG for now
+                    FamilyId = null // This is a user avatar, not necessarily tied to a family.
                 };
 
-                var uploadResult = await _mediator.Send(uploadCommand, cancellationToken);
+                var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
 
                 if (!uploadResult.IsSuccess)
                 {
                     return Result.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
                 }
 
-                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.Url))
+                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FilePath))
                 {
                     return Result.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                avatarUrl = uploadResult.Value.Url; // Update avatarUrl with the new URL
+                avatarUrl = uploadResult.Value.FilePath; // Update avatarUrl with the new FilePath
             }
             catch (FormatException)
             {

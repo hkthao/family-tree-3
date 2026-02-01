@@ -52,6 +52,7 @@ services:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+      - local-uploads:/app/apps/backend/uploads
 
     logging:
       driver: json-file
@@ -191,8 +192,33 @@ services:
       timeout: 10s
       retries: 3
 
+  storage-service:
+    build:
+      context: ../services/storage-service
+      dockerfile: Dockerfile
+    container_name: family-tree-storage-service
+    ports:
+      - "8003:8000" # Expose port 8000 for the Node.js app
+    env_file:
+      - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__USERNAME=guest
+      - RABBITMQ__PASSWORD=guest
+      - RABBITMQ__PORT=5672
+      - CLOUDINARY_ROOTFOLDER=family-tree-uploads # Placeholder, user can change
+    volumes:
+      - local-uploads:/app/uploads # Mount shared volume
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   mysql-data:
   backend-dataprotection-keys:
   redis-data:
   rabbitmq-data:
+  local-uploads:

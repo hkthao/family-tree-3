@@ -84,11 +84,14 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             try
             {
                 var imageData = ImageUtils.ConvertBase64ToBytes(request.AvatarBase64);
+                var contentType = ImageUtils.GetMimeTypeFromBase64(request.AvatarBase64);
+
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
                     FamilyId = request.FamilyId, // Add FamilyId
                     File = imageData,
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png", // Use FileName property
+                    ContentType = contentType, // Use inferred content type
                     Folder = string.Format(UploadConstants.ImagesFolder, member.FamilyId),
                     MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
                 };
@@ -100,15 +103,12 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     return Result<Guid>.Failure(string.Format(ErrorMessages.FileUploadFailed, uploadResult.Error), ErrorSources.FileUpload);
                 }
 
-                // CreateFamilyMediaCommand returns a Guid (the ID of the new FamilyMedia record), not an object with a Url.
-                // We need to fetch the FamilyMedia object to get its FilePath (URL).
-                var familyMedia = await _context.FamilyMedia.FindAsync(uploadResult.Value!.Id);
-                if (familyMedia == null || string.IsNullOrEmpty(familyMedia.FilePath))
+                if (uploadResult.Value == null || string.IsNullOrEmpty(uploadResult.Value.FilePath))
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                member.UpdateAvatar(familyMedia.FilePath); // Update avatar after successful upload
+                member.UpdateAvatar(uploadResult.Value.FilePath); // Update avatar after successful upload using the returned FilePath
             }
             catch (FormatException)
             {

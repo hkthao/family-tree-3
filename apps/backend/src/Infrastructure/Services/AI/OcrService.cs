@@ -1,11 +1,10 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
+using backend.Application.Common.Models; // Changed from backend.Application.Files.DTOs
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Files.DTOs;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging; // NEW
+using Microsoft.Extensions.Options; // NEW
 
 namespace backend.Infrastructure.Services;
 

@@ -1,7 +1,9 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging; // ADDED
+using backend.Application.Common.Models.MessageBus; // NEW
+using Microsoft.Extensions.Logging;
+using static backend.Application.Common.Constants.MessageBusConstants; // NEW
 
 namespace backend.Application.FamilyMedias.Commands.DeleteFamilyMedia;
 
@@ -9,18 +11,18 @@ public class DeleteFamilyMediaCommandHandler : IRequestHandler<DeleteFamilyMedia
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IMessageBus _messageBus; // NEW
     private readonly ILogger<DeleteFamilyMediaCommandHandler> _logger;
 
     public DeleteFamilyMediaCommandHandler(
         IApplicationDbContext context,
         IAuthorizationService authorizationService,
-        IFileStorageService fileStorageService,
+        IMessageBus messageBus, // NEW
         ILogger<DeleteFamilyMediaCommandHandler> logger)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _fileStorageService = fileStorageService;
+        _messageBus = messageBus; // NEW
         _logger = logger;
     }
 
@@ -41,15 +43,18 @@ public class DeleteFamilyMediaCommandHandler : IRequestHandler<DeleteFamilyMedia
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // Attempt to delete the file from storage
-        var deleteFileResult = await _fileStorageService.DeleteFileAsync(familyMedia.FilePath, cancellationToken);
-        if (!deleteFileResult.IsSuccess)
+        // Publish message to RabbitMQ for storage-service to handle deletion
+        var fileDeletionEvent = new FileDeletionRequestedEvent
         {
-            _logger.LogWarning("Failed to delete file from storage for FamilyMedia ID {FamilyMediaId}: {Error}", familyMedia.Id, deleteFileResult.Error);
-            // Optionally, you might choose to return failure here or proceed with DB deletion anyway
-            // For now, we'll proceed with DB deletion even if storage deletion fails,
-            // to allow manual cleanup of orphaned files in storage if necessary.
-        }
+            FileId = familyMedia.Id,
+            FilePath = familyMedia.FilePath,
+            DeleteHash = familyMedia.DeleteHash, // Pass DeleteHash if available
+            RequestedBy = familyMedia.UploadedBy ?? Guid.Empty, // Assuming UploadedBy is available
+            FamilyId = familyMedia.FamilyId
+        };
+        await _messageBus.PublishAsync(MessageBusConstants.Exchanges.FileUpload, MessageBusConstants.RoutingKeys.FileDeletionRequested, fileDeletionEvent);
+
+        _logger.LogInformation("FileDeletionRequestedEvent published for FileId {FileId} with FilePath {FilePath}", familyMedia.Id, familyMedia.FilePath);
 
         _context.FamilyMedia.Remove(familyMedia); // Soft delete is handled by interceptor
 

@@ -14,7 +14,6 @@ using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
 using backend.Application.Families.Queries.CheckAiChatQuota;
 using backend.Application.Knowledge; // NEW
 using backend.Application.MemberFaces.Commands.DetectFaces;
-using backend.Application.OCR.Commands; // NEW
 using backend.Application.Prompts.Queries.GetPromptById;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -237,43 +236,8 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 
                 if (request.Attachments != null && request.Attachments.Any())
                 {
-                    foreach (var attachment in request.Attachments)
-                    {
-                        if (attachment.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
-                            attachment.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
-                        {
-                            try
-                            {
-                                _logger.LogInformation("Đang xử lý tệp đính kèm qua OCR: {FileName} ({ContentType})", attachment.Url, attachment.ContentType);
-                                var ocrResult = await _mediator.Send(new ProcessOcrFileCommand
-                                {
-                                    FileUrl = attachment.Url, // Pass URL directly
-                                    ContentType = attachment.ContentType,
-                                    FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
-                                }, cancellationToken);
-
-                                if (ocrResult.IsSuccess && !string.IsNullOrWhiteSpace(ocrResult.Value?.Text))
-                                {
-                                    combinedChatInput.AppendLine().AppendLine("--- Nội dung được trích xuất từ tệp đính kèm ---");
-                                    combinedChatInput.AppendLine(ocrResult.Value.Text);
-                                    combinedChatInput.AppendLine("--------------------------------------------------");
-                                    _logger.LogInformation("Đã trích xuất thành công nội dung từ tệp đính kèm {FileName}. Độ dài: {Length}", attachment.Url, ocrResult.Value.Text.Length);
-                                }
-                                else
-                                {
-                                    _logger.LogWarning("Không thể trích xuất nội dung từ tệp đính kèm {FileName} qua OCR: {Error}", attachment.Url, ocrResult.Error ?? "Kết quả Text rỗng");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Lỗi khi xử lý tệp đính kèm {FileName} (OCR) từ URL {Url}", attachment.Url, attachment.ContentType);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogInformation("Tệp đính kèm '{FileName}' không phải là hình ảnh/PDF và sẽ bị bỏ qua trong ngữ cảnh DataGeneration.", attachment.Url);
-                        }
-                    }
+                    _logger.LogWarning("OCR service has been removed. Attachments will be ignored for DataGeneration context.");
+                    // You might want to log a warning or return an error if attachments are crucial for data generation
                 }
 
                 if (string.IsNullOrWhiteSpace(combinedChatInput.ToString()))
@@ -333,26 +297,13 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                     {
                         try
                         {
-                            _logger.LogInformation("Đang tải và xử lý hình ảnh cho nhận dạng khuôn mặt: {ImageUrl}", attachment.Url);
-                            var processImageCommand = new ProcessOcrFileCommand
-                            {
-                                FileUrl = attachment.Url,
-                                ContentType = attachment.ContentType,
-                                FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath)
-                            };
-                            var processedImageResult = await _mediator.Send(processImageCommand, cancellationToken);
-
-                            if (!processedImageResult.IsSuccess || processedImageResult.Value?.ProcessedBytes == null)
-                            {
-                                _logger.LogWarning("Không thể tải hoặc xử lý hình ảnh từ URL {ImageUrl} để nhận dạng khuôn mặt: {Error}", attachment.Url, processedImageResult.Error);
-                                continue; // Skip to next attachment
-                            }
-
-                            // Now use the processed bytes with DetectFacesCommand
+                            _logger.LogInformation("Đang xử lý hình ảnh cho nhận dạng khuôn mặt: {ImageUrl}", attachment.Url);
+                            // The direct processing of images for face detection (using ImageBytes) will still work
+                            // but any prior OCR processing is removed.
                             var detectFacesCommand = new DetectFacesCommand
                             {
                                 FamilyId = request.FamilyId,
-                                ImageBytes = processedImageResult.Value.ProcessedBytes, // Use processed bytes
+                                ImageUrl = attachment.Url, // Pass URL directly to face service, it should fetch it
                                 FileName = Path.GetFileName(new Uri(attachment.Url).LocalPath),
                                 ContentType = attachment.ContentType,
                                 ReturnCrop = true,

@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
@@ -76,63 +75,10 @@ public static class DependencyInjection
         services.AddSingleton<IMessageBus, RabbitMqMessageBus>();
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
 
-        // Register ImgbbSettings
-        services.Configure<ImgbbSettings>(configuration.GetSection(ImgbbSettings.SectionName));
-
-        // Register ImgbbImageUploadService and configure its HttpClient
-        services.AddHttpClient<IImageUploadService, ImgbbImageUploadService>()
-                .ConfigureHttpClient((serviceProvider, httpClient) =>
-                {
-                    var imgbbSettings = serviceProvider.GetRequiredService<IOptions<ImgbbSettings>>().Value;
-                    httpClient.BaseAddress = new Uri(imgbbSettings.BaseUrl);
-                });
-
-        // Register ImgurSettings (đã có)
-        services.Configure<ImgurSettings>(configuration.GetSection(nameof(ImgurSettings)));
-
-        // Register CloudinarySettings
-        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
 
 
-        // Register FileStorageSettings
-        services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
-        services.Configure<CloudflareR2Settings>(configuration.GetSection(CloudflareR2Settings.SectionName));
-
-
-
-        // Configure HttpClient for ImgurFileStorageService
-        services.AddHttpClient<ImgurFileStorageService>(httpClient =>
-        {
-            var serviceProvider = services.BuildServiceProvider(); // Temporarily build provider to get settings
-            var imgurSettings = serviceProvider.GetRequiredService<IOptions<ImgurSettings>>().Value;
-            httpClient.BaseAddress = new Uri("https://api.imgur.com/3/");
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Client-ID", imgurSettings.ClientId);
-        });
-
-        // Register N8nService if it's used by N8nFileStorageService
-
-
-
-
-        // Dynamically register IFileStorageService based on configuration
-        services.AddScoped<IFileStorageService>(serviceProvider =>
-        {
-            var fileStorageSettings = serviceProvider.GetRequiredService<IOptions<FileStorageSettings>>().Value;
-
-            return fileStorageSettings.Provider switch
-            {
-                "Imgur" => serviceProvider.GetRequiredService<ImgurFileStorageService>(), // Get already configured ImgurFileStorageService
-                "CloudflareR2" => new CloudflareR2FileStorageService(
-                                        serviceProvider.GetRequiredService<IOptions<CloudflareR2Settings>>(),
-                                        serviceProvider.GetRequiredService<ILogger<CloudflareR2FileStorageService>>()
-                                    ),
-                "Cloudinary" => new CloudinaryFileStorageService(
-                                        serviceProvider.GetRequiredService<IOptions<CloudinarySettings>>(),
-                                        serviceProvider.GetRequiredService<ILogger<CloudinaryFileStorageService>>()
-                                    ),
-                _ => throw new ArgumentException($"Unknown file storage provider: {fileStorageSettings.Provider}")
-            };
-        });
+        // Register IFileStorageService to use LocalDiskFileStorageService
+        services.AddScoped<IFileStorageService, LocalDiskFileStorageService>();
 
         // Register JwtHelperFactory
         services.AddScoped<IJwtHelperFactory, JwtHelperFactory>();
@@ -140,6 +86,7 @@ public static class DependencyInjection
         // Register Background Task Queue
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
         services.AddHostedService<QueuedHostedService>();
+        services.AddHostedService<backend.Infrastructure.Services.MessageBus.Consumers.FileUploadCompletedConsumer>(); // NEW
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 

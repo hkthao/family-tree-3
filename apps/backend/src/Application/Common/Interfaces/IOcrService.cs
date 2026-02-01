@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Files.DTOs; // For OcrResultDto
 
 namespace backend.Application.Common.Interfaces;
 
