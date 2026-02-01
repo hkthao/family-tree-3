@@ -175,6 +175,18 @@ public class FileUploadCompletedConsumer : BackgroundService
                                 logger.LogWarning("Member with ID {MemberId} not found for avatar update.", eventData.RefId.Value);
                             }
                             break;
+                        case RefType.MemberFace: // NEW: Handle MemberFace RefType
+                            var memberFace = await context.MemberFaces.FirstOrDefaultAsync(mf => mf.Id == eventData.RefId.Value, cancellationToken);
+                            if (memberFace != null)
+                            {
+                                memberFace.ThumbnailUrl = eventData.FinalFileUrl;
+                                logger.LogInformation("MemberFace ID {MemberFaceId} thumbnail URL updated to {FinalFileUrl}.", memberFace.Id, eventData.FinalFileUrl);
+                            }
+                            else
+                            {
+                                logger.LogWarning("MemberFace with ID {MemberFaceId} not found for thumbnail URL update.", eventData.RefId.Value);
+                            }
+                            break;
                         // Add more cases for other RefTypes as needed
                         default:
                             logger.LogWarning("Unhandled RefType {RefType} for FileId {FileId}.", eventData.RefType.Value, eventData.FileId);

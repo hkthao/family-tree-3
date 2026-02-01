@@ -25,5 +25,8 @@ public enum MediaLinkType
     /// <summary>
     /// Media linked as a background image.
     /// </summary>
-    BackgroundImage = 4
+    /// <summary>
+    /// Media linked as a thumbnail image.
+    /// </summary>
+    Thumbnail = 5
 }

@@ -41,7 +41,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
             MediaType = MediaType.Image,
         }; // Corrected: Closing brace for command
 
-        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mapper);
+        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mapper);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -75,7 +75,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
             MediaType = MediaType.Image
         };
 
-        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mapper);
+        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mapper);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -123,7 +123,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
             MediaType = MediaType.Image
         };
 
-        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mapper);
+        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mapper);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -156,7 +156,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
             // MediaType is null, should be inferred
         };
 
-        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mapper);
+        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mapper);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -185,7 +185,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
             MediaType = MediaType.Image, // Explicitly provided as Image
         };
 
-        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mapper);
+        var handler = new CreateFamilyMediaFromUrlCommandHandler(_context, _mockAuthorizationService.Object, _mapper);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

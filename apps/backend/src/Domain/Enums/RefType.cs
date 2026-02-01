@@ -6,5 +6,6 @@ public enum RefType
     Event,
     Family,
     MemoryItem,
-    UserProfile // NEW
+    UserProfile, // NEW
+    MemberFace // NEW
 }

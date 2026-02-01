@@ -11,18 +11,15 @@ public class CreateFamilyMediaFromUrlCommandHandler : IRequestHandler<CreateFami
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
-    private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
 
     public CreateFamilyMediaFromUrlCommandHandler(
         IApplicationDbContext context,
         IAuthorizationService authorizationService,
-        ICurrentUser currentUser,
         IMapper mapper)
     {
         _context = context;
         _authorizationService = authorizationService;
-        _currentUser = currentUser;
         _mapper = mapper;
     }
 
