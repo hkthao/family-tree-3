@@ -52,7 +52,7 @@ services:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - local-uploads:/app/apps/backend/uploads
+      - local-uploads:/app/uploads
 
     logging:
       driver: json-file

@@ -97,13 +97,23 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             effectiveContentType = GetContentTypeFromMediaType(actualMediaType);
         }
 
+        // Determine the target folder for Cloudinary based on family ID and media type
+        var mediaTypeFolder = request.MediaType switch
+        {
+            Domain.Enums.MediaType.Image => "images",
+            Domain.Enums.MediaType.Video => "videos",
+            Domain.Enums.MediaType.Document => "documents",
+            _ => "others"
+        };
+        var targetFolder = $"{request.FamilyId.Value}/{mediaTypeFolder}";
+
         // Save file locally first using the new IFileStorageService (LocalDiskFileStorageService)
         using var fileStream = new MemoryStream(request.File);
         var saveResult = await _fileStorageService.SaveFileAsync(
             fileStream,
             request.FileName,
             effectiveContentType,
-            request.Folder,
+            targetFolder, // Use the dynamically generated targetFolder
             cancellationToken
         );
 
@@ -138,7 +148,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             OriginalFileName = request.FileName,
             TempLocalPath = tempLocalPath,
             ContentType = effectiveContentType,
-            Folder = request.Folder,
+            Folder = targetFolder,
             UploadedBy = _currentUser.UserId,
             FileSize = request.File.Length,
             FamilyId = request.FamilyId // Assign the nullable Guid directly
