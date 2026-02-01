@@ -100,25 +100,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  ocr-service:
-    build:
-      context: ../services/ocr-service
-      dockerfile: Dockerfile
-    container_name: family-tree-ocr-service
-    ports:
-      - "8001:8000" # Expose port 8000 for the FastAPI app
-    env_file:
-      - ./.env.dev
-    environment:
-      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
-      - TZ=Asia/Ho_Chi_Minh
-    mem_limit: 2g # Set memory limit for OCR service
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   notification-service:
     build:
       context: ../services/notification-service

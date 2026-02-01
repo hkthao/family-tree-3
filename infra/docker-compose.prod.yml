@@ -90,8 +90,13 @@ services:
         condition: service_healthy
       rabbitmq: # Add dependency on rabbitmq
         condition: service_healthy
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - local-uploads:/app/uploads
     networks:
       - app-network
     restart: unless-stopped
@@ -180,6 +185,15 @@ services:
       - "3001:3000" # Expose port 3000 for the Node.js app
     env_file:
       - ./.env
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - local-uploads:/app/uploads # Mount shared volume
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - app-network
     restart: unless-stopped
@@ -193,3 +207,4 @@ volumes:
   backend-dataprotection-keys:
   redis-data:
   rabbitmq-data:
+  local-uploads:
