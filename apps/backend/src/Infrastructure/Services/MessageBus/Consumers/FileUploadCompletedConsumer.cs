@@ -116,7 +116,7 @@ public class FileUploadCompletedConsumer : BackgroundService
 
             try
             {
-                var familyMedia = await context.FamilyMedia.FindAsync(new object[] { eventData.FileId }, cancellationToken);
+                var familyMedia = await context.FamilyMedia.FindAsync([eventData.FileId], cancellationToken);
 
                 if (familyMedia == null)
                 {
@@ -161,6 +161,18 @@ public class FileUploadCompletedConsumer : BackgroundService
                             else
                             {
                                 logger.LogWarning("Family with ID {FamilyId} not found for avatar update.", eventData.RefId.Value);
+                            }
+                            break;
+                        case RefType.Member: // NEW: Handle Member RefType
+                            var member = await context.Members.FirstOrDefaultAsync(m => m.Id == eventData.RefId.Value, cancellationToken);
+                            if (member != null)
+                            {
+                                member.UpdateAvatar(eventData.FinalFileUrl);
+                                logger.LogInformation("Member ID {MemberId} avatar updated to {FinalFileUrl}.", member.Id, eventData.FinalFileUrl);
+                            }
+                            else
+                            {
+                                logger.LogWarning("Member with ID {MemberId} not found for avatar update.", eventData.RefId.Value);
                             }
                             break;
                         // Add more cases for other RefTypes as needed
