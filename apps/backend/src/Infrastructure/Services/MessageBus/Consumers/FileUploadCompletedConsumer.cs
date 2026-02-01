@@ -22,7 +22,7 @@ public class FileUploadCompletedConsumer : BackgroundService
     private IChannel? _channel;
 
     private readonly string _exchangeName = MessageBusConstants.Exchanges.FileUpload;
-    private readonly string _queueName = "backend_file_upload_completed_queue"; // Declare _queueName here
+    private readonly string _queueName = MessageBusConstants.Queues.FileUploadCompletedQueue; // Declare _queueName here
     private readonly string _routingKey = MessageBusConstants.RoutingKeys.FileUploadCompleted;
 
     public FileUploadCompletedConsumer(ILogger<FileUploadCompletedConsumer> logger, IServiceScopeFactory serviceScopeFactory, ConnectionFactory factory)

@@ -19,4 +19,9 @@ public static class MessageBusConstants
         public const string FileDeletionCompleted = "file.deletion.completed"; // NEW
         // Add other routing keys here
     }
+
+    public static class Queues
+    {
+        public const string FileUploadCompletedQueue = "backend_file_upload_completed_queue"; // NEW
+    }
 }
