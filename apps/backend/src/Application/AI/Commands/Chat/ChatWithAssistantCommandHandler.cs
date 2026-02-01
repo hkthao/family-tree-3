@@ -236,7 +236,7 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 
                 if (request.Attachments != null && request.Attachments.Any())
                 {
-                    _logger.LogWarning("OCR service has been removed. Attachments will be ignored for DataGeneration context.");
+        
                     // You might want to log a warning or return an error if attachments are crucial for data generation
                 }
 
@@ -299,7 +299,7 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
                         {
                             _logger.LogInformation("Đang xử lý hình ảnh cho nhận dạng khuôn mặt: {ImageUrl}", attachment.Url);
                             // The direct processing of images for face detection (using ImageBytes) will still work
-                            // but any prior OCR processing is removed.
+                
                             var detectFacesCommand = new DetectFacesCommand
                             {
                                 FamilyId = request.FamilyId,

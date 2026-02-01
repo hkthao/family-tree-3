@@ -57,12 +57,7 @@ public static class DependencyInjection
         // Register the ApiKeyAuthenticationFilter
         services.AddScoped<ApiKeyAuthenticationFilter>();
 
-        // Register OcrSettings
-        services.Configure<OcrSettings>(configuration.GetSection(nameof(OcrSettings)));
-        services.AddHttpClient<IOcrService, OcrService>(client =>
-        {
-            client.BaseAddress = new Uri(configuration.GetSection(nameof(OcrSettings))["BaseUrl"] ?? throw new InvalidOperationException("OCR BaseUrl is not configured."));
-        });
+
 
     }
 }

@@ -1,4 +1,4 @@
-name: CD Pipeline for OCR Service
+name: CD Pipeline for Storage Service
 
 on:
   workflow_run:
@@ -7,7 +7,7 @@ on:
       - completed
 
 jobs:
-  docker-push:
+  docker-push-storage-service:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
 
@@ -23,10 +23,10 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Build and push ocr-service Docker image
+    - name: Build and push storage-service Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./services/ocr-service
-        file: ./services/ocr-service/Dockerfile
+        context: ./services/storage-service
+        file: ./services/storage-service/Dockerfile
         push: true
-        tags: hkthao/family-tree-ocr-service:latest
+        tags: hkthao/family-tree-storage-service:latest

@@ -14,9 +14,9 @@ services:
       - admin
       - backend
       - face-service
-      - ocr-service
       - knowledge-search-service
       - llm-gateway-service
+      - storage-service
 
   certbot:
     image: certbot/certbot
@@ -125,21 +125,6 @@ services:
       - app-network
     restart: unless-stopped
 
-  ocr-service:
-    image: hkthao/family-tree-ocr-service:latest # Assuming a pre-built image
-    platform: linux/amd64
-    container_name: family-tree-ocr-service-prod
-    ports:
-      - "8003:8000" # Expose port 3000 for the Node.js app
-    env_file:
-      - ./.env
-    environment:
-      - PYTHONUNBUFFERED=1
-    mem_limit: 2g # Consistent with dev, adjust if needed
-    networks:
-      - app-network
-    restart: unless-stopped
-
   notification-service:
     image: hkthao/family-tree-notification-service:latest
     container_name: family-tree-notification-service
@@ -187,6 +172,18 @@ services:
       - app-network
     restart: unless-stopped
 
+  storage-service:
+    image: hkthao/family-tree-storage-service:latest
+    platform: linux/amd64
+    container_name: family-tree-storage-service-prod
+    ports:
+      - "3001:3000" # Expose port 3000 for the Node.js app
+    env_file:
+      - ./.env
+    networks:
+      - app-network
+    restart: unless-stopped
+
 networks:
   app-network:
     driver: bridge
@@ -195,5 +192,4 @@ volumes:
   mysql-data:
   backend-dataprotection-keys:
   redis-data:
-  lancedb-data:
   rabbitmq-data:
