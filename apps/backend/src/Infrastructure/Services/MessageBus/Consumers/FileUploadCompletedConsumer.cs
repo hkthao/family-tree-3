@@ -151,6 +151,18 @@ public class FileUploadCompletedConsumer : BackgroundService
                                 logger.LogWarning("UserProfile with ID {ProfileId} not found for avatar update.", eventData.RefId.Value);
                             }
                             break;
+                        case RefType.Family: // NEW: Handle Family RefType
+                            var family = await context.Families.FirstOrDefaultAsync(f => f.Id == eventData.RefId.Value, cancellationToken);
+                            if (family != null)
+                            {
+                                family.UpdateAvatar(eventData.FinalFileUrl);
+                                logger.LogInformation("Family ID {FamilyId} avatar updated to {FinalFileUrl}.", family.Id, eventData.FinalFileUrl);
+                            }
+                            else
+                            {
+                                logger.LogWarning("Family with ID {FamilyId} not found for avatar update.", eventData.RefId.Value);
+                            }
+                            break;
                         // Add more cases for other RefTypes as needed
                         default:
                             logger.LogWarning("Unhandled RefType {RefType} for FileId {FileId}.", eventData.RefType.Value, eventData.FileId);

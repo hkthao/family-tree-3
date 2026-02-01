@@ -42,7 +42,9 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMed
                     ContentType = "image/png", // Assuming PNG for now
                     FamilyId = null, // This is a user avatar, not necessarily tied to a family.
                     RefType = RefType.UserProfile, // Link to UserProfile
-                    RefId = request.Id // ID of the UserProfile
+                    RefId = request.Id, // ID of the UserProfile
+                    MediaLinkType = MediaLinkType.Avatar, // This is an avatar
+                    AllowMultipleMediaLinks = false // Avatars should not allow multiple links
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);

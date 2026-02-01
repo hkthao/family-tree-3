@@ -37,16 +37,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         _currentUserMock.Setup(x => x.UserId).Returns(userId);
 
         var avatarBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("fake image data")); // Simulate image data
-        var expectedAvatarUrl = "http://uploaded.example.com/avatar.png";
-        var familyMediaId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateFamilyMediaCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = familyMediaId, FilePath = expectedAvatarUrl }));
-
-        // Mock the FamilyMedia DbSet to return a FamilyMedia object when FindAsync is called
-        var mockFamilyMedia = new FamilyMedia { Id = familyMediaId, FilePath = expectedAvatarUrl };
-        _context.FamilyMedia.Add(mockFamilyMedia);
-        await _context.SaveChangesAsync();
+                     .ReturnsAsync(Result<FamilyMediaDto>.Success(new FamilyMediaDto { Id = Guid.NewGuid(), FilePath = "http://temp.example.com/temp.png" }));
 
         var command = new CreateFamilyCommand
         {
@@ -72,7 +65,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily!.Name.Should().Be(command.Name);
         createdFamily.Description.Should().Be(command.Description);
         createdFamily.Address.Should().Be(command.Address);
-        createdFamily.AvatarUrl.Should().Be(expectedAvatarUrl); // Assert against expected uploaded URL
+        createdFamily.AvatarUrl.Should().BeNull(); // AvatarUrl is now handled asynchronously
         createdFamily.Visibility.Should().Be(command.Visibility);
         createdFamily.Code.Should().StartWith("FAM-");
         createdFamily.FamilyUsers.Should().HaveCount(1); // Only Creator (Manager)

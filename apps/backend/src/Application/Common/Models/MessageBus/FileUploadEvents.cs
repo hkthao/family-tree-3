@@ -12,9 +12,10 @@ public class FileUploadRequestedEvent : IntegrationEvent
     public string? Folder { get; set; }
     public Guid UploadedBy { get; set; }
     public long FileSize { get; set; }
-    public Guid? FamilyId { get; set; } // Optional, for family-specific uploads
-    public RefType? RefType { get; set; } // NEW
-    public Guid? RefId { get; set; } // NEW
+    public Guid? FamilyId { get; set; } // For Family-specific folder structures or permissions
+    public RefType? RefType { get; set; }
+    public Guid? RefId { get; set; }
+    public MediaLinkType? MediaLinkType { get; set; } // NEW
 }
 
 public class FileUploadCompletedEvent : IntegrationEvent
@@ -28,6 +29,7 @@ public class FileUploadCompletedEvent : IntegrationEvent
     public string? Error { get; set; } // Added for error reporting
     public RefType? RefType { get; set; } // NEW
     public Guid? RefId { get; set; } // NEW
+    public MediaLinkType? MediaLinkType { get; set; } // NEW
 }
 
 public class FileDeletionRequestedEvent : IntegrationEvent

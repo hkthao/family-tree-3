@@ -15,4 +15,6 @@ public record CreateFamilyMediaCommand : IRequest<Result<FamilyMediaDto>>
     public string? Folder { get; init; } // Folder within storage (e.g., "photos", "videos")
     public RefType? RefType { get; init; } // New: Type of entity this media is linked to
     public Guid? RefId { get; init; } // New: ID of the entity this media is linked to
+    public MediaLinkType? MediaLinkType { get; init; } // New: Type of media link (e.g., Avatar, GalleryImage)
+    public bool AllowMultipleMediaLinks { get; init; } = false; // NEW: Option to allow multiple media links for the same RefType/RefId/MediaLinkType
 }

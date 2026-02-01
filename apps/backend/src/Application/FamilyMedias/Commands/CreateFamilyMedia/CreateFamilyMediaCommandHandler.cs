@@ -141,18 +141,52 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         _context.FamilyMedia.Add(familyMedia);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Create MediaLink if RefType and RefId are provided
-        if (request.RefType.HasValue && request.RefId.HasValue)
+        // Handle MediaLink creation/update based on AllowMultipleMediaLinks option
+        if (request.RefType.HasValue && request.RefId.HasValue && request.MediaLinkType.HasValue)
         {
-            var mediaLink = new MediaLink
+            if (request.AllowMultipleMediaLinks)
             {
-                FamilyMediaId = familyMedia.Id,
-                RefType = request.RefType.Value,
-                RefId = request.RefId.Value
-            };
-            _context.MediaLinks.Add(mediaLink);
-            await _context.SaveChangesAsync(cancellationToken);
+                // Create a new MediaLink, allowing multiple for this RefType/RefId/MediaLinkType combination
+                var mediaLink = new MediaLink
+                {
+                    FamilyMediaId = familyMedia.Id,
+                    RefType = request.RefType.Value,
+                    RefId = request.RefId.Value,
+                    MediaLinkType = request.MediaLinkType.Value // Assign MediaLinkType
+                };
+                _context.MediaLinks.Add(mediaLink);
+            }
+            else
+            {
+                // Find existing MediaLink with the same RefType, RefId, and MediaLinkType
+                var existingMediaLink = await _context.MediaLinks
+                    .FirstOrDefaultAsync(ml => ml.RefType == request.RefType.Value &&
+                                               ml.RefId == request.RefId.Value &&
+                                               ml.MediaLinkType == request.MediaLinkType.Value, cancellationToken);
+
+                if (existingMediaLink != null)
+                {
+                    // Update existing MediaLink to point to the new FamilyMedia
+                    existingMediaLink.FamilyMediaId = familyMedia.Id;
+                    // _context.MediaLinks is an observable collection in EF Core,
+                    // so changes to existingMediaLink will be tracked automatically.
+                }
+                else
+                {
+                    // No existing MediaLink found, create a new one
+                    var mediaLink = new MediaLink
+                    {
+                        FamilyMediaId = familyMedia.Id,
+                        RefType = request.RefType.Value,
+                        RefId = request.RefId.Value,
+                        MediaLinkType = request.MediaLinkType.Value // Assign MediaLinkType
+                    };
+                    _context.MediaLinks.Add(mediaLink);
+                }
+            }
+            await _context.SaveChangesAsync(cancellationToken); // Save changes for MediaLink
         }
+
 
         // Publish message to RabbitMQ for storage-service to pick up
         var fileUploadEvent = new FileUploadRequestedEvent
@@ -166,7 +200,8 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             FileSize = request.File.Length,
             FamilyId = request.FamilyId, // Assign the nullable Guid directly
             RefType = request.RefType, // NEW
-            RefId = request.RefId // NEW
+            RefId = request.RefId, // NEW
+            MediaLinkType = request.MediaLinkType // NEW
         };
         await _messageBus.PublishAsync(Exchanges.FileUpload, RoutingKeys.FileUploadRequested, fileUploadEvent);
 

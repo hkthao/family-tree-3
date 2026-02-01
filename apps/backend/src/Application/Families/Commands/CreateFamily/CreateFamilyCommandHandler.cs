@@ -4,7 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils; // NEW
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Domain.Entities;
-using backend.Domain.Enums;
+using backend.Domain.Enums; // NEW
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
@@ -56,7 +56,10 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
 
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    FamilyId = entity.Id, // Link media to the newly created Family
+                    RefId = entity.Id, // Link media to the newly created Family
+                    RefType = RefType.Family,
+                    MediaLinkType = MediaLinkType.Avatar,
+                    AllowMultipleMediaLinks = false, // Avatars should not allow multiple links
                     File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
                     ContentType = contentType, // Use inferred content type
@@ -75,8 +78,6 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
                 {
                     return Result<Guid>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
-
-                entity.UpdateAvatar(uploadResult.Value.FilePath); // Update avatar after successful upload using the returned FilePath
             }
             catch (FormatException)
             {
