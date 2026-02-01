@@ -62,7 +62,7 @@ public class DeleteFamilyMediaCommandHandlerTests : TestBase
             MediaType = mediaType,
             FileSize = 100,
             Description = "Test description",
-            UploadedBy = _mockUser.Object.UserId
+
         };
     }
 

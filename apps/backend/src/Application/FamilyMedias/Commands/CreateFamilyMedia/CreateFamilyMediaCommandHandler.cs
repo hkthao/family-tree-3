@@ -133,8 +133,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             FilePath = tempLocalPath, // Store temporary local path
             MediaType = actualMediaType,
             FileSize = request.File.Length,
-            Description = request.Description,
-            UploadedBy = _currentUser.UserId,
+
             // DeleteHash will be set later by storage-service if needed
         };
 

@@ -57,7 +57,7 @@ public class CreateFamilyMediaFromUrlCommandHandlerTests : TestBase
         var createdMedia = await _context.FamilyMedia.FindAsync(result.Value.Id);
         createdMedia.Should().NotBeNull();
         createdMedia!.FamilyId.Should().Be(command.FamilyId);
-        createdMedia.UploadedBy.Should().Be(_mockUser.Object.UserId);
+
     }
 
     [Fact]

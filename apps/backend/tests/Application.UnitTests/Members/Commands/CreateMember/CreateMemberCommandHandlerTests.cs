@@ -62,7 +62,7 @@ public class CreateMemberCommandHandlerTests : TestBase
             FilePath = expectedAvatarUrl,
             MediaType = Domain.Enums.MediaType.Image,
             FileSize = 12345,
-            UploadedBy = Guid.NewGuid() // Mock a user ID for upload
+
         });
         await _context.SaveChangesAsync();
 

@@ -42,7 +42,7 @@ public class LinkMediaToEntityCommandHandlerTests : TestBase
             MediaType = mediaType,
             FileSize = 100,
             Description = "Initial description",
-            UploadedBy = _mockUser.Object.UserId
+
         };
     }
 

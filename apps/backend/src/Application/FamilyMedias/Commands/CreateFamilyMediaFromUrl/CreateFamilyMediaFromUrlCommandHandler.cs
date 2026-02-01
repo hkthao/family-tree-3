@@ -57,7 +57,7 @@ public class CreateFamilyMediaFromUrlCommandHandler : IRequestHandler<CreateFami
             MediaType = request.MediaType ?? request.Url.InferMediaTypeFromUrl(), // Infer from URL using the new extension method
             FileSize = 0, // File size is 0 for URL-based media
             Description = request.Description,
-            UploadedBy = _currentUser.UserId // Current user uploading the file
+
         };
 
         _context.FamilyMedia.Add(familyMedia);

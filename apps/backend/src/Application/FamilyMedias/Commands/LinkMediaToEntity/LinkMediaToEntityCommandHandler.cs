@@ -27,8 +27,8 @@ public class LinkMediaToEntityCommandHandler : IRequestHandler<LinkMediaToEntity
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"FamilyMedia with ID {request.FamilyMediaId}"), ErrorSources.NotFound);
         }
 
-        // Authorization check for the family associated with the media
-        if (!_authorizationService.CanManageFamily(familyMedia.FamilyId))
+        // Authorization check for the family associated with the media - only applies if media is associated with a family
+        if (familyMedia.FamilyId.HasValue && !_authorizationService.CanManageFamily(familyMedia.FamilyId.Value))
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }

@@ -103,8 +103,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
 
         var createdMedia = await _context.FamilyMedia.FindAsync(result.Value.Id);
         createdMedia.Should().NotBeNull();
-        createdMedia!.FamilyId.Should().Be(command.FamilyId?.ToString());
-        createdMedia.UploadedBy.Should().Be(_mockUser.Object.UserId);
+        createdMedia!.FamilyId.Should().Be(command.FamilyId);
 
         _fileStorageServiceMock.Verify(s => s.SaveFileAsync(
             It.IsAny<Stream>(),
@@ -281,7 +280,7 @@ public class CreateFamilyMediaCommandHandlerTests : TestBase
             FilePath = "http://existing.com/file1.jpg",
             MediaType = MediaType.Image,
             FileSize = existingFilesSize, // FileSize is here
-            UploadedBy = _mockUser.Object.UserId
+
         });
         await _context.SaveChangesAsync();
 

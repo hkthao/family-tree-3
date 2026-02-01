@@ -37,8 +37,8 @@ public class DeleteFamilyMediaCommandHandler : IRequestHandler<DeleteFamilyMedia
             return Result.Failure(string.Format(ErrorMessages.NotFound, $"FamilyMedia with ID {request.Id}"), ErrorSources.NotFound);
         }
 
-        // Authorization check
-        if (!_authorizationService.CanManageFamily(familyMedia.FamilyId))
+        // Authorization check - only applies if media is associated with a family
+        if (familyMedia.FamilyId.HasValue && !_authorizationService.CanManageFamily(familyMedia.FamilyId.Value))
         {
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
@@ -49,14 +49,14 @@ public class DeleteFamilyMediaCommandHandler : IRequestHandler<DeleteFamilyMedia
             FileId = familyMedia.Id,
             FilePath = familyMedia.FilePath,
             DeleteHash = familyMedia.DeleteHash, // Pass DeleteHash if available
-            RequestedBy = familyMedia.UploadedBy ?? Guid.Empty, // Assuming UploadedBy is available
+            RequestedBy = Guid.Empty, // UploadedBy property was removed. CreatedBy is a string, so using Guid.Empty for RequestedBy (Guid).
             FamilyId = familyMedia.FamilyId
         };
         await _messageBus.PublishAsync(MessageBusConstants.Exchanges.FileUpload, MessageBusConstants.RoutingKeys.FileDeletionRequested, fileDeletionEvent);
 
         _logger.LogInformation("FileDeletionRequestedEvent published for FileId {FileId} with FilePath {FilePath}", familyMedia.Id, familyMedia.FilePath);
 
-        _context.FamilyMedia.Remove(familyMedia); // Soft delete is handled by interceptor
+        _context.FamilyMedia.Remove(familyMedia); // FamilyMedia is now hard deleted
 
         await _context.SaveChangesAsync(cancellationToken);
 
