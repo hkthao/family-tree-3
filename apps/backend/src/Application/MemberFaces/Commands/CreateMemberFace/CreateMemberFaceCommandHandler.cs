@@ -29,6 +29,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
         {
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
+        var id = Guid.NewGuid();
 
         string? finalThumbnailUrl = null; // Declare here
         if (!string.IsNullOrEmpty(request.Thumbnail))
@@ -41,7 +42,7 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
                     FamilyId = member.FamilyId,
-                    RefId = request.MemberId, // Link media to the Member
+                    RefId = id, // Link media to the Member
                     RefType = RefType.MemberFace, // Thumbnail for a MemberFace
                     MediaLinkType = MediaLinkType.Thumbnail, // Specify it's a thumbnail
                     AllowMultipleMediaLinks = true, // Allow multiple thumbnails per member (different faces)
@@ -82,7 +83,6 @@ public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuth
             }
         }
 
-        var id = Guid.NewGuid();
         var entity = new MemberFace
         {
             Id = id,
