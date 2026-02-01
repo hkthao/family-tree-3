@@ -90,7 +90,7 @@ async function connectRabbitMQ() {
 }
 
 async function processFileUploadRequestedEvent(eventData) {
-  const { file_id, original_file_name, temp_local_path, content_type, folder, uploaded_by, family_id } = eventData;
+  const { file_id, original_file_name, temp_local_path, content_type, folder, uploaded_by, family_id, ref_id, ref_type } = eventData;
 
   let finalFileUrl = null;
   let deleteHash = null;
@@ -147,6 +147,8 @@ async function processFileUploadRequestedEvent(eventData) {
     delete_hash: deleteHash,
     uploaded_by: uploaded_by,
     family_id: family_id,
+    ref_id: ref_id, // Added ref_id
+    ref_type: ref_type, // Added ref_type
     error: uploadError // Include error if any
   };
 

@@ -104,7 +104,10 @@ describe('ImgurStorageProvider', () => {
   });
 
   test('should return false for invalid deletehash', async () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await provider.deleteFile(null);
     expect(result).toBe(false);
+    expect(consoleWarnSpy).toHaveBeenCalledWith('Invalid deletehash for Imgur delete operation.');
+    consoleWarnSpy.mockRestore();
   });
 });

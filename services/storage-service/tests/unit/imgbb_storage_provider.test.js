@@ -102,7 +102,10 @@ describe('ImgBBStorageProvider', () => {
   });
 
   test('should return false for invalid deleteUrl', async () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await provider.deleteFile('invalid_url');
     expect(result).toBe(false);
+    expect(consoleWarnSpy).toHaveBeenCalledWith('Invalid deleteUrl for ImgBB delete operation.');
+    consoleWarnSpy.mockRestore();
   });
 });
