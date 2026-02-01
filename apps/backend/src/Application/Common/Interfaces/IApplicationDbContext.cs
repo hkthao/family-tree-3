@@ -99,16 +99,6 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<Prompt> Prompts { get; }
 
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceProfile.
-    /// </summary>
-    DbSet<VoiceProfile> VoiceProfiles { get; }
-
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể VoiceGeneration.
-    /// </summary>
-    DbSet<VoiceGeneration> VoiceGenerations { get; }
-
 
 
     /// <summary>

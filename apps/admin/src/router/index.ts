@@ -23,7 +23,6 @@ import { miscRoutes } from './features/misc.routes'; // New
 import { chatRoutes } from './features/chat.routes'; // New
 import { promptRoutes } from './features/prompt.routes'; // New
 import { relationshipDetectionRoutes } from './features/relationship-detection.routes'; // NEW
-import { voiceProfileRoutes } from './features/voice-profile.routes'; // NEW
 import userPushTokenRoutes from './features/user-push-token.routes'; // NEW
 
 const router = createRouter({
@@ -48,7 +47,6 @@ const router = createRouter({
         ...chatRoutes, // New
         ...promptRoutes, // New
         ...relationshipDetectionRoutes, // NEW
-        ...voiceProfileRoutes, // NEW
       ],
     },
     ...publicRoutes, // Replaced

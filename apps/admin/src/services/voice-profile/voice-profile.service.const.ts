@@ -1,1 +1,0 @@
-export const VOICE_PROFILE_SERVICE_NAME = 'IVoiceProfileService';

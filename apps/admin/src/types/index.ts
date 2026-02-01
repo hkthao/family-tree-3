@@ -30,8 +30,7 @@ export * from './apiError.d';
 export * from './ai.d';
 export * from './ocr.d'; // NEW
 export * from './file.d'; // NEW
-export * from './voice-profile.d';
-export * from './voice-generation.d'; // NEW
+
 export * from './user-push-token.d'; // NEW
 export * from './familyFollow.d'; // NEW
 
