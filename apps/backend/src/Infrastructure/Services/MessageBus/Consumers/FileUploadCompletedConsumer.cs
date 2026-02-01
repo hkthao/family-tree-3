@@ -8,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using backend.Domain.Enums; // NEW
+using Microsoft.EntityFrameworkCore; // NEW
 
 namespace backend.Infrastructure.Services.MessageBus.Consumers;
 
@@ -131,6 +133,30 @@ public class FileUploadCompletedConsumer : BackgroundService
 
                 familyMedia.FilePath = eventData.FinalFileUrl;
                 familyMedia.DeleteHash = eventData.DeleteHash; // Update delete hash if provided
+
+                // Handle entity-specific updates based on RefType and RefId
+                if (eventData.RefType.HasValue && eventData.RefId.HasValue)
+                {
+                    switch (eventData.RefType.Value)
+                    {
+                        case RefType.UserProfile:
+                            var user = await context.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Profile!.Id == eventData.RefId.Value, cancellationToken);
+                            if (user != null && user.Profile != null)
+                            {
+                                user.Profile.UpdateAvatar(eventData.FinalFileUrl);
+                                logger.LogInformation("UserProfile ID {ProfileId} avatar updated to {FinalFileUrl}.", user.Profile.Id, eventData.FinalFileUrl);
+                            }
+                            else
+                            {
+                                logger.LogWarning("UserProfile with ID {ProfileId} not found for avatar update.", eventData.RefId.Value);
+                            }
+                            break;
+                        // Add more cases for other RefTypes as needed
+                        default:
+                            logger.LogWarning("Unhandled RefType {RefType} for FileId {FileId}.", eventData.RefType.Value, eventData.FileId);
+                            break;
+                    }
+                }
 
                 await context.SaveChangesAsync(cancellationToken);
                 logger.LogInformation("FamilyMedia ID {FileId} updated with final URL: {FinalFileUrl}.", familyMedia.Id, eventData.FinalFileUrl);

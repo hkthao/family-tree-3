@@ -57,6 +57,11 @@ public class UserProfile : BaseAuditableEntity
     /// </summary>
     public string? Avatar { get; private set; }
 
+    public void UpdateAvatar(string avatarUrl)
+    {
+        Avatar = avatarUrl;
+    }
+
     public void Update(string externalId, string email, string name, string firstName, string lastName, string phone, string avatar)
     {
         ExternalId = externalId;

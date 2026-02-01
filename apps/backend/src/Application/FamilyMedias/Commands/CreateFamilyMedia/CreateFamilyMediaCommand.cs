@@ -13,4 +13,6 @@ public record CreateFamilyMediaCommand : IRequest<Result<FamilyMediaDto>>
     public MediaType? MediaType { get; init; }
     public string? Description { get; init; }
     public string? Folder { get; init; } // Folder within storage (e.g., "photos", "videos")
+    public RefType? RefType { get; init; } // New: Type of entity this media is linked to
+    public Guid? RefId { get; init; } // New: ID of the entity this media is linked to
 }

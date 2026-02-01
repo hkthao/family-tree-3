@@ -5,6 +5,7 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Utils; // New using
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
 using backend.Application.Users.Specifications;
+using backend.Domain.Enums; // NEW
 
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
@@ -39,7 +40,9 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMed
                     FileName = $"User_Avatar_{Guid.NewGuid()}.png",
                     Folder = string.Format(UploadConstants.UserImagesFolder), // User specific folder
                     ContentType = "image/png", // Assuming PNG for now
-                    FamilyId = null // This is a user avatar, not necessarily tied to a family.
+                    FamilyId = null, // This is a user avatar, not necessarily tied to a family.
+                    RefType = RefType.UserProfile, // Link to UserProfile
+                    RefId = request.Id // ID of the UserProfile
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
@@ -54,7 +57,7 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMed
                     return Result.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileUpload);
                 }
 
-                avatarUrl = uploadResult.Value.FilePath; // Update avatarUrl with the new FilePath
+                avatarUrl = string.Empty; // Indicate avatar is pending upload
             }
             catch (FormatException)
             {

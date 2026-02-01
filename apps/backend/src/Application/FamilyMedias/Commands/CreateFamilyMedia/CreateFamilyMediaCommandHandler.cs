@@ -6,6 +6,7 @@ using backend.Application.Common.Models.MessageBus; // NEW
 using backend.Application.FamilyMedias.DTOs;
 using Microsoft.Extensions.Logging;
 using static backend.Application.Common.Constants.MessageBusConstants;
+using backend.Domain.Entities; // NEW
 
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
@@ -140,6 +141,19 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         _context.FamilyMedia.Add(familyMedia);
         await _context.SaveChangesAsync(cancellationToken);
 
+        // Create MediaLink if RefType and RefId are provided
+        if (request.RefType.HasValue && request.RefId.HasValue)
+        {
+            var mediaLink = new MediaLink
+            {
+                FamilyMediaId = familyMedia.Id,
+                RefType = request.RefType.Value,
+                RefId = request.RefId.Value
+            };
+            _context.MediaLinks.Add(mediaLink);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         // Publish message to RabbitMQ for storage-service to pick up
         var fileUploadEvent = new FileUploadRequestedEvent
         {
@@ -150,7 +164,9 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             Folder = targetFolder,
             UploadedBy = _currentUser.UserId,
             FileSize = request.File.Length,
-            FamilyId = request.FamilyId // Assign the nullable Guid directly
+            FamilyId = request.FamilyId, // Assign the nullable Guid directly
+            RefType = request.RefType, // NEW
+            RefId = request.RefId // NEW
         };
         await _messageBus.PublishAsync(Exchanges.FileUpload, RoutingKeys.FileUploadRequested, fileUploadEvent);
 
@@ -163,7 +179,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
         return Result<FamilyMediaDto>.Success(familyMediaDto);
     }
 
-    private static string GetContentTypeFromMediaType(backend.Domain.Enums.MediaType mediaType)
+    private static string GetContentTypeFromMediaType(Domain.Enums.MediaType mediaType)
     {
         return mediaType switch
         {

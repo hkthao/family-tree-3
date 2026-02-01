@@ -1,4 +1,5 @@
 using backend.Application.Common.Models;
+using backend.Domain.Enums; // NEW
 
 namespace backend.Application.Common.Models.MessageBus;
 
@@ -12,6 +13,8 @@ public class FileUploadRequestedEvent : IntegrationEvent
     public Guid UploadedBy { get; set; }
     public long FileSize { get; set; }
     public Guid? FamilyId { get; set; } // Optional, for family-specific uploads
+    public RefType? RefType { get; set; } // NEW
+    public Guid? RefId { get; set; } // NEW
 }
 
 public class FileUploadCompletedEvent : IntegrationEvent
@@ -23,6 +26,8 @@ public class FileUploadCompletedEvent : IntegrationEvent
     public Guid UploadedBy { get; set; }
     public Guid? FamilyId { get; set; } // Optional
     public string? Error { get; set; } // Added for error reporting
+    public RefType? RefType { get; set; } // NEW
+    public Guid? RefId { get; set; } // NEW
 }
 
 public class FileDeletionRequestedEvent : IntegrationEvent

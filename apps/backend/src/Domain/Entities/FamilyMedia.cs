@@ -11,8 +11,5 @@ public class FamilyMedia : BaseAuditableEntity
     public long FileSize { get; set; } // in bytes
     public string? Description { get; set; }
     public string? DeleteHash { get; set; }
-
-
-
     public ICollection<MediaLink> MediaLinks { get; set; } = [];
 }
