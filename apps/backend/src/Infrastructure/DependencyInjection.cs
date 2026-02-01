@@ -123,8 +123,7 @@ public static class DependencyInjection
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
 
-        // If you want to use N8nFileStorageService instead, comment out the Imgur registration above
-        // and uncomment the line below.
+
 
         // Register NotificationSettings
 
