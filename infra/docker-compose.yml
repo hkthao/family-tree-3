@@ -203,11 +203,6 @@ services:
       - ./.env.dev
     environment:
       - TZ=Asia/Ho_Chi_Minh
-      - RABBITMQ__HOSTNAME=rabbitmq
-      - RABBITMQ__USERNAME=guest
-      - RABBITMQ__PASSWORD=guest
-      - RABBITMQ__PORT=5672
-      - CLOUDINARY_ROOTFOLDER=family-tree-uploads # Placeholder, user can change
     volumes:
       - local-uploads:/app/uploads # Mount shared volume
     logging:
