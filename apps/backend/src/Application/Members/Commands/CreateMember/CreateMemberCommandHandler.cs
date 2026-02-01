@@ -88,7 +88,11 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    FamilyId = request.FamilyId, // Add FamilyId
+                    RefId = member.Id, // Link media to the newly created Member
+                    RefType = RefType.Member,
+                    FamilyId = request.FamilyId,
+                    MediaLinkType = MediaLinkType.Avatar,
+                    AllowMultipleMediaLinks = false, // Avatars should not allow multiple links
                     File = imageData,
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png", // Use FileName property
                     ContentType = contentType, // Use inferred content type

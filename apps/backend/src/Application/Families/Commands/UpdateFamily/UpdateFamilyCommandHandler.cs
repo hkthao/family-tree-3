@@ -43,7 +43,11 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    FamilyId = entity.Id, // Link media to the updated Family
+                    RefId = entity.Id, // Link media to the updated Family
+                    RefType = RefType.Family,
+                    FamilyId = entity.Id,
+                    MediaLinkType = MediaLinkType.Avatar,
+                    AllowMultipleMediaLinks = false, // Avatars should not allow multiple links
                     File = imageData,
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
                     ContentType = contentType, // Use inferred content type

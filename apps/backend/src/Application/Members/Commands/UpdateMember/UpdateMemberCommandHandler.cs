@@ -56,11 +56,15 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
                 var createFamilyMediaCommand = new CreateFamilyMediaCommand
                 {
-                    FamilyId = request.FamilyId, // Add FamilyId
+                    RefId = member.Id, // Link media to the updated Member
+                    RefType = RefType.Member,
+                    FamilyId = request.FamilyId,
+                    MediaLinkType = MediaLinkType.Avatar,
+                    AllowMultipleMediaLinks = false, // Avatars should not allow multiple links
                     File = imageData,
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png",
                     ContentType = contentType, // Use inferred content type
-                    Folder = string.Format(UploadConstants.ImagesFolder, request.FamilyId),
+                    Folder = string.Format(UploadConstants.ImagesFolder, member.FamilyId),
                     MediaType = MediaType.Image // Explicitly set MediaType if known
                 };
 

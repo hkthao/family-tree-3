@@ -3,13 +3,13 @@ using System.Text.Json;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.MessageBus;
+using backend.Domain.Enums; // NEW
+using Microsoft.EntityFrameworkCore; // NEW
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using backend.Domain.Enums; // NEW
-using Microsoft.EntityFrameworkCore; // NEW
 
 namespace backend.Infrastructure.Services.MessageBus.Consumers;
 

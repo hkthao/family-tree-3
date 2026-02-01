@@ -4,9 +4,9 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.MessageBus; // NEW
 using backend.Application.FamilyMedias.DTOs;
+using backend.Domain.Entities; // NEW
 using Microsoft.Extensions.Logging;
 using static backend.Application.Common.Constants.MessageBusConstants;
-using backend.Domain.Entities; // NEW
 
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
