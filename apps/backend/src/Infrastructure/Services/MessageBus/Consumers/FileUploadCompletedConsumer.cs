@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.MessageBus;
@@ -6,8 +8,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
 
 namespace backend.Infrastructure.Services.MessageBus.Consumers;
 

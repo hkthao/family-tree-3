@@ -208,27 +208,27 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 
 
 
-                        var handler = new DetectFacesCommandHandler(
+            var handler = new DetectFacesCommandHandler(
 
 
 
-                            _faceApiServiceMock.Object,
+                _faceApiServiceMock.Object,
 
 
 
-                            _context,
+                _context,
 
 
 
-                            _loggerMock.Object,
+                _loggerMock.Object,
 
-                            _mediatorMock.Object, // Re-add IMediator mock
+                _mediatorMock.Object, // Re-add IMediator mock
 
-                            _mockUser.Object, // Pass ICurrentUser mock
+                _mockUser.Object, // Pass ICurrentUser mock
 
 
 
-                            _mockAuthorizationService.Object); // Pass IAuthorizationService mock
+                _mockAuthorizationService.Object); // Pass IAuthorizationService mock
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);

@@ -31,7 +31,7 @@ public class CreateMemberFaceCommandHandlerTests : TestBase
 
     private CreateMemberFaceCommandHandler CreateCreateHandler()
     {
-        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object,_messageBusMock.Object);
+        return new CreateMemberFaceCommandHandler(_context, _authorizationServiceMock.Object, _createLoggerMock.Object, _messageBusMock.Object);
     }
 
     [Fact]

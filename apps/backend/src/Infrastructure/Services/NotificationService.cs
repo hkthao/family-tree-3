@@ -1,8 +1,8 @@
+using backend.Application.Common.Events; // New using directive for events
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Notifications.DTOs;
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Events; // New using directive for events
 
 namespace backend.Infrastructure.Services;
 

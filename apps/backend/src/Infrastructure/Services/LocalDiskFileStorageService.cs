@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Services;
 
@@ -57,14 +57,14 @@ public class LocalDiskFileStorageService : IFileStorageService
             }
             finalPath = Path.Combine(targetDirectory, uniqueFileName);
         }
-        
+
         using (var file = new FileStream(finalPath, FileMode.Create, FileAccess.Write))
         {
             await fileStream.CopyToAsync(file, cancellationToken);
         }
 
         _logger.LogInformation("File saved locally: {FileName} at {FilePath}", fileName, finalPath);
-        
+
         // Return the local file path. It will be the "FilePath" in FamilyMedia and sent via message bus.
         return Result<FileStorageResultDto>.Success(new FileStorageResultDto { FileUrl = finalPath, DeleteHash = null });
     }

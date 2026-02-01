@@ -1,6 +1,7 @@
 using backend.Application.Common.Constants; // ADDED BACK
 using backend.Application.Common.Interfaces.Services.LLMGateway;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting; // NEW
 using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage;
@@ -11,7 +12,6 @@ using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options; // NEW
-using backend.Application.Common.Models.AppSetting; // NEW
 using Moq;
 using Xunit;
 
