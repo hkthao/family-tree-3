@@ -1,16 +1,16 @@
-name: CD Deploy OCR Service
+name: CD Deploy Storage Service
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-ocr-service:
+  deploy-storage-service:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Deploy OCR Service to Server via SSH
+    - name: Deploy Storage Service to Server via SSH
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -18,6 +18,6 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          docker compose -f docker-compose.prod.yml pull ocr-service
-          docker compose -f docker-compose.prod.yml up -d --no-deps ocr-service
-          echo "OCR Service deployment completed successfully!"
+          docker compose -f docker-compose.prod.yml pull storage-service
+          docker compose -f docker-compose.prod.yml up -d --no-deps storage-service
+          echo "Storage Service deployment completed successfully!"

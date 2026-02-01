@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-python-multipart
-Pillow
-pytesseract
-opencv-python-headless
-pdf2image
