@@ -1,5 +1,3 @@
-using System;
-
 namespace backend.Application.Common.Models;
 
 public abstract class IntegrationEvent

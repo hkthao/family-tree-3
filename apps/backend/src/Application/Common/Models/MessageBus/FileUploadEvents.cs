@@ -1,4 +1,3 @@
-using backend.Application.Common.Models;
 using backend.Domain.Enums; // NEW
 
 namespace backend.Application.Common.Models.MessageBus;

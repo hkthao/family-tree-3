@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.MessageBus; // NEW
 using Microsoft.Extensions.Logging;
-using static backend.Application.Common.Constants.MessageBusConstants; // NEW
 
 namespace backend.Application.FamilyMedias.Commands.DeleteFamilyMedia;
 
