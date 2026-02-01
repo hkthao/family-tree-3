@@ -98,17 +98,17 @@ async function processFileUploadRequestedEvent(eventData) {
 
   try {
     // Read the file from the shared local storage
-    const fileBuffer = await fs.readFile(TempLocalPath);
-    console.log(`[Storage Service] Read file from local path: ${TempLocalPath}`);
+    const fileBuffer = await fs.readFile(temp_local_path);
+    console.log(`[Storage Service] Read file from local path: ${temp_local_path}`);
 
     // Determine the Cloudinary folder
-    const cloudinaryFolder = Folder ? path.join(CLOUDINARY_ROOTFOLDER, Folder) : CLOUDINARY_ROOTFOLDER;
+    const cloudinaryFolder = folder ? path.join(CLOUDINARY_ROOTFOLDER, folder) : CLOUDINARY_ROOTFOLDER;
 
     // Upload to Cloudinary
     // Use the buffer directly for upload
-    const uploadResult = await cloudinary.uploader.upload(`data:${ContentType};base64,${fileBuffer.toString('base64')}`, {
+    const uploadResult = await cloudinary.uploader.upload(`data:${content_type};base64,${fileBuffer.toString('base64')}`, {
       resource_type: 'auto', // Automatically determine resource type (image, video, raw)
-      public_id: OriginalFileName.split('.')[0] + '-' + FileId, // Use original filename without extension + fileId as public ID
+      public_id: original_file_name.split('.')[0] + '-' + file_id, // Use original filename without extension + fileId as public ID
       folder: cloudinaryFolder,
       overwrite: true,
       use_filename: true,
@@ -123,31 +123,31 @@ async function processFileUploadRequestedEvent(eventData) {
       console.log(`[Storage Service] File uploaded to Cloudinary: ${finalFileUrl}`);
     } else {
       uploadError = 'Cloudinary upload failed: No secure_url returned.';
-      console.error(`[Storage Service] Cloudinary upload failed for ${OriginalFileName}: No secure_url returned.`);
+      console.error(`[Storage Service] Cloudinary upload failed for ${original_file_name}: No secure_url returned.`);
     }
 
   } catch (error) {
     uploadError = `Error during Cloudinary upload: ${error.message}`;
-    console.error(`[Storage Service] Error processing file ${OriginalFileName}:`, error);
+    console.error(`[Storage Service] Error processing file ${original_file_name}:`, error);
   } finally {
     // Clean up the local temporary file
     try {
-      await fs.unlink(TempLocalPath);
-      console.log(`[Storage Service] Deleted temporary local file: ${TempLocalPath}`);
+      await fs.unlink(temp_local_path);
+      console.log(`[Storage Service] Deleted temporary local file: ${temp_local_path}`);
     } catch (unlinkError) {
-      console.error(`[Storage Service] Error deleting temporary local file ${TempLocalPath}:`, unlinkError);
+      console.error(`[Storage Service] Error deleting temporary local file ${temp_local_path}:`, unlinkError);
     }
   }
 
   // Publish FileUploadCompletedEvent back to backend
   const fileUploadCompletedEvent = {
-    FileId: FileId,
-    OriginalFileName: OriginalFileName,
-    FinalFileUrl: finalFileUrl,
-    DeleteHash: deleteHash,
-    UploadedBy: UploadedBy,
-    FamilyId: FamilyId,
-    Error: uploadError // Include error if any
+    file_id: file_id,
+    original_file_name: original_file_name,
+    final_file_url: finalFileUrl,
+    delete_hash: deleteHash,
+    uploaded_by: uploaded_by,
+    family_id: family_id,
+    error: uploadError // Include error if any
   };
 
   try {
