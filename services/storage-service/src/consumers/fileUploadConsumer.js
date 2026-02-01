@@ -90,7 +90,7 @@ async function connectRabbitMQ() {
 }
 
 async function processFileUploadRequestedEvent(eventData) {
-  const { file_id, original_file_name, temp_local_path, content_type, folder, uploaded_by, file_size, family_id } = eventData;
+  const { file_id, original_file_name, temp_local_path, content_type, folder, uploaded_by, family_id } = eventData;
 
   let finalFileUrl = null;
   let deleteHash = null;
@@ -159,7 +159,7 @@ async function processFileUploadRequestedEvent(eventData) {
 }
 
 async function processFileDeletionRequestedEvent(eventData) {
-  const { FileId, FilePath, DeleteHash, RequestedBy, FamilyId } = eventData;
+  const { file_id, file_path, delete_hash, requested_by, family_id } = eventData;
 
   let isSuccess = false;
   let deletionError = null;
@@ -167,11 +167,11 @@ async function processFileDeletionRequestedEvent(eventData) {
   try {
     // For Cloudinary, we primarily use the public_id (stored as DeleteHash in our system) for deletion.
     // If DeleteHash is not provided, we might try to extract public_id from FilePath.
-    const publicIdToDelete = DeleteHash || extractPublicIdFromCloudinaryUrl(FilePath);
+    const publicIdToDelete = delete_hash || extractPublicIdFromCloudinaryUrl(file_path);
 
     if (!publicIdToDelete) {
       deletionError = 'Cannot delete from Cloudinary: No public_id or deleteHash provided/found.';
-      console.error(`[Storage Service] ${deletionError} FileId: ${FileId}, FilePath: ${FilePath}`);
+      console.error(`[Storage Service] ${deletionError} FileId: ${file_id}, FilePath: ${file_path}`);
     } else {
       const deleteResult = await cloudinary.uploader.destroy(publicIdToDelete, {
         resource_type: 'image' // Assuming images for now. Adjust as needed if raw/video types are handled.
@@ -190,16 +190,16 @@ async function processFileDeletionRequestedEvent(eventData) {
 
   } catch (error) {
     deletionError = `Error during Cloudinary deletion: ${error.message}`;
-    console.error(`[Storage Service] Error processing file deletion for FileId ${FileId}:`, error);
+    console.error(`[Storage Service] Error processing file deletion for FileId ${file_id}:`, error);
   }
 
   // Publish FileDeletionCompletedEvent back to backend
   const fileDeletionCompletedEvent = {
-    FileId: FileId,
-    IsSuccess: isSuccess,
-    Error: deletionError,
-    FamilyId: FamilyId,
-    RequestedBy: RequestedBy // Pass along for context if needed by backend
+    file_id: file_id,
+    is_success: isSuccess,
+    error: deletionError,
+    family_id: family_id,
+    requested_by: requested_by // Pass along for context if needed by backend
   };
 
   try {
@@ -230,5 +230,8 @@ function extractPublicIdFromCloudinaryUrl(url) {
 // }
 
 module.exports = {
-  connectRabbitMQ
+  connectRabbitMQ,
+  processFileDeletionRequestedEvent, // Export for testing
+  setChannel: (newChannel) => { channel = newChannel; }, // Setter for testing
+  setConnection: (newConnection) => { connection = newConnection; } // Setter for testing
 };
