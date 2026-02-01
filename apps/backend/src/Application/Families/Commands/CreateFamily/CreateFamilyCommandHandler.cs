@@ -35,13 +35,13 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
 
         foreach (var managerId in request.ManagerIds)
         {
-            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
+            entity.AddFamilyUser(managerId, FamilyRole.Manager);
         }
 
         // Add Viewers
         foreach (var viewerId in request.ViewerIds)
         {
-            entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
+            entity.AddFamilyUser(viewerId, FamilyRole.Viewer);
         }
 
         entity.AddDomainEvent(new FamilyCreatedEvent(entity));

@@ -93,7 +93,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                     FileName = $"Member_Avatar_{Guid.NewGuid()}.png", // Use FileName property
                     ContentType = contentType, // Use inferred content type
                     Folder = string.Format(UploadConstants.ImagesFolder, member.FamilyId),
-                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType if known
+                    MediaType = MediaType.Image // Explicitly set MediaType if known
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);

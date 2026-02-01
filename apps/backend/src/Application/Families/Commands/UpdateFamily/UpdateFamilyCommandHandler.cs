@@ -48,7 +48,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                     FileName = $"Family_Avatar_{Guid.NewGuid()}.png",
                     ContentType = contentType, // Use inferred content type
                     Folder = string.Format(UploadConstants.ImagesFolder, entity.Id),
-                    MediaType = Domain.Enums.MediaType.Image // Explicitly set MediaType
+                    MediaType = MediaType.Image // Explicitly set MediaType
                 };
 
                 var uploadResult = await _mediator.Send(createFamilyMediaCommand, cancellationToken);
@@ -151,7 +151,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         // Add Managers
         foreach (var managerId in request.ManagerIds.Distinct())
         {
-            entity.AddFamilyUser(managerId, Domain.Enums.FamilyRole.Manager);
+            entity.AddFamilyUser(managerId, FamilyRole.Manager);
         }
 
         // Add Viewers
@@ -161,7 +161,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             // If they are a manager, they implicitly have viewer permissions.
             if (!request.ManagerIds.Contains(viewerId))
             {
-                entity.AddFamilyUser(viewerId, Domain.Enums.FamilyRole.Viewer);
+                entity.AddFamilyUser(viewerId, FamilyRole.Viewer);
             }
         }
         // --- End Update FamilyUsers ---

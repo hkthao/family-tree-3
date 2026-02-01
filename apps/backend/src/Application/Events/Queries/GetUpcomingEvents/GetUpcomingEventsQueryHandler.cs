@@ -29,8 +29,8 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
 
         // TEMP: Add basic date filtering for upcoming events for Solar events until EventOccurrenceService is implemented
         eventsQuery = eventsQuery.Where(e =>
-            (e.CalendarType == backend.Domain.Enums.CalendarType.Solar && e.SolarDate.HasValue && e.SolarDate.Value > DateTime.UtcNow) ||
-            e.CalendarType == backend.Domain.Enums.CalendarType.Lunar // For lunar, we don't have a simple "upcoming" filter here yet
+            (e.CalendarType == Domain.Enums.CalendarType.Solar && e.SolarDate.HasValue && e.SolarDate.Value > DateTime.UtcNow) ||
+            e.CalendarType == Domain.Enums.CalendarType.Lunar // For lunar, we don't have a simple "upcoming" filter here yet
         );
 
         var upcomingEventsEntities = await eventsQuery

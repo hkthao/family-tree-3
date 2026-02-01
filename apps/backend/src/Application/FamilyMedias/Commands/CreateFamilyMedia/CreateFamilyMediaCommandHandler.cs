@@ -153,7 +153,7 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
             FileSize = request.File.Length,
             FamilyId = request.FamilyId // Assign the nullable Guid directly
         };
-        await _messageBus.PublishAsync(MessageBusConstants.Exchanges.FileUpload, MessageBusConstants.RoutingKeys.FileUploadRequested, fileUploadEvent);
+        await _messageBus.PublishAsync(Exchanges.FileUpload, RoutingKeys.FileUploadRequested, fileUploadEvent);
 
         _logger.LogInformation("File {FileName} saved locally at {TempPath} and FileUploadRequestedEvent published for FamilyMedia ID {FamilyMediaId}.",
                                request.FileName, tempLocalPath, familyMedia.Id);
@@ -168,10 +168,10 @@ public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMedia
     {
         return mediaType switch
         {
-            backend.Domain.Enums.MediaType.Image => "image/jpeg", // Mặc định là jpeg, lý tưởng nên cụ thể hơn
-            backend.Domain.Enums.MediaType.Video => "video/mp4",  // Mặc định là mp4
-            backend.Domain.Enums.MediaType.Audio => "audio/mpeg", // Mặc định là mpeg
-            backend.Domain.Enums.MediaType.Document => "application/pdf", // Chỉ loại tài liệu được xử lý rõ ràng
+            Domain.Enums.MediaType.Image => "image/jpeg", // Mặc định là jpeg, lý tưởng nên cụ thể hơn
+            Domain.Enums.MediaType.Video => "video/mp4",  // Mặc định là mp4
+            Domain.Enums.MediaType.Audio => "audio/mpeg", // Mặc định là mpeg
+            Domain.Enums.MediaType.Document => "application/pdf", // Chỉ loại tài liệu được xử lý rõ ràng
             _ => "application/octet-stream" // Dữ liệu nhị phân chung
         };
     }
