@@ -106,5 +106,10 @@ Thư mục `infra/` chứa các tệp cấu hình và tập lệnh cần thiết
 
 *   Hệ thống sử dụng các công cụ và cấu hình để thu thập, tổng hợp và phân tích nhật ký từ tất cả các ứng dụng và dịch vụ, hỗ trợ việc giám sát và gỡ lỗi. (Có thể sử dụng Promtail/Loki).
 
+### 5.4. Hàng đợi Tin nhắn (Message Queue)
+
+*   **Loại:** RabbitMQ.
+*   **Mô tả:** Được sử dụng làm Message Broker để cho phép các microservice giao tiếp bất đồng bộ, giảm sự phụ thuộc lẫn nhau và tăng cường khả năng mở rộng. Ví dụ, Notification Service có thể sử dụng RabbitMQ để xử lý các yêu cầu gửi thông báo.
+
 ---
 **Lưu ý:** Tài liệu này sẽ được cập nhật khi kiến trúc hệ thống phát triển.
