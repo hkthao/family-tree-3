@@ -9,7 +9,9 @@ namespace backend.Application.Services.GraphGeneration;
 public record FamilyTreeNode(
     Guid Id,
     string FullName,
-    int Generation
+    int Generation,
+    int? BirthYear,
+    int? DeathYear
 );
 
 /// <summary>
@@ -26,7 +28,7 @@ public class FamilyTreeBuilder
     /// <param name="rootMemberId">ID của thành viên gốc để bắt đầu xây dựng cây.</param>
     /// <param name="maxDepth">Độ sâu tối đa của cây để ngăn chặn vòng lặp vô hạn.</param>
     /// <returns>Một từ điển chứa các node (thành viên) trong cây và danh sách các cặp (parent, child) đại diện cho các cạnh.</returns>
-    public (Dictionary<Guid, FamilyTreeNode> Nodes, List<(Guid ParentId, Guid ChildId)> Edges) BuildSubTree(
+    public (Dictionary<Guid, FamilyTreeNode> Nodes, List<(Guid ParentId, Guid ChildId)> Edges, List<Tuple<Guid, Guid>> Couples) BuildSubTree(
         IReadOnlyCollection<Member> allMembers,
         IReadOnlyCollection<Relationship> allRelationships,
         Guid rootMemberId,
@@ -37,15 +39,16 @@ public class FamilyTreeBuilder
         var edges = new List<(Guid ParentId, Guid ChildId)>();
         var visited = new HashSet<Guid>(); // Theo dõi các thành viên đã ghé thăm để tránh vòng lặp và trùng lặp
         var queue = new Queue<(Guid MemberId, int CurrentDepth)>();
+        var couples = new List<Tuple<Guid, Guid>>(); // Danh sách các cặp vợ chồng đã xác định trong cây con
 
         var rootMember = allMembers.FirstOrDefault(m => m.Id == rootMemberId);
         if (rootMember == null)
         {
-            return (nodes, edges);
+            return (nodes, edges, couples);
         }
 
         // rootMember là thế hệ 0
-        nodes.Add(rootMember.Id, new FamilyTreeNode(rootMember.Id, rootMember.FullName, 0));
+        nodes.Add(rootMember.Id, new FamilyTreeNode(rootMember.Id, rootMember.FullName, 0, rootMember.DateOfBirth?.Year, rootMember.DateOfDeath?.Year));
 
         queue.Enqueue((rootMember.Id, 0));
         visited.Add(rootMember.Id);
@@ -59,7 +62,40 @@ public class FamilyTreeBuilder
                 continue; // Dừng nếu đạt đến độ sâu tối đa
             }
 
-            // Tìm con của thành viên hiện tại
+            // --- Xử lý mối quan hệ vợ chồng (Spouse) ---
+            var spouseRelationships = allRelationships
+                .Where(r => (r.SourceMemberId == currentMemberId && (r.Type == RelationshipType.Husband || r.Type == RelationshipType.Wife)) ||
+                            (r.TargetMemberId == currentMemberId && (r.Type == RelationshipType.Husband || r.Type == RelationshipType.Wife)))
+                .ToList();
+
+            foreach (var rel in spouseRelationships)
+            {
+                var spouseId = (rel.SourceMemberId == currentMemberId) ? rel.TargetMemberId : rel.SourceMemberId;
+                var spouseMember = allMembers.FirstOrDefault(m => m.Id == spouseId);
+
+                if (spouseMember != null && nodes.ContainsKey(currentMemberId)) // Ensure spouse is relevant to current path
+                {
+                    // Add spouse to nodes if not already there, with same generation as currentMember
+                    if (!nodes.ContainsKey(spouseId))
+                    {
+                        nodes.Add(spouseId, new FamilyTreeNode(spouseMember.Id, spouseMember.FullName, currentGeneration, spouseMember.DateOfBirth?.Year, spouseMember.DateOfDeath?.Year));
+                        // No need to add spouse to queue for traversal if we only traverse descendants.
+                        // We add them to nodes for rendering and to identify couples.
+                    }
+
+                    // Add couple to list if not already present, ensuring consistent order
+                    var key = currentMemberId.CompareTo(spouseId) < 0
+                        ? Tuple.Create(currentMemberId, spouseId)
+                        : Tuple.Create(spouseId, currentMemberId);
+
+                    if (!couples.Contains(key))
+                    {
+                        couples.Add(key);
+                    }
+                }
+            }
+
+            // --- Tìm con của thành viên hiện tại ---
             // Các mối quan hệ có SourceMemberId là cha/mẹ và TargetMemberId là con.
             var childrenRelationships = allRelationships
                 .Where(r => r.SourceMemberId == currentMemberId &&
@@ -76,9 +112,11 @@ public class FamilyTreeBuilder
                     // Nếu node con chưa được thêm vào danh sách hoặc cần cập nhật thế hệ
                     if (!nodes.ContainsKey(childId))
                     {
-                        nodes.Add(childId, new FamilyTreeNode(childMember.Id, childMember.FullName, currentGeneration + 1));
+                        nodes.Add(childId, new FamilyTreeNode(childMember.Id, childMember.FullName, currentGeneration + 1, childMember.DateOfBirth?.Year, childMember.DateOfDeath?.Year));
                     }
                     // Thêm cạnh (cha/mẹ -> con)
+                    // Note: Edges are now processed in DotFileGenerator to account for marriage nodes
+                    // So, we collect original edges here but DotFileGenerator will adjust them.
                     edges.Add((currentMemberId, childId));
 
                     // Nếu chưa ghé thăm con này, thêm vào hàng đợi để tiếp tục duyệt
@@ -91,6 +129,6 @@ public class FamilyTreeBuilder
             }
         }
 
-        return (nodes, edges);
+        return (nodes, edges, couples);
     }
 }

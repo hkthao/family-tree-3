@@ -55,7 +55,7 @@ public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFam
 
         // 2. Build the family sub-tree
         _logger.LogInformation("Xây dựng cây con từ RootMemberId: {RootMemberId}", command.RootMemberId);
-        var (nodes, edges) = _treeBuilder.BuildSubTree(family.Members, family.Relationships, command.RootMemberId);
+        var (nodes, edges, couples) = _treeBuilder.BuildSubTree(family.Members, family.Relationships, command.RootMemberId);
 
         if (!nodes.Any())
         {
@@ -65,7 +65,7 @@ public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFam
 
         // 3. Generate DOT file content
         _logger.LogInformation("Tạo nội dung file DOT.");
-        var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges);
+        var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges, couples, family.Members);
 
         var outputPath = "/shared/input"; // Đường dẫn cố định như yêu cầu
 
