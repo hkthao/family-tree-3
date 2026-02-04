@@ -16,20 +16,21 @@ This microservice listens for Graphviz `.dot` file rendering requests via Rabbit
         ```
 *   **Input File Location**: Reads `.dot` files from `/shared/input/{dot_filename}`.
 *   **Output File Location**: Writes generated PDFs to `/shared/output/{job_id}.pdf`.
-*   **Output Queue**: `render_response`
+*   **Output (Status Update) Exchange**: `graph_generation_exchange`
+    *   **Routing Key**: `graph.status.updated`
     *   **Success Message**:
         ```json
         {
           "job_id": "unique_job_identifier",
-          "status": "success",
-          "pdf_path": "/shared/output/unique_job_identifier.pdf"
+          "status": "Completed",
+          "output_file_path": "/shared/output/unique_job_identifier.pdf"
         }
         ```
     *   **Failure Message**:
         ```json
         {
           "job_id": "unique_job_identifier",
-          "status": "error",
+          "status": "Failed",
           "error_message": "Details about the error"
         }
         ```
@@ -123,11 +124,11 @@ docker run -d \
     The service will process the request, and if successful, you should find `my_test_job.pdf` in your mounted output directory (`/path/to/your/output_pdfs`).
 
 4.  **Monitor responses**:
-    You can also consume messages from the `render_response` queue to see the status of your rendering jobs.
+    You can consume messages from the `backend_graph_generation_status_queue` (bound to `graph_generation_exchange` with routing key `graph.status.updated`) to see the status of your rendering jobs.
 
 ## Error Handling
 
-The service provides detailed error messages in the `render_response` queue if a rendering job fails due to:
+The service publishes detailed error messages to the `graph_generation_exchange` with routing key `graph.status.updated` if a rendering job fails due to:
 *   Missing input `.dot` file.
 *   Graphviz command errors (e.g., invalid `.dot` syntax).
 *   Timeout during rendering.

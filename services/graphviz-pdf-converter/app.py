@@ -20,8 +20,10 @@ RABBITMQ_PASS = os.environ.get('RABBITMQ__PASSWORD', 'guest')
 INPUT_DIR = '/shared/input'
 OUTPUT_DIR = '/shared/output'
 
-RENDER_REQUEST_QUEUE = 'render_request'
-RENDER_RESPONSE_QUEUE = 'render_response'
+# Queues for inbound and outbound messages
+RENDER_REQUEST_QUEUE = 'render_request' # Backend publishes to this
+STATUS_UPDATE_EXCHANGE = 'graph_generation_exchange' # Python publishes to this
+STATUS_UPDATE_ROUTING_KEY = 'graph.status.updated' # Python publishes with this routing key
 
 RENDER_TIMEOUT_SECONDS = 120 # Timeout for Graphviz dot command
 
@@ -42,9 +44,12 @@ def establish_rabbitmq_connection():
         connection = pika.BlockingConnection(connection_params)
         channel = connection.channel()
 
-        # Declare queues to ensure they exist
+        # Declare the queue for render requests
         channel.queue_declare(queue=RENDER_REQUEST_QUEUE, durable=True)
-        channel.queue_declare(queue=RENDER_RESPONSE_QUEUE, durable=True)
+
+        # Declare the exchange for status updates
+        channel.exchange_declare(exchange=STATUS_UPDATE_EXCHANGE, exchange_type='topic', durable=True)
+        
         logger.info(f"Successfully connected to RabbitMQ at {RABBITMQ_HOST}:{RABBITMQ_PORT}")
         return channel
     except pika.exceptions.AMQPConnectionError as e:
@@ -56,14 +61,14 @@ def establish_rabbitmq_connection():
         sys.exit(1)
 
 
-def publish_response(job_id, status, pdf_path=None, error_message=None):
-    """Publishes a response message to the RENDER_RESPONSE_QUEUE."""
+def publish_response(job_id, status, output_file_path=None, error_message=None):
+    """Publishes a response message to the backend for status updates."""
     payload = {
         "job_id": job_id,
         "status": status,
     }
-    if pdf_path:
-        payload["pdf_path"] = pdf_path
+    if output_file_path:
+        payload["output_file_path"] = output_file_path # Renamed from pdf_path
     if error_message:
         payload["error_message"] = error_message
 
@@ -73,14 +78,14 @@ def publish_response(job_id, status, pdf_path=None, error_message=None):
             establish_rabbitmq_connection() # Re-establish connection if it was closed
 
         channel.basic_publish(
-            exchange='',
-            routing_key=RENDER_RESPONSE_QUEUE,
+            exchange=STATUS_UPDATE_EXCHANGE, # Publish to the exchange
+            routing_key=STATUS_UPDATE_ROUTING_KEY, # Use the routing key
             body=json.dumps(payload),
             properties=pika.BasicProperties(
                 delivery_mode=2,  # make message persistent
             )
         )
-        logger.info(f"Published response for job {job_id}: {status}")
+        logger.info(f"Published response for job {job_id} to exchange '{STATUS_UPDATE_EXCHANGE}' with routing key '{STATUS_UPDATE_ROUTING_KEY}': {status}")
     except Exception as e:
         logger.error(f"Failed to publish response for job {job_id}: {e}")
 

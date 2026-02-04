@@ -6,6 +6,7 @@ using backend.Application.Common.Models;
 using backend.Application.Services.GraphGeneration;
 using backend.Domain.Entities;
 using System.Text.Json; // For RabbitMQ message payload
+using backend.Application.Common.Constants; // NEW
 
 namespace backend.Application.Families.Commands.GenerateFamilyTreeGraph;
 
@@ -68,11 +69,27 @@ public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFam
         _logger.LogInformation("Tạo nội dung file DOT.");
         var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges);
 
-        // 4. Generate unique jobId
-        var jobId = Guid.NewGuid().ToString("N"); // Unique ID without hyphens
-        var dotFilename = $"{jobId}.dot";
         var outputPath = "/shared/input"; // Đường dẫn cố định như yêu cầu
+
+        // 4. Create and save GraphGenerationJob entity
+        // Generate a unique ID first to use it for the filename and job tracking
+        var jobId = Guid.NewGuid().ToString("N");
+        var dotFilename = $"{jobId}.dot";
         var filePath = Path.Combine(outputPath, dotFilename);
+
+        var job = new GraphGenerationJob
+        {
+            JobId = jobId,
+            FamilyId = command.FamilyId,
+            RootMemberId = command.RootMemberId,
+            DotFilePath = filePath, // Store the expected path
+            Status = "Pending",
+            RequestedAt = DateTime.UtcNow
+        };
+        _context.GraphGenerationJobs.Add(job);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Đã lưu thông tin job tạo đồ thị cây gia phả với JobId: {JobId}", job.JobId);
 
         // 5. Write the .dot file
         _logger.LogInformation("Ghi file DOT vào: {FilePath}", filePath);
@@ -85,19 +102,22 @@ public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFam
         catch (Exception ex)
         {
             _logger.LogError(ex, "Lỗi khi ghi file DOT vào {FilePath}", filePath);
+            job.Status = "Failed";
+            job.ErrorMessage = $"Lỗi khi ghi file DOT: {ex.Message}";
+            await _context.SaveChangesAsync(cancellationToken); // Save the failed status
             return Result<string>.Failure($"Lỗi khi ghi file DOT: {ex.Message}");
         }
 
         // 6. Publish RabbitMQ message
-        _logger.LogInformation("Gửi tin nhắn RabbitMQ cho JobId: {JobId}", jobId);
+        _logger.LogInformation("Gửi tin nhắn RabbitMQ cho JobId: {JobId}", job.JobId);
         var messagePayload = new
         {
-            job_id = jobId,
+            job_id = job.JobId,
             dot_filename = dotFilename,
             page_size = "A0",
             direction = "LR"
         };
-        var queueName = "render_request"; // Tên queue được yêu cầu
+        var queueName = MessageBusConstants.Queues.RenderRequestQueue; // Tên queue được yêu cầu
         
         try
         {
@@ -107,13 +127,16 @@ public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFam
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Lỗi khi gửi tin nhắn RabbitMQ cho JobId: {JobId}", jobId);
+            _logger.LogError(ex, "Lỗi khi gửi tin nhắn RabbitMQ cho JobId: {JobId}", job.JobId);
+            job.Status = "Failed";
+            job.ErrorMessage = $"Lỗi khi gửi tin nhắn RabbitMQ: {ex.Message}";
+            await _context.SaveChangesAsync(cancellationToken); // Save the failed status
             // Có thể chọn xóa file .dot nếu không gửi được tin nhắn, hoặc để lại để xử lý thủ công.
             // Hiện tại, tôi sẽ không xóa mà chỉ ghi log lỗi.
             return Result<string>.Failure($"Lỗi khi gửi tin nhắn RabbitMQ: {ex.Message}");
         }
 
-        _logger.LogInformation("Hoàn tất tạo đồ thị cây gia phả và gửi yêu cầu render cho JobId: {JobId}", jobId);
-        return Result<string>.Success(jobId);
+        _logger.LogInformation("Hoàn tất tạo đồ thị cây gia phả và gửi yêu cầu render cho JobId: {JobId}", job.JobId);
+        return Result<string>.Success(job.JobId);
     }
 }

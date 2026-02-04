@@ -105,6 +105,10 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<Prompt> Prompts { get; set; } = null!;
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể GraphGenerationJob.
+    /// </summary>
+    public DbSet<GraphGenerationJob> GraphGenerationJobs { get; set; } = null!;
 
 
     /// <summary>

@@ -99,6 +99,10 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<Prompt> Prompts { get; }
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể GraphGenerationJob.
+    /// </summary>
+    DbSet<GraphGenerationJob> GraphGenerationJobs { get; }
 
 
     /// <summary>

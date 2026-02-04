@@ -87,6 +87,7 @@ public static class DependencyInjection
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
         services.AddHostedService<QueuedHostedService>();
         services.AddHostedService<backend.Infrastructure.Services.MessageBus.Consumers.FileUploadCompletedConsumer>(); // NEW
+        services.AddHostedService<backend.Infrastructure.Services.MessageBus.Consumers.GraphGenerationStatusConsumer>(); // NEW
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 
