@@ -11,6 +11,7 @@ using backend.Application.Families.Commands.ResetFamilyAiChatQuota; // ADDED
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Commands.UpdateFamilyLimitConfiguration;
 using backend.Application.Families.Commands.UpdatePrivacyConfiguration;
+using backend.Application.Families.Commands.GenerateFamilyTreeGraph; // NEW: Added using for GenerateFamilyTreeGraphCommand
 using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
@@ -342,5 +343,39 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
         var command = new FixFamilyRelationshipsCommand { FamilyId = familyId };
         var result = await _mediator.Send(command);
         return result.ToActionResult(this, _logger, 204); // 204 No Content for successful operation with no return value
+    }
+
+    /// <summary>
+    /// Gửi yêu cầu tạo file Graphviz .dot cho cây gia phả và gửi yêu cầu render qua RabbitMQ.
+    /// </summary>
+    /// <param name="id">ID của gia đình từ URL.</param>
+    /// <param name="command">Dữ liệu yêu cầu bao gồm FamilyId và RootMemberId.</param>
+    /// <returns>JobId của tác vụ tạo đồ thị.</returns>
+    [HttpPost("{id}/graph")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GenerateFamilyTreeGraph(Guid id, [FromBody] GenerateFamilyTreeGraphCommand command)
+    {
+        if (id != command.FamilyId)
+        {
+            _logger.LogWarning("Mismatched FamilyId in URL ({Id}) and command body ({CommandFamilyId}) for GenerateFamilyTreeGraphCommand from {RemoteIpAddress}", id, command.FamilyId, HttpContext.Connection.RemoteIpAddress);
+            return BadRequest("FamilyId in URL does not match command body.");
+        }
+
+        var result = await _mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            if (result.Error != null && result.Error.Contains("Không tìm thấy", StringComparison.OrdinalIgnoreCase))
+            {
+                return NotFound(result.Error);
+            }
+            return BadRequest(result.Error);
+        }
     }
 }

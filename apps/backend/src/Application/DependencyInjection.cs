@@ -29,6 +29,10 @@ public static class DependencyInjection
         services.AddTransient<Events.EventOccurrences.Jobs.IGenerateEventOccurrencesJob, Events.EventOccurrences.Jobs.GenerateEventOccurrencesJob>();
         services.AddTransient<Events.EventOccurrences.Jobs.IEventNotificationJob, Events.EventOccurrences.Jobs.EventNotificationJob>();
 
+        // Thêm đăng ký cho các dịch vụ tạo đồ thị cây gia phả
+        services.AddTransient<Services.GraphGeneration.FamilyTreeBuilder>();
+        services.AddTransient<Services.GraphGeneration.DotFileGenerator>();
+
         services.Configure<KnowledgeSearchServiceSettings>(configuration.GetSection(nameof(KnowledgeSearchServiceSettings)));
         services.AddHttpClient<IKnowledgeService, KnowledgeService>((serviceProvider, httpClient) =>
         {

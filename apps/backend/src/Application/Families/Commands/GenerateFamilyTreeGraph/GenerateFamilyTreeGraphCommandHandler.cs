@@ -1,0 +1,119 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.Services.GraphGeneration;
+using backend.Domain.Entities;
+using System.Text.Json; // For RabbitMQ message payload
+
+namespace backend.Application.Families.Commands.GenerateFamilyTreeGraph;
+
+public class GenerateFamilyTreeGraphCommandHandler : IRequestHandler<GenerateFamilyTreeGraphCommand, Result<string>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMessageBus _messageBus;
+    private readonly FamilyTreeBuilder _treeBuilder;
+    private readonly DotFileGenerator _dotFileGenerator;
+    private readonly ILogger<GenerateFamilyTreeGraphCommandHandler> _logger;
+
+    public GenerateFamilyTreeGraphCommandHandler(
+        IApplicationDbContext context,
+        IMessageBus messageBus,
+        FamilyTreeBuilder treeBuilder,
+        DotFileGenerator dotFileGenerator,
+        ILogger<GenerateFamilyTreeGraphCommandHandler> logger)
+    {
+        _context = context;
+        _messageBus = messageBus;
+        _treeBuilder = treeBuilder;
+        _dotFileGenerator = dotFileGenerator;
+        _logger = logger;
+    }
+
+    public async Task<Result<string>> Handle(GenerateFamilyTreeGraphCommand command, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Bắt đầu tạo đồ thị cây gia phả cho FamilyId: {FamilyId}, RootMemberId: {RootMemberId}", command.FamilyId, command.RootMemberId);
+
+        // 1. Fetch Family data including Members and Relationships
+        var family = await _context.Families
+            .Include(f => f.Members)
+            .Include(f => f.Relationships)
+            .FirstOrDefaultAsync(f => f.Id == command.FamilyId, cancellationToken);
+
+        if (family == null)
+        {
+            _logger.LogWarning("Không tìm thấy gia đình với FamilyId: {FamilyId}", command.FamilyId);
+            return Result<string>.NotFound($"Không tìm thấy gia đình với ID: {command.FamilyId}");
+        }
+
+        var rootMember = family.Members.FirstOrDefault(m => m.Id == command.RootMemberId);
+        if (rootMember == null)
+        {
+            _logger.LogWarning("Không tìm thấy thành viên gốc với RootMemberId: {RootMemberId} trong gia đình {FamilyId}", command.RootMemberId, command.FamilyId);
+            return Result<string>.NotFound($"Không tìm thấy thành viên gốc với ID: {command.RootMemberId} trong gia đình {command.FamilyId}");
+        }
+
+        // 2. Build the family sub-tree
+        _logger.LogInformation("Xây dựng cây con từ RootMemberId: {RootMemberId}", command.RootMemberId);
+        var (nodes, edges) = _treeBuilder.BuildSubTree(family.Members, family.Relationships, command.RootMemberId);
+
+        if (!nodes.Any())
+        {
+            _logger.LogWarning("Không có node nào được tìm thấy cho cây con từ RootMemberId: {RootMemberId}", command.RootMemberId);
+            return Result<string>.Success("Không có node nào được tìm thấy để tạo đồ thị.");
+        }
+
+        // 3. Generate DOT file content
+        _logger.LogInformation("Tạo nội dung file DOT.");
+        var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges);
+
+        // 4. Generate unique jobId
+        var jobId = Guid.NewGuid().ToString("N"); // Unique ID without hyphens
+        var dotFilename = $"{jobId}.dot";
+        var outputPath = "/shared/input"; // Đường dẫn cố định như yêu cầu
+        var filePath = Path.Combine(outputPath, dotFilename);
+
+        // 5. Write the .dot file
+        _logger.LogInformation("Ghi file DOT vào: {FilePath}", filePath);
+        try
+        {
+            Directory.CreateDirectory(outputPath); // Đảm bảo thư mục tồn tại
+            await File.WriteAllTextAsync(filePath, dotContent, cancellationToken);
+            _logger.LogInformation("Ghi file DOT thành công.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi ghi file DOT vào {FilePath}", filePath);
+            return Result<string>.Failure($"Lỗi khi ghi file DOT: {ex.Message}");
+        }
+
+        // 6. Publish RabbitMQ message
+        _logger.LogInformation("Gửi tin nhắn RabbitMQ cho JobId: {JobId}", jobId);
+        var messagePayload = new
+        {
+            job_id = jobId,
+            dot_filename = dotFilename,
+            page_size = "A0",
+            direction = "LR"
+        };
+        var queueName = "render_request"; // Tên queue được yêu cầu
+        
+        try
+        {
+            // Serialize to JSON and publish
+            await _messageBus.PublishAsync(queueName, queueName, messagePayload, cancellationToken);
+            _logger.LogInformation("Tin nhắn RabbitMQ đã được gửi thành công.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi khi gửi tin nhắn RabbitMQ cho JobId: {JobId}", jobId);
+            // Có thể chọn xóa file .dot nếu không gửi được tin nhắn, hoặc để lại để xử lý thủ công.
+            // Hiện tại, tôi sẽ không xóa mà chỉ ghi log lỗi.
+            return Result<string>.Failure($"Lỗi khi gửi tin nhắn RabbitMQ: {ex.Message}");
+        }
+
+        _logger.LogInformation("Hoàn tất tạo đồ thị cây gia phả và gửi yêu cầu render cho JobId: {JobId}", jobId);
+        return Result<string>.Success(jobId);
+    }
+}

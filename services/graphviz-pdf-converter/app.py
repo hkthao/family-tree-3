@@ -12,10 +12,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # --- Configuration Constants ---
-RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'localhost')
-RABBITMQ_PORT = int(os.environ.get('RABBITMQ_PORT', 5672))
-RABBITMQ_USER = os.environ.get('RABBITMQ_USER', 'guest')
-RABBITMQ_PASS = os.environ.get('RABBITMQ_PASS', 'guest')
+RABBITMQ_HOST = os.environ.get('RABBITMQ__HOSTNAME', 'rabbitmq')
+RABBITMQ_PORT = int(os.environ.get('RABBITMQ__PORT', 5672))
+RABBITMQ_USER = os.environ.get('RABBITMQ__USERNAME', 'guest')
+RABBITMQ_PASS = os.environ.get('RABBITMQ__PASSWORD', 'guest')
 
 INPUT_DIR = '/shared/input'
 OUTPUT_DIR = '/shared/output'
@@ -112,7 +112,7 @@ def process_render_request(ch, method, properties, body):
             error_msg = f"Input .dot file not found: {input_dot_path}"
             logger.error(error_msg)
             publish_response(job_id, "error", error_message=error_msg)
-            ch.basic_ack(method.delivery_tag)
+            # ch.basic_ack(method.delivery_tag) # Removed: Acknowledged in finally block
             return
 
         # 2. Ensure output directory exists
