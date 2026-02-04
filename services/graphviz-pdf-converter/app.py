@@ -22,6 +22,7 @@ OUTPUT_DIR = '/shared/output'
 
 # Queues for inbound and outbound messages
 RENDER_REQUEST_QUEUE = 'render_request' # Backend publishes to this
+RENDER_REQUEST_EXCHANGE = 'render_request' # Backend publishes to this exchange
 STATUS_UPDATE_EXCHANGE = 'graph_generation_exchange' # Python publishes to this
 STATUS_UPDATE_ROUTING_KEY = 'graph.status.updated' # Python publishes with this routing key
 
@@ -46,6 +47,13 @@ def establish_rabbitmq_connection():
 
         # Declare the queue for render requests
         channel.queue_declare(queue=RENDER_REQUEST_QUEUE, durable=True)
+        # Declare the exchange for render requests and bind the queue to it
+        channel.exchange_declare(exchange=RENDER_REQUEST_EXCHANGE, exchange_type='topic', durable=True)
+        channel.queue_bind(
+            queue=RENDER_REQUEST_QUEUE,
+            exchange=RENDER_REQUEST_EXCHANGE,
+            routing_key=RENDER_REQUEST_QUEUE # Routing key is also 'render_request' based on backend logs
+        )
 
         # Declare the exchange for status updates
         channel.exchange_declare(exchange=STATUS_UPDATE_EXCHANGE, exchange_type='topic', durable=True)
@@ -152,7 +160,7 @@ def process_render_request(ch, method, properties, body):
 
             if result.returncode == 0:
                 logger.info(f"Successfully rendered PDF for job {job_id} at {output_pdf_path}")
-                publish_response(job_id, "success", pdf_path=output_pdf_path)
+                publish_response(job_id, "success", output_file_path=output_pdf_path)
             else:
                 error_msg = (
                     f"Graphviz rendering failed for job {job_id}. "

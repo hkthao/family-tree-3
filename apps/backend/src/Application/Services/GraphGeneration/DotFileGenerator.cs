@@ -1,5 +1,4 @@
 using System.Text;
-using backend.Application.Services.GraphGeneration;
 
 namespace backend.Application.Services.GraphGeneration;
 
@@ -19,20 +18,34 @@ public class DotFileGenerator
         var dotContent = new StringBuilder();
 
         dotContent.AppendLine("digraph FamilyTree {");
-        dotContent.AppendLine("    rankdir=LR; // Hướng từ trái sang phải"); 
-        dotContent.AppendLine("    nodesep=0.5; // Khoảng cách giữa các node"); 
-        dotContent.AppendLine("    ranksep=0.75; // Khoảng cách giữa các rank"); 
-        dotContent.AppendLine("    compound=true; // Cho phép các cụm (cluster)"); 
-        dotContent.AppendLine("    graph [pad=\"0.5,0.5\", viewport=\"1122,793,75\", size=\"A0\"]; // A0 size: 1189mm x 841mm"); 
+        dotContent.AppendLine("    rankdir=LR;");
+        dotContent.AppendLine("    compound=true;");
 
-        // Định nghĩa kiểu cho các node
-        dotContent.AppendLine("    node [shape=box, style=\"filled\", fillcolor=\"#f0f0f0\", fontname=\"Helvetica\"];");
+        dotContent.AppendLine("");
+        dotContent.AppendLine("    graph [");
+        dotContent.AppendLine("        size=\"46.8,33.1!\"");
+        dotContent.AppendLine("        pad=\"1,1\"");
+        dotContent.AppendLine("        dpi=72");
+        dotContent.AppendLine("        bgcolor=\"white\"");
+        dotContent.AppendLine("    ];");
+        dotContent.AppendLine("");
+        dotContent.AppendLine("    nodesep=0.5;");
+        dotContent.AppendLine("    ranksep=0.8;");
+        dotContent.AppendLine("");
+        dotContent.AppendLine("    node [");
+        dotContent.AppendLine("        shape=box");
+        dotContent.AppendLine("        style=\"rounded,filled\"");
+        dotContent.AppendLine("        fillcolor=\"#f5f5f5\"");
+        dotContent.AppendLine("        fontname=\"Helvetica\"");
+        dotContent.AppendLine("        fontsize=10");
+        dotContent.AppendLine("    ];");
+        dotContent.AppendLine("");
 
         // Thêm các node vào Graph
         foreach (var node in nodes.Values.OrderBy(n => n.Generation).ThenBy(n => n.FullName)) // Sắp xếp để hiển thị đẹp hơn
         {
-            // member_123 [label="member_123\nNguyen Van A\nGen 3"];
-            dotContent.AppendLine($"    \"{node.Id}\" [label=\"{node.Id}\\n{node.FullName}\\nGen {node.Generation}\"];");
+            // "8cf2e95a-e7a0-42d4-bf8a-16389d447119" [label="Tú Anh\nGen 0"];
+            dotContent.AppendLine($"    \"{node.Id}\" [label=\"{node.FullName}\\nGen {node.Generation}\"];");
         }
 
         // Thêm các cạnh vào Graph

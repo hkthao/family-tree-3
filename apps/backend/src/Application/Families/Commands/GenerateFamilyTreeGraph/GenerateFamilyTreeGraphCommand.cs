@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Models;
 
 namespace backend.Application.Families.Commands.GenerateFamilyTreeGraph;
@@ -6,7 +5,7 @@ namespace backend.Application.Families.Commands.GenerateFamilyTreeGraph;
 /// <summary>
 /// Command để tạo Graphviz .dot file cho cây gia phả.
 /// </summary>
-public record GenerateFamilyTreeGraphCommand : IRequest<Result<string>>
+public record GenerateFamilyTreeGraphCommand : IRequest<Result<GraphGenerationJobDto>>
 {
     /// <summary>
     /// ID của gia đình.

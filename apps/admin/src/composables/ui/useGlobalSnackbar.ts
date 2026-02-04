@@ -7,8 +7,18 @@ export function useGlobalSnackbar() {
     notificationStore.showSnackbar(message, color, timeout);
   };
 
+  const showSuccess = (message: string, timeout: number = 3000) => {
+    showSnackbar(message, 'success', timeout);
+  };
+
+  const showError = (message: string, timeout: number = 3000) => {
+    showSnackbar(message, 'error', timeout);
+  };
+
   return {
     showSnackbar,
+    showSuccess,
+    showError,
   };
 }
 

@@ -192,7 +192,7 @@ public class Startup
 
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
-            Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+            Authorization = [new HangfireDashboardAuthorizationFilter()]
         });
 
         var supportedCultures = new[] { "en-US", "vi-VN" };

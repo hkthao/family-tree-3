@@ -18,6 +18,13 @@
         </v-btn>
       </template>
     </v-tooltip>
+    <v-tooltip :text="t('family.tree.printGraph')">
+      <template v-slot:activator="{ props }">
+        <v-btn icon v-bind="props" color="primary" @click="handlePrintGraph" class="mr-2" :loading="isPrinting">
+          <v-icon>mdi-printer</v-icon>
+        </v-btn>
+      </template>
+    </v-tooltip>
     <v-tooltip :text="t('member.add')" v-if="canAddMember">
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props" color="primary" @click="handleAddMember" class="mr-2">
@@ -85,10 +92,11 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const chartMode = ref('hierarchical');
+// const isPrinting = ref(false); // No longer needed, comes from composable
 
 const {
-  state: { members, relationships, selectedRootMemberId },
-  actions: { fetchTreeData },
+  state: { members, relationships, selectedRootMemberId, isPrinting }, // Added isPrinting
+  actions: { fetchTreeData, handlePrintGraph }, // Added handlePrintGraph
 } = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
 
 const { state } = useAuth();
