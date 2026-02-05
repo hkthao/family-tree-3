@@ -22,7 +22,8 @@ def establish_rabbitmq_connection():
             host=config.RABBITMQ_HOST,
             port=config.RABBITMQ_PORT,
             credentials=credentials,
-            heartbeat=config.RABBITMQ_HEARTBEAT
+            heartbeat=config.RABBITMQ_HEARTBEAT,
+            blocked_connection_timeout=config.RABBITMQ_BLOCKED_CONNECTION_TIMEOUT
         )
         connection = pika.BlockingConnection(connection_params)
         channel = connection.channel()
@@ -43,11 +44,11 @@ def establish_rabbitmq_connection():
         logger.info(f"Successfully connected to RabbitMQ at {config.RABBITMQ_HOST}:{config.RABBITMQ_PORT}")
         return connection, channel
     except pika.exceptions.AMQPConnectionError as e:
-        logger.error(f"Failed to connect to RabbitMQ: {e}")
-        sys.exit(1)
+        logger.error(f"Failed to connect to RabbitMQ: {e}. The service will attempt to reconnect.")
+        return None, None
     except Exception as e:
-        logger.error(f"An unexpected error occurred during RabbitMQ connection: {e}")
-        sys.exit(1)
+        logger.error(f"An unexpected error occurred during RabbitMQ connection: {e}. The service will attempt to reconnect.")
+        return None, None
 
 
 from src.core.domain import RenderResponse # Add import
@@ -144,28 +145,49 @@ def main():
 
     connection = None
     channel = None
-    try:
-        connection, channel = establish_rabbitmq_connection()
-        # Register the graceful shutdown handler with connection and channel
-        signal.signal(signal.SIGTERM, lambda signum, frame: graceful_shutdown(signum, frame, connection, channel))
+    reconnect_delay = 5 # seconds
 
+    while True: # Loop to continuously try connecting
+        try:
+            logger.info("Attempting to connect to RabbitMQ...")
+            connection, channel = establish_rabbitmq_connection()
 
-        logger.info("Waiting for messages in %s. To exit press CTRL+C", config.RENDER_REQUEST_QUEUE)
+            if connection is None or channel is None:
+                logger.error(f"Failed to establish RabbitMQ connection. Retrying in {reconnect_delay} seconds...")
+                time.sleep(reconnect_delay)
+                continue # Try again
 
-        channel.basic_qos(prefetch_count=1) # Process one message at a time
-        channel.basic_consume(queue=config.RENDER_REQUEST_QUEUE, on_message_callback=lambda ch, method, properties, body: process_render_request(ch, method, properties, body))
-        channel.start_consuming()
-    except KeyboardInterrupt:
-        logger.info("KeyboardInterrupt received, exiting.")
-        graceful_shutdown(None, None, connection, channel) # Pass existing connection/channel
-    except pika.exceptions.ConnectionClosedByBroker:
-        logger.error("RabbitMQ connection closed by broker, attempting to reconnect...")
-        time.sleep(5)
-        # Attempt to restart main, which will re-establish connection
-        main()
-    except Exception as e:
-        logger.error("An unexpected error occurred during message consumption: %s", e)
-        graceful_shutdown(None, None, connection, channel) # Pass existing connection/channel
+            # Register the graceful shutdown handler with connection and channel
+            # This needs to be done *after* a successful connection is established
+            signal.signal(signal.SIGTERM, lambda signum, frame: graceful_shutdown(signum, frame, connection, channel))
 
-if __name__ == "__main__":
-    main()
+            logger.info("Waiting for messages in %s. To exit press CTRL+C", config.RENDER_REQUEST_QUEUE)
+
+            channel.basic_qos(prefetch_count=1) # Process one message at a time
+            channel.basic_consume(queue=config.RENDER_REQUEST_QUEUE, on_message_callback=lambda ch, method, properties, body: process_render_request(ch, method, properties, body))
+            channel.start_consuming()
+
+        except KeyboardInterrupt:
+            logger.info("KeyboardInterrupt received, exiting.")
+            graceful_shutdown(None, None, connection, channel) # Pass existing connection/channel
+            break # Exit the while loop
+        except pika.exceptions.ConnectionClosedByBroker:
+            logger.error("RabbitMQ connection closed by broker. Attempting to reconnect in %s seconds...", reconnect_delay)
+            time.sleep(reconnect_delay)
+            # Loop will naturally try to re-establish connection
+        except pika.exceptions.AMQPChannelError as e:
+            logger.error(f"RabbitMQ channel error: {e}. Attempting to reconnect in {reconnect_delay} seconds...")
+            if connection and connection.is_open:
+                connection.close() # Close the connection to ensure a fresh start
+            time.sleep(reconnect_delay)
+        except Exception as e:
+            logger.error("An unexpected error occurred during message consumption: %s. Attempting to reconnect in %s seconds...", e, reconnect_delay, exc_info=True)
+            if connection and connection.is_open:
+                connection.close()
+            time.sleep(reconnect_delay)
+
+        finally:
+            # Ensure connection is closed if not already (e.g., after an exception in start_consuming)
+            if connection and connection.is_open:
+                connection.close()
+                logger.info("Closed RabbitMQ connection in finally block.")

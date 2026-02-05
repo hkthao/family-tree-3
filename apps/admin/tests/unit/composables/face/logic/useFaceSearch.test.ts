@@ -8,8 +8,12 @@ import type { UseDetectFacesMutationReturn } from '@/composables';
 
 // Mock external dependencies
 const mockShowSnackbar = vi.fn();
+const mockShowSuccess = vi.fn();
+const mockShowError = vi.fn();
 const mockUseGlobalSnackbar: () => UseGlobalSnackbarReturn = () => ({
   showSnackbar: mockShowSnackbar,
+  showSuccess: mockShowSuccess,
+  showError: mockShowError,
 });
 
 const mockUseI18n: () => Composer = () => ({

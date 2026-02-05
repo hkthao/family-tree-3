@@ -127,8 +127,6 @@ services:
       - ./.env.dev
     environment:
       - TZ=Asia/Ho_Chi_Minh
-    depends_on:
-      - rabbitmq
     volumes:
       - graph-inputs:/shared/input
       - graph-outputs:/shared/output
