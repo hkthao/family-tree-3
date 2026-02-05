@@ -28,6 +28,7 @@ class GraphvizService:
         output_pdf_path = os.path.join(config.OUTPUT_DIR, f"{request.job_id}.pdf")
 
         # 1. Validate input .dot file existence
+        print(f"DEBUG: Checking existence of input file: {input_dot_path}")
         if not os.path.exists(input_dot_path):
             raise FileNotFoundError(f"Input .dot file not found: {input_dot_path}")
 

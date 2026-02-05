@@ -169,8 +169,35 @@ docker run -d \
              }'
     ```
 
-3.  **Check for the PDF**:
-    The service will process the request, and if successful, you should find `my_test_job_api.pdf` in your mounted output directory (`/path/to/your/output_pdfs`).
+3.  **Send a POST request to `/render-and-download` (File Upload)**:
+    This endpoint allows you to upload a `.dot` file directly.
+    ```bash
+    curl -X POST "http://localhost:8000/render-and-download" \
+         -H "Content-Type: multipart/form-data" \
+         -F "job_id=my_uploaded_job" \
+         -F "dot_file=@/path/to/your/input_files/my_graph.dot;type=text/plain" \
+         -F "page_size=A4" \
+         -F "direction=LR" \
+         --output /path/to/your/downloads/my_uploaded_job.pdf
+    ```
+    *Replace `/path/to/your/input_files/my_graph.dot` with the actual path to your `.dot` file.*
+    *Replace `/path/to/your/downloads/my_uploaded_job.pdf` with the desired output path for the downloaded PDF.*
+
+4.  **Send a POST request to `/render-and-download` (Using existing path)**:
+    This endpoint allows you to specify a path to an existing `.dot` file on the server's mounted input directory.
+    ```bash
+    curl -X POST "http://localhost:8000/render-and-download" \
+         -H "Content-Type: multipart/form-data" \
+         -F "job_id=my_path_job" \
+         -F "dot_filename_path=my_graph.dot" \
+         -F "page_size=A3" \
+         -F "direction=TB" \
+         --output /path/to/your/downloads/my_path_job.pdf
+    ```
+
+5.  **Check for the PDF**:
+    For `/render` endpoint, the service will process the request, and if successful, you should find `my_test_job_api.pdf` in your mounted output directory (`/path/to/your/output_pdfs`).
+    For `/render-and-download` endpoint, the PDF will be directly returned as a file download.
 
 ### 4. Example Usage (RabbitMQ Consumer)
 
