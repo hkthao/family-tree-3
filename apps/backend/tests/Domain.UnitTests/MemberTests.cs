@@ -149,7 +149,7 @@ public class MemberTests
     public void UpdateGender_ShouldUpdateGender()
     {
         // Arrange
-        var member = new Member("Test", "Member", "TM", _familyId);
+        var member = new Member("Test", "Member", "TM", _familyId, gender: "Female");
         var newGender = "Female";
 
         // Act
