@@ -29,6 +29,12 @@ public class FamilyOrderingSpecification : Specification<Family>
                     else
                         Query.OrderBy(family => family.TotalMembers);
                     break;
+                case "totalgenerations":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(family => family.TotalGenerations);
+                    else
+                        Query.OrderBy(family => family.TotalGenerations);
+                    break;
                 case "created":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(family => family.Created);
@@ -36,13 +42,13 @@ public class FamilyOrderingSpecification : Specification<Family>
                         Query.OrderBy(family => family.Created);
                     break;
                 default:
-                    Query.OrderBy(family => family.Name); // Default sort by name
+                    Query.OrderByDescending(family => family.TotalGenerations).ThenByDescending(e => e.TotalMembers).ThenBy(e => e.Name); // Default sort by name
                     break;
             }
         }
         else
         {
-            Query.OrderBy(family => family.Name); // Default order by
+            Query.OrderByDescending(family => family.TotalGenerations).ThenByDescending(e => e.TotalMembers).ThenBy(e => e.Name); // Default sort by name
         }
     }
 }
