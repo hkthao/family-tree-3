@@ -1,11 +1,14 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services.GraphvizPdfConverter; // NEW: For IGraphvizPdfConverterClient
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.Auth; // For IJwtHelperFactory, JwtHelperFactory, Auth0ClaimsTransformer
 using backend.Infrastructure.Data;
+using backend.Infrastructure.ExternalApiSettings; // NEW: For GraphvizPdfConverterApiSettings
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.Background;
+using backend.Infrastructure.Services.GraphvizPdfConverter; // NEW: For GraphvizPdfConverterClient
 using backend.Infrastructure.Services.LLMGateway; // NEW
 using backend.Infrastructure.Services.MessageBus; // NEW
 using backend.Infrastructure.Services.RateLimiting;
@@ -152,6 +155,24 @@ public static class DependencyInjection
                     else
                     {
                         serviceProvider.GetRequiredService<ILogger<LLMGatewayService>>().LogWarning("LLMGateway BaseUrl is not configured, falling back to default.");
+                    }
+                });
+
+        // Register GraphvizPdfConverterApiSettings
+        services.Configure<GraphvizPdfConverterApiSettings>(configuration.GetSection(GraphvizPdfConverterApiSettings.SettingsKey));
+
+        // Register IGraphvizPdfConverterClient as a typed HttpClient
+        services.AddHttpClient<IGraphvizPdfConverterClient, GraphvizPdfConverterClient>()
+                .ConfigureHttpClient((serviceProvider, httpClient) =>
+                {
+                    var settings = serviceProvider.GetRequiredService<IOptions<GraphvizPdfConverterApiSettings>>().Value;
+                    if (!string.IsNullOrEmpty(settings.BaseUrl))
+                    {
+                        httpClient.BaseAddress = new Uri(settings.BaseUrl);
+                    }
+                    else
+                    {
+                        serviceProvider.GetRequiredService<ILogger<GraphvizPdfConverterClient>>().LogWarning("GraphvizPdfConverterApi BaseUrl is not configured.");
                     }
                 });
 
