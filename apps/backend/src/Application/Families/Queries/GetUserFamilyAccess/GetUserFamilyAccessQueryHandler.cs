@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
@@ -7,13 +7,11 @@ namespace backend.Application.Families.Queries.GetUserFamilyAccessQuery;
 public class GetUserFamilyAccessQueryHandler : IRequestHandler<GetUserFamilyAccessQuery, Result<List<FamilyAccessDto>>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private readonly ICurrentUser _currentUser;
 
-    public GetUserFamilyAccessQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser)
+    public GetUserFamilyAccessQueryHandler(IApplicationDbContext context, ICurrentUser currentUser)
     {
         _context = context;
-        _mapper = mapper;
         _currentUser = currentUser;
     }
 

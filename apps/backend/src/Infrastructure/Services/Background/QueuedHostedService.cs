@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Background;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,19 +8,12 @@ namespace backend.Infrastructure.Services.Background;
 /// <summary>
 /// Dịch vụ lưu trữ chạy các tác vụ nền từ hàng đợi.
 /// </summary>
-public class QueuedHostedService : BackgroundService
+public class QueuedHostedService(IBackgroundTaskQueue taskQueue, ILogger<QueuedHostedService> logger, IServiceProvider serviceProvider) : BackgroundService
 {
-    private readonly ILogger<QueuedHostedService> _logger;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<QueuedHostedService> _logger = logger;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-    public IBackgroundTaskQueue TaskQueue { get; }
-
-    public QueuedHostedService(IBackgroundTaskQueue taskQueue, ILogger<QueuedHostedService> logger, IServiceProvider serviceProvider)
-    {
-        TaskQueue = taskQueue;
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-    }
+    public IBackgroundTaskQueue TaskQueue { get; } = taskQueue;
 
     /// <summary>
     /// Logic chính để thực thi các tác vụ nền.

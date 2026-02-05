@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models; // Added
 using backend.Domain.Entities;
 
@@ -7,14 +7,12 @@ namespace backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 public class CreateFamilyDictCommandHandler : IRequestHandler<CreateFamilyDictCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
     private readonly IAuthorizationService _authorizationService;
 
-    public CreateFamilyDictCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IMapper mapper, IAuthorizationService authorizationService)
+    public CreateFamilyDictCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
     {
         _context = context;
-        _currentUser = currentUser;
         _mapper = mapper;
         _authorizationService = authorizationService;
     }

@@ -1,24 +1,17 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // NEW: For Gender enum
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.EventOccurrences.Jobs;
 
-public class EventNotificationJob : IEventNotificationJob
+public class EventNotificationJob(IApplicationDbContext context, INotificationService notificationService, IDateTime dateTime, ILogger<EventNotificationJob> logger) : IEventNotificationJob
 {
-    private readonly IApplicationDbContext _context;
-    private readonly INotificationService _notificationService;
-    private readonly IDateTime _dateTime;
-    private readonly ILogger<EventNotificationJob> _logger;
-
-    public EventNotificationJob(IApplicationDbContext context, INotificationService notificationService, IDateTime dateTime, ILogger<EventNotificationJob> logger)
-    {
-        _context = context;
-        _notificationService = notificationService;
-        _dateTime = dateTime;
-        _logger = logger;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDateTime _dateTime = dateTime;
+    private readonly ILogger<EventNotificationJob> _logger = logger;
 
     public async Task Run(CancellationToken cancellationToken = default)
     {

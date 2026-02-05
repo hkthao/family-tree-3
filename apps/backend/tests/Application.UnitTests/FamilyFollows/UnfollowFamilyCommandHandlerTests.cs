@@ -24,7 +24,7 @@ public class UnfollowFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UnfollowFamilyCommand { FamilyId = family.Id };
-        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -49,7 +49,7 @@ public class UnfollowFamilyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid(); // Not followed
         var command = new UnfollowFamilyCommand { FamilyId = familyId };
-        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -76,7 +76,7 @@ public class UnfollowFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UnfollowFamilyCommand { FamilyId = family.Id };
-        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UnfollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

@@ -1,6 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.UserActivities.Specifications;
 
@@ -9,12 +9,11 @@ namespace backend.Application.UserActivities.Queries.GetRecentActivities;
 /// <summary>
 /// Handler for fetching recent user activities.
 /// </summary>
-public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser user, IAuthorizationService authorizationService) : IRequestHandler<GetRecentActivitiesQuery, Result<PaginatedList<UserActivityDto>>>
+public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser user) : IRequestHandler<GetRecentActivitiesQuery, Result<PaginatedList<UserActivityDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly ICurrentUser _user = user;
-    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)
     {

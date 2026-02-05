@@ -1,6 +1,6 @@
 using backend.Application.MemberFaces.Common; // NEW: Add this using for FaceDetectionResultDto
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Services;
 
 /// <summary>
 /// Định nghĩa giao diện cho dịch vụ API nhận diện khuôn mặt.

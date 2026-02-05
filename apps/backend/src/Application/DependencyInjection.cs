@@ -1,6 +1,8 @@
 ﻿using backend.Application.Common.Behaviours;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Common.Models.AppSetting; // Added for KnowledgeSearchServiceSettings
 using backend.Application.Knowledge; // Added for IKnowledgeService and KnowledgeService
+using backend.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options; // Added for IOptions
@@ -23,7 +25,7 @@ public static class DependencyInjection
         });
 
 
-        services.AddScoped<Common.Interfaces.IRelationshipDetectionService, Services.RelationshipDetectionService>();
+        services.AddScoped<IRelationshipDetectionService, RelationshipDetectionService>();
         services.AddTransient<Common.Services.SampleHangfireJob>();
         services.AddTransient<Common.Services.ILunarCalendarService, Common.Services.LunarCalendarService>();
         services.AddTransient<Events.EventOccurrences.Jobs.IGenerateEventOccurrencesJob, Events.EventOccurrences.Jobs.GenerateEventOccurrencesJob>();

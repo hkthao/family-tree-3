@@ -1,29 +1,22 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.SendEventNotification;
 
-public class SendEventNotificationCommandHandler : IRequestHandler<SendEventNotificationCommand, Result<string>>
+public class SendEventNotificationCommandHandler(
+    IApplicationDbContext context,
+    INotificationService notificationService,
+    ILogger<SendEventNotificationCommandHandler> logger,
+    IAuthorizationService authorizationService) : IRequestHandler<SendEventNotificationCommand, Result<string>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly INotificationService _notificationService;
-    private readonly ILogger<SendEventNotificationCommandHandler> _logger;
-    private readonly IAuthorizationService _authorizationService;
-
-    public SendEventNotificationCommandHandler(
-        IApplicationDbContext context,
-        INotificationService notificationService,
-        ILogger<SendEventNotificationCommandHandler> logger,
-        IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _notificationService = notificationService;
-        _logger = logger;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly INotificationService _notificationService = notificationService;
+    private readonly ILogger<SendEventNotificationCommandHandler> _logger = logger;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<string>> Handle(SendEventNotificationCommand request, CancellationToken cancellationToken)
     {

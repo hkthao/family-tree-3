@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Files;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

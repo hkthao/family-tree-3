@@ -1,5 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore; // Add this
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications; // Add this
 using backend.Domain.Entities;

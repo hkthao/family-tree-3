@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Background;
 
 /// <summary>
 /// Giao diện cho một hàng đợi tác vụ nền không đồng bộ.

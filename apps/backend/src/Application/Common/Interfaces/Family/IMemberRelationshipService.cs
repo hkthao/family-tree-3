@@ -1,6 +1,6 @@
 using backend.Domain.Entities;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Family;
 
 public interface IMemberRelationshipService
 {

@@ -1,6 +1,6 @@
 using backend.Domain.Entities;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Core;
 
 /// <summary>
 /// Định nghĩa giao diện cho Application Database Context, cung cấp quyền truy cập vào các DbSet của ứng dụng.
@@ -18,7 +18,7 @@ public interface IApplicationDbContext
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
-    DbSet<Family> Families { get; }
+    DbSet<backend.Domain.Entities.Family> Families { get; }
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Member.
     /// </summary>

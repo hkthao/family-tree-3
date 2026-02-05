@@ -1,5 +1,5 @@
 using System.Threading.Channels;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Background;
 
 namespace backend.Infrastructure.Services;
 

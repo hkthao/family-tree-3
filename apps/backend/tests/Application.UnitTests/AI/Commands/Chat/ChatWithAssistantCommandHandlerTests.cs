@@ -1,5 +1,5 @@
 using backend.Application.AI.Chat;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models.AppSetting; // Re-add this
 using backend.Application.Knowledge; // NEW
 using MediatR;
@@ -16,7 +16,6 @@ public class ChatWithAssistantCommandHandlerTests
     private readonly Mock<IOptions<LLMGatewaySettings>> _mockLLMGatewaySettings;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IKnowledgeService> _mockKnowledgeService; // NEW
-    private readonly ChatWithAssistantCommandHandler _handler;
 
     public ChatWithAssistantCommandHandlerTests()
     {
@@ -33,13 +32,5 @@ public class ChatWithAssistantCommandHandlerTests
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>())).Returns(true);
-
-        _handler = new ChatWithAssistantCommandHandler(
-            _loggerMock.Object,
-            _mockMediator.Object,
-            _mockLLMGatewaySettings.Object,
-            _mockAuthorizationService.Object,
-            _mockKnowledgeService.Object // NEW
-        );
     }
 }

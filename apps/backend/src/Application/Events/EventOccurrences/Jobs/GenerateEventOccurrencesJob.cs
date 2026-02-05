@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Services;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;

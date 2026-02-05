@@ -2,25 +2,18 @@ using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.FamilyMedias.Queries.Specifications;
 
 namespace backend.Application.FamilyMedias.Queries.SearchFamilyMedia;
 
-public class SearchFamilyMediaQueryHandler : IRequestHandler<SearchFamilyMediaQuery, Result<PaginatedList<FamilyMediaDto>>>
+public class SearchFamilyMediaQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMapper mapper) : IRequestHandler<SearchFamilyMediaQuery, Result<PaginatedList<FamilyMediaDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMapper _mapper;
-
-    public SearchFamilyMediaQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMapper mapper)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<FamilyMediaDto>>> Handle(SearchFamilyMediaQuery request, CancellationToken cancellationToken)
     {

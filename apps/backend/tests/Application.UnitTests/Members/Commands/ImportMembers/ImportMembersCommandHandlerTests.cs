@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Members.Commands.ImportMembers;
 using backend.Application.Members.DTOs; // MemberImportDto is here
 using backend.Application.UnitTests.Common;

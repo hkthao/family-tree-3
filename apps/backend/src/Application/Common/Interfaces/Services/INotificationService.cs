@@ -1,7 +1,7 @@
 using backend.Application.Common.Models;
 using backend.Application.Notifications.DTOs;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Services;
 
 public interface INotificationService
 {

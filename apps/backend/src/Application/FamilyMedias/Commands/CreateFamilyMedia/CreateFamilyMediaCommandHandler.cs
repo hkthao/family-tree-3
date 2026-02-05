@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Files;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.MessageBus; // NEW
 using backend.Application.FamilyMedias.DTOs;
@@ -10,36 +12,24 @@ using static backend.Application.Common.Constants.MessageBusConstants;
 
 namespace backend.Application.FamilyMedias.Commands.CreateFamilyMedia;
 
-public class CreateFamilyMediaCommandHandler : IRequestHandler<CreateFamilyMediaCommand, Result<FamilyMediaDto>>
+public class CreateFamilyMediaCommandHandler(
+    IApplicationDbContext context,
+    IAuthorizationService authorizationService,
+    IFileStorageService fileStorageService, // Changed from ILocalFileStorageService
+    ICurrentUser currentUser,
+    ILogger<CreateFamilyMediaCommandHandler> logger,
+    IMapper mapper,
+    IMediator mediator,
+    IMessageBus messageBus) : IRequestHandler<CreateFamilyMediaCommand, Result<FamilyMediaDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IFileStorageService _fileStorageService; // Changed from ILocalFileStorageService
-    private readonly ICurrentUser _currentUser;
-    private readonly ILogger<CreateFamilyMediaCommandHandler> _logger;
-    private readonly IMapper _mapper;
-    private readonly IMediator _mediator;
-    private readonly IMessageBus _messageBus;
-
-    public CreateFamilyMediaCommandHandler(
-        IApplicationDbContext context,
-        IAuthorizationService authorizationService,
-        IFileStorageService fileStorageService, // Changed from ILocalFileStorageService
-        ICurrentUser currentUser,
-        ILogger<CreateFamilyMediaCommandHandler> logger,
-        IMapper mapper,
-        IMediator mediator,
-        IMessageBus messageBus)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _fileStorageService = fileStorageService; // Changed from _localFileStorageService
-        _currentUser = currentUser;
-        _logger = logger;
-        _mapper = mapper;
-        _mediator = mediator;
-        _messageBus = messageBus;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IFileStorageService _fileStorageService = fileStorageService; // Changed from ILocalFileStorageService
+    private readonly ICurrentUser _currentUser = currentUser;
+    private readonly ILogger<CreateFamilyMediaCommandHandler> _logger = logger;
+    private readonly IMapper _mapper = mapper;
+    private readonly IMediator _mediator = mediator;
+    private readonly IMessageBus _messageBus = messageBus;
 
     public async Task<Result<FamilyMediaDto>> Handle(CreateFamilyMediaCommand request, CancellationToken cancellationToken)
     {

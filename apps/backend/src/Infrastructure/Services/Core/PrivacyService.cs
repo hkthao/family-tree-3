@@ -1,6 +1,6 @@
 using System.Reflection;
-using AutoMapper;
-using backend.Application.Common.Interfaces; // For ICurrentUserService
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById; // For EventDetailDto
 using backend.Application.Families.Queries; // For FamilyDto
@@ -18,23 +18,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Services;
 
-public class PrivacyService : IPrivacyService
+public class PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService) : IPrivacyService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ICurrentUser _currentUser;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMapper _mapper;
+    private readonly IApplicationDbContext _context = context;
+    private readonly ICurrentUser _currentUser = currentUserService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     // Cache PropertyInfo objects to improve performance
     private static readonly Dictionary<Type, Dictionary<string, PropertyInfo?>> _propertyCache = [];
-
-    public PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService, IMapper mapper)
-    {
-        _context = context;
-        _currentUser = currentUserService;
-        _authorizationService = authorizationService;
-        _mapper = mapper;
-    }
 
     /// <summary>
     /// Phương thức trợ giúp chung để lọc các thuộc tính của DTO.

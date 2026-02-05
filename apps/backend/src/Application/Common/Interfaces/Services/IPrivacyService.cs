@@ -10,7 +10,7 @@ using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Services;
 
 public interface IPrivacyService
 {

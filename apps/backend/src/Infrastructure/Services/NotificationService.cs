@@ -1,23 +1,17 @@
 using backend.Application.Common.Events; // New using directive for events
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.Notifications.DTOs;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Services;
 
-public class NotificationService : INotificationService
+public class NotificationService(
+    ILogger<NotificationService> logger,
+    IMessageBus messageBus) : INotificationService
 {
-    private readonly ILogger<NotificationService> _logger;
-    private readonly IMessageBus _messageBus;
-
-    public NotificationService(
-        ILogger<NotificationService> logger,
-        IMessageBus messageBus)
-    {
-        _logger = logger;
-        _messageBus = messageBus;
-    }
+    private readonly ILogger<NotificationService> _logger = logger;
+    private readonly IMessageBus _messageBus = messageBus;
 
     public async Task<Result> SyncSubscriberAsync(SyncSubscriberDto subscriberDto, CancellationToken cancellationToken = default)
     {

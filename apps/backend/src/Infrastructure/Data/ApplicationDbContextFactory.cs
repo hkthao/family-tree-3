@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Domain.Common; // Thêm dòng này
 using backend.Infrastructure.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;

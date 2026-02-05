@@ -1,4 +1,5 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.ValueObjects;
@@ -7,14 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Services;
 
-public class FamilyTreeService : IFamilyTreeService
+public class FamilyTreeService(IApplicationDbContext context) : IFamilyTreeService
 {
-    private readonly IApplicationDbContext _context;
-
-    public FamilyTreeService(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default)
     {

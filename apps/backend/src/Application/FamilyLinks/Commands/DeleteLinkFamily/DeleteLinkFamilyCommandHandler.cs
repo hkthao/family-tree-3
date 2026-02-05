@@ -1,20 +1,12 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyLinks.Commands.DeleteLinkFamily;
 
-public class DeleteLinkFamilyCommandHandler : IRequestHandler<DeleteLinkFamilyCommand, Result<Unit>>
+public class DeleteLinkFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteLinkFamilyCommand, Result<Unit>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ICurrentUser _currentUser;
-
-    public DeleteLinkFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _currentUser = currentUser;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<Unit>> Handle(DeleteLinkFamilyCommand request, CancellationToken cancellationToken)
     {

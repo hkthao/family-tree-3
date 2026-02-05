@@ -1,6 +1,6 @@
 
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Common; // NEW

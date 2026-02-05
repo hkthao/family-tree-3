@@ -1,21 +1,15 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using Newtonsoft.Json;
 
 namespace backend.Application.Events.Queries.ExportEvents;
 
-public class ExportEventsQueryHandler : IRequestHandler<ExportEventsQuery, Result<string>>
+public class ExportEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<ExportEventsQuery, Result<string>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IPrivacyService _privacyService;
-
-    public ExportEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _privacyService = privacyService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<string>> Handle(ExportEventsQuery request, CancellationToken cancellationToken)
     {

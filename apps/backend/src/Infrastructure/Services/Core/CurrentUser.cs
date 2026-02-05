@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Domain.Constants;
 using Microsoft.AspNetCore.Http;
 

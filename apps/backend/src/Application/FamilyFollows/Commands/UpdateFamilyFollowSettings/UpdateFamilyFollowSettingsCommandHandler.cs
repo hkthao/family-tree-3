@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Common.Security;
 using backend.Domain.Events;
@@ -10,13 +10,11 @@ public class UpdateFamilyFollowSettingsCommandHandler : IRequestHandler<UpdateFa
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUser _currentUser;
-    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
-    public UpdateFamilyFollowSettingsCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IDomainEventDispatcher domainEventDispatcher)
+    public UpdateFamilyFollowSettingsCommandHandler(IApplicationDbContext context, ICurrentUser currentUser)
     {
         _context = context;
         _currentUser = currentUser;
-        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public async Task<Result> Handle(UpdateFamilyFollowSettingsCommand request, CancellationToken cancellationToken)

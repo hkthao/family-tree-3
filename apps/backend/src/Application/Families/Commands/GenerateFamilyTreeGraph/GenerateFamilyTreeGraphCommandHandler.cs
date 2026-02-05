@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Services.GraphGeneration;
 using backend.Domain.Entities;
-using backend.Application.Common.Constants; // NEW
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services; // NEW
 
 namespace backend.Application.Families.Commands.GenerateFamilyTreeGraph;
 

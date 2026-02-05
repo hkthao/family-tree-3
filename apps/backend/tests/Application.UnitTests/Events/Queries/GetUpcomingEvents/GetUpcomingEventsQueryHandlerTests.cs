@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetUpcomingEvents;
 using backend.Application.UnitTests.Common;

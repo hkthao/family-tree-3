@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.UnitTests.Common;

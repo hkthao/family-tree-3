@@ -1,6 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Dtos; // Added
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Events.Commands.ImportEvents;
 using backend.Application.Events.Queries;
 using backend.Application.UnitTests.Common;

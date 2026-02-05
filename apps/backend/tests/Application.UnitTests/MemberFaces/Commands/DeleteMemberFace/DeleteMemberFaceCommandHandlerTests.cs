@@ -1,11 +1,11 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.MemberFaces.Commands.DeleteMemberFace;
 using backend.Domain.Entities;
 using backend.Domain.Events.MemberFaces; // Added
 using backend.Domain.ValueObjects;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore; // Added
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.EntityFrameworkCore; // Added for mock DbSet
@@ -16,9 +16,6 @@ namespace backend.Application.UnitTests.MemberFaces.Commands.DeleteMemberFace;
 public class DeleteMemberFaceCommandHandlerTests
 {
     private readonly Mock<IApplicationDbContext> _contextMock;
-    private readonly Mock<DbSet<MemberFace>> _memberFacesDbSetMock;
-    private readonly Mock<DbSet<Family>> _familiesDbSetMock; // Added
-    private readonly Mock<DbSet<Member>> _membersDbSetMock; // Added
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ILogger<DeleteMemberFaceCommandHandler>> _loggerMock;
     private readonly Mock<IMessageBus> _messageBusMock;
@@ -29,9 +26,6 @@ public class DeleteMemberFaceCommandHandlerTests
     public DeleteMemberFaceCommandHandlerTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
-        _memberFacesDbSetMock = new Mock<DbSet<MemberFace>>();
-        _familiesDbSetMock = new Mock<DbSet<Family>>();
-        _membersDbSetMock = new Mock<DbSet<Member>>();
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _loggerMock = new Mock<ILogger<DeleteMemberFaceCommandHandler>>();
         _messageBusMock = new Mock<IMessageBus>();

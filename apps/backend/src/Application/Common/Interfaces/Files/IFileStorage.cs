@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Files;
 
 /// <summary>
 /// Định nghĩa giao diện cho các hoạt động lưu trữ tệp.

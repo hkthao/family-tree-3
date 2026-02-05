@@ -1,6 +1,7 @@
 using System.Text;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models.LLMGateway; // NEW
 using backend.Application.Families.Commands.IncrementFamilyAiChatUsage; // ADDED

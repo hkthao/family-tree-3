@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Core;
 
 /// <summary>
 /// Định nghĩa giao diện cho dịch vụ cung cấp thông tin về người dùng hiện tại.

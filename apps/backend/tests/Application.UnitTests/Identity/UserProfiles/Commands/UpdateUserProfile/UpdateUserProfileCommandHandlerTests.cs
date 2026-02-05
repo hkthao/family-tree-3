@@ -1,7 +1,5 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -22,7 +20,7 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
     {
         _mockMediator = new Mock<IMediator>();
         _mockCurrentUser = new Mock<ICurrentUser>();
-        _handler = new UpdateUserProfileCommandHandler(_context, _mockMediator.Object, _mockCurrentUser.Object);
+        _handler = new UpdateUserProfileCommandHandler(_context, _mockMediator.Object);
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces; // Ensure this is present for IAuthorizationService and ICurrentUser
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common; // For MemberFaceDto and BoundingBoxDto
 using backend.Application.MemberFaces.Specifications; // Import the new specification

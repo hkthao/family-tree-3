@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models.MessageBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,24 +12,17 @@ using RabbitMQ.Client.Events;
 
 namespace backend.Infrastructure.Services.MessageBus.Consumers;
 
-public class GraphGenerationStatusConsumer : BackgroundService
+public class GraphGenerationStatusConsumer(ILogger<GraphGenerationStatusConsumer> logger, IServiceScopeFactory serviceScopeFactory, ConnectionFactory factory) : BackgroundService
 {
-    private readonly ILogger<GraphGenerationStatusConsumer> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ConnectionFactory _factory;
+    private readonly ILogger<GraphGenerationStatusConsumer> _logger = logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly ConnectionFactory _factory = factory;
     private IConnection? _connection;
     private IChannel? _channel;
 
     private readonly string _exchangeName = MessageBusConstants.Exchanges.GraphGeneration;
     private readonly string _queueName = MessageBusConstants.Queues.GraphGenerationStatusQueue;
     private readonly string _routingKey = MessageBusConstants.RoutingKeys.GraphStatusUpdated;
-
-    public GraphGenerationStatusConsumer(ILogger<GraphGenerationStatusConsumer> logger, IServiceScopeFactory serviceScopeFactory, ConnectionFactory factory)
-    {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-        _factory = factory;
-    }
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {

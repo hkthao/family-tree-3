@@ -1,6 +1,6 @@
 
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Users.Specifications;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;

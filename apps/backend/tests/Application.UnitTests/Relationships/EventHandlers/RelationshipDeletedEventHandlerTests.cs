@@ -1,5 +1,4 @@
-
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Relationships.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;

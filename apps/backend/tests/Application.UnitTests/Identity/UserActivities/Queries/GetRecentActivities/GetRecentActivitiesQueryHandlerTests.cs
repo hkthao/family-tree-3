@@ -1,5 +1,4 @@
-
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Entities;
@@ -35,7 +34,7 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         _context.UserActivities.AddRange(activities);
         await _context.SaveChangesAsync();
 
-        var handler = new GetRecentActivitiesQueryHandler(_context, _mapper, _currentUserMock.Object, _mockAuthorizationService.Object);
+        var handler = new GetRecentActivitiesQueryHandler(_context, _mapper, _currentUserMock.Object);
         var query = new GetRecentActivitiesQuery();
 
         // Act

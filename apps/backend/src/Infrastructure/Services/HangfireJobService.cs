@@ -1,28 +1,21 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Background;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Events.EventOccurrences.Jobs;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Services;
 
-public class HangfireJobService : IBackgroundJobService
+public class HangfireJobService(
+    IBackgroundJobClient backgroundJobClient,
+    IRecurringJobManager recurringJobManager,
+    ILogger<HangfireJobService> logger,
+    IDateTime dateTime) : IBackgroundJobService
 {
-    private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IRecurringJobManager _recurringJobManager;
-    private readonly ILogger<HangfireJobService> _logger;
-    private readonly IDateTime _dateTime;
-
-    public HangfireJobService(
-        IBackgroundJobClient backgroundJobClient,
-        IRecurringJobManager recurringJobManager,
-        ILogger<HangfireJobService> logger,
-        IDateTime dateTime)
-    {
-        _backgroundJobClient = backgroundJobClient;
-        _recurringJobManager = recurringJobManager;
-        _logger = logger;
-        _dateTime = dateTime;
-    }
+    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
+    private readonly IRecurringJobManager _recurringJobManager = recurringJobManager;
+    private readonly ILogger<HangfireJobService> _logger = logger;
+    private readonly IDateTime _dateTime = dateTime;
 
     public string EnqueueGenerateEventOccurrences(int year, Guid? familyId, CancellationToken cancellationToken)
     {

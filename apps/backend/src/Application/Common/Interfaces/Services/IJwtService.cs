@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Services;
 
 /// <summary>
 /// Dịch vụ để tạo và quản lý JWT.

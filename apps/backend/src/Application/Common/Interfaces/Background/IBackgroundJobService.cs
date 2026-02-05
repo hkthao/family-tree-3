@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Background;
 
 /// <summary>
 /// Defines an interface for scheduling background jobs, abstracting away the underlying job queue implementation.

@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.Identity.Queries.GetUserByUsernameOrEmail;
@@ -6,16 +6,10 @@ namespace backend.Application.Identity.Queries.GetUserByUsernameOrEmail;
 /// <summary>
 /// Xử lý truy vấn để lấy thông tin người dùng dựa trên tên người dùng hoặc email.
 /// </summary>
-public class GetUserByUsernameOrEmailQueryHandler : IRequestHandler<GetUserByUsernameOrEmailQuery, Result<UserDto>>
+public class GetUserByUsernameOrEmailQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetUserByUsernameOrEmailQuery, Result<UserDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetUserByUsernameOrEmailQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserDto>> Handle(GetUserByUsernameOrEmailQuery request, CancellationToken cancellationToken)
     {

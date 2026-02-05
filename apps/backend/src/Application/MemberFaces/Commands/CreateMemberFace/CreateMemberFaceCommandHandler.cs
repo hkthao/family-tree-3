@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Utils; // NEW
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Messages;
@@ -9,6 +8,8 @@ using backend.Domain.Entities;
 using backend.Domain.Enums; // NEW
 using backend.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 namespace backend.Application.MemberFaces.Commands.CreateMemberFace;
 
 public class CreateMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<CreateMemberFaceCommandHandler> logger, IMessageBus messageBus, IMediator mediator) : IRequestHandler<CreateMemberFaceCommand, Result<Guid>>

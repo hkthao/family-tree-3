@@ -1,6 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore; // Re-add this
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils;
 using backend.Application.Families.Specifications;

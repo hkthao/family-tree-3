@@ -1,22 +1,13 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyLinks.Queries.GetFamilyLinkById;
 
-public class GetFamilyLinkByIdQueryHandler : IRequestHandler<GetFamilyLinkByIdQuery, Result<FamilyLinkDto>>
+public class GetFamilyLinkByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<GetFamilyLinkByIdQuery, Result<FamilyLinkDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ICurrentUser _currentUser;
-
-    public GetFamilyLinkByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser)
-    {
-        _context = context;
-        _mapper = mapper;
-        _authorizationService = authorizationService;
-        _currentUser = currentUser;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<FamilyLinkDto>> Handle(GetFamilyLinkByIdQuery request, CancellationToken cancellationToken)
     {

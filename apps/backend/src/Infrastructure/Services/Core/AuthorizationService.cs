@@ -1,20 +1,14 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
 namespace backend.Infrastructure.Services;
 
-public class AuthorizationService : IAuthorizationService
+public class AuthorizationService(ICurrentUser user, IApplicationDbContext context) : IAuthorizationService
 {
-    private readonly ICurrentUser _user;
-    private readonly IApplicationDbContext _context;
-
-    public AuthorizationService(ICurrentUser user, IApplicationDbContext context)
-    {
-        _user = user;
-        _context = context;
-    }
+    private readonly ICurrentUser _user = user;
+    private readonly IApplicationDbContext _context = context;
 
     public Task<Result> AuthorizeAsync(string role)
     {

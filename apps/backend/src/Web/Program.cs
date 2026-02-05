@@ -1,4 +1,6 @@
 using backend.Application.Common.Interfaces; // NEW: Added for IDateTime and IBackgroundJobService
+using backend.Application.Common.Interfaces.Background;
+using backend.Application.Common.Interfaces.Services;
 using backend.CompositionRoot;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services.MessageBus;

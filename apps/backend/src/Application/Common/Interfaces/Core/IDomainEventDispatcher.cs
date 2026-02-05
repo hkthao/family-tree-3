@@ -1,6 +1,6 @@
 using backend.Domain.Common;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Core;
 
 /// <summary>
 /// Giao diện định nghĩa một bộ điều phối sự kiện miền.

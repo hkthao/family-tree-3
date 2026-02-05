@@ -1,6 +1,6 @@
 using backend.Domain.ValueObjects;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Family;
 
 /// <summary>
 /// Định nghĩa giao diện cho dịch vụ quản lý cây gia phả.

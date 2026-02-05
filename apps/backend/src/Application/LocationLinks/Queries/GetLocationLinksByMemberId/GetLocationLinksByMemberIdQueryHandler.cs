@@ -1,19 +1,13 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
 namespace backend.Application.LocationLinks.Queries;
 
-public class GetLocationLinksByMemberIdQueryHandler : IRequestHandler<GetLocationLinksByMemberIdQuery, Result<List<LocationLinkDto>>>
+public class GetLocationLinksByMemberIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetLocationLinksByMemberIdQuery, Result<List<LocationLinkDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetLocationLinksByMemberIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<LocationLinkDto>>> Handle(GetLocationLinksByMemberIdQuery request, CancellationToken cancellationToken)
     {

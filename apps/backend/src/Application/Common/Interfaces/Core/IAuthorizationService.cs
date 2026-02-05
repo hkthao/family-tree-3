@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces.Core;
 
 /// <summary>
 /// Định nghĩa giao diện cho dịch vụ ủy quyền, cung cấp các phương thức để kiểm tra quyền truy cập và vai trò của người dùng.

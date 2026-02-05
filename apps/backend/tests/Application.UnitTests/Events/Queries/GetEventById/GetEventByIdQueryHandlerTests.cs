@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Events.Queries; // For EventDto
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Members.Queries.GetMembers; // For MemberListDto, etc.

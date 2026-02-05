@@ -1,5 +1,4 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.MemberFaces.Commands.CreateMemberFace;
 using backend.Application.MemberFaces.Common;
 using backend.Application.MemberFaces.Messages;
@@ -13,6 +12,8 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces.Services;
+using backend.Application.Common.Interfaces.Core;
 
 namespace backend.Application.UnitTests.MemberFaces.Commands.CreateMemberFace;
 

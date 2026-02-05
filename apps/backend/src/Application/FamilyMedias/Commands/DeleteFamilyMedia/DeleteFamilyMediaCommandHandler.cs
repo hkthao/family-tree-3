@@ -1,5 +1,6 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.MessageBus; // NEW
 using Microsoft.Extensions.Logging;

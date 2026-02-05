@@ -23,7 +23,7 @@ public class FollowFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new FollowFamilyCommand { FamilyId = family.Id };
-        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -65,7 +65,7 @@ public class FollowFamilyCommandHandlerTests : TestBase
             NotifyBirthday = true,
             NotifyDeathAnniversary = false
         };
-        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -93,7 +93,7 @@ public class FollowFamilyCommandHandlerTests : TestBase
     {
         // Arrange
         var command = new FollowFamilyCommand { FamilyId = Guid.NewGuid() }; // Non-existent FamilyId
-        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -120,7 +120,7 @@ public class FollowFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new FollowFamilyCommand { FamilyId = family.Id };
-        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -142,7 +142,7 @@ public class FollowFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new FollowFamilyCommand { FamilyId = family.Id };
-        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new FollowFamilyCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

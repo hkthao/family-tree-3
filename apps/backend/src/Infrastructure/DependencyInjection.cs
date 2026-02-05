@@ -1,5 +1,9 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Background;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
+using backend.Application.Common.Interfaces.Files;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Interfaces.Services.GraphvizPdfConverter; // NEW: For IGraphvizPdfConverterClient
 using backend.Application.Common.Interfaces.Services.LLMGateway; // NEW
 using backend.Application.Common.Models.AppSetting;
@@ -77,8 +81,6 @@ public static class DependencyInjection
         // Register IMessageBus with RabbitMqMessageBus implementation
         services.AddSingleton<IMessageBus, RabbitMqMessageBus>();
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
-
-
 
         // Register IFileStorageService to use LocalDiskFileStorageService
         services.AddScoped<IFileStorageService, LocalDiskFileStorageService>();

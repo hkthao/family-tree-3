@@ -35,7 +35,7 @@ public class UpdateFamilyFollowSettingsCommandHandlerTests : TestBase
             NotifyDeathAnniversary = true, // Add new
             NotifyEvent = false // No change
         };
-        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -80,7 +80,7 @@ public class UpdateFamilyFollowSettingsCommandHandlerTests : TestBase
             NotifyEvent = false,
             NotifyDeathAnniversary = false
         };
-        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -111,7 +111,7 @@ public class UpdateFamilyFollowSettingsCommandHandlerTests : TestBase
             NotifyEvent = false,
             NotifyDeathAnniversary = true
         };
-        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object, _mockDomainEventDispatcher.Object);
+        var handler = new UpdateFamilyFollowSettingsCommandHandler(_context, _mockUser.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

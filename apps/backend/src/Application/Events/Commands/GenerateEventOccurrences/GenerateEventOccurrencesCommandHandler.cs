@@ -1,23 +1,16 @@
 using backend.Application.Common.Constants; // NEW
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs; // Needed for IGenerateEventOccurrencesJob
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.GenerateEventOccurrences;
 
-public class GenerateEventOccurrencesCommandHandler : IRequestHandler<GenerateEventOccurrencesCommand, Result<string>>
+public class GenerateEventOccurrencesCommandHandler(IGenerateEventOccurrencesJob generateEventOccurrencesJob, ILogger<GenerateEventOccurrencesCommandHandler> logger, IAuthorizationService authorizationService) : IRequestHandler<GenerateEventOccurrencesCommand, Result<string>>
 {
-    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob;
-    private readonly ILogger<GenerateEventOccurrencesCommandHandler> _logger;
-    private readonly IAuthorizationService _authorizationService; // NEW
-
-    public GenerateEventOccurrencesCommandHandler(IGenerateEventOccurrencesJob generateEventOccurrencesJob, ILogger<GenerateEventOccurrencesCommandHandler> logger, IAuthorizationService authorizationService) // UPDATED
-    {
-        _generateEventOccurrencesJob = generateEventOccurrencesJob;
-        _logger = logger;
-        _authorizationService = authorizationService; // NEW
-    }
+    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob = generateEventOccurrencesJob;
+    private readonly ILogger<GenerateEventOccurrencesCommandHandler> _logger = logger;
+    private readonly IAuthorizationService _authorizationService = authorizationService; // NEW
 
     public async Task<Result<string>> Handle(GenerateEventOccurrencesCommand request, CancellationToken cancellationToken)
     {

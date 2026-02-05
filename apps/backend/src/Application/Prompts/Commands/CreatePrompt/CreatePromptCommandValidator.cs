@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 
 namespace backend.Application.Prompts.Commands.CreatePrompt;
 

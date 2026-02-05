@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants; // Added
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Services; // Added for ILunarCalendarService
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.Inputs;
@@ -18,16 +18,14 @@ namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 public class CreateEventCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly Mock<IMediator> _mediatorMock; // Added
     private readonly Mock<ILunarCalendarService> _lunarCalendarServiceMock; // Added
     private readonly CreateEventCommandHandler _handler;
 
     public CreateEventCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _mediatorMock = new Mock<IMediator>(); // Added
         _lunarCalendarServiceMock = new Mock<ILunarCalendarService>(); // Added
-        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object, _mediatorMock.Object, _lunarCalendarServiceMock.Object); // Modified
+        _handler = new CreateEventCommandHandler(_context, _authorizationServiceMock.Object, _lunarCalendarServiceMock.Object); // Modified
     }
 
     [Fact]
