@@ -7,6 +7,7 @@ class Config:
     RABBITMQ_USER: str = os.environ.get('RABBITMQ_USER', 'guest')
     RABBITMQ_PASS: str = os.environ.get('RABBITMQ_PASS', 'guest')
     RABBITMQ_HEARTBEAT: int = int(os.environ.get('RABBITMQ_HEARTBEAT', 600)) # seconds
+    RABBITMQ_BLOCKED_CONNECTION_TIMEOUT: int = int(os.environ.get('RABBITMQ_BLOCKED_CONNECTION_TIMEOUT', 300)) # seconds
 
     # Directory Configuration
     INPUT_DIR: str = os.environ.get('INPUT_DIR', '/shared/input')
