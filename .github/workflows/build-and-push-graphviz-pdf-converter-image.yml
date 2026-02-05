@@ -1,0 +1,32 @@
+name: CD Pipeline for Graphviz PDF Converter
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  docker-push-graphviz-pdf-converter:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Build and push Graphviz PDF Converter Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./services/graphviz-pdf-converter
+        file: ./services/graphviz-pdf-converter/Dockerfile
+        push: true
+        tags: hkthao/family-tree-graphviz-pdf-converter:latest
