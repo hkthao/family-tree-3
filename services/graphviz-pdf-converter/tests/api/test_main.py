@@ -138,6 +138,87 @@ class TestFastAPI:
         assert response.json() == {"detail": "An unexpected server error occurred: An unforeseen issue occurred"}
         mock_render_dot_to_pdf.assert_called_once()
 
+    # --- Tests for /render-pdf-filename endpoint ---
+    def test_render_pdf_filename_success(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_render_dot_to_pdf.return_value = os.path.join(config.OUTPUT_DIR, f"{mock_render_request_data['job_id']}.pdf")
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 200
+        expected_response = RenderResponse(
+            job_id=mock_render_request_data['job_id'],
+            status="success",
+            output_file_path=mock_render_dot_to_pdf.return_value
+        )
+        assert response.json() == expected_response.model_dump()
+        mock_render_dot_to_pdf.assert_called_once()
+        args, kwargs = mock_render_dot_to_pdf.call_args
+        assert isinstance(args[0], RenderRequest)
+        assert args[0].job_id == mock_render_request_data['job_id']
+
+    def test_render_pdf_filename_input_file_not_found(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_render_dot_to_pdf.side_effect = FileNotFoundError("Input .dot file not found: /mock/input/non_existent.dot")
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Input DOT file not found: Input .dot file not found: /mock/input/non_existent.dot"}
+        mock_render_dot_to_pdf.assert_called_once()
+
+    def test_render_pdf_filename_dot_command_not_found(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_render_dot_to_pdf.side_effect = FileNotFoundError("Graphviz 'dot' command not found. Is Graphviz installed and in PATH?")
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Graphviz 'dot' command not found on server: Graphviz 'dot' command not found. Is Graphviz installed and in PATH?"}
+        mock_render_dot_to_pdf.assert_called_once()
+
+    def test_render_pdf_filename_timeout(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_exception = subprocess.TimeoutExpired(
+            cmd=['dot'], timeout=config.RENDER_TIMEOUT_SECONDS, output=b'', stderr=b'timed out'
+        )
+        mock_render_dot_to_pdf.side_effect = mock_exception
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 504
+        assert response.json() == {"detail": f"Graphviz rendering timed out after {config.RENDER_TIMEOUT_SECONDS} seconds. Stderr: {mock_exception.stderr.decode().strip()}"}
+
+    def test_render_pdf_filename_command_failure(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_render_dot_to_pdf.side_effect = RuntimeError("Graphviz command failed: error message")
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Graphviz rendering failed: Graphviz command failed: error message"}
+        mock_render_dot_to_pdf.assert_called_once()
+
+    def test_render_pdf_filename_invalid_request_body(self, mock_render_request_data):
+        invalid_data = mock_render_request_data.copy()
+        invalid_data.pop("job_id") # Missing required field
+
+        response = client.post("/render-pdf-filename", json=invalid_data)
+
+        assert response.status_code == 422 # Unprocessable Entity for Pydantic validation errors
+        assert "job_id" in response.json()["detail"][0]["loc"]
+        assert "field required".lower() in response.json()["detail"][0]["msg"].lower()
+
+    def test_render_pdf_filename_unexpected_error(self, mock_render_request_data, mocker):
+        mock_render_dot_to_pdf = mocker.patch('src.core.services.GraphvizService.render_dot_to_pdf')
+        mock_render_dot_to_pdf.side_effect = Exception("An unforeseen issue occurred")
+
+        response = client.post("/render-pdf-filename", json=mock_render_request_data)
+
+        assert response.status_code == 500
+        assert response.json() == {"detail": "An unexpected server error occurred: An unforeseen issue occurred"}
+        mock_render_dot_to_pdf.assert_called_once()
+
 
     # --- Tests for /render-and-download endpoint ---
 
