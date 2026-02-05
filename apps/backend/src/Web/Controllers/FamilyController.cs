@@ -346,16 +346,16 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
     }
 
     /// <summary>
-    /// Gửi yêu cầu tạo file Graphviz .dot cho cây gia phả và gửi yêu cầu render qua RabbitMQ.
+    /// Gửi yêu cầu tạo file Graphviz .dot cho cây gia phả và trả về file PDF trực tiếp.
     /// </summary>
     /// <param name="id">ID của gia đình từ URL.</param>
-    /// <param name="command">Dữ liệu yêu cầu bao gồm FamilyId và RootMemberId.</param>
-    /// <returns>JobId và trạng thái ban đầu của tác vụ tạo đồ thị.</returns>
+    /// <param name="command">Dữ liệu yêu cầu bao gồm FamilyId, RootMemberId, PageSize và Direction.</param>
+    /// <returns>File PDF của đồ thị cây gia phả.</returns>
     [HttpPost("{id}/graph")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileResult))] // Specify return type as FileResult
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GraphGenerationJobDto>> GenerateFamilyTreeGraph(Guid id, [FromBody] GenerateFamilyTreeGraphCommand command)
+    public async Task<IActionResult> GenerateFamilyTreeGraph(Guid id, [FromBody] GenerateFamilyTreeGraphCommand command)
     {
         if (id != command.FamilyId)
         {
@@ -367,7 +367,13 @@ public class FamilyController(IMediator mediator, ILogger<FamilyController> logg
 
         if (result.IsSuccess)
         {
-            return Ok(result.Value);
+            if (result.Value == null)
+            {
+                _logger.LogWarning("GenerateFamilyTreeGraph succeeded but returned null PDF content for FamilyId: {FamilyId}", command.FamilyId);
+                return NotFound("Generated PDF content is null.");
+            }
+            // Trả về file PDF trực tiếp
+            return File(result.Value, "application/pdf", $"family-tree-{command.FamilyId}.pdf");
         }
         else
         {

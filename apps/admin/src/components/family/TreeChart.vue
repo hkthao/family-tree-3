@@ -64,13 +64,9 @@
       @close="editMemberDrawer = false" @saved="handleMemberEdited" />
   </v-navigation-drawer>
 
-  <MemberActionDialog
-    v-model="isActionDialogOpen"
-    :member-id="selectedMemberIdForAction"
-    :member-name="selectedMemberNameForAction"
-    @view-details="handleViewDetails"
-    @view-relationships="handleViewRelationships"
-  />
+  <MemberActionDialog v-model="isActionDialogOpen" :member-id="selectedMemberIdForAction"
+    :member-name="selectedMemberNameForAction" @view-details="handleViewDetails"
+    @view-relationships="handleViewRelationships" />
 </template>
 
 <script setup lang="ts">

@@ -99,9 +99,9 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
     return this.http.get<IFamilyTreeData>(`/family/${familyId}/tree-data`, { params });
   }
 
-  async generateFamilyTreeGraph(familyId: string, rootMemberId: string | null): Promise<Result<GraphGenerationJobDto>> {
-    const payload = { familyId, rootMemberId };
-    return this.http.post<GraphGenerationJobDto>(`/family/${familyId}/graph`, payload);
+  async generateFamilyTreeGraph(familyId: string, rootMemberId: string | null, pageSize: string = "A0", direction: string = "LR"): Promise<Result<Blob>> {
+    const payload = { familyId, rootMemberId, pageSize, direction };
+    return this.http.post<Blob>(`/family/${familyId}/graph`, payload, { responseType: 'blob' });
   }
 }
 

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/vue-query'; // 
 import { useI18n } from 'vue-i18n';
 import { useServices } from '@/plugins/services.plugin';
 import { queryKeys } from '@/constants/queryKeys';
-import type { MemberDto, Relationship, IFamilyTreeData } from '@/types'; // Added GraphGenerationJobDto
+import type { MemberDto, Relationship, IFamilyTreeData } from '@/types';
 import { useGlobalSnackbar } from '@/composables/ui/useGlobalSnackbar'; // Added
 // import apiClient from '@/plugins/axios'; // Removed direct apiClient import
 
@@ -62,17 +62,27 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
 
   // Mutation for generating the graph
   const generateGraphMutation = useMutation({
-    mutationFn: async (payload: { familyId: string; rootMemberId: string | null }) => {
+    mutationFn: async (payload: { familyId: string; rootMemberId: string | null; pageSize: string; direction: string }) => {
       // Use the family service's method directly
-      const response = await family.generateFamilyTreeGraph(payload.familyId, payload.rootMemberId);
+      const response = await family.generateFamilyTreeGraph(payload.familyId, payload.rootMemberId, payload.pageSize, payload.direction);
       if (response.ok) {
-        return response.value; // Access the value property
+        return response.value; // Now returns a Blob
       } else {
         throw response.error; // Throw the error if not successful
       }
     },
-    onSuccess: (data) => {
-      snackbar.showSuccess(t('family.tree.printGraph.success', { jobId: data.jobId }));
+    onSuccess: (data: Blob) => {
+      // Implement PDF download logic
+      const url = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `FamilyTreeGraph-${new Date().toISOString().slice(0, 10)}.pdf`); // e.g., FamilyTreeGraph-2023-10-27.pdf
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      snackbar.showSuccess(t('family.tree.printGraph.success'));
     },
     onError: (error: any) => {
       console.error('Error generating family tree graph:', error);
@@ -88,9 +98,15 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
       snackbar.showError(t('family.tree.printGraph.noFamilyId'));
       return;
     }
+    // Default values for pageSize and direction, could be made configurable in the future
+    const pageSize = "A0";
+    const direction = "LR";
+
     generateGraphMutation.mutate({
       familyId: currentFamilyId,
-      rootMemberId: selectedRootMemberId.value ?? null, // Convert undefined to null
+      rootMemberId: selectedRootMemberId.value ?? null,
+      pageSize,
+      direction,
     });
   };
 
