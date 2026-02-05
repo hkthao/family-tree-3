@@ -19,6 +19,7 @@ RUN mkdir -p /shared/input /shared/output
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
+COPY src ./src
 
-CMD ["python", "app.py"]
+# Default command to run the FastAPI application
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

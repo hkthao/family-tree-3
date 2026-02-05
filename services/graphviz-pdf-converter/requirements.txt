@@ -1,1 +1,7 @@
 pika==1.3.2
+fastapi
+uvicorn
+pydantic
+pytest==7.4.4
+httpx
+starlette
