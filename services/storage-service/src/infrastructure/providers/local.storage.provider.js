@@ -18,7 +18,8 @@ class LocalStorageProvider extends IStorageService {
     if (Buffer.isBuffer(fileDto.filepath)) {
       await fs.writeFile(destinationPath, fileDto.filepath);
     } else {
-      await fs.rename(fileDto.filepath, destinationPath);
+      await fs.copyFile(fileDto.filepath, destinationPath);
+      await fs.unlink(fileDto.filepath);
     }
 
     return {

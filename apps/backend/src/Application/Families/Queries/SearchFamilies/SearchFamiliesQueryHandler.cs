@@ -48,9 +48,10 @@ public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper m
             }
         }
         query = query.WithSpecification(new FamilySearchQuerySpecification(request.SearchQuery));
-        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
         query = query.WithSpecification(new FamilyAccessSpecification(_authorizationService.IsAdmin(), _currentUser.UserId));
         query = query.WithSpecification(new FamilyVisibilitySpecification(request.Visibility));
+
+        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedFamilyEntities = await query
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
