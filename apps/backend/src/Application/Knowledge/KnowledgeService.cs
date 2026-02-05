@@ -1,5 +1,5 @@
 using System.Text.Json;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Knowledge.DTOs;
 using backend.Domain.Enums;

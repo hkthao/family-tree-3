@@ -8,6 +8,7 @@ import {
   type FamilyLimitConfiguration, // NEW
   type FamilyImportDto, // NEW
   type IFamilyTreeData, // NEWLY ADDED
+  type GraphGenerationJobDto, // NEW
 } from '@/types';
 import type { Result } from '@/types';
 import type { PrivacyConfiguration } from '@/types/privacyConfiguration';
@@ -96,6 +97,11 @@ export class ApiFamilyService extends ApiCrudService<FamilyDto, FamilyAddDto, Fa
       params.initialMemberId = initialMemberId;
     }
     return this.http.get<IFamilyTreeData>(`/family/${familyId}/tree-data`, { params });
+  }
+
+  async generateFamilyTreeGraph(familyId: string, rootMemberId: string | null, pageSize: string = "A0", direction: string = "LR"): Promise<Result<Blob>> {
+    const payload = { familyId, rootMemberId, pageSize, direction };
+    return this.http.post<Blob>(`/family/${familyId}/graph`, payload, { responseType: 'blob' });
   }
 }
 

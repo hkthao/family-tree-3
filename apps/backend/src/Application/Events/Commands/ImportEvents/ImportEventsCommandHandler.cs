@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants; // Added
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums; // Added
@@ -9,18 +9,11 @@ using backend.Domain.ValueObjects; // Added for LunarDate
 
 namespace backend.Application.Events.Commands.ImportEvents;
 
-public class ImportEventsCommandHandler : IRequestHandler<ImportEventsCommand, Result<Unit>>
+public class ImportEventsCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<ImportEventsCommand, Result<Unit>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IAuthorizationService _authorizationService; // Added
-
-    public ImportEventsCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) // Added authorizationService
-    {
-        _context = context;
-        _mapper = mapper;
-        _authorizationService = authorizationService; // Assign it
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService; // Added
 
     public async Task<Result<Unit>> Handle(ImportEventsCommand request, CancellationToken cancellationToken)
     {

@@ -18,6 +18,13 @@
         </v-btn>
       </template>
     </v-tooltip>
+    <v-tooltip :text="t('family.tree.printGraph')">
+      <template v-slot:activator="{ props }">
+        <v-btn icon v-bind="props" color="primary" @click="showPrintOptionsDialog = true" class="mr-2" :loading="isPrinting">
+          <v-icon>mdi-printer</v-icon>
+        </v-btn>
+      </template>
+    </v-tooltip>
     <v-tooltip :text="t('member.add')" v-if="canAddMember">
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props" color="primary" @click="handleAddMember" class="mr-2">
@@ -57,13 +64,12 @@
       @close="editMemberDrawer = false" @saved="handleMemberEdited" />
   </v-navigation-drawer>
 
-  <MemberActionDialog
-    v-model="isActionDialogOpen"
-    :member-id="selectedMemberIdForAction"
-    :member-name="selectedMemberNameForAction"
-    @view-details="handleViewDetails"
-    @view-relationships="handleViewRelationships"
-  />
+  <MemberActionDialog v-model="isActionDialogOpen" :member-id="selectedMemberIdForAction"
+    :member-name="selectedMemberNameForAction" @view-details="handleViewDetails"
+    @view-relationships="handleViewRelationships" />
+
+  <!-- Print Options Dialog -->
+  <PrintOptionsDialog v-model="showPrintOptionsDialog" @generate="generatePdfWithOptions" />
 </template>
 
 <script setup lang="ts">
@@ -75,8 +81,9 @@ import MemberDetailTabsView from '@/views/member/MemberDetailTabsView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useAuth } from '@/composables';
-import { useTreeVisualization } from '@/composables/family/useTreeVisualization'; // Import the new composable
-import MemberActionDialog from '@/components/member/MemberActionDialog.vue'; // Import MemberActionDialog
+import { useTreeVisualization } from '@/composables/family/useTreeVisualization';
+import MemberActionDialog from '@/components/member/MemberActionDialog.vue';
+import PrintOptionsDialog from './PrintOptionsDialog.vue'; // NEW
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -87,11 +94,13 @@ const { t } = useI18n();
 const chartMode = ref('hierarchical');
 
 const {
-  state: { members, relationships, selectedRootMemberId },
-  actions: { fetchTreeData },
+  state: { members, relationships, selectedRootMemberId, isPrinting },
+  actions: { fetchTreeData, handlePrintGraph },
 } = useTreeVisualization(toRef(props, 'familyId'), props.initialMemberId);
 
 const { state } = useAuth();
+
+const showPrintOptionsDialog = ref(false); // NEW
 
 const canAddMember = computed(() => {
   return !props.readOnly && (state.isAdmin.value || state.isFamilyManager.value(props.familyId));
@@ -135,7 +144,7 @@ const handleAddMember = () => {
 const handleMemberAdded = () => {
   addMemberDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined);
   }
 };
 
@@ -149,7 +158,7 @@ const handleShowMemberDetailDrawer = (memberId: string) => {
 const handleMemberDeleted = () => {
   memberDetailDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined);
   }
 };
 
@@ -170,28 +179,24 @@ const handleEditMember = (memberId: string) => {
 const handleMemberEdited = () => {
   editMemberDrawer.value = false;
   if (props.familyId) {
-    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined);
   }
 };
 
 const handleRefresh = () => {
   if (props.familyId) {
-    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined); // Pass selectedRootMemberId to refetch correctly
+    fetchTreeData(props.familyId, selectedRootMemberId.value ?? undefined);
   }
 };
 
-// No need for onMounted and watch here, useTreeVisualization handles it internally
-// However, ensure fetchTreeData is called initially
+const generatePdfWithOptions = (options: { pageSize: string; direction: string }) => {
+  // handlePrintGraph already uses currentFamilyId and selectedRootMemberId
+  handlePrintGraph(options.pageSize, options.direction);
+};
+
 onMounted(() => {
   if (props.familyId) {
     fetchTreeData(props.familyId, props.initialMemberId ?? undefined);
   }
 });
-
-// Remove the watch below as it's now handled internally by useTreeVisualization's watch effects.
-// watch([() => props.familyId, () => props.initialMemberId], ([newFamilyId, newInitialMemberId]) => {
-//   if (newFamilyId) {
-//     fetchTreeData(newFamilyId, newInitialMemberId ?? undefined);
-//   }
-// });
 </script>

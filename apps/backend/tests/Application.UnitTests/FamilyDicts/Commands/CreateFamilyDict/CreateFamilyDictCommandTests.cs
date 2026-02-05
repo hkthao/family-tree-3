@@ -20,7 +20,7 @@ public class CreateFamilyDictCommandTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
+        var handler = new CreateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
             Name = "New FamilyDict",
@@ -55,7 +55,7 @@ public class CreateFamilyDictCommandTests : TestBase
         // Note: For validation tests, authorization check is not the primary focus,
         // but the handler still needs the authorizationService mock.
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
+        var handler = new CreateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
             Name = "", // Empty name
@@ -79,7 +79,7 @@ public class CreateFamilyDictCommandTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
+        var handler = new CreateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
             Name = new string('A', 201), // Too long name
@@ -103,7 +103,7 @@ public class CreateFamilyDictCommandTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-        var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
+        var handler = new CreateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
             Name = "Valid Name",
@@ -127,7 +127,7 @@ public class CreateFamilyDictCommandTests : TestBase
     {
         // Arrange
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false); // Simulate non-admin user
-        var handler = new CreateFamilyDictCommandHandler(_context, _mockUser.Object, _mapper, _mockAuthorizationService.Object);
+        var handler = new CreateFamilyDictCommandHandler(_context, _mapper, _mockAuthorizationService.Object);
         var command = new CreateFamilyDictCommand
         {
             Name = "New FamilyDict",

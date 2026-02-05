@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Family;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.EventHandlers;

@@ -731,6 +731,92 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("family_users");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.GraphGenerationJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<string>("DotFilePath")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("dot_file_path");
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("error_message");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("JobId")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("job_id");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("OutputFilePath")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("output_file_path");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("requested_at");
+
+                    b.Property<Guid>("RootMemberId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("root_member_id");
+
+                    b.Property<DateTime?>("StartedProcessingAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("started_processing_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_graph_generation_jobs");
+
+                    b.ToTable("graph_generation_jobs");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Location", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2011,163 +2097,6 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("user_push_tokens");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("AudioUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("audio_url");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("deleted_by");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("deleted_date");
-
-                    b.Property<double>("Duration")
-                        .HasColumnType("double")
-                        .HasColumnName("duration");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("last_modified");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("varchar(4000)")
-                        .HasColumnName("text");
-
-                    b.Property<Guid>("VoiceProfileId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("voice_profile_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_voice_generations");
-
-                    b.HasIndex("VoiceProfileId")
-                        .HasDatabaseName("ix_voice_generations_voice_profile_id");
-
-                    b.ToTable("voice_generations");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("AudioUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("audio_url");
-
-                    b.Property<bool>("Consent")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("consent");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("deleted_by");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("deleted_date");
-
-                    b.Property<double>("DurationSeconds")
-                        .HasColumnType("double")
-                        .HasColumnName("duration_seconds");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("label");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("language");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("last_modified");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("member_id");
-
-                    b.Property<string>("OverallQuality")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("overall_quality");
-
-                    b.Property<string>("QualityMessages")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("quality_messages");
-
-                    b.Property<double>("QualityScore")
-                        .HasColumnType("double")
-                        .HasColumnName("quality_score");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_voice_profiles");
-
-                    b.HasIndex("MemberId")
-                        .HasDatabaseName("ix_voice_profiles_member_id");
-
-                    b.ToTable("voice_profiles");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Family", "Family")
@@ -2569,30 +2498,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.VoiceGeneration", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.VoiceProfile", "VoiceProfile")
-                        .WithMany("VoiceGenerations")
-                        .HasForeignKey("VoiceProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_voice_generations_voice_profiles_voice_profile_id");
-
-                    b.Navigation("VoiceProfile");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_voice_profiles_members_member_id");
-
-                    b.Navigation("Member");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.Navigation("EventMembers");
@@ -2645,11 +2550,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("UserActivities");
 
                     b.Navigation("UserPushTokens");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.VoiceProfile", b =>
-                {
-                    b.Navigation("VoiceGenerations");
                 });
 #pragma warning restore 612, 618
         }

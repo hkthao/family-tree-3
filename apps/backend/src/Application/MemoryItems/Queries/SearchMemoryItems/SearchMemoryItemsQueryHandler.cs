@@ -1,5 +1,6 @@
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.MemoryItems.DTOs;
 

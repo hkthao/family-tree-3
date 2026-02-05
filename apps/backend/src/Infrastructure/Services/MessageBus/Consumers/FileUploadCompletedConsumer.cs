@@ -1,7 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Files;
 using backend.Application.Common.Models.MessageBus;
 using backend.Domain.Enums; // NEW
 using Microsoft.EntityFrameworkCore; // NEW
@@ -13,24 +14,17 @@ using RabbitMQ.Client.Events;
 
 namespace backend.Infrastructure.Services.MessageBus.Consumers;
 
-public class FileUploadCompletedConsumer : BackgroundService
+public class FileUploadCompletedConsumer(ILogger<FileUploadCompletedConsumer> logger, IServiceScopeFactory serviceScopeFactory, ConnectionFactory factory) : BackgroundService
 {
-    private readonly ILogger<FileUploadCompletedConsumer> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ConnectionFactory _factory;
+    private readonly ILogger<FileUploadCompletedConsumer> _logger = logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly ConnectionFactory _factory = factory;
     private IConnection? _connection;
     private IChannel? _channel;
 
     private readonly string _exchangeName = MessageBusConstants.Exchanges.FileUpload;
     private readonly string _queueName = MessageBusConstants.Queues.FileUploadCompletedQueue; // Declare _queueName here
     private readonly string _routingKey = MessageBusConstants.RoutingKeys.FileUploadCompleted;
-
-    public FileUploadCompletedConsumer(ILogger<FileUploadCompletedConsumer> logger, IServiceScopeFactory serviceScopeFactory, ConnectionFactory factory)
-    {
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-        _factory = factory;
-    }
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {

@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Events.Queries; // Add this using statement for EventDto
 using backend.Application.Events.Queries.SearchEvents;
 using backend.Application.UnitTests.Common;

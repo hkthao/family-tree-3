@@ -1,26 +1,17 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore; // New import
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.FamilyLinks.Specifications; // New import
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyLinks.Queries.SearchFamilyLinks;
 
-public class SearchFamilyLinksQueryHandler : IRequestHandler<SearchFamilyLinksQuery, Result<PaginatedList<FamilyLinkDto>>>
+public class SearchFamilyLinksQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<SearchFamilyLinksQuery, Result<PaginatedList<FamilyLinkDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ICurrentUser _currentUser;
-
-    public SearchFamilyLinksQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser)
-    {
-        _context = context;
-        _mapper = mapper;
-        _authorizationService = authorizationService;
-        _currentUser = currentUser;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<FamilyLinkDto>>> Handle(SearchFamilyLinksQuery request, CancellationToken cancellationToken)
     {

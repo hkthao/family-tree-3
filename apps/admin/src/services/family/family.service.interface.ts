@@ -12,6 +12,7 @@ export interface IFamilyService extends ICrudService<FamilyDto, FamilyAddDto, Fa
   updateFamilyLimitConfiguration(familyId: string, payload: { maxMembers: number; maxStorageMb: number; aiChatMonthlyLimit: number }): Promise<Result<void, ApiError>>;
   importFamilyData(familyData: FamilyImportDto, clearExistingData: boolean): Promise<Result<string, ApiError>>;
   fetchFamilyTreeData(familyId: string, initialMemberId: string | null): Promise<Result<IFamilyTreeData, ApiError>>;
+  generateFamilyTreeGraph(familyId: string, rootMemberId: string | null, pageSize?: string, direction?: string): Promise<Result<Blob, ApiError>>;
 }
 
 

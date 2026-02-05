@@ -90,8 +90,14 @@ services:
         condition: service_healthy
       rabbitmq: # Add dependency on rabbitmq
         condition: service_healthy
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - local-uploads:/app/uploads
+      - graph-inputs:/shared/input
     networks:
       - app-network
     restart: unless-stopped
@@ -143,6 +149,31 @@ services:
       - app-network # Add to app-network for inter-service communication
     restart: unless-stopped
 
+  graphviz-pdf-converter:
+    image: hkthao/family-tree-graphviz-pdf-converter:latest
+    platform: linux/amd64
+    container_name: family-tree-graphviz-pdf-converter-prod
+    ports:
+      - "8005:8000" # Expose port 8005 for the Graphviz PDF Converter service
+    env_file:
+      - ./.env
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - graph-inputs:/shared/input
+      - graph-outputs:/shared/output
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app-network
+    restart: unless-stopped
+
   knowledge-search-service:
     image: hkthao/family-tree-knowledge-search-service:latest
     platform: linux/amd64
@@ -180,6 +211,15 @@ services:
       - "3001:3000" # Expose port 3000 for the Node.js app
     env_file:
       - ./.env
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - local-uploads:/app/uploads # Mount shared volume
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - app-network
     restart: unless-stopped
@@ -193,3 +233,6 @@ volumes:
   backend-dataprotection-keys:
   redis-data:
   rabbitmq-data:
+  local-uploads:
+  graph-inputs:
+  graph-outputs:

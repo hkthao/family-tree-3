@@ -1,32 +1,23 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Events.EventOccurrences.Jobs;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.GenerateAndNotifyEvents;
 
-public class GenerateAndNotifyEventsCommandHandler : IRequestHandler<GenerateAndNotifyEventsCommand, Result<string>>
+public class GenerateAndNotifyEventsCommandHandler(
+    ILogger<GenerateAndNotifyEventsCommandHandler> logger,
+    IAuthorizationService authorizationService,
+    IGenerateEventOccurrencesJob generateEventOccurrencesJob,
+    IEventNotificationJob eventNotificationJob,
+    IDateTime dateTime) : IRequestHandler<GenerateAndNotifyEventsCommand, Result<string>>
 {
-    private readonly ILogger<GenerateAndNotifyEventsCommandHandler> _logger;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob;
-    private readonly IEventNotificationJob _eventNotificationJob;
-    private readonly IDateTime _dateTime;
-
-    public GenerateAndNotifyEventsCommandHandler(
-        ILogger<GenerateAndNotifyEventsCommandHandler> logger,
-        IAuthorizationService authorizationService,
-        IGenerateEventOccurrencesJob generateEventOccurrencesJob,
-        IEventNotificationJob eventNotificationJob,
-        IDateTime dateTime)
-    {
-        _logger = logger;
-        _authorizationService = authorizationService;
-        _generateEventOccurrencesJob = generateEventOccurrencesJob;
-        _eventNotificationJob = eventNotificationJob;
-        _dateTime = dateTime;
-    }
+    private readonly ILogger<GenerateAndNotifyEventsCommandHandler> _logger = logger;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IGenerateEventOccurrencesJob _generateEventOccurrencesJob = generateEventOccurrencesJob;
+    private readonly IEventNotificationJob _eventNotificationJob = eventNotificationJob;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<string>> Handle(GenerateAndNotifyEventsCommand request, CancellationToken cancellationToken)
     {

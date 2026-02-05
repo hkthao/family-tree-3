@@ -1,13 +1,10 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces.Services;
 
 using backend.Application.MemberFaces.Commands.DetectFaces;
 using backend.Application.MemberFaces.Common;
-using backend.Application.MemberFaces.Queries.SearchVectorFace;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MediatR; // Re-add MediatR
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -18,13 +15,11 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
     {
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
-        private readonly Mock<IMediator> _mediatorMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
-            _mediatorMock = new Mock<IMediator>();
 
 
 

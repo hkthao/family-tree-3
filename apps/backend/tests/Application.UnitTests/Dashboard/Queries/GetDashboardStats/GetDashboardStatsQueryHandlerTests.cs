@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using backend.Application.Families.Queries;

@@ -53,6 +53,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - local-uploads:/app/uploads
+      - graph-inputs:/shared/input # New volume for shared graph inputs
 
     logging:
       driver: json-file
@@ -100,25 +101,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  ocr-service:
-    build:
-      context: ../services/ocr-service
-      dockerfile: Dockerfile
-    container_name: family-tree-ocr-service
-    ports:
-      - "8001:8000" # Expose port 8000 for the FastAPI app
-    env_file:
-      - ./.env.dev
-    environment:
-      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
-      - TZ=Asia/Ho_Chi_Minh
-    mem_limit: 2g # Set memory limit for OCR service
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   notification-service:
     build:
       context: ../services/notification-service
@@ -130,6 +112,26 @@ services:
       - ./.env.dev
     environment:
       - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  graphviz-pdf-converter:
+    build:
+      context: ../services/graphviz-pdf-converter
+      dockerfile: Dockerfile
+    container_name: family-tree-graphviz-pdf-converter
+    env_file:
+      - ./.env.dev
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    depends_on:
+      - rabbitmq
+    volumes:
+      - graph-inputs:/shared/input
+      - graph-outputs:/shared/output
     logging:
       driver: json-file
       options:
@@ -217,3 +219,5 @@ volumes:
   redis-data:
   rabbitmq-data:
   local-uploads:
+  graph-inputs:
+  graph-outputs: # New named volume definition # New named volume definition

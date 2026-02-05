@@ -1,5 +1,5 @@
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Families.Commands.RecalculateFamilyStats;
 using backend.Application.UnitTests.Common; // NEW: Added missing using directive
 using backend.Domain.Entities;

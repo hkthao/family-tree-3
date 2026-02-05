@@ -33,4 +33,5 @@ export * from './file.d'; // NEW
 
 export * from './user-push-token.d'; // NEW
 export * from './familyFollow.d'; // NEW
+export * from './graph-generation.d'; // NEW
 

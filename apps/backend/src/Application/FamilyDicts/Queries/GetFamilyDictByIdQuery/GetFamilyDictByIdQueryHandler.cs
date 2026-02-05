@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models; // Add this using statement
 
 namespace backend.Application.FamilyDicts.Queries;

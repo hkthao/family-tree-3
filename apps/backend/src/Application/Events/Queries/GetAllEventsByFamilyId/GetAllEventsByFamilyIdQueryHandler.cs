@@ -1,21 +1,15 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Queries.GetAllEventsByFamilyId;
 
-public class GetAllEventsByFamilyIdQueryHandler : IRequestHandler<GetAllEventsByFamilyIdQuery, Result<List<EventDto>>>
+public class GetAllEventsByFamilyIdQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<GetAllEventsByFamilyIdQuery, Result<List<EventDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IPrivacyService _privacyService;
-
-    public GetAllEventsByFamilyIdQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _privacyService = privacyService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<List<EventDto>>> Handle(GetAllEventsByFamilyIdQuery request, CancellationToken cancellationToken)
     {

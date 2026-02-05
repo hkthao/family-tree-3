@@ -1,25 +1,17 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Common;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Queries.ExportMemberFaces;
 
-public class ExportMemberFacesQueryHandler : IRequestHandler<ExportMemberFacesQuery, Result<List<MemberFaceDto>>>
+public class ExportMemberFacesQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportMemberFacesQueryHandler> logger, IMapper mapper) : IRequestHandler<ExportMemberFacesQuery, Result<List<MemberFaceDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ILogger<ExportMemberFacesQueryHandler> _logger;
-    private readonly IMapper _mapper;
-
-    public ExportMemberFacesQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportMemberFacesQueryHandler> logger, IMapper mapper)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _logger = logger;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ILogger<ExportMemberFacesQueryHandler> _logger = logger;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<MemberFaceDto>>> Handle(ExportMemberFacesQuery request, CancellationToken cancellationToken)
     {

@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Common.Security;
 using backend.Domain.Entities;
@@ -11,13 +11,11 @@ public class FollowFamilyCommandHandler : IRequestHandler<FollowFamilyCommand, R
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUser _currentUser;
-    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
-    public FollowFamilyCommandHandler(IApplicationDbContext context, ICurrentUser currentUser, IDomainEventDispatcher domainEventDispatcher)
+    public FollowFamilyCommandHandler(IApplicationDbContext context, ICurrentUser currentUser)
     {
         _context = context;
         _currentUser = currentUser;
-        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public async Task<Result<Guid>> Handle(FollowFamilyCommand request, CancellationToken cancellationToken) // Changed return type

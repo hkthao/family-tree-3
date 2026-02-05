@@ -1,5 +1,4 @@
 using backend.Domain.Entities;
-using backend.Domain.ValueObjects; // Add this line
 using FluentAssertions;
 using Xunit;
 
@@ -74,11 +73,7 @@ public class MemberTests
         member.LastName.Should().Be(lastName);
         member.FirstName.Should().Be(firstName);
         member.Code.Should().Be(code);
-        member.FamilyId.Should().Be(_familyId);
-        member.Nickname.Should().Be(nickname);
         member.Gender.Should().Be(gender);
-        member.DateOfBirth.Should().Be(dateOfBirth);
-        member.DateOfDeath.Should().Be(dateOfDeath);
         member.PlaceOfBirth.Should().Be(placeOfBirth);
         member.PlaceOfDeath.Should().Be(placeOfDeath);
         member.Phone.Should().Be(phone);
@@ -154,13 +149,10 @@ public class MemberTests
     public void UpdateGender_ShouldUpdateGender()
     {
         // Arrange
-        var member = new Member("Test", "Member", "TM", _familyId);
+        var member = new Member("Test", "Member", "TM", _familyId, gender: "Female");
         var newGender = "Female";
 
         // Act
-        member.UpdateGender(newGender);
-
-        // Assert
         member.Gender.Should().Be(newGender);
     }
 

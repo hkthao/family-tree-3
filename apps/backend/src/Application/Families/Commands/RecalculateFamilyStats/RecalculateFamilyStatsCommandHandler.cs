@@ -1,5 +1,6 @@
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Common.Models;
 using backend.Application.Families.Queries;
 using backend.Domain.Entities;
@@ -10,18 +11,11 @@ namespace backend.Application.Families.Commands.RecalculateFamilyStats;
 /// <summary>
 /// Xử lý lệnh tính toán lại tổng số thành viên và tổng số thế hệ cho một gia đình.
 /// </summary>
-public class RecalculateFamilyStatsCommandHandler : IRequestHandler<RecalculateFamilyStatsCommand, Result<FamilyStatsDto>>
+public class RecalculateFamilyStatsCommandHandler(IApplicationDbContext context, ILogger<RecalculateFamilyStatsCommandHandler> logger, IFamilyTreeService familyTreeService) : IRequestHandler<RecalculateFamilyStatsCommand, Result<FamilyStatsDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ILogger<RecalculateFamilyStatsCommandHandler> _logger;
-    private readonly IFamilyTreeService _familyTreeService; // NEW: Inject IFamilyTreeService
-
-    public RecalculateFamilyStatsCommandHandler(IApplicationDbContext context, ILogger<RecalculateFamilyStatsCommandHandler> logger, IFamilyTreeService familyTreeService) // NEW: Add IFamilyTreeService
-    {
-        _context = context;
-        _logger = logger;
-        _familyTreeService = familyTreeService; // NEW
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly ILogger<RecalculateFamilyStatsCommandHandler> _logger = logger;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService; // NEW: Inject IFamilyTreeService
 
     public async Task<Result<FamilyStatsDto>> Handle(RecalculateFamilyStatsCommand request, CancellationToken cancellationToken)
     {

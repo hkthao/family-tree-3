@@ -1,5 +1,5 @@
-
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Members.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
@@ -17,7 +17,6 @@ public class MemberUpdatedEventHandlerTests
     private readonly Mock<ILogger<MemberUpdatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
-
     private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly MemberUpdatedEventHandler _handler;
 

@@ -4,7 +4,7 @@ using backend.Application.AI.Commands.DetermineChatContext;
 using backend.Application.AI.DTOs;
 using backend.Application.AI.Enums;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models; // Re-add this
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Common.Models.LLMGateway; // NEW
@@ -24,27 +24,18 @@ namespace backend.Application.AI.Chat;
 /// Handler cho lệnh <see cref="ChatWithAssistantCommand"/>.
 /// Đây là một Orchestrator, điều phối các hoạt động AI chat.
 /// </summary>
-public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistantCommand, Result<ChatResponse>>
+public class ChatWithAssistantCommandHandler(
+    ILogger<ChatWithAssistantCommandHandler> logger,
+    IMediator mediator,
+    IOptions<LLMGatewaySettings> llmGatewaySettings, // Inject IOptions<LLMGatewaySettings>
+    IAuthorizationService authorizationService,
+    IKnowledgeService knowledgeService) : IRequestHandler<ChatWithAssistantCommand, Result<ChatResponse>>
 {
-    private readonly ILogger<ChatWithAssistantCommandHandler> _logger;
-    private readonly IMediator _mediator;
-    private readonly LLMGatewaySettings _llmGatewaySettings; // Changed from ChatSettings
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IKnowledgeService _knowledgeService; // NEW
-
-    public ChatWithAssistantCommandHandler(
-        ILogger<ChatWithAssistantCommandHandler> logger,
-        IMediator mediator,
-        IOptions<LLMGatewaySettings> llmGatewaySettings, // Inject IOptions<LLMGatewaySettings>
-        IAuthorizationService authorizationService,
-        IKnowledgeService knowledgeService) // NEW
-    {
-        _logger = logger;
-        _mediator = mediator;
-        _llmGatewaySettings = llmGatewaySettings.Value; // Extract LLMGatewaySettings
-        _authorizationService = authorizationService;
-        _knowledgeService = knowledgeService; // NEW
-    }
+    private readonly ILogger<ChatWithAssistantCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
+    private readonly LLMGatewaySettings _llmGatewaySettings = llmGatewaySettings.Value; // Changed from ChatSettings
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IKnowledgeService _knowledgeService = knowledgeService; // NEW
 
     private async Task<Result<string>> GetSystemPromptContent(string promptCode, CancellationToken cancellationToken)
     {

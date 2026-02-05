@@ -1,18 +1,12 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyFollows.Queries.GetFamilyFollowers;
 
-public class GetFamilyFollowersQueryHandler : IRequestHandler<GetFamilyFollowersQuery, Result<ICollection<FamilyFollowDto>>>
+public class GetFamilyFollowersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetFamilyFollowersQuery, Result<ICollection<FamilyFollowDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetFamilyFollowersQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<ICollection<FamilyFollowDto>>> Handle(GetFamilyFollowersQuery request, CancellationToken cancellationToken)
     {

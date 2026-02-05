@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces; // Add this using statement
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.MemoryItems.DTOs; // For MemoryItemDto
 using backend.Application.MemoryItems.Queries.SearchMemoryItems;
 using backend.Application.UnitTests.Common;

@@ -1,20 +1,14 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.Prompts.Commands.CreatePrompt;
 
-public class CreatePromptCommandHandler : IRequestHandler<CreatePromptCommand, Result<Guid>>
+public class CreatePromptCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreatePromptCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-
-    public CreatePromptCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<Guid>> Handle(CreatePromptCommand request, CancellationToken cancellationToken)
     {

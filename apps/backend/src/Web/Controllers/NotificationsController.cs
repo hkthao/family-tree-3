@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Notifications.Commands.SyncSubscriber;
 using backend.Application.UserPushTokens.Commands.RemoveCurrentUserPushToken; // Changed using directive
@@ -11,18 +11,10 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController] // Add ApiController attribute for API conventions
 [Route("api/notification")] // Add route attribute
-public class NotificationsController : ControllerBase
+public class NotificationsController(IMediator mediator, ICurrentUser currentUser) : ControllerBase
 {
-    private readonly ILogger<NotificationsController> _logger;
-    private readonly IMediator _mediator;
-    private readonly ICurrentUser _currentUser; // Inject ICurrentUser
-
-    public NotificationsController(ILogger<NotificationsController> logger, IMediator mediator, ICurrentUser currentUser)
-    {
-        _logger = logger;
-        _mediator = mediator;
-        _currentUser = currentUser;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly ICurrentUser _currentUser = currentUser; // Inject ICurrentUser
 
     [HttpPost("push-token")]
     public async Task<ActionResult<Result>> SyncPushToken([FromBody] SyncCurrentUserPushTokenCommand command)

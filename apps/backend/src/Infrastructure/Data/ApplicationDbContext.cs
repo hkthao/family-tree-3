@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Domain.Common;
 using backend.Domain.Entities;
 using backend.Infrastructure.Persistence.Extensions;
@@ -105,6 +105,10 @@ public class ApplicationDbContext(
     /// </summary>
     public DbSet<Prompt> Prompts { get; set; } = null!;
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể GraphGenerationJob.
+    /// </summary>
+    public DbSet<GraphGenerationJob> GraphGenerationJobs { get; set; } = null!;
 
 
     /// <summary>

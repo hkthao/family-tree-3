@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
@@ -7,12 +7,10 @@ namespace backend.Application.MemoryItems.Commands.ImportMemoryItems;
 public class ImportMemoryItemsCommandHandler : IRequestHandler<ImportMemoryItemsCommand, Result<Unit>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
 
-    public ImportMemoryItemsCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public ImportMemoryItemsCommandHandler(IApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
     public async Task<Result<Unit>> Handle(ImportMemoryItemsCommand request, CancellationToken cancellationToken)

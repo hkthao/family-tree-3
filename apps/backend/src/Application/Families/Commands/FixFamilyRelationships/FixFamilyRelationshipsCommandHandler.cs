@@ -1,20 +1,14 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.Commands.FixFamilyRelationships;
 
-public class FixFamilyRelationshipsCommandHandler : IRequestHandler<FixFamilyRelationshipsCommand, Result>
+public class FixFamilyRelationshipsCommandHandler(IApplicationDbContext context, ILogger<FixFamilyRelationshipsCommandHandler> logger) : IRequestHandler<FixFamilyRelationshipsCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ILogger<FixFamilyRelationshipsCommandHandler> _logger;
-
-    public FixFamilyRelationshipsCommandHandler(IApplicationDbContext context, ILogger<FixFamilyRelationshipsCommandHandler> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly ILogger<FixFamilyRelationshipsCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(FixFamilyRelationshipsCommand request, CancellationToken cancellationToken)
     {

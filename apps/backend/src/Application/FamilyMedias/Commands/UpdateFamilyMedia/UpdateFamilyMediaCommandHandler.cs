@@ -1,19 +1,13 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyMedias.Commands.UpdateFamilyMedia;
 
-public class UpdateFamilyMediaCommandHandler : IRequestHandler<UpdateFamilyMediaCommand, Result>
+public class UpdateFamilyMediaCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateFamilyMediaCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-
-    public UpdateFamilyMediaCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result> Handle(UpdateFamilyMediaCommand request, CancellationToken cancellationToken)
     {

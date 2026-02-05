@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.FamilyMedias.DTOs;
 using backend.Application.FamilyMedias.Queries.Specifications;
@@ -12,13 +12,11 @@ namespace backend.Application.FamilyMedias.Queries.GetFamilyMediaById;
 public class GetFamilyMediaByIdQueryHandler : IRequestHandler<GetFamilyMediaByIdQuery, Result<FamilyMediaDto>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
     private readonly IMapper _mapper;
 
-    public GetFamilyMediaByIdQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMapper mapper)
+    public GetFamilyMediaByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
-        _authorizationService = authorizationService;
         _mapper = mapper;
     }
 

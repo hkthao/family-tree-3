@@ -1,5 +1,5 @@
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 
 namespace backend.Application.FamilyDicts.Queries;

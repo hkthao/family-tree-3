@@ -1,16 +1,16 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, ICurrentUser currentUser, IPrivacyService privacyService) : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
+public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser currentUser, IPrivacyService privacyService) : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IPrivacyService _privacyService = privacyService;
 

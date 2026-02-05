@@ -1,26 +1,18 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.FamilyLocations.Queries.ExportFamilyLocations;
 
-public class ExportFamilyLocationsQueryHandler : IRequestHandler<ExportFamilyLocationsQuery, Result<List<FamilyLocationDto>>>
+public class ExportFamilyLocationsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportFamilyLocationsQueryHandler> logger, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<ExportFamilyLocationsQuery, Result<List<FamilyLocationDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ILogger<ExportFamilyLocationsQueryHandler> _logger;
-    private readonly IMapper _mapper;
-    private readonly IPrivacyService _privacyService;
-
-    public ExportFamilyLocationsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<ExportFamilyLocationsQueryHandler> logger, IMapper mapper, IPrivacyService privacyService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _logger = logger;
-        _mapper = mapper;
-        _privacyService = privacyService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ILogger<ExportFamilyLocationsQueryHandler> _logger = logger;
+    private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<List<FamilyLocationDto>>> Handle(ExportFamilyLocationsQuery request, CancellationToken cancellationToken)
     {

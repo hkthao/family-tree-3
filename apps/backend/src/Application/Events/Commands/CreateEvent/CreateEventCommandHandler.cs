@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services; // Add this for ILunarCalendarService
 using backend.Domain.Entities;
@@ -8,11 +8,10 @@ using backend.Domain.ValueObjects;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, ILunarCalendarService lunarCalendarService) : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILunarCalendarService lunarCalendarService) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
     private readonly ILunarCalendarService _lunarCalendarService = lunarCalendarService; // Injected service
 
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)

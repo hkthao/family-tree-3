@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Relationships.Queries.DetectRelationship;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;

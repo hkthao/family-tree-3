@@ -1,6 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Common.Utils; // New using
 using backend.Application.FamilyMedias.Commands.CreateFamilyMedia; // NEW
@@ -9,11 +9,10 @@ using backend.Domain.Enums; // NEW
 
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
-public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMediator mediator, ICurrentUser currentUser) : IRequestHandler<UpdateUserProfileCommand, Result>
+public class UpdateUserProfileCommandHandler(IApplicationDbContext context, IMediator mediator) : IRequestHandler<UpdateUserProfileCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMediator _mediator = mediator; // New private field
-    private readonly ICurrentUser _currentUser = currentUser; // New private field
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {

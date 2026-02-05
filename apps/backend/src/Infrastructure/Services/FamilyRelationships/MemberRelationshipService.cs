@@ -1,18 +1,14 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Family;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Services;
 
-public class MemberRelationshipService : IMemberRelationshipService
+public class MemberRelationshipService(IApplicationDbContext context) : IMemberRelationshipService
 {
-    private readonly IApplicationDbContext _context;
-
-    public MemberRelationshipService(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task UpdateDenormalizedRelationshipFields(Member member, CancellationToken cancellationToken)
     {

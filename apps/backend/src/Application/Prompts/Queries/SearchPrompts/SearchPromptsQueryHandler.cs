@@ -1,20 +1,14 @@
 using backend.Application.Common.Extensions;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Application.Prompts.DTOs;
 
 namespace backend.Application.Prompts.Queries.SearchPrompts;
 
-public class SearchPromptsQueryHandler : IRequestHandler<SearchPromptsQuery, Result<PaginatedList<PromptDto>>>
+public class SearchPromptsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchPromptsQuery, Result<PaginatedList<PromptDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchPromptsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<PromptDto>>> Handle(SearchPromptsQuery request, CancellationToken cancellationToken)
     {

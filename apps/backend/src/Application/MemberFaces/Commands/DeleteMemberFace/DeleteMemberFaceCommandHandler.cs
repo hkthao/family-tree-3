@@ -1,5 +1,6 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Common.Models;
 using backend.Application.MemberFaces.Messages; // Add this using statement
 using backend.Domain.Events.MemberFaces; // Add this line
@@ -7,20 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.MemberFaces.Commands.DeleteMemberFace;
 
-public class DeleteMemberFaceCommandHandler : IRequestHandler<DeleteMemberFaceCommand, Result<Unit>>
+public class DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IMessageBus messageBus) : IRequestHandler<DeleteMemberFaceCommand, Result<Unit>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ILogger<DeleteMemberFaceCommandHandler> _logger;
-    private readonly IMessageBus _messageBus;
-
-    public DeleteMemberFaceCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<DeleteMemberFaceCommandHandler> logger, IMessageBus messageBus)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _logger = logger;
-        _messageBus = messageBus;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ILogger<DeleteMemberFaceCommandHandler> _logger = logger;
+    private readonly IMessageBus _messageBus = messageBus;
 
     public async Task<Result<Unit>> Handle(DeleteMemberFaceCommand request, CancellationToken cancellationToken)
     {

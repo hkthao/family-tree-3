@@ -1,4 +1,4 @@
-﻿using backend.Application.Common.Interfaces;
+﻿using backend.Application.Common.Interfaces.Core;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Behaviours;

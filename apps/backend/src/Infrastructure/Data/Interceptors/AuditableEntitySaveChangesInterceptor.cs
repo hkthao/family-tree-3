@@ -1,18 +1,13 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace backend.Infrastructure.Data.Interceptors;
 
-public class AuditableEntitySaveChangesInterceptor : SaveChangesInterceptor
+public class AuditableEntitySaveChangesInterceptor(ICurrentUser user) : SaveChangesInterceptor
 {
-    private readonly ICurrentUser _user;
-
-    public AuditableEntitySaveChangesInterceptor(ICurrentUser user)
-    {
-        _user = user;
-    }
+    private readonly ICurrentUser _user = user;
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {

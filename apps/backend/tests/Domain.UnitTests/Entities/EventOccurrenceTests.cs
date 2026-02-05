@@ -1,4 +1,3 @@
-using System;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;

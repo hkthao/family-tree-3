@@ -1,5 +1,5 @@
 using backend.Application.Common.Constants; // ADDED for ErrorMessages and ErrorSources
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Events;
 

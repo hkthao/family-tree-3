@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,21 +8,15 @@ namespace backend.Infrastructure.Services;
 /// <summary>
 /// Triển khai IDomainEventDispatcher để điều phối các sự kiện miền.
 /// </summary>
-public class DomainEventDispatcher : IDomainEventDispatcher
+/// <remarks>
+/// Khởi tạo một thể hiện mới của lớp DomainEventDispatcher.
+/// </remarks>
+/// <param name="mediator">Giao diện IMediator để gửi các sự kiện.</param>
+/// <param name="logger">Giao diện ILogger để ghi log.</param>
+public class DomainEventDispatcher(IMediator mediator, ILogger<DomainEventDispatcher> logger) : IDomainEventDispatcher
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<DomainEventDispatcher> _logger;
-
-    /// <summary>
-    /// Khởi tạo một thể hiện mới của lớp DomainEventDispatcher.
-    /// </summary>
-    /// <param name="mediator">Giao diện IMediator để gửi các sự kiện.</param>
-    /// <param name="logger">Giao diện ILogger để ghi log.</param>
-    public DomainEventDispatcher(IMediator mediator, ILogger<DomainEventDispatcher> logger)
-    {
-        _mediator = mediator;
-        _logger = logger;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<DomainEventDispatcher> _logger = logger;
 
     /// <summary>
     /// Điều phối và xóa tất cả các sự kiện miền từ một tập hợp các thực thể.

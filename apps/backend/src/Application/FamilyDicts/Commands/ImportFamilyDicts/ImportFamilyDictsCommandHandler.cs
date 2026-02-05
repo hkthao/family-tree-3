@@ -1,21 +1,14 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 
-public class ImportFamilyDictsCommandHandler : IRequestHandler<ImportFamilyDictsCommand, Result<List<Guid>>>
+public class ImportFamilyDictsCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<ImportFamilyDictsCommand, Result<List<Guid>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IAuthorizationService _authorizationService;
-
-    public ImportFamilyDictsCommandHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<Guid>>> Handle(ImportFamilyDictsCommand request, CancellationToken cancellationToken)
     {

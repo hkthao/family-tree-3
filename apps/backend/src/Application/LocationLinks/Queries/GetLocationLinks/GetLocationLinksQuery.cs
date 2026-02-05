@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
@@ -11,16 +11,10 @@ public record GetLocationLinksQuery : IRequest<Result<List<LocationLinkDto>>>
     public RefType? RefType { get; init; }
 }
 
-public class GetLocationLinksQueryHandler : IRequestHandler<GetLocationLinksQuery, Result<List<LocationLinkDto>>>
+public class GetLocationLinksQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetLocationLinksQuery, Result<List<LocationLinkDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetLocationLinksQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<LocationLinkDto>>> Handle(GetLocationLinksQuery request, CancellationToken cancellationToken)
     {

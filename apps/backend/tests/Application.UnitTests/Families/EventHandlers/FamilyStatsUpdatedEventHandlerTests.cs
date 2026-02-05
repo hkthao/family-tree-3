@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Family;
 using backend.Application.Families.EventHandlers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Events.Families;

@@ -67,7 +67,7 @@ Dự án được tổ chức theo cấu trúc monorepo, bao gồm các thư m�
     *   `apps/admin/`: Mã nguồn ứng dụng Vue.js frontend cho giao diện quản trị.
 *   `services/`: Chứa các dịch vụ phụ trợ.
     *   `services/face-service/`: Dịch vụ xử lý khuôn mặt bằng Python.
-    *   `services/puppeteer-service/`: Dịch vụ chuyển đổi HTML/CSS sang PDF bằng Node.js và Puppeteer.
+
 *   `packages/`: (Tùy chọn) Chứa các gói mã nguồn được chia sẻ giữa các ứng dụng.
     *   `packages/shared-types/`: (Tùy chọn) Định nghĩa các kiểu dữ liệu (TypeScript types/interfaces/DTOs) được chia sẻ giữa backend và các frontend.
     *   `packages/ui-components/`: (Tùy chọn) Nơi chứa các thành phần UI dùng chung cho các ứng dụng frontend.

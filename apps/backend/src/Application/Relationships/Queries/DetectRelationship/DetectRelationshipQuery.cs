@@ -1,4 +1,4 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Family;
 
 namespace backend.Application.Relationships.Queries.DetectRelationship;
 

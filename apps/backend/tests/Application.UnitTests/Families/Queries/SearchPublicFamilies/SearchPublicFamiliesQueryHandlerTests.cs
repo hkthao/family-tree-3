@@ -1,4 +1,5 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces.Core;
+using backend.Application.Common.Interfaces.Services;
 using backend.Application.Families.Queries; // For FamilyDto
 using backend.Application.Families.Queries.SearchPublicFamilies;
 using backend.Application.UnitTests.Common;
