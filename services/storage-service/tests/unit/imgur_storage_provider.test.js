@@ -59,6 +59,7 @@ describe('ImgurStorageProvider', () => {
   });
 
   test('should handle upload failure', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     axios.post.mockRejectedValueOnce({ response: { data: { data: { error: 'Upload failed' } } } });
 
     const fileDto = new UploadFileDto({
@@ -69,6 +70,8 @@ describe('ImgurStorageProvider', () => {
     });
 
     await expect(provider.uploadFile(fileDto)).rejects.toThrow('Imgur upload failed: Upload failed');
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   test('should get a file by URL', async () => {
@@ -94,6 +97,7 @@ describe('ImgurStorageProvider', () => {
   });
 
   test('should handle delete failure', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     axios.delete.mockRejectedValueOnce({ response: { data: { success: false } } });
 
     const deletehash = 'failDeleteHash';
@@ -101,6 +105,8 @@ describe('ImgurStorageProvider', () => {
 
     expect(axios.delete).toHaveBeenCalledWith(`https://api.imgur.com/3/image/${deletehash}`, expect.any(Object));
     expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   test('should return false for invalid deletehash', async () => {

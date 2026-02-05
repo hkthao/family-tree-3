@@ -85,6 +85,7 @@ describe('fileUploadConsumer', () => {
     });
 
     it('should handle deletion failure and publish a completion event with error', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const eventData = {
         file_id: 'test-file-id-456',
         file_path: 'https://res.cloudinary.com/example/image/upload/v1234567890/fail_public_id.png',
@@ -119,9 +120,12 @@ describe('fileUploadConsumer', () => {
           })
         )
       );
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
 
     it('should handle deletion failure due to missing public_id/delete_hash and publish a completion event with error', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const eventData = {
             file_id: 'test-file-id-789',
             file_path: 'invalid_path', // Malformed URL
@@ -151,6 +155,8 @@ describe('fileUploadConsumer', () => {
                 })
             )
         );
+        expect(consoleErrorSpy).toHaveBeenCalled();
+        consoleErrorSpy.mockRestore();
     });
 
     it('should use extractPublicIdFromCloudinaryUrl if delete_hash is null', async () => {

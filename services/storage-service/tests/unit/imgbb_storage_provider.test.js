@@ -57,6 +57,7 @@ describe('ImgBBStorageProvider', () => {
   });
 
   test('should handle upload failure', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     axios.post.mockRejectedValueOnce({ response: { data: { error: { message: 'Upload failed' } } } });
 
     const fileDto = new UploadFileDto({
@@ -67,6 +68,8 @@ describe('ImgBBStorageProvider', () => {
     });
 
     await expect(provider.uploadFile(fileDto)).rejects.toThrow('ImgBB upload failed: Upload failed');
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   test('should get a file by URL', async () => {
@@ -92,6 +95,7 @@ describe('ImgBBStorageProvider', () => {
   });
 
   test('should handle delete failure', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     axios.get.mockRejectedValueOnce({ response: { data: 'Delete failed' } });
 
     const deleteUrl = 'http://test.imgbb.com/delete/fail_image.txt';
@@ -99,6 +103,8 @@ describe('ImgBBStorageProvider', () => {
 
     expect(axios.get).toHaveBeenCalledWith(deleteUrl);
     expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   test('should return false for invalid deleteUrl', async () => {
