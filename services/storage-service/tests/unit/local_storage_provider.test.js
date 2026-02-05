@@ -23,7 +23,7 @@ describe('LocalStorageProvider', () => {
   });
 
   test('should upload a file from a temporary path', async () => {
-    const tempFilePath = path.join(__dirname, 'temp_test_file.txt');
+    const tempFilePath = path.join(testUploadDir, 'temp_test_file.txt');
     await fs.writeFile(tempFilePath, 'Hello, local storage!');
 
     const fileDto = new UploadFileDto({
