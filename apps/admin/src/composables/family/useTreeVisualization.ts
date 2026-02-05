@@ -92,16 +92,12 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
 
   const isPrinting = computed(() => generateGraphMutation.isPending.value);
 
-  const handlePrintGraph = () => {
+  const handlePrintGraph = (pageSize: string, direction: string) => {
     const currentFamilyId = unref(familyId);
     if (!currentFamilyId) {
       snackbar.showError(t('family.tree.printGraph.noFamilyId'));
       return;
     }
-    // Default values for pageSize and direction, could be made configurable in the future
-    const pageSize = "A0";
-    const direction = "LR";
-
     generateGraphMutation.mutate({
       familyId: currentFamilyId,
       rootMemberId: selectedRootMemberId.value ?? null,
@@ -130,11 +126,11 @@ export function useTreeVisualization(familyId: MaybeRef<string | undefined>, ini
       isError,
       error,
       selectedRootMemberId,
-      isPrinting, // Expose isPrinting
+      isPrinting,
     },
     actions: {
       fetchTreeData,
-      handlePrintGraph, // Expose handlePrintGraph
+      handlePrintGraph: handlePrintGraph as (pageSize: string, direction: string) => void,
     },
   };
 }

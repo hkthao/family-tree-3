@@ -16,11 +16,11 @@ public class DotFileGenerator
     /// <param name="couples">Danh sách các cặp vợ chồng đã xác định trong cây con.</param>
     /// <param name="allMembers">Tất cả các thành viên trong gia đình (để xác định giới tính).</param>
     /// <returns>Chuỗi nội dung của tệp .dot.</returns>
-    public string GenerateDotFileContent(Dictionary<Guid, FamilyTreeNode> nodes, List<(Guid ParentId, Guid ChildId)> edges, IReadOnlyCollection<Tuple<Guid, Guid>> couples, IReadOnlyCollection<Member> allMembers)
+    public string GenerateDotFileContent(Dictionary<Guid, FamilyTreeNode> nodes, List<(Guid ParentId, Guid ChildId)> edges, IReadOnlyCollection<Tuple<Guid, Guid>> couples, IReadOnlyCollection<Member> allMembers, string pageSize, string direction)
     {
         var dotContent = new StringBuilder();
 
-        AppendGraphStyles(dotContent);
+        AppendGraphStyles(dotContent, pageSize, direction);
 
         // Dictionary to store generated node IDs for couples and individuals
         var generatedNodeIds = new Dictionary<Guid, string>();
@@ -70,16 +70,17 @@ public class DotFileGenerator
     /// Appends standard Graphviz styles for the family tree graph, nodes, and edges.
     /// </summary>
     /// <param name="dotContent">The StringBuilder to append the styles to.</param>
-    private void AppendGraphStyles(StringBuilder dotContent)
+    private void AppendGraphStyles(StringBuilder dotContent, string pageSize, string direction)
     {
         dotContent.AppendLine("digraph FamilyTree {");
-        dotContent.AppendLine("    rankdir=TB; // Changed to Top-to-Bottom for generational view");
+        dotContent.AppendLine($"    rankdir={direction}; // Dynamic direction based on user input");
         dotContent.AppendLine("    nodesep=1.3;");
         dotContent.AppendLine("    ranksep=2.0;");
         dotContent.AppendLine("");
         dotContent.AppendLine("    graph [");
         dotContent.AppendLine("        bgcolor=\"white\"");
         dotContent.AppendLine("        splines=true");
+        dotContent.AppendLine($"        page=\"{pageSize}\" // Dynamic page size based on user input");
         dotContent.AppendLine("    ];");
         dotContent.AppendLine("");
         dotContent.AppendLine("    node [");

@@ -68,7 +68,7 @@ public class GenerateFamilyTreeGraphCommandHandler(
 
         // 3. Generate DOT file content
         _logger.LogInformation("Tạo nội dung file DOT.");
-        var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges, couples, family.Members);
+        var dotContent = _dotFileGenerator.GenerateDotFileContent(nodes, edges, couples, family.Members, command.PageSize, command.Direction);
 
         // 4. Directly convert DOT content to PDF using GraphvizPdfConverterClient
         _logger.LogInformation("Gọi dịch vụ chuyển đổi DOT sang PDF.");
