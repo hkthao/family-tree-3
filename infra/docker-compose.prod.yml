@@ -153,6 +153,8 @@ services:
     image: hkthao/family-tree-graphviz-pdf-converter:latest
     platform: linux/amd64
     container_name: family-tree-graphviz-pdf-converter-prod
+    ports:
+      - "8005:8000" # Expose port 8005 for the Graphviz PDF Converter service
     env_file:
       - ./.env
     environment:
